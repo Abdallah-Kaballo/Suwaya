@@ -14,7 +14,8 @@ class IbadatScreen extends ConsumerWidget {
   const IbadatScreen({super.key});
 
   String _getDisplayTime(DateTime targetTime, AstroState astroState, bool useAstro) {
-    if (!useAstro) return DateFormat('HH:mm').format(targetTime);
+    // تم إضافة 'en' لإجبار مكتبة intl على استخدام الأرقام الإنجليزية (0-9) دائماً
+    if (!useAstro) return DateFormat('HH:mm', 'en').format(targetTime);
 
     if (astroState.periods.isEmpty) return "00:00";
     double totalVirtualMinutes = 0.0;
@@ -89,7 +90,8 @@ class IbadatScreen extends ConsumerWidget {
       {'name': 'periods.dhuhr'.tr(), 'time': ibadat.dhuhr},
       {'name': 'periods.asr'.tr(), 'time': ibadat.asr},
       {'name': 'periods.maghrib'.tr(), 'time': ibadat.maghrib},
-      {'name': 'periods.isha'.tr(), 'time': ibadat.isha},
+      // تم تصحيح المفتاح هنا من periods.isha إلى prayers.isha
+      {'name': 'prayers.isha'.tr(), 'time': ibadat.isha},
       {'name': 'ibadat.next_fajr'.tr(), 'time': ibadat.nextFajr},
     ];
 
@@ -168,7 +170,7 @@ class IbadatScreen extends ConsumerWidget {
         _buildTimingCard(context, ref, astroState, '3', 'periods.dhuhr'.tr(), ibadat.dhuhr, LucideIcons.sun_dim, const Color(0xFFFFCA28), nextPrayer['time'] == ibadat.dhuhr, isDark),
         _buildTimingCard(context, ref, astroState, '4', 'periods.asr'.tr(), ibadat.asr, LucideIcons.cloud_sun, const Color(0xFFFF9800), nextPrayer['time'] == ibadat.asr, isDark),
         _buildTimingCard(context, ref, astroState, '5', 'periods.maghrib'.tr(), ibadat.maghrib, LucideIcons.sunset, const Color(0xFFE53935), nextPrayer['time'] == ibadat.maghrib, isDark),
-        _buildTimingCard(context, ref, astroState, 'isha', 'periods.isha'.tr(), ibadat.isha, LucideIcons.moon, const Color(0xFF1A237E), nextPrayer['time'] == ibadat.isha, isDark),
+        _buildTimingCard(context, ref, astroState, 'isha', 'prayers.isha'.tr(), ibadat.isha, LucideIcons.moon, const Color(0xFF1A237E), nextPrayer['time'] == ibadat.isha, isDark),
       ],
     );
   }
