@@ -1,0 +1,88 @@
+name: suwaya
+description: "A new Astro-Productivity application."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+    
+  # --- State Management ---
+  flutter_riverpod: ^2.5.1
+  
+  # --- Routing & UI ---
+  go_router: ^14.0.0
+  cupertino_icons: ^1.0.6
+  flutter_animate: ^4.5.0
+  fl_chart: ^0.68.0
+  flutter_lucide: ^1.7.0
+  
+  # --- Localization & Date/Time ---
+  easy_localization: ^3.0.8
+  intl: ^0.20.2
+  timezone: ^0.9.4
+
+  # --- Location & Astronomy ---
+  adhan: ^2.0.0+1
+  geolocator: ^14.0.3
+  geocoding: ^4.0.0
+  
+  # --- Database & Storage (Cleaned) ---
+  isar_community: ^3.3.2
+  isar_community_flutter_libs: ^3.3.2
+  sqflite: ^2.4.0
+  path: ^1.9.0
+  path_provider: ^2.1.6
+  
+  # --- Notifications, Permissions & Hardware ---
+  flutter_local_notifications: ^17.1.0
+  permission_handler: ^11.3.0
+  vibration: ^3.2.0
+  
+  # --- Pro Stack & Firebase ---
+  share_plus: ^13.2.0
+  firebase_core: ^2.27.0
+  firebase_crashlytics: ^3.4.14
+
+  # --- Supabase & Sync ---
+  supabase_flutter: ^2.5.0
+  uuid: ^4.3.3
+  shared_preferences: ^2.5.5
+  google_sign_in: ^7.2.0
+  alarm: ^5.10.0
+  hijri: ^3.0.1
+  flutter_dotenv: ^6.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.11
+  isar_community_generator: ^3.3.2
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/translations/
+    - assets/db/cities.db
+    - assets/icons/app_icon.png
+    - assets/audio/
+    - .env
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png" 
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  
+  adaptive_icon_background: "assets/icons/ic_background.png" 
+  adaptive_icon_foreground: "assets/icons/ic_foreground.png" 

@@ -1,0 +1,182 @@
+{
+  "categories": {
+    "unspecified": "Unspecified", "work": "Work", "study": "Study", "sport": "Sport",
+    "entertainment": "Entertainment", "worship": "Worship", "personal": "Personal", "social": "Social"
+  },
+  "common": {
+    "new_task": "New Task", "continuous_habit": "Continuous Habit", "suwaya": "Suwaya", "of": "of",
+    "astro": "Astro", "civil": "Civil", "ah": "AH", "cancel": "Cancel", "confirm": "Confirm", "done": "Done",
+    "add": "Add", "days": "Days", "period": "Period", "from": "from", "to": "to"
+  },
+  "night_parts": {
+    "half_1": "First Half", "half_2": "Second Half", "third_1": "First Third", "third_2": "Second Third",
+    "third_3": "Last Third", "sixth_1": "First Sixth", "sixth_2": "Second Sixth", "sixth_3": "Third Sixth",
+    "sixth_4": "Fourth Sixth", "sixth_5": "Fifth Sixth", "sixth_6": "Last Sixth"
+  },
+  "home": {
+    "night_of": "Night of", "day_of": "Day of", "civil_time": "Civil Time", "astro_time": "Astro Time",
+    "dial_indicators": "Task Indicators:", "period_tasks": "Period Tasks", "manage_periods": "Manage Periods",
+    "no_tasks": "No tasks currently, enjoy your time!"
+  },
+  "details": {
+    "total_length": "Total Length:", "start": "Start", "end": "End", "suwaya_length": "Suwaya Length",
+    "flow_speed": "Flow Speed", "scheduled_tasks": "Scheduled Tasks & Habits", "empty_period": "Period is currently empty",
+    "hour_and": "h and", "minute": "m", "min_and": "m and", "sec": "s", "suwayas": "Suwayas"
+  },
+  "header": {
+    "set_location": "Set Location to Start", "current_city": "Current City:", "current_location": "Current Location",
+    "nearest_city": "Nearest City:"
+  },
+  "hijri": {
+    "m1": "Muharram", "m2": "Safar", "m3": "Rabi Al-Awwal", "m4": "Rabi Al-Akhar", "m5": "Jumada Al-Ula", "m6": "Jumada Al-Akhirah",
+    "m7": "Rajab", "m8": "Sha'ban", "m9": "Ramadan", "m10": "Shawwal", "m11": "Dhu Al-Qi'dah", "m12": "Dhu Al-Hijjah"
+  },
+  "alerts": {
+    "default_ring": "Default Ring", "makkah_adhan": "Makkah Adhan", "soft_bell": "Soft Bell",
+    "birds": "Birds Chirping", "silent": "Silent", "notification": "Notification", "alarm": "Alarm", "alarm_tone": "Alarm Tone"
+  },
+  "patterns": {
+    "linear": "Classic Lines", "hexagon": "Hexagons", "stone": "Stacked Stones", "trihex": "Complex Geometric"
+  },
+  "add_screen": {
+    "time_required": "Please select the time first!", "permissions_required": "Permissions must be granted for the alarm to work!",
+    "select_start_time": "Set Start Time", "select_end_time": "Set End Time", "pin_exact_time": "Pin Exact Time",
+    "by_periods": "By Periods", "cumulative": "Cumulative", "civil": "Civil", "cumulative_suwaya": "Cumulative Suwaya",
+    "minute": "Minute", "civil_hour": "Civil Hour", "pattern_and_color": "Pattern and Color",
+    "recurrence_days": "Recurrence Days", "target_date": "Target Date", "every_day": "Every Day",
+    "alert_settings": "Alert Settings", "category_and_dial": "Task Category & Appearance",
+    "show_on_dial": "Show task indicator on dial", "new_addition": "New Addition", "what_to_add": "What do you want to add?",
+    "save_and_add": "Save & Add to Dial", "not_set_mandatory": "Not Set (Mandatory)", "daily": "Daily",
+    "category_appearance": "Category & Look", "recurrence": "Recurrence", "date": "Date", "time": "Time",
+    "alert": "Alert", "start_time": "Start Time", "end_time": "End Time", "pattern_color": "Pattern & Color"
+  },
+  "tasks": {
+    "casual_task": "Casual Task", "continuous_habit": "Continuous Habit", "routine_period": "Routine Period",
+    "selected": "Selected", "suwaya_management": "Suwaya Management", "tab_casual": "Tasks", "tab_habits": "Habits",
+    "tab_routines": "Periods", "empty_tasks": "No tasks currently.", "empty_routines": "No routine periods saved."
+  },
+  "routines": {
+    "manage_special_periods": "Manage Special Periods", "periods_count": "Periods", "no_routines": "No special periods added yet."
+  },
+  "settings": {
+    "title": "Settings", "search_hint": "Search settings...", "account_data": "Account & Data",
+    "cloud_account": "Cloud Account", "create_account": "Create account for sync", "connected_account": "Connected to your account",
+    "manual_backup": "Manual Backup", "extract_backup": "Extract full backup (JSON)",
+    "preparing_data": "Preparing your data... ⏳", "backup_success": "Backup exported successfully ✅",
+    "notifications_alerts": "Notifications & Alerts", "notifications_desc": "Adhan tones, Suwaya alerts, and vibration",
+    "advanced_astro": "Advanced Prayer Settings", "astro_settings": "Advanced Astro Settings",
+    "astro_desc": "Calculation method, manual adjustments, Madhab", "active_location": "Active Location",
+    "appearance_accessibility": "Appearance & Accessibility", "app_appearance": "App Appearance",
+    "theme_system": "System Default", "theme_dark": "Dark (Always)", "theme_light": "Light (Always)",
+    "theme_mixed": "Mixed (Auto by Sun)", "theme_midnight": "Midnight Blue 👑",
+    "dial_settings": "Interactive Dial Settings", "golden_night_markers": "Golden Night Markers",
+    "markers_desc": "Choose max 2 markers (auto-prevents conflict)", "auto_rotate": "Auto-Rotate Dial",
+    "auto_rotate_desc": "Pin the time needle at the top and rotate the dial with time.", "general": "General",
+    "app_language": "App Language", "permissions": "Permissions & Access",
+    "permissions_desc": "Manage location, notifications, and alarm permissions", "about": "About Suwaya", "privacy_policy": "Privacy Policy",
+    "version": "Version 1.0.0", "update_gps": "Update GPS Location",
+    "gps_desc": "Used once to set timings accurately without battery drain.", "update": "Update",
+    "fetching_gps": "Fetching accurate location...", "gps_success": "Location updated successfully: ",
+    "gps_failed": "Failed to update location: Ensure GPS is enabled.", "max_two_markers": "Select maximum of two markers"
+  },
+  "astro_calc": {
+    "title": "Advanced Astro Settings", "warning": "These settings are for advanced users.\nIf modified, you can always auto-detect location to reset them.",
+    "calc_method": "Calculation Method", "mwl": "Muslim World League (MWL)", "mwl_desc": "Europe, Far East, parts of US",
+    "egypt": "Egyptian General Authority of Survey", "egypt_desc": "Egypt, Africa, Syria, Lebanon", "makkah": "Umm Al-Qura University, Makkah",
+    "makkah_desc": "Arabian Peninsula", "dubai": "Dubai (DIAC)", "dubai_desc": "UAE",
+    "qatar": "Qatar", "qatar_desc": "Qatar and nearby regions", "kuwait": "Kuwait", "kuwait_desc": "Kuwait and nearby regions",
+    "karachi": "University of Islamic Sciences, Karachi", "karachi_desc": "Pakistan, Afghanistan, Bangladesh",
+    "isna": "Islamic Society of North America (ISNA)", "isna_desc": "North America and Canada",
+    "turkey": "Diyanet", "turkey_desc": "Turkey and Central Asia",
+    "tehran": "Institute of Geophysics, Univ. of Tehran", "tehran_desc": "Iran and parts of Asia",
+    "uoif": "UOIF (France)", "uoif_desc": "France and parts of Europe (Angle 12)",
+    "russia": "Spiritual Administration of Muslims of Russia", "russia_desc": "Russia and nearby countries",
+    "singapore": "MUIS (Singapore)", "singapore_desc": "Singapore and South East Asia",
+    "custom": "Custom Angles", "custom_desc": "Set Fajr and Isha angles manually", "custom_angles": "Set Custom Angles",
+    "fajr_angle": "Fajr Angle", "isha_angle": "Isha Angle", "asr_madhab": "Asr Madhab",
+    "shafi": "Majority (Shafi, Maliki, Hanbali)", "shafi_desc": "Shadow equals object length", "hanafi": "Hanafi",
+    "hanafi_desc": "Shadow is twice object length", "high_lat": "High Latitude Rule",
+    "midnight": "Middle of the Night", "midnight_desc": "Common where twilight doesn't disappear", "seventh": "Seventh of the Night",
+    "seventh_desc": "Divide night by 7 (Europe)", "twilight": "Twilight Angle", "twilight_desc": "Based on sun depression angle"
+  },
+  "notifications": {
+    "title": "Notifications & Alerts", "prayers": "Obligatory Prayers", "prayers_desc": "Applied to (Fajr, Dhuhr, Asr, Maghrib, Isha)",
+    "qiyam": "Qiyam and Suhoor", "qiyam_desc": "Applied to all enabled night parts (stops if hidden)",
+    "productivity": "Productivity & Time Management", "alert_level": "Alert Level", "silent": "Silent", "quiet": "Quiet",
+    "interactive": "Interactive Alarm", "alarm_tone": "Alarm Tone", "fade_in": "Fade-in volume will be applied automatically.",
+    "save_changes": "Save Changes", "saved": "Saved:", "continuous_habits": "Continuous Habits",
+    "habit_default": "Default applied when adding a habit", "casual_tasks": "Casual Tasks", "task_default": "Default applied when adding a task",
+    "defaults_title": "Defaults", "default_level": "Default Alert Level:", "default_tone": "Default Tone:",
+    "snooze_system": "Smart Snooze System", "snooze_duration": "Snooze Duration:", "snooze_max": "Max Snoozes:",
+    "mins_5": "5 mins", "mins_10": "10 mins", "mins_15": "15 mins", "mins_30": "30 mins", "once": "Once",
+    "times_3": "3 times", "times_5": "5 times", "no_limit": "No Limit (Not recommended)", "wake_screen": "Interactive Alarm (Wakes screen)",
+    "save": "Save"
+  }
+
+  ,"permissions": {
+    "title": "System Permissions", "desc": "For a perfect experience and accurate timely alerts, please ensure the following permissions are granted:",
+    "location": "Location (GPS)", "location_desc": "Crucial to accurately calculate prayer times and night parts based on your city.",
+    "notifications": "Notifications & Alerts", "notifications_desc": "To send Adhan, Suwaya alerts, and period transition notifications.",
+    "exact_alarms": "Exact Alarms", "exact_alarms_desc": "The system prevents apps from ringing at exact times unless this option is enabled.",
+    "granted": "Granted", "not_granted": "Not Granted", "active": "Permission Active", "open_settings": "Open System Settings", "grant": "Grant Permission"
+  },
+  "onboarding": {
+    "set_location": "Set Your Location Accurately", "location_desc": "The Suwaya system relies entirely on the sun's rhythm in your city.\nPlease set your location to adjust your astro dial accurately.",
+    "location_success": "Location set successfully", "change_location": "Change Location", "fetching_gps": "Fetching accurate location...",
+    "update_gps": "Update GPS Location", "gps_success": "Location set successfully:", "gps_failed": "Failed to determine location. Ensure app permissions are granted.",
+    "manual_select": "Manual Selection (Offline)", "start_journey": "Start Journey", "welcome": "Welcome to Suwaya",
+    "welcome_sub": "مرحباً بك في سُويعَة", "continue_btn": "Continue"
+  },
+  "auth": {
+    "secure_data": "Secure Your Cloud Data", "cloud_account": "Your Cloud Account",
+    "secure_desc": "Link your account now to ensure your tasks and habits sync across all devices, never to be lost.",
+    "connected_desc": "You are connected to the cloud. Your data is encrypted and securely synced.", "synced": "Synced & Secured",
+    "logout": "Log out from device", "continue_google": "Continue with Google",
+    "terms_agree": "By continuing, you agree to Suwaya's Terms of Service and Privacy Policy."
+  },
+  "ibadat": {
+    "title": "Worship Timings", "prayers_tab": "Obligatory Prayers", "qiyam_tab": "Qiyam (Night) Timings",
+    "virtual_remaining": "Virtual Time Remaining", "civil_remaining": "Civil Time Remaining", "next_prayer": "Next Prayer",
+    "customize_prayers": "Customize Prayer Timings", "astro_time": "Astro Time (Suwayas)", "civil_time": "Civil Time (Hours)",
+    "show_sunrise": "Show Sunrise Time", "show_sunrise_desc": "Displays sunrise in the prayers list",
+    "no_qiyam": "You haven't selected any Qiyam times.\nTap the customize icon above to show them.",
+    "peak_time": "Prime Time for Tahajjud & Dua", "starts_at": "Starts at:", "ends_at": "Ends at:",
+    "alert_for": "Alert for:", "silent": "Silent (No alert)", "notification": "Notification (Quiet message)",
+    "alarm": "Alarm / Adhan (Wakes screen)", "customize_qiyam": "Customize Qiyam Timings", "sunrise": "Sunrise", "next_fajr": "Next Fajr"
+  },
+  "location_picker": {
+    "locate_accurately": "Accurate Location", "manual_choice": "Manual Choice", "choose_region": "Choose Region",
+    "saved_locations": "Saved Locations", "custom_coordinates": "Custom Coordinates", "no_saved_locations": "No saved locations",
+    "choose_from_lists": "Choose from Lists", "enter_coordinates_manually": "Enter Coordinates Manually",
+    "select_country": "Select Country", "select_city": "Select City", "loading": "Loading...",
+    "location_name_example": "Location Name (e.g., Home, Work)", "latitude": "Latitude", "longitude": "Longitude",
+    "save_use": "Save and Use", "search_country": "Search country...", "search_city_hint": "Search city...",
+    "try_english_name": "Try searching in English", "location_name_required": "Location name is required",
+    "lat_validation_error": "Invalid latitude (must be between -90 and 90)", "lng_validation_error": "Invalid longitude (must be between -180 and 180)",
+    "location_updated": "Location updated successfully"
+  },
+  "periods": {
+    "fajr": "Fajr", "duha": "Duha", "dhuhr": "Dhuhr", "asr": "Asr",
+    "maghrib": "Maghrib", "middle_third": "Middle Third", "last_third": "Last Third"
+  },
+  "prayers": {
+    "fajr": "Fajr", "dhuhr": "Dhuhr", "asr": "Asr", "maghrib": "Maghrib", "isha": "Isha"
+  },
+  "pomodoro": {
+    "break_remaining": "Break Remaining", "focus_remaining": "Focus Remaining",
+    "deep_relaxation": "Deep Relaxation", "in_flow": "In Flow State",
+    "absolute_focus": "Absolute\n30/0", "balanced": "Balanced\n25/5", "relaxed": "Relaxed\n20/10",
+    "no_tasks": "No tasks assigned for this Suwaya", "focus_now_on": "Focus now on:"
+  },
+  "nav": {
+    "home": "Home", "tasks": "Tasks", "pomodoro": "Focus", "ibadat": "Worship"
+  },
+  "languages": {
+    "tr": "Turkish", "ru": "Russian", "ur": "Urdu", "ar": "Arabic",
+    "hi": "Hindi", "bn": "Bengali", "th": "Thai", "ja": "Japanese",
+    "zh": "Chinese", "ug": "Uyghur", "pt": "Portuguese", "ff": "Fula",
+    "az": "Azerbaijani", "id": "Indonesian", "ms": "Malay", "da": "Danish",
+    "de": "German", "en": "English", "es": "Spanish", "fr": "French",
+    "it": "Italian", "nl": "Dutch"
+  }
+}
