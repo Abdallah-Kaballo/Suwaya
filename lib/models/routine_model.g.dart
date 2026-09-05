@@ -67,40 +67,60 @@ const RoutineModelSchema = CollectionSchema(
       name: r'isAstroTime',
       type: IsarType.bool,
     ),
-    r'pattern': PropertySchema(
+    r'isDeleted': PropertySchema(
       id: 10,
+      name: r'isDeleted',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 11,
+      name: r'isSynced',
+      type: IsarType.bool,
+    ),
+    r'pattern': PropertySchema(
+      id: 12,
       name: r'pattern',
       type: IsarType.string,
     ),
     r'recurrenceDays': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'recurrenceDays',
       type: IsarType.longList,
     ),
     r'startPeriodId': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'startPeriodId',
       type: IsarType.long,
     ),
     r'startSuwaya': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'startSuwaya',
       type: IsarType.long,
     ),
     r'startTimeMinutes': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'startTimeMinutes',
       type: IsarType.long,
     ),
     r'startVirtualMinute': PropertySchema(
-      id: 15,
+      id: 17,
       name: r'startVirtualMinute',
       type: IsarType.long,
     ),
+    r'syncId': PropertySchema(
+      id: 18,
+      name: r'syncId',
+      type: IsarType.string,
+    ),
     r'title': PropertySchema(
-      id: 16,
+      id: 19,
       name: r'title',
       type: IsarType.string,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 20,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _routineModelEstimateSize,
@@ -109,6 +129,19 @@ const RoutineModelSchema = CollectionSchema(
   deserializeProp: _routineModelDeserializeProp,
   idName: r'id',
   indexes: {
+    r'syncId': IndexSchema(
+      id: 7538593479801827566,
+      name: r'syncId',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'syncId',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
     r'isActive': IndexSchema(
       id: 8092228061260947457,
       name: r'isActive',
@@ -145,6 +178,7 @@ int _routineModelEstimateSize(
       bytesCount += 3 + value.length * 8;
     }
   }
+  bytesCount += 3 + object.syncId.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -165,13 +199,17 @@ void _routineModelSerialize(
   writer.writeLong(offsets[7], object.endVirtualMinute);
   writer.writeBool(offsets[8], object.isActive);
   writer.writeBool(offsets[9], object.isAstroTime);
-  writer.writeString(offsets[10], object.pattern);
-  writer.writeLongList(offsets[11], object.recurrenceDays);
-  writer.writeLong(offsets[12], object.startPeriodId);
-  writer.writeLong(offsets[13], object.startSuwaya);
-  writer.writeLong(offsets[14], object.startTimeMinutes);
-  writer.writeLong(offsets[15], object.startVirtualMinute);
-  writer.writeString(offsets[16], object.title);
+  writer.writeBool(offsets[10], object.isDeleted);
+  writer.writeBool(offsets[11], object.isSynced);
+  writer.writeString(offsets[12], object.pattern);
+  writer.writeLongList(offsets[13], object.recurrenceDays);
+  writer.writeLong(offsets[14], object.startPeriodId);
+  writer.writeLong(offsets[15], object.startSuwaya);
+  writer.writeLong(offsets[16], object.startTimeMinutes);
+  writer.writeLong(offsets[17], object.startVirtualMinute);
+  writer.writeString(offsets[18], object.syncId);
+  writer.writeString(offsets[19], object.title);
+  writer.writeDateTime(offsets[20], object.updatedAt);
 }
 
 RoutineModel _routineModelDeserialize(
@@ -192,13 +230,17 @@ RoutineModel _routineModelDeserialize(
   object.id = id;
   object.isActive = reader.readBool(offsets[8]);
   object.isAstroTime = reader.readBool(offsets[9]);
-  object.pattern = reader.readString(offsets[10]);
-  object.recurrenceDays = reader.readLongList(offsets[11]);
-  object.startPeriodId = reader.readLongOrNull(offsets[12]);
-  object.startSuwaya = reader.readLongOrNull(offsets[13]);
-  object.startTimeMinutes = reader.readLongOrNull(offsets[14]);
-  object.startVirtualMinute = reader.readLongOrNull(offsets[15]);
-  object.title = reader.readString(offsets[16]);
+  object.isDeleted = reader.readBool(offsets[10]);
+  object.isSynced = reader.readBool(offsets[11]);
+  object.pattern = reader.readString(offsets[12]);
+  object.recurrenceDays = reader.readLongList(offsets[13]);
+  object.startPeriodId = reader.readLongOrNull(offsets[14]);
+  object.startSuwaya = reader.readLongOrNull(offsets[15]);
+  object.startTimeMinutes = reader.readLongOrNull(offsets[16]);
+  object.startVirtualMinute = reader.readLongOrNull(offsets[17]);
+  object.syncId = reader.readString(offsets[18]);
+  object.title = reader.readString(offsets[19]);
+  object.updatedAt = reader.readDateTime(offsets[20]);
   return object;
 }
 
@@ -230,19 +272,27 @@ P _routineModelDeserializeProp<P>(
     case 9:
       return (reader.readBool(offset)) as P;
     case 10:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 11:
-      return (reader.readLongList(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 12:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 13:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLongList(offset)) as P;
     case 14:
       return (reader.readLongOrNull(offset)) as P;
     case 15:
       return (reader.readLongOrNull(offset)) as P;
     case 16:
+      return (reader.readLongOrNull(offset)) as P;
+    case 17:
+      return (reader.readLongOrNull(offset)) as P;
+    case 18:
       return (reader.readString(offset)) as P;
+    case 19:
+      return (reader.readString(offset)) as P;
+    case 20:
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -259,6 +309,61 @@ List<IsarLinkBase<dynamic>> _routineModelGetLinks(RoutineModel object) {
 void _routineModelAttach(
     IsarCollection<dynamic> col, Id id, RoutineModel object) {
   object.id = id;
+}
+
+extension RoutineModelByIndex on IsarCollection<RoutineModel> {
+  Future<RoutineModel?> getBySyncId(String syncId) {
+    return getByIndex(r'syncId', [syncId]);
+  }
+
+  RoutineModel? getBySyncIdSync(String syncId) {
+    return getByIndexSync(r'syncId', [syncId]);
+  }
+
+  Future<bool> deleteBySyncId(String syncId) {
+    return deleteByIndex(r'syncId', [syncId]);
+  }
+
+  bool deleteBySyncIdSync(String syncId) {
+    return deleteByIndexSync(r'syncId', [syncId]);
+  }
+
+  Future<List<RoutineModel?>> getAllBySyncId(List<String> syncIdValues) {
+    final values = syncIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'syncId', values);
+  }
+
+  List<RoutineModel?> getAllBySyncIdSync(List<String> syncIdValues) {
+    final values = syncIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'syncId', values);
+  }
+
+  Future<int> deleteAllBySyncId(List<String> syncIdValues) {
+    final values = syncIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'syncId', values);
+  }
+
+  int deleteAllBySyncIdSync(List<String> syncIdValues) {
+    final values = syncIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'syncId', values);
+  }
+
+  Future<Id> putBySyncId(RoutineModel object) {
+    return putByIndex(r'syncId', object);
+  }
+
+  Id putBySyncIdSync(RoutineModel object, {bool saveLinks = true}) {
+    return putByIndexSync(r'syncId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllBySyncId(List<RoutineModel> objects) {
+    return putAllByIndex(r'syncId', objects);
+  }
+
+  List<Id> putAllBySyncIdSync(List<RoutineModel> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'syncId', objects, saveLinks: saveLinks);
+  }
 }
 
 extension RoutineModelQueryWhereSort
@@ -344,6 +449,51 @@ extension RoutineModelQueryWhere
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterWhereClause> syncIdEqualTo(
+      String syncId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'syncId',
+        value: [syncId],
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterWhereClause> syncIdNotEqualTo(
+      String syncId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncId',
+              lower: [],
+              upper: [syncId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncId',
+              lower: [syncId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncId',
+              lower: [syncId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'syncId',
+              lower: [],
+              upper: [syncId],
+              includeUpper: false,
+            ));
+      }
     });
   }
 
@@ -1079,6 +1229,26 @@ extension RoutineModelQueryFilter
   }
 
   QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      isDeletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDeleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      isSyncedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSynced',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
       patternEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1673,6 +1843,141 @@ extension RoutineModelQueryFilter
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition> syncIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'syncId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'syncId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'syncId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition> syncIdBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'syncId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'syncId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'syncId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'syncId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition> syncIdMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'syncId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'syncId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      syncIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'syncId',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition> titleEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1803,6 +2108,62 @@ extension RoutineModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'title',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      updatedAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      updatedAtLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      updatedAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1945,6 +2306,30 @@ extension RoutineModelQuerySortBy
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByPattern() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pattern', Sort.asc);
@@ -2011,6 +2396,18 @@ extension RoutineModelQuerySortBy
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortBySyncId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortBySyncIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncId', Sort.desc);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -2020,6 +2417,18 @@ extension RoutineModelQuerySortBy
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 }
@@ -2167,6 +2576,30 @@ extension RoutineModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByIsDeletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDeleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByPattern() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pattern', Sort.asc);
@@ -2233,6 +2666,18 @@ extension RoutineModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenBySyncId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenBySyncIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'syncId', Sort.desc);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -2242,6 +2687,18 @@ extension RoutineModelQuerySortThenBy
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 }
@@ -2311,6 +2768,18 @@ extension RoutineModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QDistinct> distinctByIsDeleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QDistinct> distinctByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSynced');
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QDistinct> distinctByPattern(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2352,10 +2821,23 @@ extension RoutineModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QDistinct> distinctBySyncId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'syncId', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
     });
   }
 }
@@ -2429,6 +2911,18 @@ extension RoutineModelQueryProperty
     });
   }
 
+  QueryBuilder<RoutineModel, bool, QQueryOperations> isDeletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<RoutineModel, bool, QQueryOperations> isSyncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSynced');
+    });
+  }
+
   QueryBuilder<RoutineModel, String, QQueryOperations> patternProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pattern');
@@ -2468,9 +2962,21 @@ extension RoutineModelQueryProperty
     });
   }
 
+  QueryBuilder<RoutineModel, String, QQueryOperations> syncIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'syncId');
+    });
+  }
+
   QueryBuilder<RoutineModel, String, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'title');
+    });
+  }
+
+  QueryBuilder<RoutineModel, DateTime, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }

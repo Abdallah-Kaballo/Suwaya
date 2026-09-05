@@ -21,6 +21,8 @@ import 'package:alarm/alarm.dart';
 import 'core/services/alarm_service.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:intl/date_symbol_data_local.dart';
+import 'core/theme/theme_color_provider.dart';
+import 'core/sync/sync_wrapper.dart';
 
 
 void main() async {
@@ -39,7 +41,9 @@ void main() async {
     ]);
 
     _setupErrorHandlers();
-    _initBackgroundServices();
+    
+    // 🌟 التعديل الأول: إضافة await لضمان تهيئة Supabase قبل تشغيل الواجهة
+    await _initBackgroundServices();
 
     runApp(
       ProviderScope(
@@ -105,6 +109,7 @@ Future<void> _initBackgroundServices() async {
       NotificationService().init(),
       Supabase.initialize(
         url: dotenv.env['SUPABASE_URL']!, 
+        // 🌟 العودة إلى publishableKey للتوافق مع التحديث الأخير للحزمة
         publishableKey: dotenv.env['SUPABASE_ANON_KEY']!, 
       ),
     ]);
@@ -128,6 +133,7 @@ class SuwayaApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    final activeColorTheme = ref.watch(themeColorProvider);
 
     final bool isDayTime = ref.watch(astroProvider.select((state) {
       if (state.periods.isEmpty) {
@@ -138,18 +144,21 @@ class SuwayaApp extends ConsumerWidget {
       return pId >= 1 && pId <= 4; 
     }));
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Suwaya',
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale, 
-      
-      themeMode: AppTheme.getThemeMode(settings.themeMode, isDayTime: isDayTime),
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      
-      home: const SplashScreen(),
+    // 🌟 إحاطة التطبيق بالـ GlobalSyncWrapper
+    return GlobalSyncWrapper(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Suwaya',
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale, 
+        
+        themeMode: AppTheme.getThemeMode(settings.themeMode, isDayTime: isDayTime),
+        theme: AppTheme.getLightTheme(activeColorTheme),
+        darkTheme: AppTheme.getDarkTheme(activeColorTheme),
+        
+        home: const SplashScreen(),
+      ),
     );
   }
 }

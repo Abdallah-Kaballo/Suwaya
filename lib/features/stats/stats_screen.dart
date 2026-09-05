@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/astro_engine/astro_models.dart';
+import 'package:suwaya/core/astro_engine/astro_models.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
 import 'stats_provider.dart';
@@ -37,15 +38,19 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         elevation: 0,
         title: Text('المرآة الفلكية ✨', style: TextStyle(color: textColor, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
         centerTitle: true,
-        iconTheme: IconThemeData(color: textColor),
       ),
       body: stats.isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.amber))
-          : SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(24).copyWith(bottom: 100),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          : RefreshIndicator(
+              color: Colors.amber,
+              backgroundColor: isDark ? const Color(0xFF1E2530) : Colors.white,
+              onRefresh: () async {
+                HapticFeedback.lightImpact();
+                ref.read(statsProvider.notifier).refreshStats();
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                padding: const EdgeInsets.all(24).copyWith(bottom: 100),
                 children: [
                   _buildArchetypeCard(stats, isDark),
                   const SizedBox(height: 24),
@@ -53,16 +58,16 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   _buildHarmonyCard(stats, isDark),
                   const SizedBox(height: 32),
                   
-                  Text('خريطة نبضك الفلكي', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('الخريطة الحرارية (آخر 7 أيام)', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
-                  _buildHeatmapSection(stats, astroState, isDark, context),
+                  _buildHeatmapGrid(stats, astroState, isDark),
                   const SizedBox(height: 32),
                   
                   Row(
                     children: [
                       const Icon(LucideIcons.sparkles, color: Colors.amber, size: 20),
                       const SizedBox(width: 8),
-                      Text('همسات السُّوَيْعَة', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('رؤى السُّوَيْعَة الذكية', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -79,12 +84,16 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.amber.withValues(alpha: isDark ? 0.15 : 0.2), Colors.amber.withValues(alpha: isDark ? 0.02 : 0.05)],
+          colors: [
+            Colors.amber.withValues(alpha: isDark ? 0.15 : 0.3), 
+            Colors.amber.withValues(alpha: isDark ? 0.02 : 0.05)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: isDark ? [BoxShadow(color: Colors.amber.withValues(alpha: 0.05), blurRadius: 20, spreadRadius: 5)] : [],
       ),
       child: Column(
         children: [
@@ -97,14 +106,14 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             child: const Icon(LucideIcons.compass, color: Colors.amber, size: 40),
           ),
           const SizedBox(height: 16),
-          Text('أنت هذا الأسبوع', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14)),
+          Text('نمطك الفلكي الحالي', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 1.5)),
           const SizedBox(height: 8),
-          Text(stats.archetypeTitle, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(stats.archetypeTitle, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 26, fontWeight: FontWeight.w900)),
           const SizedBox(height: 12),
           Text(
             stats.archetypeDescription,
             textAlign: TextAlign.center,
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 15, height: 1.5),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 14, height: 1.6),
           ),
         ],
       ),
@@ -113,17 +122,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   Widget _buildHarmonyCard(StatsState stats, bool isDark) {
     String moonPhase;
-    if (stats.harmonyScore >= 90) {
-      moonPhase = '🌕';
-    } else if (stats.harmonyScore >= 70) {
-      moonPhase = '🌖';
-    } else if (stats.harmonyScore >= 50) {
-      moonPhase = '🌗';
-    } else if (stats.harmonyScore >= 30) {
-      moonPhase = '🌘';
-    } else {
-      moonPhase = '🌑';
-    }
+    Color phaseColor;
+    if (stats.harmonyScore >= 80) { moonPhase = '🌕'; phaseColor = Colors.amber; } 
+    else if (stats.harmonyScore >= 60) { moonPhase = '🌖'; phaseColor = Colors.blueAccent; } 
+    else if (stats.harmonyScore >= 40) { moonPhase = '🌗'; phaseColor = Colors.orangeAccent; } 
+    else if (stats.harmonyScore >= 20) { moonPhase = '🌘'; phaseColor = Colors.deepOrange; } 
+    else { moonPhase = '🌑'; phaseColor = Colors.redAccent; }
 
     final cardColor = isDark ? const Color(0xFF1E2530) : Colors.white;
 
@@ -131,40 +135,47 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
         boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
-          Text(moonPhase, style: const TextStyle(fontSize: 42)),
-          const SizedBox(width: 16),
+          Container(
+            width: 70, height: 70,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: phaseColor.withValues(alpha: 0.1),
+              border: Border.all(color: phaseColor.withValues(alpha: 0.3)),
+            ),
+            child: Text(moonPhase, style: const TextStyle(fontSize: 32)),
+          ),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('مؤشر التناغم الفلكي', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14)),
+                Text('مؤشر التناغم', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 4),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('${stats.harmonyScore}', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 28, fontWeight: FontWeight.bold)),
+                    Text('${stats.harmonyScore}', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 32, fontWeight: FontWeight.w900)),
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 4, right: 4),
-                      child: Text('%', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 16)),
+                      padding: const EdgeInsets.only(bottom: 6, right: 4),
+                      child: Text('%', style: TextStyle(color: isDark ? Colors.white54 : Colors.black45, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: stats.harmonyScore / 100,
                     backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      stats.harmonyScore >= 70 ? Colors.greenAccent : (stats.harmonyScore >= 40 ? Colors.amber : Colors.deepOrangeAccent),
-                    ),
-                    minHeight: 6,
+                    valueColor: AlwaysStoppedAnimation<Color>(phaseColor),
+                    minHeight: 8,
                   ),
                 ),
               ],
@@ -175,25 +186,25 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  Widget _buildHeatmapSection(StatsState stats, AstroState astroState, bool isDark, BuildContext context) {
+  // 🌟 هنا السر: الخريطة الحرارية بأسلوب المربعات
+  Widget _buildHeatmapGrid(StatsState stats, AstroState astroState, bool isDark) {
     final cardColor = isDark ? const Color(0xFF1E2530) : Colors.white;
 
     if (astroState.periods.isEmpty || stats.periodHeatmap.isEmpty) {
       return Container(
-        height: 140,
+        height: 160,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: cardColor, 
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
-          boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.bar_chart_rounded, color: isDark ? Colors.white24 : Colors.black26, size: 32), // 🌟 الإصلاح: تغيير الأيقونة
+            Icon(LucideIcons.activity, color: isDark ? Colors.white24 : Colors.black26, size: 36),
             const SizedBox(height: 12),
-            Text('لا توجد مهام منجزة كافية لرسم خريطتك بعد', style: TextStyle(color: isDark ? Colors.white38 : Colors.black45)),
+            Text('سجل إنجازاتك فارغ هذا الأسبوع', style: TextStyle(color: isDark ? Colors.white38 : Colors.black45, fontSize: 14)),
           ],
         ),
       );
@@ -205,7 +216,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
         boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
@@ -213,32 +224,52 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: astroState.periods.map<Widget>((period) {
-          final taskCount = stats.periodHeatmap[period.id] ?? 0;
-          final barHeight = maxTasks > 0 ? (taskCount / maxTasks) * 80.0 : 0.0;
+          final count = stats.periodHeatmap[period.id] ?? 0;
           
+          // حساب مستوى الإضاءة (من 0 إلى 5 مربعات)
+          int activeBlocks = 0;
+          if (count > 0) {
+            activeBlocks = ((count / maxTasks) * 5).ceil().clamp(1, 5);
+          }
+
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(taskCount > 0 ? '$taskCount' : '', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(count > 0 ? '$count' : '', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               
-              Container(
-                width: 16,
-                height: barHeight == 0 ? 4 : barHeight, 
-                decoration: BoxDecoration(
-                  color: taskCount > 0 ? period.color : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: taskCount > 0 ? [BoxShadow(color: period.color.withValues(alpha: 0.4), blurRadius: 8)] : null,
-                ),
+              // بناء عمود المربعات
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(5, (index) {
+                  // المربعات ترسم من الأسفل للأعلى (index 0 هو الأعلى)
+                  final isLit = (4 - index) < activeBlocks;
+                  
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 500),
+                    margin: const EdgeInsets.only(bottom: 4),
+                    width: 20,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: isLit 
+                          ? period.color 
+                          : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03)),
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: isLit && isDark 
+                          ? [BoxShadow(color: period.color.withValues(alpha: 0.4), blurRadius: 6)] 
+                          : null,
+                    ),
+                  );
+                }),
               ),
-              const SizedBox(height: 12),
               
+              const SizedBox(height: 12),
               Text(
                 period.shortName,
                 style: TextStyle(
-                  color: taskCount > 0 ? (isDark ? Colors.white : Colors.black87) : (isDark ? Colors.white38 : Colors.black38),
-                  fontSize: 10,
-                  fontWeight: taskCount > 0 ? FontWeight.bold : FontWeight.normal,
+                  color: count > 0 ? (isDark ? Colors.white : Colors.black87) : (isDark ? Colors.white38 : Colors.black38),
+                  fontSize: 11,
+                  fontWeight: count > 0 ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
             ],
@@ -249,20 +280,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   }
 
   Widget _buildInsightsList(StatsState stats, bool isDark) {
-    if (stats.insights.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 20),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(LucideIcons.lightbulb, color: isDark ? Colors.white24 : Colors.black26, size: 32),
-              const SizedBox(height: 12),
-              Text('اكتشف همساتك هنا قريباً...', style: TextStyle(color: isDark ? Colors.white38 : Colors.black45)),
-            ],
-          ),
-        ),
-      );
-    }
+    if (stats.insights.isEmpty) return const SizedBox.shrink();
 
     return Column(
       children: stats.insights.map((insight) {
@@ -277,12 +295,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('✨', style: TextStyle(fontSize: 18)),
+              Icon(LucideIcons.zap, color: Colors.amber.withValues(alpha: 0.8), size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   insight,
-                  style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 14, height: 1.6),
+                  style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, height: 1.6, fontWeight: FontWeight.w500),
                 ),
               ),
             ],

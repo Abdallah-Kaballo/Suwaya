@@ -4,10 +4,18 @@ part 'settings_model.g.dart';
 @collection
 class SettingsModel {
   Id id = 0; 
+  
+  // 🌟 المزامنة
+  DateTime updatedAt = DateTime.now().toUtc();
+  bool isSynced = false;
+
   bool isFirstLaunch = true;
   String languageCode = 'ar';
-  
   String themeMode = 'dark'; 
+
+  // 🌟 ميكانيكا الاستريك المتقدمة (Gamification)
+  int streakFreezesAvailable = 3; // رصيد أيام التجميد لحماية السلسلة
+  String dayBoundary = 'maghrib'; // 'maghrib' أو 'midnight' (تجديد اليوم)
 
   String calculationMethod = 'muslim_world_league';
   String madhab = 'shafi';
@@ -23,9 +31,7 @@ class SettingsModel {
   DateTime? lastStreakDate;
 
   bool qiyamAlarmEnabled = false;
-
   List<int> hiddenPeriods = [];
-
   bool isDialAutoRotating = true;
   String suwayaNumberStyle = 'english'; 
   List<String> activeNightMarkers = ['fifth_sixth']; 
@@ -153,7 +159,7 @@ class SavedLocation {
 class PeriodConfig {
   String? periodId;
   bool isEnabled = true;
-  int alertLevel = 0; // 🌟 الافتراضي صامت أيضاً هنا
+  int alertLevel = 0; 
   String? soundPath;
   double volume = 1.0;
   int manualOffsetMinutes = 0; 

@@ -57,6 +57,7 @@ dependencies:
   alarm: ^5.10.0
   hijri: ^3.0.1
   flutter_dotenv: ^6.0.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

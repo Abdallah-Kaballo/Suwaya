@@ -6,7 +6,8 @@ import 'package:isar_community/isar.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/database/local_db_service.dart';
 import '../../models/task_model.dart';
-import '../../models/daily_stats_model.dart';
+// 🌟 1. استبدال استيراد الإحصاءات القديمة بالجدول الجديد
+import '../../models/activity_log_model.dart';
 import '../settings/settings_provider.dart';
 
 class TasksState {
@@ -66,7 +67,6 @@ class TasksNotifier extends Notifier<TasksState> {
     return all.map((t) => t.title).toSet().toList();
   }
 
-  // 🌟 هنا السر! يتم فلترة المهام المكتملة لكي تختفي من كل التطبيق
   void _refreshFromMemory(List<TaskModel> allTasks) {
     final astroState = ref.read(astroProvider);
     final currentPeriodId = astroState.periods.isNotEmpty ? astroState.currentPeriod.id : null;
@@ -79,7 +79,6 @@ class TasksNotifier extends Notifier<TasksState> {
     final List<TaskModel> horizonList = [];
 
     for (var task in allTasks) {
-      // 🌟 الفلترة الجراحية: أي مهمة مكتملة يتم تجاهلها تماماً من القوائم
       if (task.type == TaskType.casual && task.isCompleted) continue;
       if (task.type == TaskType.permanent && task.isCompletedToday) continue;
 
@@ -180,7 +179,6 @@ class TasksNotifier extends Notifier<TasksState> {
     Alarm.stop(10000 + id); 
   }
 
-  // 🌟 دالة الحذف الجماعي للمهام المحددة
   Future<void> deleteMultipleTasks(List<int> ids) async {
     final updatedList = state.allTasks.where((t) => !ids.contains(t.id)).toList();
     _refreshFromMemory(updatedList);
@@ -222,28 +220,43 @@ class TasksNotifier extends Notifier<TasksState> {
 
     LocalDbService.saveTask(task).then((_) {
       if (isAchievedNow) ref.read(settingsProvider.notifier).updateGlobalStreak();
-      _updateDailyStats(task, isAchievedNow);
+      _logActivity(task, isAchievedNow); // 🌟 استدعاء دالة التسجيل الجديدة
     });
   }
 
-  Future<void> _updateDailyStats(TaskModel task, bool isCompleted) async {
+  // 🌟 2. المحرك الجديد: تسجيل الأحداث بدلاً من العدادات
+  Future<void> _logActivity(TaskModel task, bool isCompleted) async {
     final db = LocalDbService.isar;
-    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final now = DateTime.now();
+    final todayStr = DateFormat('yyyy-MM-dd').format(now); // يمكن ترقيتها لاحقاً لحساب حدود المغرب
+
     await db.writeTxn(() async {
-      var stats = await db.dailyCosmicStats.where().dateStringEqualTo(todayStr).findFirst();
-      stats ??= DailyCosmicStats()..dateString = todayStr;
-      final increment = isCompleted ? 1 : -1;
-      stats.totalCompleted = (stats.totalCompleted + increment).clamp(0, 99999);
-      switch (task.targetPeriodId) {
-        case 1: stats.fajrCount = (stats.fajrCount + increment).clamp(0, 9999); break;
-        case 2: stats.duhaCount = (stats.duhaCount + increment).clamp(0, 9999); break;
-        case 3: stats.dhuhrCount = (stats.dhuhrCount + increment).clamp(0, 9999); break;
-        case 4: stats.asrCount = (stats.asrCount + increment).clamp(0, 9999); break;
-        case 5: stats.maghribCount = (stats.maghribCount + increment).clamp(0, 9999); break;
-        case 6: stats.ishaCount = (stats.ishaCount + increment).clamp(0, 9999); break;
-        case 7: stats.qiyamCount = (stats.qiyamCount + increment).clamp(0, 9999); break;
+      if (isCompleted) {
+        // 🌟 إدراج حدث جديد (Event Sourcing)
+        final log = ActivityLog()
+          ..taskSyncId = task.syncId
+          ..category = task.category.name
+          ..periodId = task.targetPeriodId ?? 1
+          ..suwayasCount = task.targetSuwayas.isNotEmpty ? task.targetSuwayas.length : 1
+          ..completedAtUtc = now.toUtc()
+          ..activeDayDate = todayStr;
+
+        await db.activityLogs.put(log);
+      } else {
+        // 🌟 إذا تراجع المستخدم، نبحث عن آخر حدث لهذه المهمة ونحذفه ناعماً
+        final lastLog = await db.activityLogs
+            .filter()
+            .taskSyncIdEqualTo(task.syncId)
+            .sortByCompletedAtUtcDesc()
+            .findFirst();
+
+        if (lastLog != null) {
+          lastLog.isDeleted = true;
+          lastLog.updatedAt = now.toUtc();
+          lastLog.isSynced = false;
+          await db.activityLogs.put(lastLog);
+        }
       }
-      await db.dailyCosmicStats.put(stats);
     });
   }
 

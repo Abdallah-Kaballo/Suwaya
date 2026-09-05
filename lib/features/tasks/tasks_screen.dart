@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:easy_localization/easy_localization.dart' hide TextDirection; // 🌟
+import 'package:easy_localization/easy_localization.dart' hide TextDirection; 
 import 'dart:ui' as ui;
 
 import 'tasks_provider.dart';
@@ -144,17 +144,20 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
           _buildRoutinesList(routines, periods),
         ],
       ),
-      floatingActionButton: _isSelectionMode ? null : FloatingActionButton.extended(
-        backgroundColor: accentColor,
-        onPressed: () {
-          HapticFeedback.heavyImpact();
-          showModalBottomSheet(
-            context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-            builder: (_) => UniversalAddScreen(currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya, initialTab: _tabController.index),
-          );
-        },
-        icon: const Icon(LucideIcons.plus, color: Colors.white),
-        label: Text('common.add'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      floatingActionButton: _isSelectionMode ? null : Padding(
+        padding: const EdgeInsets.only(bottom: 90.0), // رفع الزر فوق الشريط الزجاجي
+        child: FloatingActionButton.extended(
+          backgroundColor: accentColor,
+          onPressed: () {
+            HapticFeedback.heavyImpact();
+            showModalBottomSheet(
+              context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+              builder: (_) => UniversalAddScreen(currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya, initialTab: _tabController.index),
+            );
+          },
+          icon: const Icon(LucideIcons.plus, color: Colors.white),
+          label: Text('common.add'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
       ),
     );
   }
@@ -331,7 +334,7 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(timeStr, style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'monospace')),
+                  Text(timeStr, style: TextStyle(color: textColor, fontSize: 16, fontWeight: t.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: t.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: t.isAstroTime ? 1.0 : 0.0)),
                   const SizedBox(height: 2),
                   Text(dateStr, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.bold)),
                 ],
@@ -381,7 +384,7 @@ class _RoutineRowItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(timeStr, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'monospace')),
+                  Text(timeStr, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: routine.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: routine.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: routine.isAstroTime ? 1.0 : 0.0)),
                   const SizedBox(height: 2),
                   Text(recStr, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
                 ],

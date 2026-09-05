@@ -4,6 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya/core/sync/sync_service.dart';
 
 import '../../core/sync/auth_service.dart';
 
@@ -153,13 +154,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         HapticFeedback.mediumImpact();
                         setState(() => _isLoading = true);
                         
+                        // 🌟 1. التقاط حالة المستخدم قبل الدخول (هل كان ضيفاً؟)
+                        final wasAnon = authService.isAnonymous; 
+                        
                         final errorMessage = await authService.signInWithGoogle();
                         
                         if (!context.mounted) return; 
                         
-                        setState(() => _isLoading = false);
-                        
-                        if (errorMessage != null) {
+                        if (errorMessage == null) {
+                          // 🌟 2. إذا نجح الدخول وكان ضيفاً، نفعل دمج البيانات
+                          if (wasAnon) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('جاري دمج بياناتك المحلية مع السحابة... ☁️'), backgroundColor: Colors.amber, duration: Duration(seconds: 3))
+                            );
+                            
+                            // 🌟 3. استدعاء دوال الدمج والمزامنة
+                            final syncService = ref.read(syncServiceProvider);
+                            await syncService.migrateGuestData();
+                            await syncService.syncAll();
+                          }
+                        } else {
+                          // عرض الخطأ إن وجد
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(errorMessage, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)), 
@@ -168,6 +183,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             )
                           );
                         }
+                        
+                        setState(() => _isLoading = false);
                       },
                     ),
                 

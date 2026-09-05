@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_community/isar.dart';
 import '../../core/database/local_db_service.dart';
-import '../../models/task_model.dart';
+import '../../models/activity_log_model.dart'; // 🌟 استيراد سجل الأحداث
 
 class StatsState {
   final String archetypeTitle;       
@@ -28,12 +29,19 @@ class StatsNotifier extends Notifier<StatsState> {
   }
 
   Future<void> _calculateAstroStats() async {
-    final now = DateTime.now();
+    final db = LocalDbService.isar;
+    final now = DateTime.now().toUtc();
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
     
-    final recentCompletedTasks = await LocalDbService.getRecentCompletedTasks(sevenDaysAgo);
+    // 🌟 1. استدعاء الأحداث من ActivityLog بدلاً من المهام
+    // نستثني الأحداث التي تراجع عنها المستخدم (isDeleted = true)
+    final recentLogs = await db.activityLogs
+        .filter()
+        .isDeletedEqualTo(false)
+        .completedAtUtcGreaterThan(sevenDaysAgo)
+        .findAll();
 
-    if (recentCompletedTasks.isEmpty) {
+    if (recentLogs.isEmpty) {
       state = StatsState(isLoading: false);
       return;
     }
@@ -41,10 +49,15 @@ class StatsNotifier extends Notifier<StatsState> {
     final heatmap = <int, int>{};
     int topPeriodId = 1;
     int maxTasks = 0;
+    
+    // 🌟 2. تتبع الأيام الفريدة النشطة لحساب مؤشر التناغم
+    final activeDays = <String>{};
 
-    for (var task in recentCompletedTasks) {
-      final pId = task.targetPeriodId ?? 1;
-      heatmap[pId] = (heatmap[pId] ?? 0) + 1;
+    for (var log in recentLogs) {
+      final pId = log.periodId ?? 1;
+      // نجمع عدد السويعات (الجهد الفعلي) وليس مجرد عدد المهام
+      heatmap[pId] = (heatmap[pId] ?? 0) + log.suwayasCount;
+      activeDays.add(log.activeDayDate);
       
       if (heatmap[pId]! > maxTasks) {
         maxTasks = heatmap[pId]!;
@@ -54,10 +67,11 @@ class StatsNotifier extends Notifier<StatsState> {
 
     final archetypeInfo = _determineArchetype(topPeriodId);
 
-    int unmigratedTasksCount = recentCompletedTasks.where((t) => t.migrationCount == 0).length;
-    int harmony = ((unmigratedTasksCount / recentCompletedTasks.length) * 100).round();
+    // 🌟 3. حساب مؤشر التناغم (Harmony) 
+    // يرتكز الآن على عدد الأيام التي أُنجزت فيها مهام من أصل آخر 7 أيام
+    int harmony = ((activeDays.length / 7) * 100).round().clamp(0, 100);
 
-    final generatedInsights = _generateSmartInsights(recentCompletedTasks, harmony, topPeriodId);
+    final generatedInsights = _generateSmartInsights(heatmap, harmony, topPeriodId);
 
     state = StatsState(
       archetypeTitle: archetypeInfo['title']!,
@@ -71,40 +85,34 @@ class StatsNotifier extends Notifier<StatsState> {
 
   Map<String, String> _determineArchetype(int topPeriodId) {
     switch (topPeriodId) {
-      case 1: return {'title': 'title_fajr', 'desc': 'desc_fajr'};
-      case 2: return {'title': 'title_duha', 'desc': 'desc_duha'};
-      case 3: return {'title': 'title_dhuhr', 'desc': 'desc_dhuhr'};
-      case 4: return {'title': 'title_asr', 'desc': 'desc_asr'};
+      case 1: return {'title': 'نسمة الفجر 🕊️', 'desc': 'طاقة البدايات والبركة تتجلى في إنجازاتك الصباحية.'};
+      case 2: return {'title': 'رائد الضُّحى 🌤️', 'desc': 'شمس الضحى تضيء إنتاجيتك، أنت في قمة تركيزك نهاراً.'};
+      case 3: 
+      case 4: return {'title': 'فارس النهار 🐎', 'desc': 'لا تعرف الكسل في كبد النهار، إنجازاتك مستمرة وقوية.'};
       case 5:
       case 6:
-      case 7: return {'title': 'title_night', 'desc': 'desc_night'};
-      default: return {'title': 'title_balanced', 'desc': 'desc_balanced'};
+      case 7: return {'title': 'ساهر السَّحَر 🌙', 'desc': 'في الوقت الذي ينام فيه الناس، ترتفع أعمالك وإنجازاتك بهدوء.'};
+      default: return {'title': 'متوازن ⚖️', 'desc': 'توزع مجهودك ببراعة على مدار اليوم.'};
     }
   }
 
-  List<String> _generateSmartInsights(List<TaskModel> recentTasks, int harmony, int topPeriodId) {
+  List<String> _generateSmartInsights(Map<int, int> heatmap, int harmony, int topPeriodId) {
     List<String> insights = [];
-
-    final tarweehMigrated = recentTasks.where((t) => t.category == TaskCategory.unspecified && t.migrationCount > 3).length;
-  
-    if (tarweehMigrated > 0) {
-      insights.add("insight_tarweeh"); 
-    }
     
-    if (harmony >= 90) {
-      insights.add("insight_harmony_high");
-    } else if (harmony < 50) {
-      insights.add("insight_harmony_low");
+    if (harmony >= 80) {
+      insights.add("تناغمك الفلكي مرتفع جداً! استمرارية رائعة خلال الأسبوع الماضي.");
+    } else if (harmony <= 40) {
+      insights.add("يبدو أنك مررت بأسبوع حافل. حاول توزيع مهامك لتقليل الضغط.");
     }
 
-    if (topPeriodId == 2) {
-      insights.add("insight_duha");
+    if (topPeriodId == 1) {
+      insights.add("تركيزك في الفجر يمنحك أفضلية مذهلة وصفاءً ذهنياً لباقي اليوم.");
     } else if (topPeriodId >= 5) {
-      insights.add("insight_night");
+      insights.add("نشاطك الليلي ممتاز، لكن تأكد من أخذ قسط كافٍ من الراحة الجسدية.");
     }
 
     if (insights.isEmpty) {
-      insights.add("insight_stable");
+      insights.add("أداؤك مستقر وتوزع طاقتك بشكل جيد على الفترات المختلفة.");
     }
 
     return insights;

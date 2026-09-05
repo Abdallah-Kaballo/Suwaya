@@ -56,11 +56,12 @@ class _MiniDialPainter extends CustomPainter {
 
       final innerTextR = radius * 0.6;
       final innerP = Offset(center.dx + innerTextR * cos(middleAngle), center.dy + innerTextR * sin(middleAngle));
-      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 10, fontWeight: FontWeight.bold));
+      
+      // 🌟 التعديل هنا: الخط الفلكي (Playfair Display) لأرقام السويعات على القرص
+      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
       textPainter.layout();
       textPainter.paint(canvas, innerP - Offset(textPainter.width / 2, textPainter.height / 2));
 
-      // 🌟 الاعتماد حصرياً على الفترات الـ 7
       String pName = '';
       switch(period.id) {
         case 1: pName = 'periods.fajr'.tr(); break;

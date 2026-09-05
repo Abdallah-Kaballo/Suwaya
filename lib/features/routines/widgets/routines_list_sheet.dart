@@ -100,7 +100,8 @@ class RoutinesListSheet extends ConsumerWidget {
                           title: Text(r.title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
                           subtitle: Padding(
                             padding: const EdgeInsets.only(top: 4.0),
-                            child: Directionality(textDirection: ui.TextDirection.ltr, child: Text(timeText, textAlign: TextAlign.right, style: TextStyle(color: hintColor, fontSize: 12, fontFamily: r.isAstroTime ? null : 'monospace'))),
+                            // 🌟 التعديل هنا: الخط الفلكي (Playfair Display) والمدني (Inter)
+                            child: Directionality(textDirection: ui.TextDirection.ltr, child: Text(timeText, textAlign: TextAlign.right, style: TextStyle(color: hintColor, fontSize: 13, fontWeight: r.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: r.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: r.isAstroTime ? 1.0 : 0.0))),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,

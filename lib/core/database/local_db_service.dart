@@ -6,7 +6,7 @@ import '../../models/task_model.dart';
 import 'package:suwaya/models/settings_model.dart';
 import '../models/geo_models.dart';
 import '../../models/routine_model.dart';
-import '../../models/daily_stats_model.dart'; // 🟢 استيراد نموذج الإحصائيات
+import '../../models/activity_log_model.dart'; 
 
 class LocalDbService {
   static late Isar isar;
@@ -21,16 +21,13 @@ class LocalDbService {
           SettingsModelSchema,
           GeoCountrySchema,
           RoutineModelSchema,
-          DailyCosmicStatsSchema, // 🟢 تمت الإضافة
+          ActivityLogSchema, // 🌟 التعديل هنا: استبدال المخطط القديم بالجديد
         ],
         directory: dir.path,
         inspector: true,
       );
     } catch (e) {
       debugPrint('🚨 فشل فتح قاعدة البيانات: $e');
-      // 🛡️ لا نحذف البيانات تلقائيًا. نعطي المستخدم فرصة لاستعادة نسخة أو إعادة التثبيت.
-      // بدلاً من deleteFromDisk، نحاول الفتح بدون أي مخططات جديدة قد تكون السبب.
-      // إذا فشل أيضًا، نرمي استثناءً واضحًا ليتعامل معه main.dart.
       try {
         isar = await Isar.open(
           [
@@ -43,7 +40,6 @@ class LocalDbService {
           inspector: true,
         );
       } catch (_) {
-        // إذا استمر الفشل، نرمي استثناءً يمنع التطبيق من الاستمرار بصمت.
         throw Exception('لا يمكن فتح قاعدة البيانات. يرجى إعادة تشغيل التطبيق أو استعادة نسخة احتياطية.');
       }
     }
@@ -77,7 +73,7 @@ class LocalDbService {
       final task = await isar.taskModels.get(id);
       if (task != null) {
         task.isDeleted = true;
-        task.updatedAt = DateTime.now();
+        task.updatedAt = DateTime.now().toUtc(); // 🌟 يفضل استخدام UTC هنا للمزامنة
         task.isSynced = false;
         await isar.taskModels.put(task);
       }

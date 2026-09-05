@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:suwaya/core/services/location_service.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:suwaya/features/layout/main_layout.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import 'package:suwaya/core/services/location_service.dart'; 
 import 'package:suwaya/features/auth/auth_screen.dart';
 import 'package:suwaya/features/settings/screens/permissions_screen.dart';
 import 'settings_provider.dart';
@@ -13,10 +16,24 @@ import 'widgets/smart_location_picker.dart';
 import 'screens/astro_calculations_screen.dart';
 import 'screens/notifications_settings_screen.dart';
 import '../../core/sync/backup_service.dart';
-import '../../core/sync/auth_service.dart'; 
+import '../../core/sync/auth_service.dart';
+import '../../core/sync/sync_service.dart';
+
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/theme_color_provider.dart';
+import '../../core/theme/dial_design_provider.dart';
 
 final settingsAuthStateProvider = StreamProvider<AuthState>((ref) {
   return Supabase.instance.client.auth.onAuthStateChange;
+});
+
+final lastSyncTimeProvider = FutureProvider.autoDispose<DateTime?>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  final timeStr = prefs.getString('last_sync_time');
+  if (timeStr != null) {
+    return DateTime.parse(timeStr).toLocal();
+  }
+  return null;
 });
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -30,30 +47,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // 🌟 إضافة القائمة الشاملة للغات الـ 22
   final Map<String, String> _appLanguages = {
-    'tr': 'Türkçe',
-    'ru': 'Русский',
-    'ur': 'اردو',
-    'ar': 'العربية',
-    'hi': 'हिन्दी',
-    'bn': 'বাংলা',
-    'th': 'ไทย',
-    'ja': '日本語',
-    'zh': '中文 (简体)',
-    'ug': 'ئۇيغۇرچە',
-    'pt': 'Português',
-    'ff': 'Pulaar',
-    'az': 'Azərbaycanca',
-    'id': 'Bahasa Indonesia',
-    'ms': 'Bahasa Melayu',
-    'da': 'Dansk',
-    'de': 'Deutsch',
-    'en': 'English',
-    'es': 'Español',
-    'fr': 'Français',
-    'it': 'Italiano',
-    'nl': 'Nederlands',
+    'tr': 'Türkçe', 'ru': 'Русский', 'ur': 'اردو', 'ar': 'العربية', 'hi': 'हिन्दी',
+    'bn': 'বাংলা', 'th': 'ไทย', 'ja': '日本語', 'zh': '中文 (简体)', 'ug': 'ئۇيغۇرچە',
+    'pt': 'Português', 'ff': 'Pulaar', 'az': 'Azərbaycanca', 'id': 'Bahasa Indonesia',
+    'ms': 'Bahasa Melayu', 'da': 'Dansk', 'de': 'Deutsch', 'en': 'English',
+    'es': 'Español', 'fr': 'Français', 'it': 'Italiano', 'nl': 'Nederlands',
   };
 
   @override
@@ -73,16 +72,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  String _getColorThemeName(AppColorTheme theme) {
+    switch(theme) {
+      case AppColorTheme.gold: return 'settings.color_gold'.tr(); 
+      case AppColorTheme.ocean: return 'settings.color_ocean'.tr();
+      case AppColorTheme.forest: return 'settings.color_forest'.tr();
+      case AppColorTheme.desert: return 'settings.color_desert'.tr();
+    }
+  }
+
+  String _getDialDesignName(DialDesign design) {
+    switch(design) {
+      case DialDesign.classic: return 'settings.design_classic'.tr();
+      case DialDesign.minimal: return 'settings.design_minimal'.tr();
+      case DialDesign.geometric: return 'settings.design_geometric'.tr();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.watch(settingsAuthStateProvider); 
     final authService = ref.read(authServiceProvider);
-    
     final settingsState = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     
+    final activeColorTheme = ref.watch(themeColorProvider);
+    final colorNotifier = ref.read(themeColorProvider.notifier);
+
+    final activeDialDesign = ref.watch(dialDesignProvider);
+    final dialDesignNotifier = ref.read(dialDesignProvider.notifier);
+    
     final currentLang = settingsState.languageCode;
-    // 🌟 جلب اسم اللغة الحالية لعرضه كـ Subtitle
     final currentLangName = _appLanguages[currentLang] ?? 'English';
 
     final activeLocation = settingsState.activeLocation;
@@ -106,7 +126,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            ref.read(mainNavIndexProvider.notifier).state = 2; 
+          },
         ),
         title: Text('settings.title'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
         centerTitle: true,
@@ -149,6 +171,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: isAnon ? 'settings.create_account'.tr() : userName, 
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthScreen()))
                   ),
+                  
+                  if (!isAnon)
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final lastSync = ref.watch(lastSyncTimeProvider);
+                        final dateStr = lastSync.when(
+                          data: (date) => date != null 
+                              ? '${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}  ${date.hour.toString().padLeft(2,'0')}:${date.minute.toString().padLeft(2,'0')}'
+                              : 'settings.not_synced_yet'.tr(),
+                          loading: () => 'settings.checking'.tr(),
+                          error: (_, __) => 'settings.unavailable'.tr(),
+                        );
+                        
+                        return _buildSettingRow(
+                          icon: LucideIcons.refresh_cw, 
+                          title: 'settings.cloud_sync'.tr(), 
+                          subtitle: '${'settings.last_sync'.tr()}: $dateStr',
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('settings.syncing'.tr()), duration: const Duration(seconds: 2))
+                            );
+                            await ref.read(syncServiceProvider).syncAll();
+                            ref.invalidate(lastSyncTimeProvider); 
+                          }
+                        );
+                      },
+                    ),
+
                   _buildSettingRow(
                     icon: LucideIcons.cloud_download, title: 'settings.manual_backup'.tr(), subtitle: 'settings.extract_backup'.tr(), 
                     onTap: () async {
@@ -195,9 +246,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       isDark, surfaceColor, textColor, primaryColor
                     )
                   ),
+                  _buildSettingRow(
+                    icon: LucideIcons.droplets, 
+                    title: 'settings.app_color'.tr(), 
+                    subtitle: _getColorThemeName(activeColorTheme),
+                    onTap: () {
+                      _showSelectionSheet(
+                        'settings.choose_app_color'.tr(), 
+                        {
+                          AppColorTheme.gold.name: _getColorThemeName(AppColorTheme.gold),
+                          AppColorTheme.ocean.name: _getColorThemeName(AppColorTheme.ocean),
+                          AppColorTheme.forest.name: _getColorThemeName(AppColorTheme.forest),
+                          AppColorTheme.desert.name: _getColorThemeName(AppColorTheme.desert),
+                        }, 
+                        activeColorTheme.name, 
+                        (v) => colorNotifier.changeTheme(AppColorTheme.values.firstWhere((e) => e.name == v)),
+                        isDark, surfaceColor, textColor, primaryColor
+                      );
+                    }
+                  ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.dial_settings'.tr(), [
+                  _buildSettingRow(
+                    icon: LucideIcons.disc, 
+                    title: 'settings.dial_design'.tr(), 
+                    subtitle: _getDialDesignName(activeDialDesign),
+                    onTap: () {
+                      _showSelectionSheet(
+                        'settings.choose_dial_design'.tr(), 
+                        {
+                          DialDesign.classic.name: _getDialDesignName(DialDesign.classic),
+                          DialDesign.minimal.name: _getDialDesignName(DialDesign.minimal),
+                          DialDesign.geometric.name: _getDialDesignName(DialDesign.geometric),
+                        }, 
+                        activeDialDesign.name, 
+                        (v) => dialDesignNotifier.changeDesign(DialDesign.values.firstWhere((e) => e.name == v)),
+                        isDark, surfaceColor, textColor, primaryColor
+                      );
+                    }
+                  ),
                   _buildSettingRow(
                     icon: LucideIcons.moon_star, title: 'settings.golden_night_markers'.tr(), subtitle: 'settings.markers_desc'.tr(),
                     onTap: () => _showNightMarkersSheet(context, isDark, surfaceColor, textColor, primaryColor)
@@ -210,7 +298,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.general'.tr(), [
-                  // 🌟 الاعتماد على القائمة الشاملة عند تغيير اللغة
                   _buildSettingRow(
                     icon: LucideIcons.languages, title: 'settings.app_language'.tr(), subtitle: currentLangName,
                     onTap: () => _showSelectionSheet('settings.app_language'.tr(), _appLanguages, currentLang, (v){ notifier.updateLanguage(v); context.setLocale(Locale(v)); }, isDark, surfaceColor, textColor, primaryColor)
@@ -222,7 +309,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PermissionsScreen())),
                   ),
                   _buildSettingRow(icon: LucideIcons.info, title: 'settings.about'.tr(), onTap: () {}),
-                  _buildSettingRow(icon: LucideIcons.shield, title: 'settings.privacy_policy'.tr(), onTap: () {}),
+                  _buildSettingRow(
+                    icon: LucideIcons.shield, 
+                    title: 'settings.privacy_policy'.tr(), 
+                    onTap: () async {
+                      final Uri url = Uri.parse('https://abdallah-kaballo.github.io/Suwaya/privacy.html');
+                      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                        debugPrint('settings.cannot_open_link'.tr());
+                      }
+                    }
+                  ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 Padding(

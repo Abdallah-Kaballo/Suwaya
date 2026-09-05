@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart' hide TextDirection; // 🌟
+import 'package:easy_localization/easy_localization.dart' hide TextDirection; 
 import 'package:alarm/alarm.dart';
 
 import '../tasks_provider.dart';
@@ -413,9 +413,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 if (tempMode == 0)
                   _TripleWheelPicker(periods: periods, initialPeriodId: tPeriodId, initialSuwaya: tLocalSuwaya, initialMinute: tVirtualMinute, textColor: text, surfaceColor: surface, onChanged: (pId, sNum, vMin) { tPeriodId = pId; tLocalSuwaya = sNum; tVirtualMinute = vMin; })
                 else if (tempMode == 1)
-                  _DoubleWheelPicker(label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya, initialVal2: tVirtualMinute, min1: 0, max1: 47, max2: 30, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s; tVirtualMinute = m; })
+                  _DoubleWheelPicker(isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya, initialVal2: tVirtualMinute, min1: 0, max1: 47, max2: 30, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s; tVirtualMinute = m; })
                 else
-                  _DoubleWheelPicker(label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tCivilHour, initialVal2: tCivilMinute, min1: 0, max1: 23, max2: 59, textColor: text, surfaceColor: surface, onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }),
+                  _DoubleWheelPicker(isAstro: false, label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tCivilHour, initialVal2: tCivilMinute, min1: 0, max1: 23, max2: 59, textColor: text, surfaceColor: surface, onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }),
 
                 const SizedBox(height: 24),
                 Row(
@@ -784,6 +784,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     String dateStr = isHabit ? (_recurrenceDays.isEmpty ? 'add_screen.daily'.tr() : '${_recurrenceDays.length} ${'common.days'.tr()}') : DateFormat('MM/dd').format(_selectedDate!);
     String alertStr = _alertLevel == 0 ? 'alerts.silent'.tr() : (_alertLevel == 1 ? 'alerts.notification'.tr() : 'alerts.alarm'.tr());
     String catStr = _selectedCategory.displayName;
+    
+    // 🌟 التعديل هنا: تمرير الخط الفلكي أو المدني لويدجت العرض
+    String? timeFont = _hasTime ? (_timeMode == 2 ? 'Inter' : 'Playfair Display') : null;
 
     return Column(
       children: [
@@ -797,7 +800,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.time'.tr(), timeStr, LucideIcons.clock, _hasTime, (_timeError && !_hasTime), () => _showTimeDialog(accentColor, surfaceColor, textColor, periods)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.time'.tr(), timeStr, LucideIcons.clock, _hasTime, (_timeError && !_hasTime), () => _showTimeDialog(accentColor, surfaceColor, textColor, periods), fontFamily: timeFont),
             const SizedBox(width: 12),
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.alert'.tr(), alertStr, _alertLevel == 2 ? LucideIcons.alarm_clock : LucideIcons.bell, _alertLevel > 0, false, () => _showAlertsDialog(accentColor, surfaceColor, textColor)),
           ],
@@ -827,6 +830,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       endStr = '${sIndexEnd.toString().padLeft(2, '0')}:${_routineEndLocalSuwaya.toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
     }
 
+    // 🌟 التعديل هنا: تمرير الخط الفلكي أو المدني
+    String fontStr = _routineTimeMode == 2 ? 'Inter' : 'Playfair Display';
+
     return Column(
       children: [
         Container(
@@ -851,15 +857,15 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         ),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), startStr, LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: true)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), startStr, LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: true), fontFamily: fontStr),
             const SizedBox(width: 12),
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), endStr, LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: false)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), endStr, LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: false), fontFamily: fontStr),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.pattern_color'.tr(), _availablePatterns[_routinePattern] ?? 'خطوط', LucideIcons.paint_bucket, true, false, () => _showRoutinePatternDialog(accentColor, surfaceColor, textColor)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.pattern_color'.tr(), _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(), LucideIcons.paint_bucket, true, false, () => _showRoutinePatternDialog(accentColor, surfaceColor, textColor)),
             const SizedBox(width: 12),
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.recurrence'.tr(), recurrenceStr, LucideIcons.calendar_days, false, false, () => _showDateRecurrenceDialog(accentColor, surfaceColor, textColor, true)),
           ],
@@ -868,7 +874,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     );
   }
 
-  Widget _buildGridCard(Color surfaceColor, Color accentColor, Color textColor, String title, String value, IconData icon, bool isHighlighted, bool isError, VoidCallback? onTap) {
+  Widget _buildGridCard(Color surfaceColor, Color accentColor, Color textColor, String title, String value, IconData icon, bool isHighlighted, bool isError, VoidCallback? onTap, {String? fontFamily}) {
+    // 🌟 التعديل هنا: تحديد السماكة والحجم بناءً على الخط 
+    final isAstroFont = fontFamily == 'Playfair Display';
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -893,7 +901,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 ],
               ),
               const Spacer(),
-              Text(value, style: TextStyle(color: isError ? Colors.redAccent : textColor, fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'monospace')),
+              Text(value, style: TextStyle(color: isError ? Colors.redAccent : textColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
             ],
           ),
         ),
@@ -1052,9 +1060,10 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
               }, 
               childCount: maxSuwayas, 
               itemBuilder: (ctx, idx) => Center(
+                // 🌟 التعديل هنا: الخط الفلكي داخل عجلة الاختيار الفلكية
                 child: Text(
                   idx.toString().padLeft(2, '0'), 
-                  style: TextStyle(color: widget.textColor, fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'monospace')
+                  style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
                 )
               )
             )
@@ -1072,9 +1081,10 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
               }, 
               itemBuilder: (ctx, idx) => Center(
+                // 🌟 التعديل هنا: الخط الفلكي داخل عجلة الاختيار الفلكية
                 child: Text(
                   (idx % 30).toString().padLeft(2, '0'), 
-                  style: TextStyle(color: widget.textColor, fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'monospace')
+                  style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
                 )
               )
             )
@@ -1086,9 +1096,10 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
 }
 
 class _DoubleWheelPicker extends StatefulWidget {
+  final bool isAstro; // 🌟 إضافة متغير لتحديد الخط
   final String label1, label2; final int initialVal1, initialVal2, min1, max1, max2;
   final Function(int, int) onChanged; final Color textColor, surfaceColor;
-  const _DoubleWheelPicker({required this.label1, required this.label2, required this.initialVal1, required this.initialVal2, required this.min1, required this.max1, required this.max2, required this.onChanged, required this.textColor, required this.surfaceColor});
+  const _DoubleWheelPicker({required this.isAstro, required this.label1, required this.label2, required this.initialVal1, required this.initialVal2, required this.min1, required this.max1, required this.max2, required this.onChanged, required this.textColor, required this.surfaceColor});
   @override State<_DoubleWheelPicker> createState() => _DoubleWheelPickerState();
 }
 class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
@@ -1124,9 +1135,9 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
       Directionality(
         textDirection: TextDirection.ltr, 
         child: SizedBox(height: 140, child: Row(children: [
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'monospace'))))),
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
           Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'monospace'))))),
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
         ]))
       )
     ]);

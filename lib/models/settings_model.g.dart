@@ -48,125 +48,145 @@ const SettingsModelSchema = CollectionSchema(
       name: r'customIshaAngle',
       type: IsarType.double,
     ),
-    r'defaultHabitAlertLevel': PropertySchema(
+    r'dayBoundary': PropertySchema(
       id: 6,
+      name: r'dayBoundary',
+      type: IsarType.string,
+    ),
+    r'defaultHabitAlertLevel': PropertySchema(
+      id: 7,
       name: r'defaultHabitAlertLevel',
       type: IsarType.long,
     ),
     r'defaultHabitTone': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'defaultHabitTone',
       type: IsarType.string,
     ),
     r'defaultHabitVolume': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'defaultHabitVolume',
       type: IsarType.double,
     ),
     r'defaultTaskAlertLevel': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'defaultTaskAlertLevel',
       type: IsarType.long,
     ),
     r'defaultTaskTone': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'defaultTaskTone',
       type: IsarType.string,
     ),
     r'defaultTaskVolume': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'defaultTaskVolume',
       type: IsarType.double,
     ),
     r'hiddenPeriods': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'hiddenPeriods',
       type: IsarType.longList,
     ),
     r'highLatitudeRule': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'highLatitudeRule',
       type: IsarType.string,
     ),
     r'isDialAutoRotating': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'isDialAutoRotating',
       type: IsarType.bool,
     ),
     r'isFirstLaunch': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'isFirstLaunch',
       type: IsarType.bool,
     ),
+    r'isSynced': PropertySchema(
+      id: 17,
+      name: r'isSynced',
+      type: IsarType.bool,
+    ),
     r'languageCode': PropertySchema(
-      id: 16,
+      id: 18,
       name: r'languageCode',
       type: IsarType.string,
     ),
     r'lastStreakDate': PropertySchema(
-      id: 17,
+      id: 19,
       name: r'lastStreakDate',
       type: IsarType.dateTime,
     ),
     r'longestStreak': PropertySchema(
-      id: 18,
+      id: 20,
       name: r'longestStreak',
       type: IsarType.long,
     ),
     r'madhab': PropertySchema(
-      id: 19,
+      id: 21,
       name: r'madhab',
       type: IsarType.string,
     ),
     r'maxSnoozeCount': PropertySchema(
-      id: 20,
+      id: 22,
       name: r'maxSnoozeCount',
       type: IsarType.long,
     ),
     r'periodConfigs': PropertySchema(
-      id: 21,
+      id: 23,
       name: r'periodConfigs',
       type: IsarType.objectList,
       target: r'PeriodConfig',
     ),
     r'qiyamAlarmEnabled': PropertySchema(
-      id: 22,
+      id: 24,
       name: r'qiyamAlarmEnabled',
       type: IsarType.bool,
     ),
     r'savedLocations': PropertySchema(
-      id: 23,
+      id: 25,
       name: r'savedLocations',
       type: IsarType.objectList,
       target: r'SavedLocation',
     ),
     r'showSunrise': PropertySchema(
-      id: 24,
+      id: 26,
       name: r'showSunrise',
       type: IsarType.bool,
     ),
     r'snoozeDurationMinutes': PropertySchema(
-      id: 25,
+      id: 27,
       name: r'snoozeDurationMinutes',
       type: IsarType.long,
     ),
+    r'streakFreezesAvailable': PropertySchema(
+      id: 28,
+      name: r'streakFreezesAvailable',
+      type: IsarType.long,
+    ),
     r'suwayaNumberStyle': PropertySchema(
-      id: 26,
+      id: 29,
       name: r'suwayaNumberStyle',
       type: IsarType.string,
     ),
     r'themeMode': PropertySchema(
-      id: 27,
+      id: 30,
       name: r'themeMode',
       type: IsarType.string,
     ),
+    r'updatedAt': PropertySchema(
+      id: 31,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
+    ),
     r'useAstroTimeForIbadat': PropertySchema(
-      id: 28,
+      id: 32,
       name: r'useAstroTimeForIbadat',
       type: IsarType.bool,
     ),
     r'visibleNightParts': PropertySchema(
-      id: 29,
+      id: 33,
       name: r'visibleNightParts',
       type: IsarType.stringList,
     )
@@ -210,6 +230,7 @@ int _settingsModelEstimateSize(
     }
   }
   bytesCount += 3 + object.calculationMethod.length * 3;
+  bytesCount += 3 + object.dayBoundary.length * 3;
   bytesCount += 3 + object.defaultHabitTone.length * 3;
   bytesCount += 3 + object.defaultTaskTone.length * 3;
   bytesCount += 3 + object.hiddenPeriods.length * 8;
@@ -262,40 +283,44 @@ void _settingsModelSerialize(
   writer.writeLong(offsets[3], object.currentStreak);
   writer.writeDouble(offsets[4], object.customFajrAngle);
   writer.writeDouble(offsets[5], object.customIshaAngle);
-  writer.writeLong(offsets[6], object.defaultHabitAlertLevel);
-  writer.writeString(offsets[7], object.defaultHabitTone);
-  writer.writeDouble(offsets[8], object.defaultHabitVolume);
-  writer.writeLong(offsets[9], object.defaultTaskAlertLevel);
-  writer.writeString(offsets[10], object.defaultTaskTone);
-  writer.writeDouble(offsets[11], object.defaultTaskVolume);
-  writer.writeLongList(offsets[12], object.hiddenPeriods);
-  writer.writeString(offsets[13], object.highLatitudeRule);
-  writer.writeBool(offsets[14], object.isDialAutoRotating);
-  writer.writeBool(offsets[15], object.isFirstLaunch);
-  writer.writeString(offsets[16], object.languageCode);
-  writer.writeDateTime(offsets[17], object.lastStreakDate);
-  writer.writeLong(offsets[18], object.longestStreak);
-  writer.writeString(offsets[19], object.madhab);
-  writer.writeLong(offsets[20], object.maxSnoozeCount);
+  writer.writeString(offsets[6], object.dayBoundary);
+  writer.writeLong(offsets[7], object.defaultHabitAlertLevel);
+  writer.writeString(offsets[8], object.defaultHabitTone);
+  writer.writeDouble(offsets[9], object.defaultHabitVolume);
+  writer.writeLong(offsets[10], object.defaultTaskAlertLevel);
+  writer.writeString(offsets[11], object.defaultTaskTone);
+  writer.writeDouble(offsets[12], object.defaultTaskVolume);
+  writer.writeLongList(offsets[13], object.hiddenPeriods);
+  writer.writeString(offsets[14], object.highLatitudeRule);
+  writer.writeBool(offsets[15], object.isDialAutoRotating);
+  writer.writeBool(offsets[16], object.isFirstLaunch);
+  writer.writeBool(offsets[17], object.isSynced);
+  writer.writeString(offsets[18], object.languageCode);
+  writer.writeDateTime(offsets[19], object.lastStreakDate);
+  writer.writeLong(offsets[20], object.longestStreak);
+  writer.writeString(offsets[21], object.madhab);
+  writer.writeLong(offsets[22], object.maxSnoozeCount);
   writer.writeObjectList<PeriodConfig>(
-    offsets[21],
+    offsets[23],
     allOffsets,
     PeriodConfigSchema.serialize,
     object.periodConfigs,
   );
-  writer.writeBool(offsets[22], object.qiyamAlarmEnabled);
+  writer.writeBool(offsets[24], object.qiyamAlarmEnabled);
   writer.writeObjectList<SavedLocation>(
-    offsets[23],
+    offsets[25],
     allOffsets,
     SavedLocationSchema.serialize,
     object.savedLocations,
   );
-  writer.writeBool(offsets[24], object.showSunrise);
-  writer.writeLong(offsets[25], object.snoozeDurationMinutes);
-  writer.writeString(offsets[26], object.suwayaNumberStyle);
-  writer.writeString(offsets[27], object.themeMode);
-  writer.writeBool(offsets[28], object.useAstroTimeForIbadat);
-  writer.writeStringList(offsets[29], object.visibleNightParts);
+  writer.writeBool(offsets[26], object.showSunrise);
+  writer.writeLong(offsets[27], object.snoozeDurationMinutes);
+  writer.writeLong(offsets[28], object.streakFreezesAvailable);
+  writer.writeString(offsets[29], object.suwayaNumberStyle);
+  writer.writeString(offsets[30], object.themeMode);
+  writer.writeDateTime(offsets[31], object.updatedAt);
+  writer.writeBool(offsets[32], object.useAstroTimeForIbadat);
+  writer.writeStringList(offsets[33], object.visibleNightParts);
 }
 
 SettingsModel _settingsModelDeserialize(
@@ -315,43 +340,47 @@ SettingsModel _settingsModelDeserialize(
   object.currentStreak = reader.readLong(offsets[3]);
   object.customFajrAngle = reader.readDouble(offsets[4]);
   object.customIshaAngle = reader.readDouble(offsets[5]);
-  object.defaultHabitAlertLevel = reader.readLong(offsets[6]);
-  object.defaultHabitTone = reader.readString(offsets[7]);
-  object.defaultHabitVolume = reader.readDouble(offsets[8]);
-  object.defaultTaskAlertLevel = reader.readLong(offsets[9]);
-  object.defaultTaskTone = reader.readString(offsets[10]);
-  object.defaultTaskVolume = reader.readDouble(offsets[11]);
-  object.hiddenPeriods = reader.readLongList(offsets[12]) ?? [];
-  object.highLatitudeRule = reader.readString(offsets[13]);
+  object.dayBoundary = reader.readString(offsets[6]);
+  object.defaultHabitAlertLevel = reader.readLong(offsets[7]);
+  object.defaultHabitTone = reader.readString(offsets[8]);
+  object.defaultHabitVolume = reader.readDouble(offsets[9]);
+  object.defaultTaskAlertLevel = reader.readLong(offsets[10]);
+  object.defaultTaskTone = reader.readString(offsets[11]);
+  object.defaultTaskVolume = reader.readDouble(offsets[12]);
+  object.hiddenPeriods = reader.readLongList(offsets[13]) ?? [];
+  object.highLatitudeRule = reader.readString(offsets[14]);
   object.id = id;
-  object.isDialAutoRotating = reader.readBool(offsets[14]);
-  object.isFirstLaunch = reader.readBool(offsets[15]);
-  object.languageCode = reader.readString(offsets[16]);
-  object.lastStreakDate = reader.readDateTimeOrNull(offsets[17]);
-  object.longestStreak = reader.readLong(offsets[18]);
-  object.madhab = reader.readString(offsets[19]);
-  object.maxSnoozeCount = reader.readLong(offsets[20]);
+  object.isDialAutoRotating = reader.readBool(offsets[15]);
+  object.isFirstLaunch = reader.readBool(offsets[16]);
+  object.isSynced = reader.readBool(offsets[17]);
+  object.languageCode = reader.readString(offsets[18]);
+  object.lastStreakDate = reader.readDateTimeOrNull(offsets[19]);
+  object.longestStreak = reader.readLong(offsets[20]);
+  object.madhab = reader.readString(offsets[21]);
+  object.maxSnoozeCount = reader.readLong(offsets[22]);
   object.periodConfigs = reader.readObjectList<PeriodConfig>(
-        offsets[21],
+        offsets[23],
         PeriodConfigSchema.deserialize,
         allOffsets,
         PeriodConfig(),
       ) ??
       [];
-  object.qiyamAlarmEnabled = reader.readBool(offsets[22]);
+  object.qiyamAlarmEnabled = reader.readBool(offsets[24]);
   object.savedLocations = reader.readObjectList<SavedLocation>(
-        offsets[23],
+        offsets[25],
         SavedLocationSchema.deserialize,
         allOffsets,
         SavedLocation(),
       ) ??
       [];
-  object.showSunrise = reader.readBool(offsets[24]);
-  object.snoozeDurationMinutes = reader.readLong(offsets[25]);
-  object.suwayaNumberStyle = reader.readString(offsets[26]);
-  object.themeMode = reader.readString(offsets[27]);
-  object.useAstroTimeForIbadat = reader.readBool(offsets[28]);
-  object.visibleNightParts = reader.readStringList(offsets[29]) ?? [];
+  object.showSunrise = reader.readBool(offsets[26]);
+  object.snoozeDurationMinutes = reader.readLong(offsets[27]);
+  object.streakFreezesAvailable = reader.readLong(offsets[28]);
+  object.suwayaNumberStyle = reader.readString(offsets[29]);
+  object.themeMode = reader.readString(offsets[30]);
+  object.updatedAt = reader.readDateTime(offsets[31]);
+  object.useAstroTimeForIbadat = reader.readBool(offsets[32]);
+  object.visibleNightParts = reader.readStringList(offsets[33]) ?? [];
   return object;
 }
 
@@ -379,36 +408,40 @@ P _settingsModelDeserializeProp<P>(
     case 5:
       return (reader.readDouble(offset)) as P;
     case 6:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
-    case 8:
-      return (reader.readDouble(offset)) as P;
-    case 9:
       return (reader.readLong(offset)) as P;
-    case 10:
+    case 8:
       return (reader.readString(offset)) as P;
-    case 11:
+    case 9:
       return (reader.readDouble(offset)) as P;
-    case 12:
-      return (reader.readLongList(offset) ?? []) as P;
-    case 13:
+    case 10:
+      return (reader.readLong(offset)) as P;
+    case 11:
       return (reader.readString(offset)) as P;
+    case 12:
+      return (reader.readDouble(offset)) as P;
+    case 13:
+      return (reader.readLongList(offset) ?? []) as P;
     case 14:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 15:
       return (reader.readBool(offset)) as P;
     case 16:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 17:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 18:
-      return (reader.readLong(offset)) as P;
-    case 19:
       return (reader.readString(offset)) as P;
+    case 19:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 20:
       return (reader.readLong(offset)) as P;
     case 21:
+      return (reader.readString(offset)) as P;
+    case 22:
+      return (reader.readLong(offset)) as P;
+    case 23:
       return (reader.readObjectList<PeriodConfig>(
             offset,
             PeriodConfigSchema.deserialize,
@@ -416,9 +449,9 @@ P _settingsModelDeserializeProp<P>(
             PeriodConfig(),
           ) ??
           []) as P;
-    case 22:
+    case 24:
       return (reader.readBool(offset)) as P;
-    case 23:
+    case 25:
       return (reader.readObjectList<SavedLocation>(
             offset,
             SavedLocationSchema.deserialize,
@@ -426,17 +459,21 @@ P _settingsModelDeserializeProp<P>(
             SavedLocation(),
           ) ??
           []) as P;
-    case 24:
-      return (reader.readBool(offset)) as P;
-    case 25:
-      return (reader.readLong(offset)) as P;
     case 26:
-      return (reader.readString(offset)) as P;
-    case 27:
-      return (reader.readString(offset)) as P;
-    case 28:
       return (reader.readBool(offset)) as P;
+    case 27:
+      return (reader.readLong(offset)) as P;
+    case 28:
+      return (reader.readLong(offset)) as P;
     case 29:
+      return (reader.readString(offset)) as P;
+    case 30:
+      return (reader.readString(offset)) as P;
+    case 31:
+      return (reader.readDateTime(offset)) as P;
+    case 32:
+      return (reader.readBool(offset)) as P;
+    case 33:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1104,6 +1141,142 @@ extension SettingsModelQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayBoundary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dayBoundary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dayBoundary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dayBoundary',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dayBoundary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dayBoundary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dayBoundary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dayBoundary',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dayBoundary',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dayBoundaryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dayBoundary',
+        value: '',
       ));
     });
   }
@@ -1980,6 +2153,16 @@ extension SettingsModelQueryFilter
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      isSyncedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isSynced',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
       languageCodeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2692,6 +2875,62 @@ extension SettingsModelQueryFilter
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      streakFreezesAvailableEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'streakFreezesAvailable',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      streakFreezesAvailableGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'streakFreezesAvailable',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      streakFreezesAvailableLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'streakFreezesAvailable',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      streakFreezesAvailableBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'streakFreezesAvailable',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
       suwayaNumberStyleEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2959,6 +3198,62 @@ extension SettingsModelQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'themeMode',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      updatedAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      updatedAtGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      updatedAtLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      updatedAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -3286,6 +3581,19 @@ extension SettingsModelQuerySortBy
     });
   }
 
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> sortByDayBoundary() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayBoundary', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByDayBoundaryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayBoundary', Sort.desc);
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       sortByDefaultHabitAlertLevel() {
     return QueryBuilder.apply(this, (query) {
@@ -3412,6 +3720,19 @@ extension SettingsModelQuerySortBy
     });
   }
 
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> sortByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       sortByLanguageCode() {
     return QueryBuilder.apply(this, (query) {
@@ -3522,6 +3843,20 @@ extension SettingsModelQuerySortBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByStreakFreezesAvailable() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'streakFreezesAvailable', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByStreakFreezesAvailableDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'streakFreezesAvailable', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       sortBySuwayaNumberStyle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'suwayaNumberStyle', Sort.asc);
@@ -3545,6 +3880,19 @@ extension SettingsModelQuerySortBy
       sortByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 
@@ -3618,6 +3966,19 @@ extension SettingsModelQuerySortThenBy
       thenByCustomIshaAngleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'customIshaAngle', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> thenByDayBoundary() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayBoundary', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByDayBoundaryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dayBoundary', Sort.desc);
     });
   }
 
@@ -3759,6 +4120,19 @@ extension SettingsModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> thenByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByIsSyncedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isSynced', Sort.desc);
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       thenByLanguageCode() {
     return QueryBuilder.apply(this, (query) {
@@ -3869,6 +4243,20 @@ extension SettingsModelQuerySortThenBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByStreakFreezesAvailable() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'streakFreezesAvailable', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByStreakFreezesAvailableDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'streakFreezesAvailable', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       thenBySuwayaNumberStyle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'suwayaNumberStyle', Sort.asc);
@@ -3892,6 +4280,19 @@ extension SettingsModelQuerySortThenBy
       thenByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 
@@ -3945,6 +4346,13 @@ extension SettingsModelQueryWhereDistinct
       distinctByCustomIshaAngle() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'customIshaAngle');
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct> distinctByDayBoundary(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dayBoundary', caseSensitive: caseSensitive);
     });
   }
 
@@ -4021,6 +4429,12 @@ extension SettingsModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct> distinctByIsSynced() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isSynced');
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QDistinct> distinctByLanguageCode(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -4078,6 +4492,13 @@ extension SettingsModelQueryWhereDistinct
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+      distinctByStreakFreezesAvailable() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'streakFreezesAvailable');
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
       distinctBySuwayaNumberStyle({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'suwayaNumberStyle',
@@ -4089,6 +4510,12 @@ extension SettingsModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
     });
   }
 
@@ -4153,6 +4580,12 @@ extension SettingsModelQueryProperty
       customIshaAngleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'customIshaAngle');
+    });
+  }
+
+  QueryBuilder<SettingsModel, String, QQueryOperations> dayBoundaryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dayBoundary');
     });
   }
 
@@ -4225,6 +4658,12 @@ extension SettingsModelQueryProperty
     });
   }
 
+  QueryBuilder<SettingsModel, bool, QQueryOperations> isSyncedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isSynced');
+    });
+  }
+
   QueryBuilder<SettingsModel, String, QQueryOperations> languageCodeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'languageCode');
@@ -4290,6 +4729,13 @@ extension SettingsModelQueryProperty
     });
   }
 
+  QueryBuilder<SettingsModel, int, QQueryOperations>
+      streakFreezesAvailableProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'streakFreezesAvailable');
+    });
+  }
+
   QueryBuilder<SettingsModel, String, QQueryOperations>
       suwayaNumberStyleProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -4300,6 +4746,12 @@ extension SettingsModelQueryProperty
   QueryBuilder<SettingsModel, String, QQueryOperations> themeModeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'themeMode');
+    });
+  }
+
+  QueryBuilder<SettingsModel, DateTime, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 

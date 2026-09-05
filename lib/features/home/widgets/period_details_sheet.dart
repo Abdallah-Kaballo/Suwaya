@@ -118,9 +118,9 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildInfoCol('details.start'.tr(), _isCivilMode ? DateFormat('hh:mm a').format(widget.period.startTime) : '${'common.suwaya'.tr()} ${startGlobalSuwaya.toString().padLeft(2, '0')}', pColor, textColor),
+                          _buildInfoCol('details.start'.tr(), _isCivilMode ? DateFormat('hh:mm a').format(widget.period.startTime) : '${'common.suwaya'.tr()} ${startGlobalSuwaya.toString().padLeft(2, '0')}', pColor, textColor, _isCivilMode),
                           Container(width: 1, height: 40, color: pColor.withValues(alpha: 0.2)),
-                          _buildInfoCol('details.end'.tr(), _isCivilMode ? DateFormat('hh:mm a').format(widget.period.endTime) : '${'common.suwaya'.tr()} ${endGlobalSuwaya.toString().padLeft(2, '0')}', pColor, textColor),
+                          _buildInfoCol('details.end'.tr(), _isCivilMode ? DateFormat('hh:mm a').format(widget.period.endTime) : '${'common.suwaya'.tr()} ${endGlobalSuwaya.toString().padLeft(2, '0')}', pColor, textColor, _isCivilMode),
                         ],
                       ),
                     ),
@@ -149,7 +149,8 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
                             const SizedBox(width: 12),
                             Text(t.title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                             const Spacer(),
-                            if (t.targetSuwayas.isNotEmpty) Text('${'common.suwaya'.tr()} ${t.targetSuwayas.first.toString().padLeft(2, '0')}', style: TextStyle(color: pColor, fontSize: 12, fontFamily: 'monospace')),
+                            // 🌟 التعديل هنا: الخط الفلكي
+                            if (t.targetSuwayas.isNotEmpty) Text('${'common.suwaya'.tr()} ${t.targetSuwayas.first.toString().padLeft(2, '0')}', style: TextStyle(color: pColor, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
                           ],
                         )
                       )),
@@ -201,18 +202,20 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
         children: [
           Row(children: [Icon(icon, color: pColor, size: 14), const SizedBox(width: 6), Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11))]),
           const SizedBox(height: 8),
-          Text(val, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+          // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
+          Text(val, style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCol(String label, String val, Color pColor, Color textColor) {
+  Widget _buildInfoCol(String label, String val, Color pColor, Color textColor, bool isCivil) {
     return Column(
       children: [
         Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11)),
         const SizedBox(height: 4),
-        Text(val, style: TextStyle(color: pColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+        // 🌟 التعديل هنا: تبديل الخطوط للفلكي والمدني
+        Text(val, style: TextStyle(color: pColor, fontSize: 18, fontWeight: isCivil ? FontWeight.w600 : FontWeight.w900, fontFamily: isCivil ? 'Inter' : 'Playfair Display', letterSpacing: isCivil ? 0.0 : 1.0)),
       ],
     );
   }

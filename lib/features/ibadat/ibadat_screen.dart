@@ -14,7 +14,6 @@ class IbadatScreen extends ConsumerWidget {
   const IbadatScreen({super.key});
 
   String _getDisplayTime(DateTime targetTime, AstroState astroState, bool useAstro) {
-    // تم إضافة 'en' لإجبار مكتبة intl على استخدام الأرقام الإنجليزية (0-9) دائماً
     if (!useAstro) return DateFormat('HH:mm', 'en').format(targetTime);
 
     if (astroState.periods.isEmpty) return "00:00";
@@ -90,7 +89,6 @@ class IbadatScreen extends ConsumerWidget {
       {'name': 'periods.dhuhr'.tr(), 'time': ibadat.dhuhr},
       {'name': 'periods.asr'.tr(), 'time': ibadat.asr},
       {'name': 'periods.maghrib'.tr(), 'time': ibadat.maghrib},
-      // تم تصحيح المفتاح هنا من periods.isha إلى prayers.isha
       {'name': 'prayers.isha'.tr(), 'time': ibadat.isha},
       {'name': 'ibadat.next_fajr'.tr(), 'time': ibadat.nextFajr},
     ];
@@ -117,7 +115,7 @@ class IbadatScreen extends ConsumerWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
         Container(
           padding: const EdgeInsets.all(20), margin: const EdgeInsets.only(bottom: 24),
@@ -146,7 +144,8 @@ class IbadatScreen extends ConsumerWidget {
                 children: [
                   Text(topLabel, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 11)),
                   const SizedBox(height: 4),
-                  Directionality(textDirection: ui.TextDirection.ltr, child: Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'monospace'))),
+                  // 🌟 التعديل هنا: تطبيق الخطوط الديناميكية
+                  Directionality(textDirection: ui.TextDirection.ltr, child: Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: settings.useAstroTimeForIbadat ? 22 : 20, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.5 : 0.0))),
                 ],
               ),
             ],
@@ -181,7 +180,7 @@ class IbadatScreen extends ConsumerWidget {
     final visibleNightParts = settings.visibleNightParts;
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -269,7 +268,8 @@ class IbadatScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('ibadat.starts_at'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                              Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontFamily: 'monospace'))),
+                              // 🌟 التعديل هنا: تطبيق الخطوط الديناميكية
+                              Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: settings.useAstroTimeForIbadat ? 15 : 14, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.0 : 0.0))),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -277,7 +277,8 @@ class IbadatScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('ibadat.ends_at'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                              Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontFamily: 'monospace'))),
+                              // 🌟 التعديل هنا: تطبيق الخطوط الديناميكية
+                              Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: settings.useAstroTimeForIbadat ? 15 : 14, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.0 : 0.0))),
                             ],
                           ),
                         ],
@@ -316,7 +317,8 @@ class IbadatScreen extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isNext ? activeTextColor : (isDark ? Colors.white : Colors.black87), fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'monospace'))),
+            // 🌟 التعديل هنا: تطبيق الخطوط الديناميكية
+            Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isNext ? activeTextColor : (isDark ? Colors.white : Colors.black87), fontSize: settings.useAstroTimeForIbadat ? 20 : 18, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.5 : 0.0))),
             const SizedBox(width: 16),
             GestureDetector(
               onTap: () {

@@ -77,7 +77,13 @@
     "version": "Version 1.0.0", "update_gps": "Update GPS Location",
     "gps_desc": "Used once to set timings accurately without battery drain.", "update": "Update",
     "fetching_gps": "Fetching accurate location...", "gps_success": "Location updated successfully: ",
-    "gps_failed": "Failed to update location: Ensure GPS is enabled.", "max_two_markers": "Select maximum of two markers"
+    "gps_failed": "Failed to update location: Ensure GPS is enabled.", "max_two_markers": "Select maximum of two markers",
+    "app_color": "App Color", "choose_app_color": "Choose App Color", "color_gold": "Gold (Default)", 
+    "color_ocean": "Ocean", "color_forest": "Forest", "color_desert": "Desert", 
+    "dial_design": "Dial Design", "choose_dial_design": "Choose Dial Design", "design_classic": "Classic Islamic", 
+    "design_minimal": "Modern Minimal", "design_geometric": "Geometric", "checking": "Checking...", 
+    "unavailable": "Unavailable", "not_synced_yet": "Not synced yet", "last_sync": "Last sync", 
+    "syncing": "Syncing with cloud... ☁️", "cloud_sync": "Cloud Sync", "cannot_open_link": "Cannot open link"
   },
   "astro_calc": {
     "title": "Advanced Astro Settings", "warning": "These settings are for advanced users.\nIf modified, you can always auto-detect location to reset them.",
@@ -111,9 +117,8 @@
     "mins_5": "5 mins", "mins_10": "10 mins", "mins_15": "15 mins", "mins_30": "30 mins", "once": "Once",
     "times_3": "3 times", "times_5": "5 times", "no_limit": "No Limit (Not recommended)", "wake_screen": "Interactive Alarm (Wakes screen)",
     "save": "Save"
-  }
-
-  ,"permissions": {
+  },
+  "permissions": {
     "title": "System Permissions", "desc": "For a perfect experience and accurate timely alerts, please ensure the following permissions are granted:",
     "location": "Location (GPS)", "location_desc": "Crucial to accurately calculate prayer times and night parts based on your city.",
     "notifications": "Notifications & Alerts", "notifications_desc": "To send Adhan, Suwaya alerts, and period transition notifications.",

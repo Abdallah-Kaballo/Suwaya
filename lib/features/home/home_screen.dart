@@ -18,7 +18,6 @@ import '../routines/routines_provider.dart';
 
 import '../../shared/widgets/task_card.dart';
 import 'widgets/location_header.dart'; 
-import '../settings/settings_screen.dart';
 import '../tasks/screens/universal_add_screen.dart'; 
 import 'widgets/premium_astro_dial.dart'; 
 import 'widgets/period_details_sheet.dart';
@@ -68,29 +67,29 @@ class HomeScreen extends ConsumerWidget {
     DateTime islamicDate = cityNow;
     bool isNight = false;
     final langCode = context.locale.languageCode;
-    // 🌟 آلية الأمان لتجنب انهيار التواريخ
+    
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
 
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
-      dayNightStr = '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; // 🌟
+      dayNightStr = '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; 
     } else if (cityNow.isBefore(todayMaghrib)) {
       islamicDate = cityNow;
       isNight = false;
-      dayNightStr = '${'home.day_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; // 🌟
+      dayNightStr = '${'home.day_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; 
     } else {
       islamicDate = cityNow.add(const Duration(days: 1));
       isNight = true;
-      dayNightStr = '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; // 🌟
+      dayNightStr = '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; 
     }
     
     final hijriDate = HijriCalendar.fromDate(islamicDate); 
     final monthName = 'hijri.m${hijriDate.hMonth}'.tr();
     final hijriStr = '${hijriDate.hDay} $monthName ${hijriDate.hYear}';
 
-    final gregorianDate = DateFormat('d MMMM yyyy', safeIntl).format(cityNow); // 🌟
-    final civilTime = DateFormat('hh:mm a', safeIntl).format(cityNow); // 🌟
+    final gregorianDate = DateFormat('d MMMM yyyy', safeIntl).format(cityNow); 
+    final civilTime = DateFormat('hh:mm a', safeIntl).format(cityNow); 
     final textColor = isDark ? Colors.white : Colors.black87;
 
     return Padding(
@@ -123,7 +122,7 @@ class HomeScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('home.civil_time'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 9)),
-                          Text(civilTime, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+                          Text(civilTime, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
                         ],
                       ),
                     ),
@@ -135,7 +134,7 @@ class HomeScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('home.astro_time'.tr(), style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 9)),
-                          Text(astroState.currentFormattedVirtualTime, style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+                          Text(astroState.currentFormattedVirtualTime, style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)),
                         ],
                       ),
                     ),
@@ -172,10 +171,7 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: scaffoldBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, title: const LocationHeader(), 
-        actions: [
-          IconButton(icon: Icon(LucideIcons.settings, color: isDark ? Colors.white70 : Colors.black87), onPressed: () { HapticFeedback.selectionClick(); Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())); }),
-          const SizedBox(width: 8),
-        ],
+        // تمت إزالة زر الإعدادات من هنا كما اتفقنا مسبقاً
       ),
       body: RefreshIndicator(
         color: pColor, backgroundColor: surfaceColor,
@@ -275,7 +271,10 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: PremiumExpandableFab(color: pColor, isDark: isDark, currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 90.0), // رفع الزر فوق الشريط الزجاجي
+        child: PremiumExpandableFab(color: pColor, isDark: isDark, currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya),
+      ),
     );
   }
 }

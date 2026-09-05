@@ -15,6 +15,7 @@ import '../../settings/settings_provider.dart';
 import '../../routines/routines_provider.dart'; 
 import '../../tasks/tasks_provider.dart';
 import '../../../models/task_model.dart'; 
+import '../../../core/theme/dial_design_provider.dart';
 
 const Color goldBase = Color(0xFFD4AF37);
 const Color goldLight = Color(0xFFFFE58F);
@@ -347,8 +348,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
   Widget build(BuildContext context) {
     final astroState = ref.watch(astroProvider);
     final settings = ref.watch(settingsProvider);
+    final selectedDesign = ref.watch(dialDesignProvider);
+    
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currentLang = context.locale.languageCode; // 🌟 
+    final currentLang = context.locale.languageCode; 
 
     if (astroState.periods.isEmpty) return SizedBox(width: widget.size, height: widget.size);
 
@@ -358,11 +361,17 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
     final textColor = isDark ? Colors.white : const Color(0xFF0B0F19);
     
     List<Map<String, dynamic>> activeNightMarkers = [];
-
     for (var part in astroState.ibadatTimings.nightParts) {
       if (settings.activeNightMarkers.contains(part.nameKey)) {
         activeNightMarkers.add({'n': ('night_parts.${part.nameKey.replaceAll("np_", "")}').tr(), 't': part.startTime});
       }
+    }
+
+    if (settings.showSunrise) {
+      activeNightMarkers.add({
+        'n': 'ibadat.sunrise'.tr(), 
+        't': astroState.ibadatTimings.sunrise
+      });
     }
 
     final todayTasks = ref.watch(tasksProvider).todayTasks;
@@ -388,7 +397,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
             if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
             taskTime = dt; 
           }
-
           if (taskTime != null) {
             Color tColor = getNeonColorForCategory(task.category); 
             String formattedName = task.dialShortName ?? task.title;
@@ -402,30 +410,37 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _buildLayer(AstrolabeBackgroundPainter(isDark: isDark)),
-          _buildLayer(IslamicRetePainter(isDark: isDark)), 
-          _buildLayer(RoutinesRingPainter(routineArcs: widget.routineArcs, isDark: isDark)),
-          _buildLayer(PeriodRingPainter(periods: astroState.periods, currentPeriod: astroState.currentPeriod, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, langCode: currentLang)), // 🌟
-          _buildLayer(OuterRingPainter(periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark)), 
-          _buildLayer(CrownPainter(dayStart: dayStart, dayEnd: dayEnd)), 
+          _buildLayer(BackgroundPainter(isDark: isDark, design: selectedDesign)),
+          
+          if (selectedDesign == DialDesign.classic) 
+            _buildLayer(IslamicRetePainter(isDark: isDark)), 
+          if (selectedDesign == DialDesign.geometric) 
+            _buildLayer(GeometricRetePainter(isDark: isDark)),
+            
+          _buildLayer(RoutinesRingPainter(routineArcs: widget.routineArcs, isDark: isDark, design: selectedDesign)),
+          _buildLayer(PeriodRingPainter(periods: astroState.periods, currentPeriod: astroState.currentPeriod, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, langCode: currentLang, design: selectedDesign)), 
+          _buildLayer(OuterRingPainter(periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, design: selectedDesign)), 
+          
+          if (selectedDesign == DialDesign.classic) 
+            _buildLayer(CrownPainter(dayStart: dayStart, dayEnd: dayEnd)), 
         ],
       ),
     );
 
     final needleLayer = RepaintBoundary(
-      child: _buildLayer(DynamicNeedlePainter(currentTime: _smoothNow.value, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark))
+      child: _buildLayer(DynamicNeedlePainter(currentTime: _smoothNow.value, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, design: selectedDesign))
     );
 
     final prayersAndTasksLayer = RepaintBoundary(
       child: _buildLayer(RailwayRingPainter(
         ibadat: astroState.ibadatTimings, nightMarkers: activeNightMarkers, 
         tasks: _currentDialTasks, periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, 
-        isDark: isDark, draggedTask: _draggedTask, dragAngle: _dragAngle, langCode: currentLang, // 🌟
+        isDark: isDark, draggedTask: _draggedTask, dragAngle: _dragAngle, langCode: currentLang, design: selectedDesign
       ))
     );
 
     final dividersLayer = RepaintBoundary(
-      child: _buildLayer(DividerRingPainter(periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark))
+      child: _buildLayer(DividerRingPainter(periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, design: selectedDesign))
     );
 
     return SizedBox(
@@ -464,7 +479,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
               );
             },
           ),
-          _buildCenterGlow(isDark),
+          _buildCenterGlow(isDark, selectedDesign),
           _buildCentralTime(astroState, textColor, pColor, isDark),
         ],
       ),
@@ -473,7 +488,18 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
 
   Widget _buildLayer(CustomPainter painter) => SizedBox(width: widget.size, height: widget.size, child: CustomPaint(painter: painter));
 
-  Widget _buildCenterGlow(bool isDark) {
+  Widget _buildCenterGlow(bool isDark, DialDesign design) {
+    if (design == DialDesign.minimal) {
+      return Container(
+        width: widget.size * (kInnerR - 0.02), height: widget.size * (kInnerR - 0.02),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isDark ? const Color(0xFF13131A) : const Color(0xFFF8F9FA),
+          border: Border.all(color: isDark ? Colors.white12 : Colors.black12, width: 1.5),
+        ),
+      );
+    }
+    
     return Container(
       width: widget.size * (kInnerR - 0.02), height: widget.size * (kInnerR - 0.02),
       decoration: BoxDecoration(
@@ -492,7 +518,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
     final virtualTime = state.currentFormattedVirtualTime;
     final String suwayaText = '${'common.suwaya'.tr()} ${state.currentSuwaya} ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
     
-    // 🌟 ترجمة الفترات الـ 7 فقط للمركز
     String currentPeriodName = '';
     switch(state.currentPeriod.id) {
       case 1: currentPeriodName = 'periods.fajr'.tr(); break;
@@ -510,14 +535,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(suwayaText, style: const TextStyle(color: goldLight, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
+          // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
+          Text(suwayaText, style: const TextStyle(color: goldLight, fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
           const SizedBox(height: 2),
           Text(currentPeriodName, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w900, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)])),
           const SizedBox(height: 4),
           Stack(
             children: [
-              Text(virtualTime, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, fontFamily: 'monospace', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 3..color = isDark ? Colors.black : Colors.white)),
-              Text(virtualTime, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: textColor, fontFamily: 'monospace', letterSpacing: 2.0)),
+              // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
+              Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 3..color = isDark ? Colors.black : Colors.white)),
+              Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: textColor, fontFamily: 'Playfair Display', letterSpacing: 2.0)),
             ],
           ),
           const SizedBox(height: 4),
@@ -550,8 +577,9 @@ class TimeSpeedIndicator extends ConsumerWidget {
           const SizedBox(width: 4),
           Stack(
             children: [
-              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=2..color=strokeColor)),
-              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(color: pColor, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+              // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
+              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=2..color=strokeColor)),
+              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(color: pColor, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
             ],
           ),
         ],
@@ -572,7 +600,9 @@ class UnifiedDialItem {
 class RoutinesRingPainter extends CustomPainter {
   final List<RoutineArcData> routineArcs;
   final bool isDark;
-  RoutinesRingPainter({required this.routineArcs, required this.isDark});
+  final DialDesign design;
+  
+  RoutinesRingPainter({required this.routineArcs, required this.isDark, required this.design});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -597,12 +627,14 @@ class RoutinesRingPainter extends CustomPainter {
         ..style = PaintingStyle.fill;
       canvas.drawPath(path, fillPaint);
 
-      canvas.save();
-      canvas.clipPath(path); 
-      final hatchPaint = Paint()..color = arc.color.withValues(alpha: 0.4)..strokeWidth = 1.0..style = PaintingStyle.stroke;
-      final bounds = path.getBounds();
-      _drawLinearGrid(canvas, bounds, hatchPaint); 
-      canvas.restore();
+      if (design != DialDesign.minimal) {
+        canvas.save();
+        canvas.clipPath(path); 
+        final hatchPaint = Paint()..color = arc.color.withValues(alpha: 0.4)..strokeWidth = 1.0..style = PaintingStyle.stroke;
+        final bounds = path.getBounds();
+        _drawLinearGrid(canvas, bounds, hatchPaint); 
+        canvas.restore();
+      }
 
       canvas.drawPath(path, Paint()..color = arc.color.withValues(alpha: 0.8)..strokeWidth = 1.5..style = PaintingStyle.stroke..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2.0));
     }
@@ -614,32 +646,43 @@ class RoutinesRingPainter extends CustomPainter {
       canvas.drawLine(Offset(bounds.left + i, bounds.top), Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
     }
   }
-  @override bool shouldRepaint(covariant RoutinesRingPainter old) => old.isDark != isDark || old.routineArcs.length != routineArcs.length;
+  @override bool shouldRepaint(covariant RoutinesRingPainter old) => old.isDark != isDark || old.routineArcs.length != routineArcs.length || old.design != design;
 }
 
-class AstrolabeBackgroundPainter extends CustomPainter {
+class BackgroundPainter extends CustomPainter {
   final bool isDark;
-  AstrolabeBackgroundPainter({required this.isDark});
+  final DialDesign design;
+  BackgroundPainter({required this.isDark, required this.design});
+  
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
+    
+    if (design == DialDesign.minimal) {
+      canvas.drawCircle(center, R, Paint()..color = isDark ? const Color(0xFF13131A) : const Color(0xFFF8F9FA));
+      return;
+    }
+    
     final bgPaint = Paint()..shader = RadialGradient(colors: isDark ? [const Color(0xFF13131A), const Color(0xFF030305)] : [const Color(0xFFF8F9FA), const Color(0xFFE2E8F0)]).createShader(Rect.fromCircle(center: center, radius: R));
     canvas.drawCircle(center, R, bgPaint);
     
     if (!isDark) return; 
-    final rand = Random(42); 
-    final paint = Paint();
-    for (int i = 0; i < 90; i++) {
-      final x = rand.nextDouble() * size.width;
-      final y = rand.nextDouble() * size.height;
-      final s = rand.nextDouble() * 2.0 + 1.0;
-      paint.color = Colors.white.withValues(alpha: rand.nextDouble() * 0.5 + 0.1);
-      Path starPath = Path()..moveTo(x, y - s)..quadraticBezierTo(x, y, x + s, y)..quadraticBezierTo(x, y, x, y + s)..quadraticBezierTo(x, y, x - s, y)..quadraticBezierTo(x, y, x, y - s);
-      canvas.drawPath(starPath, paint);
+    
+    if (design == DialDesign.classic) {
+      final rand = Random(42); 
+      final paint = Paint();
+      for (int i = 0; i < 90; i++) {
+        final x = rand.nextDouble() * size.width;
+        final y = rand.nextDouble() * size.height;
+        final s = rand.nextDouble() * 2.0 + 1.0;
+        paint.color = Colors.white.withValues(alpha: rand.nextDouble() * 0.5 + 0.1);
+        Path starPath = Path()..moveTo(x, y - s)..quadraticBezierTo(x, y, x + s, y)..quadraticBezierTo(x, y, x, y + s)..quadraticBezierTo(x, y, x - s, y)..quadraticBezierTo(x, y, x, y - s);
+        canvas.drawPath(starPath, paint);
+      }
     }
   }
-  @override bool shouldRepaint(covariant AstrolabeBackgroundPainter old) => old.isDark != isDark;
+  @override bool shouldRepaint(covariant BackgroundPainter old) => old.isDark != isDark || old.design != design;
 }
 
 class IslamicRetePainter extends CustomPainter {
@@ -667,15 +710,38 @@ class IslamicRetePainter extends CustomPainter {
   @override bool shouldRepaint(covariant IslamicRetePainter old) => old.isDark != isDark;
 }
 
+class GeometricRetePainter extends CustomPainter {
+  final bool isDark;
+  GeometricRetePainter({required this.isDark});
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final R = size.width / 2;
+    final rRete = R * kInnerR; 
+
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    final paint = Paint()..color = goldBase.withValues(alpha: 0.2)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    
+    final rectPath = Path()..addRect(Rect.fromCircle(center: Offset.zero, radius: rRete * 0.8));
+    canvas.drawPath(rectPath, paint);
+    canvas.rotate(pi / 4);
+    canvas.drawPath(rectPath, paint);
+    canvas.restore();
+  }
+  @override bool shouldRepaint(covariant GeometricRetePainter old) => old.isDark != isDark;
+}
+
 class PeriodRingPainter extends CustomPainter {
   final List<AstroPeriod> periods;
   final AstroPeriod currentPeriod;
   final DateTime dayStart;
   final DateTime dayEnd;
   final bool isDark;
-  final String langCode; // 🌟
+  final String langCode; 
+  final DialDesign design;
 
-  PeriodRingPainter({required this.periods, required this.currentPeriod, required this.dayStart, required this.dayEnd, required this.isDark, required this.langCode});
+  PeriodRingPainter({required this.periods, required this.currentPeriod, required this.dayStart, required this.dayEnd, required this.isDark, required this.langCode, required this.design});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -683,8 +749,8 @@ class PeriodRingPainter extends CustomPainter {
     final R = size.width / 2;
     final innerRadius = R * kInnerR;
     final outerRadius = R * kPeriodR;
-    final width = outerRadius - innerRadius;
-    final drawRadius = innerRadius + (width / 2);
+    final width = design == DialDesign.minimal ? (outerRadius - innerRadius) * 0.4 : (outerRadius - innerRadius);
+    final drawRadius = design == DialDesign.minimal ? innerRadius + (width / 2) + 10 : innerRadius + (width / 2);
     final textPainter = TextPainter(textDirection: ui.TextDirection.ltr, textAlign: TextAlign.center);
 
     for (var period in periods) {
@@ -697,7 +763,7 @@ class PeriodRingPainter extends CustomPainter {
       if (period.id == 6 || period.nameKey == 'period_second_third') pColor = const Color(0xFF3F51B5); 
       final isCurrent = period.id == currentPeriod.id;
       
-      if (isCurrent) {
+      if (isCurrent && design != DialDesign.minimal) {
         final glowPaint = Paint()..color = pColor.withValues(alpha: 0.4)..style = PaintingStyle.stroke..strokeWidth = width + 6..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
         canvas.drawArc(Rect.fromCircle(center: center, radius: drawRadius), startAngle, sweepAngle, false, glowPaint);
       }
@@ -706,12 +772,13 @@ class PeriodRingPainter extends CustomPainter {
       final rect = Rect.fromCircle(center: center, radius: drawRadius);
       canvas.drawArc(rect, startAngle, sweepAngle, false, Paint()..style = PaintingStyle.stroke..strokeWidth = width..strokeCap = StrokeCap.butt..shader = gradient.createShader(rect));
 
+      if (design == DialDesign.minimal) continue;
+
       final middleAngle = (startAngle + (sweepAngle / 2)) % (2 * pi);
       canvas.save();
       canvas.translate(center.dx + drawRadius * cos(middleAngle), center.dy + drawRadius * sin(middleAngle));
       canvas.rotate(middleAngle + pi / 2); 
       
-      // 🌟 الترجمة الدقيقة 
       String pName = '';
       switch(period.id) {
         case 1: pName = 'periods.fajr'.tr(); break;
@@ -741,12 +808,7 @@ class PeriodRingPainter extends CustomPainter {
       canvas.restore();
     }
   }
-  @override bool shouldRepaint(covariant PeriodRingPainter old) => 
-      old.currentPeriod.id != currentPeriod.id || 
-      old.isDark != isDark || 
-      old.dayStart != dayStart || 
-      old.langCode != langCode || // 🌟
-      old.periods.length != periods.length;
+  @override bool shouldRepaint(covariant PeriodRingPainter old) => old.currentPeriod.id != currentPeriod.id || old.isDark != isDark || old.dayStart != dayStart || old.langCode != langCode || old.design != design || old.periods.length != periods.length;
 }
 
 class RailwayRingPainter extends CustomPainter {
@@ -759,12 +821,13 @@ class RailwayRingPainter extends CustomPainter {
   final bool isDark;
   final TaskModel? draggedTask; 
   final double? dragAngle;      
-  final String langCode; // 🌟
+  final String langCode;
+  final DialDesign design;
   
   RailwayRingPainter({
     required this.ibadat, required this.nightMarkers, required this.tasks, required this.periods,
     required this.dayStart, required this.dayEnd, required this.isDark,
-    this.draggedTask, this.dragAngle, required this.langCode,
+    this.draggedTask, this.dragAngle, required this.langCode, required this.design,
   });
 
   void _drawEquilateralArrow(Canvas canvas, Offset center, double radius, double baseWidth, double angle, Color color, {bool isDragged = false, bool isPrayer = false}) {
@@ -774,6 +837,12 @@ class RailwayRingPainter extends CustomPainter {
     canvas.translate(0, -radius);
     
     if (isDragged) canvas.scale(1.4); 
+
+    if (design == DialDesign.minimal) {
+      canvas.drawCircle(Offset.zero, 4.0, Paint()..color = color);
+      canvas.restore();
+      return;
+    }
 
     final double height = baseWidth * 0.866; 
 
@@ -794,6 +863,8 @@ class RailwayRingPainter extends CustomPainter {
   }
 
   void _drawTextBadge(Canvas canvas, Offset center, double radius, double angle, String text, Color color) {
+    if (design == DialDesign.minimal) return; 
+
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(angle + pi / 2);
@@ -841,8 +912,10 @@ class RailwayRingPainter extends CustomPainter {
     final double innerTrackTip = midTrackTip - trackStep;
     final trackRadii = [outerTrackTip, midTrackTip, innerTrackTip];
 
-    for (var r in trackRadii) {
-       canvas.drawCircle(center, r, Paint()..color = Colors.white.withValues(alpha: 0.1)..style = PaintingStyle.stroke..strokeWidth = 0.5);
+    if (design != DialDesign.minimal) {
+      for (var r in trackRadii) {
+         canvas.drawCircle(center, r, Paint()..color = Colors.white.withValues(alpha: 0.1)..style = PaintingStyle.stroke..strokeWidth = 0.5);
+      }
     }
 
     final stationPaint = Paint()..color = goldLight.withValues(alpha: 0.2)..style = PaintingStyle.fill;
@@ -857,12 +930,11 @@ class RailwayRingPainter extends CustomPainter {
         final angle = startAngle + (i * suwayaAngle);
         for (int t = 0; t < numTracks; t++) {
           final r = trackRadii[t] - (trackStep * 0.433);
-          canvas.drawCircle(Offset(center.dx + r * cos(angle), center.dy + r * sin(angle)), 1.2, stationPaint);
+          canvas.drawCircle(Offset(center.dx + r * cos(angle), center.dy + r * sin(angle)), design == DialDesign.minimal ? 0.5 : 1.2, stationPaint);
         }
       }
     }
 
-    // 🌟 استخدام الصلوات الـ 5 فقط من قاموس prayers
     List<UnifiedDialItem> prayersList = [];
     prayersList.add(UnifiedDialItem(text: 'prayers.fajr'.tr(), time: ibadat.fajr, color: goldLight, isPrayer: true));
     prayersList.add(UnifiedDialItem(text: 'prayers.dhuhr'.tr(), time: ibadat.dhuhr, color: goldLight, isPrayer: true));
@@ -917,13 +989,9 @@ class RailwayRingPainter extends CustomPainter {
 
   @override 
   bool shouldRepaint(covariant RailwayRingPainter old) {
-    return old.isDark != isDark || 
-           old.langCode != langCode || // 🌟
-           old.dayStart != dayStart || 
-           old.tasks.length != tasks.length || 
-           old.nightMarkers.length != nightMarkers.length || 
-           old.draggedTask?.id != draggedTask?.id || 
-           old.dragAngle != dragAngle; 
+    return old.isDark != isDark || old.langCode != langCode || old.design != design ||
+           old.dayStart != dayStart || old.tasks.length != tasks.length || old.nightMarkers.length != nightMarkers.length || 
+           old.draggedTask?.id != draggedTask?.id || old.dragAngle != dragAngle; 
   }
 }
 
@@ -932,8 +1000,9 @@ class OuterRingPainter extends CustomPainter {
   final DateTime dayStart;
   final DateTime dayEnd;
   final bool isDark;
+  final DialDesign design;
 
-  OuterRingPainter({required this.periods, required this.dayStart, required this.dayEnd, required this.isDark});
+  OuterRingPainter({required this.periods, required this.dayStart, required this.dayEnd, required this.isDark, required this.design});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -961,23 +1030,28 @@ class OuterRingPainter extends CustomPainter {
         canvas.translate(center.dx, center.dy);
         canvas.rotate(lineAngle + pi/2); 
         
-        canvas.drawLine(Offset(0, -pinStart), Offset(0, -pinEnd), Paint()..color = goldBase..strokeWidth = 2.0..strokeCap = StrokeCap.round);
-        canvas.drawCircle(Offset(0, -pinEnd), 1.5, Paint()..color = goldLight);
+        if (design != DialDesign.minimal) {
+          canvas.drawLine(Offset(0, -pinStart), Offset(0, -pinEnd), Paint()..color = goldBase..strokeWidth = 2.0..strokeCap = StrokeCap.round);
+        }
+        canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = goldLight);
 
-        textPainter.text = TextSpan(
-          text: globalLineIndex.toString().padLeft(2, '0'), 
-          style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'monospace', shadows: const [Shadow(color: Colors.black, blurRadius: 4)])
-        );
-        textPainter.layout();
-        canvas.translate(0, -textR);
-        textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+        if (design != DialDesign.minimal || globalLineIndex % 5 == 0) {
+          // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
+          textPainter.text = TextSpan(
+            text: globalLineIndex.toString().padLeft(2, '0'), 
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: const [Shadow(color: Colors.black, blurRadius: 4)])
+          );
+          textPainter.layout();
+          canvas.translate(0, -textR);
+          textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+        }
         
         canvas.restore();
         globalLineIndex++;
       }
     }
   }
-  @override bool shouldRepaint(covariant OuterRingPainter old) => old.isDark != isDark || old.dayStart != dayStart || old.periods.length != periods.length; 
+  @override bool shouldRepaint(covariant OuterRingPainter old) => old.isDark != isDark || old.dayStart != dayStart || old.design != design || old.periods.length != periods.length; 
 }
 
 class CrownPainter extends CustomPainter {
@@ -1029,8 +1103,9 @@ class DynamicNeedlePainter extends CustomPainter {
   final DateTime dayStart;
   final DateTime dayEnd;
   final bool isDark;
+  final DialDesign design;
 
-  DynamicNeedlePainter({required this.currentTime, required this.dayStart, required this.dayEnd, required this.isDark});
+  DynamicNeedlePainter({required this.currentTime, required this.dayStart, required this.dayEnd, required this.isDark, required this.design});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1044,6 +1119,13 @@ class DynamicNeedlePainter extends CustomPainter {
 
     final needleLength = R * kRailwayR - 8.0; 
     final needleStart = R * 0.25; 
+
+    if (design == DialDesign.minimal) {
+      canvas.drawLine(Offset(0, -needleStart), Offset(0, -needleLength), Paint()..color = const Color(0xFF007BFF)..strokeWidth = 2.0..strokeCap = StrokeCap.round);
+      canvas.drawCircle(Offset(0, -needleLength), 4.0, Paint()..color = const Color(0xFF007BFF));
+      canvas.restore();
+      return;
+    }
 
     final stripedPaint = Paint()
       ..shader = ui.Gradient.linear(
@@ -1068,7 +1150,7 @@ class DynamicNeedlePainter extends CustomPainter {
 
     canvas.restore();
   }
-  @override bool shouldRepaint(covariant DynamicNeedlePainter old) => old.currentTime != currentTime;
+  @override bool shouldRepaint(covariant DynamicNeedlePainter old) => old.currentTime != currentTime || old.design != design;
 }
 
 class DividerRingPainter extends CustomPainter {
@@ -1076,8 +1158,9 @@ class DividerRingPainter extends CustomPainter {
   final DateTime dayStart;
   final DateTime dayEnd;
   final bool isDark;
+  final DialDesign design;
   
-  DividerRingPainter({required this.periods, required this.dayStart, required this.dayEnd, required this.isDark});
+  DividerRingPainter({required this.periods, required this.dayStart, required this.dayEnd, required this.isDark, required this.design});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1091,6 +1174,11 @@ class DividerRingPainter extends CustomPainter {
       final p1 = Offset(center.dx + innerR * cos(angle), center.dy + innerR * sin(angle));
       final p2 = Offset(center.dx + outerR * cos(angle), center.dy + outerR * sin(angle));
       
+      if (design == DialDesign.minimal) {
+        canvas.drawLine(p1, p2, Paint()..color = isDark ? Colors.white24 : Colors.black26..strokeWidth = 1.5..strokeCap = StrokeCap.round);
+        continue;
+      }
+
       canvas.drawLine(p1, p2, Paint()..color = isDark ? Colors.black : Colors.white..strokeWidth = 6.0..strokeCap = StrokeCap.round);
       canvas.drawLine(p1, p2, Paint()..color = goldBase..strokeWidth = 2.5..strokeCap = StrokeCap.round);
       
@@ -1099,5 +1187,5 @@ class DividerRingPainter extends CustomPainter {
     }
   }
   
-  @override bool shouldRepaint(covariant DividerRingPainter old) => old.isDark != isDark || old.dayStart != dayStart || old.periods.length != periods.length;
+  @override bool shouldRepaint(covariant DividerRingPainter old) => old.isDark != isDark || old.dayStart != dayStart || old.design != design || old.periods.length != periods.length;
 }

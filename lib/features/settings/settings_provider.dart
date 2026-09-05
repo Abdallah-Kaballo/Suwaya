@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../core/repositories/settings_repository.dart';
@@ -66,10 +67,60 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   @override
   SettingsModel build() {
     _repository = ref.watch(settingsRepositoryProvider);
-    _loadSettings();
-    return SettingsModel();
+    
+    // 🌟 دمجنا الدالتين هنا: تحميل الإعدادات أولاً، ثم تدقيق التجميد في الخلفية
+    Future.microtask(() async {
+      await _loadSettings();
+      await validateAndApplyStreakFreezes(); // 🌟 التدقيق التلقائي لسلاسل الإنجاز
+    });
+    
+    return SettingsModel(); 
   }
  
+  // 🌟 محرك التدقيق الفني لسلاسل الإنجاز والتجميد
+  Future<void> validateAndApplyStreakFreezes() async {
+    final settings = state.clone();
+    if (settings.lastStreakDate == null || settings.currentStreak == 0) return;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastDate = DateTime(
+      settings.lastStreakDate!.year, 
+      settings.lastStreakDate!.month, 
+      settings.lastStreakDate!.day
+    );
+
+    int missedDays = today.difference(lastDate).inDays - 1;
+
+    // إذا كان هناك أيام فائتة (أكثر من يوم واحد منذ آخر إنجاز)
+    if (missedDays > 0) {
+      bool isSaved = false;
+
+      // محاولة استهلاك رصيد التجميد لتغطية الأيام الفائتة
+      while (missedDays > 0 && settings.streakFreezesAvailable > 0) {
+        settings.streakFreezesAvailable -= 1;
+        missedDays -= 1;
+        isSaved = true;
+      }
+
+      if (missedDays > 0) {
+        // نفد رصيد التجميد ولم يتم تغطية كل الأيام الفائتة 💔
+        settings.currentStreak = 0;
+        settings.lastStreakDate = null;
+        debugPrint('💔 ضاعت سلسلة الإنجاز. عودة للصفر.');
+      } else if (isSaved) {
+        // تم إنقاذ السلسلة! نحدث التاريخ الوهمي ليكون "أمس" ليستمر اليوم بشكل طبيعي 🛡️
+        settings.lastStreakDate = today.subtract(const Duration(days: 1));
+        debugPrint('🛡️ تم إنقاذ السلسلة باستخدام التجميد! الرصيد المتبقي: ${settings.streakFreezesAvailable}');
+      }
+
+      settings.updatedAt = DateTime.now().toUtc();
+      settings.isSynced = false;
+      await _repository.saveSettings(settings);
+      state = settings;
+    }
+  }
+
   Future<void> _loadSettings() async {
     final settings = await _repository.getSettings();
     state = settings.clone(); 

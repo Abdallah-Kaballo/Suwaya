@@ -1,90 +1,94 @@
 import 'package:flutter/material.dart';
 
+// 🌟 1. تعريف الثيمات المتاحة
+enum AppColorTheme { gold, ocean, forest, desert }
+
 class AppTheme {
   static const String fontFamily = 'Tajawal';
-  static const Color goldAccent = Color(0xFFD4AF37); // الذهبي المضيء (لليل)
-  static const Color darkGoldAccent = Color(0xFFB8860B); // الذهبي الداكن (للنهار للوضوح)
 
-  // 🌙 1. الثيم الداكن (OLED Black الموفر للبطارية)
-  static ThemeData get darkTheme {
+  // 🌟 2. درجات الألوان للوضع الفاتح
+  static Color _getPrimaryLight(AppColorTheme theme) {
+    switch (theme) {
+      case AppColorTheme.gold: return const Color(0xFFB8860B);
+      case AppColorTheme.ocean: return const Color(0xFF00897B); // تيل / محيطي
+      case AppColorTheme.forest: return const Color(0xFF2E7D32); // أخضر غابة
+      case AppColorTheme.desert: return const Color(0xFFD84315); // برتقالي صحراوي
+    }
+  }
+
+  // 🌟 3. درجات الألوان للوضع الداكن (OLED)
+  static Color _getPrimaryDark(AppColorTheme theme) {
+    switch (theme) {
+      case AppColorTheme.gold: return const Color(0xFFD4AF37);
+      case AppColorTheme.ocean: return const Color(0xFF4DB6AC);
+      case AppColorTheme.forest: return const Color(0xFF81C784);
+      case AppColorTheme.desert: return const Color(0xFFFF8A65);
+    }
+  }
+
+  // 🌙 الثيم الداكن المحدث
+  static ThemeData getDarkTheme(AppColorTheme theme) {
+    final primary = _getPrimaryDark(theme);
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: Colors.black, // 🌟 أسود مطلق للخلفيات
-      primaryColor: goldAccent,
+      scaffoldBackgroundColor: Colors.black,
+      primaryColor: primary,
       fontFamily: fontFamily,
-      colorScheme: const ColorScheme.dark(
-        primary: goldAccent,
-        secondary: goldAccent,
-        surface: Color(0xFF0A0A0F), // 🌟 رمادي كحلي داكن جداً للأسطح
+      colorScheme: ColorScheme.dark(
+        primary: primary,
+        secondary: primary,
+        surface: const Color(0xFF0A0A0F),
         onSurface: Colors.white,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+        backgroundColor: Colors.transparent, elevation: 0, centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: fontFamily),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Colors.black, // 🌟 شريط تنقل أسود ليدمج مع الشاشة
-        selectedItemColor: goldAccent,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: Colors.black,
+        selectedItemColor: primary,
         unselectedItemColor: Colors.white38,
-        elevation: 10,
-        type: BottomNavigationBarType.fixed,
+        elevation: 10, type: BottomNavigationBarType.fixed,
       ),
-      cardColor: const Color(0xFF0A0A0F), // 🌟 لون الكروت
-      canvasColor: const Color(0xFF0A0A0F), // 🌟 لون النوافذ المنبثقة
-      
-      // 🌟 تم تصحيح الكلاس إلى DialogThemeData
-      dialogTheme: const DialogThemeData(
-        backgroundColor: Color(0xFF0A0A0F),
-      ),
-      
-      dividerColor: Colors.white.withValues(alpha: 0.05), // 🌟 خطوط فصل خفيفة جداً
+      cardColor: const Color(0xFF0A0A0F),
+      canvasColor: const Color(0xFF0A0A0F),
+      dialogTheme: const DialogThemeData(backgroundColor: Color(0xFF0A0A0F)),
+      dividerColor: Colors.white.withValues(alpha: 0.05),
       bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: Color(0xFF0A0A0F),
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+        backgroundColor: Color(0xFF0A0A0F), surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       ),
     );
   }
 
-  // ☀️ 2. الثيم المضيء (النهاري المريح للعين)
-  static ThemeData get lightTheme {
+  // ☀️ الثيم المضيء المحدث
+  static ThemeData getLightTheme(AppColorTheme theme) {
+    final primary = _getPrimaryLight(theme);
     return ThemeData(
       brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFF4F6F9), // رمادي فاتح مريح
-      primaryColor: darkGoldAccent, 
+      scaffoldBackgroundColor: const Color(0xFFF4F6F9),
+      primaryColor: primary,
       fontFamily: fontFamily,
-      colorScheme: const ColorScheme.light(
-        primary: darkGoldAccent,
-        secondary: darkGoldAccent,
+      colorScheme: ColorScheme.light(
+        primary: primary,
+        secondary: primary,
         surface: Colors.white,
-        onSurface: Color(0xFF0B0F19),
+        onSurface: const Color(0xFF0B0F19),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+        backgroundColor: Colors.transparent, elevation: 0, centerTitle: true,
         iconTheme: IconThemeData(color: Color(0xFF0B0F19)),
         titleTextStyle: TextStyle(color: Color(0xFF0B0F19), fontSize: 18, fontWeight: FontWeight.bold, fontFamily: fontFamily),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
-        selectedItemColor: darkGoldAccent,
+        selectedItemColor: primary,
         unselectedItemColor: Colors.black38,
-        elevation: 15,
-        type: BottomNavigationBarType.fixed,
+        elevation: 15, type: BottomNavigationBarType.fixed,
       ),
       cardColor: Colors.white,
-      
-      // 🌟 تم تصحيح الكلاس إلى DialogThemeData للثيم النهاري أيضاً
-      dialogTheme: const DialogThemeData(
-        backgroundColor: Colors.white,
-      ),
-      
+      dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
       dividerColor: Colors.black12,
     );
   }
