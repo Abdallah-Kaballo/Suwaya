@@ -1,27 +1,48 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+// 🌟 قراءة ملف المفاتيح الآمن (إن وُجد)
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+val hasKeystore = keystorePropertiesFile.exists()
+if (hasKeystore) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
-    // END: FlutterFire Configuration
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-    namespace = "com.example.suwaya"
+    // 🌟 تغيير المعرف إلى اسم احترافي
+    namespace = "com.suwaya.app"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        // 🟢 تفعيل الـ Desugaring بشكل صحيح للـ Kotlin DSL
         isCoreLibraryDesugaringEnabled = true 
     }
 
+    // 🌟 إعداد توقيع الإنتاج الآمن
+    signingConfigs {
+        if (hasKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
     defaultConfig {
-        applicationId = "com.example.suwaya"
+        // 🌟 تغيير المعرف هنا أيضاً
+        applicationId = "com.suwaya.app"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode
@@ -30,11 +51,12 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            // 🌟 استخدام مفتاح الإنتاج بدلاً من debug إذا كان الملف موجوداً
+            signingConfig = if (hasKeystore) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-} // 🌟 تم إغلاق كتلة android هنا بشكل صحيح
+}
 
 kotlin {
     compilerOptions {
@@ -47,11 +69,8 @@ flutter {
 }
 
 dependencies {
-    // 🟢 مكتبة الـ Desugaring لمعالجة الدوال الحديثة (مثل الاشعارات والزمن) في الأجهزة القديمة
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-
-    // 🌟 الحل الجذري لـ Crashlytics: إضافة مكتبات فايربيز الأصلية لمنع المحسن (R8) من حذفها في الـ Release
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-analytics") // Crashlytics يعتمد على Analytics ليعمل بكفاءة
+    implementation("com.google.firebase:firebase-analytics") 
 }

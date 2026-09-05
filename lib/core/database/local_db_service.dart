@@ -21,10 +21,11 @@ class LocalDbService {
           SettingsModelSchema,
           GeoCountrySchema,
           RoutineModelSchema,
-          ActivityLogSchema, // 🌟 التعديل هنا: استبدال المخطط القديم بالجديد
+          ActivityLogSchema, 
         ],
         directory: dir.path,
-        inspector: true,
+        // 🌟 إغلاق الثغرة: تفعيل المفتش فقط في وضع التطوير
+        inspector: !kReleaseMode,
       );
     } catch (e) {
       debugPrint('🚨 فشل فتح قاعدة البيانات: $e');
@@ -37,7 +38,8 @@ class LocalDbService {
             RoutineModelSchema,
           ],
           directory: dir.path,
-          inspector: true,
+          // 🌟 إغلاق الثغرة في وضع الطوارئ أيضاً
+          inspector: !kReleaseMode,
         );
       } catch (_) {
         throw Exception('لا يمكن فتح قاعدة البيانات. يرجى إعادة تشغيل التطبيق أو استعادة نسخة احتياطية.');
@@ -63,17 +65,15 @@ class LocalDbService {
   }
 
   static Future<List<TaskModel>> getAllTasks() async {
-    // 🟢 نعيد فقط المهام غير المحذوفة ناعمًا
     return await isar.taskModels.filter().isDeletedEqualTo(false).findAll();
   }
 
   static Future<void> deleteTask(int id) async {
-    // 🟢 حذف ناعم
     await isar.writeTxn(() async {
       final task = await isar.taskModels.get(id);
       if (task != null) {
         task.isDeleted = true;
-        task.updatedAt = DateTime.now().toUtc(); // 🌟 يفضل استخدام UTC هنا للمزامنة
+        task.updatedAt = DateTime.now().toUtc(); 
         task.isSynced = false;
         await isar.taskModels.put(task);
       }

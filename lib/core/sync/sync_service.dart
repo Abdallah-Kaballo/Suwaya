@@ -16,26 +16,21 @@ class SyncService {
 
   SyncService(this._authService);
 
-  // 🌟 الدالة الرئيسية التي يتم استدعاؤها للمزامنة
   Future<void> syncAll() async {
     if (_authService.currentUser == null) return; 
 
-    // 1. سحب التعديلات من السحابة وتطبيقها محلياً
     await _pullRemoteChanges();
-    // 2. رفع التعديلات المحلية (التي لم تُزامن) للسحابة
     await _pushLocalChanges();
   }
 
   Future<void> migrateGuestData() async {
     await _isar.writeTxn(() async {
-      // 1. جعل كل المهام المحلية غير متزامنة لفرض رفعها
       final tasks = await _isar.taskModels.where().findAll();
       for (var t in tasks) {
         t.isSynced = false;
         await _isar.taskModels.put(t);
       }
 
-      // 2. جعل كل سجلات النشاط غير متزامنة لفرض رفعها
       final logs = await _isar.activityLogs.where().findAll();
       for (var log in logs) {
         log.isSynced = false;
@@ -43,7 +38,6 @@ class SyncService {
       }
     });
 
-    // 3. حذف توقيت المزامنة لفرض سحب كل بيانات السحابة (إن وجدت)
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('last_sync_time');
     
@@ -53,7 +47,6 @@ class SyncService {
   Future<void> _pushLocalChanges() async {
     final userId = _authService.currentUser!.id;
     
-    // 🌟 استخراج المهام غير المتزامنة (بما فيها المحذوفة ناعماً)
     final unsyncedTasks = await _isar.taskModels.filter().isSyncedEqualTo(false).findAll();
     
     if (unsyncedTasks.isNotEmpty) {
@@ -73,7 +66,6 @@ class SyncService {
 
       try {
         await _supabase.from('tasks').upsert(taskPayload);
-        // تحديث الحالة محلياً إلى "تمت المزامنة"
         await _isar.writeTxn(() async {
           for (var t in unsyncedTasks) {
             t.isSynced = true;
@@ -85,7 +77,6 @@ class SyncService {
       }
     }
 
-    // 🌟 استخراج سجلات النشاط غير المتزامنة
     final unsyncedLogs = await _isar.activityLogs.filter().isSyncedEqualTo(false).findAll();
     if (unsyncedLogs.isNotEmpty) {
       final logPayload = unsyncedLogs.map((log) => {
@@ -116,13 +107,17 @@ class SyncService {
   }
 
   Future<void> _pullRemoteChanges() async {
+    final userId = _authService.currentUser?.id;
+    if (userId == null) return;
+
     final prefs = await SharedPreferences.getInstance();
     final lastSyncStr = prefs.getString('last_sync_time');
     DateTime? lastSync = lastSyncStr != null ? DateTime.parse(lastSyncStr) : null;
 
     try {
-      // 🌟 سحب المهام
-      var taskQuery = _supabase.from('tasks').select();
+      // 🌟 تأمين الاستعلام: فلترة العميل الصريحة باستخدام eq('user_id', userId)
+      var taskQuery = _supabase.from('tasks').select().eq('user_id', userId);
+      
       if (lastSync != null) {
         taskQuery = taskQuery.gt('updated_at', lastSync.toIso8601String());
       }
@@ -136,7 +131,6 @@ class SyncService {
 
             var localTask = await _isar.taskModels.filter().syncIdEqualTo(syncId).findFirst();
 
-            // تطبيق التعديل السحابي فقط إذا كان أحدث من المحلي (Conflict Resolution)
             if (localTask == null || remoteUpdatedAt.isAfter(localTask.updatedAt)) {
               localTask ??= TaskModel()..syncId = syncId;
               
@@ -158,7 +152,6 @@ class SyncService {
         });
       }
       
-      // حفظ وقت المزامنة لتجنب سحب نفس البيانات مستقبلاً
       await prefs.setString('last_sync_time', DateTime.now().toUtc().toIso8601String());
     } catch (e) {
       debugPrint('❌ فشل سحب البيانات: $e');
