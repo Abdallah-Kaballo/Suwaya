@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya/features/home/home_screen.dart';
 import '../../../core/astro_engine/astro_models.dart';
-import '../../../core/astro_engine/astro_provider.dart';
 import '../../../models/task_model.dart';
-import '../../tasks/screens/universal_add_screen.dart'; 
-import 'premium_astro_dial.dart'; 
+import '../../tasks/universal_add_screen.dart'; 
+import '../../../core/theme/astro_ui_extensions.dart';
 
 class PeriodDetailsSheet extends StatefulWidget {
   final AstroPeriod period;
@@ -26,7 +26,7 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF0D0D12) : Colors.white;
     final surfaceColor = isDark ? const Color(0xFF1A1A24) : const Color(0xFFF5F7FA);
-    final pColor = widget.period.color.adapt(context);
+    final pColor = widget.period.uiColor.adapt(context);
     final textColor = isDark ? Colors.white : Colors.black87;
 
     final durationMicro = widget.period.endTime.difference(widget.period.startTime).inMicroseconds;
@@ -149,8 +149,8 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
                             const SizedBox(width: 12),
                             Text(t.title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                             const Spacer(),
-                            // 🌟 التعديل هنا: الخط الفلكي
-                            if (t.targetSuwayas.isNotEmpty) Text('${'common.suwaya'.tr()} ${t.targetSuwayas.first.toString().padLeft(2, '0')}', style: TextStyle(color: pColor, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                            // 🌟 الذهبي الفلكي لمهام السويعات
+                            if (t.targetSuwayas.isNotEmpty) Text('${'common.suwaya'.tr()} ${t.targetSuwayas.first.toString().padLeft(2, '0')}', style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
                           ],
                         )
                       )),
@@ -202,7 +202,6 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
         children: [
           Row(children: [Icon(icon, color: pColor, size: 14), const SizedBox(width: 6), Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11))]),
           const SizedBox(height: 8),
-          // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
           Text(val, style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
         ],
       ),
@@ -214,8 +213,8 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
       children: [
         Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11)),
         const SizedBox(height: 4),
-        // 🌟 التعديل هنا: تبديل الخطوط للفلكي والمدني
-        Text(val, style: TextStyle(color: pColor, fontSize: 18, fontWeight: isCivil ? FontWeight.w600 : FontWeight.w900, fontFamily: isCivil ? 'Inter' : 'Playfair Display', letterSpacing: isCivil ? 0.0 : 1.0)),
+        // 🌟 تطبيق الذهبي إذا كان فلكي، والأبيض/الأسود إذا كان مدني
+        Text(val, style: TextStyle(color: isCivil ? textColor : const Color(0xFFF2C94C), fontSize: 18, fontWeight: isCivil ? FontWeight.w600 : FontWeight.w900, fontFamily: isCivil ? 'Inter' : 'Playfair Display', letterSpacing: isCivil ? 0.0 : 1.0)),
       ],
     );
   }
@@ -232,7 +231,7 @@ class ReplicaArcPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height * 1.5); 
     final R = size.height * 1.4; 
     
-    final pColor = period.color;
+    final pColor = period.uiColor;
     const sweepAngle = pi / 2.5; 
     const startAngle = -pi / 2 - (sweepAngle / 2);
 

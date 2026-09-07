@@ -4,7 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
-import '../settings_provider.dart';
+import 'settings_provider.dart';
 
 class NotificationsSettingsScreen extends ConsumerStatefulWidget {
   const NotificationsSettingsScreen({super.key});

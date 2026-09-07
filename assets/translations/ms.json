@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Baki Rehat", "focus_remaining": "Baki Fokus", "deep_relaxation": "Relaksasi Mendalam", "in_flow": "Dalam Aliran (Flow)", "absolute_focus": "Fokus Mutlak\n30/0", "balanced": "Seimbang\n25/5", "relaxed": "Santai\n20/10", "no_tasks": "Tiada tugasan untuk Suwaya ini", "focus_now_on": "Fokus sekarang pada:"},
   "nav": {"home": "Utama", "tasks": "Tugasan", "pomodoro": "Fokus", "ibadat": "Ibadah"},
   "languages": {"tr": "Turki", "ru": "Rusia", "ur": "Urdu", "ar": "Arab", "hi": "Hindi", "bn": "Bengali", "th": "Thai", "ja": "Jepun", "zh": "Cina", "ug": "Uyghur", "pt": "Portugis", "ff": "Fula", "az": "Azerbaijan", "id": "Indonesia", "ms": "Melayu", "da": "Denmark", "de": "Jerman", "en": "Inggeris", "es": "Sepanyol", "fr": "Perancis", "it": "Itali", "nl": "Belanda"}
+  ,"drawer": {
+    "faq": "Soalan Lazim",
+    "contact": "Hubungi & Sokongan",
+    "about_app": "Mengenai Aplikasi",
+    "check_updates": "Semak Kemas Kini",
+    "develop_with_us": "Bangunkan bersama kami",
+    "checking_updates": "Menyemak kemas kini...",
+    "up_to_date": "Anda sedang menggunakan versi Suwaya terkini 🌟",
+    "update_check_failed": "Gagal menyemak kemas kini. Sila semak internet anda.",
+    "update_available": "Kemas Kini Baru Tersedia!",
+    "new_version_desc": "Versi Suwaya yang baru dan dipertingkatkan kini tersedia.",
+    "do_you_want_to_download": "Adakah anda mahu memuat turun dan memasang kemas kini?",
+    "download": "Muat Turun Sekarang",
+    "guest_user": "Pengguna Tetamu",
+    "secure_data": "Lindungi data anda ☁️",
+    "tap_to_login": "Ketik untuk log masuk dan segerak",
+    "manage_account": "Urus Akaun & Segerak"
+  },
+  "analytics": {
+    "title": "Analitik & Statistik",
+    "coming_soon": "Papan pemuka analitik akan dibina di sini tidak lama lagi...",
+    "daily_progress": "Kemajuan Harian",
+    "perfect_day": "Hari yang Sempurna! 🌟",
+    "keep_going": "Terus bersinar, setiap Suwaya membawa perubahan.",
+    "current_streak": "Rentetan Semasa",
+    "days": "Hari",
+    "focus_time": "Masa Fokus",
+    "hours": "Jam",
+    "weekly_overview": "Gambaran Keseluruhan Mingguan"
+  }
 }

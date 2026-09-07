@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/astro_engine/astro_models.dart';
-
+// 🌟 استيراد الامتداد الذكي للألوان
+import '../../core/theme/astro_ui_extensions.dart';
 
 class AstroTimelineScreen extends ConsumerWidget {
   const AstroTimelineScreen({super.key});
@@ -15,7 +15,6 @@ class AstroTimelineScreen extends ConsumerWidget {
     final astroState = ref.watch(astroProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // 🌟 خلفية رمادية فاتحة جداً في النهار لتعطي عمقاً (Depth) للبطاقات البيضاء
     final bgColor = isDark ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF5F7FA);
     final surfaceColor = isDark ? Theme.of(context).cardColor : Colors.white;
     final textColor = Theme.of(context).colorScheme.onSurface;
@@ -43,13 +42,13 @@ class AstroTimelineScreen extends ConsumerWidget {
                 final period = astroState.periods[index];
                 final isCurrent = astroState.currentPeriod.id == period.id;
                 
-                // 🌟 تطبيق اللون الذكي (مضيء ليلاً، داكن نهاراً)
-                final adaptedColor = period.color.adapt(context);
+                // 🌟 استخدام uiColor
+                final adaptedColor = period.uiColor.adapt(context);
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: isCurrent ? period.color.withValues(alpha: isDark ? 0.15 : 0.08) : surfaceColor,
+                    color: isCurrent ? period.uiColor.withValues(alpha: isDark ? 0.15 : 0.08) : surfaceColor, // 🌟 استخدام uiColor
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: isCurrent ? adaptedColor.withValues(alpha: 0.5) : borderColor, width: isCurrent ? 1.5 : 1),
                     boxShadow: isDark ? [] : [

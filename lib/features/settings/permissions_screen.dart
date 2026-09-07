@@ -3,7 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../core/services/permissions_provider.dart';
+import 'package:suwaya/core/location/permissions_provider.dart';
 
 class PermissionsScreen extends ConsumerStatefulWidget {
   const PermissionsScreen({super.key});

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import '../../../core/astro_engine/astro_models.dart';
+import '../../../core/theme/astro_ui_extensions.dart';
 
 class MiniAstroDial extends StatelessWidget {
   final List<AstroPeriod> periods;
@@ -46,19 +47,19 @@ class _MiniDialPainter extends CustomPainter {
       final sweepAngle = (period.suwayasCount / 48) * 2 * pi;
       
       final paint = Paint()
-        ..color = period.color.withValues(alpha: 0.2)
+        ..color = period.uiColor.withValues(alpha: 0.2)
         ..style = PaintingStyle.fill;
       
       canvas.drawArc(Rect.fromCircle(center: center, radius: radius), currentAngle, sweepAngle, true, paint);
-      canvas.drawArc(Rect.fromCircle(center: center, radius: radius), currentAngle, sweepAngle, true, Paint()..color = period.color..style = PaintingStyle.stroke..strokeWidth = 1.5);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: radius), currentAngle, sweepAngle, true, Paint()..color = period.uiColor..style = PaintingStyle.stroke..strokeWidth = 1.5); 
 
       final middleAngle = currentAngle + (sweepAngle / 2);
 
       final innerTextR = radius * 0.6;
       final innerP = Offset(center.dx + innerTextR * cos(middleAngle), center.dy + innerTextR * sin(middleAngle));
       
-      // 🌟 التعديل هنا: الخط الفلكي (Playfair Display) لأرقام السويعات على القرص
-      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
+      // 🌟 تم تطبيق اللون الذهبي الفلكي لعدد السويعات في المركز
+      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
       textPainter.layout();
       textPainter.paint(canvas, innerP - Offset(textPainter.width / 2, textPainter.height / 2));
 
@@ -78,7 +79,7 @@ class _MiniDialPainter extends CustomPainter {
       final outerTextR = radius + 15;
       final outerP = Offset(center.dx + outerTextR * cos(middleAngle), center.dy + outerTextR * sin(middleAngle));
       
-      textPainter.text = TextSpan(text: outerText, style: TextStyle(color: period.color, fontSize: 9, fontWeight: FontWeight.bold, height: 1.2));
+      textPainter.text = TextSpan(text: outerText, style: TextStyle(color: period.uiColor, fontSize: 9, fontWeight: FontWeight.bold, height: 1.2)); 
       textPainter.layout();
       textPainter.paint(canvas, outerP - Offset(textPainter.width / 2, textPainter.height / 2));
 

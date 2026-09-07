@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Sisa Istirahat", "focus_remaining": "Sisa Fokus", "deep_relaxation": "Relaksasi Dalam", "in_flow": "Mode Mengalir (Flow)", "absolute_focus": "Fokus Mutlak\n30/0", "balanced": "Seimbang\n25/5", "relaxed": "Santai\n20/10", "no_tasks": "Tidak ada tugas untuk Suwaya ini", "focus_now_on": "Fokus sekarang pada:"},
   "nav": {"home": "Beranda", "tasks": "Tugas", "pomodoro": "Fokus", "ibadat": "Ibadah"},
   "languages": {"tr": "Turki", "ru": "Rusia", "ur": "Urdu", "ar": "Arab", "hi": "Hindi", "bn": "Bengali", "th": "Thailand", "ja": "Jepang", "zh": "Mandarin", "ug": "Uyghur", "pt": "Portugis", "ff": "Fula", "az": "Azerbaijan", "id": "Indonesia", "ms": "Melayu", "da": "Denmark", "de": "Jerman", "en": "Inggris", "es": "Spanyol", "fr": "Prancis", "it": "Italia", "nl": "Belanda"}
+  ,"drawer": {
+    "faq": "FAQ",
+    "contact": "Kontak & Dukungan",
+    "about_app": "Tentang Aplikasi",
+    "check_updates": "Periksa Pembaruan",
+    "develop_with_us": "Kembangkan bersama kami",
+    "checking_updates": "Memeriksa pembaruan...",
+    "up_to_date": "Anda menggunakan versi Suwaya terbaru 🌟",
+    "update_check_failed": "Gagal memeriksa pembaruan. Periksa internet Anda.",
+    "update_available": "Pembaruan Baru Tersedia!",
+    "new_version_desc": "Versi Suwaya yang baru dan lebih baik kini tersedia.",
+    "do_you_want_to_download": "Apakah Anda ingin mengunduh dan menginstal pembaruan?",
+    "download": "Unduh Sekarang",
+    "guest_user": "Pengguna Tamu",
+    "secure_data": "Amankan data Anda ☁️",
+    "tap_to_login": "Ketuk untuk masuk dan sinkronisasi",
+    "manage_account": "Kelola Akun & Sinkronisasi"
+  },
+  "analytics": {
+    "title": "Analitik & Statistik",
+    "coming_soon": "Dasbor analitik akan segera dibangun di sini...",
+    "daily_progress": "Kemajuan Harian",
+    "perfect_day": "Hari yang Sempurna! 🌟",
+    "keep_going": "Teruslah bersinar, setiap Suwaya membawa perubahan.",
+    "current_streak": "Rentetan Saat Ini",
+    "days": "Hari",
+    "focus_time": "Waktu Fokus",
+    "hours": "Jam",
+    "weekly_overview": "Tinjauan Mingguan"
+  }
 }

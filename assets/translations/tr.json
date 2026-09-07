@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Kalan Mola", "focus_remaining": "Kalan Odak", "deep_relaxation": "Derin Rahatlama", "in_flow": "Akışta (Flow)", "absolute_focus": "Mutlak Odak\n30/0", "balanced": "Dengeli\n25/5", "relaxed": "Rahat\n20/10", "no_tasks": "Bu Suwaya için atanmış görev yok", "focus_now_on": "Şimdi buna odaklan:"},
   "nav": {"home": "Ana Sayfa", "tasks": "Görevler", "pomodoro": "Odak", "ibadat": "İbadet"},
   "languages": {"tr": "Türkçe", "ru": "Rusça", "ur": "Urduca", "ar": "Arapça", "hi": "Hintçe", "bn": "Bengalce", "th": "Tayca", "ja": "Japonca", "zh": "Çince", "ug": "Uygurca", "pt": "Portekizce", "ff": "Fula", "az": "Azerice", "id": "Endonezce", "ms": "Malayca", "da": "Danca", "de": "Almanca", "en": "İngilizce", "es": "İspanyolca", "fr": "Fransızca", "it": "İtalyanca", "nl": "Felemenkçe"}
+  ,"drawer": {
+    "faq": "SSS",
+    "contact": "İletişim ve Destek",
+    "about_app": "Uygulama Hakkında",
+    "check_updates": "Güncellemeleri Kontrol Et",
+    "develop_with_us": "Bizimle Geliştir",
+    "checking_updates": "Güncellemeler kontrol ediliyor...",
+    "up_to_date": "Suwaya'nın en son sürümünü kullanıyorsunuz 🌟",
+    "update_check_failed": "Güncelleme kontrolü başarısız oldu. İnternetinizi kontrol edin.",
+    "update_available": "Yeni Güncelleme Mevcut!",
+    "new_version_desc": "Suwaya'nın yeni ve geliştirilmiş bir sürümü mevcut.",
+    "do_you_want_to_download": "Güncellemeyi indirip yüklemek istiyor musunuz?",
+    "download": "Şimdi İndir",
+    "guest_user": "Misafir Kullanıcı",
+    "secure_data": "Verilerinizi güvenceye alın ☁️",
+    "tap_to_login": "Giriş yapmak ve senkronize etmek için dokunun",
+    "manage_account": "Hesabı ve Senkronizasyonu Yönet"
+  },
+  "analytics": {
+    "title": "Analizler ve İstatistikler",
+    "coming_soon": "Analiz paneli yakında burada oluşturulacak...",
+    "daily_progress": "Günlük İlerleme",
+    "perfect_day": "Kusursuz Gün! 🌟",
+    "keep_going": "Parlamaya devam et, her Suwaya bir fark yaratır.",
+    "current_streak": "Mevcut Seri",
+    "days": "Gün",
+    "focus_time": "Odaklanma Süresi",
+    "hours": "Saat",
+    "weekly_overview": "Haftalık Genel Bakış"
+  }
 }

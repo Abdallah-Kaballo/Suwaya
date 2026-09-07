@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Descanso Restante", "focus_remaining": "Enfoque Restante", "deep_relaxation": "Relajación Profunda", "in_flow": "En Estado de Flujo", "absolute_focus": "Enfoque Absoluto\n30/0", "balanced": "Equilibrado\n25/5", "relaxed": "Relajado\n20/10", "no_tasks": "No hay tareas asignadas a este Suwaya", "focus_now_on": "Concéntrate ahora en:"},
   "nav": {"home": "Inicio", "tasks": "Tareas", "pomodoro": "Enfoque", "ibadat": "Adoración"},
   "languages": {"tr": "Turco", "ru": "Ruso", "ur": "Urdu", "ar": "Árabe", "hi": "Hindi", "bn": "Bengalí", "th": "Tailandés", "ja": "Japonés", "zh": "Chino", "ug": "Uigur", "pt": "Portugués", "ff": "Fula", "az": "Azerbaiyano", "id": "Indonesio", "ms": "Malayo", "da": "Danés", "de": "Alemán", "en": "Inglés", "es": "Español", "fr": "Francés", "it": "Italiano", "nl": "Holandés"}
+  ,"drawer": {
+    "faq": "Preguntas Frecuentes",
+    "contact": "Contacto y Soporte",
+    "about_app": "Acerca de la App",
+    "check_updates": "Buscar actualizaciones",
+    "develop_with_us": "Desarrolla con nosotros",
+    "checking_updates": "Buscando actualizaciones...",
+    "up_to_date": "Estás usando la última versión de Suwaya 🌟",
+    "update_check_failed": "Error al buscar actualizaciones. Verifica tu conexión.",
+    "update_available": "¡Nueva actualización disponible!",
+    "new_version_desc": "Una nueva y mejorada versión de Suwaya está disponible.",
+    "do_you_want_to_download": "¿Quieres descargar e instalar la actualización?",
+    "download": "Descargar ahora",
+    "guest_user": "Usuario Invitado",
+    "secure_data": "Protege tus datos ☁️",
+    "tap_to_login": "Toca para iniciar sesión y sincronizar",
+    "manage_account": "Gestionar cuenta y sincronizar"
+  },
+  "analytics": {
+    "title": "Análisis y Estadísticas",
+    "coming_soon": "El panel de análisis se construirá aquí pronto...",
+    "daily_progress": "Progreso diario",
+    "perfect_day": "¡Día Perfecto! 🌟",
+    "keep_going": "Sigue brillando, cada Suwaya hace la diferencia.",
+    "current_streak": "Racha actual",
+    "days": "Días",
+    "focus_time": "Tiempo de enfoque",
+    "hours": "Horas",
+    "weekly_overview": "Resumen semanal"
+  }
 }

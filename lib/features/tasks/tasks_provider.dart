@@ -2,11 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:alarm/alarm.dart';
 import 'package:isar_community/isar.dart';
+import 'package:suwaya/core/astro_engine/astro_models.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/database/local_db_service.dart';
+// 🌟 1. استيراد مزودات قاعدة البيانات والمستودع بدلاً من الخدمة الثابتة
+import '../../core/database/database_provider.dart';
+import '../../core/repositories/task_repository.dart';
 import '../../models/task_model.dart';
-// 🌟 1. استبدال استيراد الإحصاءات القديمة بالجدول الجديد
 import '../../models/activity_log_model.dart';
 import '../settings/settings_provider.dart';
 
@@ -63,7 +65,8 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<List<String>> getUniqueTaskTitles() async {
-    final all = await LocalDbService.getAllTasks();
+    // 🌟 استخدام المستودع عبر Riverpod
+    final all = await ref.read(taskRepositoryProvider).getAllTasks();
     return all.map((t) => t.title).toSet().toList();
   }
 
@@ -133,7 +136,8 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> loadTasks() async {
-    final all = await LocalDbService.getAllTasks();
+    // 🌟 استخدام المستودع عبر Riverpod
+    final all = await ref.read(taskRepositoryProvider).getAllTasks();
     _refreshFromMemory(all);
   }
 
@@ -150,7 +154,8 @@ class TasksNotifier extends Notifier<TasksState> {
     task.isSynced = false;
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
-    LocalDbService.saveTask(task);
+    // 🌟 استخدام المستودع عبر Riverpod
+    ref.read(taskRepositoryProvider).saveTask(task);
   }
 
   List<TaskModel> getTasksForDate(DateTime date) {
@@ -167,7 +172,8 @@ class TasksNotifier extends Notifier<TasksState> {
 
   Future<void> addTask(TaskModel task) async {
     task.isSynced = false;
-    await LocalDbService.saveTask(task);
+    // 🌟 استخدام المستودع عبر Riverpod
+    await ref.read(taskRepositoryProvider).saveTask(task);
     final updatedList = [...state.allTasks.where((t) => t.id != task.id), task];
     _refreshFromMemory(updatedList);
   }
@@ -175,7 +181,8 @@ class TasksNotifier extends Notifier<TasksState> {
   Future<void> deleteTask(int id) async {
     final updatedList = state.allTasks.where((t) => t.id != id).toList();
     _refreshFromMemory(updatedList);
-    LocalDbService.deleteTask(id);
+    // 🌟 استخدام المستودع عبر Riverpod
+    ref.read(taskRepositoryProvider).deleteTask(id);
     Alarm.stop(10000 + id); 
   }
 
@@ -183,7 +190,8 @@ class TasksNotifier extends Notifier<TasksState> {
     final updatedList = state.allTasks.where((t) => !ids.contains(t.id)).toList();
     _refreshFromMemory(updatedList);
     for (var id in ids) {
-      LocalDbService.deleteTask(id);
+      // 🌟 استخدام المستودع عبر Riverpod
+      ref.read(taskRepositoryProvider).deleteTask(id);
       Alarm.stop(10000 + id);
     }
   }
@@ -218,21 +226,21 @@ class TasksNotifier extends Notifier<TasksState> {
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
 
-    LocalDbService.saveTask(task).then((_) {
+    // 🌟 استخدام المستودع عبر Riverpod
+    ref.read(taskRepositoryProvider).saveTask(task).then((_) {
       if (isAchievedNow) ref.read(settingsProvider.notifier).updateGlobalStreak();
-      _logActivity(task, isAchievedNow); // 🌟 استدعاء دالة التسجيل الجديدة
+      _logActivity(task, isAchievedNow); 
     });
   }
 
-  // 🌟 2. المحرك الجديد: تسجيل الأحداث بدلاً من العدادات
   Future<void> _logActivity(TaskModel task, bool isCompleted) async {
-    final db = LocalDbService.isar;
+    // 🌟 جلب قاعدة البيانات عبر Provider (الاستغناء عن الكائن الثابت)
+    final db = ref.read(isarProvider);
     final now = DateTime.now();
-    final todayStr = DateFormat('yyyy-MM-dd').format(now); // يمكن ترقيتها لاحقاً لحساب حدود المغرب
+    final todayStr = DateFormat('yyyy-MM-dd').format(now); 
 
     await db.writeTxn(() async {
       if (isCompleted) {
-        // 🌟 إدراج حدث جديد (Event Sourcing)
         final log = ActivityLog()
           ..taskSyncId = task.syncId
           ..category = task.category.name
@@ -243,7 +251,6 @@ class TasksNotifier extends Notifier<TasksState> {
 
         await db.activityLogs.put(log);
       } else {
-        // 🌟 إذا تراجع المستخدم، نبحث عن آخر حدث لهذه المهمة ونحذفه ناعماً
         final lastLog = await db.activityLogs
             .filter()
             .taskSyncIdEqualTo(task.syncId)
@@ -270,7 +277,8 @@ class TasksNotifier extends Notifier<TasksState> {
 
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
-    LocalDbService.saveTask(task);
+    // 🌟 استخدام المستودع عبر Riverpod
+    ref.read(taskRepositoryProvider).saveTask(task);
   }
 }
 

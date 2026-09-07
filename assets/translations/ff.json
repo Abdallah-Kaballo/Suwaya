@@ -31,4 +31,35 @@
   "pomodoro": {"break_remaining": "Fooftere Keddiinde", "focus_remaining": "Fokis Keddiido", "deep_relaxation": "Fooftere Lugge", "in_flow": "E nder Ruyruy", "absolute_focus": "Fokis Timmuɗo\n30/0", "balanced": "Potondirɗo\n25/5", "relaxed": "Bojjuɗo\n20/10", "no_tasks": "Alaa golle toɗɗaaɗe e ngal Suwaya", "focus_now_on": "Fokis jooni e:"},
   "nav": {"home": "Jaɓɓaale", "tasks": "Golle", "pomodoro": "Fokis", "ibadat": "Ibaada"},
   "languages": {"tr": "Turk", "ru": "Riis", "ur": "Urdu", "ar": "Aarab", "hi": "Enndo", "bn": "Bengal", "th": "Tay", "ja": "Nihon", "zh": "Siin", "ug": "Uygur", "pt": "Purtugeec", "ff": "Pulaar", "az": "Aserbayjan", "id": "Indonesi", "ms": "Malay", "da": "Danmark", "de": "Aleman", "en": "Engele", "es": "Espaañ", "fr": "Farans", "it": "Itali", "nl": "Dut"}
+  ,"drawer": {
+    "faq": "FAQ",
+    "contact": "Jokkondiral & Ballal",
+    "about_app": "Baɗte App",
+    "check_updates": "Ƴeewto hesɗitinooje",
+    "develop_with_us": "Gollo e amen",
+    "checking_updates": "Ena ƴeewtoo hesɗitinooje...",
+    "up_to_date": "Aɗa huutoro yamre cakkitiinde Suwaya 🌟",
+    "update_check_failed": "Waañii ƴeewtaade hesɗitinooje. Ƴeewto enternet maa.",
+    "update_available": "Hesɗitinoore Hesere Ena Heɓoo!",
+    "new_version_desc": "Yamre hesere ɓurnde moƴƴude e Suwaya ena heɓoo jooni.",
+    "do_you_want_to_download": "Mbele aɗa yiɗi aawtaade e loowde hesɗitinoore ndee?",
+    "download": "Aawto Jooni",
+    "guest_user": "Kuutortooɗo Kodo",
+    "secure_data": "Histo kumpital maa ☁️",
+    "tap_to_login": "Ɓooy ngam naatde e pottinde",
+    "manage_account": "Yuurnito Akawnt & Pottinal"
+  },
+  "analytics": {
+    "title": "Limoore & Limto",
+    "coming_soon": "Deski limoore maa sosaade ɗoo ɓooyaani...",
+    "daily_progress": "Yeeso Ñalnde Kala",
+    "perfect_day": "Ñalawma Moƴƴo! 🌟",
+    "keep_going": "Jokku e jalbude, Suwaya kala ena waɗa ceergal.",
+    "current_streak": "Jokkondiral Jooni",
+    "days": "Balɗe",
+    "focus_time": "Wakkati Fokis",
+    "hours": "Waktuuji",
+    "weekly_overview": "Yiyngo Yontere"
+  }
+
 }

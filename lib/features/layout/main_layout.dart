@@ -3,47 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../home/home_screen.dart';
-import '../tasks/tasks_screen.dart';
-import '../ibadat/ibadat_screen.dart';
-import '../pomodoro/pomodoro_screen.dart';
-import '../settings/settings_screen.dart';
-
-// 🌟 مزود حالة عام للتحكم في الشريط السفلي من أي مكان في التطبيق
-final mainNavIndexProvider = StateProvider<int>((ref) => 2);
+import 'package:go_router/go_router.dart';
+import 'package:suwaya/core/providers/ui_providers.dart'; // 🌟 استيراد مزود الحالة
 
 class MainLayout extends ConsumerWidget {
-  const MainLayout({super.key});
+  final StatefulNavigationShell navigationShell;
 
-  final List<Widget> _screens = const [
-    TasksScreen(),      
-    IbadatScreen(),     
-    HomeScreen(),       
-    PomodoroScreen(),   
-    SettingsScreen(),   
-  ];
+  const MainLayout({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // الاستماع لمؤشر الشاشة الحالي
-    final currentIndex = ref.watch(mainNavIndexProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
     final bgColor = isDark ? Colors.black : const Color(0xFFF5F7FA);
 
+    // 🌟 الاستماع لحالة القائمة الجانبية
+    final isDrawerOpen = ref.watch(isDrawerOpenProvider);
+
     return Scaffold(
       backgroundColor: bgColor,
       extendBody: true, 
-      body: IndexedStack(
-        index: currentIndex,
-        children: _screens,
+      body: navigationShell,
+      // 🌟 الشريط السفلي يتحرك بسلاسة للأسفل عند فتح القائمة
+      bottomNavigationBar: AnimatedSlide(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+        offset: isDrawerOpen ? const Offset(0, 1.5) : Offset.zero,
+        child: _buildFloatingNavBar(navigationShell.currentIndex, isDark, primaryColor),
       ),
-      bottomNavigationBar: _buildFloatingNavBar(ref, currentIndex, isDark, primaryColor),
     );
   }
 
-  Widget _buildFloatingNavBar(WidgetRef ref, int currentIndex, bool isDark, Color primaryColor) {
+  Widget _buildFloatingNavBar(int currentIndex, bool isDark, Color primaryColor) {
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
@@ -62,11 +53,11 @@ class MainLayout extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildNavItem(ref, LucideIcons.calendar_clock, 0, currentIndex, isDark, primaryColor),
-                _buildNavItem(ref, LucideIcons.book_open, 1, currentIndex, isDark, primaryColor),
-                _buildCenterItem(ref, currentIndex, primaryColor), 
-                _buildNavItem(ref, LucideIcons.timer, 3, currentIndex, isDark, primaryColor),
-                _buildNavItem(ref, LucideIcons.settings, 4, currentIndex, isDark, primaryColor),
+                _buildNavItem(LucideIcons.calendar_clock, 0, currentIndex, isDark, primaryColor),
+                _buildNavItem(LucideIcons.book_open, 1, currentIndex, isDark, primaryColor),
+                _buildCenterItem(currentIndex, primaryColor), 
+                _buildNavItem(LucideIcons.timer, 3, currentIndex, isDark, primaryColor),
+                _buildNavItem(LucideIcons.trending_up, 4, currentIndex, isDark, primaryColor),
               ],
             ),
           ),
@@ -75,14 +66,14 @@ class MainLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavItem(WidgetRef ref, IconData icon, int index, int currentIndex, bool isDark, Color primaryColor) {
+  Widget _buildNavItem(IconData icon, int index, int currentIndex, bool isDark, Color primaryColor) {
     final isSelected = currentIndex == index;
     final scale = isSelected ? 1.15 : 1.0; 
     
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
-        ref.read(mainNavIndexProvider.notifier).state = index;
+        navigationShell.goBranch(index, initialLocation: index == currentIndex); 
       },
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -98,14 +89,14 @@ class MainLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildCenterItem(WidgetRef ref, int currentIndex, Color primaryColor) {
+  Widget _buildCenterItem(int currentIndex, Color primaryColor) {
     final isSelected = currentIndex == 2;
     final scale = isSelected ? 1.05 : 1.0; 
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        ref.read(mainNavIndexProvider.notifier).state = 2;
+        navigationShell.goBranch(2, initialLocation: 2 == currentIndex);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

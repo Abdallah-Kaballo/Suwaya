@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:suwaya/core/location/location_service.dart';
+import 'package:suwaya/core/location/permissions_provider.dart';
 import '../../core/repositories/settings_repository.dart';
 import 'package:suwaya/models/settings_model.dart';
-import '../../core/services/location_service.dart';
-import '../../core/services/permissions_provider.dart'; 
 
 class AstroDefaults {
   final String method;

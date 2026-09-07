@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:suwaya/core/services/location_service.dart'; 
+import 'package:go_router/go_router.dart';
+import 'package:suwaya/core/location/location_service.dart';
+import 'package:suwaya/core/location/permissions_provider.dart';
 
 import 'package:suwaya/features/settings/settings_provider.dart';
 import 'package:suwaya/features/settings/widgets/smart_location_picker.dart';
-import 'package:suwaya/features/layout/main_layout.dart'; 
-import 'package:suwaya/core/services/permissions_provider.dart';
 
 class OnboardingLocationScreen extends ConsumerStatefulWidget {
   const OnboardingLocationScreen({super.key});
@@ -100,7 +100,7 @@ class _OnboardingLocationScreenState extends ConsumerState<OnboardingLocationScr
                           setState(() => _isFetchingGps = true);
                           try { 
                             final langCode = Localizations.localeOf(context).languageCode;
-                            final locData = await SmartGpsEngine.fetchOfflineLocation(langCode);
+                            final locData = await LocationService.fetchOfflineLocation(langCode);
                             
                             await ref.read(settingsProvider.notifier).addAndSelectLocation(
                               locData['formattedName'], 
@@ -175,11 +175,9 @@ class _OnboardingLocationScreenState extends ConsumerState<OnboardingLocationScr
                           await Future.delayed(const Duration(milliseconds: 150));
                           
                           if (!context.mounted) return; 
-                          Navigator.pushAndRemoveUntil(
-                            context, 
-                            MaterialPageRoute(builder: (_) => const MainLayout()), 
-                            (route) => false
-                          );
+                          
+                          // 🌟 إغلاق مسار الإعداد والبدء باستخدام التطبيق
+                          context.go('/home');
                         } : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,

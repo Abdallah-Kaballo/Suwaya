@@ -4,25 +4,28 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya/core/astro_engine/astro_models.dart';
 
 import 'package:suwaya/core/notification/scheduler_service.dart';
 import 'package:suwaya/models/settings_model.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/astro_engine/astro_models.dart';
 import '../../models/task_model.dart';
 import '../tasks/tasks_provider.dart';
 import '../settings/settings_provider.dart';
 import '../routines/routines_provider.dart'; 
+import '../../core/providers/ui_providers.dart'; // 🌟
 
 import '../../shared/widgets/task_card.dart';
 import 'widgets/location_header.dart'; 
-import '../tasks/screens/universal_add_screen.dart'; 
 import 'widgets/premium_astro_dial.dart'; 
 import 'widgets/period_details_sheet.dart';
 import '../routines/widgets/routines_list_sheet.dart';
 import 'widgets/mini_astro_dial.dart';
+import '../../shared/widgets/app_drawer.dart';
+import '../../core/theme/astro_ui_extensions.dart';
+import 'package:go_router/go_router.dart';
 
 Color getNeonColorForCategory(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -93,7 +96,7 @@ class HomeScreen extends ConsumerWidget {
     final textColor = isDark ? Colors.white : Colors.black87;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,37 +107,40 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun, color: pColor, size: 16),
+                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun, color: pColor, size: 18), 
                     const SizedBox(width: 8),
-                    Text(dayNightStr, style: TextStyle(color: pColor, fontWeight: FontWeight.bold, fontSize: 13)),
-                    Text(' • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 12)),
+                    Text(dayNightStr, style: TextStyle(color: pColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(' • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 13)),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text('$hijriStr ${'common.ah'.tr()}', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', letterSpacing: 0.5)),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
+                Text('$hijriStr ${'common.ah'.tr()}', style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', letterSpacing: 0.5)),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: pColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8), border: Border.all(color: pColor.withValues(alpha: 0.3))),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), 
+                      decoration: BoxDecoration(color: pColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: pColor.withValues(alpha: 0.3))),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('home.civil_time'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 9)),
-                          Text(civilTime, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                          Text('home.civil_time'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 10)), 
+                          const SizedBox(height: 2),
+                          Text(civilTime, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'Inter')), 
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: pColor, borderRadius: BorderRadius.circular(8), boxShadow: [BoxShadow(color: pColor.withValues(alpha: 0.3), blurRadius: 4)]),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), 
+                      decoration: BoxDecoration(color: pColor, borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: pColor.withValues(alpha: 0.3), blurRadius: 4)]),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('home.astro_time'.tr(), style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 9)),
-                          Text(astroState.currentFormattedVirtualTime, style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)),
+                          Text('home.astro_time'.tr(), style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 10)), 
+                          const SizedBox(height: 2),
+                          // 🌟 تم تطبيق اللون الذهبي هنا
+                          Text(astroState.currentFormattedVirtualTime, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 17, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)), 
                         ],
                       ),
                     ),
@@ -164,14 +170,25 @@ class HomeScreen extends ConsumerWidget {
       return Scaffold(backgroundColor: scaffoldBgColor, body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)));
     }
 
-    final pColor = astroState.currentPeriod.color.adapt(context);
+    final pColor = astroState.currentPeriod.uiColor.adapt(context);
     final cityNow = _getCityTime(settings); 
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
+      drawer: const AppDrawer(), 
+      // 🌟 تفعيل إخفاء الشريط السفلي
+      onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 0, title: const LocationHeader(), 
-        // تمت إزالة زر الإعدادات من هنا كما اتفقنا مسبقاً
+        backgroundColor: Colors.transparent, 
+        elevation: 0, 
+        scrolledUnderElevation: 0, 
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: Icon(LucideIcons.menu, color: isDark ? Colors.white : Colors.black87),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
+        title: const LocationHeader(), 
       ),
       body: RefreshIndicator(
         color: pColor, backgroundColor: surfaceColor,
@@ -182,7 +199,6 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: _buildTopHeader(context, astroState, pColor, isDark, cityNow), 
             ),
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20), 
@@ -202,7 +218,6 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-
             SliverToBoxAdapter(
               child: Builder(
                 builder: (context) {
@@ -249,7 +264,6 @@ class HomeScreen extends ConsumerWidget {
                 },
               ),
             ),
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
@@ -272,7 +286,7 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 90.0), // رفع الزر فوق الشريط الزجاجي
+        padding: const EdgeInsets.only(bottom: 90.0), 
         child: PremiumExpandableFab(color: pColor, isDark: isDark, currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya),
       ),
     );
@@ -325,7 +339,10 @@ class _PremiumExpandableFabState extends State<PremiumExpandableFab> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       onPressed: () { 
         HapticFeedback.lightImpact(); 
-        Navigator.push(context, MaterialPageRoute(builder: (_) => UniversalAddScreen(currentPeriodId: widget.currentPeriodId, currentSuwaya: widget.currentSuwaya)));
+        context.push('/add-task', extra: {
+          'currentPeriodId': widget.currentPeriodId,
+          'currentSuwaya': widget.currentSuwaya,
+        });
       },
       child: const Icon(LucideIcons.plus, size: 28),
     );

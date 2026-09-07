@@ -5,7 +5,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:alarm/alarm.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
-import '../../../core/services/alarm_service.dart';
+import '../../core/services/alarm_service.dart';
 
 class AlarmRingScreen extends StatefulWidget {
   final AlarmSettings alarmSettings;
@@ -21,9 +21,11 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
   late Color accentColor;
   late int snoozeCount;
   
-  // 🌟 متغيرات الشريط المزدوج
+  // 🌟 جسر التواصل مع نظام أندرويد للتحكم في قفل الشاشة
+  static const platform = MethodChannel('com.suwaya.app/lockscreen');
+  
   double _dragPosition = 0.0;
-  final double _maxDragThreshold = 120.0; // المسافة المطلوبة لتفعيل الإجراء
+  final double _maxDragThreshold = 120.0; 
   late AnimationController _glowController;
   late Animation<double> _glowAnimation;
 
@@ -31,22 +33,41 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
   void initState() {
     super.initState();
     
-    // تحليل البيانات القادمة من المنبه (Isolate Payload)
+    // 🌟 إجبار هذه الشاشة فقط على الظهور فوق القفل وإضاءة الشاشة
+    _enableLockScreenVisibility();
+
     final payload = widget.alarmSettings.payload?.split('|') ?? ['تنبيه', '0xFFD4AF37', '0'];
     taskTitle = payload[0];
     accentColor = Color(int.tryParse(payload[1]) ?? 0xFFD4AF37);
     snoozeCount = int.tryParse(payload[2]) ?? 0;
 
-    // نبض الإضاءة الهادئ
     _glowController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
     _glowAnimation = Tween<double>(begin: 0.2, end: 0.6).animate(CurvedAnimation(parent: _glowController, curve: Curves.easeInOut));
 
-    // 🌟 السحر: الاستماع لأزرار خفض ورفع الصوت للغفوة
     HardwareKeyboard.instance.addHandler(_handleHardwareKeys);
+  }
+
+  // 🌟 تفعيل الظهور فوق القفل
+  Future<void> _enableLockScreenVisibility() async {
+    try {
+      await platform.invokeMethod('showOnLockScreen');
+    } catch (e) {
+      debugPrint('Failed to show on lock screen: $e');
+    }
+  }
+
+  // 🌟 إلغاء الظهور فوق القفل عند إغلاق المنبه
+  Future<void> _disableLockScreenVisibility() async {
+    try {
+      await platform.invokeMethod('hideFromLockScreen');
+    } catch (e) {
+      debugPrint('Failed to hide from lock screen: $e');
+    }
   }
 
   @override
   void dispose() {
+    _disableLockScreenVisibility(); // 🌟 إعادة حماية التطبيق بالقفل فور الانتهاء
     _glowController.dispose();
     HardwareKeyboard.instance.removeHandler(_handleHardwareKeys);
     super.dispose();
@@ -56,7 +77,7 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp || event.logicalKey == LogicalKeyboardKey.audioVolumeDown) {
         _triggerSnooze();
-        return true; // يمنع تغيير الصوت ويفعل الغفوة بدلاً من ذلك
+        return true; 
       }
     }
     return false;
@@ -66,14 +87,12 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
     if (snoozeCount >= AlarmService.maxSnoozes) return;
     HapticFeedback.heavyImpact();
     AlarmService.snooze(widget.alarmSettings);
-    // 🌟 تطبيق طلبك: إغلاق الشاشة فوراً دون فتح التطبيق
     SystemNavigator.pop(); 
   }
 
   void _triggerStop() {
     HapticFeedback.heavyImpact();
     Alarm.stop(widget.alarmSettings.id);
-    // 🌟 تطبيق طلبك: إغلاق الشاشة فوراً والعودة للصفحة الرئيسية للهاتف
     SystemNavigator.pop();
   }
 
@@ -88,7 +107,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // خلفية نابضة باللون المميز للمهمة
           AnimatedBuilder(
             animation: _glowAnimation,
             builder: (context, child) {
@@ -108,7 +126,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // 1. الوقت واسم المهمة
                 Column(
                   children: [
                     Icon(LucideIcons.alarm_clock, color: accentColor, size: 40),
@@ -124,7 +141,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                   ],
                 ),
 
-                // 2. شريط السحب المزدوج (Double-sided Slider)
                 Directionality(
                   textDirection: ui.TextDirection.ltr,
                   child: Container(
@@ -138,7 +154,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // نصوص الخلفية
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -152,14 +167,12 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                             ),
                           ],
                         ),
-                        // الزر القابل للسحب
                         Positioned(
                           left: (MediaQuery.of(context).size.width - 64) / 2 - 35 + _dragPosition,
                           child: GestureDetector(
                             onHorizontalDragUpdate: (details) {
                               setState(() {
                                 _dragPosition += details.delta.dx;
-                                // منع السحب للغفوة إذا انتهى رصيد الغفوات
                                 if (!canSnooze && _dragPosition < 0) _dragPosition = 0;
                               });
                             },
@@ -169,7 +182,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                               } else if (_dragPosition < -_maxDragThreshold && canSnooze) {
                                 _triggerSnooze();
                               } else {
-                                // العودة للمنتصف بمرونة إذا لم يكمل السحب
                                 setState(() => _dragPosition = 0);
                               }
                             },

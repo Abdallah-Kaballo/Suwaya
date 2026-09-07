@@ -3,29 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:suwaya/features/layout/main_layout.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:suwaya/core/location/location_service.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:suwaya/core/services/location_service.dart'; 
-import 'package:suwaya/features/auth/auth_screen.dart';
-import 'package:suwaya/features/settings/screens/permissions_screen.dart';
 import 'settings_provider.dart';
 import 'widgets/smart_location_picker.dart';
-import 'screens/astro_calculations_screen.dart';
-import 'screens/notifications_settings_screen.dart';
 import '../../core/sync/backup_service.dart';
-import '../../core/sync/auth_service.dart';
-import '../../core/sync/sync_service.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/theme_color_provider.dart';
 import '../../core/theme/dial_design_provider.dart';
+import 'package:geolocator/geolocator.dart';
 
-final settingsAuthStateProvider = StreamProvider<AuthState>((ref) {
-  return Supabase.instance.client.auth.onAuthStateChange;
-});
 
 final lastSyncTimeProvider = FutureProvider.autoDispose<DateTime?>((ref) async {
   final prefs = await SharedPreferences.getInstance();
@@ -91,8 +81,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(settingsAuthStateProvider); 
-    final authService = ref.read(authServiceProvider);
     final settingsState = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     
@@ -115,10 +103,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final borderColor = Theme.of(context).dividerColor;
     final primaryColor = Theme.of(context).primaryColor;
 
-    final isAnon = authService.isAnonymous;
-    final userMeta = authService.currentUser?.userMetadata;
-    final userName = userMeta?['full_name'] ?? userMeta?['name'] ?? authService.currentUser?.email ?? 'settings.connected_account'.tr();
-
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -127,7 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         leading: IconButton(
           icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
           onPressed: () {
-            ref.read(mainNavIndexProvider.notifier).state = 2; 
+            context.pop();
           },
         ),
         title: Text('settings.title'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
@@ -165,40 +149,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.only(bottom: 60),
               children: [
                 _buildSettingsGroup('settings.account_data'.tr(), [
-                  _buildSettingRow(
-                      icon: isAnon ? LucideIcons.cloud : LucideIcons.cloud_check, 
-                      title: 'settings.cloud_account'.tr(), 
-                      subtitle: isAnon ? 'settings.create_account'.tr() : userName, 
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthScreen()))
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final lastSync = ref.watch(lastSyncTimeProvider);
+                      final dateStr = lastSync.when(
+                        data: (date) => date != null 
+                            ? '${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}  ${date.hour.toString().padLeft(2,'0')}:${date.minute.toString().padLeft(2,'0')}'
+                            : 'settings.not_synced_yet'.tr(),
+                        loading: () => 'settings.checking'.tr(),
+                        error: (_, __) => 'settings.unavailable'.tr(),
+                      );
+                      
+                      return _buildSettingRow(
+                        icon: LucideIcons.refresh_cw, 
+                        title: 'settings.cloud_sync'.tr(), 
+                        subtitle: '${'settings.last_sync'.tr()}: $dateStr',
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('settings.syncing'.tr()), duration: const Duration(seconds: 2))
+                          );
+                          ref.invalidate(lastSyncTimeProvider); 
+                        }
+                      );
+                    },
                   ),
-                  
-                  if (!isAnon)
-                    Consumer(
-                      builder: (context, ref, child) {
-                        final lastSync = ref.watch(lastSyncTimeProvider);
-                        final dateStr = lastSync.when(
-                          data: (date) => date != null 
-                              ? '${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}  ${date.hour.toString().padLeft(2,'0')}:${date.minute.toString().padLeft(2,'0')}'
-                              : 'settings.not_synced_yet'.tr(),
-                          loading: () => 'settings.checking'.tr(),
-                          error: (_, __) => 'settings.unavailable'.tr(),
-                        );
-                        
-                        return _buildSettingRow(
-                          icon: LucideIcons.refresh_cw, 
-                          title: 'settings.cloud_sync'.tr(), 
-                          subtitle: '${'settings.last_sync'.tr()}: $dateStr',
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('settings.syncing'.tr()), duration: const Duration(seconds: 2))
-                            );
-                            await ref.read(syncServiceProvider).syncAll();
-                            ref.invalidate(lastSyncTimeProvider); 
-                          }
-                        );
-                      },
-                    ),
 
                   _buildSettingRow(
                     icon: LucideIcons.cloud_download, title: 'settings.manual_backup'.tr(), subtitle: 'settings.extract_backup'.tr(), 
@@ -216,14 +191,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingsGroup('settings.notifications_alerts'.tr(), [
                   _buildSettingRow(
                     icon: LucideIcons.bell_ring, title: 'settings.notifications_alerts'.tr(), subtitle: 'settings.notifications_desc'.tr(), 
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsSettingsScreen()))
+                    onTap: () => context.push('/settings/notifications')
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.advanced_astro'.tr(), [
                   _buildSettingRow(
                     icon: LucideIcons.telescope, title: 'settings.astro_settings'.tr(), subtitle: 'settings.astro_desc'.tr(),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AstroCalculationsScreen()))
+                    onTap: () => context.push('/settings/astro')
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
@@ -306,18 +281,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     icon: LucideIcons.shield_alert, 
                     title: 'settings.permissions'.tr(), 
                     subtitle: 'settings.permissions_desc'.tr(),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PermissionsScreen())),
-                  ),
-                  _buildSettingRow(icon: LucideIcons.info, title: 'settings.about'.tr(), onTap: () {}),
-                  _buildSettingRow(
-                    icon: LucideIcons.shield, 
-                    title: 'settings.privacy_policy'.tr(), 
-                    onTap: () async {
-                      final Uri url = Uri.parse('https://abdallah-kaballo.github.io/Suwaya/privacy.html');
-                      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                        debugPrint('settings.cannot_open_link'.tr());
-                      }
-                    }
+                    onTap: () => context.push('/settings/permissions'),
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
@@ -383,10 +347,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     onPressed: () async {
                       HapticFeedback.lightImpact();
+                      
+                      final langCode = Localizations.localeOf(context).languageCode;
+                      
                       setState(() => isUpdating = true);
                       try {
-                        final langCode = Localizations.localeOf(context).languageCode;
-                        final locData = await SmartGpsEngine.fetchOfflineLocation(langCode);
+                        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                        if (!serviceEnabled) {
+                          setState(() => isUpdating = false);
+                          await Geolocator.openLocationSettings();
+                          return; 
+                        }
+
+                        final locData = await LocationService.fetchOfflineLocation(langCode);
                         
                         await ref.read(settingsProvider.notifier).addAndSelectLocation(
                           locData['formattedName'], 
@@ -410,7 +383,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           );
                         }
                       } finally {
-                        setState(() => isUpdating = false);
+                        if (mounted) setState(() => isUpdating = false);
                       }
                     },
                     child: Text('settings.update'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),

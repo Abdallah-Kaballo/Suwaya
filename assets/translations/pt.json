@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Pausa Restante", "focus_remaining": "Foco Restante", "deep_relaxation": "Relaxamento Profundo", "in_flow": "Em Estado de Fluxo (Flow)", "absolute_focus": "Foco Absoluto\n30/0", "balanced": "Equilibrado\n25/5", "relaxed": "Relaxado\n20/10", "no_tasks": "Nenhuma tarefa para este Suwaya", "focus_now_on": "Concentre-se agora em:"},
   "nav": {"home": "Início", "tasks": "Tarefas", "pomodoro": "Foco", "ibadat": "Adoração"},
   "languages": {"tr": "Turco", "ru": "Russo", "ur": "Urdu", "ar": "Árabe", "hi": "Hindi", "bn": "Bengali", "th": "Tailandês", "ja": "Japonês", "zh": "Chinês", "ug": "Uigur", "pt": "Português", "ff": "Fula", "az": "Azerbaijano", "id": "Indonésio", "ms": "Malaio", "da": "Dinamarquês", "de": "Alemão", "en": "Inglês", "es": "Espanhol", "fr": "Francês", "it": "Italiano", "nl": "Holandês"}
+  ,"drawer": {
+    "faq": "Perguntas Frequentes",
+    "contact": "Contato e Suporte",
+    "about_app": "Sobre o App",
+    "check_updates": "Verificar atualizações",
+    "develop_with_us": "Desenvolva conosco",
+    "checking_updates": "Verificando atualizações...",
+    "up_to_date": "Você está usando a versão mais recente do Suwaya 🌟",
+    "update_check_failed": "Falha ao verificar atualizações. Verifique sua internet.",
+    "update_available": "Nova atualização disponível!",
+    "new_version_desc": "Uma nova versão melhorada do Suwaya está disponível.",
+    "do_you_want_to_download": "Deseja baixar e instalar a atualização?",
+    "download": "Baixar agora",
+    "guest_user": "Usuário Convidado",
+    "secure_data": "Proteja seus dados ☁️",
+    "tap_to_login": "Toque para entrar e sincronizar",
+    "manage_account": "Gerenciar Conta e Sincronização"
+  },
+  "analytics": {
+    "title": "Análises e Estatísticas",
+    "coming_soon": "O painel de análises será construído aqui em breve...",
+    "daily_progress": "Progresso Diário",
+    "perfect_day": "Dia Perfeito! 🌟",
+    "keep_going": "Continue brilhando, cada Suwaya faz a diferença.",
+    "current_streak": "Sequência Atual",
+    "days": "Dias",
+    "focus_time": "Tempo de Foco",
+    "hours": "Horas",
+    "weekly_overview": "Visão Geral Semanal"
+  }
 }

@@ -16,11 +16,13 @@ import '../../routines/routines_provider.dart';
 import '../../tasks/tasks_provider.dart';
 import '../../../models/task_model.dart'; 
 import '../../../core/theme/dial_design_provider.dart';
+import '../../../core/theme/astro_ui_extensions.dart';
 
 const Color goldBase = Color(0xFFD4AF37);
 const Color goldLight = Color(0xFFFFE58F);
 const Color goldDark = Color(0xFFAA7900);
 const Color carvedText = Color(0xFFFFD87A);
+const Color astroGold = Color(0xFFF2C94C); // 🌟 اللون الذهبي الفلكي الأساسي المطلوب
 
 const double kInnerR = 0.35;   
 const double kPeriodR = 0.50;  
@@ -357,7 +359,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
 
     final dayStart = astroState.periods.first.startTime;
     final dayEnd = astroState.periods.last.endTime;
-    final pColor = astroState.currentPeriod.color.adapt(context);
+    final pColor = astroState.currentPeriod.uiColor.adapt(context);
     final textColor = isDark ? Colors.white : const Color(0xFF0B0F19);
     
     List<Map<String, dynamic>> activeNightMarkers = [];
@@ -535,16 +537,15 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
-          Text(suwayaText, style: const TextStyle(color: goldLight, fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
+          // 🌟 تم تطبيق اللون الذهبي هنا للنصوص الفلكية بالمركز
+          Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
           const SizedBox(height: 2),
           Text(currentPeriodName, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w900, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)])),
           const SizedBox(height: 4),
           Stack(
             children: [
-              // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
               Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 3..color = isDark ? Colors.black : Colors.white)),
-              Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: textColor, fontFamily: 'Playfair Display', letterSpacing: 2.0)),
+              Text(virtualTime, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: astroGold, fontFamily: 'Playfair Display', letterSpacing: 2.0)),
             ],
           ),
           const SizedBox(height: 4),
@@ -564,7 +565,7 @@ class TimeSpeedIndicator extends ConsumerWidget {
     if (astroState.periods.isEmpty) return const SizedBox.shrink();
 
     final speedMultiplier = astroState.timeSpeedMultiplier;
-    final pColor = astroState.currentPeriod.color.adapt(context);
+    final pColor = astroState.currentPeriod.uiColor.adapt(context);
     final strokeColor = isDark ? Colors.black : Colors.white;
 
     return Container(
@@ -577,7 +578,6 @@ class TimeSpeedIndicator extends ConsumerWidget {
           const SizedBox(width: 4),
           Stack(
             children: [
-              // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
               Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=2..color=strokeColor)),
               Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(color: pColor, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
             ],
@@ -759,7 +759,7 @@ class PeriodRingPainter extends CustomPainter {
       double sweepAngle = endAngle - startAngle;
       if (sweepAngle <= 0) sweepAngle += 2 * pi;
 
-      Color pColor = period.color;
+      Color pColor = period.uiColor;
       if (period.id == 6 || period.nameKey == 'period_second_third') pColor = const Color(0xFF3F51B5); 
       final isCurrent = period.id == currentPeriod.id;
       
@@ -1036,10 +1036,10 @@ class OuterRingPainter extends CustomPainter {
         canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = goldLight);
 
         if (design != DialDesign.minimal || globalLineIndex % 5 == 0) {
-          // 🌟 التعديل هنا: الخط الفلكي (Playfair Display)
+          // 🌟 تم تطبيق اللون الذهبي الفلكي لأرقام السويعات حول القرص
           textPainter.text = TextSpan(
             text: globalLineIndex.toString().padLeft(2, '0'), 
-            style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: const [Shadow(color: Colors.black, blurRadius: 4)])
+            style: const TextStyle(color: astroGold, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: [Shadow(color: Colors.black, blurRadius: 4)])
           );
           textPainter.layout();
           canvas.translate(0, -textR);

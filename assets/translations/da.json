@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Pause Tilbage", "focus_remaining": "Fokus Tilbage", "deep_relaxation": "Dyb Afslapning", "in_flow": "I Flow-tilstand", "absolute_focus": "Absolut\n30/0", "balanced": "Balanceret\n25/5", "relaxed": "Afslappet\n20/10", "no_tasks": "Ingen opgaver for denne Suwaya", "focus_now_on": "Fokuser nu på:"},
   "nav": {"home": "Hjem", "tasks": "Opgaver", "pomodoro": "Fokus", "ibadat": "Tilbedelse"},
   "languages": {"tr": "Tyrkisk", "ru": "Russisk", "ur": "Urdu", "ar": "Arabisk", "hi": "Hindi", "bn": "Bengali", "th": "Thai", "ja": "Japansk", "zh": "Kinesisk", "ug": "Uighur", "pt": "Portugisisk", "ff": "Fula", "az": "Aserbajdsjansk", "id": "Indonesisk", "ms": "Malajisk", "da": "Dansk", "de": "Tysk", "en": "Engelsk", "es": "Spansk", "fr": "Fransk", "it": "Italiensk", "nl": "Hollandsk"}
+  ,"drawer": {
+    "faq": "FAQ",
+    "contact": "Kontakt & Support",
+    "about_app": "Om Appen",
+    "check_updates": "Søg efter opdateringer",
+    "develop_with_us": "Udvikl med os",
+    "checking_updates": "Søger efter opdateringer...",
+    "up_to_date": "Du bruger den nyeste version af Suwaya 🌟",
+    "update_check_failed": "Kunne ikke søge efter opdateringer. Tjek dit internet.",
+    "update_available": "Ny Opdatering Tilgængelig!",
+    "new_version_desc": "En ny og forbedret version af Suwaya er nu tilgængelig.",
+    "do_you_want_to_download": "Vil du downloade og installere opdateringen?",
+    "download": "Download Nu",
+    "guest_user": "Gæstebruger",
+    "secure_data": "Sikr dine data ☁️",
+    "tap_to_login": "Tryk for at logge ind og synkronisere",
+    "manage_account": "Administrer Konto & Synkronisering"
+  },
+  "analytics": {
+    "title": "Analyse & Statistik",
+    "coming_soon": "Analyse-dashboard vil snart blive bygget her...",
+    "daily_progress": "Daglig Fremgang",
+    "perfect_day": "Perfekt Dag! 🌟",
+    "keep_going": "Fortsæt med at skinne, hver Suwaya gør en forskel.",
+    "current_streak": "Nuværende Stime",
+    "days": "Dage",
+    "focus_time": "Fokus Tid",
+    "hours": "Timer",
+    "weekly_overview": "Ugentlig Oversigt"
+  }
 }

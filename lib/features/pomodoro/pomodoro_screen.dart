@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' show pi, cos, sin;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,32 +6,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../core/astro_engine/astro_provider.dart';
+import '../../core/theme/astro_ui_extensions.dart'; 
 import '../tasks/tasks_provider.dart';
 import '../../shared/widgets/task_card.dart'; 
+import '../../shared/widgets/app_drawer.dart';
+import '../../core/providers/ui_providers.dart'; // 🌟
 
 final pomodoroModeProvider = StateProvider<int>((ref) => 1);
 
-class PomodoroScreen extends ConsumerStatefulWidget {
+class PomodoroScreen extends ConsumerWidget {
   const PomodoroScreen({super.key});
 
   @override
-  ConsumerState<PomodoroScreen> createState() => _PomodoroScreenState();
-}
-
-class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
-  Timer? _dynamicTimer;
-  int _visualElapsedSecs = 0;
-  double _currentSpeed = 0.0;
-  int _lastEngineSecs = -1;
-
-  @override
-  void dispose() {
-    _dynamicTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final astroState = ref.watch(astroProvider);
     final mode = ref.watch(pomodoroModeProvider);
     final tasksState = ref.watch(tasksProvider);
@@ -45,33 +31,9 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
       return Scaffold(backgroundColor: scaffoldBgColor, body: const Center(child: CircularProgressIndicator()));
     }
 
-    final engineElapsed = astroState.elapsedVirtualTime.inSeconds;
-    final speed = astroState.timeSpeedMultiplier;
-
-    if (_dynamicTimer == null || _currentSpeed != speed) {
-      _currentSpeed = speed;
-      _visualElapsedSecs = engineElapsed;
-      _lastEngineSecs = engineElapsed;
-      
-      _dynamicTimer?.cancel();
-      if (speed > 0) {
-        final ms = (1000 / speed).round().clamp(10, 10000);
-        _dynamicTimer = Timer.periodic(Duration(milliseconds: ms), (t) {
-          if (mounted) setState(() { _visualElapsedSecs++; });
-        });
-      }
-    } else {
-       if (engineElapsed != _lastEngineSecs) {
-         _lastEngineSecs = engineElapsed;
-         if ((_visualElapsedSecs - engineElapsed).abs() > 2) {
-            _visualElapsedSecs = engineElapsed;
-         }
-       }
-    }
-
     final currentPeriod = astroState.currentPeriod;
     const totalSuwayaSecs = 1800; 
-    final elapsedSecs = _visualElapsedSecs % totalSuwayaSecs;
+    final int elapsedSecs = astroState.elapsedVirtualTime.inSeconds % totalSuwayaSecs;
     
     int focusDuration = 1500; 
     if (mode == 0) focusDuration = 1800; 
@@ -80,13 +42,13 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
     final isBreak = elapsedSecs >= focusDuration;
     final remainingSecs = isBreak ? (totalSuwayaSecs - elapsedSecs) : (focusDuration - elapsedSecs);
     
-    final double globalProgress = elapsedSecs / totalSuwayaSecs;
+    final double globalProgress = astroState.suwayaProgress;
     
     final m = (remainingSecs ~/ 60).toString().padLeft(2, '0');
     final s = (remainingSecs % 60).toString().padLeft(2, '0');
 
-    // 🌟 ألوان ثابتة: أزرق (الفجر) للراحة، وأحمر (المغرب) للتركيز
-    final activeColor = isBreak ? const Color(0xFF64B5F6) : const Color(0xFFE53935);
+    final periodColor = currentPeriod.uiColor.adapt(context);
+    final activeColor = isBreak ? const Color(0xFF64B5F6) : periodColor;
 
     final currentSuwayaTasks = tasksState.todayTasks.where((t) => 
       !t.isCompletedToday && 
@@ -108,10 +70,19 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
+      drawer: const AppDrawer(),
+      // 🌟 تفعيل الإخفاء
+      onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: Icon(LucideIcons.menu, color: textColor),
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
         title: Text('$currentPeriodName • ${'common.suwaya'.tr()} ${astroState.currentSuwaya}/${currentPeriod.suwayasCount}', 
            style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold, fontFamily: 'Playfair Display')),
       ),
@@ -120,7 +91,6 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
           children: [
             const Spacer(flex: 1),
             
-            // 🌟 المؤقت الهادئ (Zen Timer)
             Stack(
               alignment: Alignment.center,
               children: [
@@ -140,7 +110,7 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                   children: [
                     Text(
                       '$m:$s',
-                      style: TextStyle(fontSize: 84, fontWeight: FontWeight.w400, color: textColor, fontFamily: 'Playfair Display'),
+                      style: const TextStyle(fontSize: 84, fontWeight: FontWeight.w400, color: Color(0xFFF2C94C), fontFamily: 'Playfair Display'),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -161,22 +131,20 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
             
             const Spacer(flex: 1),
             
-            // 🌟 مبدل الأوضاع المبسط
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildModeTab('pomodoro.absolute_focus'.tr(), 0, mode, activeColor, isDark),
-                  _buildModeTab('pomodoro.balanced'.tr(), 1, mode, activeColor, isDark),
-                  _buildModeTab('pomodoro.relaxed'.tr(), 2, mode, activeColor, isDark),
+                  _buildModeTab('pomodoro.absolute_focus'.tr(), 0, mode, activeColor, isDark, ref),
+                  _buildModeTab('pomodoro.balanced'.tr(), 1, mode, activeColor, isDark, ref),
+                  _buildModeTab('pomodoro.relaxed'.tr(), 2, mode, activeColor, isDark, ref),
                 ],
               ),
             ),
 
             const SizedBox(height: 32),
             
-            // 🌟 المهام المبسطة
             if (currentSuwayaTasks.isNotEmpty)
               Expanded(
                 child: ListView.builder(
@@ -196,7 +164,6 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                 ),
               ),
 
-            // 🌟 شريط السويعات المصغر والهادئ
             SizedBox(
               height: 50,
               child: ListView.builder(
@@ -224,14 +191,14 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 100), // مساحة للشريط السفلي
+            const SizedBox(height: 100), 
           ],
         ),
       ),
     );
   }
 
-  Widget _buildModeTab(String title, int value, int currentValue, Color activeColor, bool isDark) {
+  Widget _buildModeTab(String title, int value, int currentValue, Color activeColor, bool isDark, WidgetRef ref) {
     final isSelected = value == currentValue;
     return GestureDetector(
       onTap: () {
@@ -270,14 +237,12 @@ class _ZenTimerPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // الدائرة الخلفية النحيفة المريحة
     final trackPaint = Paint()
       ..color = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
     canvas.drawCircle(center, radius, trackPaint);
 
-    // دائرة التقدم
     final progressPaint = Paint()
       ..color = activeColor
       ..style = PaintingStyle.stroke
@@ -291,7 +256,6 @@ class _ZenTimerPainter extends CustomPainter {
       progressPaint,
     );
 
-    // مؤشر النهاية (Knob)
     final knobAngle = -pi / 2 + (progress * 2 * pi);
     final knobCenter = Offset(
       center.dx + cos(knobAngle) * radius,

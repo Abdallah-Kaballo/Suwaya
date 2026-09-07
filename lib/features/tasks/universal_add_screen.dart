@@ -6,13 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection; 
 import 'package:alarm/alarm.dart';
 
-import '../tasks_provider.dart';
-import '../../routines/routines_provider.dart';
-import '../../../models/task_model.dart';
-import '../../../models/routine_model.dart';
-import '../../../core/astro_engine/astro_provider.dart';
-import '../../../core/astro_engine/astro_models.dart';
-import '../../../core/services/alarm_service.dart';
+import 'tasks_provider.dart';
+import '../routines/routines_provider.dart';
+import '../../models/task_model.dart';
+import '../../models/routine_model.dart';
+import '../../core/astro_engine/astro_provider.dart';
+import '../../core/astro_engine/astro_models.dart';
+import '../../core/services/alarm_service.dart';
 
 Color _getNeonColor(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -753,7 +753,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                         ref.read(routinesProvider.notifier).deleteRoutine(widget.existingRoutine!.id);
                       }
                       Navigator.pop(context); 
-                    }, style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.redAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: const Icon(LucideIcons.trash_2, color: Colors.redAccent)))),
+                    }, style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.redAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: const Icon(LucideIcons.trash, color: Colors.redAccent)))),
                     const SizedBox(width: 12),
                   ],
                   Expanded(flex: 3, child: SizedBox(height: 60, child: ElevatedButton(onPressed: _saveItem, style: ElevatedButton.styleFrom(backgroundColor: accentColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: Text('add_screen.save_and_add'.tr(), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))))),
@@ -785,7 +785,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     String alertStr = _alertLevel == 0 ? 'alerts.silent'.tr() : (_alertLevel == 1 ? 'alerts.notification'.tr() : 'alerts.alarm'.tr());
     String catStr = _selectedCategory.displayName;
     
-    // 🌟 التعديل هنا: تمرير الخط الفلكي أو المدني لويدجت العرض
     String? timeFont = _hasTime ? (_timeMode == 2 ? 'Inter' : 'Playfair Display') : null;
 
     return Column(
@@ -800,7 +799,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.time'.tr(), timeStr, LucideIcons.clock, _hasTime, (_timeError && !_hasTime), () => _showTimeDialog(accentColor, surfaceColor, textColor, periods), fontFamily: timeFont),
+            // 🌟 تمرير isAstroTime لتطبيق اللون الذهبي
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.time'.tr(), timeStr, LucideIcons.clock, _hasTime, (_timeError && !_hasTime), () => _showTimeDialog(accentColor, surfaceColor, textColor, periods), fontFamily: timeFont, isAstroTime: _hasTime && _timeMode != 2),
             const SizedBox(width: 12),
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.alert'.tr(), alertStr, _alertLevel == 2 ? LucideIcons.alarm_clock : LucideIcons.bell, _alertLevel > 0, false, () => _showAlertsDialog(accentColor, surfaceColor, textColor)),
           ],
@@ -830,7 +830,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       endStr = '${sIndexEnd.toString().padLeft(2, '0')}:${_routineEndLocalSuwaya.toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
     }
 
-    // 🌟 التعديل هنا: تمرير الخط الفلكي أو المدني
     String fontStr = _routineTimeMode == 2 ? 'Inter' : 'Playfair Display';
 
     return Column(
@@ -857,9 +856,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         ),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), startStr, LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: true), fontFamily: fontStr),
+            // 🌟 تمرير isAstroTime لتطبيق اللون الذهبي
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), startStr, LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: true), fontFamily: fontStr, isAstroTime: _routineTimeMode != 2),
             const SizedBox(width: 12),
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), endStr, LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: false), fontFamily: fontStr),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), endStr, LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: false), fontFamily: fontStr, isAstroTime: _routineTimeMode != 2),
           ],
         ),
         const SizedBox(height: 12),
@@ -874,9 +874,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     );
   }
 
-  Widget _buildGridCard(Color surfaceColor, Color accentColor, Color textColor, String title, String value, IconData icon, bool isHighlighted, bool isError, VoidCallback? onTap, {String? fontFamily}) {
-    // 🌟 التعديل هنا: تحديد السماكة والحجم بناءً على الخط 
+  // 🌟 استقبال حالة isAstroTime وتطبيق اللون الذهبي
+  Widget _buildGridCard(Color surfaceColor, Color accentColor, Color textColor, String title, String value, IconData icon, bool isHighlighted, bool isError, VoidCallback? onTap, {String? fontFamily, bool isAstroTime = false}) {
     final isAstroFont = fontFamily == 'Playfair Display';
+    Color valColor = isError ? Colors.redAccent : (isAstroTime ? const Color(0xFFF2C94C) : textColor);
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -901,7 +903,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 ],
               ),
               const Spacer(),
-              Text(value, style: TextStyle(color: isError ? Colors.redAccent : textColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
+              Text(value, style: TextStyle(color: valColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
             ],
           ),
         ),
@@ -1060,10 +1062,10 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
               }, 
               childCount: maxSuwayas, 
               itemBuilder: (ctx, idx) => Center(
-                // 🌟 التعديل هنا: الخط الفلكي داخل عجلة الاختيار الفلكية
+                // 🌟 اللون الذهبي الفلكي لعجلة السويعات
                 child: Text(
                   idx.toString().padLeft(2, '0'), 
-                  style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
+                  style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
                 )
               )
             )
@@ -1081,10 +1083,10 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
               }, 
               itemBuilder: (ctx, idx) => Center(
-                // 🌟 التعديل هنا: الخط الفلكي داخل عجلة الاختيار الفلكية
+                // 🌟 اللون الذهبي الفلكي لعجلة الدقائق الافتراضية
                 child: Text(
                   (idx % 30).toString().padLeft(2, '0'), 
-                  style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
+                  style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
                 )
               )
             )
@@ -1096,7 +1098,7 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
 }
 
 class _DoubleWheelPicker extends StatefulWidget {
-  final bool isAstro; // 🌟 إضافة متغير لتحديد الخط
+  final bool isAstro; 
   final String label1, label2; final int initialVal1, initialVal2, min1, max1, max2;
   final Function(int, int) onChanged; final Color textColor, surfaceColor;
   const _DoubleWheelPicker({required this.isAstro, required this.label1, required this.label2, required this.initialVal1, required this.initialVal2, required this.min1, required this.max1, required this.max2, required this.onChanged, required this.textColor, required this.surfaceColor});
@@ -1119,6 +1121,9 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
   @override Widget build(BuildContext context) {
     int range1 = widget.max1 - widget.min1 + 1;
     final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
+    
+    // 🌟 تحديد اللون بناءً على نوع النظام (فلكي = ذهبي، مدني = أبيض/أسود)
+    Color valColor = widget.isAstro ? const Color(0xFFF2C94C) : widget.textColor;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Directionality(
@@ -1135,9 +1140,9 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
       Directionality(
         textDirection: TextDirection.ltr, 
         child: SizedBox(height: 140, child: Row(children: [
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
           Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
         ]))
       )
     ]);

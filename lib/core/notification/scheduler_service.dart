@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:isolate'; // 🌟 1. استيراد مكتبة العزل (Isolates) للأداء الخارق
+import 'dart:isolate'; 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:alarm/alarm.dart'; 
@@ -111,24 +111,20 @@ class NotificationScheduler {
           if (c.periodId != null) c.periodId!: c.manualOffsetMinutes
       };
 
-      // ==============================================================
-      // 🌟 2. استخراج المتغيرات الأساسية لتمريرها بسلام إلى الـ Isolate
-      // ==============================================================
       final double lat = loc.latitude;
       final double lng = loc.longitude;
-      final String calcMethod = settings.calculationMethod;
-      final String madhab = settings.madhab;
-      final String hlRule = settings.highLatitudeRule;
+      
+      // 🌟 تحويل النصوص إلى أنواع آمنة (Enums) باستخدام أدوات التحويل التي أنشأناها
+      final CalculationMethodType calcMethod = settings.calculationMethod.toCalculationMethod();
+      final MadhabType madhab = settings.madhab.toMadhab();
+      final HighLatitudeRuleType hlRule = settings.highLatitudeRule.toHighLatRule();
+      final Map<PrayerKey, int> isolatedManualOffsets = manualOffsetsMap.toPrayerKeyMap();
+
       final double fajrAngle = settings.customFajrAngle;
       final double ishaAngle = settings.customIshaAngle;
-      final Map<String, int> isolatedManualOffsets = Map<String, int>.from(manualOffsetsMap);
       final Duration isolatedCityOffset = cityOffset;
       final DateTime isolatedCityNow = cityNow;
 
-      // ==============================================================
-      // 🌟 3. السحر الحقيقي (Isolate.run): تشغيل العمليات الفلكية الثقيلة 
-      // لـ 7 أيام في الخلفية لمنع تجمّد الواجهة الرسومية (Zero Jank)
-      // ==============================================================
       final List<Map<String, dynamic>> weekAstroData = await Isolate.run(() {
         final distribution = AstroEngine.calculateAnnualSuwayaDistribution(
           lat, lng, calcMethod, madhab, hlRule, fajrAngle, ishaAngle, 
@@ -159,16 +155,12 @@ class NotificationScheduler {
         return daysData;
       });
 
-      // ==============================================================
-      // 🌟 4. العودة للمسار الرئيسي وتوزيع الإشعارات بناءً على البيانات الجاهزة
-      // ==============================================================
       for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
         final dayData = weekAstroData[dayOffset];
         final targetDate = dayData['targetDate'] as DateTime;
         final ibadat = dayData['ibadat'] as IbadatTimings;
         final periods = dayData['periods'] as List<AstroPeriod>;
 
-        // 🟢 1. جدولة الصلوات الخمس المفروضة
         final mandatoryPrayers = [
           {'id': '1', 'nameKey': 'period_fajr', 'time': ibadat.fajr, 'numericId': 1},
           {'id': '3', 'nameKey': 'period_dhuhr', 'time': ibadat.dhuhr, 'numericId': 3},
@@ -239,7 +231,6 @@ class NotificationScheduler {
           }
         }
 
-        // 🟢 2. جدولة أجزاء الليل (قيام الليل)
         for (var nightPart in ibadat.nightParts) {
           if (settings.visibleNightParts.contains(nightPart.id) && nightPart.startTime.isAfter(cityNow)) {
             final int alertLevel = settings.getPeriodAlertLevel(nightPart.id, 0);
@@ -297,7 +288,6 @@ class NotificationScheduler {
           }
         }
 
-        // 🟢 3. جدولة الفترات الروتينية (Routines) 
         for (var routine in routines) {
           if (!routine.isActive || routine.alertLevel == 0) continue;
           if (routine.recurrenceDays != null && routine.recurrenceDays!.isNotEmpty && !routine.recurrenceDays!.contains(targetDate.weekday)) continue;
@@ -366,7 +356,6 @@ class NotificationScheduler {
           }
         }
 
-        // 🟢 4. معالجة المهام (Tasks)
         for (var period in periods) {
           int globalSuwayaBase = 0;
           for (var p in periods) {
@@ -398,7 +387,6 @@ class NotificationScheduler {
               final microPerVirtualMin = microPerSuwaya ~/ 30;
               
               for (var suwayaNum in task.targetSuwayas) {
-                // 🌟 معالجة المهام العائمة (-1) بتعيينها تلقائياً في منتصف الفترة في المجدول
                 int effectiveSuwayaNum = suwayaNum;
                 if (effectiveSuwayaNum == -1) {
                     effectiveSuwayaNum = (suwayaCount ~/ 2) + 1;
@@ -464,7 +452,6 @@ class NotificationScheduler {
         }
       }
 
-      // 🟢 5. التنظيف الذكي
       for (var alarm in activeAlarms) {
          if (!requiredAlarmIds.contains(alarm.id) && alarm.id < 100000) {
             await Alarm.stop(alarm.id);

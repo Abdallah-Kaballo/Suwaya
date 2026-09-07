@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_community/isar.dart';
-import '../../core/database/local_db_service.dart';
-import '../../models/activity_log_model.dart'; // 🌟 استيراد سجل الأحداث
+import '../../core/repositories/activity_log_repository.dart';
 
 class StatsState {
   final String archetypeTitle;       
@@ -29,17 +27,11 @@ class StatsNotifier extends Notifier<StatsState> {
   }
 
   Future<void> _calculateAstroStats() async {
-    final db = LocalDbService.isar;
+    final repository = ref.read(activityLogRepositoryProvider);
     final now = DateTime.now().toUtc();
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
     
-    // 🌟 1. استدعاء الأحداث من ActivityLog بدلاً من المهام
-    // نستثني الأحداث التي تراجع عنها المستخدم (isDeleted = true)
-    final recentLogs = await db.activityLogs
-        .filter()
-        .isDeletedEqualTo(false)
-        .completedAtUtcGreaterThan(sevenDaysAgo)
-        .findAll();
+    final recentLogs = await repository.getRecentActiveLogs(sevenDaysAgo);
 
     if (recentLogs.isEmpty) {
       state = StatsState(isLoading: false);
@@ -50,12 +42,10 @@ class StatsNotifier extends Notifier<StatsState> {
     int topPeriodId = 1;
     int maxTasks = 0;
     
-    // 🌟 2. تتبع الأيام الفريدة النشطة لحساب مؤشر التناغم
     final activeDays = <String>{};
 
     for (var log in recentLogs) {
       final pId = log.periodId ?? 1;
-      // نجمع عدد السويعات (الجهد الفعلي) وليس مجرد عدد المهام
       heatmap[pId] = (heatmap[pId] ?? 0) + log.suwayasCount;
       activeDays.add(log.activeDayDate);
       
@@ -67,9 +57,8 @@ class StatsNotifier extends Notifier<StatsState> {
 
     final archetypeInfo = _determineArchetype(topPeriodId);
 
-    // 🌟 3. حساب مؤشر التناغم (Harmony) 
-    // يرتكز الآن على عدد الأيام التي أُنجزت فيها مهام من أصل آخر 7 أيام
-    int harmony = ((activeDays.length / 7) * 100).round().clamp(0, 100);
+    // 🌟 استخدام القسمة الصحيحة لضمان نوع int النقي
+    int harmony = ((activeDays.length * 100) ~/ 7).clamp(0, 100);
 
     final generatedInsights = _generateSmartInsights(heatmap, harmony, topPeriodId);
 

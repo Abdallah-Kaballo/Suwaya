@@ -184,4 +184,34 @@
     "de": "German", "en": "English", "es": "Spanish", "fr": "French",
     "it": "Italian", "nl": "Dutch"
   }
+  ,"drawer": {
+    "faq": "FAQ",
+    "contact": "Contact & Support",
+    "about_app": "About App",
+    "check_updates": "Check for Updates",
+    "develop_with_us": "Develop with us",
+    "checking_updates": "Checking for updates...",
+    "up_to_date": "You are using the latest version of Suwaya 🌟",
+    "update_check_failed": "Failed to check for updates. Please check your internet.",
+    "update_available": "New Update Available!",
+    "new_version_desc": "A new and improved version of Suwaya is now available.",
+    "do_you_want_to_download": "Do you want to download and install the update?",
+    "download": "Download Now",
+    "guest_user": "Guest User",
+    "secure_data": "Secure your data ☁️",
+    "tap_to_login": "Tap to login and sync",
+    "manage_account": "Manage Account & Sync"
+  },
+  "analytics": {
+    "title": "Analytics & Stats",
+    "coming_soon": "Analytics dashboard will be built here soon...",
+    "daily_progress": "Daily Progress",
+    "perfect_day": "Perfect Day! 🌟",
+    "keep_going": "Keep shining, every Suwaya makes a difference.",
+    "current_streak": "Current Streak",
+    "days": "Days",
+    "focus_time": "Focus Time",
+    "hours": "Hours",
+    "weekly_overview": "Weekly Overview"
+  }
 }

@@ -1,11 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_community/isar.dart'; 
 
-import '../../core/database/local_db_service.dart';
 import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
+import '../../core/repositories/routine_repository.dart';
 
 class RoutineArcData {
   final Color color;
@@ -29,37 +28,30 @@ class RoutinesNotifier extends Notifier<List<RoutineModel>> {
   }
 
   Future<void> _loadRoutines() async {
-    final db = LocalDbService.isar;
-    final routines = await db.routineModels.where().findAll();
+    // 🌟 جلب البيانات عبر المستودع بدلاً من القاعدة المباشرة
+    final repository = ref.read(routineRepositoryProvider);
+    final routines = await repository.getAllRoutines();
     state = List.from(routines);
   }
 
   Future<void> addRoutine(RoutineModel routine) async {
-    final db = LocalDbService.isar;
+    final repository = ref.read(routineRepositoryProvider);
+    await repository.saveRoutine(routine);
     
-    // 1. الكتابة السريعة للحصول على الـ ID المؤكد
-    await db.writeTxn(() async {
-      await db.routineModels.put(routine);
-    });
-    
-    // 🌟 2. التحديث التدريجي: حقن العنصر في الذاكرة فوراً دون قراءة القاعدة من الصفر!
     state = [...state.where((r) => r.id != routine.id), routine];
   }
 
   Future<void> deleteRoutine(int id) async {
-    // 🌟 1. التحديث الفوري للواجهة (Optimistic Update): حذف من الذاكرة فوراً لسرعة الاستجابة
     state = state.where((r) => r.id != id).toList();
     
-    // 2. التنفيذ في الخلفية (Fire-and-Forget): الحذف من القاعدة بهدوء
-    final db = LocalDbService.isar;
-    db.writeTxn(() async {
-      await db.routineModels.delete(id);
-    });
+    final repository = ref.read(routineRepositoryProvider);
+    repository.deleteRoutine(id); // عملية في الخلفية
   }
 }
 
 final routinesProvider = NotifierProvider<RoutinesNotifier, List<RoutineModel>>(RoutinesNotifier.new);
 
+// ... (باقي الكود الخاص بـ routineArcsProvider يبقى كما هو دون تغيير)
 final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
   final routines = ref.watch(routinesProvider);
   final astroState = ref.watch(astroProvider);

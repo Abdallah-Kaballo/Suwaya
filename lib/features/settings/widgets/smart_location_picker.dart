@@ -3,8 +3,8 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../../core/services/geo_search_service.dart';
-import '../../../core/services/location_service.dart'; 
+import 'package:suwaya/core/location/geo_database_service.dart';
+import 'package:suwaya/core/location/location_service.dart';
 import '../settings_provider.dart';
 
 enum LocationStep { method, manualChoice, dropdowns, coordinates, savedLocations }
@@ -84,10 +84,10 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     if (!mounted) return;
     final langCode = context.locale.languageCode;
     
-    await GeoSearchService.loadDatabase();
+    await GeoDatabaseService.loadDatabase();
     
     if (!mounted) return;
-    final countries = await GeoSearchService.getCountries(langCode);
+    final countries = await GeoDatabaseService.getCountries(langCode);
     
     if (!mounted) return;
     setState(() {
@@ -100,7 +100,7 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     setState(() => _isLoadingCities = true);
     try {
       final langCode = context.locale.languageCode;
-      final rawCities = await GeoSearchService.getCitiesByCountry(countryCode);
+      final rawCities = await GeoDatabaseService.getCitiesByCountry(countryCode);
       final mutableCities = List<Map<String, dynamic>>.from(rawCities);
       
       mutableCities.sort((a, b) {
@@ -152,13 +152,13 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     final notifier = ref.read(settingsProvider.notifier);
     final langCode = context.locale.languageCode;
 
-    final localData = await GeoSearchService.getNearestLocationData(lat, lng, langCode);
+    final localData = await GeoDatabaseService.getNearestLocationData(lat, lng, langCode);
     String countryCode = 'CUSTOM';
     String countryName = 'غير معروف';
 
     if (localData != null) {
       countryCode = localData['countryCode'] ?? 'CUSTOM';
-      countryName = GeoSearchService.getLocalizedCountryName(countryCode, langCode);
+      countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
     }
 
     await notifier.addAndSelectLocation(name, lat, lng, countryCode);
@@ -250,7 +250,7 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
               setState(() => _isFetchingGps = true);
               try { 
                 final langCode = Localizations.localeOf(context).languageCode;
-                final locData = await SmartGpsEngine.fetchOfflineLocation(langCode);
+                final locData = await LocationService.fetchOfflineLocation(langCode);
                 
                 await ref.read(settingsProvider.notifier).addAndSelectLocation(
                   locData['formattedName'], 
@@ -415,7 +415,7 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedCountry != null ? '${GeoSearchService.getFlagEmoji(_selectedCountry!['code']!)} ${_selectedCountry!['name']}' : 'location_picker.select_country'.tr(),
+                        _selectedCountry != null ? '${GeoDatabaseService.getFlagEmoji(_selectedCountry!['code']!)} ${_selectedCountry!['name']}' : 'location_picker.select_country'.tr(),
                         style: TextStyle(color: _selectedCountry != null ? textColor : hintColor, fontSize: 16, fontWeight: _selectedCountry != null ? FontWeight.bold : FontWeight.normal),
                       )
                     ),
@@ -448,7 +448,7 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                         
                         final cityName = langCode == 'ar' ? (city['name'] ?? city['nameEn']) : (city['nameEn'] ?? city['name']);
                         final countryCode = city['countryCode'];
-                        final countryName = GeoSearchService.getLocalizedCountryName(countryCode, langCode);
+                        final countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
 
                         await notifier.addAndSelectLocation(
                           cityName, 
@@ -575,7 +575,7 @@ class _CountrySearchSheetState extends State<_CountrySearchSheet> {
               itemBuilder: (context, index) {
                 final country = filtered[index];
                 return ListTile(
-                  leading: Text(GeoSearchService.getFlagEmoji(country['code']!), style: const TextStyle(fontSize: 24)),
+                  leading: Text(GeoDatabaseService.getFlagEmoji(country['code']!), style: const TextStyle(fontSize: 24)),
                   title: Text(country['name']!, style: TextStyle(color: textColor)),
                   onTap: () { Navigator.pop(context); widget.onSelected(country); },
                 );

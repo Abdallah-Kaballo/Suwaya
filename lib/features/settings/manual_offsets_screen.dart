@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../core/astro_engine/astro_provider.dart';
-import '../settings_provider.dart';
+import '../../core/astro_engine/astro_provider.dart';
+import 'settings_provider.dart';
+// 🌟 استيراد الامتداد الذكي
+import '../../core/theme/astro_ui_extensions.dart';
 
 class ManualOffsetsScreen extends ConsumerWidget {
   const ManualOffsetsScreen({super.key});
@@ -82,7 +84,6 @@ class ManualOffsetsScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final period = astro.periods[index];
                 final String pId = period.id.toString();
-                // 🌟 تم تصحيح الأقواس هنا
                 final int currentOffset = settings.getManualOffset(pId);
 
                 final bool canDecrease = currentOffset > -59;
@@ -98,7 +99,8 @@ class ManualOffsetsScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      Container(width: 10, height: 10, decoration: BoxDecoration(color: period.color, shape: BoxShape.circle)),
+                      // 🌟 استخدام uiColor
+                      Container(width: 10, height: 10, decoration: BoxDecoration(color: period.uiColor, shape: BoxShape.circle)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(

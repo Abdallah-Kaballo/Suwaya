@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "剩余休息", "focus_remaining": "剩余专注", "deep_relaxation": "深度放松", "in_flow": "心流状态", "absolute_focus": "绝对专注\n30/0", "balanced": "平衡\n25/5", "relaxed": "放松\n20/10", "no_tasks": "此斯瓦亚没有分配的任务", "focus_now_on": "现在专注于："},
   "nav": {"home": "首页", "tasks": "任务", "pomodoro": "专注", "ibadat": "礼拜"},
   "languages": {"tr": "土耳其语", "ru": "俄语", "ur": "乌尔都语", "ar": "阿拉伯语", "hi": "印地语", "bn": "孟加拉语", "th": "泰语", "ja": "日语", "zh": "中文", "ug": "维吾尔语", "pt": "葡萄牙语", "ff": "富拉语", "az": "阿塞拜疆语", "id": "印度尼西亚语", "ms": "马来语", "da": "丹麦语", "de": "德语", "en": "英语", "es": "西班牙语", "fr": "法语", "it": "意大利语", "nl": "荷兰语"}
+  ,"drawer": {
+    "faq": "常见问题",
+    "contact": "联系与支持",
+    "about_app": "关于应用",
+    "check_updates": "检查更新",
+    "develop_with_us": "与我们一起开发",
+    "checking_updates": "正在检查更新...",
+    "up_to_date": "您使用的是最新版本的 Suwaya 🌟",
+    "update_check_failed": "检查更新失败。请检查您的网络。",
+    "update_available": "有新版本可用！",
+    "new_version_desc": "Suwaya 的全新改进版本现已推出。",
+    "do_you_want_to_download": "您要下载并安装更新吗？",
+    "download": "立即下载",
+    "guest_user": "访客用户",
+    "secure_data": "保护您的数据 ☁️",
+    "tap_to_login": "点击以登录并同步",
+    "manage_account": "管理帐户和同步"
+  },
+  "analytics": {
+    "title": "分析与统计",
+    "coming_soon": "分析仪表板即将在这里构建...",
+    "daily_progress": "每日进度",
+    "perfect_day": "完美的一天！🌟",
+    "keep_going": "继续发光，每一个斯瓦亚都会带来改变。",
+    "current_streak": "当前连续",
+    "days": "天",
+    "focus_time": "专注时间",
+    "hours": "小时",
+    "weekly_overview": "每周概览"
+  }
 }

@@ -7,6 +7,8 @@ import 'package:suwaya/core/astro_engine/astro_models.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
 import 'stats_provider.dart';
+// 🌟 استيراد الامتداد الذكي للألوان
+import '../../core/theme/astro_ui_extensions.dart';
 
 class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
@@ -186,7 +188,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  // 🌟 هنا السر: الخريطة الحرارية بأسلوب المربعات
   Widget _buildHeatmapGrid(StatsState stats, AstroState astroState, bool isDark) {
     final cardColor = isDark ? const Color(0xFF1E2530) : Colors.white;
 
@@ -226,7 +227,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         children: astroState.periods.map<Widget>((period) {
           final count = stats.periodHeatmap[period.id] ?? 0;
           
-          // حساب مستوى الإضاءة (من 0 إلى 5 مربعات)
           int activeBlocks = 0;
           if (count > 0) {
             activeBlocks = ((count / maxTasks) * 5).ceil().clamp(1, 5);
@@ -238,11 +238,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               Text(count > 0 ? '$count' : '', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               
-              // بناء عمود المربعات
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: List.generate(5, (index) {
-                  // المربعات ترسم من الأسفل للأعلى (index 0 هو الأعلى)
                   final isLit = (4 - index) < activeBlocks;
                   
                   return AnimatedContainer(
@@ -252,11 +250,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     height: 14,
                     decoration: BoxDecoration(
                       color: isLit 
-                          ? period.color 
+                          ? period.uiColor // 🌟 استخدام uiColor
                           : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03)),
                       borderRadius: BorderRadius.circular(4),
                       boxShadow: isLit && isDark 
-                          ? [BoxShadow(color: period.color.withValues(alpha: 0.4), blurRadius: 6)] 
+                          ? [BoxShadow(color: period.uiColor.withValues(alpha: 0.4), blurRadius: 6)] // 🌟 استخدام uiColor
                           : null,
                     ),
                   );

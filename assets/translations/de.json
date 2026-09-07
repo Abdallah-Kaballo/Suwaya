@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Verbleibende Pause", "focus_remaining": "Verbleibender Fokus", "deep_relaxation": "Tiefe Entspannung", "in_flow": "Im Flow-Zustand", "absolute_focus": "Absoluter Fokus\n30/0", "balanced": "Ausgewogen\n25/5", "relaxed": "Entspannt\n20/10", "no_tasks": "Keine Aufgaben für diese Suwaya", "focus_now_on": "Fokussiere dich jetzt auf:"},
   "nav": {"home": "Start", "tasks": "Aufgaben", "pomodoro": "Fokus", "ibadat": "Gottesdienst"},
   "languages": {"tr": "Türkisch", "ru": "Russisch", "ur": "Urdu", "ar": "Arabisch", "hi": "Hindi", "bn": "Bengalisch", "th": "Thailändisch", "ja": "Japanisch", "zh": "Chinesisch", "ug": "Uigurisch", "pt": "Portugiesisch", "ff": "Fulfulde", "az": "Aserbaidschanisch", "id": "Indonesisch", "ms": "Malaiisch", "da": "Dänisch", "de": "Deutsch", "en": "Englisch", "es": "Spanisch", "fr": "Französisch", "it": "Italienisch", "nl": "Niederländisch"}
+  ,"drawer": {
+    "faq": "FAQ",
+    "contact": "Kontakt & Support",
+    "about_app": "Über die App",
+    "check_updates": "Auf Updates prüfen",
+    "develop_with_us": "Entwickle mit uns",
+    "checking_updates": "Suche nach Updates...",
+    "up_to_date": "Du nutzt die neueste Version von Suwaya 🌟",
+    "update_check_failed": "Update-Suche fehlgeschlagen. Bitte Internetverbindung prüfen.",
+    "update_available": "Neues Update verfügbar!",
+    "new_version_desc": "Eine neue und verbesserte Version von Suwaya ist verfügbar.",
+    "do_you_want_to_download": "Möchten Sie das Update herunterladen und installieren?",
+    "download": "Jetzt herunterladen",
+    "guest_user": "Gastnutzer",
+    "secure_data": "Sichere deine Daten ☁️",
+    "tap_to_login": "Tippen zum Anmelden und Synchronisieren",
+    "manage_account": "Konto & Synchronisierung verwalten"
+  },
+  "analytics": {
+    "title": "Analysen & Statistiken",
+    "coming_soon": "Das Analyse-Dashboard wird hier bald erstellt...",
+    "daily_progress": "Täglicher Fortschritt",
+    "perfect_day": "Perfekter Tag! 🌟",
+    "keep_going": "Leuchte weiter, jede Suwaya macht einen Unterschied.",
+    "current_streak": "Aktuelle Serie",
+    "days": "Tage",
+    "focus_time": "Fokus-Zeit",
+    "hours": "Stunden",
+    "weekly_overview": "Wöchentliche Übersicht"
+  }
 }

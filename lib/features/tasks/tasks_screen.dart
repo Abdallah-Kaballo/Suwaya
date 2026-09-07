@@ -11,7 +11,9 @@ import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/astro_engine/astro_models.dart';
 import '../routines/routines_provider.dart';
-import 'screens/universal_add_screen.dart';
+import 'universal_add_screen.dart';
+import '../../shared/widgets/app_drawer.dart';
+import '../../core/providers/ui_providers.dart'; // 🌟
 
 Color _getNeonColor(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -103,6 +105,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
 
     return Scaffold(
       backgroundColor: bgColor,
+      drawer: const AppDrawer(), 
+      // 🌟 تفعيل الإخفاء
+      onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
@@ -111,10 +116,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
             : Text('tasks.suwaya_management'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.w900, fontSize: 22)),
         leading: _isSelectionMode 
             ? IconButton(icon: Icon(LucideIcons.x, color: textColor), onPressed: _clearSelection) 
-            : null,
+            : Builder(
+                builder: (ctx) => IconButton(
+                  icon: Icon(LucideIcons.menu, color: textColor),
+                  onPressed: () => Scaffold.of(ctx).openDrawer(),
+                ),
+              ),
         actions: [
           if (_isSelectionMode)
-            IconButton(icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent), onPressed: _deleteSelectedItems),
+            IconButton(icon: const Icon(LucideIcons.trash, color: Colors.redAccent), onPressed: _deleteSelectedItems),
           const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
@@ -145,7 +155,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
         ],
       ),
       floatingActionButton: _isSelectionMode ? null : Padding(
-        padding: const EdgeInsets.only(bottom: 90.0), // رفع الزر فوق الشريط الزجاجي
+        padding: const EdgeInsets.only(bottom: 90.0), 
         child: FloatingActionButton.extended(
           backgroundColor: accentColor,
           onPressed: () {
@@ -228,7 +238,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
       child: Dismissible(
         key: ValueKey('swipe_${isRoutine ? "r" : "t"}_$id'),
         direction: _isSelectionMode ? DismissDirection.none : DismissDirection.horizontal,
-        background: Container(color: Colors.redAccent, alignment: Alignment.centerRight, padding: const EdgeInsets.symmetric(horizontal: 24), child: const Icon(LucideIcons.trash_2, color: Colors.white)), 
+        background: Container(color: Colors.redAccent, alignment: Alignment.centerRight, padding: const EdgeInsets.symmetric(horizontal: 24), child: const Icon(LucideIcons.trash, color: Colors.white)), 
         secondaryBackground: Container(color: Colors.blueAccent, alignment: Alignment.centerLeft, padding: const EdgeInsets.symmetric(horizontal: 24), child: const Icon(LucideIcons.pencil, color: Colors.white)), 
         confirmDismiss: (dir) async {
           if (dir == DismissDirection.startToEnd) return true; 
@@ -334,7 +344,8 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(timeStr, style: TextStyle(color: textColor, fontSize: 16, fontWeight: t.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: t.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: t.isAstroTime ? 1.0 : 0.0)),
+                  // 🌟 اللون الذهبي إذا كان فلكي، والأبيض/الأسود إذا كان مدني
+                  Text(timeStr, style: TextStyle(color: t.isAstroTime ? const Color(0xFFF2C94C) : textColor, fontSize: 16, fontWeight: t.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: t.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: t.isAstroTime ? 1.0 : 0.0)),
                   const SizedBox(height: 2),
                   Text(dateStr, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.bold)),
                 ],
@@ -384,7 +395,8 @@ class _RoutineRowItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(timeStr, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: routine.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: routine.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: routine.isAstroTime ? 1.0 : 0.0)),
+                  // 🌟 اللون الذهبي للفلكي هنا أيضاً
+                  Text(timeStr, style: TextStyle(color: routine.isAstroTime ? const Color(0xFFF2C94C) : (isDark ? Colors.white : Colors.black87), fontSize: 13, fontWeight: routine.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: routine.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: routine.isAstroTime ? 1.0 : 0.0)),
                   const SizedBox(height: 2),
                   Text(recStr, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
                 ],

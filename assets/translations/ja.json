@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "残りの休憩", "focus_remaining": "残りの集中", "deep_relaxation": "深いリラクゼーション", "in_flow": "フロー状態", "absolute_focus": "絶対的な集中\n30/0", "balanced": "バランス\n25/5", "relaxed": "リラックス\n20/10", "no_tasks": "このスワヤに割り当てられたタスクはありません", "focus_now_on": "今集中するタスク:"},
   "nav": {"home": "ホーム", "tasks": "タスク", "pomodoro": "フォーカス", "ibadat": "礼拝"},
   "languages": {"tr": "トルコ語", "ru": "ロシア語", "ur": "ウルドゥー語", "ar": "アラビア語", "hi": "ヒンディー語", "bn": "ベンガル語", "th": "タイ語", "ja": "日本語", "zh": "中国語", "ug": "ウイグル語", "pt": "ポルトガル語", "ff": "フラ語", "az": "アゼルバイジャン語", "id": "インドネシア語", "ms": "マレー語", "da": "デンマーク語", "de": "ドイツ語", "en": "英語", "es": "スペイン語", "fr": "フランス語", "it": "イタリア語", "nl": "オランダ語"}
+  ,"drawer": {
+    "faq": "よくある質問",
+    "contact": "お問い合わせとサポート",
+    "about_app": "アプリについて",
+    "check_updates": "アップデートを確認",
+    "develop_with_us": "一緒に開発する",
+    "checking_updates": "アップデートを確認中...",
+    "up_to_date": "最新バージョンのSuwayaを使用しています 🌟",
+    "update_check_failed": "アップデートの確認に失敗しました。インターネットを確認してください。",
+    "update_available": "新しいアップデートが利用可能です！",
+    "new_version_desc": "新しく改善されたバージョンのSuwayaが利用可能です。",
+    "do_you_want_to_download": "アップデートをダウンロードしてインストールしますか？",
+    "download": "今すぐダウンロード",
+    "guest_user": "ゲストユーザー",
+    "secure_data": "データを保護する ☁️",
+    "tap_to_login": "タップしてログインと同期",
+    "manage_account": "アカウントと同期を管理"
+  },
+  "analytics": {
+    "title": "分析と統計",
+    "coming_soon": "分析ダッシュボードはまもなくここに構築されます...",
+    "daily_progress": "毎日の進捗",
+    "perfect_day": "完璧な一日！🌟",
+    "keep_going": "輝き続けてください、すべてのスワヤが違いを生みます。",
+    "current_streak": "現在の連続記録",
+    "days": "日",
+    "focus_time": "集中時間",
+    "hours": "時間",
+    "weekly_overview": "週間の概要"
+  }
 }

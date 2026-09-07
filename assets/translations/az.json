@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Qalan Fasilə", "focus_remaining": "Qalan Fokus", "deep_relaxation": "Dərin Rahatlıq", "in_flow": "Axında (Flow)", "absolute_focus": "Mütləq Fokus\n30/0", "balanced": "Balanslı\n25/5", "relaxed": "Rahat\n20/10", "no_tasks": "Bu Suwaya üçün təyin olunmuş tapşırıq yoxdur", "focus_now_on": "İndi buna fokuslan:"},
   "nav": {"home": "Ana Səhifə", "tasks": "Tapşırıqlar", "pomodoro": "Fokus", "ibadat": "İbadət"},
   "languages": {"tr": "Türk", "ru": "Rus", "ur": "Urdu", "ar": "Ərəb", "hi": "Hind", "bn": "Benqal", "th": "Tay", "ja": "Yapon", "zh": "Çin", "ug": "Uyğur", "pt": "Portuqal", "ff": "Fula", "az": "Azərbaycan", "id": "İndoneziya", "ms": "Malay", "da": "Danimarka", "de": "Alman", "en": "İngilis", "es": "İspan", "fr": "Fransız", "it": "İtalyan", "nl": "Niderland"}
+  ,"drawer": {
+    "faq": "Tez-tez Verilən Suallar",
+    "contact": "Əlaqə və Dəstək",
+    "about_app": "Tətbiq Haqqında",
+    "check_updates": "Yeniləmələri Yoxla",
+    "develop_with_us": "Bizimlə İnkişaf Et",
+    "checking_updates": "Yeniləmələr yoxlanılır...",
+    "up_to_date": "Siz Suwaya-nın ən son versiyasını istifadə edirsiniz 🌟",
+    "update_check_failed": "Yoxlama uğursuz oldu. İnternetinizi yoxlayın.",
+    "update_available": "Yeni Yeniləmə Mövcuddur!",
+    "new_version_desc": "Suwaya-nın yeni və təkmilləşdirilmiş versiyası mövcuddur.",
+    "do_you_want_to_download": "Yeniləməni yükləyib quraşdırmaq istəyirsiniz?",
+    "download": "İndi Yüklə",
+    "guest_user": "Qonaq İstifadəçi",
+    "secure_data": "Məlumatlarınızı qoruyun ☁️",
+    "tap_to_login": "Daxil olmaq və sinxronizasiya etmək üçün toxunun",
+    "manage_account": "Hesab və Sinxronizasiyanı İdarə Et"
+  },
+  "analytics": {
+    "title": "Analitika və Statistika",
+    "coming_soon": "Analitika paneli tezliklə burada yaradılacaq...",
+    "daily_progress": "Gündəlik İnkişaf",
+    "perfect_day": "Mükəmməl Gün! 🌟",
+    "keep_going": "Parlamağa davam edin, hər Suwaya bir fərq yaradır.",
+    "current_streak": "Cari Seriya",
+    "days": "Gün",
+    "focus_time": "Fokus Vaxtı",
+    "hours": "Saat",
+    "weekly_overview": "Həftəlik İcmal"
+  }
 }

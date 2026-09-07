@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Resterende pauze", "focus_remaining": "Resterende focus", "deep_relaxation": "Diepe ontspanning", "in_flow": "In Flow-staat", "absolute_focus": "Absoluut\n30/0", "balanced": "Gebalanceerd\n25/5", "relaxed": "Ontspannen\n20/10", "no_tasks": "Geen taken voor deze Suwaya", "focus_now_on": "Focus je nu op:"},
   "nav": {"home": "Home", "tasks": "Taken", "pomodoro": "Focus", "ibadat": "Aanbidding"},
   "languages": {"tr": "Turks", "ru": "Russisch", "ur": "Urdu", "ar": "Arabisch", "hi": "Hindi", "bn": "Bengaals", "th": "Thais", "ja": "Japans", "zh": "Chinees", "ug": "Oeigoers", "pt": "Portugees", "ff": "Fula", "az": "Azerbeidzjaans", "id": "Indonesisch", "ms": "Maleis", "da": "Deens", "de": "Duits", "en": "Engels", "es": "Spaans", "fr": "Frans", "it": "Italiaans", "nl": "Nederlands"}
+  ,"drawer": {
+    "faq": "Veelgestelde Vragen",
+    "contact": "Contact & Ondersteuning",
+    "about_app": "Over de App",
+    "check_updates": "Controleer op updates",
+    "develop_with_us": "Ontwikkel met ons mee",
+    "checking_updates": "Controleren op updates...",
+    "up_to_date": "Je gebruikt de nieuwste versie van Suwaya 🌟",
+    "update_check_failed": "Kan niet controleren op updates. Controleer je internet.",
+    "update_available": "Nieuwe Update Beschikbaar!",
+    "new_version_desc": "Er is nu een nieuwe en verbeterde versie van Suwaya beschikbaar.",
+    "do_you_want_to_download": "Wil je de update downloaden en installeren?",
+    "download": "Nu Downloaden",
+    "guest_user": "Gastgebruiker",
+    "secure_data": "Beveilig je data ☁️",
+    "tap_to_login": "Tik om in te loggen en te synchroniseren",
+    "manage_account": "Account & Synchronisatie beheren"
+  },
+  "analytics": {
+    "title": "Analyses & Statistiken",
+    "coming_soon": "Het analysedashboard wordt hier binnenkort gebouwd...",
+    "daily_progress": "Dagelijkse Voortgang",
+    "perfect_day": "Perfecte Dag! 🌟",
+    "keep_going": "Blijf stralen, elke Suwaya maakt een verschil.",
+    "current_streak": "Huidige Reeks",
+    "days": "Dagen",
+    "focus_time": "Focustijd",
+    "hours": "Uur",
+    "weekly_overview": "Wekelijks Overzicht"
+  }
 }

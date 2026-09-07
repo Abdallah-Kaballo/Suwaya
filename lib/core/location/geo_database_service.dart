@@ -1,13 +1,19 @@
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' show cos, asin, sqrt;
 import 'package:flutter/services.dart';
+import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
-class GeoSearchService {
+import '../../models/geo_models.dart';
+
+class GeoDatabaseService {
   static Database? _database;
 
+  // ==========================================
+  // 1. SQLite: إدارة قاعدة بيانات المدن
+  // ==========================================
   static Future<void> loadDatabase() async {
     if (_database != null) return;
     try {
@@ -26,8 +32,7 @@ class GeoSearchService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> searchCitiesInCountry(
-      String query, String countryCode) async {
+  static Future<List<Map<String, dynamic>>> searchCitiesInCountry(String query, String countryCode) async {
     await loadDatabase();
     if (query.trim().isEmpty || countryCode.isEmpty) return [];
 
@@ -57,15 +62,11 @@ class GeoSearchService {
 
   static Future<List<Map<String, String>>> getCountries(String langCode) async {
     await loadDatabase();
-    final result = await _database!.rawQuery('''
-      SELECT DISTINCT country_code as code
-      FROM cities ORDER BY country_code
-    ''');
+    final result = await _database!.rawQuery('SELECT DISTINCT country_code as code FROM cities ORDER BY country_code');
 
     final list = result.map((row) {
       final code = row['code'] as String;
-      final name = _getLocalizedCountryName(code, langCode);
-      return {'code': code, 'name': name};
+      return {'code': code, 'name': getLocalizedCountryName(code, langCode)};
     }).toList();
 
     list.sort((a, b) => a['name']!.compareTo(b['name']!));
@@ -76,8 +77,7 @@ class GeoSearchService {
     await loadDatabase();
     final results = await _database!.rawQuery('''
       SELECT name_ar as name, name_en as nameEn, country_code as countryCode, lat, lng, timezone
-      FROM cities
-      WHERE country_code = ?
+      FROM cities WHERE country_code = ?
     ''', [countryCode.toUpperCase()]);
 
     return results.map((row) {
@@ -91,26 +91,58 @@ class GeoSearchService {
         arName = arName.replaceAll(RegExp(r'^(محافظة|مدينة|ولاية|مقاطعة|بلدية)\s+'), ''); 
         arName = arName.replaceAll(RegExp(r'(?<=[\u0600-\u06FF])-(?=[\u0600-\u06FF])'), ' '); 
         arName = arName.replaceAll(RegExp(r'\s*\(.*?\)\s*'), ''); 
-        arName = arName.trim().replaceAll(RegExp(r'\s+'), ' '); 
-        mutableRow['name'] = arName;
+        mutableRow['name'] = arName.trim().replaceAll(RegExp(r'\s+'), ' '); 
       }
 
       if (enName != null) {
         enName = enName.replaceAll(RegExp(r'\s+(Governorate|City|Municipality|Province)$', caseSensitive: false), '');
         enName = enName.replaceAll(RegExp(r'\s*\(.*?\)\s*'), '');
-        enName = enName.trim().replaceAll(RegExp(r'\s+'), ' ');
-        mutableRow['nameEn'] = enName;
+        mutableRow['nameEn'] = enName.trim().replaceAll(RegExp(r'\s+'), ' ');
       }
-      
       return mutableRow;
     }).toList();
   }
 
-  // ✅ دالة عكسية (Reverse Geocoding) محلية 100% وبدون إنترنت
+  // ==========================================
+  // 2. Isar: زراعة الدول الافتراضية
+  // ==========================================
+  static Future<void> seedCountries(Isar isar) async {
+    final countries = isar.collection<GeoCountry>();
+    if (await countries.count() > 0) return;
+
+    final List<Map<String, dynamic>> defaultCountries = [
+      {'code': 'EG', 'ar': 'مصر', 'en': 'Egypt', 'method': 'egyptian', 'madhab': 'shafi'},
+      {'code': 'SA', 'ar': 'المملكة العربية السعودية', 'en': 'Saudi Arabia', 'method': 'umm_al_qura', 'madhab': 'shafi'},
+      {'code': 'AE', 'ar': 'الإمارات العربية المتحدة', 'en': 'United Arab Emirates', 'method': 'dubai', 'madhab': 'shafi'},
+      {'code': 'QA', 'ar': 'قطر', 'en': 'Qatar', 'method': 'qatar', 'madhab': 'shafi'},
+      {'code': 'KW', 'ar': 'الكويت', 'en': 'Kuwait', 'method': 'kuwait', 'madhab': 'shafi'},
+      {'code': 'TR', 'ar': 'تركيا', 'en': 'Turkey', 'method': 'turkey', 'madhab': 'hanafi'},
+      {'code': 'PK', 'ar': 'باكستان', 'en': 'Pakistan', 'method': 'karachi', 'madhab': 'hanafi'},
+      {'code': 'US', 'ar': 'الولايات المتحدة', 'en': 'United States', 'method': 'north_america', 'madhab': 'shafi'},
+      {'code': 'UK', 'ar': 'المملكة المتحدة', 'en': 'United Kingdom', 'method': 'muslim_world_league', 'madhab': 'shafi'},
+    ];
+
+    await isar.writeTxn(() async {
+      for (var data in defaultCountries) {
+        final country = GeoCountry()
+          ..code = data['code']
+          ..nameAr = data['ar']
+          ..nameEn = data['en']
+          ..defaultMethod = data['method']
+          ..defaultMadhab = data['madhab']
+          ..isDownloaded = false;
+        await countries.put(country);
+      }
+    });
+  }
+
+  // ==========================================
+  // 3. Utils: الهندسة العكسية (Reverse Geocoding)
+  // ==========================================
   static Future<Map<String, dynamic>?> getNearestLocationData(double lat, double lng, String langCode) async {
     await loadDatabase();
     
-    double limit = 2.0; // نطاق البحث
+    double limit = 2.0; 
     final results = await _database!.rawQuery('''
       SELECT name_ar, name_en, country_code, lat, lng
       FROM cities
@@ -126,7 +158,7 @@ class GeoSearchService {
       double cityLat = (row['lat'] as num).toDouble();
       double cityLng = (row['lng'] as num).toDouble();
 
-      double distance = _haversineDistance(lat, lng, cityLat, cityLng);
+      double distance = calculateDistance(lat, lng, cityLat, cityLng);
       if (distance < minDistance) {
         minDistance = distance;
         closest = Map<String, dynamic>.from(row);
@@ -142,35 +174,24 @@ class GeoSearchService {
     }
     return null;
   }
-  
-  // 🟢 أضف هذه الدالة أيضاً لجلب اسم الدولة بالعربي/الإنجليزي لـ Header
+
+  static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const p = 0.017453292519943295; // Math.PI / 180
+    final a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a)); // 2 * R; R = 6371 km
+  }
+
+  static String getFlagEmoji(String countryCode) {
+    if (countryCode.isEmpty || countryCode.length > 2) return '📍';
+    return countryCode.toUpperCase().split('').map((c) => String.fromCharCode(c.codeUnitAt(0) + 127397)).join();
+  }
+
   static String getLocalizedCountryName(String code, String lang) {
     if (lang == 'ar') return _countriesAr[code] ?? code;
     return _countriesEn[code] ?? code;
   }
 
-  static double _haversineDistance(double lat1, double lon1, double lat2, double lon2) {
-    const R = 6371.0; 
-    var dLat = _toRadians(lat2 - lat1);
-    var dLon = _toRadians(lon2 - lon1);
-    var a = sin(dLat / 2) * sin(dLat / 2) + cos(_toRadians(lat1)) * cos(_toRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2);
-    var c = 2 * asin(sqrt(a));
-    return R * c;
-  }
-
-  static double _toRadians(double degree) => degree * pi / 180;
-
-  static String getFlagEmoji(String countryCode) {
-    if (countryCode.isEmpty || countryCode.length > 2) return '📍';
-    return countryCode.toUpperCase().split('').map((c) =>
-        String.fromCharCode(c.codeUnitAt(0) + 127397)).join();
-  }
-
-  static String _getLocalizedCountryName(String code, String lang) {
-    if (lang == 'ar') return _countriesAr[code] ?? code;
-    return _countriesEn[code] ?? code;
-  }
-
+  // تم الاحتفاظ بقوائم الدول لدعم getLocalizedCountryName
   static const Map<String, String> _countriesAr = {
     'AF': 'أفغانستان', 'AX': 'جزر أولاند', 'AL': 'ألبانيا', 'DZ': 'الجزائر', 'AS': 'ساموا الأمريكية', 'AD': 'أندورا', 'AO': 'أنغولا', 'AI': 'أنغويلا', 'AQ': 'أنتاركتيكا', 'AG': 'أنتيغوا وباربودا',
     'AR': 'الأرجنتين', 'AM': 'أرمينيا', 'AW': 'أروبا', 'AU': 'أستراليا', 'AT': 'النمسا', 'AZ': 'أذربيجان', 'BS': 'جزر البهاما', 'BH': 'البحرين', 'BD': 'بنغلاديش', 'BB': 'باربادوس',

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:go_router/go_router.dart';
 
 import '../settings/settings_provider.dart';
-import '../layout/main_layout.dart';
-import '../onboarding/onboarding_language_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -22,7 +21,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   void initState() {
     super.initState();
     
-    // أنيميشن ناعم للشعار لجعله فاخراً
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
@@ -32,18 +30,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   }
 
   Future<void> _navigateToNext() async {
-    // ننتظر قليلاً ليرى المستخدم الأنميشن
     await Future.delayed(const Duration(milliseconds: 1800));
-    
     if (!mounted) return;
 
     final settings = ref.read(settingsProvider);
-
-    // توجيه ذكي بناءً على إكمال الإعداد المسبق أم لا
     if (settings.isFirstLaunch) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingLanguageScreen()));
+      context.go('/onboarding');
     } else {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainLayout()));
+      context.go('/home'); 
     }
   }
 
@@ -70,7 +64,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(LucideIcons.compass, size: 80, color: primaryColor), // استبدله بشعار التطبيق لاحقاً
+                    Icon(LucideIcons.compass, size: 80, color: primaryColor), 
                     const SizedBox(height: 24),
                     Text('سُـويـعَـة', style: TextStyle(color: primaryColor, fontSize: 32, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),

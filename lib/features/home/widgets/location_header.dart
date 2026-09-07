@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya/core/location/geo_database_service.dart';
 
 import '../../settings/settings_provider.dart';
-import '../../../core/services/geo_search_service.dart';
 import '../../settings/settings_screen.dart';
 
 
@@ -14,7 +14,7 @@ final nearestCityProvider = FutureProvider.family.autoDispose<String?, String>((
   if (loc == null) return null;
   
   if (loc.isAutoLocation || loc.countryCode == 'CUSTOM') {
-    final data = await GeoSearchService.getNearestLocationData(loc.latitude, loc.longitude, langCode);
+    final data = await GeoDatabaseService.getNearestLocationData(loc.latitude, loc.longitude, langCode);
     return data?['cityName'] as String?;
   }
   return null; 

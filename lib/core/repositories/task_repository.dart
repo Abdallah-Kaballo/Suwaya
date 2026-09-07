@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/task_model.dart';
 import '../database/database_provider.dart';
 
-// 🟢 توفير المستودع وحقن Isar بداخله (Dependency Injection)
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
+  // 🌟 حقن الاعتماديات: المستودع لا يعرف شيئاً عن LocalDbService، بل يأخذ Isar من المزود
   final isar = ref.watch(isarProvider);
   return TaskRepository(isar);
 });
@@ -14,25 +14,52 @@ class TaskRepository {
 
   TaskRepository(this._isar);
 
-  // ── 1. جلب كل المهام (للاستخدام العام) ──
   Future<List<TaskModel>> getAllTasks() async {
-    return await _isar.taskModels.where().findAll();
+    // 🌟 تم نقل استبعاد المهام المحذوفة إلى هنا
+    return await _isar.taskModels.filter().isDeletedEqualTo(false).findAll();
   }
 
-  // ── 2. حفظ أو تحديث مهمة ──
   Future<void> saveTask(TaskModel task) async {
     await _isar.writeTxn(() async {
       await _isar.taskModels.put(task);
     });
   }
 
-  // ── 3. جلب مهمة محددة برقمها ──
   Future<TaskModel?> getTaskById(int id) async {
     return await _isar.taskModels.get(id);
   }
 
-  // ── 4. 🚀 استعلام فائق السرعة عبر Isar (يحل مشكلة فلترة الذاكرة) ──
-  // بدلاً من جلب 5000 مهمة للذاكرة، نجلب مهام اليوم والمهام المتكررة فقط
+  Future<void> deleteTask(int id) async {
+    // 🌟 تم نقل منطق الحذف الآمن (Soft Delete) وعلامة المزامنة إلى المستودع
+    await _isar.writeTxn(() async {
+      final task = await _isar.taskModels.get(id);
+      if (task != null) {
+        task.isDeleted = true;
+        task.updatedAt = DateTime.now().toUtc(); 
+        task.isSynced = false;
+        await _isar.taskModels.put(task);
+      }
+    });
+  }
+
+  Future<List<TaskModel>> getRecentCompletedTasks(DateTime since) async {
+    // 🌟 تم نقل الفرز المنطقي للمهام المكتملة إلى هنا
+    final completedTasks = await _isar.taskModels.filter()
+        .isCompletedEqualTo(true)
+        .and()
+        .completedAtGreaterThan(since)
+        .findAll();
+
+    completedTasks.sort((a, b) {
+      if (a.completedAt == null && b.completedAt == null) return 0;
+      if (a.completedAt == null) return 1;
+      if (b.completedAt == null) return -1;
+      return b.completedAt!.compareTo(a.completedAt!);
+    });
+
+    return completedTasks;
+  }
+
   Future<List<TaskModel>> getRelevantTasksForToday(DateTime today) async {
     final startOfDay = DateTime(today.year, today.month, today.day);
     
@@ -40,7 +67,7 @@ class TaskRepository {
         .filter()
         .targetDateEqualTo(startOfDay)
         .or()
-        .targetDateIsNull() // لجلب مهام الأفق
+        .targetDateIsNull() 
         .or()
         .typeEqualTo(TaskType.permanent)
         .findAll();

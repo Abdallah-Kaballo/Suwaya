@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/services/geo_search_service.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya/core/location/geo_database_service.dart';
 
 class CountryPickerScreen extends StatefulWidget {
   const CountryPickerScreen({super.key});
@@ -28,7 +28,7 @@ class _CountryPickerScreenState extends State<CountryPickerScreen> {
   }
 
   Future<void> _load() async {
-    final data = await GeoSearchService.getCountries(context.locale.languageCode);
+    final data = await GeoDatabaseService.getCountries(context.locale.languageCode);
     setState(() {
       _countries = data;
       _loading = false;
@@ -52,7 +52,7 @@ class _CountryPickerScreenState extends State<CountryPickerScreen> {
                 final code = _countries[index]['code'] as String;
                 final displayName = _countryNames[code] ?? code;
                 return ListTile(
-                  leading: Text(GeoSearchService.getFlagEmoji(code),
+                  leading: Text(GeoDatabaseService.getFlagEmoji(code),
                       style: const TextStyle(fontSize: 24)),
                   title: Text(displayName, style: const TextStyle(color: Colors.white, fontSize: 16)),
                   trailing: Text(code, style: const TextStyle(color: Colors.white38, fontSize: 12)),

@@ -31,4 +31,34 @@
   "pomodoro": {"break_remaining": "Pausa Rimanente", "focus_remaining": "Focus Rimanente", "deep_relaxation": "Rilassamento Profondo", "in_flow": "Stato di Flusso (Flow)", "absolute_focus": "Assoluto\n30/0", "balanced": "Bilanciato\n25/5", "relaxed": "Rilassato\n20/10", "no_tasks": "Nessuna attività assegnata a questa Suwaya", "focus_now_on": "Concentrati ora su:"},
   "nav": {"home": "Home", "tasks": "Attività", "pomodoro": "Focus", "ibadat": "Culto"},
   "languages": {"tr": "Turco", "ru": "Russo", "ur": "Urdu", "ar": "Arabo", "hi": "Hindi", "bn": "Bengalese", "th": "Tailandese", "ja": "Giapponese", "zh": "Cinese", "ug": "Uiguro", "pt": "Portoghese", "ff": "Fula", "az": "Azero", "id": "Indonesiano", "ms": "Malese", "da": "Danese", "de": "Tedesco", "en": "Inglese", "es": "Spagnolo", "fr": "Francese", "it": "Italiano", "nl": "Olandese"}
+  ,"drawer": {
+    "faq": "FAQ",
+    "contact": "Contatti e Supporto",
+    "about_app": "Informazioni sull'App",
+    "check_updates": "Controlla aggiornamenti",
+    "develop_with_us": "Sviluppa con noi",
+    "checking_updates": "Controllo aggiornamenti in corso...",
+    "up_to_date": "Stai usando l'ultima versione di Suwaya 🌟",
+    "update_check_failed": "Impossibile controllare gli aggiornamenti. Verifica la tua connessione.",
+    "update_available": "Nuovo aggiornamento disponibile!",
+    "new_version_desc": "È ora disponibile una versione nuova e migliorata di Suwaya.",
+    "do_you_want_to_download": "Vuoi scaricare e installare l'aggiornamento?",
+    "download": "Scarica Ora",
+    "guest_user": "Utente Ospite",
+    "secure_data": "Proteggi i tuoi dati ☁️",
+    "tap_to_login": "Tocca per accedere e sincronizzare",
+    "manage_account": "Gestisci Account e Sincronizzazione"
+  },
+  "analytics": {
+    "title": "Analisi e Statistiche",
+    "coming_soon": "La dashboard di analisi sarà presto disponibile qui...",
+    "daily_progress": "Progresso Quotidiano",
+    "perfect_day": "Giorno Perfetto! 🌟",
+    "keep_going": "Continua a brillare, ogni Suwaya fa la differenza.",
+    "current_streak": "Serie Attuale",
+    "days": "Giorni",
+    "focus_time": "Tempo di Concentrazione",
+    "hours": "Ore",
+    "weekly_overview": "Panoramica Settimanale"
+  }
 }

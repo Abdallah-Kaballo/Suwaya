@@ -3,9 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:suwaya/features/settings/settings_provider.dart';
-
-import 'onboarding_location_screen.dart';
 
 class OnboardingLanguageScreen extends ConsumerStatefulWidget {
   const OnboardingLanguageScreen({super.key});
@@ -17,30 +16,12 @@ class OnboardingLanguageScreen extends ConsumerStatefulWidget {
 class _OnboardingLanguageScreenState extends ConsumerState<OnboardingLanguageScreen> {
   late String _selectedLang;
 
-  // 🌟 القائمة تحتوي على الاسم الأصلي فقط، أما الترجمة فستأتي من القاموس
   final Map<String, String> _appLanguages = {
-    'tr': 'Türkçe',
-    'ru': 'Русский',
-    'ur': 'اردو',
-    'ar': 'العربية',
-    'hi': 'हिन्दी',
-    'bn': 'বাংলা',
-    'th': 'ไทย',
-    'ja': '日本語',
-    'zh': '中文 (简体)',
-    'ug': 'ئۇيغۇرچە',
-    'pt': 'Português',
-    'ff': 'Pulaar',
-    'az': 'Azərbaycanca',
-    'id': 'Bahasa Indonesia',
-    'ms': 'Bahasa Melayu',
-    'da': 'Dansk',
-    'de': 'Deutsch',
-    'en': 'English',
-    'es': 'Español',
-    'fr': 'Français',
-    'it': 'Italiano',
-    'nl': 'Nederlands',
+    'tr': 'Türkçe', 'ru': 'Русский', 'ur': 'اردو', 'ar': 'العربية', 'hi': 'हिन्दी',
+    'bn': 'বাংলা', 'th': 'ไทย', 'ja': '日本語', 'zh': '中文 (简体)', 'ug': 'ئۇيغۇرچە',
+    'pt': 'Português', 'ff': 'Pulaar', 'az': 'Azərbaycanca', 'id': 'Bahasa Indonesia',
+    'ms': 'Bahasa Melayu', 'da': 'Dansk', 'de': 'Deutsch', 'en': 'English',
+    'es': 'Español', 'fr': 'Français', 'it': 'Italiano', 'nl': 'Nederlands',
   };
 
   @override
@@ -88,7 +69,9 @@ class _OnboardingLanguageScreenState extends ConsumerState<OnboardingLanguageScr
                   HapticFeedback.mediumImpact();
                   await ref.read(settingsProvider.notifier).updateLanguage(_selectedLang);
                   if (!context.mounted) return;
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingLocationScreen()));
+                  
+                  // 🌟 توجيه المستخدم لشاشة الموقع لإكمال الإعداد
+                  context.push('/onboarding-location');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
@@ -114,7 +97,6 @@ class _OnboardingLanguageScreenState extends ConsumerState<OnboardingLanguageScr
           onTap: () async {
             HapticFeedback.selectionClick();
             setState(() => _selectedLang = code);
-            // 🌟 تحديث لغة التطبيق بالكامل فوراً عند الضغط
             await context.setLocale(Locale(code));
           },
           child: Padding(
@@ -129,7 +111,6 @@ class _OnboardingLanguageScreenState extends ConsumerState<OnboardingLanguageScr
                     children: [
                       Text(nativeName, style: TextStyle(color: textColor, fontSize: 16, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                       const SizedBox(height: 4),
-                      // 🌟 الترجمة تأتي من القاموس وتتحدث فوراً (مثال: التركية -> Turkish)
                       Text('languages.$code'.tr(), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 13)),
                     ],
                   ),
