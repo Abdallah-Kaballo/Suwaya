@@ -19,10 +19,10 @@ class StatsScreen extends ConsumerStatefulWidget {
 
 class _StatsScreenState extends ConsumerState<StatsScreen> {
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() => ref.read(statsProvider.notifier).refreshStats());
-  }
+void initState() {
+  super.initState();
+  Future.microtask(() => ref.read(statsProvider.notifier).refreshStats()); 
+}
 
   @override
   Widget build(BuildContext context) {

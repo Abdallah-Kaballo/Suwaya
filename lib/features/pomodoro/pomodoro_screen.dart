@@ -7,11 +7,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/theme/astro_ui_extensions.dart'; 
 import '../../shared/widgets/app_drawer.dart';
 import '../../core/providers/ui_providers.dart'; 
 
 final pomodoroModeProvider = StateProvider<int>((ref) => 1);
+
+Color _getSafePeriodColor(int id) {
+  switch (id) {
+    case 1: return const Color(0xFF64B5F6);
+    case 2: return Colors.orangeAccent;
+    case 3: return const Color(0xFFFFCA28);
+    case 4: return const Color(0xFFFF9800);
+    case 5: return const Color(0xFFE53935);
+    case 6: return const Color(0xFF3F51B5);
+    case 7: return const Color(0xFF1A237E);
+    default: return Colors.grey;
+  }
+}
 
 class PomodoroScreen extends ConsumerStatefulWidget {
   const PomodoroScreen({super.key});
@@ -33,20 +45,16 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
 
   void _startDynamicTimer() {
     _timer?.cancel();
-    
     final astro = ref.read(astroProvider);
     if (astro.periods.isEmpty) return;
     
     _currentPeriodId = astro.currentPeriod.id;
-    
     final speed = astro.timeSpeedMultiplier;
     final msPerVirtualSec = speed > 0 ? (1000 / speed).round() : 1000;
 
     _updateTime(); 
-
     _timer = Timer.periodic(Duration(milliseconds: msPerVirtualSec), (_) {
       final currentAstro = ref.read(astroProvider);
-      
       if (currentAstro.currentPeriod.id != _currentPeriodId) {
          _startDynamicTimer();
          return;
@@ -58,11 +66,9 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
   void _updateTime() {
     final astro = ref.read(astroProvider);
     if (astro.periods.isEmpty) return;
-    
     final now = DateTime.now();
     final realDiff = now.difference(astro.currentPeriod.startTime);
     final virtualSeconds = (realDiff.inMicroseconds / 1000000.0) * astro.timeSpeedMultiplier;
-    
     _exactElapsedSecs.value = virtualSeconds;
   }
 
@@ -78,7 +84,8 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final surfaceColor = Theme.of(context).cardColor;
-    final pColor = astroState.currentPeriod.uiColor.adapt(context);
+    
+    final pColor = _getSafePeriodColor(astroState.currentPeriod.id);
 
     final speed = astroState.timeSpeedMultiplier;
     final actualTotalSecs = speed > 0 ? (1800 / speed).round() : 1800;
@@ -97,7 +104,8 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
       default: currentPeriodName = astroState.currentPeriod.nameKey.tr();
     }
 
-    final currentTimeStr = DateFormat('HH:mm').format(DateTime.now());
+    final currentTimeStr = astroState.currentFormattedVirtualTime;
+    final int displaySuwaya = astroState.currentSuwaya;
 
     showDialog(
       context: context,
@@ -111,20 +119,20 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
             children: [
               Icon(LucideIcons.info, color: pColor, size: 32),
               const SizedBox(height: 16),
-              Text('معلومات السويعة', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('pomodoro.suwaya_info'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 24),
-              _buildInfoRow('الوقت الآن', currentTimeStr, textColor, pColor),
-              _buildInfoRow('الفترة', currentPeriodName, textColor, pColor),
-              _buildInfoRow('السويعة', '${astroState.currentSuwaya} من ${astroState.currentPeriod.suwayasCount}', textColor, pColor),
-              _buildInfoRow('سرعة الوقت', '${speed.toStringAsFixed(2)}x', textColor, pColor),
-              _buildInfoRow('الطول الفعلي للسويعة', '$actMins:$actSecs', textColor, pColor),
+              _buildInfoRow('pomodoro.current_time'.tr(), currentTimeStr, textColor, pColor),
+              _buildInfoRow('common.period'.tr(), currentPeriodName, textColor, pColor),
+              _buildInfoRow('common.suwaya'.tr(), '$displaySuwaya ${'common.of'.tr()} ${astroState.currentPeriod.suwayasCount}', textColor, pColor),
+              _buildInfoRow('pomodoro.time_speed'.tr(), '${speed.toStringAsFixed(2)}x', textColor, pColor),
+              _buildInfoRow('pomodoro.actual_length'.tr(), '$actMins:$actSecs', textColor, pColor),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: pColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('حسناً', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -141,7 +149,7 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title, style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 14)),
-          Text(value, style: TextStyle(color: pColor, fontSize: 14, fontWeight: FontWeight.bold)),
+          Text(value, style: TextStyle(color: pColor, fontSize: 14, fontWeight: FontWeight.normal)),
         ],
       ),
     );
@@ -163,11 +171,11 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('تخصيص السويعة', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('pomodoro.customize_suwaya'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 24),
-              _buildModeOption(ctx, 0, currentMode, 'تركيز مطلق', '30 دقيقة تركيز متواصلة', '30/0', activeColor, textColor),
-              _buildModeOption(ctx, 1, currentMode, 'متوازن (الافتراضي)', '25 دقيقة تركيز + 5 دقائق راحة', '25/5', activeColor, textColor),
-              _buildModeOption(ctx, 2, currentMode, 'مريح', '20 دقيقة تركيز + 10 دقائق راحة', '20/10', activeColor, textColor),
+              _buildModeOption(ctx, 0, currentMode, 'pomodoro.absolute_focus'.tr(), 'pomodoro.absolute_focus_desc'.tr(), '30/0', activeColor, textColor),
+              _buildModeOption(ctx, 1, currentMode, 'pomodoro.balanced_default'.tr(), 'pomodoro.balanced_desc'.tr(), '25/5', activeColor, textColor),
+              _buildModeOption(ctx, 2, currentMode, 'pomodoro.relaxed'.tr(), 'pomodoro.relaxed_desc'.tr(), '20/10', activeColor, textColor),
             ],
           ),
         ),
@@ -208,14 +216,10 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
       return Scaffold(backgroundColor: scaffoldBgColor, body: const Center(child: CircularProgressIndicator()));
     }
 
-    final currentPeriod = astroState.currentPeriod;
     const totalSuwayaSecs = 1800; 
-    
     int focusDuration = 1500; 
     if (mode == 0) focusDuration = 1800; 
     if (mode == 2) focusDuration = 1200; 
-
-    final periodColor = currentPeriod.uiColor.adapt(context);
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
@@ -230,11 +234,12 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
-        // 🌟 إزالة النص العلوي وإضافة زر الـ Info
         actions: [
-          IconButton(
-            icon: Icon(LucideIcons.info, color: textColor.withValues(alpha: 0.5)),
-            onPressed: () => _showInfoDialog(context, astroState),
+          Builder(
+            builder: (ctx) => IconButton(
+              icon: Icon(LucideIcons.info, color: textColor.withValues(alpha: 0.5)),
+              onPressed: () => _showInfoDialog(ctx, astroState),
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -243,90 +248,85 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
         child: ValueListenableBuilder<double>(
           valueListenable: _exactElapsedSecs,
           builder: (context, exactElapsed, child) {
-            final int elapsedSecs = exactElapsed.floor() % totalSuwayaSecs;
-            final isBreak = elapsedSecs >= focusDuration;
-            final remainingSecs = isBreak ? (totalSuwayaSecs - elapsedSecs) : (focusDuration - elapsedSecs);
+            final double elapsedDouble = exactElapsed % totalSuwayaSecs;
+            final int elapsedSecs = elapsedDouble.floor();
+            final breakStatus = elapsedSecs >= focusDuration;
+            final remainingSecs = breakStatus ? (totalSuwayaSecs - elapsedSecs) : (focusDuration - elapsedSecs);
             
-            final double globalProgress = (exactElapsed % totalSuwayaSecs) / totalSuwayaSecs;
-            
+            // 🌟 الفكرة الجديدة: حساب تقدم الدائرة كدائرة كاملة لكل مرحلة
+            double phaseProgress = 0.0;
+            if (!breakStatus) {
+              phaseProgress = elapsedDouble / focusDuration;
+            } else {
+              final double breakTotal = (totalSuwayaSecs - focusDuration).toDouble();
+              final double breakElapsed = elapsedDouble - focusDuration;
+              phaseProgress = breakTotal > 0 ? (breakElapsed / breakTotal) : 0.0;
+            }
+
             final m = (remainingSecs ~/ 60).toString().padLeft(2, '0');
             final s = (remainingSecs % 60).toString().padLeft(2, '0');
+            
+            final activeColor = breakStatus ? const Color(0xFF64B5F6) : const Color(0xFFE53935);
 
-            final activeColor = isBreak ? const Color(0xFF64B5F6) : periodColor;
-
-            return Column(
-              children: [
-                const Spacer(flex: 2),
-                
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 320, height: 320,
-                      child: CustomPaint(
-                        painter: _ZenTimerPainter(
-                          progress: globalProgress,
-                          activeColor: activeColor,
-                          isDark: isDark,
-                        ),
+            return SizedBox(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 2),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 320, height: 320,
+                        // 🌟 تمرير التقدم المنفصل إلى رسام الدائرة
+                        child: CustomPaint(painter: _ZenTimerPainter(progress: phaseProgress, activeColor: activeColor, isDark: isDark)),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text('$m:$s', style: TextStyle(fontSize: 84, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=4.0..color=Colors.white)),
+                              Text('$m:$s', style: const TextStyle(fontSize: 84, fontWeight: FontWeight.normal, color: Color(0xFFF2C94C), fontFamily: 'Playfair Display')),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(breakStatus ? LucideIcons.coffee : LucideIcons.sparkles, color: activeColor, size: 16),
+                              const SizedBox(width: 8),
+                              Text(
+                                breakStatus ? 'pomodoro.deep_relaxation'.tr() : 'pomodoro.in_flow'.tr(),
+                                style: TextStyle(color: activeColor, fontSize: 15, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 48),
+                  GestureDetector(
+                    onTap: () => _showModeSheet(context, mode, activeColor),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(color: activeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: activeColor.withValues(alpha: 0.3))),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.sliders_horizontal, color: activeColor, size: 16),
+                          const SizedBox(width: 8),
+                          Text('pomodoro.focus_rest'.tr(), style: TextStyle(color: activeColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                        ],
                       ),
                     ),
-                    
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Text('$m:$s', style: TextStyle(fontSize: 84, fontWeight: FontWeight.w400, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=4.0..color=Colors.white)),
-                            Text('$m:$s', style: const TextStyle(fontSize: 84, fontWeight: FontWeight.w400, color: Color(0xFFF2C94C), fontFamily: 'Playfair Display')),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(isBreak ? LucideIcons.coffee : LucideIcons.sparkles, color: activeColor, size: 16),
-                            const SizedBox(width: 8),
-                            Text(
-                              isBreak ? 'pomodoro.deep_relaxation'.tr() : 'pomodoro.in_flow'.tr(),
-                              style: TextStyle(color: activeColor, fontSize: 15, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // 🌟 زر اختيار النمط الصغير (تركيز/راحة)
-                GestureDetector(
-                  onTap: () => _showModeSheet(context, mode, activeColor),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: activeColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: activeColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(LucideIcons.sliders_horizontal, color: activeColor, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'تركيز / راحة',
-                          style: TextStyle(color: activeColor, fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
                   ),
-                ),
-                
-                const Spacer(flex: 3),
-              ],
+                  const Spacer(flex: 3),
+                ],
+              ),
             );
           }
         ),
@@ -347,34 +347,16 @@ class _ZenTimerPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    final trackPaint = Paint()
-      ..color = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0;
+    final trackPaint = Paint()..color = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)..style = PaintingStyle.stroke..strokeWidth = 3.0;
     canvas.drawCircle(center, radius, trackPaint);
 
-    final progressPaint = Paint()
-      ..color = activeColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6.0
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      progress * 2 * pi,
-      false,
-      progressPaint,
-    );
+    final progressPaint = Paint()..color = activeColor..style = PaintingStyle.stroke..strokeWidth = 6.0..strokeCap = StrokeCap.round;
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -pi / 2, progress * 2 * pi, false, progressPaint);
 
     final knobAngle = -pi / 2 + (progress * 2 * pi);
-    final knobCenter = Offset(
-      center.dx + cos(knobAngle) * radius,
-      center.dy + sin(knobAngle) * radius,
-    );
+    final knobCenter = Offset(center.dx + cos(knobAngle) * radius, center.dy + sin(knobAngle) * radius);
     canvas.drawCircle(knobCenter, 8, Paint()..color = activeColor);
     canvas.drawCircle(knobCenter, 4, Paint()..color = isDark ? Colors.black : Colors.white);
   }
-
-  @override
-  bool shouldRepaint(covariant _ZenTimerPainter old) => old.progress != progress || old.activeColor != activeColor || old.isDark != isDark;
+  @override bool shouldRepaint(covariant _ZenTimerPainter old) => old.progress != progress || old.activeColor != activeColor || old.isDark != isDark;
 }

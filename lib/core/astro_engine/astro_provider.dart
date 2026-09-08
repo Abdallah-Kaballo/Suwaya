@@ -9,8 +9,18 @@ import '../../features/settings/settings_provider.dart';
 import 'astro_models.dart';
 import 'suwaya_time_engine.dart';
 
+// 🌟 1. "المزود السريع" (Fast Clock)
+// هذا المتغير سيتحدث كل ثانية، ويتم الاستماع له في الواجهة باستخدام ValueListenableBuilder
+// مما يمنع إعادة بناء الشاشات بالكامل ويحافظ على البطارية!
+final virtualTimeNotifier = ValueNotifier<String>("00:00:00");
+
+// 🌟 2. الذاكرة المؤقتة (Cache) لمنع الحسابات المعقدة المتكررة (حل النقطة 3)
+final Map<String, SuwayaDay> _dayCache = {};
+
 class AstroNotifier extends Notifier<AstroState> {
   Timer? _timer;
+  int _lastPeriodId = -1;
+  int _lastSuwaya = -1;
 
   Duration _getUtcOffsetForLocation(SavedLocation? loc) {
     if (loc == null || loc.isAutoLocation == true || loc.timezone == null) return DateTime.now().timeZoneOffset;
@@ -34,12 +44,12 @@ class AstroNotifier extends Notifier<AstroState> {
 
   @override
   AstroState build() {
-    ref.watch(settingsProvider.select((s) {
-      String fingerprint = '${s.activeLocation?.latitude}_${s.activeLocation?.longitude}_${s.calculationMethod}_${s.madhab}_${s.highLatitudeRule}_${s.customFajrAngle}_${s.customIshaAngle}';
+    final fingerprint = ref.watch(settingsProvider.select((s) {
+      String f = '${s.activeLocation?.latitude}_${s.activeLocation?.longitude}_${s.calculationMethod}_${s.madhab}_${s.highLatitudeRule}_${s.customFajrAngle}_${s.customIshaAngle}';
       for (var c in s.periodConfigs) {
-        fingerprint += '_${c.periodId}:${c.manualOffsetMinutes}';
+        f += '_${c.periodId}:${c.manualOffsetMinutes}';
       }
-      return fingerprint;
+      return f;
     }));
 
     final settings = ref.read(settingsProvider);
@@ -63,31 +73,46 @@ class AstroNotifier extends Notifier<AstroState> {
       final madhabEnum = settings.madhab.toMadhab();
       final highLatEnum = settings.highLatitudeRule.toHighLatRule();
 
-      // 🌟 الاعتماد الكلي على المحرك المستقل
-      SuwayaDay generatedDay = SuwayaTimeEngine.generateDay(
-        loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, dateToGenerate, 
-        methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-        cityOffset, manualOffsets: manualOffsetsMap 
-      );
+      SuwayaDay generatedDay;
+      
+      // 🌟 دالة مساعدة لتوليد أو جلب اليوم من الذاكرة المؤقتة
+      SuwayaDay getOrGenerateDay(DateTime date) {
+        final String cacheKey = '${date.year}-${date.month}-${date.day}_$fingerprint';
+        if (_dayCache.containsKey(cacheKey)) {
+          return _dayCache[cacheKey]!;
+        } else {
+          final newDay = SuwayaTimeEngine.generateDay(
+            loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, date, 
+            methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
+            cityOffset, manualOffsets: manualOffsetsMap 
+          );
+          // نحتفظ بـ 3 أيام فقط في الذاكرة لمنع امتلاء الـ RAM
+          if (_dayCache.length > 3) _dayCache.clear();
+          _dayCache[cacheKey] = newDay;
+          return newDay;
+        }
+      }
+
+      generatedDay = getOrGenerateDay(dateToGenerate);
 
       if (cityNow.isBefore(generatedDay.ibadatTimings.fajr)) {
         dateToGenerate = dateToGenerate.subtract(const Duration(days: 1));
-        generatedDay = SuwayaTimeEngine.generateDay(
-          loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, dateToGenerate, 
-          methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-          cityOffset, manualOffsets: manualOffsetsMap 
-        );
+        generatedDay = getOrGenerateDay(dateToGenerate);
       } else if (cityNow.isAfter(generatedDay.ibadatTimings.nextFajr) || cityNow.isAtSameMomentAs(generatedDay.ibadatTimings.nextFajr)) {
         dateToGenerate = dateToGenerate.add(const Duration(days: 1));
-        generatedDay = SuwayaTimeEngine.generateDay(
-          loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, dateToGenerate, 
-          methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-          cityOffset, manualOffsets: manualOffsetsMap 
-        );
+        generatedDay = getOrGenerateDay(dateToGenerate);
       }
 
+      final initialState = SuwayaTimeEngine.calculateCurrentState(generatedDay, cityNow);
+      
+      _lastPeriodId = initialState.currentPeriod.id;
+      _lastSuwaya = initialState.currentSuwaya;
+      
+      // تعيين الوقت الافتراضي فوراً
+      Future.microtask(() => virtualTimeNotifier.value = initialState.currentFormattedVirtualTime);
+
       _startTicker(generatedDay, loc);
-      return SuwayaTimeEngine.calculateCurrentState(generatedDay, cityNow);
+      return initialState;
       
     } catch (e) {
       debugPrint('AstroEngine Error: $e');
@@ -106,8 +131,18 @@ class AstroNotifier extends Notifier<AstroState> {
         Future.microtask(() => ref.invalidateSelf());
         return;
       }
-      // 🌟 المحرك يحسب اللحظة، والتطبيق يعرضها فقط
-      state = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
+      
+      final newState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
+      
+      // 🌟 1. التحديث السريع: تحديث النص فقط كل ثانية (سريع جداً وخفيف)
+      virtualTimeNotifier.value = newState.currentFormattedVirtualTime;
+
+      // 🌟 2. التحديث البطيء: إعادة بناء Riverpod والتطبيق تحدث فقط عند عبور سويعة جديدة!
+      if (_lastPeriodId != newState.currentPeriod.id || _lastSuwaya != newState.currentSuwaya) {
+         _lastPeriodId = newState.currentPeriod.id;
+         _lastSuwaya = newState.currentSuwaya;
+         state = newState; // هنا يتم إخبار التطبيق بإعادة البناء
+      }
     });
   }
 

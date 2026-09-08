@@ -16,7 +16,8 @@
   "home": {
     "night_of": "ليلة", "day_of": "نهار", "civil_time": "الوقت المدني", "astro_time": "الوقت الفلكي",
     "dial_indicators": "مؤشرات المهام على القرص:", "period_tasks": "مهام هذه الفترة", "manage_periods": "إدارة الفترات",
-    "no_tasks": "لا توجد مهام حالياً، استمتع بوقتك!"
+    "no_tasks": "لا توجد مهام حالياً، استمتع بوقتك!", "period_info": "معلومات الفترة",
+    "suwayas_count": "عدد سويعاتها"
   },
   "details": {
     "total_length": "الطول الكلي:", "start": "البداية", "end": "النهاية", "suwaya_length": "طول السويعة",
@@ -160,12 +161,7 @@
     "lat_validation_error": "خط العرض غير صحيح (يجب أن يكون بين -90 و 90)", "lng_validation_error": "خط الطول غير صحيح (يجب أن يكون بين -180 و 180)",
     "location_updated": "تم تحديث الموقع الجغرافي بنجاح"
   },
-  "pomodoro": {
-    "break_remaining": "متبقي من الراحة", "focus_remaining": "متبقي من التركيز",
-    "deep_relaxation": "استرخاء عميق", "in_flow": "في حالة تدفق",
-    "absolute_focus": "تركيز مطلق\n30/0", "balanced": "متوازن\n25/5", "relaxed": "مريح\n20/10",
-    "no_tasks": "لا توجد مهام مخصصة لهذه السويعة", "focus_now_on": "ركز الآن على:"
-  },
+  
   "nav": {
     "home": "الرئيسية", "tasks": "المهام", "pomodoro": "التركيز", "ibadat": "العبادات"
   },
@@ -213,5 +209,28 @@
     "focus_time": "وقت التركيز",
     "hours": "ساعة",
     "weekly_overview": "نظرة عامة على الأسبوع"
+  },
+
+  "pomodoro": {
+    "suwaya_info": "معلومات السويعة",
+    "current_time": "الوقت الآن",
+    "time_speed": "سرعة الوقت",
+    "actual_length": "الطول الفعلي للسويعة",
+    "customize_suwaya": "تخصيص السويعة",
+    "absolute_focus": "تركيز مطلق",
+    "absolute_focus_desc": "30 دقيقة تركيز متواصلة",
+    "balanced_default": "متوازن (الافتراضي)",
+    "balanced_desc": "25 دقيقة تركيز + 5 دقائق راحة",
+    "relaxed": "مريح",
+    "relaxed_desc": "20 دقيقة تركيز + 10 دقائق راحة",
+    "focus_rest": "تركيز / راحة",
+    "in_flow": "في حالة تدفق",
+    "break_remaining": "متبقي من الراحة", 
+    "focus_remaining": "متبقي من التركيز",
+    "deep_relaxation": "استرخاء عميق", 
+    "balanced": "متوازن\n25/5", 
+    "no_tasks": "لا توجد مهام مخصصة لهذه السويعة", 
+    "focus_now_on": "ركز الآن على:"
   }
+    
 }

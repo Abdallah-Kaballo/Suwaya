@@ -20,7 +20,6 @@ import '../../core/providers/ui_providers.dart';
 import '../../shared/widgets/task_card.dart';
 import 'widgets/location_header.dart'; 
 import 'widgets/premium_astro_dial.dart'; 
-import 'widgets/period_details_sheet.dart';
 import '../routines/widgets/routines_list_sheet.dart';
 import 'widgets/mini_astro_dial.dart';
 import '../../shared/widgets/app_drawer.dart';
@@ -39,8 +38,121 @@ Color getNeonColorForCategory(TaskCategory category) {
   return const Color(0xFF18FFFF);
 }
 
+// 🌟 دالة مساعدة للحصول على ألوان الفترات بأمان
+Color _getSafePeriodColor(int id) {
+  switch (id) {
+    case 1: return const Color(0xFF64B5F6);
+    case 2: return Colors.orangeAccent;
+    case 3: return const Color(0xFFFFCA28);
+    case 4: return const Color(0xFFFF9800);
+    case 5: return const Color(0xFFE53935);
+    case 6: return const Color(0xFF3F51B5);
+    case 7: return const Color(0xFF1A237E);
+    default: return Colors.grey;
+  }
+}
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  Widget _buildInfoRow(String title, String value, Color textColor, Color pColor) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 14)),
+          Text(value, style: TextStyle(color: pColor, fontSize: 14, fontWeight: FontWeight.normal)),
+        ],
+      ),
+    );
+  }
+
+  // 🌟 شاشة Info الجديدة للقرص (تستبدل الشاشة السفلية القديمة)
+  void _showPeriodInfoDialog(BuildContext context, AstroPeriod period, AstroState astroState) {
+    HapticFeedback.lightImpact();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final surfaceColor = Theme.of(context).cardColor;
+    
+    final pColor = _getSafePeriodColor(period.id);
+
+    // حساب الطول الفعلي والسرعة
+    final durationMicro = period.endTime.difference(period.startTime).inMicroseconds;
+    final suwayaMicro = durationMicro ~/ (period.suwayasCount > 0 ? period.suwayasCount : 1);
+    final durationSecs = suwayaMicro ~/ 1000000;
+    final sMins = durationSecs ~/ 60;
+    final sSecs = durationSecs % 60;
+    final actualLengthStr = '${sMins.toString().padLeft(2, '0')}:${sSecs.toString().padLeft(2, '0')}';
+
+    final periodMins = durationMicro ~/ 60000000;
+    final virtualMins = period.suwayasCount * 30.0;
+    double speed = periodMins > 0 ? (virtualMins / periodMins) : 1.0;
+
+    // حساب السويعة التراكمية الصحيحة
+    int startGlobalSuwaya = 0;
+    for (var p in astroState.periods) {
+      if (p.id == period.id) break;
+      startGlobalSuwaya += p.suwayasCount;
+    }
+    int endGlobalSuwaya = startGlobalSuwaya + period.suwayasCount - 1;
+
+    String periodName = '';
+    switch(period.id) {
+      case 1: periodName = 'periods.fajr'.tr(); break;
+      case 2: periodName = 'periods.duha'.tr(); break;
+      case 3: periodName = 'periods.dhuhr'.tr(); break;
+      case 4: periodName = 'periods.asr'.tr(); break;
+      case 5: periodName = 'periods.maghrib'.tr(); break;
+      case 6: periodName = 'periods.middle_third'.tr(); break;
+      case 7: periodName = 'periods.last_third'.tr(); break;
+      default: periodName = period.nameKey.tr();
+    }
+
+    final langCode = context.locale.languageCode;
+    final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
+    final startCivil = DateFormat('hh:mm a', safeIntl).format(period.startTime);
+    final endCivil = DateFormat('hh:mm a', safeIntl).format(period.endTime);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: surfaceColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.info, color: pColor, size: 32),
+              const SizedBox(height: 16),
+              Text('home.period_info'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              _buildInfoRow('common.period'.tr(), periodName, textColor, pColor),
+              _buildInfoRow('home.suwayas_count'.tr(), period.suwayasCount.toString(), textColor, pColor),
+              _buildInfoRow('pomodoro.actual_length'.tr(), actualLengthStr, textColor, pColor),
+              _buildInfoRow('pomodoro.time_speed'.tr(), '${speed.toStringAsFixed(2)}x', textColor, pColor),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Divider(color: Colors.white12),
+              ),
+              _buildInfoRow('details.start'.tr(), '${'common.suwaya'.tr()} ${startGlobalSuwaya.toString().padLeft(2, '0')} / $startCivil', textColor, pColor),
+              _buildInfoRow('details.end'.tr(), '${'common.suwaya'.tr()} ${endGlobalSuwaya.toString().padLeft(2, '0')} / $endCivil', textColor, pColor),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: pColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+  }
 
   DateTime _getCityTime(SettingsModel settings) {
     final loc = settings.activeLocation;
@@ -112,55 +224,23 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Stack(
                       children: [
-                        Text(dayNightStr, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
-                        Text(dayNightStr, style: TextStyle(color: pColor, fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal')),
-                      ],
-                    ),
-                    Stack(
-                      children: [
-                        Text(' • $gregorianDate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
-                        Text(' • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal')),
+                        Text(dayNightStr, style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
+                        Text(dayNightStr, style: TextStyle(color: pColor, fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'Tajawal')),
                       ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text('$hijriStr ${'common.ah'.tr()}', style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', letterSpacing: 0.5)),
-                const SizedBox(height: 16),
-                Row(
+                
+                Stack(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), 
-                      decoration: BoxDecoration(color: pColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: pColor.withValues(alpha: 0.3))),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('home.civil_time'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 10)), 
-                          const SizedBox(height: 2),
-                          Text(civilTime, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'Inter')), 
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), 
-                      decoration: BoxDecoration(color: pColor, borderRadius: BorderRadius.circular(10), boxShadow: [BoxShadow(color: pColor.withValues(alpha: 0.3), blurRadius: 4)]),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('home.astro_time'.tr(), style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 10)), 
-                          const SizedBox(height: 2),
-                          Stack(
-                            children: [
-                              Text(astroState.currentFormattedVirtualTime, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.8..color=Colors.white)), 
-                              Text(astroState.currentFormattedVirtualTime, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 17, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)), 
-                            ],
-                          ),
-                       ],
-                      ),
-                    ),
+                    Text('$civilTime • $gregorianDate', style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
+                    Text('$civilTime • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 16, fontWeight: FontWeight.normal, fontFamily: 'Tajawal')),
                   ],
                 ),
+                const SizedBox(height: 6),
+                
+                Text('$hijriStr ${'common.ah'.tr()}', style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', letterSpacing: 0.5)),
               ],
             ),
           ),
@@ -223,8 +303,9 @@ class HomeScreen extends ConsumerWidget {
                       child: PremiumAstroDial(
                         size: maxSize, 
                         routineArcs: routineArcs, 
+                        // 🌟 تم استبدال الشاشة السفلية بـ Dialog النافذة المنبثقة
                         onPeriodTapped: (period) {
-                          showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (context) => PeriodDetailsSheet(period: period, astroState: ref.read(astroProvider), tasks: ref.read(tasksProvider).todayTasks));
+                          _showPeriodInfoDialog(context, period, astroState);
                         },
                       ),
                     );
@@ -249,7 +330,6 @@ class HomeScreen extends ConsumerWidget {
                           spacing: 8, runSpacing: 10,
                           children: tasksForLegend.map((task) {
                             Color tColor = getNeonColorForCategory(task.category); 
-                            // 🌟 الاستماع للمهمة المتوهجة
                             final isHighlighted = ref.watch(highlightedTaskProvider) == task.id;
                             
                             return GestureDetector(

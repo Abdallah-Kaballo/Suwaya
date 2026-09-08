@@ -16,7 +16,8 @@
   "home": {
     "night_of": "Night of", "day_of": "Day of", "civil_time": "Civil Time", "astro_time": "Astro Time",
     "dial_indicators": "Task Indicators:", "period_tasks": "Period Tasks", "manage_periods": "Manage Periods",
-    "no_tasks": "No tasks currently, enjoy your time!"
+    "no_tasks": "No tasks currently, enjoy your time!", "period_info": "Period Info",
+    "suwayas_count": "Number of Suwayas"
   },
   "details": {
     "total_length": "Total Length:", "start": "Start", "end": "End", "suwaya_length": "Suwaya Length",
@@ -170,8 +171,20 @@
   "pomodoro": {
     "break_remaining": "Break Remaining", "focus_remaining": "Focus Remaining",
     "deep_relaxation": "Deep Relaxation", "in_flow": "In Flow State",
-    "absolute_focus": "Absolute\n30/0", "balanced": "Balanced\n25/5", "relaxed": "Relaxed\n20/10",
-    "no_tasks": "No tasks assigned for this Suwaya", "focus_now_on": "Focus now on:"
+    "balanced": "Balanced\n25/5", 
+    "no_tasks": "No tasks assigned for this Suwaya", "focus_now_on": "Focus now on:",
+    "suwaya_info": "Suwaya Info",
+    "current_time": "Current Time",
+    "time_speed": "Time Speed",
+    "actual_length": "Actual Length",
+    "customize_suwaya": "Customize Suwaya",
+    "absolute_focus": "Absolute Focus",
+    "absolute_focus_desc": "30 mins of deep work",
+    "balanced_default": "Balanced (Default)",
+    "balanced_desc": "25 mins focus + 5 mins break",
+    "relaxed": "Relaxed",
+    "relaxed_desc": "20 mins focus + 10 mins break",
+    "focus_rest": "Focus / Break"
   },
   "nav": {
     "home": "Home", "tasks": "Tasks", "pomodoro": "Focus", "ibadat": "Worship"

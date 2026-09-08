@@ -5,7 +5,6 @@ import 'package:isar_community/isar.dart';
 import 'package:suwaya/core/astro_engine/astro_models.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
-// 🌟 1. استيراد مزودات قاعدة البيانات والمستودع بدلاً من الخدمة الثابتة
 import '../../core/database/database_provider.dart';
 import '../../core/repositories/task_repository.dart';
 import '../../models/task_model.dart';
@@ -65,9 +64,9 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<List<String>> getUniqueTaskTitles() async {
-    // 🌟 استخدام المستودع عبر Riverpod
-    final all = await ref.read(taskRepositoryProvider).getAllTasks();
-    return all.map((t) => t.title).toSet().toList();
+    // 🌟 استخدام الدالة المحسنة لعدم إرهاق الذاكرة بآلاف المهام القديمة
+    final activeTasks = await ref.read(taskRepositoryProvider).getActiveTasks();
+    return activeTasks.map((t) => t.title).toSet().toList();
   }
 
   void _refreshFromMemory(List<TaskModel> allTasks) {
@@ -136,9 +135,9 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> loadTasks() async {
-    // 🌟 استخدام المستودع عبر Riverpod
-    final all = await ref.read(taskRepositoryProvider).getAllTasks();
-    _refreshFromMemory(all);
+    // 🌟 استبدال getAllTasks بـ getActiveTasks لحل مشكلة الأداء (النقطة 8)
+    final active = await ref.read(taskRepositoryProvider).getActiveTasks();
+    _refreshFromMemory(active);
   }
 
   Future<void> toggleTaskNotification(TaskModel task) async {
@@ -154,8 +153,9 @@ class TasksNotifier extends Notifier<TasksState> {
     task.isSynced = false;
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
-    // 🌟 استخدام المستودع عبر Riverpod
-    ref.read(taskRepositoryProvider).saveTask(task);
+    
+    // 🌟 إصلاح النقطة 5: انتظار الحفظ بقاعدة البيانات
+    await ref.read(taskRepositoryProvider).saveTask(task);
   }
 
   List<TaskModel> getTasksForDate(DateTime date) {
@@ -172,7 +172,7 @@ class TasksNotifier extends Notifier<TasksState> {
 
   Future<void> addTask(TaskModel task) async {
     task.isSynced = false;
-    // 🌟 استخدام المستودع عبر Riverpod
+    // 🌟 كانت هذه سليمة (تحتوي على await)
     await ref.read(taskRepositoryProvider).saveTask(task);
     final updatedList = [...state.allTasks.where((t) => t.id != task.id), task];
     _refreshFromMemory(updatedList);
@@ -181,8 +181,9 @@ class TasksNotifier extends Notifier<TasksState> {
   Future<void> deleteTask(int id) async {
     final updatedList = state.allTasks.where((t) => t.id != id).toList();
     _refreshFromMemory(updatedList);
-    // 🌟 استخدام المستودع عبر Riverpod
-    ref.read(taskRepositoryProvider).deleteTask(id);
+    
+    // 🌟 إصلاح النقطة 5: انتظار الحذف بقاعدة البيانات
+    await ref.read(taskRepositoryProvider).deleteTask(id);
     Alarm.stop(10000 + id); 
   }
 
@@ -190,8 +191,8 @@ class TasksNotifier extends Notifier<TasksState> {
     final updatedList = state.allTasks.where((t) => !ids.contains(t.id)).toList();
     _refreshFromMemory(updatedList);
     for (var id in ids) {
-      // 🌟 استخدام المستودع عبر Riverpod
-      ref.read(taskRepositoryProvider).deleteTask(id);
+      // 🌟 إصلاح النقطة 5: انتظار الحذف المتعدد بقاعدة البيانات
+      await ref.read(taskRepositoryProvider).deleteTask(id);
       Alarm.stop(10000 + id);
     }
   }
@@ -226,15 +227,16 @@ class TasksNotifier extends Notifier<TasksState> {
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
 
-    // 🌟 استخدام المستودع عبر Riverpod
-    ref.read(taskRepositoryProvider).saveTask(task).then((_) {
-      if (isAchievedNow) ref.read(settingsProvider.notifier).updateGlobalStreak();
-      _logActivity(task, isAchievedNow); 
-    });
+    // 🌟 إصلاح النقطة 5: انتظار الحفظ وتسجيل النشاط
+    await ref.read(taskRepositoryProvider).saveTask(task);
+    
+    if (isAchievedNow) {
+       ref.read(settingsProvider.notifier).updateGlobalStreak();
+    }
+    await _logActivity(task, isAchievedNow); 
   }
 
   Future<void> _logActivity(TaskModel task, bool isCompleted) async {
-    // 🌟 جلب قاعدة البيانات عبر Provider (الاستغناء عن الكائن الثابت)
     final db = ref.read(isarProvider);
     final now = DateTime.now();
     final todayStr = DateFormat('yyyy-MM-dd').format(now); 
@@ -277,8 +279,9 @@ class TasksNotifier extends Notifier<TasksState> {
 
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
-    // 🌟 استخدام المستودع عبر Riverpod
-    ref.read(taskRepositoryProvider).saveTask(task);
+    
+    // 🌟 إصلاح النقطة 5: انتظار إعادة الجدولة
+    await ref.read(taskRepositoryProvider).saveTask(task);
   }
 }
 

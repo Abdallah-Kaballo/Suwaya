@@ -1,68 +1,53 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:isar_community/isar.dart';
-import 'package:alarm/alarm.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:intl/date_symbol_data_local.dart';
-
-import '../database/database_service.dart';
-import '../location/geo_database_service.dart';
-import '../notification/notification_service.dart';
-import '../services/alarm_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:isar_community/isar.dart';
+import '../database/database_service.dart';
 
 class AppBootstrap {
   static Future<Isar> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
-    tz.initializeTimeZones();
-    _setupErrorHandlers();
-    
-    // تحميل ملف البيئة
-await dotenv.load(fileName: ".env");
+    await EasyLocalization.ensureInitialized();
 
-// تهيئة Supabase
-await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,
-      publishableKey: dotenv.env['SUPABASE_ANON_KEY']!,
-    );
-
-    await Alarm.init();
-    await AlarmService.init();
-
-    final results = await Future.wait([
-      DatabaseService.init(),
-      EasyLocalization.ensureInitialized(),
-      initializeDateFormatting(),
-    ]);
-
-    final isarInstance = results[0] as Isar;
-
-    await _initBackgroundServices(isarInstance);
-
-    return isarInstance;
-  }
-
-  static void _setupErrorHandlers() {
-    FlutterError.onError = (FlutterErrorDetails details) {
-      FlutterError.presentError(details);
-    };
     PlatformDispatcher.instance.onError = (error, stack) {
-      debugPrint('🚨 خطأ صامت: $error');
-      return true;
+      debugPrint('💥 [خطأ حرج غير معالج]: $error\n$stack');
+      return true; 
     };
-  }
 
-  static Future<void> _initBackgroundServices(Isar isar) async {
+    // 🌟 جلب كائن isar من قاعدة البيانات
+    final isar = await DatabaseService.init();
+
+    bool isEnvLoaded = false;
     try {
-      await NotificationService().init();
-
-      GeoDatabaseService.seedCountries(isar).catchError((error, stackTrace) {
-        debugPrint('⚠️ خطأ صامت في زراعة الدول: $error');
-      });
+      await dotenv.load(fileName: ".env");
+      isEnvLoaded = true;
+      debugPrint('✅ تم تحميل ملف .env بنجاح');
     } catch (e) {
-      debugPrint('⚠️ فشل في تحميل خدمات الخلفية: $e');
+      debugPrint('⚠️ [وضع الأوفلاين]: لم يتم العثور على ملف .env. سيعمل التطبيق محلياً فقط.');
     }
+
+    if (isEnvLoaded) {
+      try {
+        final supabaseUrl = dotenv.env['SUPABASE_URL'];
+        final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+        
+        if (supabaseUrl != null && supabaseAnonKey != null && supabaseUrl.isNotEmpty) {
+          await Supabase.initialize(
+            url: supabaseUrl,
+            publishableKey: supabaseAnonKey,
+          );
+          debugPrint('✅ تم الاتصال بخوادم Supabase بنجاح');
+        } else {
+          debugPrint('⚠️ [المزامنة معطلة]: مفاتيح Supabase غير مكتملة في ملف .env');
+        }
+      } catch (e) {
+        debugPrint('⚠️ [فشل سحابي]: تعذر الاتصال بـ Supabase، سيستمر التطبيق محلياً. السبب: $e');
+      }
+    }
+    
+    // 🌟 إرجاع الكائن لكي يستلمه ملف main.dart
+    return isar;
   }
 }

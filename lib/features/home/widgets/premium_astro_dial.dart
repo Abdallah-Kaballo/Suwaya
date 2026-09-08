@@ -555,8 +555,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
   }
 
   Widget _buildCentralTime(AstroState state, Color textColor, Color pColor, bool isDark) {
-    final virtualTime = state.currentFormattedVirtualTime;
-    final String suwayaText = '${'common.suwaya'.tr()} ${state.currentSuwaya} ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
+    // 🌟 الترقيم الآن يبدأ من 1 بشكل صحيح كما طلبت
+    final int displaySuwaya = state.currentSuwaya; 
+    final String suwayaText = '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
     
     String currentPeriodName = '';
     switch(state.currentPeriod.id) {
@@ -570,27 +571,36 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
       default: currentPeriodName = state.currentPeriod.nameKey.tr();
     }
 
+    // 🌟 إزالة إزاحة التحريك (Transform) وتغليف النصوص لتتمركز بامتياز داخل الدائرة السوداء
     return Directionality(
       textDirection: ui.TextDirection.ltr,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Stack(
             children: [
-              Text(suwayaText, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.55..color=Colors.white)),
-              Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
+              Text(suwayaText, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.8..color=Colors.white)),
+              Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
             ],
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Text(currentPeriodName, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w900, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)])),
-          const SizedBox(height: 4),
-          Stack(
-            children: [
-              Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 1.6..color = Colors.white)),
-              Text(virtualTime, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: astroGold, fontFamily: 'Playfair Display', letterSpacing: 2.0)),
-            ],
+          const SizedBox(height: 2),
+          
+          ValueListenableBuilder<String>(
+            valueListenable: virtualTimeNotifier,
+            builder: (context, virtualTime, child) {
+              return Stack(
+                children: [
+                  Text(virtualTime, style: TextStyle(fontSize: 32, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 1.6..color = Colors.white)),
+                  Text(virtualTime, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.normal, color: astroGold, fontFamily: 'Playfair Display', letterSpacing: 2.0)),
+                ],
+              );
+            }
           ),
-          const SizedBox(height: 4),
+          
+          const SizedBox(height: 2),
           const TimeSpeedIndicator(), 
         ],
       ),
@@ -620,8 +630,8 @@ class TimeSpeedIndicator extends ConsumerWidget {
           const SizedBox(width: 4),
           Stack(
             children: [
-              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=2..color=strokeColor)),
-              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(color: pColor, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=2..color=strokeColor)),
+              Text('${speedMultiplier.toStringAsFixed(1)}x', style: TextStyle(color: pColor, fontSize: 11, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
             ],
           ),
         ],
@@ -1073,25 +1083,20 @@ class OuterRingPainter extends CustomPainter {
         canvas.rotate(lineAngle + pi/2); 
         
         if (design != DialDesign.minimal) {
-          canvas.drawLine(Offset(0, -pinStart), Offset(0, -pinEnd), Paint()..color = goldBase..strokeWidth = 2.0..strokeCap = StrokeCap.round);
+          // 🌟 تلوين خط السويعة بالأبيض
+          canvas.drawLine(Offset(0, -pinStart), Offset(0, -pinEnd), Paint()..color = Colors.white..strokeWidth = 2.0..strokeCap = StrokeCap.round);
         }
-        canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = goldLight);
+        // 🌟 تلوين النقطة بالأبيض
+        canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = Colors.white);
 
         if (design != DialDesign.minimal || globalLineIndex % 5 == 0) {
-          
           textPainter.text = TextSpan(
             text: globalLineIndex.toString().padLeft(2, '0'), 
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.65..color=Colors.white)
+            // 🌟 تلوين النص الخارجي بالأبيض
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: [Shadow(color: Colors.black, blurRadius: 4)])
           );
           textPainter.layout();
           canvas.translate(0, -textR);
-          textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
-
-          textPainter.text = TextSpan(
-            text: globalLineIndex.toString().padLeft(2, '0'), 
-            style: const TextStyle(color: astroGold, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: [Shadow(color: Colors.black, blurRadius: 4)])
-          );
-          textPainter.layout();
           textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
         }
         

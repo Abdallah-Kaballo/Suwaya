@@ -9,7 +9,6 @@ import '../../models/routine_model.dart';
 import '../../models/activity_log_model.dart';
 
 class DatabaseService {
-  // 🌟 لم يعد هناك كائن static! الخدمة تقوم بالتهيئة وتعيد الكائن فقط.
   static Future<Isar> init() async {
     final dir = await getApplicationDocumentsDirectory();
     Isar isar;
@@ -29,9 +28,15 @@ class DatabaseService {
     } catch (e) {
       debugPrint('🚨 فشل فتح قاعدة البيانات: $e');
       try {
-        // محاولة الفتح كخيار بديل (Fallback)
+        // 🌟 تم إصلاح النقطة 2: تضمين ActivityLogSchema في وضع الـ Fallback لتجنب انهيار التطبيق
         isar = await Isar.open(
-          [TaskModelSchema, SettingsModelSchema, GeoCountrySchema, RoutineModelSchema],
+          [
+            TaskModelSchema, 
+            SettingsModelSchema, 
+            GeoCountrySchema, 
+            RoutineModelSchema, 
+            ActivityLogSchema // 🌟 إضافة الجدول المفقود هنا
+          ],
           directory: dir.path,
           inspector: !kReleaseMode,
         );

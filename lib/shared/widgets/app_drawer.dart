@@ -206,7 +206,7 @@ class AppDrawer extends ConsumerWidget {
                   }),
                   _buildDrawerItem(context, LucideIcons.book_open, 'drawer.faq'.tr(), () {}),
                   _buildDrawerItem(context, LucideIcons.mail, 'drawer.contact'.tr(), () {
-                    _launchUrl('mailto:support@suwaya.com');
+                    _launchUrl('mailto:suwaya2026@gmail.com');
                   }),
                   
                   Padding(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), child: Text('drawer.about_app'.tr(), style: TextStyle(color: primaryColor, fontSize: 12, fontWeight: FontWeight.bold))),

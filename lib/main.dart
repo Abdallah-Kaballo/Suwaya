@@ -13,7 +13,7 @@ import 'core/router/app_router.dart';
 
 void main() async {
   try {
-    final isar = await AppBootstrap.initialize();
+    final isar = await AppBootstrap.initialize(); // 🌟 هذا هو السطر الذي يحل الخطأ
 
     runApp(
       ProviderScope(

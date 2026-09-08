@@ -15,8 +15,6 @@ import '../astro_engine/astro_engine.dart';
 import '../astro_engine/astro_models.dart'; 
 import 'notification_service.dart';
 
-final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
-
 final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
   final notifService = ref.read(notificationServiceProvider);
   final scheduler = NotificationScheduler(notifService);
@@ -93,11 +91,13 @@ class NotificationScheduler {
 
   Future<void> scheduleAhead(SettingsModel settings, List<TaskModel> allTasks, List<RoutineModel> routines) async {
     if (_isScheduling) return;
-    _isScheduling = true;
-
+    
+    // 🌟 بدء نطاق الـ try قبل تغيير الحالة، لضمان عمل الـ finally دائماً
     try {
+      _isScheduling = true;
+
       final loc = settings.activeLocation;
-      if (loc == null) return; 
+      if (loc == null) return; // الآن هذا الخروج المباشر آمن تماماً!
 
       final activeAlarms = await Alarm.getAlarms();
       final activeAlarmMap = {for (var a in activeAlarms) a.id: a};
@@ -114,7 +114,6 @@ class NotificationScheduler {
       final double lat = loc.latitude;
       final double lng = loc.longitude;
       
-      // 🌟 تحويل النصوص إلى أنواع آمنة (Enums) باستخدام أدوات التحويل التي أنشأناها
       final CalculationMethodType calcMethod = settings.calculationMethod.toCalculationMethod();
       final MadhabType madhab = settings.madhab.toMadhab();
       final HighLatitudeRuleType hlRule = settings.highLatitudeRule.toHighLatRule();
@@ -458,6 +457,7 @@ class NotificationScheduler {
          }
       }
     } finally {
+      // 🌟 الآن نحن واثقون بنسبة 100% أن القفل سيُفتح مجدداً مهما حدث من أخطاء أو خروج!
       _isScheduling = false;
     }
   }

@@ -421,7 +421,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                   )
                 else if (tempMode == 1)
                   // 🌟 عرض عجلة السويعات التراكمية لتبدأ من 1 بدلاً من 0
-                  _DoubleWheelPicker(isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya + 1, initialVal2: tVirtualMinute, min1: 1, max1: 48, max2: 30, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s - 1; tVirtualMinute = m; })
+                  _DoubleWheelPicker(isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya + 1, initialVal2: tVirtualMinute, min1: 0, max1: 47, max2: 29, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s - 1; tVirtualMinute = m; })
                 else
                   _DoubleWheelPicker(isAstro: false, label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tCivilHour, initialVal2: tCivilMinute, min1: 0, max1: 23, max2: 59, textColor: text, surfaceColor: surface, onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }),
 
@@ -781,15 +781,13 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       if (_timeMode == 2) {
         timeStr = '${_targetCivilHour.toString().padLeft(2, '0')}:${_targetCivilMinute.toString().padLeft(2, '0')}';
       } else {
-        // 🌟 عرض الوقت كخانتين دائمًا للمهام الفلكية (السويعة التراكمية)
-        timeStr = '${(_targetGlobalSuwaya + 1).toString().padLeft(2, '0')}:${_targetVirtualMinute.toString().padLeft(2, '0')}';
+        timeStr = '${(_targetGlobalSuwaya).toString().padLeft(2, '0')}:${_targetVirtualMinute.toString().padLeft(2, '0')}';
       }
     }
 
     String dateStr = isHabit ? (_recurrenceDays.isEmpty ? 'add_screen.daily'.tr() : '${_recurrenceDays.length} ${'common.days'.tr()}') : DateFormat('MM/dd').format(_selectedDate!);
     String alertStr = _alertLevel == 0 ? 'alerts.silent'.tr() : (_alertLevel == 1 ? 'alerts.notification'.tr() : 'alerts.alarm'.tr());
     String catStr = _selectedCategory.displayName;
-    
     String? timeFont = _hasTime ? (_timeMode == 2 ? 'Inter' : 'Playfair Display') : null;
 
     return Column(
@@ -815,16 +813,14 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
 
   Widget _buildRoutineDashboardGrid(Color textColor, Color surfaceColor, Color accentColor, List<AstroPeriod> periods) {
     String recurrenceStr = _routineRecurrenceDays.isEmpty ? 'add_screen.daily'.tr() : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
-    
     String startStr = '', endStr = '';
     
     if (_routineTimeMode == 2) {
       startStr = '${_routineStartCivilHour.toString().padLeft(2, '0')}:${_routineStartCivilMinute.toString().padLeft(2, '0')}';
       endStr = '${_routineEndCivilHour.toString().padLeft(2, '0')}:${_routineEndCivilMinute.toString().padLeft(2, '0')}';
     } else {
-      // 🌟 عرض الوقت كخانتين دائمًا للروتين الفلكي
-      startStr = '${(_routineStartGlobalSuwaya + 1).toString().padLeft(2, '0')}:${_routineStartVirtualMinute.toString().padLeft(2, '0')}';
-      endStr = '${(_routineEndGlobalSuwaya + 1).toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
+      startStr = '${(_routineStartGlobalSuwaya).toString().padLeft(2, '0')}:${_routineStartVirtualMinute.toString().padLeft(2, '0')}';
+      endStr = '${(_routineEndGlobalSuwaya).toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
     }
 
     String fontStr = _routineTimeMode == 2 ? 'Inter' : 'Playfair Display';
@@ -841,14 +837,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
               ButtonSegment(value: 2, label: Text('add_screen.civil'.tr()))
             ],
             selected: {_routineTimeMode},
-            onSelectionChanged: (set) { 
-              HapticFeedback.selectionClick(); 
-              setState(() => _routineTimeMode = set.first); 
-            },
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor.withValues(alpha: 0.2) : Colors.transparent), 
-              foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor : textColor.withValues(alpha: 0.5))
-            ),
+            onSelectionChanged: (set) { HapticFeedback.selectionClick(); setState(() => _routineTimeMode = set.first); },
+            style: ButtonStyle(backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor.withValues(alpha: 0.2) : Colors.transparent), foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor : textColor.withValues(alpha: 0.5))),
           ),
         ),
         Row(
@@ -871,7 +861,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
   }
 
   Widget _buildGridCard(Color surfaceColor, Color accentColor, Color textColor, String title, String value, IconData icon, bool isHighlighted, bool isError, VoidCallback? onTap, {String? fontFamily, bool isAstroTime = false}) {
-    final isAstroFont = fontFamily == 'Playfair Display';
     Color valColor = isError ? Colors.redAccent : (isAstroTime ? const Color(0xFFF2C94C) : textColor);
 
     return Expanded(
@@ -879,14 +868,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         onTap: onTap,
         child: Container(
           height: 100, padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: surfaceColor, 
-            borderRadius: BorderRadius.circular(20), 
-            border: Border.all(
-              color: isError ? Colors.redAccent : (isHighlighted ? accentColor : Colors.transparent), 
-              width: 2
-            )
-          ),
+          decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: isError ? Colors.redAccent : (isHighlighted ? accentColor : Colors.transparent), width: 2)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -900,10 +882,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
               const Spacer(),
               isAstroTime ? Stack(
                 children: [
-                  Text(value, style: TextStyle(fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.95..color=Colors.white)),
-                  Text(value, style: TextStyle(color: valColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
+                  Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal, fontFamily: fontFamily ?? 'Inter', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.95..color=Colors.white)),
+                  Text(value, style: TextStyle(color: valColor, fontSize: 20, fontWeight: FontWeight.normal, fontFamily: fontFamily ?? 'Inter', letterSpacing: 1.0)),
                 ],
-              ) : Text(value, style: TextStyle(color: valColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
+              ) : Text(value, style: TextStyle(color: valColor, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: fontFamily ?? 'Inter')),
             ],
           ),
         ),
@@ -973,17 +955,13 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
     selectedSuwaya = widget.initialSuwaya; 
     selectedMinute = widget.initialMinute;
     _periodController = FixedExtentScrollController(initialItem: selectedPeriodIndex);
-    // 🌟 بدأ العجلة من القيمة الصحيحة للسويعة 1
     _suwayaController = FixedExtentScrollController(initialItem: selectedSuwaya - 1);
     _minuteController = FixedExtentScrollController(initialItem: 10000 * 30 + selectedMinute);
   }
   
   @override 
   void dispose() { 
-    _periodController.dispose(); 
-    _suwayaController.dispose(); 
-    _minuteController.dispose(); 
-    super.dispose(); 
+    _periodController.dispose(); _suwayaController.dispose(); _minuteController.dispose(); super.dispose(); 
   }
 
   String _getCustomPeriodName(int idx) {
@@ -1004,7 +982,6 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
     if (widget.periods.isEmpty) return const SizedBox.shrink();
     AstroPeriod currentPeriod = widget.periods[selectedPeriodIndex];
     int maxSuwayas = currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
-    
     final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1027,8 +1004,7 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
           Expanded(
             flex: 3, 
             child: CupertinoPicker.builder(
-              scrollController: _periodController, 
-              itemExtent: 40, 
+              scrollController: _periodController, itemExtent: 40, 
               onSelectedItemChanged: (i) { 
                 HapticFeedback.selectionClick(); 
                 setState(() { 
@@ -1041,13 +1017,7 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 widget.onChanged(widget.periods[i].id, selectedSuwaya, selectedMinute); 
               }, 
               childCount: widget.periods.length, 
-              itemBuilder: (ctx, idx) => Center(
-                // 🌟 إزالة الرقم من عجلة الفترات والاعتماد على الاسم فقط بخط عريض
-                child: Text(
-                  _getCustomPeriodName(idx), 
-                  style: TextStyle(color: widget.textColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')
-                )
-              )
+              itemBuilder: (ctx, idx) => Center(child: Text(_getCustomPeriodName(idx), style: TextStyle(color: widget.textColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')))
             )
           ),
           Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
@@ -1055,11 +1025,10 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
           Expanded(
             flex: 2, 
             child: CupertinoPicker.builder(
-              scrollController: _suwayaController, 
-              itemExtent: 40, 
+              scrollController: _suwayaController, itemExtent: 40, 
               onSelectedItemChanged: (i) { 
                 HapticFeedback.selectionClick(); 
-                selectedSuwaya = i + 1; // 🌟 أصبحت السويعة تبدأ من 1 للمستخدم
+                selectedSuwaya = i + 1; 
                 widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
               }, 
               childCount: maxSuwayas, 
@@ -1067,8 +1036,8 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Text((idx + 1).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                    Text((idx + 1).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+                    Text((idx).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                    Text((idx).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
                   ],
                 ),
               )
@@ -1079,8 +1048,7 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
           Expanded(
             flex: 2, 
             child: CupertinoPicker.builder(
-              scrollController: _minuteController, 
-              itemExtent: 40, 
+              scrollController: _minuteController, itemExtent: 40, 
               onSelectedItemChanged: (i) { 
                 HapticFeedback.selectionClick(); 
                 selectedMinute = i % 30; 
@@ -1090,8 +1058,8 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Text((idx % 30).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                    Text((idx % 30).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+                    Text((idx % 30).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                    Text((idx % 30).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
                   ],
                 ),
               )
@@ -1119,27 +1087,16 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
     _controller1 = FixedExtentScrollController(initialItem: 10000 * range1 + (val1 - widget.min1));
     _controller2 = FixedExtentScrollController(initialItem: 10000 * widget.max2 + val2);
   }
-  @override void dispose() { 
-    _controller1.dispose(); 
-    _controller2.dispose(); 
-    super.dispose(); 
-  }
+  @override void dispose() { _controller1.dispose(); _controller2.dispose(); super.dispose(); }
   @override Widget build(BuildContext context) {
     int range1 = widget.max1 - widget.min1 + 1;
     final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
-    
     Color valColor = widget.isAstro ? const Color(0xFFF2C94C) : widget.textColor;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Row(
-          children: [
-            Expanded(child: Center(child: Text(widget.label1, style: headerStyle))),
-            const SizedBox(width: 24),
-            Expanded(child: Center(child: Text(widget.label2, style: headerStyle))),
-          ]
-        ),
+        child: Row(children: [Expanded(child: Center(child: Text(widget.label1, style: headerStyle))), const SizedBox(width: 24), Expanded(child: Center(child: Text(widget.label2, style: headerStyle)))])
       ),
       const SizedBox(height: 8),
       Directionality(
@@ -1149,20 +1106,20 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
             child: widget.isAstro ? Stack(
               alignment: Alignment.center,
               children: [
-                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
               ],
             ) : Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
           ))),
           Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = (i % (widget.max2 + 1)); widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(
             child: widget.isAstro ? Stack(
               alignment: Alignment.center,
               children: [
-                Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+                Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
               ],
-            ) : Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+            ) : Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
           ))),
         ]))
       )

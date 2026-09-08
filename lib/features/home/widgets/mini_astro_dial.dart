@@ -57,11 +57,11 @@ class _MiniDialPainter extends CustomPainter {
       final innerTextR = radius * 0.6;
       final innerP = Offset(center.dx + innerTextR * cos(middleAngle), center.dy + innerTextR * sin(middleAngle));
       
-      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: TextStyle(foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.5..color=Colors.white, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
+      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: TextStyle(foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.5..color=Colors.white, fontSize: 11, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 0.5));
       textPainter.layout();
       textPainter.paint(canvas, innerP - Offset(textPainter.width / 2, textPainter.height / 2));
 
-      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
+      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 11, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 0.5));
       textPainter.layout();
       textPainter.paint(canvas, innerP - Offset(textPainter.width / 2, textPainter.height / 2));
 
