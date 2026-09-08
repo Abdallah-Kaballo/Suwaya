@@ -60,12 +60,12 @@ class SuwayaDistributor {
   ) {
     List<int> totalDurations = List.filled(7, 0);
     final int year = DateTime.now().year;
-    final List<int> sampleDays = [1, 11, 21];
+    // 🌟 إضافة 3 أيام إضافية كما طلبت لزيادة الدقة (المجموع 72 يوم في السنة)
+    final List<int> sampleDays = [1, 6, 11, 16, 21, 26]; 
     
     for (int month = 1; month <= 12; month++) {
       for (int day in sampleDays) {
         final date = DateTime(year, month, day);
-        // نستخدم حاسبة الصلاة هنا لحساب التوزيع السنوي
         final ibadat = PrayerCalculator.getIbadatTimings(
           lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
         );
@@ -86,7 +86,8 @@ class SuwayaDistributor {
       }
     }
     
-    List<int> avgDurations = totalDurations.map((d) => d ~/ 36).toList();
+    // 🌟 التعديل هنا ليقسم على 72 يوماً بدلاً من 36 ليتناسب مع عدد العينات الجديد
+    List<int> avgDurations = totalDurations.map((d) => d ~/ 72).toList();
     return distribute48Suwayas(avgDurations);
   }
 }

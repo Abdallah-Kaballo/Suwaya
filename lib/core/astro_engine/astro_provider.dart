@@ -2,20 +2,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:suwaya/core/astro_engine/astro_calculators.dart';
+import 'package:suwaya/core/astro_engine/suwaya_time_engine.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../models/settings_model.dart';
 import '../../features/settings/settings_provider.dart';
 import 'astro_models.dart';
-import 'suwaya_time_engine.dart';
 
-// 🌟 1. "المزود السريع" (Fast Clock)
-// هذا المتغير سيتحدث كل ثانية، ويتم الاستماع له في الواجهة باستخدام ValueListenableBuilder
-// مما يمنع إعادة بناء الشاشات بالكامل ويحافظ على البطارية!
 final virtualTimeNotifier = ValueNotifier<String>("00:00:00");
-
-// 🌟 2. الذاكرة المؤقتة (Cache) لمنع الحسابات المعقدة المتكررة (حل النقطة 3)
 final Map<String, SuwayaDay> _dayCache = {};
+
+// 🌟 مخزن التوزيع السنوي (يمنع إعادة الحساب المعقدة مع كل يوم جديد)
+List<int>? _annualDistributionCache;
+String _lastDistributionFingerprint = "";
 
 class AstroNotifier extends Notifier<AstroState> {
   Timer? _timer;
@@ -73,9 +73,19 @@ class AstroNotifier extends Notifier<AstroState> {
       final madhabEnum = settings.madhab.toMadhab();
       final highLatEnum = settings.highLatitudeRule.toHighLatRule();
 
+      // 🌟 جلب التوزيع السنوي المحفوظ أو حسابه إذا كانت الإعدادات جديدة
+      if (_annualDistributionCache == null || _lastDistributionFingerprint != fingerprint) {
+        _annualDistributionCache = SuwayaDistributor.calculateAnnualDistribution(
+          loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, 
+          methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
+          cityOffset, manualOffsets: manualOffsetsMap
+        );
+        _lastDistributionFingerprint = fingerprint;
+        _dayCache.clear(); // تفريغ ذاكرة الأيام لأن التوزيع الأساسي تغير
+      }
+
       SuwayaDay generatedDay;
       
-      // 🌟 دالة مساعدة لتوليد أو جلب اليوم من الذاكرة المؤقتة
       SuwayaDay getOrGenerateDay(DateTime date) {
         final String cacheKey = '${date.year}-${date.month}-${date.day}_$fingerprint';
         if (_dayCache.containsKey(cacheKey)) {
@@ -84,9 +94,8 @@ class AstroNotifier extends Notifier<AstroState> {
           final newDay = SuwayaTimeEngine.generateDay(
             loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, date, 
             methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-            cityOffset, manualOffsets: manualOffsetsMap 
+            cityOffset, _annualDistributionCache!, manualOffsets: manualOffsetsMap // 🌟 تمرير التوزيع المحفوظ
           );
-          // نحتفظ بـ 3 أيام فقط في الذاكرة لمنع امتلاء الـ RAM
           if (_dayCache.length > 3) _dayCache.clear();
           _dayCache[cacheKey] = newDay;
           return newDay;
@@ -108,7 +117,6 @@ class AstroNotifier extends Notifier<AstroState> {
       _lastPeriodId = initialState.currentPeriod.id;
       _lastSuwaya = initialState.currentSuwaya;
       
-      // تعيين الوقت الافتراضي فوراً
       Future.microtask(() => virtualTimeNotifier.value = initialState.currentFormattedVirtualTime);
 
       _startTicker(generatedDay, loc);
@@ -134,14 +142,12 @@ class AstroNotifier extends Notifier<AstroState> {
       
       final newState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
       
-      // 🌟 1. التحديث السريع: تحديث النص فقط كل ثانية (سريع جداً وخفيف)
       virtualTimeNotifier.value = newState.currentFormattedVirtualTime;
 
-      // 🌟 2. التحديث البطيء: إعادة بناء Riverpod والتطبيق تحدث فقط عند عبور سويعة جديدة!
       if (_lastPeriodId != newState.currentPeriod.id || _lastSuwaya != newState.currentSuwaya) {
          _lastPeriodId = newState.currentPeriod.id;
          _lastSuwaya = newState.currentSuwaya;
-         state = newState; // هنا يتم إخبار التطبيق بإعادة البناء
+         state = newState; 
       }
     });
   }

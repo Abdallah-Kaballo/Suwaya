@@ -9,19 +9,14 @@ class SuwayaTimeEngine {
     double lat, double lng, DateTime date, 
     CalculationMethodType methodType, MadhabType madhabType, 
     HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
+    Duration cityOffset, List<int> cachedDistribution, {Map<PrayerKey, int>? manualOffsets} // 🌟 نمرر التوزيع الجاهز بدلاً من حسابه هنا
   ) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat, lng, date, methodType, madhabType, highLatRuleType, 
       customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
     );
     
-    final distribution = SuwayaDistributor.calculateAnnualDistribution(
-      lat, lng, methodType, madhabType, highLatRuleType, 
-      customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
-    );
-    
-    final periods = PeriodGenerator.generatePeriods(ibadat, distribution);
+    final periods = PeriodGenerator.generatePeriods(ibadat, cachedDistribution);
     return SuwayaDay(ibadatTimings: ibadat, periods: periods);
   }
 
@@ -38,7 +33,6 @@ class SuwayaTimeEngine {
     });
   }
 
-  // 🌟 هذا هو العقل المدبر الذي تم استخراجه من Riverpod ليكون مسؤولية المحرك
   static AstroState calculateCurrentState(SuwayaDay day, DateTime now) {
     if (day.periods.isEmpty) return getFallbackState(now);
     
