@@ -22,12 +22,15 @@ const Color goldBase = Color(0xFFD4AF37);
 const Color goldLight = Color(0xFFFFE58F);
 const Color goldDark = Color(0xFFAA7900);
 const Color carvedText = Color(0xFFFFD87A);
-const Color astroGold = Color(0xFFF2C94C); // 🌟 اللون الذهبي الفلكي الأساسي المطلوب
+const Color astroGold = Color(0xFFF2C94C); 
 
 const double kInnerR = 0.35;   
 const double kPeriodR = 0.50;  
 const double kRailwayR = 0.82; 
 const double kOuterR = 0.98;   
+
+// 🌟 هذا هو المزود الذي يربط التوهج بين القرص والأسماء بالأسفل
+final highlightedTaskProvider = StateProvider<int?>((ref) => null);
 
 Color getNeonColorForCategory(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -322,6 +325,38 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
     double actualDialAngle = (screenAngle - totalRotation) % (2 * pi);
     if (actualDialAngle < 0) actualDialAngle += 2 * pi;
 
+    final distance = sqrt(dx * dx + dy * dy);
+    final R = widget.size / 2;
+
+    // 🌟 1. استكشاف إذا كان اللمس على سهم مهمة أولاً
+    if (distance >= R * kPeriodR && distance <= R * kOuterR) {
+      DialTask? tappedTask;
+      double minDiff = 0.08; 
+      for (var dt in _currentDialTasks) {
+        double tAngle = _timeToAngle(dt.time, dayStart, dayEnd) % (2 * pi);
+        if (tAngle < 0) tAngle += 2 * pi;
+        double diff = (actualDialAngle - tAngle).abs();
+        if (diff > pi) diff = 2 * pi - diff;
+        if (diff < minDiff) {
+          minDiff = diff;
+          tappedTask = dt;
+        }
+      }
+      
+      if (tappedTask != null) {
+        HapticFeedback.lightImpact();
+        // 🌟 تفعيل التوهج للسهم واسم المهمة معاً
+        ref.read(highlightedTaskProvider.notifier).state = tappedTask.taskModel.id;
+        Future.delayed(const Duration(seconds: 3), () {
+          if (ref.read(highlightedTaskProvider) == tappedTask!.taskModel.id) {
+            ref.read(highlightedTaskProvider.notifier).state = null;
+          }
+        });
+        return; // إنهاء الدالة لكي لا يتم فتح تفاصيل الفترة
+      }
+    }
+
+    // 2. إذا لم يكن اللمس على مهمة، نتحقق من فتح تفاصيل الفترة
     for (var period in state.periods) {
       double startA = _timeToAngle(period.startTime, dayStart, dayEnd) % (2 * pi);
       double endA = _timeToAngle(period.endTime, dayStart, dayEnd) % (2 * pi);
@@ -351,6 +386,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
     final astroState = ref.watch(astroProvider);
     final settings = ref.watch(settingsProvider);
     final selectedDesign = ref.watch(dialDesignProvider);
+    final highlightedTaskId = ref.watch(highlightedTaskProvider); // 🌟 الاستماع للتوهج
     
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentLang = context.locale.languageCode; 
@@ -436,8 +472,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
     final prayersAndTasksLayer = RepaintBoundary(
       child: _buildLayer(RailwayRingPainter(
         ibadat: astroState.ibadatTimings, nightMarkers: activeNightMarkers, 
-        tasks: _currentDialTasks, periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, 
-        isDark: isDark, draggedTask: _draggedTask, dragAngle: _dragAngle, langCode: currentLang, design: selectedDesign
+        tasks: List.of(_currentDialTasks), // 🌟 التحديث الفوري المباشر للقائمة المنسوخة
+        periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, 
+        isDark: isDark, draggedTask: _draggedTask, dragAngle: _dragAngle, langCode: currentLang, design: selectedDesign,
+        highlightedTaskId: highlightedTaskId // 🌟 تمرير مهمة التوهج للرسام
       ))
     );
 
@@ -537,14 +575,18 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Ticker
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 🌟 تم تطبيق اللون الذهبي هنا للنصوص الفلكية بالمركز
-          Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
+          Stack(
+            children: [
+              Text(suwayaText, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.55..color=Colors.white)),
+              Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 12, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, shadows: [Shadow(color: Colors.black87, blurRadius: 3)])),
+            ],
+          ),
           const SizedBox(height: 2),
           Text(currentPeriodName, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w900, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)])),
           const SizedBox(height: 4),
           Stack(
             children: [
-              Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 3..color = isDark ? Colors.black : Colors.white)),
+              Text(virtualTime, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 2.0, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 1.6..color = Colors.white)),
               Text(virtualTime, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: astroGold, fontFamily: 'Playfair Display', letterSpacing: 2.0)),
             ],
           ),
@@ -823,20 +865,23 @@ class RailwayRingPainter extends CustomPainter {
   final double? dragAngle;      
   final String langCode;
   final DialDesign design;
+  final int? highlightedTaskId; // 🌟 إضافة متغير لتتبع السهم المتوهج
   
   RailwayRingPainter({
     required this.ibadat, required this.nightMarkers, required this.tasks, required this.periods,
     required this.dayStart, required this.dayEnd, required this.isDark,
-    this.draggedTask, this.dragAngle, required this.langCode, required this.design,
+    this.draggedTask, this.dragAngle, required this.langCode, required this.design, this.highlightedTaskId,
   });
 
-  void _drawEquilateralArrow(Canvas canvas, Offset center, double radius, double baseWidth, double angle, Color color, {bool isDragged = false, bool isPrayer = false}) {
+  // 🌟 تكبير السهم وإضافة حالة التوهج
+  void _drawEquilateralArrow(Canvas canvas, Offset center, double radius, double baseWidth, double angle, Color color, {bool isDragged = false, bool isPrayer = false, bool isHighlighted = false}) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(angle + pi / 2);
     canvas.translate(0, -radius);
     
-    if (isDragged) canvas.scale(1.4); 
+    // 🌟 تكبير السهم عند التوهج
+    if (isDragged || isHighlighted) canvas.scale(1.4); 
 
     if (design == DialDesign.minimal) {
       canvas.drawCircle(Offset.zero, 4.0, Paint()..color = color);
@@ -852,8 +897,11 @@ class RailwayRingPainter extends CustomPainter {
     path.lineTo(baseWidth / 2, 0); 
     path.close();
 
-    canvas.drawPath(path, Paint()..color = color..maskFilter = MaskFilter.blur(BlurStyle.normal, isDragged ? 8 : 3));
-    canvas.drawPath(path, Paint()..color = color);
+    // 🌟 إضافة طبقة توهج فقط إذا كان مصلياً، مسحوباً، أو منقوراً (متوهجاً)
+    if (isPrayer || isDragged || isHighlighted) {
+       canvas.drawPath(path, Paint()..color = color..maskFilter = MaskFilter.blur(BlurStyle.normal, (isDragged || isHighlighted) ? 10 : 3));
+    }
+    canvas.drawPath(path, Paint()..color = color); // اللون المطفي الأساسي
     
     if (!isPrayer) {
       final inner = Path()..moveTo(0, -height + 2)..lineTo(-baseWidth / 2 + 2, -1)..lineTo(baseWidth / 2 - 2, -1)..close();
@@ -870,24 +918,18 @@ class RailwayRingPainter extends CustomPainter {
     canvas.rotate(angle + pi / 2);
     canvas.translate(0, -radius);
 
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: text, 
-        style: TextStyle(
-          color: color, 
-          fontSize: 13, 
-          fontWeight: FontWeight.w900, 
-          fontFamily: 'Tajawal',
-          shadows: [
-            Shadow(color: Colors.black.withValues(alpha: 0.8), blurRadius: 4, offset: const Offset(0, 1)),
-            Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 10, offset: const Offset(0, 0)),
-          ]
-        )
-      ),
+    final textPainterStroke = TextPainter(
+      text: TextSpan(text: text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.6..color=Colors.white)),
       textDirection: ui.TextDirection.ltr,
     )..layout();
+    textPainterStroke.paint(canvas, Offset(-textPainterStroke.width / 2, -textPainterStroke.height / 2));
 
-    textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+    final textPainterFill = TextPainter(
+      text: TextSpan(text: text, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', shadows: [Shadow(color: Colors.black.withValues(alpha: 0.8), blurRadius: 4, offset: const Offset(0, 1))])),
+      textDirection: ui.TextDirection.ltr,
+    )..layout();
+    textPainterFill.paint(canvas, Offset(-textPainterFill.width / 2, -textPainterFill.height / 2));
+    
     canvas.restore();
   }
 
@@ -961,6 +1003,8 @@ class RailwayRingPainter extends CustomPainter {
 
     for (var item in taskItems) {
       bool isDragged = draggedTask != null && item.taskModel!.id == draggedTask!.id;
+      // 🌟 التحقق مما إذا كان السهم متوهجاً (مضغوط عليه)
+      bool isHighlighted = highlightedTaskId != null && item.taskModel!.id == highlightedTaskId;
       double angle = (isDragged && dragAngle != null) ? dragAngle! : _timeToAngle(item.time, dayStart, dayEnd);
       
       int targetTrack = 2; 
@@ -983,16 +1027,14 @@ class RailwayRingPainter extends CustomPainter {
       }
       
       occupied[targetTrack].add({'angle': angle, 'margin': taskMargin});
-      _drawEquilateralArrow(canvas, center, trackRadii[targetTrack], 10.0, angle, item.color, isDragged: isDragged, isPrayer: false);
+      // 🌟 تم تكبير مقاس السهم من 10 إلى 12 ليطابق أسهم الصلوات
+      _drawEquilateralArrow(canvas, center, trackRadii[targetTrack], 12.0, angle, item.color, isDragged: isDragged, isPrayer: false, isHighlighted: isHighlighted);
     }
   }
 
+  // 🌟 إرجاع true للرسم الفوري بمجرد إضافة مهمة أو تغيير حالة التوهج
   @override 
-  bool shouldRepaint(covariant RailwayRingPainter old) {
-    return old.isDark != isDark || old.langCode != langCode || old.design != design ||
-           old.dayStart != dayStart || old.tasks.length != tasks.length || old.nightMarkers.length != nightMarkers.length || 
-           old.draggedTask?.id != draggedTask?.id || old.dragAngle != dragAngle; 
-  }
+  bool shouldRepaint(covariant RailwayRingPainter old) => true; 
 }
 
 class OuterRingPainter extends CustomPainter {
@@ -1036,13 +1078,20 @@ class OuterRingPainter extends CustomPainter {
         canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = goldLight);
 
         if (design != DialDesign.minimal || globalLineIndex % 5 == 0) {
-          // 🌟 تم تطبيق اللون الذهبي الفلكي لأرقام السويعات حول القرص
+          
+          textPainter.text = TextSpan(
+            text: globalLineIndex.toString().padLeft(2, '0'), 
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.65..color=Colors.white)
+          );
+          textPainter.layout();
+          canvas.translate(0, -textR);
+          textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+
           textPainter.text = TextSpan(
             text: globalLineIndex.toString().padLeft(2, '0'), 
             style: const TextStyle(color: astroGold, fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: [Shadow(color: Colors.black, blurRadius: 4)])
           );
           textPainter.layout();
-          canvas.translate(0, -textR);
           textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
         }
         

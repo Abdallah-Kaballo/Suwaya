@@ -13,7 +13,7 @@ import '../../core/astro_engine/astro_models.dart';
 import '../routines/routines_provider.dart';
 import 'universal_add_screen.dart';
 import '../../shared/widgets/app_drawer.dart';
-import '../../core/providers/ui_providers.dart'; // 🌟
+import '../../core/providers/ui_providers.dart'; 
 
 Color _getNeonColor(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -25,6 +25,16 @@ Color _getNeonColor(TaskCategory category) {
   if (catStr.contains('personal')) return const Color(0xFFD500F9);
   if (catStr.contains('social')) return const Color(0xFF76FF03);
   return const Color(0xFF18FFFF);
+}
+
+// 🌟 دالة مساعدة لترجمة الفترة والموقع إلى رقم سويعة تراكمي عام
+int _getGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
+  int global = 0;
+  for (var p in periods) {
+    if (p.id == pId) return global + sNum - 1;
+    global += p.suwayasCount;
+  }
+  return 0;
 }
 
 class TasksScreen extends ConsumerStatefulWidget {
@@ -106,7 +116,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     return Scaffold(
       backgroundColor: bgColor,
       drawer: const AppDrawer(), 
-      // 🌟 تفعيل الإخفاء
       onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
         backgroundColor: bgColor,
@@ -288,9 +297,9 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
       timeStr = '${(t.targetCivilTimeMinutes! ~/ 60).toString().padLeft(2, '0')}:${(t.targetCivilTimeMinutes! % 60).toString().padLeft(2, '0')}';
     } else if (t.isAstroTime && t.targetPeriodId != null && widget.periods.isNotEmpty) {
-      int pIdx = widget.periods.indexWhere((p) => p.id == t.targetPeriodId);
-      if (pIdx == -1) pIdx = 0;
-      timeStr = '${pIdx.toString().padLeft(2, '0')}:${t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first.toString().padLeft(2, '0') : "01"}:${t.targetVirtualMinute.toString().padLeft(2, '0')}';
+      // 🌟 جلب السويعة التراكمية وعرضها كخانتين فقط (الخلاصة الفلكية)
+      int gSuwaya = _getGlobalSuwaya(t.targetPeriodId!, t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1, widget.periods) + 1;
+      timeStr = '${gSuwaya.toString().padLeft(2, '0')}:${t.targetVirtualMinute.toString().padLeft(2, '0')}';
     }
 
     String dateStr = 'add_screen.daily'.tr();
@@ -344,8 +353,12 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // 🌟 اللون الذهبي إذا كان فلكي، والأبيض/الأسود إذا كان مدني
-                  Text(timeStr, style: TextStyle(color: t.isAstroTime ? const Color(0xFFF2C94C) : textColor, fontSize: 16, fontWeight: t.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: t.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: t.isAstroTime ? 1.0 : 0.0)),
+                  t.isAstroTime ? Stack(
+                    children: [
+                      Text(timeStr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.75..color=Colors.white)),
+                      Text(timeStr, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                    ],
+                  ) : Text(timeStr, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
                   const SizedBox(height: 2),
                   Text(dateStr, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.bold)),
                 ],
@@ -371,11 +384,10 @@ class _RoutineRowItem extends StatelessWidget {
       final sm = (routine.startTimeMinutes! % 60).toString().padLeft(2, '0');
       timeStr = '${'common.civil'.tr()} (${'common.from'.tr()} $sh:$sm)';
     } else if (routine.isAstroTime && routine.startPeriodId != null) {
-      int pIdx = periods.indexWhere((p) => p.id == routine.startPeriodId);
-      if (pIdx == -1) pIdx = 0;
-      final ss = (routine.startSuwaya ?? 1).toString().padLeft(2, '0');
+      // 🌟 جلب السويعة التراكمية وعرضها كخانتين فقط للروتين الفلكي
+      int gSuwaya = _getGlobalSuwaya(routine.startPeriodId!, routine.startSuwaya ?? 1, periods) + 1;
       final sm = (routine.startVirtualMinute ?? 0).toString().padLeft(2, '0');
-      timeStr = '${'common.astro'.tr()} (${'common.from'.tr()} ${pIdx.toString().padLeft(2, '0')}:$ss:$sm)';
+      timeStr = '${'common.astro'.tr()} (${'common.from'.tr()} ${gSuwaya.toString().padLeft(2, '0')}:$sm)';
     }
 
     String recStr = routine.recurrenceDays == null || routine.recurrenceDays!.isEmpty ? 'add_screen.daily'.tr() : '${routine.recurrenceDays!.length} ${'common.days'.tr()}';
@@ -395,8 +407,12 @@ class _RoutineRowItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // 🌟 اللون الذهبي للفلكي هنا أيضاً
-                  Text(timeStr, style: TextStyle(color: routine.isAstroTime ? const Color(0xFFF2C94C) : (isDark ? Colors.white : Colors.black87), fontSize: 13, fontWeight: routine.isAstroTime ? FontWeight.w900 : FontWeight.w600, fontFamily: routine.isAstroTime ? 'Playfair Display' : 'Inter', letterSpacing: routine.isAstroTime ? 1.0 : 0.0)),
+                  routine.isAstroTime ? Stack(
+                    children: [
+                      Text(timeStr, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.6..color=Colors.white)),
+                      Text(timeStr, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                    ],
+                  ) : Text(timeStr, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
                   const SizedBox(height: 2),
                   Text(recStr, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
                 ],

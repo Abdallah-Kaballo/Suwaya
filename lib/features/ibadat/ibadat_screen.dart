@@ -11,7 +11,7 @@ import '../../core/astro_engine/astro_models.dart';
 import '../settings/settings_provider.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../../core/theme/astro_ui_extensions.dart';
-import '../../core/providers/ui_providers.dart'; // 🌟
+import '../../core/providers/ui_providers.dart'; 
 
 class IbadatScreen extends ConsumerWidget {
   const IbadatScreen({super.key});
@@ -58,7 +58,6 @@ class IbadatScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
         drawer: const AppDrawer(), 
-        // 🌟 تفعيل الإخفاء
         onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
         appBar: AppBar(
           backgroundColor: Colors.transparent, 
@@ -157,7 +156,15 @@ class IbadatScreen extends ConsumerWidget {
                 children: [
                   Text(topLabel, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 11)),
                   const SizedBox(height: 4),
-                  Directionality(textDirection: ui.TextDirection.ltr, child: Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: TextStyle(color: settings.useAstroTimeForIbadat ? const Color(0xFFF2C94C) : Theme.of(context).primaryColor, fontSize: settings.useAstroTimeForIbadat ? 22 : 20, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.5 : 0.0))),
+                  Directionality(
+                    textDirection: ui.TextDirection.ltr, 
+                    child: settings.useAstroTimeForIbadat ? Stack(
+                      children: [
+                        Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
+                        Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)),
+                      ]
+                    ) : Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 20, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+                  ),
                 ],
               ),
             ],
@@ -280,14 +287,32 @@ class IbadatScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('ibadat.starts_at'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                              Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: settings.useAstroTimeForIbadat ? const Color(0xFFF2C94C) : (isDark ? Colors.white : Colors.black87), fontSize: settings.useAstroTimeForIbadat ? 15 : 14, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.0 : 0.0))),                            ],
+                              Directionality(
+                                textDirection: ui.TextDirection.ltr, 
+                                child: settings.useAstroTimeForIbadat ? Stack(
+                                  children: [
+                                    Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.7..color=Colors.white)),
+                                    Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                                  ]
+                                ) : Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('ibadat.ends_at'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                              Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: settings.useAstroTimeForIbadat ? const Color(0xFFF2C94C) : (isDark ? Colors.white : Colors.black87), fontSize: settings.useAstroTimeForIbadat ? 15 : 14, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.0 : 0.0))),                            ],
+                              Directionality(
+                                textDirection: ui.TextDirection.ltr, 
+                                child: settings.useAstroTimeForIbadat ? Stack(
+                                  children: [
+                                    Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.7..color=Colors.white)),
+                                    Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 15, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                                  ]
+                                ) : Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -325,7 +350,15 @@ class IbadatScreen extends ConsumerWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Directionality(textDirection: ui.TextDirection.ltr, child: Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: settings.useAstroTimeForIbadat ? const Color(0xFFF2C94C) : (isNext ? activeTextColor : (isDark ? Colors.white : Colors.black87)), fontSize: settings.useAstroTimeForIbadat ? 20 : 18, fontWeight: settings.useAstroTimeForIbadat ? FontWeight.w900 : FontWeight.w600, fontFamily: settings.useAstroTimeForIbadat ? 'Playfair Display' : 'Inter', letterSpacing: settings.useAstroTimeForIbadat ? 1.5 : 0.0))),
+            Directionality(
+              textDirection: ui.TextDirection.ltr, 
+              child: settings.useAstroTimeForIbadat ? Stack(
+                children: [
+                  Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.95..color=Colors.white)),
+                  Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 20, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)),
+                ]
+              ) : Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: (isNext ? activeTextColor : (isDark ? Colors.white : Colors.black87)), fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
+            ),
             const SizedBox(width: 16),
             GestureDetector(
               onTap: () {

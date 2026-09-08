@@ -21,6 +21,16 @@ class PeriodDetailsSheet extends StatefulWidget {
 class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
   bool _isCivilMode = false; 
 
+  // 🌟 دالة مساعدة لترجمة الفترة إلى سويعة تراكمية عامة
+  int _getGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
+    int global = 0;
+    for (var p in periods) {
+      if (p.id == pId) return global + sNum - 1;
+      global += p.suwayasCount;
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -149,8 +159,13 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
                             const SizedBox(width: 12),
                             Text(t.title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                             const Spacer(),
-                            // 🌟 الذهبي الفلكي لمهام السويعات
-                            if (t.targetSuwayas.isNotEmpty) Text('${'common.suwaya'.tr()} ${t.targetSuwayas.first.toString().padLeft(2, '0')}', style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                            // 🌟 جلب السويعة التراكمية وعرضها كخانتين فقط للوظيفة
+                            if (t.targetSuwayas.isNotEmpty) Stack(
+                              children: [
+                                Text('${(_getGlobalSuwaya(t.targetPeriodId ?? widget.period.id, t.targetSuwayas.first, widget.astroState.periods) + 1).toString().padLeft(2, '0')}:${t.targetVirtualMinute.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.65..color=Colors.white)),
+                                Text('${(_getGlobalSuwaya(t.targetPeriodId ?? widget.period.id, t.targetSuwayas.first, widget.astroState.periods) + 1).toString().padLeft(2, '0')}:${t.targetVirtualMinute.toString().padLeft(2, '0')}', style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 14, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+                              ]
+                            ),
                           ],
                         )
                       )),
@@ -213,8 +228,13 @@ class _PeriodDetailsSheetState extends State<PeriodDetailsSheet> {
       children: [
         Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11)),
         const SizedBox(height: 4),
-        // 🌟 تطبيق الذهبي إذا كان فلكي، والأبيض/الأسود إذا كان مدني
-        Text(val, style: TextStyle(color: isCivil ? textColor : const Color(0xFFF2C94C), fontSize: 18, fontWeight: isCivil ? FontWeight.w600 : FontWeight.w900, fontFamily: isCivil ? 'Inter' : 'Playfair Display', letterSpacing: isCivil ? 0.0 : 1.0)),
+        !isCivil ? Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(val, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.85..color=Colors.white)),
+            Text(val, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 18, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
+          ]
+        ) : Text(val, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
       ],
     );
   }

@@ -54,11 +54,13 @@ class _MiniDialPainter extends CustomPainter {
       canvas.drawArc(Rect.fromCircle(center: center, radius: radius), currentAngle, sweepAngle, true, Paint()..color = period.uiColor..style = PaintingStyle.stroke..strokeWidth = 1.5); 
 
       final middleAngle = currentAngle + (sweepAngle / 2);
-
       final innerTextR = radius * 0.6;
       final innerP = Offset(center.dx + innerTextR * cos(middleAngle), center.dy + innerTextR * sin(middleAngle));
       
-      // 🌟 تم تطبيق اللون الذهبي الفلكي لعدد السويعات في المركز
+      textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: TextStyle(foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.5..color=Colors.white, fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
+      textPainter.layout();
+      textPainter.paint(canvas, innerP - Offset(textPainter.width / 2, textPainter.height / 2));
+
       textPainter.text = TextSpan(text: period.suwayasCount.toString(), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 11, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 0.5));
       textPainter.layout();
       textPainter.paint(canvas, innerP - Offset(textPainter.width / 2, textPainter.height / 2));
@@ -79,6 +81,10 @@ class _MiniDialPainter extends CustomPainter {
       final outerTextR = radius + 15;
       final outerP = Offset(center.dx + outerTextR * cos(middleAngle), center.dy + outerTextR * sin(middleAngle));
       
+      textPainter.text = TextSpan(text: outerText, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, height: 1.2, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.4..color=Colors.white)); 
+      textPainter.layout();
+      textPainter.paint(canvas, outerP - Offset(textPainter.width / 2, textPainter.height / 2));
+
       textPainter.text = TextSpan(text: outerText, style: TextStyle(color: period.uiColor, fontSize: 9, fontWeight: FontWeight.bold, height: 1.2)); 
       textPainter.layout();
       textPainter.paint(canvas, outerP - Offset(textPainter.width / 2, textPainter.height / 2));

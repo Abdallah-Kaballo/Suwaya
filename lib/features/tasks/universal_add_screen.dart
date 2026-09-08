@@ -411,9 +411,17 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 ],
                 
                 if (tempMode == 0)
-                  _TripleWheelPicker(periods: periods, initialPeriodId: tPeriodId, initialSuwaya: tLocalSuwaya, initialMinute: tVirtualMinute, textColor: text, surfaceColor: surface, onChanged: (pId, sNum, vMin) { tPeriodId = pId; tLocalSuwaya = sNum; tVirtualMinute = vMin; })
+                  _TripleWheelPicker(
+                    periods: periods, initialPeriodId: tPeriodId, initialSuwaya: tLocalSuwaya, initialMinute: tVirtualMinute, textColor: text, surfaceColor: surface, 
+                    // 🌟 المزامنة الذكية مع السويعة التراكمية في الخلفية
+                    onChanged: (pId, sNum, vMin) { 
+                      tPeriodId = pId; tLocalSuwaya = sNum; tVirtualMinute = vMin; 
+                      tGlobalSuwaya = _mapLocalToGlobal(pId, sNum, periods); 
+                    }
+                  )
                 else if (tempMode == 1)
-                  _DoubleWheelPicker(isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya, initialVal2: tVirtualMinute, min1: 0, max1: 47, max2: 30, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s; tVirtualMinute = m; })
+                  // 🌟 عرض عجلة السويعات التراكمية لتبدأ من 1 بدلاً من 0
+                  _DoubleWheelPicker(isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya + 1, initialVal2: tVirtualMinute, min1: 1, max1: 48, max2: 30, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s - 1; tVirtualMinute = m; })
                 else
                   _DoubleWheelPicker(isAstro: false, label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tCivilHour, initialVal2: tCivilMinute, min1: 0, max1: 23, max2: 59, textColor: text, surfaceColor: surface, onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }),
 
@@ -772,12 +780,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     if (_hasTime) {
       if (_timeMode == 2) {
         timeStr = '${_targetCivilHour.toString().padLeft(2, '0')}:${_targetCivilMinute.toString().padLeft(2, '0')}';
-      } else if (_timeMode == 1) {
-        timeStr = '${_targetGlobalSuwaya.toString().padLeft(2, '0')}:${_targetVirtualMinute.toString().padLeft(2, '0')}';
       } else {
-        int pIndex = periods.indexWhere((p) => p.id == _targetPeriodId);
-        if (pIndex == -1) pIndex = 0;
-        timeStr = '${pIndex.toString().padLeft(2, '0')}:${_targetLocalSuwaya.toString().padLeft(2, '0')}:${_targetVirtualMinute.toString().padLeft(2, '0')}';
+        // 🌟 عرض الوقت كخانتين دائمًا للمهام الفلكية (السويعة التراكمية)
+        timeStr = '${(_targetGlobalSuwaya + 1).toString().padLeft(2, '0')}:${_targetVirtualMinute.toString().padLeft(2, '0')}';
       }
     }
 
@@ -799,7 +804,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         const SizedBox(height: 12),
         Row(
           children: [
-            // 🌟 تمرير isAstroTime لتطبيق اللون الذهبي
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.time'.tr(), timeStr, LucideIcons.clock, _hasTime, (_timeError && !_hasTime), () => _showTimeDialog(accentColor, surfaceColor, textColor, periods), fontFamily: timeFont, isAstroTime: _hasTime && _timeMode != 2),
             const SizedBox(width: 12),
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.alert'.tr(), alertStr, _alertLevel == 2 ? LucideIcons.alarm_clock : LucideIcons.bell, _alertLevel > 0, false, () => _showAlertsDialog(accentColor, surfaceColor, textColor)),
@@ -817,17 +821,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     if (_routineTimeMode == 2) {
       startStr = '${_routineStartCivilHour.toString().padLeft(2, '0')}:${_routineStartCivilMinute.toString().padLeft(2, '0')}';
       endStr = '${_routineEndCivilHour.toString().padLeft(2, '0')}:${_routineEndCivilMinute.toString().padLeft(2, '0')}';
-    } else if (_routineTimeMode == 1) {
-      startStr = '${_routineStartGlobalSuwaya.toString().padLeft(2, '0')}:${_routineStartVirtualMinute.toString().padLeft(2, '0')}';
-      endStr = '${_routineEndGlobalSuwaya.toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
     } else {
-      int sIndexStart = periods.indexWhere((p) => p.id == _routineStartPeriodId);
-      if (sIndexStart == -1) sIndexStart = 0;
-      startStr = '${sIndexStart.toString().padLeft(2, '0')}:${_routineStartLocalSuwaya.toString().padLeft(2, '0')}:${_routineStartVirtualMinute.toString().padLeft(2, '0')}';
-      
-      int sIndexEnd = periods.indexWhere((p) => p.id == _routineEndPeriodId);
-      if (sIndexEnd == -1) sIndexEnd = 0;
-      endStr = '${sIndexEnd.toString().padLeft(2, '0')}:${_routineEndLocalSuwaya.toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
+      // 🌟 عرض الوقت كخانتين دائمًا للروتين الفلكي
+      startStr = '${(_routineStartGlobalSuwaya + 1).toString().padLeft(2, '0')}:${_routineStartVirtualMinute.toString().padLeft(2, '0')}';
+      endStr = '${(_routineEndGlobalSuwaya + 1).toString().padLeft(2, '0')}:${_routineEndVirtualMinute.toString().padLeft(2, '0')}';
     }
 
     String fontStr = _routineTimeMode == 2 ? 'Inter' : 'Playfair Display';
@@ -856,7 +853,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         ),
         Row(
           children: [
-            // 🌟 تمرير isAstroTime لتطبيق اللون الذهبي
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), startStr, LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: true), fontFamily: fontStr, isAstroTime: _routineTimeMode != 2),
             const SizedBox(width: 12),
             _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), endStr, LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, periods, isRoutine: true, isStart: false), fontFamily: fontStr, isAstroTime: _routineTimeMode != 2),
@@ -874,7 +870,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     );
   }
 
-  // 🌟 استقبال حالة isAstroTime وتطبيق اللون الذهبي
   Widget _buildGridCard(Color surfaceColor, Color accentColor, Color textColor, String title, String value, IconData icon, bool isHighlighted, bool isError, VoidCallback? onTap, {String? fontFamily, bool isAstroTime = false}) {
     final isAstroFont = fontFamily == 'Playfair Display';
     Color valColor = isError ? Colors.redAccent : (isAstroTime ? const Color(0xFFF2C94C) : textColor);
@@ -903,7 +898,12 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 ],
               ),
               const Spacer(),
-              Text(value, style: TextStyle(color: valColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
+              isAstroTime ? Stack(
+                children: [
+                  Text(value, style: TextStyle(fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.95..color=Colors.white)),
+                  Text(value, style: TextStyle(color: valColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
+                ],
+              ) : Text(value, style: TextStyle(color: valColor, fontSize: isAstroFont ? 20 : 16, fontWeight: isAstroFont ? FontWeight.w900 : FontWeight.w600, fontFamily: fontFamily ?? 'Inter', letterSpacing: isAstroFont ? 1.0 : 0.0)),
             ],
           ),
         ),
@@ -973,7 +973,8 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
     selectedSuwaya = widget.initialSuwaya; 
     selectedMinute = widget.initialMinute;
     _periodController = FixedExtentScrollController(initialItem: selectedPeriodIndex);
-    _suwayaController = FixedExtentScrollController(initialItem: selectedSuwaya);
+    // 🌟 بدأ العجلة من القيمة الصحيحة للسويعة 1
+    _suwayaController = FixedExtentScrollController(initialItem: selectedSuwaya - 1);
     _minuteController = FixedExtentScrollController(initialItem: 10000 * 30 + selectedMinute);
   }
   
@@ -1032,18 +1033,19 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 HapticFeedback.selectionClick(); 
                 setState(() { 
                   selectedPeriodIndex = i; 
-                  if (selectedSuwaya > widget.periods[i].suwayasCount - 1) { 
-                    selectedSuwaya = widget.periods[i].suwayasCount - 1; 
-                    _suwayaController.jumpToItem(selectedSuwaya); 
+                  if (selectedSuwaya > widget.periods[i].suwayasCount) { 
+                    selectedSuwaya = widget.periods[i].suwayasCount; 
+                    _suwayaController.jumpToItem(selectedSuwaya - 1); 
                   } 
                 }); 
                 widget.onChanged(widget.periods[i].id, selectedSuwaya, selectedMinute); 
               }, 
               childCount: widget.periods.length, 
               itemBuilder: (ctx, idx) => Center(
+                // 🌟 إزالة الرقم من عجلة الفترات والاعتماد على الاسم فقط بخط عريض
                 child: Text(
-                  '${idx.toString().padLeft(2, '0')}(${_getCustomPeriodName(idx)})', 
-                  style: TextStyle(color: widget.textColor, fontSize: 13, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')
+                  _getCustomPeriodName(idx), 
+                  style: TextStyle(color: widget.textColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')
                 )
               )
             )
@@ -1057,16 +1059,18 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
               itemExtent: 40, 
               onSelectedItemChanged: (i) { 
                 HapticFeedback.selectionClick(); 
-                selectedSuwaya = i; 
+                selectedSuwaya = i + 1; // 🌟 أصبحت السويعة تبدأ من 1 للمستخدم
                 widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
               }, 
               childCount: maxSuwayas, 
               itemBuilder: (ctx, idx) => Center(
-                // 🌟 اللون الذهبي الفلكي لعجلة السويعات
-                child: Text(
-                  idx.toString().padLeft(2, '0'), 
-                  style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
-                )
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text((idx + 1).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                    Text((idx + 1).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+                  ],
+                ),
               )
             )
           ),
@@ -1083,11 +1087,13 @@ class _TripleWheelPickerState extends State<_TripleWheelPicker> {
                 widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
               }, 
               itemBuilder: (ctx, idx) => Center(
-                // 🌟 اللون الذهبي الفلكي لعجلة الدقائق الافتراضية
-                child: Text(
-                  (idx % 30).toString().padLeft(2, '0'), 
-                  style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')
-                )
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text((idx % 30).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                    Text((idx % 30).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+                  ],
+                ),
               )
             )
           ),
@@ -1122,7 +1128,6 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
     int range1 = widget.max1 - widget.min1 + 1;
     final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
     
-    // 🌟 تحديد اللون بناءً على نوع النظام (فلكي = ذهبي، مدني = أبيض/أسود)
     Color valColor = widget.isAstro ? const Color(0xFFF2C94C) : widget.textColor;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1140,9 +1145,25 @@ class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
       Directionality(
         textDirection: TextDirection.ltr, 
         child: SizedBox(height: 140, child: Row(children: [
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(
+            child: widget.isAstro ? Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+              ],
+            ) : Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+          ))),
           Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(child: Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: widget.isAstro ? FontWeight.w900 : FontWeight.w600, fontFamily: widget.isAstro ? 'Playfair Display' : 'Inter'))))),
+          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = i % widget.max2; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(
+            child: widget.isAstro ? Stack(
+              alignment: Alignment.center,
+              children: [
+                Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
+                Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display')),
+              ],
+            ) : Text((idx % widget.max2).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
+          ))),
         ]))
       )
     ]);

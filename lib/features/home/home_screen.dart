@@ -15,7 +15,7 @@ import '../../models/task_model.dart';
 import '../tasks/tasks_provider.dart';
 import '../settings/settings_provider.dart';
 import '../routines/routines_provider.dart'; 
-import '../../core/providers/ui_providers.dart'; // 🌟
+import '../../core/providers/ui_providers.dart'; 
 
 import '../../shared/widgets/task_card.dart';
 import 'widgets/location_header.dart'; 
@@ -105,12 +105,23 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun, color: pColor, size: 18), 
+                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun, color: pColor, size: 24), 
                     const SizedBox(width: 8),
-                    Text(dayNightStr, style: TextStyle(color: pColor, fontWeight: FontWeight.bold, fontSize: 15)),
-                    Text(' • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 13)),
+                    Stack(
+                      children: [
+                        Text(dayNightStr, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
+                        Text(dayNightStr, style: TextStyle(color: pColor, fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal')),
+                      ],
+                    ),
+                    Stack(
+                      children: [
+                        Text(' • $gregorianDate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
+                        Text(' • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal')),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -139,9 +150,13 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           Text('home.astro_time'.tr(), style: TextStyle(color: isDark ? Colors.black : Colors.white, fontSize: 10)), 
                           const SizedBox(height: 2),
-                          // 🌟 تم تطبيق اللون الذهبي هنا
-                          Text(astroState.currentFormattedVirtualTime, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 17, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)), 
-                        ],
+                          Stack(
+                            children: [
+                              Text(astroState.currentFormattedVirtualTime, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.8..color=Colors.white)), 
+                              Text(astroState.currentFormattedVirtualTime, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 17, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.5)), 
+                            ],
+                          ),
+                       ],
                       ),
                     ),
                   ],
@@ -176,7 +191,6 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: scaffoldBgColor,
       drawer: const AppDrawer(), 
-      // 🌟 تفعيل إخفاء الشريط السفلي
       onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
         backgroundColor: Colors.transparent, 
@@ -235,23 +249,46 @@ class HomeScreen extends ConsumerWidget {
                           spacing: 8, runSpacing: 10,
                           children: tasksForLegend.map((task) {
                             Color tColor = getNeonColorForCategory(task.category); 
-                            return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF13131A) : Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: tColor.withValues(alpha: 0.3), width: 1.5),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 12, height: 12,
-                                    decoration: BoxDecoration(color: tColor, shape: BoxShape.circle, boxShadow: [BoxShadow(color: tColor.withValues(alpha: 0.6), blurRadius: 6)]),
+                            // 🌟 الاستماع للمهمة المتوهجة
+                            final isHighlighted = ref.watch(highlightedTaskProvider) == task.id;
+                            
+                            return GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                ref.read(highlightedTaskProvider.notifier).state = task.id;
+                                Future.delayed(const Duration(seconds: 3), () {
+                                  if (ref.read(highlightedTaskProvider) == task.id) {
+                                    ref.read(highlightedTaskProvider.notifier).state = null;
+                                  }
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF13131A) : Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isHighlighted ? tColor : tColor.withValues(alpha: 0.3), 
+                                    width: isHighlighted ? 2.0 : 1.5
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(task.title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 12, fontWeight: FontWeight.bold)),
-                                ],
+                                  boxShadow: isHighlighted ? [BoxShadow(color: tColor.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)] : [],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 12, height: 12,
+                                      decoration: BoxDecoration(
+                                        color: tColor, 
+                                        shape: BoxShape.circle, 
+                                        boxShadow: isHighlighted ? [BoxShadow(color: tColor, blurRadius: 8, spreadRadius: 2)] : []
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(task.title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
                               ),
                             );
                           }).toList(),
