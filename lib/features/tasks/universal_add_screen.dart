@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection; 
-import 'package:alarm/alarm.dart';
 
 import 'tasks_provider.dart';
 import '../routines/routines_provider.dart';
@@ -12,7 +11,7 @@ import '../../models/task_model.dart';
 import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/astro_engine/astro_models.dart';
-import '../../core/services/alarm_service.dart';
+import '../../core/location/permissions_provider.dart';
 
 Color _getNeonColor(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -220,14 +219,14 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
 
     HapticFeedback.heavyImpact();
 
-    final int themeColorValue = Theme.of(context).primaryColor.toARGB32();
     final periods = ref.read(astroProvider).periods;
     final navigator = Navigator.of(context);
     final scaffold = ScaffoldMessenger.of(context);
 
     if (_tabController.index == 2) {
-      if (_alertLevel == 2) {
-        bool hasPermissions = await AlarmService.checkAndRequestPermissions();
+      // 🌟 إصلاح النقطة 3: الإشعارات العادية والمنبهات كلاهما يحتاج الصلاحية الدقيقة للعمل في خلفية Android 12+
+      if (_alertLevel >= 1) {
+        bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
         if (!mounted) return;
         if (!hasPermissions) {
           scaffold.showSnackBar(SnackBar(content: Text('add_screen.permissions_required'.tr()), backgroundColor: Colors.redAccent));
@@ -273,8 +272,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       return;
     }
 
-    if (_alertLevel == 2) {
-      bool hasPermissions = await AlarmService.checkAndRequestPermissions();
+    // 🌟 إصلاح النقطة 3 للأنواع الأخرى
+    if (_alertLevel >= 1) {
+      bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
       if (!mounted) return; 
       if (!hasPermissions) {
         scaffold.showSnackBar(SnackBar(content: Text('add_screen.permissions_required'.tr()), backgroundColor: Colors.redAccent));
@@ -295,20 +295,13 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     task.alarmTone = _alarmTone;
     task.alarmVolume = _alarmVolume;
 
-    DateTime? exactAlarmTime;
-    
     if (_hasTime) {
-      DateTime baseDate = _selectedDate ?? DateTime.now();
-
       if (_timeMode == 2) {
         task.isAstroTime = false;
         task.targetCivilTimeMinutes = (_targetCivilHour * 60) + _targetCivilMinute;
         task.targetPeriodId = null;
         task.targetSuwayas = [];
         task.targetVirtualMinute = 0;
-
-        exactAlarmTime = DateTime(baseDate.year, baseDate.month, baseDate.day, _targetCivilHour, _targetCivilMinute);
-        if (exactAlarmTime.isBefore(DateTime.now())) exactAlarmTime = exactAlarmTime.add(const Duration(days: 1));
       } else {
         task.isAstroTime = true;
         task.targetCivilTimeMinutes = null;
@@ -322,21 +315,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
           task.targetPeriodId = _targetPeriodId;
           task.targetSuwayas = [_targetLocalSuwaya];
         }
-
-        if (periods.isNotEmpty && task.targetPeriodId != null) {
-          try {
-            final p = periods.firstWhere((per) => per.id == task.targetPeriodId);
-            final microPerSuwaya = p.endTime.difference(p.startTime).inMicroseconds ~/ (p.suwayasCount > 0 ? p.suwayasCount : 1);
-            final microPerVirtualMin = microPerSuwaya ~/ 30;
-            int sIndex = task.targetSuwayas.first - 1;
-            
-            DateTime calculatedTime = p.startTime.add(Duration(microseconds: (microPerSuwaya * sIndex) + (microPerVirtualMin * _targetVirtualMinute)));
-            exactAlarmTime = DateTime(baseDate.year, baseDate.month, baseDate.day, calculatedTime.hour, calculatedTime.minute);
-            
-            if (calculatedTime.day != p.startTime.day) exactAlarmTime = exactAlarmTime.add(const Duration(days: 1));
-            if (exactAlarmTime.isBefore(DateTime.now())) exactAlarmTime = exactAlarmTime.add(const Duration(days: 1));
-          } catch (_) {}
-        }
       }
     }
 
@@ -348,19 +326,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       task.recurrenceDays = _recurrenceDays.isEmpty ? null : _recurrenceDays;
     }
 
+    // 🌟 تم الحذف الجراحي لأكواد الجدولة اليدوية من هنا. المجدول المركزي سيتولى الأمر بمجرد حفظ المهمة.
     await ref.read(tasksProvider.notifier).addTask(task);
-
-    final int targetAlarmId = 10000 + task.id;
-    if ((task.alarmMode || task.notifyMode) && exactAlarmTime != null) {
-      await AlarmService.scheduleAlarm(
-        id: targetAlarmId, dateTime: exactAlarmTime, title: task.title,
-        colorValue: themeColorValue, 
-        tonePath: task.alarmTone, volume: task.alarmVolume,
-        fullScreenIntent: task.alarmMode, vibrate: task.vibrateMode,        
-      );
-    } else {
-      await Alarm.stop(targetAlarmId); 
-    }
 
     if (!mounted) return; 
     navigator.pop();

@@ -92,12 +92,14 @@ class NotificationScheduler {
   Future<void> scheduleAhead(SettingsModel settings, List<TaskModel> allTasks, List<RoutineModel> routines) async {
     if (_isScheduling) return;
     
-    // 🌟 بدء نطاق الـ try قبل تغيير الحالة، لضمان عمل الـ finally دائماً
     try {
       _isScheduling = true;
 
       final loc = settings.activeLocation;
-      if (loc == null) return; // الآن هذا الخروج المباشر آمن تماماً!
+      if (loc == null) return;
+
+      // 🌟 1. المسح الشامل: نقتل أي إشعارات قديمة متراكمة في النظام أولاً
+      await _service.cancelAll();
 
       final activeAlarms = await Alarm.getAlarms();
       final activeAlarmMap = {for (var a in activeAlarms) a.id: a};
@@ -180,7 +182,9 @@ class NotificationScheduler {
             if (alertLevel > 0) {
               final String soundId = settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
-              final int notificationId = (dayOffset * 100) + numericId;
+              
+              // 🌟 2. منع التصادم: الصلوات تبدأ من 100,000
+              final int notificationId = 100000 + (dayOffset * 1000) + numericId;
 
               final durationUntilAlarm = pTime.difference(cityNow);
               final realAlarmTime = DateTime.now().add(durationUntilAlarm);
@@ -237,7 +241,9 @@ class NotificationScheduler {
               final String soundId = settings.getPeriodSound(nightPart.id, 'assets/audio/soft.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
               final int nightIdSafe = nightPart.id.hashCode.abs() % 100;
-              final int notificationId = 1000 + (dayOffset * 100) + nightIdSafe;
+              
+              // 🌟 2. منع التصادم: قيام الليل يبدأ من 200,000
+              final int notificationId = 200000 + (dayOffset * 1000) + nightIdSafe;
 
               final durationUntilAlarm = nightPart.startTime.difference(cityNow);
               final realAlarmTime = DateTime.now().add(durationUntilAlarm);
@@ -312,7 +318,9 @@ class NotificationScheduler {
           }
 
           if (routineAlarmTime != null && routineAlarmTime.isAfter(cityNow)) {
-              final int routineNotifId = 20000 + (dayOffset * 10000) + routine.id;
+              // 🌟 2. منع التصادم: الروتينات تبدأ من 300,000
+              final int routineNotifId = 300000 + (dayOffset * 10000) + routine.id;
+              
               final durationUntilAlarm = routineAlarmTime.difference(cityNow);
               final realAlarmTime = DateTime.now().add(durationUntilAlarm);
 
@@ -400,7 +408,10 @@ class NotificationScheduler {
                 
                 if (taskCityTime.isAfter(cityNow)) {
                   final int taskIdSafe = task.id % 1000;
-                  final int taskNotifId = 10000 + (dayOffset * 10000) + (taskIdSafe * 10) + effectiveSuwayaNum;
+                  
+                  // 🌟 2. منع التصادم: المهام تبدأ من 400,000
+                  final int taskNotifId = 400000 + (dayOffset * 10000) + (taskIdSafe * 10) + effectiveSuwayaNum;
+                  
                   int currentGlobalSuwaya = globalSuwayaBase + sIndex;
                   String timeText = 'الزمن المقطعي : ${currentGlobalSuwaya.toString().padLeft(2, '0')}:${vMin.toString().padLeft(2, '0')}';
                   
@@ -451,13 +462,13 @@ class NotificationScheduler {
         }
       }
 
+      // 🌟 تنظيف المنبهات المزعجة (إيقاف أي منبه لم يتم تجديده الآن)
       for (var alarm in activeAlarms) {
-         if (!requiredAlarmIds.contains(alarm.id) && alarm.id < 100000) {
+         if (!requiredAlarmIds.contains(alarm.id)) {
             await Alarm.stop(alarm.id);
          }
       }
     } finally {
-      // 🌟 الآن نحن واثقون بنسبة 100% أن القفل سيُفتح مجدداً مهما حدث من أخطاء أو خروج!
       _isScheduling = false;
     }
   }

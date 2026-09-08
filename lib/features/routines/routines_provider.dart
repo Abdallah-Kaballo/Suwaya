@@ -28,7 +28,6 @@ class RoutinesNotifier extends Notifier<List<RoutineModel>> {
   }
 
   Future<void> _loadRoutines() async {
-    // 🌟 جلب البيانات عبر المستودع بدلاً من القاعدة المباشرة
     final repository = ref.read(routineRepositoryProvider);
     final routines = await repository.getAllRoutines();
     state = List.from(routines);
@@ -45,13 +44,13 @@ class RoutinesNotifier extends Notifier<List<RoutineModel>> {
     state = state.where((r) => r.id != id).toList();
     
     final repository = ref.read(routineRepositoryProvider);
-    repository.deleteRoutine(id); // عملية في الخلفية
+    // 🌟 تمت إضافة await لضمان إتمام الحذف من قاعدة البيانات قبل أي عملية أخرى
+    await repository.deleteRoutine(id);
   }
 }
 
 final routinesProvider = NotifierProvider<RoutinesNotifier, List<RoutineModel>>(RoutinesNotifier.new);
 
-// ... (باقي الكود الخاص بـ routineArcsProvider يبقى كما هو دون تغيير)
 final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
   final routines = ref.watch(routinesProvider);
   final astroState = ref.watch(astroProvider);

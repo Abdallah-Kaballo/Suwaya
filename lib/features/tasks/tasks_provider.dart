@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:alarm/alarm.dart';
 import 'package:isar_community/isar.dart';
 import 'package:suwaya/core/astro_engine/astro_models.dart';
 
@@ -146,7 +145,6 @@ class TasksNotifier extends Notifier<TasksState> {
       task.notifyMode = false;
       task.alarmMode = false;
       task.vibrateMode = false;
-      Alarm.stop(10000 + task.id); 
     } else {
       task.notifyMode = true; 
     }
@@ -184,7 +182,6 @@ class TasksNotifier extends Notifier<TasksState> {
     
     // 🌟 إصلاح النقطة 5: انتظار الحذف بقاعدة البيانات
     await ref.read(taskRepositoryProvider).deleteTask(id);
-    Alarm.stop(10000 + id); 
   }
 
   Future<void> deleteMultipleTasks(List<int> ids) async {
@@ -193,7 +190,6 @@ class TasksNotifier extends Notifier<TasksState> {
     for (var id in ids) {
       // 🌟 إصلاح النقطة 5: انتظار الحذف المتعدد بقاعدة البيانات
       await ref.read(taskRepositoryProvider).deleteTask(id);
-      Alarm.stop(10000 + id);
     }
   }
 

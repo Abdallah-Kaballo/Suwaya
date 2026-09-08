@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart'; // 🌟 إضافة استيراد الترجمة
 import '../../core/repositories/activity_log_repository.dart';
 
 class StatsState {
@@ -10,13 +11,14 @@ class StatsState {
   final bool isLoading;
 
   StatsState({
-    this.archetypeTitle = 'في طور الاكتشاف 🔭',
-    this.archetypeDescription = 'أنجز المزيد من المهام لنكتشف نمطك الفلكي.',
+    String? archetypeTitle,
+    String? archetypeDescription,
     this.harmonyScore = 100,
     this.periodHeatmap = const {},
     this.insights = const [],
     this.isLoading = true,
-  });
+  }) : archetypeTitle = archetypeTitle ?? 'stats.discovery_title'.tr(), // 🌟 استخدام الترجمة بأمان
+       archetypeDescription = archetypeDescription ?? 'stats.discovery_desc'.tr();
 }
 
 class StatsNotifier extends Notifier<StatsState> {
@@ -57,7 +59,6 @@ class StatsNotifier extends Notifier<StatsState> {
 
     final archetypeInfo = _determineArchetype(topPeriodId);
 
-    // 🌟 استخدام القسمة الصحيحة لضمان نوع int النقي
     int harmony = ((activeDays.length * 100) ~/ 7).clamp(0, 100);
 
     final generatedInsights = _generateSmartInsights(heatmap, harmony, topPeriodId);
@@ -74,14 +75,14 @@ class StatsNotifier extends Notifier<StatsState> {
 
   Map<String, String> _determineArchetype(int topPeriodId) {
     switch (topPeriodId) {
-      case 1: return {'title': 'نسمة الفجر 🕊️', 'desc': 'طاقة البدايات والبركة تتجلى في إنجازاتك الصباحية.'};
-      case 2: return {'title': 'رائد الضُّحى 🌤️', 'desc': 'شمس الضحى تضيء إنتاجيتك، أنت في قمة تركيزك نهاراً.'};
+      case 1: return {'title': 'stats.fajr_title'.tr(), 'desc': 'stats.fajr_desc'.tr()};
+      case 2: return {'title': 'stats.duha_title'.tr(), 'desc': 'stats.duha_desc'.tr()};
       case 3: 
-      case 4: return {'title': 'فارس النهار 🐎', 'desc': 'لا تعرف الكسل في كبد النهار، إنجازاتك مستمرة وقوية.'};
+      case 4: return {'title': 'stats.day_title'.tr(), 'desc': 'stats.day_desc'.tr()};
       case 5:
       case 6:
-      case 7: return {'title': 'ساهر السَّحَر 🌙', 'desc': 'في الوقت الذي ينام فيه الناس، ترتفع أعمالك وإنجازاتك بهدوء.'};
-      default: return {'title': 'متوازن ⚖️', 'desc': 'توزع مجهودك ببراعة على مدار اليوم.'};
+      case 7: return {'title': 'stats.night_title'.tr(), 'desc': 'stats.night_desc'.tr()};
+      default: return {'title': 'stats.balanced_title'.tr(), 'desc': 'stats.balanced_desc'.tr()};
     }
   }
 
@@ -89,19 +90,19 @@ class StatsNotifier extends Notifier<StatsState> {
     List<String> insights = [];
     
     if (harmony >= 80) {
-      insights.add("تناغمك الفلكي مرتفع جداً! استمرارية رائعة خلال الأسبوع الماضي.");
+      insights.add('stats.insight_harmony_high'.tr());
     } else if (harmony <= 40) {
-      insights.add("يبدو أنك مررت بأسبوع حافل. حاول توزيع مهامك لتقليل الضغط.");
+      insights.add('stats.insight_harmony_low'.tr());
     }
 
     if (topPeriodId == 1) {
-      insights.add("تركيزك في الفجر يمنحك أفضلية مذهلة وصفاءً ذهنياً لباقي اليوم.");
+      insights.add('stats.insight_fajr_focus'.tr());
     } else if (topPeriodId >= 5) {
-      insights.add("نشاطك الليلي ممتاز، لكن تأكد من أخذ قسط كافٍ من الراحة الجسدية.");
+      insights.add('stats.insight_night_focus'.tr());
     }
 
     if (insights.isEmpty) {
-      insights.add("أداؤك مستقر وتوزع طاقتك بشكل جيد على الفترات المختلفة.");
+      insights.add('stats.insight_stable'.tr());
     }
 
     return insights;

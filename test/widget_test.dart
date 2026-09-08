@@ -7,7 +7,10 @@ void main() {
     
     testWidgets('اختبار عمل شاشة الإقلاع البديلة بنجاح (Bootstrap Failure Screen)', (WidgetTester tester) async {
       // 1. بناء شاشة الفشل الوهمية التي تعمل عند تعذر تشغيل قواعد البيانات في بيئة الاختبار
-      await tester.pumpWidget(const BootstrapFailureScreen());
+      await tester.pumpWidget(BootstrapFailureScreen(
+  error: 'خطأ تجريبي', 
+  onRetry: () {},
+));
 
       // 2. التحقق من أن واجهة Flutter قادرة على الرسم وعرض النصوص بشكل صحيح
       expect(find.text('حدث خطأ أثناء التشغيل. يرجى إعادة المحاولة.'), findsOneWidget);

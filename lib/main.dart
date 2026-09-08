@@ -11,9 +11,14 @@ import 'core/astro_engine/astro_provider.dart';
 import 'features/settings/settings_provider.dart';
 import 'core/router/app_router.dart';
 
-void main() async {
+// 🌟 فصلنا دالة التشغيل لكي نتمكن من استدعائها مجدداً عند الضغط على "إعادة المحاولة"
+void main() {
+  _launchApp();
+}
+
+Future<void> _launchApp() async {
   try {
-    final isar = await AppBootstrap.initialize(); // 🌟 هذا هو السطر الذي يحل الخطأ
+    final isar = await AppBootstrap.initialize(); 
 
     runApp(
       ProviderScope(
@@ -31,24 +36,55 @@ void main() async {
     );
   } catch (e, stackTrace) {
     debugPrint('💥 فشل في التهيئة: $e\n$stackTrace');
-    runApp(const BootstrapFailureScreen());
+    runApp(BootstrapFailureScreen(error: e.toString(), onRetry: _launchApp));
   }
 }
 
 class BootstrapFailureScreen extends StatelessWidget {
-  const BootstrapFailureScreen({super.key});
+  final String error;
+  final VoidCallback onRetry;
+
+  const BootstrapFailureScreen({super.key, required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Text(
-            'حدث خطأ أثناء التشغيل. يرجى إعادة المحاولة.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
+        backgroundColor: const Color(0xFF13131A),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 64),
+                const SizedBox(height: 24),
+                const Text('عذراً، حدث خطأ أثناء بدء التشغيل', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                // 🌟 عرض الخطأ التقني بشكل مصغر لمساعدة المستخدم والمطور
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(12)),
+                  child: Text(error, textAlign: TextAlign.left, style: const TextStyle(color: Colors.redAccent, fontSize: 12), maxLines: 5, overflow: TextOverflow.ellipsis),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                    onPressed: () {
+                      // 🌟 إظهار شاشة تحميل مؤقتة أثناء إعادة المحاولة
+                      runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold(backgroundColor: Color(0xFF13131A), body: Center(child: CircularProgressIndicator(color: Colors.amber)))));
+                      onRetry();
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('إعادة المحاولة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

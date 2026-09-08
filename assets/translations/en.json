@@ -226,5 +226,30 @@
     "focus_time": "Focus Time",
     "hours": "Hours",
     "weekly_overview": "Weekly Overview"
+  },
+
+  "splash": {
+    "app_title_ar": "سُـويـعَـة",
+    "app_title_en": "Suwaya"
+  },
+  "stats": {
+    "discovery_title": "Discovering 🔭",
+    "discovery_desc": "Complete more tasks to discover your astronomical pattern.",
+    "fajr_title": "Fajr Breeze 🕊️",
+    "fajr_desc": "The energy of beginnings and blessings manifests in your morning achievements.",
+    "duha_title": "Duha Pioneer 🌤️",
+    "duha_desc": "The morning sun illuminates your productivity, you are at peak focus during the day.",
+    "day_title": "Day Knight 🐎",
+    "day_desc": "You know no laziness in the middle of the day, your achievements are continuous and strong.",
+    "night_title": "Night Watcher 🌙",
+    "night_desc": "While people sleep, your work and achievements quietly rise.",
+    "balanced_title": "Balanced ⚖️",
+    "balanced_desc": "You brilliantly distribute your effort throughout the day.",
+    "insight_harmony_high": "Your astronomical harmony is very high! Great consistency over the past week.",
+    "insight_harmony_low": "It seems you had a busy week. Try to distribute your tasks to reduce pressure.",
+    "insight_fajr_focus": "Your focus at Fajr gives you an amazing advantage and mental clarity for the rest of the day.",
+    "insight_night_focus": "Your night activity is excellent, but make sure to get enough physical rest.",
+    "insight_stable": "Your performance is stable and you distribute your energy well across different periods."
   }
+
 }

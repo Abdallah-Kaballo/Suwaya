@@ -63,7 +63,6 @@ class SettingsModel {
     return _getConfig(pId)?.isEnabled ?? smartDefault;
   }
 
-  // 🌟 الحل الجذري: الإعداد الافتراضي أصبح 0 (صامت) بدلاً من 2
   int getPeriodAlertLevel(String pId, [int defaultVal = 0]) {
     final smartDefault = (pId == 'sunrise' || pId.startsWith('half') || pId.startsWith('third') || pId.startsWith('sixth')) ? 0 : defaultVal;
     return _getConfig(pId)?.alertLevel ?? smartDefault;
@@ -83,10 +82,15 @@ class SettingsModel {
 
   SettingsModel clone() {
     return SettingsModel()
+      ..id = id
+      // 🌟 تم إضافة الحقول المفقودة لمنع فقدان البيانات أثناء تعديل الإعدادات
+      ..updatedAt = updatedAt
+      ..isSynced = isSynced
+      ..streakFreezesAvailable = streakFreezesAvailable
+      ..dayBoundary = dayBoundary
       ..useAstroTimeForIbadat = useAstroTimeForIbadat
       ..showSunrise = showSunrise
       ..visibleNightParts = List.from(visibleNightParts)
-      ..id = id
       ..isFirstLaunch = isFirstLaunch
       ..languageCode = languageCode
       ..themeMode = themeMode

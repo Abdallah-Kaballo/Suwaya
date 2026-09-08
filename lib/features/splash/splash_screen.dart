@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart'; // 🌟 إضافة استيراد الترجمة
 
 import '../settings/settings_provider.dart';
 
@@ -66,9 +67,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                   children: [
                     Icon(LucideIcons.compass, size: 80, color: primaryColor), 
                     const SizedBox(height: 24),
-                    Text('سُـويـعَـة', style: TextStyle(color: primaryColor, fontSize: 32, fontWeight: FontWeight.bold)),
+                    // 🌟 استبدال النصوص الثابتة بمفاتيح الترجمة
+                    Text('splash.app_title_ar'.tr(), style: TextStyle(color: primaryColor, fontSize: 32, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text('Suwaya', style: TextStyle(color: primaryColor.withValues(alpha: 0.5), fontSize: 16, letterSpacing: 4.0)),
+                    Text('splash.app_title_en'.tr(), style: TextStyle(color: primaryColor.withValues(alpha: 0.5), fontSize: 16, letterSpacing: 4.0)),
                   ],
                 ),
               ),
