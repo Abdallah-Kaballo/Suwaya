@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:suwaya/core/astro_engine/astro_models.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
 import 'stats_provider.dart';

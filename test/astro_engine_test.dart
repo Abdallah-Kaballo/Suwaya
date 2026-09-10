@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:suwaya/core/astro_engine/astro_engine.dart';
-import 'package:suwaya/core/astro_engine/astro_models.dart';
-import 'package:suwaya/core/astro_engine/suwaya_distribution.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 void main() {
   group('Astro Engine Time Rules (Core Invariants)', () {
@@ -14,8 +12,8 @@ void main() {
     test('1. الترتيب الزمني للصلوات: الفجر < الشروق < الظهر < العصر < المغرب < العشاء', () {
       final ibadat = AstroEngine.getIbadatTimings(
         lat, lng, date, 
-        CalculationMethodType.umm_al_qura, MadhabType.shafi, 
-        HighLatitudeRuleType.middle_of_the_night, 0, 0, cityOffset
+        CalculationMethodType.ummAlQura, MadhabType.shafi, 
+        HighLatitudeRuleType.middleOfTheNight, 0, 0, cityOffset
       );
 
       expect(ibadat.fajr.isBefore(ibadat.sunrise), isTrue);
@@ -29,8 +27,8 @@ void main() {
     test('2. دقة حساب الليل: من المغرب حتى فجر اليوم التالي', () {
       final ibadat = AstroEngine.getIbadatTimings(
         lat, lng, date, 
-        CalculationMethodType.umm_al_qura, MadhabType.shafi, 
-        HighLatitudeRuleType.middle_of_the_night, 0, 0, cityOffset
+        CalculationMethodType.ummAlQura, MadhabType.shafi, 
+        HighLatitudeRuleType.middleOfTheNight, 0, 0, cityOffset
       );
 
       final nightDuration = ibadat.nextFajr.difference(ibadat.maghrib);
@@ -65,14 +63,14 @@ void main() {
 
       final ibadatWithout = AstroEngine.getIbadatTimings(
         lat, lng, date, 
-        CalculationMethodType.umm_al_qura, MadhabType.shafi, 
-        HighLatitudeRuleType.middle_of_the_night, 0, 0, cityOffset
+        CalculationMethodType.ummAlQura, MadhabType.shafi, 
+        HighLatitudeRuleType.middleOfTheNight, 0, 0, cityOffset
       );
 
       final ibadatWith = AstroEngine.getIbadatTimings(
         lat, lng, date, 
-        CalculationMethodType.umm_al_qura, MadhabType.shafi, 
-        HighLatitudeRuleType.middle_of_the_night, 0, 0, cityOffset,
+        CalculationMethodType.ummAlQura, MadhabType.shafi, 
+        HighLatitudeRuleType.middleOfTheNight, 0, 0, cityOffset,
         manualOffsets: offsets
       );
 
@@ -85,8 +83,8 @@ void main() {
       final distribution = [5, 5, 6, 6, 8, 9, 9]; // توزيع اعتباطي لـ 48 سويعة
       final periods = AstroEngine.generatePeriodsForDay(
         lat, lng, date, 
-        CalculationMethodType.umm_al_qura, MadhabType.shafi, 
-        HighLatitudeRuleType.middle_of_the_night, 0, 0, distribution, cityOffset
+        CalculationMethodType.ummAlQura, MadhabType.shafi, 
+        HighLatitudeRuleType.middleOfTheNight, 0, 0, distribution, cityOffset
       );
 
       // التأكد من أن نهاية كل فترة هي بداية الفترة التي تليها (لا توجد فجوات)
@@ -97,8 +95,8 @@ void main() {
       // إجمالي وقت الفترات يجب أن يساوي الزمن الفعلي بين الفجر وفجر اليوم التالي
       final ibadat = AstroEngine.getIbadatTimings(
         lat, lng, date, 
-        CalculationMethodType.umm_al_qura, MadhabType.shafi, 
-        HighLatitudeRuleType.middle_of_the_night, 0, 0, cityOffset
+        CalculationMethodType.ummAlQura, MadhabType.shafi, 
+        HighLatitudeRuleType.middleOfTheNight, 0, 0, cityOffset
       );
       
       final totalPeriodsDuration = periods.last.endTime.difference(periods.first.startTime);

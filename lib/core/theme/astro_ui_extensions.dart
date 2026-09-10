@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../astro_engine/astro_models.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 // 🌟 هذا الملف يربط بين المحرك الفلكي النظيف وواجهة Flutter
 

@@ -1,6 +1,3 @@
-// ignore_for_file: constant_identifier_names
-// 🌟 Pure Dart Domain: لا يوجد أي استيراد لـ Flutter هنا
-
 class AstroPeriod {
   final int id;
   final String name;
@@ -39,7 +36,6 @@ class IbadatTimings {
   });
 }
 
-// 🌟 النموذج الجديد الذي يمثل يوماً كاملاً في محرك سُويعة
 class SuwayaDay {
   final IbadatTimings ibadatTimings;
   final List<AstroPeriod> periods;
@@ -47,7 +43,6 @@ class SuwayaDay {
   SuwayaDay({required this.ibadatTimings, required this.periods});
 }
 
-// 🌟 حالة اللحظة الحالية (الناتج النهائي للمحرك)
 class AstroState {
   final DateTime virtualTime;
   final List<AstroPeriod> periods;
@@ -73,7 +68,7 @@ class AstroState {
     for (var p in periods) {
       if (targetTime.isAfter(p.endTime) || targetTime.isAtSameMomentAs(p.endTime)) {
         totalVirtualMinutes += p.suwayasCount * 30.0;
-      } else if (targetTime.isAfter(p.startTime) && targetTime.isBefore(p.endTime)) {
+      } else if ((targetTime.isAfter(p.startTime) || targetTime.isAtSameMomentAs(p.startTime)) && targetTime.isBefore(p.endTime)) {
         final totalMicro = p.endTime.difference(p.startTime).inMicroseconds;
         final elapsedMicro = targetTime.difference(p.startTime).inMicroseconds;
         final progress = totalMicro > 0 ? (elapsedMicro / totalMicro) : 0.0;
@@ -89,6 +84,34 @@ class AstroState {
   }
 }
 
+// 🌟 تحديث الأسماء لتطابق معايير لغة Dart (camelCase)
+enum CalculationMethodType { muslimWorldLeague, egyptian, karachi, ummAlQura, dubai, northAmerica, kuwait, qatar, singapore, tehran, turkey, custom }
+enum MadhabType { hanafi, shafi }
+enum HighLatitudeRuleType { middleOfTheNight, seventhOfTheNight, twilightAngle }
+enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
+
+// 🌟 حماية البيانات القديمة: تجاهل الفواصل السفلية عند قراءة النصوص من قاعدة البيانات
+extension AstroStringParsers on String {
+  String get _normalized => replaceAll('_', '').toLowerCase();
+
+  CalculationMethodType toCalculationMethod() => CalculationMethodType.values.firstWhere(
+    (e) => e.name.toLowerCase() == _normalized, 
+    orElse: () => CalculationMethodType.muslimWorldLeague
+  );
+  
+  MadhabType toMadhab() => MadhabType.values.firstWhere(
+    (e) => e.name.toLowerCase() == _normalized, 
+    orElse: () => MadhabType.shafi
+  );
+  
+  HighLatitudeRuleType toHighLatRule() => HighLatitudeRuleType.values.firstWhere(
+    (e) => e.name.toLowerCase() == _normalized, 
+    orElse: () => HighLatitudeRuleType.middleOfTheNight
+  );
+}
+
+// 🌟 الإضافات المفقودة التي تم استرجاعها من الكود القديم
+
 extension AstroPeriodNaming on AstroPeriod {
   String get longName {
     switch (id) {
@@ -101,27 +124,21 @@ extension AstroPeriodNaming on AstroPeriod {
   String get shortName => longName; 
 }
 
-enum CalculationMethodType { muslim_world_league, egyptian, karachi, umm_al_qura, dubai, north_america, kuwait, qatar, singapore, tehran, turkey, custom }
-enum MadhabType { hanafi, shafi }
-enum HighLatitudeRuleType { middle_of_the_night, seventh_of_the_night, twilight_angle }
-enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
-
-extension AstroStringParsers on String {
-  CalculationMethodType toCalculationMethod() => CalculationMethodType.values.firstWhere((e) => e.name == this, orElse: () => CalculationMethodType.muslim_world_league);
-  MadhabType toMadhab() => MadhabType.values.firstWhere((e) => e.name == this, orElse: () => MadhabType.shafi);
-  HighLatitudeRuleType toHighLatRule() => HighLatitudeRuleType.values.firstWhere((e) => e.name == this, orElse: () => HighLatitudeRuleType.middle_of_the_night);
-}
-
 extension AstroMapParsers on Map<String, int> {
   Map<PrayerKey, int> toPrayerKeyMap() {
     final map = <PrayerKey, int>{};
     forEach((key, value) {
-      switch (key) {
-        case '1': map[PrayerKey.fajr] = value; break;
+      // تم إضافة تحسين صغير هنا لدعم الأسماء القديمة والجديدة
+      switch (key.toLowerCase()) {
+        case '1': 
+        case 'fajr': map[PrayerKey.fajr] = value; break;
         case 'sunrise': map[PrayerKey.sunrise] = value; break;
-        case '3': map[PrayerKey.dhuhr] = value; break;
-        case '4': map[PrayerKey.asr] = value; break;
-        case '5': map[PrayerKey.maghrib] = value; break;
+        case '3': 
+        case 'dhuhr': map[PrayerKey.dhuhr] = value; break;
+        case '4': 
+        case 'asr': map[PrayerKey.asr] = value; break;
+        case '5': 
+        case 'maghrib': map[PrayerKey.maghrib] = value; break;
         case 'isha': map[PrayerKey.isha] = value; break;
       }
     });

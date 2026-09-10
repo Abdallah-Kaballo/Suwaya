@@ -1,5 +1,5 @@
-import 'astro_models.dart';
-import 'prayer_calculator.dart';
+import '../models/astro_models.dart';
+import '../calculators/prayer_calculator.dart';
 
 class SuwayaDistributor {
   static List<int> distribute48Suwayas(List<int> durationsInSeconds) {
@@ -13,62 +13,39 @@ class SuwayaDistributor {
     for (int i = 0; i < 7; i++) {
       double exactShare = (durationsInSeconds[i] / totalDaySeconds) * targetSuwayas;
       if (exactShare < 1.0) {
-        baseAllocations[i] = 1;
-        remainders[i] = 0.0; 
+        baseAllocations[i] = 1; remainders[i] = 0.0; 
       } else {
-        baseAllocations[i] = exactShare.floor();
-        remainders[i] = exactShare - baseAllocations[i];
+        baseAllocations[i] = exactShare.floor(); remainders[i] = exactShare - baseAllocations[i];
       }
       allocatedCount += baseAllocations[i];
     }
 
     int remainingToDistribute = targetSuwayas - allocatedCount;
-
     if (remainingToDistribute > 0) {
-      List<int> indices = List.generate(7, (i) => i);
-      indices.sort((a, b) => remainders[b].compareTo(remainders[a]));
-      for (int i = 0; i < remainingToDistribute; i++) {
-        baseAllocations[indices[i]] += 1;
-      }
+      List<int> indices = List.generate(7, (i) => i)..sort((a, b) => remainders[b].compareTo(remainders[a]));
+      for (int i = 0; i < remainingToDistribute; i++) { baseAllocations[indices[i]] += 1; }
     } else if (remainingToDistribute < 0) {
       int excess = -remainingToDistribute;
       while (excess > 0) {
-        int maxIdx = -1;
-        int maxVal = -1;
+        int maxIdx = -1, maxVal = -1;
         for (int i = 0; i < 7; i++) {
-          if (baseAllocations[i] > 1 && baseAllocations[i] > maxVal) {
-            maxVal = baseAllocations[i];
-            maxIdx = i;
-          }
+          if (baseAllocations[i] > 1 && baseAllocations[i] > maxVal) { maxVal = baseAllocations[i]; maxIdx = i; }
         }
-        if (maxIdx != -1) {
-          baseAllocations[maxIdx]--;
-          excess--;
-        } else {
-          break;
-        }
+        if (maxIdx != -1) { baseAllocations[maxIdx]--; excess--; } else { break; }
       }
     }
     return baseAllocations;
   }
 
-  static List<int> calculateAnnualDistribution(
-    double lat, double lng, 
-    CalculationMethodType methodType, MadhabType madhabType, 
-    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
-  ) {
+  static List<int> calculateAnnualDistribution(double lat, double lng, CalculationMethodType methodType, MadhabType madhabType, HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}) {
     List<int> totalDurations = List.filled(7, 0);
     final int year = DateTime.now().year;
-    // 🌟 إضافة 3 أيام إضافية كما طلبت لزيادة الدقة (المجموع 72 يوم في السنة)
     final List<int> sampleDays = [1, 6, 11, 16, 21, 26]; 
     
     for (int month = 1; month <= 12; month++) {
       for (int day in sampleDays) {
         final date = DateTime(year, month, day);
-        final ibadat = PrayerCalculator.getIbadatTimings(
-          lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
-        );
+        final ibadat = PrayerCalculator.getIbadatTimings(lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets);
         
         final midFajr = ibadat.fajr.add(Duration(microseconds: ibadat.dhuhr.difference(ibadat.fajr).inMicroseconds ~/ 2));
         final nightMicro = ibadat.nextFajr.difference(ibadat.maghrib).inMicroseconds;
@@ -85,9 +62,6 @@ class SuwayaDistributor {
         totalDurations[6] += ibadat.nextFajr.difference(secondThirdEnd).inSeconds;
       }
     }
-    
-    // 🌟 التعديل هنا ليقسم على 72 يوماً بدلاً من 36 ليتناسب مع عدد العينات الجديد
-    List<int> avgDurations = totalDurations.map((d) => d ~/ 72).toList();
-    return distribute48Suwayas(avgDurations);
+    return distribute48Suwayas(totalDurations.map((d) => d ~/ 72).toList());
   }
 }

@@ -5,14 +5,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:alarm/alarm.dart'; 
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:suwaya_time/suwaya_time.dart';
+
 import '../../models/routine_model.dart';
 import '../../models/task_model.dart';
 import '../../models/settings_model.dart';
 import '../../features/tasks/tasks_provider.dart';
 import '../../features/settings/settings_provider.dart';
 import '../../features/routines/routines_provider.dart';
-import '../astro_engine/astro_engine.dart';
-import '../astro_engine/astro_models.dart'; 
 import 'notification_service.dart';
 
 final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {

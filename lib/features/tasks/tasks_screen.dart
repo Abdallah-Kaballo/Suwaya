@@ -9,7 +9,8 @@ import 'tasks_provider.dart';
 import '../../models/task_model.dart';
 import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/astro_engine/astro_models.dart';
+
+import 'package:suwaya_time/suwaya_time.dart';
 import '../routines/routines_provider.dart';
 import 'universal_add_screen.dart';
 import '../../shared/widgets/app_drawer.dart';

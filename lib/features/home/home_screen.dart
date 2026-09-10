@@ -4,7 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:suwaya/core/astro_engine/astro_models.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 import 'package:suwaya/core/notification/scheduler_service.dart';
 import 'package:suwaya/models/settings_model.dart';

@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import '../../../core/astro_engine/astro_models.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 import '../../../core/theme/astro_ui_extensions.dart';
 
 class MiniAstroDial extends StatelessWidget {

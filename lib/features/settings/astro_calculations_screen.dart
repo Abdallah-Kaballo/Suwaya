@@ -53,7 +53,7 @@ class AstroCalculationsScreen extends ConsumerWidget {
           _buildCard(surfaceColor, borderColor, [
             _buildRadioItem('muslim_world_league', 'astro_calc.mwl'.tr(), 'astro_calc.mwl_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),
             _buildRadioItem('egyptian', 'astro_calc.egypt'.tr(), 'astro_calc.egypt_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),
-            _buildRadioItem('umm_al_qura', 'astro_calc.makkah'.tr(), 'astro_calc.makkah_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),
+            _buildRadioItem('ummAlQura', 'astro_calc.makkah'.tr(), 'astro_calc.makkah_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),
             _buildRadioItem('dubai', 'astro_calc.dubai'.tr(), 'astro_calc.dubai_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),
             _buildRadioItem('qatar', 'astro_calc.qatar'.tr(), 'astro_calc.qatar_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),
             _buildRadioItem('kuwait', 'astro_calc.kuwait'.tr(), 'astro_calc.kuwait_desc'.tr(), settings.calculationMethod, (v) => notifier.updateAstroSettings(method: v), textColor, isDark, primaryColor),

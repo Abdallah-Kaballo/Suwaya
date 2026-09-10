@@ -112,7 +112,7 @@ class GeoDatabaseService {
 
     final List<Map<String, dynamic>> defaultCountries = [
       {'code': 'EG', 'ar': 'مصر', 'en': 'Egypt', 'method': 'egyptian', 'madhab': 'shafi'},
-      {'code': 'SA', 'ar': 'المملكة العربية السعودية', 'en': 'Saudi Arabia', 'method': 'umm_al_qura', 'madhab': 'shafi'},
+      {'code': 'SA', 'ar': 'المملكة العربية السعودية', 'en': 'Saudi Arabia', 'method': 'ummAlQura', 'madhab': 'shafi'},
       {'code': 'AE', 'ar': 'الإمارات العربية المتحدة', 'en': 'United Arab Emirates', 'method': 'dubai', 'madhab': 'shafi'},
       {'code': 'QA', 'ar': 'قطر', 'en': 'Qatar', 'method': 'qatar', 'madhab': 'shafi'},
       {'code': 'KW', 'ar': 'الكويت', 'en': 'Kuwait', 'method': 'kuwait', 'madhab': 'shafi'},

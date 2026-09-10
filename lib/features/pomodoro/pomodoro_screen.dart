@@ -1,14 +1,16 @@
-import 'dart:async';
 import 'dart:math' show pi, cos, sin;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../../core/providers/ui_providers.dart'; 
+import '../../features/settings/settings_provider.dart'; 
 
 final pomodoroModeProvider = StateProvider<int>((ref) => 1);
 
@@ -32,50 +34,61 @@ class PomodoroScreen extends ConsumerStatefulWidget {
   ConsumerState<PomodoroScreen> createState() => _PomodoroScreenState();
 }
 
-class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
-  Timer? _timer;
-  final ValueNotifier<double> _exactElapsedSecs = ValueNotifier(0.0);
-  int _currentPeriodId = -1;
+class _PomodoroScreenState extends ConsumerState<PomodoroScreen> with SingleTickerProviderStateMixin {
+  late Ticker _ticker;
+  // 🌟 هذا المتغير الآن يحمل "الثواني الافتراضية" (من 0 إلى 1800)
+  final ValueNotifier<double> _virtualElapsedSecs = ValueNotifier(0.0);
 
   @override
   void initState() {
     super.initState();
-    _startDynamicTimer();
-  }
-
-  void _startDynamicTimer() {
-    _timer?.cancel();
-    final astro = ref.read(astroProvider);
-    if (astro.periods.isEmpty) return;
-    
-    _currentPeriodId = astro.currentPeriod.id;
-    final speed = astro.timeSpeedMultiplier;
-    final msPerVirtualSec = speed > 0 ? (1000 / speed).round() : 1000;
-
-    _updateTime(); 
-    _timer = Timer.periodic(Duration(milliseconds: msPerVirtualSec), (_) {
-      final currentAstro = ref.read(astroProvider);
-      if (currentAstro.currentPeriod.id != _currentPeriodId) {
-         _startDynamicTimer();
-         return;
-      }
-      _updateTime();
-    });
+    _ticker = createTicker((_) => _updateTime());
+    _ticker.start();
   }
 
   void _updateTime() {
     final astro = ref.read(astroProvider);
     if (astro.periods.isEmpty) return;
-    final now = DateTime.now();
-    final realDiff = now.difference(astro.currentPeriod.startTime);
-    final virtualSeconds = (realDiff.inMicroseconds / 1000000.0) * astro.timeSpeedMultiplier;
-    _exactElapsedSecs.value = virtualSeconds;
+
+    final settings = ref.read(settingsProvider);
+    final loc = settings.activeLocation;
+    DateTime cityNow;
+    
+    if (loc != null && loc.isAutoLocation == false && loc.timezone != null) {
+      try {
+        final location = tz.getLocation(loc.timezone!);
+        final nowInTarget = tz.TZDateTime.now(location);
+        cityNow = DateTime.utc(nowInTarget.year, nowInTarget.month, nowInTarget.day, nowInTarget.hour, nowInTarget.minute, nowInTarget.second, nowInTarget.millisecond);
+      } catch (_) {
+        final now = DateTime.now();
+        cityNow = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute, now.second, now.millisecond);
+      }
+    } else {
+      final now = DateTime.now();
+      cityNow = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute, now.second, now.millisecond);
+    }
+
+    final currentPeriod = astro.currentPeriod;
+    final totalMicroseconds = currentPeriod.totalDuration.inMicroseconds;
+    if (totalMicroseconds <= 0) return;
+
+    int sCount = currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 7;
+    final suwayaDurationMicroseconds = totalMicroseconds / sCount;
+
+    int elapsedMicroseconds = cityNow.difference(currentPeriod.startTime).inMicroseconds;
+    if (elapsedMicroseconds < 0) elapsedMicroseconds = 0;
+
+    // 🌟 حساب النسبة المئوية الدقيقة لمرور الوقت داخل السويعة الحالية (0.0 إلى 1.0)
+    final double progress = ((elapsedMicroseconds % suwayaDurationMicroseconds) / suwayaDurationMicroseconds).clamp(0.0, 1.0);
+    
+    // 🌟 تحويل النسبة إلى "ثواني افتراضية" (دائماً من 0 إلى 1800 ثانية = 30 دقيقة)
+    _virtualElapsedSecs.value = progress * 1800.0;
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _exactElapsedSecs.dispose();
+    _ticker.dispose();
+    _virtualElapsedSecs.dispose();
     super.dispose();
   }
 
@@ -216,10 +229,11 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
       return Scaffold(backgroundColor: scaffoldBgColor, body: const Center(child: CircularProgressIndicator()));
     }
 
-    const totalSuwayaSecs = 1800; 
-    int focusDuration = 1500; 
-    if (mode == 0) focusDuration = 1800; 
-    if (mode == 2) focusDuration = 1200; 
+    // 🌟 ثوابت الزمن الافتراضي الدائمة (دائماً 30 دقيقة = 1800 ثانية)
+    const double totalVirtualSecs = 1800.0; 
+    double focusVirtualSecs = 1500.0; // الوضع الافتراضي 25 دقيقة تركيز
+    if (mode == 0) focusVirtualSecs = 1800.0; // 30 دقيقة تركيز
+    if (mode == 2) focusVirtualSecs = 1200.0; // 20 دقيقة تركيز
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
@@ -246,25 +260,33 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
       ),
       body: SafeArea(
         child: ValueListenableBuilder<double>(
-          valueListenable: _exactElapsedSecs,
-          builder: (context, exactElapsed, child) {
-            final double elapsedDouble = exactElapsed % totalSuwayaSecs;
-            final int elapsedSecs = elapsedDouble.floor();
-            final breakStatus = elapsedSecs >= focusDuration;
-            final remainingSecs = breakStatus ? (totalSuwayaSecs - elapsedSecs) : (focusDuration - elapsedSecs);
+          valueListenable: _virtualElapsedSecs,
+          builder: (context, elapsedVirtual, child) {
             
-            // 🌟 الفكرة الجديدة: حساب تقدم الدائرة كدائرة كاملة لكل مرحلة
+            // تحديد هل نحن في وقت التركيز أم الراحة
+            final bool breakStatus = elapsedVirtual >= focusVirtualSecs;
+            
+            // حساب الثواني (الافتراضية) المتبقية
+            double remainingVirtual = breakStatus 
+                ? (totalVirtualSecs - elapsedVirtual) 
+                : (focusVirtualSecs - elapsedVirtual);
+                
+            if (remainingVirtual < 0) remainingVirtual = 0;
+
+            // حساب نسبة تقدم الدائرة
             double phaseProgress = 0.0;
             if (!breakStatus) {
-              phaseProgress = elapsedDouble / focusDuration;
+              phaseProgress = focusVirtualSecs > 0 ? (elapsedVirtual / focusVirtualSecs) : 0.0;
             } else {
-              final double breakTotal = (totalSuwayaSecs - focusDuration).toDouble();
-              final double breakElapsed = elapsedDouble - focusDuration;
+              final double breakTotal = totalVirtualSecs - focusVirtualSecs;
+              final double breakElapsed = elapsedVirtual - focusVirtualSecs;
               phaseProgress = breakTotal > 0 ? (breakElapsed / breakTotal) : 0.0;
             }
 
-            final m = (remainingSecs ~/ 60).toString().padLeft(2, '0');
-            final s = (remainingSecs % 60).toString().padLeft(2, '0');
+            // 🌟 استخدام ceil() يضمن ظهور 25:00 كاملة في بداية الثواني
+            final int remInt = remainingVirtual.ceil();
+            final m = (remInt ~/ 60).toString().padLeft(2, '0');
+            final s = (remInt % 60).toString().padLeft(2, '0');
             
             final activeColor = breakStatus ? const Color(0xFF64B5F6) : const Color(0xFFE53935);
 
@@ -279,7 +301,6 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                     children: [
                       SizedBox(
                         width: 320, height: 320,
-                        // 🌟 تمرير التقدم المنفصل إلى رسام الدائرة
                         child: CustomPaint(painter: _ZenTimerPainter(progress: phaseProgress, activeColor: activeColor, isDark: isDark)),
                       ),
                       Column(

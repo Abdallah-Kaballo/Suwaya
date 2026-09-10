@@ -1,7 +1,8 @@
-// 🌟 Pure Dart Engine
 import 'dart:isolate';
-import 'astro_models.dart';
-import 'astro_calculators.dart';
+import '../models/astro_models.dart';
+import '../calculators/prayer_calculator.dart';
+import '../generators/suwaya_distributor.dart';
+import '../generators/period_generator.dart';
 
 class SuwayaTimeEngine {
   
@@ -9,7 +10,7 @@ class SuwayaTimeEngine {
     double lat, double lng, DateTime date, 
     CalculationMethodType methodType, MadhabType madhabType, 
     HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, List<int> cachedDistribution, {Map<PrayerKey, int>? manualOffsets} // 🌟 نمرر التوزيع الجاهز بدلاً من حسابه هنا
+    Duration cityOffset, List<int> cachedDistribution, {Map<PrayerKey, int>? manualOffsets} 
   ) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat, lng, date, methodType, madhabType, highLatRuleType, 
@@ -61,12 +62,8 @@ class SuwayaTimeEngine {
 
     int globalSuwayaIndex = 0;
     for (var p in day.periods) {
-      if (p.id == currentPeriod.id) {
-        globalSuwayaIndex += (currentSuwaya - 1);
-        break;
-      } else {
-        globalSuwayaIndex += p.suwayasCount;
-      }
+      if (p.id == currentPeriod.id) { globalSuwayaIndex += (currentSuwaya - 1); break; } 
+      else { globalSuwayaIndex += p.suwayasCount; }
     }
     String formattedVirtualTime = '${globalSuwayaIndex.toString().padLeft(2, '0')}:${((virtualElapsedSeconds ~/ 60) % 60).toString().padLeft(2, '0')}';
 
@@ -86,5 +83,39 @@ class SuwayaTimeEngine {
       currentSuwaya: 1, elapsedVirtualTime: Duration.zero, suwayaProgress: 0, 
       timeSpeedMultiplier: 1.0, ibadatTimings: fallbackIbadat, currentFormattedVirtualTime: "00:00"
     );
+  }
+}
+
+// 🌟 محول التوافقية (Legacy Adapter) لضمان عمل الاختبارات والخدمات القديمة دون تعديلها
+class AstroEngine {
+  static IbadatTimings getIbadatTimings(
+    double lat, double lng, DateTime date, 
+    CalculationMethodType methodType, MadhabType madhabType, 
+    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
+    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
+  ) {
+    return PrayerCalculator.getIbadatTimings(lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets);
+  }
+
+  static List<int> calculateAnnualSuwayaDistribution(
+    double lat, double lng, 
+    CalculationMethodType methodType, MadhabType madhabType, 
+    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
+    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
+  ) {
+    return SuwayaDistributor.calculateAnnualDistribution(lat, lng, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets);
+  }
+
+  // 🌟 الدالة المفقودة التي استعادتها ستخفي الأخطاء المتبقية فوراً
+  static List<AstroPeriod> generatePeriodsForDay(
+    double lat, double lng, DateTime date, 
+    CalculationMethodType methodType, MadhabType madhabType, 
+    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
+    List<int> distribution, Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
+  ) {
+    final ibadat = getIbadatTimings(
+      lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
+    );
+    return PeriodGenerator.generatePeriods(ibadat, distribution);
   }
 }

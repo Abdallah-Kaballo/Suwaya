@@ -1,9 +1,7 @@
-import 'astro_models.dart';
+import '../models/astro_models.dart';
 
 class PeriodGenerator {
-  static List<AstroPeriod> generatePeriods(
-    IbadatTimings ibadat, List<int> distribution
-  ) {
+  static List<AstroPeriod> generatePeriods(IbadatTimings ibadat, List<int> distribution) {
     final mid = ibadat.fajr.add(Duration(microseconds: ibadat.dhuhr.difference(ibadat.fajr).inMicroseconds ~/ 2));
     final night = ibadat.nextFajr.difference(ibadat.maghrib);
     final t = Duration(microseconds: night.inMicroseconds ~/ 3);

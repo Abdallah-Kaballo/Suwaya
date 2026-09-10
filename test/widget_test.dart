@@ -1,23 +1,26 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:suwaya/main.dart'; // تأكد من مسار ملف main لديك
+import 'package:suwaya/main.dart'; 
 
 void main() {
   group('اختبارات واجهة التطبيق (Widget Tests)', () {
-    
     testWidgets('اختبار عمل شاشة الإقلاع البديلة بنجاح (Bootstrap Failure Screen)', (WidgetTester tester) async {
-      // 1. بناء شاشة الفشل الوهمية التي تعمل عند تعذر تشغيل قواعد البيانات في بيئة الاختبار
-      await tester.pumpWidget(BootstrapFailureScreen(
-  error: 'خطأ تجريبي', 
-  onRetry: () {},
-));
-
-      // 2. التحقق من أن واجهة Flutter قادرة على الرسم وعرض النصوص بشكل صحيح
-      expect(find.text('حدث خطأ أثناء التشغيل. يرجى إعادة المحاولة.'), findsOneWidget);
       
-      // 3. التحقق من الهيكلية (وجود Scaffold)
-      expect(find.byType(Scaffold), findsOneWidget);
-    });
+      // 1. بناء الشاشة مع تمرير المعاملات الجديدة
+      await tester.pumpWidget(
+        BootstrapFailureScreen(
+          error: 'خطأ تجريبي لاختبار الواجهة',
+          onRetry: () {},
+        ),
+      );
 
+      // 2. التحقق من وجود العنوان الجديد
+      expect(find.text('عذراً، حدث خطأ أثناء بدء التشغيل'), findsOneWidget);
+      
+      // 3. التحقق من ظهور رسالة الخطأ التقني التي مررناها
+      expect(find.text('خطأ تجريبي لاختبار الواجهة'), findsOneWidget);
+      
+      // 4. التحقق من وجود زر إعادة المحاولة
+      expect(find.text('إعادة المحاولة'), findsOneWidget);
+    });
   });
 }

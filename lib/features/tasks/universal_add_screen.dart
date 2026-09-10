@@ -10,7 +10,7 @@ import '../routines/routines_provider.dart';
 import '../../models/task_model.dart';
 import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/astro_engine/astro_models.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/location/permissions_provider.dart';
 
 Color _getNeonColor(TaskCategory category) {

@@ -9,7 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
-import '../../../core/astro_engine/astro_models.dart';
+import 'package:suwaya_time/suwaya_time.dart';
+
 import '../../../core/astro_engine/astro_provider.dart';
 import '../../settings/settings_provider.dart';
 import '../../routines/routines_provider.dart'; 

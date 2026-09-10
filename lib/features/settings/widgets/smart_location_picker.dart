@@ -16,7 +16,7 @@ Future<void> _applySmartSettings(String countryCode, String countryName, WidgetR
   if (countryCode == 'EG' || c.contains('مصر') || c.contains('سودان')) {
     method = 'egyptian';
   } else if (countryCode == 'SA' || c.contains('سعودية')) {
-    method = 'umm_al_qura';
+    method = 'ummAlQura';
   } else if (countryCode == 'PK' || countryCode == 'IN' || c.contains('باكستان') || c.contains('هند')) {
     method = 'karachi';
   } else if (countryCode == 'TR' || c.contains('تركيا')) {

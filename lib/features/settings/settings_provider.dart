@@ -31,7 +31,7 @@ class AstroSmartDefaults {
       case 'EG': case 'SD': case 'SS': case 'LY': case 'SY': case 'LB': case 'JO': case 'PS':
         method = 'egyptian'; break;
       case 'SA': 
-        method = 'umm_al_qura'; break;
+        method = 'ummAlQura'; break;
       case 'AE': 
         method = 'dubai'; break;
       case 'QA': 

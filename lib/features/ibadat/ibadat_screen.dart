@@ -6,8 +6,9 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/location/permissions_provider.dart';
 
+import 'package:suwaya_time/suwaya_time.dart';
+
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/astro_engine/astro_models.dart';
 import '../settings/settings_provider.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../../core/theme/astro_ui_extensions.dart';

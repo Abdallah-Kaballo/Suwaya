@@ -61,6 +61,9 @@ dependencies:
   sqflite: ^2.4.3
   flutter_dotenv: ^6.0.1
 
+  suwaya_time:
+    path: packages/suwaya_time
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

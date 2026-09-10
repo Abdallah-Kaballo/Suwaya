@@ -1,0 +1,16 @@
+name: suwaya_time
+description: A pure Dart astronomical time engine that divides the day into 48 virtual Suwayas based on solar events.
+version: 1.0.0
+publish_to: 'none' # يمنع رفع الحزمة للعامة بالخطأ حالياً
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  # الحزمة الوحيدة المطلوبة للحسابات الفلكية (لا يوجد أي ذكر لـ Flutter هنا!)
+  adhan: any
+
+dev_dependencies:
+  # إطار عمل الاختبارات للغة Dart الصافية
+  test: ^1.24.0
+  lints: ^3.0.0

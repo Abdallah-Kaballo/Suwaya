@@ -88,7 +88,7 @@ class LocationService {
   static String _determineMethod(String code, String countryName) {
     final c = countryName.toLowerCase();
     if (code == 'EG' || c.contains('مصر') || c.contains('سودان')) return 'egyptian';
-    if (code == 'SA' || c.contains('سعودية')) return 'umm_al_qura';
+    if (code == 'SA' || c.contains('سعودية')) return 'ummAlQura';
     if (code == 'PK' || code == 'IN' || c.contains('باكستان') || c.contains('هند')) return 'karachi';
     if (code == 'TR' || c.contains('تركيا')) return 'turkey';
     if (code == 'KW' || c.contains('كويت')) return 'kuwait';
