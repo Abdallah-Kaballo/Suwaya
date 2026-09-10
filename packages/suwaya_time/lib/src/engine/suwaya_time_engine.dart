@@ -1,4 +1,3 @@
-import 'dart:isolate';
 import '../models/astro_models.dart';
 import '../calculators/prayer_calculator.dart';
 import '../generators/suwaya_distributor.dart';
@@ -26,12 +25,8 @@ class SuwayaTimeEngine {
     HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
     Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
   ) async {
-    return Isolate.run(() {
-      return SuwayaDistributor.calculateAnnualDistribution(
-        lat, lng, methodType, madhabType, highLatRuleType, 
-        customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
-      );
-    });
+    // 🌟 إرجاع فوري للثابت بدون استهلاك المعالج
+    return SuwayaDistributor.universalDistribution;
   }
 
   static AstroState calculateCurrentState(SuwayaDay day, DateTime now) {
@@ -86,7 +81,7 @@ class SuwayaTimeEngine {
   }
 }
 
-// 🌟 محول التوافقية (Legacy Adapter) لضمان عمل الاختبارات والخدمات القديمة دون تعديلها
+// محول التوافقية (Legacy Adapter)
 class AstroEngine {
   static IbadatTimings getIbadatTimings(
     double lat, double lng, DateTime date, 
@@ -103,10 +98,9 @@ class AstroEngine {
     HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
     Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
   ) {
-    return SuwayaDistributor.calculateAnnualDistribution(lat, lng, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets);
+    return SuwayaDistributor.universalDistribution;
   }
 
-  // 🌟 الدالة المفقودة التي استعادتها ستخفي الأخطاء المتبقية فوراً
   static List<AstroPeriod> generatePeriodsForDay(
     double lat, double lng, DateTime date, 
     CalculationMethodType methodType, MadhabType madhabType, 

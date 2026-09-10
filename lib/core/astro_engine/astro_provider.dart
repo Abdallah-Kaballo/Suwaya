@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
-
-// 🌟 هذا السطر هو السحر كله! يستدعي المحرك الفلكي المستقل الذي صنعناه
 import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../models/settings_model.dart';
@@ -11,10 +9,6 @@ import '../../features/settings/settings_provider.dart';
 
 final virtualTimeNotifier = ValueNotifier<String>("00:00:00");
 final Map<String, SuwayaDay> _dayCache = {};
-
-// مخزن التوزيع السنوي (يمنع إعادة الحساب المعقدة مع كل يوم جديد)
-List<int>? _annualDistributionCache;
-String _lastDistributionFingerprint = "";
 
 class AstroNotifier extends Notifier<AstroState> {
   Timer? _timer;
@@ -68,21 +62,9 @@ class AstroNotifier extends Notifier<AstroState> {
         }
       }
 
-      // 🌟 تحويل الإعدادات النصية إلى Enums باستخدام إضافات المحرك المستقل
       final methodEnum = settings.calculationMethod.toCalculationMethod();
       final madhabEnum = settings.madhab.toMadhab();
       final highLatEnum = settings.highLatitudeRule.toHighLatRule();
-
-      if (_annualDistributionCache == null || _lastDistributionFingerprint != fingerprint) {
-        // 🌟 استدعاء دالة التوزيع من المحرك المستقل
-        _annualDistributionCache = SuwayaDistributor.calculateAnnualDistribution(
-          loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, 
-          methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-          cityOffset, manualOffsets: manualOffsetsMap
-        );
-        _lastDistributionFingerprint = fingerprint;
-        _dayCache.clear();
-      }
 
       SuwayaDay generatedDay;
       
@@ -91,11 +73,11 @@ class AstroNotifier extends Notifier<AstroState> {
         if (_dayCache.containsKey(cacheKey)) {
           return _dayCache[cacheKey]!;
         } else {
-          // 🌟 استدعاء دالة توليد الأيام من المحرك المستقل
+          // 🌟 تمرير التوزيع الموحد مباشرة
           final newDay = SuwayaTimeEngine.generateDay(
             loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, date, 
             methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-            cityOffset, _annualDistributionCache!, manualOffsets: manualOffsetsMap 
+            cityOffset, SuwayaDistributor.universalDistribution, manualOffsets: manualOffsetsMap 
           );
           if (_dayCache.length > 3) _dayCache.clear();
           _dayCache[cacheKey] = newDay;
@@ -113,7 +95,6 @@ class AstroNotifier extends Notifier<AstroState> {
         generatedDay = getOrGenerateDay(dateToGenerate);
       }
 
-      // 🌟 استدعاء دالة حساب الحالة من المحرك المستقل
       final initialState = SuwayaTimeEngine.calculateCurrentState(generatedDay, cityNow);
       
       _lastPeriodId = initialState.currentPeriod.id;
@@ -126,7 +107,6 @@ class AstroNotifier extends Notifier<AstroState> {
       
     } catch (e) {
       debugPrint('AstroEngine Error: $e');
-      // 🌟 استدعاء حالة الطوارئ من المحرك المستقل
       return SuwayaTimeEngine.getFallbackState(_getCityNow(loc));
     }
   }
@@ -143,9 +123,7 @@ class AstroNotifier extends Notifier<AstroState> {
         return;
       }
       
-      // 🌟 تحديث الشاشة باستخدام المحرك المستقل
       final newState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
-      
       virtualTimeNotifier.value = newState.currentFormattedVirtualTime;
 
       if (_lastPeriodId != newState.currentPeriod.id || _lastSuwaya != newState.currentSuwaya) {
