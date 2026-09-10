@@ -2,39 +2,72 @@ import '../models/astro_models.dart';
 import '../calculators/prayer_calculator.dart';
 
 class SuwayaDistributor {
+  
   static List<int> distribute48Suwayas(List<int> durationsInSeconds) {
-    final int totalDaySeconds = durationsInSeconds.fold(0, (a, b) => a + b);
-    if (totalDaySeconds == 0) return List.generate(7, (i) => i == 3 ? 6 : 7);
-    const int targetSuwayas = 48;
-    List<int> baseAllocations = List.filled(7, 0);
-    List<double> remainders = List.filled(7, 0.0);
-    int allocatedCount = 0;
-
-    for (int i = 0; i < 7; i++) {
-      double exactShare = (durationsInSeconds[i] / totalDaySeconds) * targetSuwayas;
-      if (exactShare < 1.0) {
-        baseAllocations[i] = 1; remainders[i] = 0.0; 
-      } else {
-        baseAllocations[i] = exactShare.floor(); remainders[i] = exactShare - baseAllocations[i];
-      }
-      allocatedCount += baseAllocations[i];
+    if (durationsInSeconds.isEmpty || durationsInSeconds.fold(0, (a, b) => a + b) == 0) {
+      return [7, 7, 6, 7, 7, 7, 7]; // حالة طوارئ آمنة
     }
 
-    int remainingToDistribute = targetSuwayas - allocatedCount;
-    if (remainingToDistribute > 0) {
-      List<int> indices = List.generate(7, (i) => i)..sort((a, b) => remainders[b].compareTo(remainders[a]));
-      for (int i = 0; i < remainingToDistribute; i++) { baseAllocations[indices[i]] += 1; }
-    } else if (remainingToDistribute < 0) {
-      int excess = -remainingToDistribute;
-      while (excess > 0) {
-        int maxIdx = -1, maxVal = -1;
-        for (int i = 0; i < 7; i++) {
-          if (baseAllocations[i] > 1 && baseAllocations[i] > maxVal) { maxVal = baseAllocations[i]; maxIdx = i; }
+    // 🌟 1. استخراج متوسط الكتل المتطابقة (Block Grouping)
+    double d1 = (durationsInSeconds[0] + durationsInSeconds[1]) / 2.0; // الفجر والضحى
+    double d3 = durationsInSeconds[2].toDouble(); // الظهر
+    double d4 = durationsInSeconds[3].toDouble(); // العصر
+    double d5 = (durationsInSeconds[4] + durationsInSeconds[5] + durationsInSeconds[6]) / 3.0; // أثلاث الليل
+
+    double totalSecs = (2 * d1) + d3 + d4 + (3 * d5);
+
+    // 🌟 2. حساب الحصة الرياضية الدقيقة بالكسور لكل كتلة
+    double e1 = 48.0 * (d1 / totalSecs);
+    double e3 = 48.0 * (d3 / totalSecs);
+    double e4 = 48.0 * (d4 / totalSecs);
+    double e5 = 48.0 * (d5 / totalSecs);
+
+    int b1 = e1.floor();
+    int b3 = e3.floor();
+    int b4 = e4.floor();
+    int b5 = e5.floor();
+
+    double bestError = double.infinity;
+    int bestS1 = b1, bestS3 = b3, bestS4 = b4, bestS5 = b5;
+
+    // 🌟 3. خوارزمية البحث الشامل لاختيار أفضل توليفة رياضية تحترم التكتل وقيد الـ 48
+    for (int s1 = b1 - 1; s1 <= b1 + 2; s1++) {
+      if (s1 < 1) continue;
+      for (int s3 = b3 - 1; s3 <= b3 + 2; s3++) {
+        if (s3 < 1) continue;
+        for (int s4 = b4 - 1; s4 <= b4 + 2; s4++) {
+          if (s4 < 1) continue;
+          for (int s5 = b5 - 1; s5 <= b5 + 2; s5++) {
+            if (s5 < 1) continue;
+
+            // شرط الجبر: يجب أن يكون المجموع 48 سويعة بالضبط
+            if ((2 * s1) + s3 + s4 + (3 * s5) == 48) {
+              
+              // حساب معامل الخطأ المطلق (نبحث عن التوليفة الأقرب للزمن الواقعي)
+              double error = 2 * (s1 - e1).abs() +
+                             (s3 - e3).abs() +
+                             (s4 - e4).abs() +
+                             3 * (s5 - e5).abs();
+
+              if (error < bestError) {
+                bestError = error;
+                bestS1 = s1; bestS3 = s3; bestS4 = s4; bestS5 = s5;
+              } else if (error == bestError) {
+                // كاسر التعادل: نفضل إعطاء السويعة الزائدة لليل ثم للفجر
+                if (s5 > bestS5) {
+                  bestS1 = s1; bestS3 = s3; bestS4 = s4; bestS5 = s5;
+                } else if (s5 == bestS5 && s1 > bestS1) {
+                  bestS1 = s1; bestS3 = s3; bestS4 = s4; bestS5 = s5;
+                }
+              }
+            }
+          }
         }
-        if (maxIdx != -1) { baseAllocations[maxIdx]--; excess--; } else { break; }
       }
     }
-    return baseAllocations;
+
+    // 🌟 إعادة تفكيك الكتل وتوزيعها بالتساوي المطلق
+    return [bestS1, bestS1, bestS3, bestS4, bestS5, bestS5, bestS5];
   }
 
   static List<int> calculateAnnualDistribution(double lat, double lng, CalculationMethodType methodType, MadhabType madhabType, HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}) {
@@ -62,6 +95,8 @@ class SuwayaDistributor {
         totalDurations[6] += ibadat.nextFajr.difference(secondThirdEnd).inSeconds;
       }
     }
-    return distribute48Suwayas(totalDurations.map((d) => d ~/ 72).toList());
+    
+    // نمرر المجموع المباشر للخوارزمية وهي ستتكفل بحساب المتوسطات وتوزيع الكتل
+    return distribute48Suwayas(totalDurations);
   }
 }
