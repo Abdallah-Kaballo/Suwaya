@@ -15,7 +15,7 @@ class AppDrawer extends ConsumerWidget {
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      debugPrint('لا يمكن فتح الرابط: $urlString');
+      debugPrint('${'settings.cannot_open_link'.tr()}: $urlString');
     }
   }
 
@@ -81,7 +81,6 @@ class AppDrawer extends ConsumerWidget {
                   Text('drawer.up_to_date'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
                 ],
               ),
-              // 🌟 استخدام الترجمة مع تمرير رقم الإصدار كمتغير
               content: Text('${'drawer.latest_version_msg'.tr()} (v$currentVersion)', style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
               actions: [
                 ElevatedButton(
@@ -100,7 +99,7 @@ class AppDrawer extends ConsumerWidget {
       if (!context.mounted) return;
       Navigator.pop(context); 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('drawer.update_check_failed'.tr()), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text('drawer.github_connection_failed'.tr()), backgroundColor: Colors.redAccent),
       );
     }
   }
@@ -148,7 +147,6 @@ class AppDrawer extends ConsumerWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // 🌟 الترويسة النظيفة والثابتة للتطبيق (بدون حسابات سحابية)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               width: double.infinity,
@@ -166,10 +164,10 @@ class AppDrawer extends ConsumerWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Suwaya', style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                        const SizedBox(height: 4),
-                        Text('Time Engineered', style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 13)),
+                        Text('Suwaya', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                        // 🌟 تم حذف جملة "هندسة الوقت" من هنا حسب طلبك
                       ],
                     ),
                   ),

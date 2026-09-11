@@ -1,29 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:suwaya/models/settings_model.dart'; // تأكد من مسار النموذج
+import 'package:suwaya/models/settings_model.dart';
 
 void main() {
-  group('اختبارات حماية البيانات (Settings Model)', () {
-    test('دالة clone يجب أن تنسخ جميع الحقول العميقة والمضافة حديثاً', () {
+  group('SettingsModel Clone Tests', () {
+    test('يجب نسخ جميع الإعدادات المحلية بدقة واستقلالية', () {
       final original = SettingsModel()
-        ..id = 1
-        ..isSynced = true
+        ..languageCode = 'ar'
+        ..themeMode = 'dark'
         ..streakFreezesAvailable = 5
-        ..dayBoundary = 'midnight'
-        ..useAstroTimeForIbadat = false
-        ..currentStreak = 10;
+        ..currentStreak = 12
+        ..isDialAutoRotating = false;
 
       final cloned = original.clone();
 
-      expect(cloned.id, equals(1));
-      expect(cloned.isSynced, isTrue, reason: 'يجب ألا تفقد حالة المزامنة');
-      expect(cloned.streakFreezesAvailable, equals(5), reason: 'يجب ألا تفقد رصيد التجميد');
-      expect(cloned.dayBoundary, equals('midnight'));
-      expect(cloned.useAstroTimeForIbadat, isFalse);
-      expect(cloned.currentStreak, equals(10));
-      
-      // التعديل على المنسوخ يجب ألا يؤثر على الأصلي (Deep Copy)
+      expect(cloned.languageCode, equals('ar'));
+      expect(cloned.themeMode, equals('dark'));
+      expect(cloned.streakFreezesAvailable, equals(5));
+      expect(cloned.currentStreak, equals(12));
+      expect(cloned.isDialAutoRotating, equals(false));
+
+      // التأكد من استقلالية الكائن المنسوخ
       cloned.currentStreak = 20;
-      expect(original.currentStreak, equals(10), reason: 'النسخ يجب أن يكون عميقاً وليس مرجعياً');
+      expect(original.currentStreak, equals(12));
     });
   });
 }

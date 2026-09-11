@@ -13,7 +13,6 @@ class TaskRepository {
 
   TaskRepository(this._isar);
 
-  // 🌟 تعديل الأداء (النقطة 8): جلب المهام النشطة فقط (دائمة + عابرة مستقبلية أو لم تكتمل بعد)
   Future<List<TaskModel>> getActiveTasks() async {
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
@@ -21,35 +20,23 @@ class TaskRepository {
 
     return await _isar.taskModels
         .filter()
-        .isDeletedEqualTo(false) // غير محذوفة
-        .and()
         .group((q) => q
-            // إما دائمة
             .typeEqualTo(TaskType.permanent)
             .or()
-            // أو عابرة وتاريخها بعد اليوم (مستقبلية)
             .targetDateGreaterThan(todayStart)
             .or()
-            // أو عابرة ولم تكتمل بعد وتاريخها ليس أقدم من 30 يوماً
             .group((q2) => q2
                 .isCompletedEqualTo(false)
                 .and()
                 .targetDateGreaterThan(thirtyDaysAgo)
             )
             .or()
-            // أو عابرة اكتملت اليوم تحديداً (لكي تظهر في الواجهة قبل أن تختفي غداً)
             .completedAtGreaterThan(todayStart)
         )
         .findAll();
   }
 
-  // نحتفظ بهذه الدالة للمزامنة السحابية فقط (لأن المزامنة تحتاج كل شيء)
-  Future<List<TaskModel>> getAllTasksForSync() async {
-    return await _isar.taskModels.where().findAll();
-  }
-
   Future<void> saveTask(TaskModel task) async {
-    task.updatedAt = DateTime.now().toUtc();
     await _isar.writeTxn(() async {
       await _isar.taskModels.put(task);
     });
@@ -59,15 +46,10 @@ class TaskRepository {
     return await _isar.taskModels.get(id);
   }
 
+  // 🌟 حذف المهمة فعلياً من قاعدة البيانات (بدلاً من isDeleted)
   Future<void> deleteTask(int id) async {
     await _isar.writeTxn(() async {
-      final task = await _isar.taskModels.get(id);
-      if (task != null) {
-        task.isDeleted = true;
-        task.updatedAt = DateTime.now().toUtc(); 
-        task.isSynced = false;
-        await _isar.taskModels.put(task);
-      }
+      await _isar.taskModels.delete(id);
     });
   }
 

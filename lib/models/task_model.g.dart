@@ -73,94 +73,74 @@ const TaskModelSchema = CollectionSchema(
       name: r'isCompleted',
       type: IsarType.bool,
     ),
-    r'isDeleted': PropertySchema(
-      id: 11,
-      name: r'isDeleted',
-      type: IsarType.bool,
-    ),
-    r'isSynced': PropertySchema(
-      id: 12,
-      name: r'isSynced',
-      type: IsarType.bool,
-    ),
     r'lastCompletedDate': PropertySchema(
-      id: 13,
+      id: 11,
       name: r'lastCompletedDate',
       type: IsarType.dateTime,
     ),
     r'longestStreak': PropertySchema(
-      id: 14,
+      id: 12,
       name: r'longestStreak',
       type: IsarType.long,
     ),
     r'migrationCount': PropertySchema(
-      id: 15,
+      id: 13,
       name: r'migrationCount',
       type: IsarType.long,
     ),
     r'notifyMode': PropertySchema(
-      id: 16,
+      id: 14,
       name: r'notifyMode',
       type: IsarType.bool,
     ),
     r'recurrenceDays': PropertySchema(
-      id: 17,
+      id: 15,
       name: r'recurrenceDays',
       type: IsarType.longList,
     ),
     r'showOnDial': PropertySchema(
-      id: 18,
+      id: 16,
       name: r'showOnDial',
       type: IsarType.bool,
     ),
-    r'syncId': PropertySchema(
-      id: 19,
-      name: r'syncId',
-      type: IsarType.string,
-    ),
     r'targetCivilTimeMinutes': PropertySchema(
-      id: 20,
+      id: 17,
       name: r'targetCivilTimeMinutes',
       type: IsarType.long,
     ),
     r'targetDate': PropertySchema(
-      id: 21,
+      id: 18,
       name: r'targetDate',
       type: IsarType.dateTime,
     ),
     r'targetPeriodId': PropertySchema(
-      id: 22,
+      id: 19,
       name: r'targetPeriodId',
       type: IsarType.long,
     ),
     r'targetSuwayas': PropertySchema(
-      id: 23,
+      id: 20,
       name: r'targetSuwayas',
       type: IsarType.longList,
     ),
     r'targetVirtualMinute': PropertySchema(
-      id: 24,
+      id: 21,
       name: r'targetVirtualMinute',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 25,
+      id: 22,
       name: r'title',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 26,
+      id: 23,
       name: r'type',
       type: IsarType.byte,
       enumMap: _TaskModeltypeEnumValueMap,
     ),
-    r'updatedAt': PropertySchema(
-      id: 27,
-      name: r'updatedAt',
-      type: IsarType.dateTime,
-    ),
     r'vibrateMode': PropertySchema(
-      id: 28,
+      id: 24,
       name: r'vibrateMode',
       type: IsarType.bool,
     )
@@ -171,19 +151,6 @@ const TaskModelSchema = CollectionSchema(
   deserializeProp: _taskModelDeserializeProp,
   idName: r'id',
   indexes: {
-    r'syncId': IndexSchema(
-      id: 7538593479801827566,
-      name: r'syncId',
-      unique: true,
-      replace: true,
-      properties: [
-        IndexPropertySchema(
-          name: r'syncId',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    ),
     r'targetDate': IndexSchema(
       id: 5284734288444860006,
       name: r'targetDate',
@@ -252,7 +219,6 @@ int _taskModelEstimateSize(
       bytesCount += 3 + value.length * 8;
     }
   }
-  bytesCount += 3 + object.syncId.length * 3;
   bytesCount += 3 + object.targetSuwayas.length * 8;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
@@ -275,24 +241,20 @@ void _taskModelSerialize(
   writer.writeString(offsets[8], object.dialShortName);
   writer.writeBool(offsets[9], object.isAstroTime);
   writer.writeBool(offsets[10], object.isCompleted);
-  writer.writeBool(offsets[11], object.isDeleted);
-  writer.writeBool(offsets[12], object.isSynced);
-  writer.writeDateTime(offsets[13], object.lastCompletedDate);
-  writer.writeLong(offsets[14], object.longestStreak);
-  writer.writeLong(offsets[15], object.migrationCount);
-  writer.writeBool(offsets[16], object.notifyMode);
-  writer.writeLongList(offsets[17], object.recurrenceDays);
-  writer.writeBool(offsets[18], object.showOnDial);
-  writer.writeString(offsets[19], object.syncId);
-  writer.writeLong(offsets[20], object.targetCivilTimeMinutes);
-  writer.writeDateTime(offsets[21], object.targetDate);
-  writer.writeLong(offsets[22], object.targetPeriodId);
-  writer.writeLongList(offsets[23], object.targetSuwayas);
-  writer.writeLong(offsets[24], object.targetVirtualMinute);
-  writer.writeString(offsets[25], object.title);
-  writer.writeByte(offsets[26], object.type.index);
-  writer.writeDateTime(offsets[27], object.updatedAt);
-  writer.writeBool(offsets[28], object.vibrateMode);
+  writer.writeDateTime(offsets[11], object.lastCompletedDate);
+  writer.writeLong(offsets[12], object.longestStreak);
+  writer.writeLong(offsets[13], object.migrationCount);
+  writer.writeBool(offsets[14], object.notifyMode);
+  writer.writeLongList(offsets[15], object.recurrenceDays);
+  writer.writeBool(offsets[16], object.showOnDial);
+  writer.writeLong(offsets[17], object.targetCivilTimeMinutes);
+  writer.writeDateTime(offsets[18], object.targetDate);
+  writer.writeLong(offsets[19], object.targetPeriodId);
+  writer.writeLongList(offsets[20], object.targetSuwayas);
+  writer.writeLong(offsets[21], object.targetVirtualMinute);
+  writer.writeString(offsets[22], object.title);
+  writer.writeByte(offsets[23], object.type.index);
+  writer.writeBool(offsets[24], object.vibrateMode);
 }
 
 TaskModel _taskModelDeserialize(
@@ -316,26 +278,22 @@ TaskModel _taskModelDeserialize(
   object.id = id;
   object.isAstroTime = reader.readBool(offsets[9]);
   object.isCompleted = reader.readBool(offsets[10]);
-  object.isDeleted = reader.readBool(offsets[11]);
-  object.isSynced = reader.readBool(offsets[12]);
-  object.lastCompletedDate = reader.readDateTimeOrNull(offsets[13]);
-  object.longestStreak = reader.readLong(offsets[14]);
-  object.migrationCount = reader.readLong(offsets[15]);
-  object.notifyMode = reader.readBool(offsets[16]);
-  object.recurrenceDays = reader.readLongList(offsets[17]);
-  object.showOnDial = reader.readBool(offsets[18]);
-  object.syncId = reader.readString(offsets[19]);
-  object.targetCivilTimeMinutes = reader.readLongOrNull(offsets[20]);
-  object.targetDate = reader.readDateTimeOrNull(offsets[21]);
-  object.targetPeriodId = reader.readLongOrNull(offsets[22]);
-  object.targetSuwayas = reader.readLongList(offsets[23]) ?? [];
-  object.targetVirtualMinute = reader.readLong(offsets[24]);
-  object.title = reader.readString(offsets[25]);
+  object.lastCompletedDate = reader.readDateTimeOrNull(offsets[11]);
+  object.longestStreak = reader.readLong(offsets[12]);
+  object.migrationCount = reader.readLong(offsets[13]);
+  object.notifyMode = reader.readBool(offsets[14]);
+  object.recurrenceDays = reader.readLongList(offsets[15]);
+  object.showOnDial = reader.readBool(offsets[16]);
+  object.targetCivilTimeMinutes = reader.readLongOrNull(offsets[17]);
+  object.targetDate = reader.readDateTimeOrNull(offsets[18]);
+  object.targetPeriodId = reader.readLongOrNull(offsets[19]);
+  object.targetSuwayas = reader.readLongList(offsets[20]) ?? [];
+  object.targetVirtualMinute = reader.readLong(offsets[21]);
+  object.title = reader.readString(offsets[22]);
   object.type =
-      _TaskModeltypeValueEnumMap[reader.readByteOrNull(offsets[26])] ??
+      _TaskModeltypeValueEnumMap[reader.readByteOrNull(offsets[23])] ??
           TaskType.casual;
-  object.updatedAt = reader.readDateTime(offsets[27]);
-  object.vibrateMode = reader.readBool(offsets[28]);
+  object.vibrateMode = reader.readBool(offsets[24]);
   return object;
 }
 
@@ -370,41 +328,33 @@ P _taskModelDeserializeProp<P>(
     case 10:
       return (reader.readBool(offset)) as P;
     case 11:
-      return (reader.readBool(offset)) as P;
-    case 12:
-      return (reader.readBool(offset)) as P;
-    case 13:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
+      return (reader.readLong(offset)) as P;
+    case 13:
+      return (reader.readLong(offset)) as P;
     case 14:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 15:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongList(offset)) as P;
     case 16:
       return (reader.readBool(offset)) as P;
     case 17:
-      return (reader.readLongList(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 18:
-      return (reader.readBool(offset)) as P;
-    case 19:
-      return (reader.readString(offset)) as P;
-    case 20:
-      return (reader.readLongOrNull(offset)) as P;
-    case 21:
       return (reader.readDateTimeOrNull(offset)) as P;
-    case 22:
+    case 19:
       return (reader.readLongOrNull(offset)) as P;
-    case 23:
+    case 20:
       return (reader.readLongList(offset) ?? []) as P;
-    case 24:
+    case 21:
       return (reader.readLong(offset)) as P;
-    case 25:
+    case 22:
       return (reader.readString(offset)) as P;
-    case 26:
+    case 23:
       return (_TaskModeltypeValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskType.casual) as P;
-    case 27:
-      return (reader.readDateTime(offset)) as P;
-    case 28:
+    case 24:
       return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -450,61 +400,6 @@ List<IsarLinkBase<dynamic>> _taskModelGetLinks(TaskModel object) {
 
 void _taskModelAttach(IsarCollection<dynamic> col, Id id, TaskModel object) {
   object.id = id;
-}
-
-extension TaskModelByIndex on IsarCollection<TaskModel> {
-  Future<TaskModel?> getBySyncId(String syncId) {
-    return getByIndex(r'syncId', [syncId]);
-  }
-
-  TaskModel? getBySyncIdSync(String syncId) {
-    return getByIndexSync(r'syncId', [syncId]);
-  }
-
-  Future<bool> deleteBySyncId(String syncId) {
-    return deleteByIndex(r'syncId', [syncId]);
-  }
-
-  bool deleteBySyncIdSync(String syncId) {
-    return deleteByIndexSync(r'syncId', [syncId]);
-  }
-
-  Future<List<TaskModel?>> getAllBySyncId(List<String> syncIdValues) {
-    final values = syncIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'syncId', values);
-  }
-
-  List<TaskModel?> getAllBySyncIdSync(List<String> syncIdValues) {
-    final values = syncIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'syncId', values);
-  }
-
-  Future<int> deleteAllBySyncId(List<String> syncIdValues) {
-    final values = syncIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'syncId', values);
-  }
-
-  int deleteAllBySyncIdSync(List<String> syncIdValues) {
-    final values = syncIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'syncId', values);
-  }
-
-  Future<Id> putBySyncId(TaskModel object) {
-    return putByIndex(r'syncId', object);
-  }
-
-  Id putBySyncIdSync(TaskModel object, {bool saveLinks = true}) {
-    return putByIndexSync(r'syncId', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllBySyncId(List<TaskModel> objects) {
-    return putAllByIndex(r'syncId', objects);
-  }
-
-  List<Id> putAllBySyncIdSync(List<TaskModel> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'syncId', objects, saveLinks: saveLinks);
-  }
 }
 
 extension TaskModelQueryWhereSort
@@ -604,51 +499,6 @@ extension TaskModelQueryWhere
         upper: upperId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterWhereClause> syncIdEqualTo(
-      String syncId) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'syncId',
-        value: [syncId],
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterWhereClause> syncIdNotEqualTo(
-      String syncId) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'syncId',
-              lower: [],
-              upper: [syncId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'syncId',
-              lower: [syncId],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'syncId',
-              lower: [syncId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'syncId',
-              lower: [],
-              upper: [syncId],
-              includeUpper: false,
-            ));
-      }
     });
   }
 
@@ -1804,26 +1654,6 @@ extension TaskModelQueryFilter
     });
   }
 
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> isDeletedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isDeleted',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> isSyncedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isSynced',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
       lastCompletedDateIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2189,136 +2019,6 @@ extension TaskModelQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'showOnDial',
         value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'syncId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'syncId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'syncId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'syncId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'syncId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'syncId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'syncId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'syncId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'syncId',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> syncIdIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'syncId',
-        value: '',
       ));
     });
   }
@@ -2926,60 +2626,6 @@ extension TaskModelQueryFilter
     });
   }
 
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> updatedAtEqualTo(
-      DateTime value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'updatedAt',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
-      updatedAtGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'updatedAt',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> updatedAtLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'updatedAt',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> updatedAtBetween(
-    DateTime lower,
-    DateTime upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'updatedAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> vibrateModeEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -3118,30 +2764,6 @@ extension TaskModelQuerySortBy on QueryBuilder<TaskModel, TaskModel, QSortBy> {
     });
   }
 
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByIsDeleted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDeleted', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByIsDeletedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDeleted', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByIsSynced() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isSynced', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByIsSyncedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isSynced', Sort.desc);
-    });
-  }
-
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByLastCompletedDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastCompletedDate', Sort.asc);
@@ -3200,18 +2822,6 @@ extension TaskModelQuerySortBy on QueryBuilder<TaskModel, TaskModel, QSortBy> {
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByShowOnDialDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'showOnDial', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortBySyncId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'syncId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortBySyncIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'syncId', Sort.desc);
     });
   }
 
@@ -3287,18 +2897,6 @@ extension TaskModelQuerySortBy on QueryBuilder<TaskModel, TaskModel, QSortBy> {
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByUpdatedAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'updatedAt', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByUpdatedAtDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 
@@ -3449,30 +3047,6 @@ extension TaskModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByIsDeleted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDeleted', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByIsDeletedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDeleted', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByIsSynced() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isSynced', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByIsSyncedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isSynced', Sort.desc);
-    });
-  }
-
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByLastCompletedDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastCompletedDate', Sort.asc);
@@ -3531,18 +3105,6 @@ extension TaskModelQuerySortThenBy
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByShowOnDialDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'showOnDial', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenBySyncId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'syncId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenBySyncIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'syncId', Sort.desc);
     });
   }
 
@@ -3618,18 +3180,6 @@ extension TaskModelQuerySortThenBy
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.desc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByUpdatedAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'updatedAt', Sort.asc);
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByUpdatedAtDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
 
@@ -3717,18 +3267,6 @@ extension TaskModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByIsDeleted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isDeleted');
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByIsSynced() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isSynced');
-    });
-  }
-
   QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByLastCompletedDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastCompletedDate');
@@ -3762,13 +3300,6 @@ extension TaskModelQueryWhereDistinct
   QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByShowOnDial() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'showOnDial');
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QDistinct> distinctBySyncId(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'syncId', caseSensitive: caseSensitive);
     });
   }
 
@@ -3814,12 +3345,6 @@ extension TaskModelQueryWhereDistinct
   QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'type');
-    });
-  }
-
-  QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByUpdatedAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'updatedAt');
     });
   }
 
@@ -3905,18 +3430,6 @@ extension TaskModelQueryProperty
     });
   }
 
-  QueryBuilder<TaskModel, bool, QQueryOperations> isDeletedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isDeleted');
-    });
-  }
-
-  QueryBuilder<TaskModel, bool, QQueryOperations> isSyncedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isSynced');
-    });
-  }
-
   QueryBuilder<TaskModel, DateTime?, QQueryOperations>
       lastCompletedDateProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -3952,12 +3465,6 @@ extension TaskModelQueryProperty
   QueryBuilder<TaskModel, bool, QQueryOperations> showOnDialProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'showOnDial');
-    });
-  }
-
-  QueryBuilder<TaskModel, String, QQueryOperations> syncIdProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'syncId');
     });
   }
 
@@ -4001,12 +3508,6 @@ extension TaskModelQueryProperty
   QueryBuilder<TaskModel, TaskType, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
-    });
-  }
-
-  QueryBuilder<TaskModel, DateTime, QQueryOperations> updatedAtProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'updatedAt');
     });
   }
 

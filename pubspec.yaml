@@ -30,7 +30,7 @@ dependencies:
   # --- Location & Astronomy ---
   adhan: ^2.0.0+1
   geolocator: ^14.0.3
-  geocoding: ^4.0.0
+  geocoding: ^5.0.0
   
   # --- Database & Storage (Cleaned) ---
   isar_community: ^3.3.2
@@ -42,14 +42,10 @@ dependencies:
   flutter_local_notifications: ^17.1.0
   permission_handler: ^11.3.0
   vibration: ^3.2.0
-  
-  # --- Pro Stack & Firebase ---
-  share_plus: ^13.2.0
 
-  # --- Supabase & Sync ---
-  uuid: ^4.3.3
+  # --- Helpers ---
   shared_preferences: ^2.5.5
-  alarm: ^5.10.0
+  alarm: ^5.13.0
   hijri: ^3.0.1
   url_launcher: ^6.3.2
   package_info_plus: ^10.2.1
@@ -85,4 +81,4 @@ flutter_launcher_icons:
   min_sdk_android: 21
   
   adaptive_icon_background: "assets/icons/ic_background.png" 
-  adaptive_icon_foreground: "assets/icons/ic_foreground.png" 
+  adaptive_icon_foreground: "assets/icons/ic_foreground.png"

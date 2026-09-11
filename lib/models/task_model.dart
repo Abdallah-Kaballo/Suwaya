@@ -1,5 +1,4 @@
 import 'package:isar_community/isar.dart';
-import 'package:uuid/uuid.dart'; 
 import 'package:easy_localization/easy_localization.dart';
 
 part 'task_model.g.dart';
@@ -25,13 +24,6 @@ extension TaskCategoryExtension on TaskCategory {
 @collection
 class TaskModel {
   Id id = Isar.autoIncrement;
-
-  @Index(unique: true, replace: true)
-  String syncId = const Uuid().v4(); 
-  
-  DateTime updatedAt = DateTime.now(); 
-  bool isSynced = false; 
-  bool isDeleted = false; 
 
   String title = '';
   

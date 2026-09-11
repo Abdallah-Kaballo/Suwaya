@@ -170,7 +170,7 @@ Application startup follows this sequence:
 2. Time zones and error handlers are configured.
 3. Alarm services are initialized.
 4. Isar is opened through `DatabaseService`.
-5. Localization, Firebase, and date formatting are initialized.
+5. Localization, and date formatting are initialized.
 6. Background services are initialized.
 7. The Isar instance is injected into `ProviderScope`.
 8. `EasyLocalization` wraps the application.

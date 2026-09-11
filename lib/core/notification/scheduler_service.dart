@@ -57,6 +57,9 @@ final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
 class NotificationScheduler {
   final NotificationService _service;
   bool _isScheduling = false; 
+  
+  String _lastScheduleHash = ''; 
+  Set<int> _previouslyScheduledNormalIds = {};
 
   NotificationScheduler(this._service);
 
@@ -91,18 +94,28 @@ class NotificationScheduler {
   Future<void> scheduleAhead(SettingsModel settings, List<TaskModel> allTasks, List<RoutineModel> routines) async {
     if (_isScheduling) return;
     
+    final sb = StringBuffer();
+    sb.write('${settings.calculationMethod}_${settings.useAstroTimeForIbadat}');
+    for (var t in allTasks) { 
+      sb.write('${t.id}_${t.isCompleted}_${t.targetPeriodId}_${t.targetVirtualMinute}_${t.notifyMode}_${t.alarmMode}'); 
+    }
+    for (var r in routines) { 
+      sb.write('${r.id}_${r.isActive}_${r.alertLevel}_${r.startPeriodId}_${r.startTimeMinutes}'); 
+    }
+    final currentHash = sb.toString();
+    if (currentHash == _lastScheduleHash) return;
+
     try {
       _isScheduling = true;
 
       final loc = settings.activeLocation;
       if (loc == null) return;
 
-      // 🌟 1. المسح الشامل: نقتل أي إشعارات قديمة متراكمة في النظام أولاً
-      await _service.cancelAll();
-
       final activeAlarms = await Alarm.getAlarms();
       final activeAlarmMap = {for (var a in activeAlarms) a.id: a};
+      
       final Set<int> requiredAlarmIds = {}; 
+      final Set<int> requiredNormalIds = {}; 
 
       final cityOffset = _getUtcOffsetForLocation(loc);
       final cityNow = _getCityNow(loc);
@@ -127,7 +140,6 @@ class NotificationScheduler {
 
       final List<Map<String, dynamic>> weekAstroData = await Isolate.run(() {
         final distribution = SuwayaDistributor.getUniversalDistribution();
-
         final List<Map<String, dynamic>> daysData = [];
         
         for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
@@ -178,8 +190,6 @@ class NotificationScheduler {
             if (alertLevel > 0) {
               final String soundId = settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
-              
-              // 🌟 2. منع التصادم: الصلوات تبدأ من 100,000
               final int notificationId = 100000 + (dayOffset * 1000) + numericId;
 
               final durationUntilAlarm = pTime.difference(cityNow);
@@ -189,7 +199,6 @@ class NotificationScheduler {
 
               if (alertLevel == 2) {
                 requiredAlarmIds.add(notificationId);
-
                 final existing = activeAlarmMap[notificationId];
                 bool needsUpdate = true;
                 if (existing != null) {
@@ -210,17 +219,18 @@ class NotificationScheduler {
                       volume: 1.0, fadeDuration: const Duration(seconds: 3), volumeEnforced: true,
                     ),
                     notificationSettings: NotificationSettings(
-                      title: 'صلاة ${nameKey.tr()}',
-                      body: 'حان الآن موعد الأذان، استعد للصلاة.',
-                      stopButton: 'إيقاف التنبيه',
+                      title: '${'notifications.prayer_of'.tr()} ${nameKey.tr()}',
+                      body: 'notifications.adhan_time_body'.tr(),
+                      stopButton: 'alarm.stop'.tr(),
                     ),
                   ));
                 }
               } else if (alertLevel == 1) {
+                requiredNormalIds.add(notificationId);
                 await _service.scheduleNormalNotification(
                   id: notificationId,
-                  title: 'صلاة ${nameKey.tr()}',
-                  body: 'حان الآن موعد الأذان.',
+                  title: '${'notifications.prayer_of'.tr()} ${nameKey.tr()}',
+                  body: 'notifications.adhan_time_short'.tr(),
                   scheduledTime: realAlarmTime, 
                   playSound: true,
                   enableVibration: true,
@@ -237,8 +247,6 @@ class NotificationScheduler {
               final String soundId = settings.getPeriodSound(nightPart.id, 'assets/audio/soft.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
               final int nightIdSafe = nightPart.id.hashCode.abs() % 100;
-              
-              // 🌟 2. منع التصادم: قيام الليل يبدأ من 200,000
               final int notificationId = 200000 + (dayOffset * 1000) + nightIdSafe;
 
               final durationUntilAlarm = nightPart.startTime.difference(cityNow);
@@ -248,7 +256,6 @@ class NotificationScheduler {
 
               if (alertLevel == 2) {
                 requiredAlarmIds.add(notificationId);
-
                 final existing = activeAlarmMap[notificationId];
                 bool needsUpdate = true;
                 if (existing != null) {
@@ -269,17 +276,18 @@ class NotificationScheduler {
                       volume: 1.0, fadeDuration: const Duration(seconds: 3), volumeEnforced: true,
                     ),
                     notificationSettings: NotificationSettings(
-                      title: 'وقت ${nightPart.nameKey.tr()}',
-                      body: 'وقت التنزل الإلهي، قم وناجِ ربك.',
-                      stopButton: 'إيقاف التنبيه',
+                      title: '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
+                      body: 'notifications.qiyam_body'.tr(),
+                      stopButton: 'alarm.stop'.tr(),
                     ),
                   ));
                 }
               } else if (alertLevel == 1) {
+                requiredNormalIds.add(notificationId);
                 await _service.scheduleNormalNotification(
                   id: notificationId,
-                  title: 'وقت ${nightPart.nameKey.tr()}',
-                  body: 'وقت التنزل الإلهي قد بدأ.',
+                  title: '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
+                  body: 'notifications.qiyam_short'.tr(),
                   scheduledTime: realAlarmTime, 
                   playSound: true,
                   enableVibration: true,
@@ -304,19 +312,15 @@ class NotificationScheduler {
                   final suwayaCount = p.suwayasCount > 0 ? p.suwayasCount : 1;
                   final microPerSuwaya = p.endTime.difference(p.startTime).inMicroseconds ~/ suwayaCount;
                   final microPerVirtualMin = microPerSuwaya ~/ 30;
-
                   int sIndex = (routine.startSuwaya ?? 1) - 1;
                   if (sIndex < 0) sIndex = 0;
                   int vMin = routine.startVirtualMinute ?? 0;
-
                   routineAlarmTime = p.startTime.add(Duration(microseconds: (microPerSuwaya * sIndex) + (microPerVirtualMin * vMin)));
               } catch (_) {}
           }
 
           if (routineAlarmTime != null && routineAlarmTime.isAfter(cityNow)) {
-              // 🌟 2. منع التصادم: الروتينات تبدأ من 300,000
               final int routineNotifId = 300000 + (dayOffset * 10000) + routine.id;
-              
               final durationUntilAlarm = routineAlarmTime.difference(cityNow);
               final realAlarmTime = DateTime.now().add(durationUntilAlarm);
 
@@ -325,7 +329,6 @@ class NotificationScheduler {
               if (routine.alertLevel == 2) {
                   requiredAlarmIds.add(routineNotifId);
                   final String rAsset = _getAssetAudioPath(routine.alarmTone);
-
                   final existingTask = activeAlarmMap[routineNotifId];
                   bool needsTaskUpdate = true;
                   if (existingTask != null) {
@@ -343,15 +346,18 @@ class NotificationScheduler {
                       loopAudio: true, vibrate: true,
                       volumeSettings: VolumeSettings.fade(volume: routine.alarmVolume, fadeDuration: const Duration(seconds: 2), volumeEnforced: true),
                       notificationSettings: NotificationSettings(
-                        title: 'بداية فترة: ${routine.title}', body: 'حان وقت بدء الفترة المحددة.', stopButton: 'إيقاف التنبيه',
+                        title: '${'notifications.period_start'.tr()}: ${routine.title}', 
+                        body: 'notifications.routine_body'.tr(), 
+                        stopButton: 'alarm.stop'.tr(),
                       ),
                     ));
                   }
               } else if (routine.alertLevel == 1) {
+                  requiredNormalIds.add(routineNotifId);
                   await _service.scheduleNormalNotification(
                     id: routineNotifId, 
-                    title: 'بداية فترة: ${routine.title}',
-                    body: 'حان وقت بدء الفترة المحددة.',
+                    title: '${'notifications.period_start'.tr()}: ${routine.title}',
+                    body: 'notifications.routine_body'.tr(),
                     scheduledTime: realAlarmTime, 
                     playSound: true, enableVibration: true,
                   );
@@ -404,12 +410,10 @@ class NotificationScheduler {
                 
                 if (taskCityTime.isAfter(cityNow)) {
                   final int taskIdSafe = task.id % 1000;
-                  
-                  // 🌟 2. منع التصادم: المهام تبدأ من 400,000
                   final int taskNotifId = 400000 + (dayOffset * 10000) + (taskIdSafe * 10) + effectiveSuwayaNum;
                   
                   int currentGlobalSuwaya = globalSuwayaBase + sIndex;
-                  String timeText = 'الزمن المقطعي : ${currentGlobalSuwaya.toString().padLeft(2, '0')}:${vMin.toString().padLeft(2, '0')}';
+                  String timeText = '${'notifications.segment_time'.tr()} : ${currentGlobalSuwaya.toString().padLeft(2, '0')}:${vMin.toString().padLeft(2, '0')}';
                   
                   final taskDurationUntilAlarm = taskCityTime.difference(cityNow);
                   final realTaskAlarmTime = DateTime.now().add(taskDurationUntilAlarm);
@@ -437,14 +441,17 @@ class NotificationScheduler {
                         loopAudio: true, vibrate: true,
                         volumeSettings: VolumeSettings.fade(volume: task.alarmVolume, fadeDuration: const Duration(seconds: 2), volumeEnforced: true),
                         notificationSettings: NotificationSettings(
-                          title: 'حان وقت: ${task.title}', body: timeText, stopButton: 'إيقاف التنبيه',
+                          title: '${'notifications.time_for_task'.tr()}: ${task.title}', 
+                          body: timeText, 
+                          stopButton: 'alarm.stop'.tr(),
                         ),
                       ));
                     }
                   } else {
+                    requiredNormalIds.add(taskNotifId);
                     await _service.scheduleNormalNotification(
                       id: taskNotifId, 
-                      title: 'حان وقت: ${task.title}',
+                      title: '${'notifications.time_for_task'.tr()}: ${task.title}',
                       body: timeText,
                       scheduledTime: realTaskAlarmTime, 
                       playSound: task.notifyMode,
@@ -458,12 +465,22 @@ class NotificationScheduler {
         }
       }
 
-      // 🌟 تنظيف المنبهات المزعجة (إيقاف أي منبه لم يتم تجديده الآن)
       for (var alarm in activeAlarms) {
          if (!requiredAlarmIds.contains(alarm.id)) {
             await Alarm.stop(alarm.id);
          }
       }
+
+      final toCancelNormal = _previouslyScheduledNormalIds.difference(requiredNormalIds);
+      for (var id in toCancelNormal) {
+         try {
+           await _service.cancel(id); 
+         } catch (_) {}
+      }
+
+      _previouslyScheduledNormalIds = requiredNormalIds;
+      _lastScheduleHash = currentHash; 
+
     } finally {
       _isScheduling = false;
     }

@@ -34,17 +34,38 @@ class PrayerCalculator {
     final today = PrayerTimes(coordinates, DateComponents.from(date), params);
     final tomorrow = PrayerTimes(coordinates, DateComponents.from(date.add(const Duration(days: 1))), params);
 
+    // 🌟 حماية المحرك: تقييد الإزاحات وتطبيقها على الصلوات الخمس فقط
+    final allowedManualOffsets = <PrayerKey, int>{};
+    if (manualOffsets != null) {
+      for (final entry in manualOffsets.entries) {
+        final key = entry.key;
+        final value = entry.value.clamp(-30, 30); 
+
+        if (key == PrayerKey.fajr ||
+            key == PrayerKey.dhuhr ||
+            key == PrayerKey.asr ||
+            key == PrayerKey.maghrib ||
+            key == PrayerKey.isha) {
+          allowedManualOffsets[key] = value;
+        }
+      }
+    }
+
     DateTime applyOffset(DateTime time, PrayerKey key) {
-      if (manualOffsets != null && manualOffsets.containsKey(key)) return time.add(Duration(minutes: manualOffsets[key]!));
+      if (allowedManualOffsets.containsKey(key)) {
+        return time.add(Duration(minutes: allowedManualOffsets[key]!));
+      }
       return time;
     }
 
     final fajr = applyOffset(today.fajr.toUtc().add(cityOffset), PrayerKey.fajr);
-    final sunrise = applyOffset(today.sunrise.toUtc().add(cityOffset), PrayerKey.sunrise);
+    // 🌟 الشروق لا يقبل الإزاحة اليدوية
+    final sunrise = today.sunrise.toUtc().add(cityOffset); 
     final dhuhr = applyOffset(today.dhuhr.toUtc().add(cityOffset), PrayerKey.dhuhr);
     final asr = applyOffset(today.asr.toUtc().add(cityOffset), PrayerKey.asr);
     final maghrib = applyOffset(today.maghrib.toUtc().add(cityOffset), PrayerKey.maghrib);
     final isha = applyOffset(today.isha.toUtc().add(cityOffset), PrayerKey.isha);
+    
     final nextFajr = applyOffset(tomorrow.fajr.toUtc().add(cityOffset), PrayerKey.fajr);
 
     return IbadatTimings(

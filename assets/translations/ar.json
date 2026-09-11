@@ -6,7 +6,9 @@
   "common": {
     "new_task": "مهمة جديدة", "continuous_habit": "عادة مستمرة", "suwaya": "سويعة", "of": "من",
     "astro": "فلكي", "civil": "مدني", "ah": "هـ", "cancel": "إلغاء", "confirm": "تأكيد", "done": "تم",
-    "add": "إضافة", "days": "أيام", "period": "الفترة", "from": "من", "to": "إلى"
+    "add": "إضافة", "days": "أيام", "period": "الفترة", "from": "من", "to": "إلى",
+    "retry": "إعادة المحاولة", "edit": "تعديل", "delete": "حذف", "unknown": "غير معروف",
+    "startup_error": "عذراً، حدث خطأ أثناء بدء التشغيل", "save": "حفظ"
   },
   "night_parts": {
     "half_1": "النصف الأول", "half_2": "النصف الثاني", "third_1": "الثلث الأول", "third_2": "الثلث الثاني",
@@ -34,7 +36,8 @@
   },
   "alerts": {
     "default_ring": "الرنين الافتراضي", "makkah_adhan": "أذان مكة", "soft_bell": "جرس هادئ",
-    "birds": "زقزقة العصافير", "silent": "صامت", "notification": "إشعار", "alarm": "منبه", "alarm_tone": "نغمة المنبه"
+    "birds": "زقزقة العصافير", "silent": "صامت", "notification": "إشعار", "alarm": "منبه", "alarm_tone": "نغمة المنبه",
+    "notification_enabled": "تنبيه مفعل"
   },
   "patterns": {
     "linear": "خطوط كلاسيكية", "hexagon": "خلايا سداسية", "stone": "أحجار متراصة", "trihex": "هندسي مركب"
@@ -49,7 +52,10 @@
     "show_on_dial": "إظهار سهم المهمة على القرص", "new_addition": "إضافة جديدة", "what_to_add": "ما الذي تريد إضافته؟",
     "save_and_add": "حفظ وإضافة للقرص", "not_set_mandatory": "لم يُحدد (إجباري)", "daily": "يومياً",
     "category_appearance": "التصنيف والظهور", "recurrence": "التكرار", "date": "التاريخ", "time": "الزمن",
-    "alert": "التنبيه", "start_time": "وقت البداية", "end_time": "وقت النهاية", "pattern_color": "الشكل واللون"
+    "alert": "التنبيه", "start_time": "وقت البداية", "end_time": "وقت النهاية", "pattern_color": "الشكل واللون",
+    "what_habit": "ما هي العادة التي تريد بناءها؟", "what_task": "ما هي المهمة؟", 
+    "recurrence_days_hint": "أيام التكرار (اتركها فارغة ليومياً)", "no_specific_period": "بدون فترة محددة",
+    "suwayas_hint": "السويعات (اختر واحدة أو أكثر)", "flexible_suwaya": "سُويعَة مرنة", "astro_connection": "الارتباط الفلكي"
   },
   "tasks": {
     "casual_task": "مهمة عابرة", "continuous_habit": "عادة مستمرة", "routine_period": "فترة روتين",
@@ -57,7 +63,7 @@
     "tab_routines": "فترات", "empty_tasks": "لا توجد مهام حالياً.", "empty_routines": "لا توجد فترات روتينية مسجلة."
   },
   "routines": {
-    "manage_special_periods": "إدارة الفترات الخاصة", "periods_count": "فترات", "no_routines": "لم تقم بإضافة أي فترات خاصة بعد."
+    "manage_special_periods": "إدارة المهام والعادات والفترات", "periods_count": "فترات", "no_routines": "لم تقم بإضافة أي فترات خاصة بعد."
   },
   "settings": {
     "title": "الإعدادات", "search_hint": "ابحث في الإعدادات...", "account_data": "الحساب والبيانات",
@@ -84,7 +90,9 @@
     "dial_design": "تصميم القرص", "choose_dial_design": "اختر تصميم القرص", "design_classic": "كلاسيكي إسلامي", 
     "design_minimal": "عصري مبسط", "design_geometric": "هندسي", "checking": "جاري التحقق...", 
     "unavailable": "غير متوفر", "not_synced_yet": "لم تتم المزامنة بعد", "last_sync": "آخر مزامنة", 
-    "syncing": "جاري المزامنة مع السحابة... ☁️", "cloud_sync": "المزامنة السحابية", "cannot_open_link": "لا يمكن فتح الرابط"
+    "syncing": "جاري المزامنة مع السحابة... ☁️", "cloud_sync": "المزامنة السحابية", "cannot_open_link": "لا يمكن فتح الرابط",
+    "manual_offset": "التعديل اليدوي للمواقيت", "manual_offset_desc": "قم بضبط الدقائق يدوياً إذا كانت أوقات الصلاة تختلف عن مسجد حيك المعتاد. (الحد الأقصى 30 دقيقة)",
+    "reset_all_offsets": "تصفير كل التعديلات", "offsets_reset_success": "تم تصفير كل التعديلات بنجاح", "no_offset": "بدون تعديل"
   },
   "astro_calc": {
     "title": "إعدادات فلكية متقدمة", "warning": "هذه الإعدادات مخصصة للمستخدمين المتقدمين.\nفي حال العبث بها، يمكنك دائماً إعادة التحديد التلقائي للموقع لضبطها مجدداً.",
@@ -117,7 +125,13 @@
     "snooze_system": "نظام الغفوة الذكي", "snooze_duration": "مدة الغفوة:", "snooze_max": "الحد الأقصى للغفوات:",
     "mins_5": "5 دقائق", "mins_10": "10 دقائق", "mins_15": "15 دقيقة", "mins_30": "نصف ساعة", "once": "مرة واحدة",
     "times_3": "3 مرات", "times_5": "5 مرات", "no_limit": "بدون حد (غير منصوح)", "wake_screen": "منبه تفاعلي يوقظ الشاشة",
-    "save": "حفظ"
+    "system_alerts": "إشعارات النظام", "normal_tasks_desc": "إشعارات المهام العادية", "prayers_alerts": "تنبيهات الصلوات القوية",
+    "prayers_alerts_desc": "منبه يستخدم نغمة جهازك الرسمية ويخترق الوضع الصامت", "silent_vibration": "الاهتزاز الصامت",
+    "silent_vibration_desc": "تنبيه بالاهتزاز فقط", "prayer_of": "صلاة", "adhan_time_body": "حان الآن موعد الأذان، استعد للصلاة.",
+    "adhan_time_short": "حان الآن موعد الأذان.", "time_for": "وقت", "qiyam_body": "وقت التنزل الإلهي، قم وناجِ ربك.",
+    "qiyam_short": "وقت التنزل الإلهي قد بدأ.", "period_start": "بداية فترة", "routine_body": "حان وقت بدء الفترة المحددة.",
+    "segment_time": "الزمن المقطعي", "time_for_task": "حان وقت إنجاز مهمتك", "alert": "تنبيه", "strong_alerts": "تنبيهات قوية",
+    "notifications": "إشعارات", "location_required": "صلاحية الموقع مطلوبة لتحديد المواقيت."
   },
   "permissions": {
     "title": "الأذونات وصلاحيات النظام", "desc": "لتجربة مثالية وتنبيهات دقيقة في وقتها، يرجى التأكد من منح التطبيق الصلاحيات التالية:",
@@ -131,7 +145,7 @@
     "location_success": "تم ضبط الموقع بنجاح", "change_location": "تغيير الموقع", "fetching_gps": "جاري تحديد الموقع بدقة...",
     "update_gps": "تحديث الموقع الجغرافي (GPS)", "gps_success": "تم تحديد الموقع بنجاح:", "gps_failed": "تعذر تحديد الموقع. تأكد من إعطاء الصلاحيات للتطبيق.",
     "manual_select": "تحديد يدوي (لا يتطلب إنترنت)", "start_journey": "ابدأ الرحلة", "welcome": "مرحباً بك في سُويعَة",
-    "welcome_sub": "Welcome to Suwaya", "continue_btn": "المتابعة"
+    "welcome_sub": "هندسة الوقت", "continue_btn": "المتابعة"
   },
   "auth": {
     "secure_data": "تأمين بياناتك السحابية", "cloud_account": "حسابك السحابي",
@@ -159,15 +173,18 @@
     "save_use": "حفظ واستخدام", "search_country": "ابحث عن الدولة...", "search_city_hint": "ابحث عن المدينة...",
     "try_english_name": "جرب البحث بالاسم الإنجليزي", "location_name_required": "يجب إدخال اسم للموقع",
     "lat_validation_error": "خط العرض غير صحيح (يجب أن يكون بين -90 و 90)", "lng_validation_error": "خط الطول غير صحيح (يجب أن يكون بين -180 و 180)",
-    "location_updated": "تم تحديث الموقع الجغرافي بنجاح"
+    "location_updated": "تم تحديث الموقع الجغرافي بنجاح", "error_gps_disabled": "خدمات الموقع معطلة. يرجى تفعيلها.",
+    "error_permission_denied": "تم رفض صلاحية الموقع.", "error_permission_denied_forever": "صلاحية الموقع مرفوضة دائماً. يرجى تفعيلها من الإعدادات.",
+    "error_gps_timeout": "انتهى وقت طلب الموقع. حاول مجدداً.", "current_location": "موقعي الحالي"
   },
-  
   "nav": {
     "home": "الرئيسية", "tasks": "المهام", "pomodoro": "التركيز", "ibadat": "العبادات"
   },
   "periods": {
     "fajr": "الفجر", "duha": "الضحى", "dhuhr": "الظهر", "asr": "العصر",
-    "maghrib": "المغرب", "middle_third": "الثلث الأوسط", "last_third": "الثلث الأخير"
+    "maghrib": "المغرب", "middle_third": "الثلث الأوسط", "last_third": "الثلث الأخير",
+    "period_1": "الفترة الأولى", "period_2": "الفترة الثانية", "period_3": "الفترة الثالثة",
+    "period_4": "الفترة الرابعة", "period_5": "الفترة الخامسة", "period_6": "الفترة السادسة", "period_7": "الفترة السابعة"
   },
   "prayers": {
     "fajr": "الفجر", "dhuhr": "الظهر", "asr": "العصر", "maghrib": "المغرب", "isha": "العشاء"
@@ -179,8 +196,8 @@
     "az": "الأذربيجانية", "id": "الإندونيسية", "ms": "الماليزية", "da": "الدنماركية",
     "de": "الألمانية", "en": "الإنجليزية", "es": "الإسبانية", "fr": "الفرنسية",
     "it": "الإيطالية", "nl": "الهولندية"
-  }
-  ,"drawer": {
+  },
+  "drawer": {
     "faq": "الأسئلة الشائعة",
     "contact": "التواصل والدعم",
     "about_app": "عن التطبيق",
@@ -196,7 +213,13 @@
     "guest_user": "مستخدم زائر",
     "secure_data": "تأمين بياناتك ☁️",
     "tap_to_login": "اضغط لتسجيل الدخول والمزامنة",
-    "manage_account": "إدارة الحساب والمزامنة"
+    "manage_account": "إدارة الحساب والمزامنة",
+    "github_connection_failed": "فشل الاتصال بـ GitHub",
+    "time_engineered": "هندسة الوقت"
+  },
+  "alarm": {
+    "suwaya_alert": "تنبيه سُويعَة", "time_for_task": "حان وقت إنجاز مهمتك!", "snooze_10m": "غفوة 10د", 
+    "swipe_to_stop": "اسحب للإيقاف أو الغفوة", "stop": "إيقاف", "default_title": "تنبيه", "max_snoozes_reached": "الحد الأقصى للغفوات"
   },
   "analytics": {
     "title": "الإحصاءات والتحليلات",
@@ -210,7 +233,6 @@
     "hours": "ساعة",
     "weekly_overview": "نظرة عامة على الأسبوع"
   },
-
   "pomodoro": {
     "suwaya_info": "معلومات السويعة",
     "current_time": "الوقت الآن",
@@ -232,7 +254,8 @@
     "no_tasks": "لا توجد مهام مخصصة لهذه السويعة", 
     "focus_now_on": "ركز الآن على:"
   },
-   
+  "full_astro_timeline": "الجدول الزمني الفلكي الكامل", "inbox": "صندوق الوارد", "today": "اليوم", 
+  "no_date": "بدون تاريخ", "add_to_period": "إضافة لفترة", "recurring": "متكرر",
   "splash": {
     "app_title_ar": "سُـويـعَـة",
     "app_title_en": "Suwaya"
@@ -256,5 +279,4 @@
     "insight_night_focus": "نشاطك الليلي ممتاز، لكن تأكد من أخذ قسط كافٍ من الراحة الجسدية.",
     "insight_stable": "أداؤك مستقر وتوزع طاقتك بشكل جيد على الفترات المختلفة."
   }
-
 }

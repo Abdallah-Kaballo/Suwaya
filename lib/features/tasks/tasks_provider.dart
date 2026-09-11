@@ -1,13 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:isar_community/isar.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
-import '../../core/database/database_provider.dart';
 import '../../core/repositories/task_repository.dart';
 import '../../models/task_model.dart';
-import '../../models/activity_log_model.dart';
 import '../settings/settings_provider.dart';
 
 class TasksState {
@@ -63,7 +59,6 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<List<String>> getUniqueTaskTitles() async {
-    // 🌟 استخدام الدالة المحسنة لعدم إرهاق الذاكرة بآلاف المهام القديمة
     final activeTasks = await ref.read(taskRepositoryProvider).getActiveTasks();
     return activeTasks.map((t) => t.title).toSet().toList();
   }
@@ -79,12 +74,18 @@ class TasksNotifier extends Notifier<TasksState> {
     final List<TaskModel> todayList = [];
     final List<TaskModel> horizonList = [];
 
+    // 🌟 Cache لحفظ نتائج החישوب أثناء الفرز وتوفير المعالج
+    final Map<int, Map<String, int>> astroCache = {};
+
     for (var task in allTasks) {
       if (task.type == TaskType.casual && task.isCompleted) continue;
       if (task.type == TaskType.permanent && task.isCompletedToday) continue;
 
       final effectiveDays = task.recurrenceDays;
       final dynamicAstro = _getDynamicAstro(task, astroState, now);
+      
+      if (dynamicAstro != null) astroCache[task.id] = dynamicAstro;
+
       final pId = dynamicAstro?['pId'];
       final sNum = dynamicAstro?['sNum'];
       
@@ -112,9 +113,10 @@ class TasksNotifier extends Notifier<TasksState> {
       }
     }
 
+    // 🌟 استخدام المخبأ (Cache) في الفرز بدلاً من الحساب الثقيل المتكرر
     todayList.sort((a, b) {
-      final astroA = _getDynamicAstro(a, astroState, now);
-      final astroB = _getDynamicAstro(b, astroState, now);
+      final astroA = astroCache[a.id];
+      final astroB = astroCache[b.id];
       int periodCompare = (astroA?['pId'] ?? 0).compareTo(astroB?['pId'] ?? 0);
       if (periodCompare != 0) return periodCompare;
       int aSuwaya = astroA?['sNum'] ?? 0;
@@ -123,8 +125,8 @@ class TasksNotifier extends Notifier<TasksState> {
     });
 
     nowList.sort((a, b) {
-      final astroA = _getDynamicAstro(a, astroState, now);
-      final astroB = _getDynamicAstro(b, astroState, now);
+      final astroA = astroCache[a.id];
+      final astroB = astroCache[b.id];
       int aSuwaya = astroA?['sNum'] ?? 0;
       int bSuwaya = astroB?['sNum'] ?? 0;
       return aSuwaya.compareTo(bSuwaya);
@@ -134,7 +136,6 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> loadTasks() async {
-    // 🌟 استبدال getAllTasks بـ getActiveTasks لحل مشكلة الأداء (النقطة 8)
     final active = await ref.read(taskRepositoryProvider).getActiveTasks();
     _refreshFromMemory(active);
   }
@@ -148,11 +149,8 @@ class TasksNotifier extends Notifier<TasksState> {
     } else {
       task.notifyMode = true; 
     }
-    task.isSynced = false;
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
-    
-    // 🌟 إصلاح النقطة 5: انتظار الحفظ بقاعدة البيانات
     await ref.read(taskRepositoryProvider).saveTask(task);
   }
 
@@ -169,8 +167,6 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> addTask(TaskModel task) async {
-    task.isSynced = false;
-    // 🌟 كانت هذه سليمة (تحتوي على await)
     await ref.read(taskRepositoryProvider).saveTask(task);
     final updatedList = [...state.allTasks.where((t) => t.id != task.id), task];
     _refreshFromMemory(updatedList);
@@ -179,8 +175,6 @@ class TasksNotifier extends Notifier<TasksState> {
   Future<void> deleteTask(int id) async {
     final updatedList = state.allTasks.where((t) => t.id != id).toList();
     _refreshFromMemory(updatedList);
-    
-    // 🌟 إصلاح النقطة 5: انتظار الحذف بقاعدة البيانات
     await ref.read(taskRepositoryProvider).deleteTask(id);
   }
 
@@ -188,7 +182,6 @@ class TasksNotifier extends Notifier<TasksState> {
     final updatedList = state.allTasks.where((t) => !ids.contains(t.id)).toList();
     _refreshFromMemory(updatedList);
     for (var id in ids) {
-      // 🌟 إصلاح النقطة 5: انتظار الحذف المتعدد بقاعدة البيانات
       await ref.read(taskRepositoryProvider).deleteTask(id);
     }
   }
@@ -218,58 +211,17 @@ class TasksNotifier extends Notifier<TasksState> {
       isAchievedNow = task.isCompleted;
     }
     
-    task.isSynced = false;
-    
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
 
     await ref.read(taskRepositoryProvider).saveTask(task);
     
-    // 🌟 حماية الاختبارات: استخدام try-catch يمنع انهيار الاختبار إذا لم تكن قاعدة البيانات Isar مهيأة
     try {
       if (isAchievedNow) {
-         ref.read(settingsProvider.notifier).updateGlobalStreak();
+        ref.read(settingsProvider.notifier).updateGlobalStreak();
       }
-      await _logActivity(task, isAchievedNow); 
-    } catch (e) {
-      // تجاهل أخطاء التبعيات الخارجية أثناء الـ Unit Testing
-    }
-  }
-
-  Future<void> _logActivity(TaskModel task, bool isCompleted) async {
-    try {
-      final db = ref.read(isarProvider);
-      final now = DateTime.now();
-      final todayStr = DateFormat('yyyy-MM-dd').format(now); 
-
-      await db.writeTxn(() async {
-        if (isCompleted) {
-          final log = ActivityLog()
-            ..taskSyncId = task.syncId
-            ..category = task.category.name
-            ..periodId = task.targetPeriodId ?? 1
-            ..suwayasCount = task.targetSuwayas.isNotEmpty ? task.targetSuwayas.length : 1
-            ..completedAtUtc = now.toUtc()
-            ..activeDayDate = todayStr;
-
-          await db.activityLogs.put(log);
-        } else {
-          final lastLog = await db.activityLogs
-              .filter()
-              .taskSyncIdEqualTo(task.syncId)
-              .sortByCompletedAtUtcDesc()
-              .findFirst();
-
-          if (lastLog != null) {
-            lastLog.isDeleted = true;
-            lastLog.updatedAt = now.toUtc();
-            lastLog.isSynced = false;
-            await db.activityLogs.put(lastLog);
-          }
-        }
-      });
-    } catch (e) {
-      // صمام أمان لبيئة الاختبار
+    } catch (_) {
+      // تم تجاهل الخطأ عمداً لتفادي انهيار الاختبارات عند عدم توفر المزود
     }
   }
 
@@ -279,12 +231,10 @@ class TasksNotifier extends Notifier<TasksState> {
     task.targetSuwayas = [suwaya];
     task.targetVirtualMinute = vMin;
     task.targetCivilTimeMinutes = null; 
-    task.isSynced = false;
 
     final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
     
-    // 🌟 إصلاح النقطة 5: انتظار إعادة الجدولة
     await ref.read(taskRepositoryProvider).saveTask(task);
   }
 }

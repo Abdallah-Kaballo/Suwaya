@@ -51,9 +51,10 @@ class RailwayRingPainter extends CustomPainter {
     path.lineTo(baseWidth / 2, 0); 
     path.close();
 
-    if (isPrayer || isDragged || isHighlighted) {
-       canvas.drawPath(path, Paint()..color = color..maskFilter = MaskFilter.blur(BlurStyle.normal, (isDragged || isHighlighted) ? 10 : 3));
+    if (isDragged || isHighlighted) {
+       canvas.drawPath(path, Paint()..color = color..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
     }
+    
     canvas.drawPath(path, Paint()..color = color); 
     
     if (!isPrayer) {
@@ -184,7 +185,46 @@ class RailwayRingPainter extends CustomPainter {
   }
   
   @override 
-  bool shouldRepaint(covariant RailwayRingPainter old) => true; 
+  bool shouldRepaint(covariant RailwayRingPainter old) {
+    if (old.isDark != isDark ||
+        old.draggedTask?.id != draggedTask?.id ||
+        old.dragAngle != dragAngle ||
+        old.langCode != langCode ||
+        old.design != design ||
+        old.highlightedTaskId != highlightedTaskId ||
+        old.dayStart != dayStart ||
+        old.dayEnd != dayEnd ||
+        old.ibadat.fajr != ibadat.fajr ||
+        old.ibadat.sunrise != ibadat.sunrise ||
+        old.ibadat.dhuhr != ibadat.dhuhr ||
+        old.ibadat.asr != ibadat.asr ||
+        old.ibadat.maghrib != ibadat.maghrib ||
+        old.ibadat.isha != ibadat.isha ||
+        old.ibadat.nextFajr != ibadat.nextFajr ||
+        old.nightMarkers.length != nightMarkers.length ||
+        old.tasks.length != tasks.length) {
+      return true;
+    }
+
+    for (int i = 0; i < nightMarkers.length; i++) {
+      final a = old.nightMarkers[i];
+      final b = nightMarkers[i];
+      if (a['n'] != b['n'] || a['t'] != b['t']) return true;
+    }
+
+    for (int i = 0; i < tasks.length; i++) {
+      final a = old.tasks[i];
+      final b = tasks[i];
+      if (a.taskModel.id != b.taskModel.id ||
+          a.time != b.time ||
+          a.color != b.color ||
+          a.shortName != b.shortName) {
+        return true;
+      }
+    }
+
+    return false; 
+  }
 }
 
 class CrownPainter extends CustomPainter {
@@ -269,9 +309,22 @@ class DynamicNeedlePainter extends CustomPainter {
         TileMode.repeated,
       );
 
-    canvas.drawLine(Offset(0, -needleStart), Offset(0, -needleLength), Paint()..color = const Color(0xFF007BFF).withValues(alpha: 0.3)..strokeWidth = 6.0..strokeCap = StrokeCap.round..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
+    // 🌟 تنفيذ الطلب 9: زيادة توهج العقرب وإبرازه بخط أبيض ناصع
+    canvas.drawLine(
+      Offset(0, -needleStart), 
+      Offset(0, -needleLength), 
+      Paint()
+        ..color = const Color(0xFF007BFF).withValues(alpha: 0.8) 
+        ..strokeWidth = 8.0 
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12)
+    );
+
     canvas.drawLine(Offset(0, -needleStart), Offset(0, -needleLength), stripedPaint..strokeWidth = 3.5..strokeCap = StrokeCap.round..style = PaintingStyle.stroke);
     
+    // قلب ناصع البياض للعقرب ليكون بارزاً
+    canvas.drawLine(Offset(0, -needleStart), Offset(0, -needleLength), Paint()..color = Colors.white.withValues(alpha: 0.7)..strokeWidth = 1.0..strokeCap = StrokeCap.round);
+
     final Path compassArrow = Path()
       ..moveTo(0, -needleLength - 8) 
       ..lineTo(-5, -needleLength + 4)

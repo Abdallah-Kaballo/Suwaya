@@ -6,7 +6,6 @@ import '../../models/task_model.dart';
 import '../../models/settings_model.dart';
 import '../../models/geo_models.dart';
 import '../../models/routine_model.dart';
-import '../../models/activity_log_model.dart';
 
 class DatabaseService {
   static Future<Isar> init() async {
@@ -20,7 +19,6 @@ class DatabaseService {
           SettingsModelSchema,
           GeoCountrySchema,
           RoutineModelSchema,
-          ActivityLogSchema,
         ],
         directory: dir.path,
         inspector: !kReleaseMode,
@@ -28,14 +26,13 @@ class DatabaseService {
     } catch (e) {
       debugPrint('🚨 فشل فتح قاعدة البيانات: $e');
       try {
-        // 🌟 تم إصلاح النقطة 2: تضمين ActivityLogSchema في وضع الـ Fallback لتجنب انهيار التطبيق
+        // Fallback في حال الفشل
         isar = await Isar.open(
           [
             TaskModelSchema, 
             SettingsModelSchema, 
             GeoCountrySchema, 
             RoutineModelSchema, 
-            ActivityLogSchema // 🌟 إضافة الجدول المفقود هنا
           ],
           directory: dir.path,
           inspector: !kReleaseMode,

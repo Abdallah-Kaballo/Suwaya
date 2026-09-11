@@ -28,7 +28,6 @@ Color _getNeonColor(TaskCategory category) {
   return const Color(0xFF18FFFF);
 }
 
-// 🌟 دالة مساعدة لترجمة الفترة والموقع إلى رقم سويعة تراكمي عام
 int _getGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
   int global = 0;
   for (var p in periods) {
@@ -182,8 +181,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     );
   }
 
-  // ... (قم بنسخ الأكواد السابقة في الملف كما هي، واستبدل فقط _buildTasksList وما تحته)
-
   Widget _buildTasksList(List<TaskModel> tasks, List<AstroPeriod> periods, bool isHabit) {
     if (tasks.isEmpty) return _buildEmptyState('tasks.empty_tasks'.tr());
     return ListView.builder(
@@ -205,7 +202,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
                 _editTask(task); 
               }
             },
-            // 🌟 إضافة أيقونة النقاط الثلاث كبديل للسحب
             onMoreOptions: () => _showOptionsSheet(context, task: task),
           ),
           onDelete: () => ref.read(tasksProvider.notifier).deleteTask(task.id),
@@ -236,7 +232,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
                 _editRoutine(r); 
               }
             },
-            // 🌟 إضافة أيقونة النقاط الثلاث كبديل للسحب
             onMoreOptions: () => _showOptionsSheet(context, routine: r),
           ),
           onDelete: () => ref.read(routinesProvider.notifier).deleteRoutine(r.id),
@@ -246,7 +241,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     );
   }
 
-  // 🌟 نافذة الخيارات السفلية عند الضغط على النقاط الثلاث
   void _showOptionsSheet(BuildContext context, {TaskModel? task, RoutineModel? routine}) {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
@@ -324,6 +318,7 @@ class _TaskRowItem extends ConsumerStatefulWidget {
   const _TaskRowItem({required this.task, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress, required this.onMoreOptions});
   @override ConsumerState<_TaskRowItem> createState() => _TaskRowItemState();
 }
+
 class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
   bool _isLocalCompleted = false; 
 
@@ -341,7 +336,8 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
       timeStr = '${(t.targetCivilTimeMinutes! ~/ 60).toString().padLeft(2, '0')}:${(t.targetCivilTimeMinutes! % 60).toString().padLeft(2, '0')}';
     } else if (t.isAstroTime && t.targetPeriodId != null && widget.periods.isNotEmpty) {
-      int gSuwaya = _getGlobalSuwaya(t.targetPeriodId!, t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1, widget.periods) + 1;
+      // 🌟 الإصلاح 1: إزالة الـ +1 الوهمية ليتطابق مع العجلة (Zero-based)
+      int gSuwaya = _getGlobalSuwaya(t.targetPeriodId!, t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1, widget.periods);
       timeStr = '${gSuwaya.toString().padLeft(2, '0')}:${t.targetVirtualMinute.toString().padLeft(2, '0')}';
     }
 
@@ -408,7 +404,6 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
               ),
             ),
 
-            // 🌟 زر النقاط الثلاث للوصولية (البديل البصري للسحب)
             if (!widget.isSelectionMode)
               IconButton(
                 padding: const EdgeInsets.only(left: 8),
@@ -437,7 +432,8 @@ class _RoutineRowItem extends StatelessWidget {
       final sm = (routine.startTimeMinutes! % 60).toString().padLeft(2, '0');
       timeStr = '${'common.civil'.tr()} (${'common.from'.tr()} $sh:$sm)';
     } else if (routine.isAstroTime && routine.startPeriodId != null) {
-      int gSuwaya = _getGlobalSuwaya(routine.startPeriodId!, routine.startSuwaya ?? 1, periods) + 1;
+      // 🌟 الإصلاح 2: إزالة الـ +1 الوهمية من عرض الروتين التراكمي
+      int gSuwaya = _getGlobalSuwaya(routine.startPeriodId!, routine.startSuwaya ?? 1, periods);
       final sm = (routine.startVirtualMinute ?? 0).toString().padLeft(2, '0');
       timeStr = '${'common.astro'.tr()} (${'common.from'.tr()} ${gSuwaya.toString().padLeft(2, '0')}:$sm)';
     }
@@ -471,7 +467,6 @@ class _RoutineRowItem extends StatelessWidget {
               ),
             ),
             
-            // 🌟 زر النقاط الثلاث للوصولية (البديل البصري للسحب)
             if (!isSelectionMode)
               IconButton(
                 padding: const EdgeInsets.only(left: 8),

@@ -50,8 +50,26 @@ class IbadatScreen extends ConsumerWidget {
     final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
     final textColor = isDark ? Colors.white : Colors.black87;
 
+    // 🌟 حل مشكلة التحميل اللانهائي هنا أيضاً
     if (astroState.periods.isEmpty) {
-      return Scaffold(backgroundColor: scaffoldBgColor, body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)));
+      return Scaffold(
+        backgroundColor: scaffoldBgColor, 
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Theme.of(context).primaryColor),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => ref.read(astroProvider.notifier).resetToRealTime(),
+                icon: const Icon(Icons.refresh),
+                label: Text('common.retry'.tr()),
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
+              )
+            ],
+          )
+        )
+      );
     }
 
     return DefaultTabController(

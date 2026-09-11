@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:suwaya/features/ibadat/astro_timeline_screen.dart';
-import 'package:suwaya/features/settings/country_picker_screen.dart';
 import 'package:suwaya/features/settings/manual_offsets_screen.dart';
 
 import '../../features/splash/splash_screen.dart';
@@ -72,10 +71,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'manual-offsets',
             builder: (context, state) => const ManualOffsetsScreen(),
-          ),
-          GoRoute(
-            path: 'country-picker',
-            builder: (context, state) => const CountryPickerScreen(),
           ),
         ],
       ),

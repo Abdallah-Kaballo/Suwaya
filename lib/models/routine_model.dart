@@ -1,19 +1,10 @@
 import 'package:isar_community/isar.dart';
-import 'package:uuid/uuid.dart'; 
 
 part 'routine_model.g.dart';
 
 @collection
 class RoutineModel {
   Id id = Isar.autoIncrement;
-
-  // 🌟 حقول المزامنة (تمت إضافتها)
-  @Index(unique: true, replace: true)
-  String syncId = const Uuid().v4(); 
-  
-  DateTime updatedAt = DateTime.now().toUtc(); 
-  bool isSynced = false; 
-  bool isDeleted = false; 
 
   String title = '';
   int colorValue = 0xFF1E88E5;

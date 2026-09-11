@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -154,7 +156,7 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
 
     final localData = await GeoDatabaseService.getNearestLocationData(lat, lng, langCode);
     String countryCode = 'CUSTOM';
-    String countryName = 'غير معروف';
+    String countryName = 'common.unknown'.tr();
 
     if (localData != null) {
       countryCode = localData['countryCode'] ?? 'CUSTOM';
@@ -598,6 +600,21 @@ class _CitySearchSheet extends StatefulWidget {
 
 class _CitySearchSheetState extends State<_CitySearchSheet> {
   String _query = '';
+  Timer? _debounceTimer; 
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String val) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      setState(() => _query = val);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -612,13 +629,16 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
       final q = _query.toLowerCase();
       return nameAr.contains(q) || nameEn.contains(q);
     }).toList();
+    
     return Container(
       height: MediaQuery.of(context).size.height * 0.8, padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: hintColor.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(4))),
           TextField(
-            autofocus: true, onChanged: (val) => setState(() => _query = val), style: TextStyle(color: textColor),
+            autofocus: true, 
+            onChanged: _onSearchChanged, 
+            style: TextStyle(color: textColor),
             decoration: InputDecoration(hintText: 'location_picker.search_city_hint'.tr(), hintStyle: TextStyle(color: hintColor), prefixIcon: Icon(LucideIcons.search, color: hintColor), filled: true, fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
           ),
           const SizedBox(height: 16),

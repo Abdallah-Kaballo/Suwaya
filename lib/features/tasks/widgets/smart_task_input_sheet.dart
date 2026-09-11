@@ -23,14 +23,16 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
   TaskCategory _selectedCategory = TaskCategory.unspecified; 
   bool _isPermanent = false;
   
-  // 🌟 تم التعديل: استخدام المتغيرات الثلاثة الجديدة
   bool _notifyMode = true;
   final bool _alarmMode = false;
   final bool _vibrateMode = false;
 
-  final Map<int, String> _periods = {
-    1: 'الفترة الأولى', 2: 'الفترة الثانية', 3: 'الفترة الثالثة', 4: 'الفترة الرابعة', 5: 'الفترة الخامسة', 6: 'الفترة السادسة', 7: 'الفترة السابعة'
-  };
+  Map<int, String> _getPeriodsMap() {
+    return {
+      1: 'periods.fajr'.tr(), 2: 'periods.duha'.tr(), 3: 'periods.dhuhr'.tr(),
+      4: 'periods.asr'.tr(), 5: 'periods.maghrib'.tr(), 6: 'periods.middle_third'.tr(), 7: 'periods.last_third'.tr()
+    };
+  }
 
   bool _isSelectingPeriod = false;
   bool _isSelectingSuwaya = false;
@@ -56,7 +58,6 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
       ..title = title
       ..type = _isPermanent ? TaskType.permanent : TaskType.casual  
       ..category = _selectedCategory
-      // 🌟 تم التعديل: حفظ الخيارات الجديدة
       ..notifyMode = _notifyMode
       ..alarmMode = _alarmMode
       ..vibrateMode = _vibrateMode
@@ -128,7 +129,7 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
               onChanged: (value) => setState(() {}),
               onSubmitted: (_) => _saveTask(),
               decoration: InputDecoration(
-                hintText: 'what_on_your_mind'.tr(),
+                hintText: 'add_screen.what_to_add'.tr(),
                 hintStyle: TextStyle(color: hintColor, fontSize: 18),
                 border: InputBorder.none,
               ),
@@ -153,7 +154,7 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
 
                   _buildActionChip(
                     icon: LucideIcons.moon,
-                    label: _selectedPeriodId != null ? _periods[_selectedPeriodId]! : 'add_to_period'.tr(),
+                    label: _selectedPeriodId != null ? _getPeriodsMap()[_selectedPeriodId]! : 'add_to_period'.tr(),
                     color: _selectedPeriodId != null ? Colors.amber : (isDark ? Colors.white70 : Colors.black54),
                     isActive: _selectedPeriodId != null || _isSelectingPeriod,
                     onTap: () => setState(() {
@@ -168,7 +169,7 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
                   if (_selectedPeriodId != null) ...[
                     _buildActionChip(
                       icon: LucideIcons.clock,
-                      label: _selectedSuwaya != null ? 'سُويعَة $_selectedSuwaya' : 'سُويعَة مرنة',
+                      label: _selectedSuwaya != null ? '${'common.suwaya'.tr()} $_selectedSuwaya' : 'add_screen.flexible_suwaya'.tr(),
                       color: _selectedSuwaya != null ? Colors.blueAccent : (isDark ? Colors.white70 : Colors.black54),
                       isActive: _selectedSuwaya != null || _isSelectingSuwaya,
                       onTap: () => setState(() {
@@ -205,10 +206,9 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
                   ),
                   const SizedBox(width: 8),
 
-                  // 🌟 زر الجرس يعكس حالة الإشعار
                   _buildActionChip(
                     icon: _notifyMode ? LucideIcons.bell : LucideIcons.bell_off,
-                    label: _notifyMode ? 'تنبيه مفعل' : 'صامت',
+                    label: _notifyMode ? 'alerts.notification_enabled'.tr() : 'alerts.silent'.tr(),
                     color: _notifyMode ? Colors.amber : (isDark ? Colors.white38 : Colors.black38),
                     isActive: _notifyMode,
                     onTap: () => setState(() => _notifyMode = !_notifyMode),
@@ -225,7 +225,7 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
                 children: [
                   if (_isSelectingPeriod)
                     _buildSelectionList(
-                      items: _periods.values.toList(),
+                      items: _getPeriodsMap().values.toList(),
                       selectedIndex: _selectedPeriodId != null ? _selectedPeriodId! - 1 : -1,
                       color: Colors.amber,
                       isDark: isDark,
@@ -238,7 +238,7 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
 
                   if (_isSelectingSuwaya && _selectedPeriodId != null)
                     _buildSelectionList(
-                      items: List.generate(suwayasCount, (i) => 'سُويعَة ${i + 1}'),
+                      items: List.generate(suwayasCount, (i) => '${'common.suwaya'.tr()} ${i + 1}'),
                       selectedIndex: _selectedSuwaya != null ? _selectedSuwaya! - 1 : -1,
                       color: Colors.blueAccent,
                       isDark: isDark,
@@ -274,7 +274,7 @@ class _SmartTaskInputSheetState extends ConsumerState<SmartTaskInputSheet> {
                   children: [
                     Icon(LucideIcons.inbox, color: hintColor, size: 18),
                     const SizedBox(width: 8),
-                    Text(_selectedPeriodId != null ? 'مهام ${_periods[_selectedPeriodId]}' : 'inbox'.tr(), 
+                    Text(_selectedPeriodId != null ? '${'home.period_tasks'.tr()} ${_getPeriodsMap()[_selectedPeriodId]}' : 'inbox'.tr(), 
                       style: TextStyle(color: hintColor, fontSize: 14)),
                   ],
                 ),

@@ -44,13 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Secret Environment Variables
-*.env
 
-# Firebase configuration files
-ios/Runner/GoogleService-Info.plist
-macos/Runner/GoogleService-Info.plist
-lib/firebase_options.dart
 
 # Secure Keys
 android/key.properties

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../core/astro_engine/astro_provider.dart';
-// 🌟 استيراد الامتداد الذكي للألوان
 import '../../core/theme/astro_ui_extensions.dart';
 
 class AstroTimelineScreen extends ConsumerWidget {
@@ -42,13 +41,12 @@ class AstroTimelineScreen extends ConsumerWidget {
                 final period = astroState.periods[index];
                 final isCurrent = astroState.currentPeriod.id == period.id;
                 
-                // 🌟 استخدام uiColor
                 final adaptedColor = period.uiColor.adapt(context);
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: isCurrent ? period.uiColor.withValues(alpha: isDark ? 0.15 : 0.08) : surfaceColor, // 🌟 استخدام uiColor
+                    color: isCurrent ? period.uiColor.withValues(alpha: isDark ? 0.15 : 0.08) : surfaceColor, 
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: isCurrent ? adaptedColor.withValues(alpha: 0.5) : borderColor, width: isCurrent ? 1.5 : 1),
                     boxShadow: isDark ? [] : [
@@ -87,17 +85,17 @@ class AstroTimelineScreen extends ConsumerWidget {
                           ),
                           child: Column(
                             children: [
-                              _buildTimeRow('starts_at'.tr(), period.startTime, context, isDark, textColor),
+                              _buildTimeRow('ibadat.starts_at'.tr(), period.startTime, context, isDark, textColor),
                               const SizedBox(height: 8),
-                              _buildTimeRow('ends_at'.tr(), period.endTime, context, isDark, textColor),
+                              _buildTimeRow('ibadat.ends_at'.tr(), period.endTime, context, isDark, textColor),
                               const SizedBox(height: 8),
                               Divider(color: isDark ? Colors.white12 : Colors.black12),
                               const SizedBox(height: 8),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('suwayas_count'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                                  Text('${period.suwayasCount} سويعات', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                                  Text('home.suwayas_count'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
+                                  Text('${period.suwayasCount} ${'details.suwayas'.tr()}', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ],

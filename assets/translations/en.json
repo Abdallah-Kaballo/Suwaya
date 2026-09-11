@@ -6,7 +6,9 @@
   "common": {
     "new_task": "New Task", "continuous_habit": "Continuous Habit", "suwaya": "Suwaya", "of": "of",
     "astro": "Astro", "civil": "Civil", "ah": "AH", "cancel": "Cancel", "confirm": "Confirm", "done": "Done",
-    "add": "Add", "days": "Days", "period": "Period", "from": "from", "to": "to"
+    "add": "Add", "days": "Days", "period": "Period", "from": "from", "to": "to",
+    "retry": "Retry", "edit": "Edit", "delete": "Delete", "unknown": "Unknown",
+    "startup_error": "Sorry, an error occurred during startup", "save": "Save"
   },
   "night_parts": {
     "half_1": "First Half", "half_2": "Second Half", "third_1": "First Third", "third_2": "Second Third",
@@ -15,7 +17,7 @@
   },
   "home": {
     "night_of": "Night of", "day_of": "Day of", "civil_time": "Civil Time", "astro_time": "Astro Time",
-    "dial_indicators": "Task Indicators:", "period_tasks": "Period Tasks", "manage_periods": "Manage Periods",
+    "dial_indicators": "Tasks, Habits & Periods on Dial:", "period_tasks": "Period Tasks", "manage_periods": "Manage Tasks, Habits & Periods",
     "no_tasks": "No tasks currently, enjoy your time!", "period_info": "Period Info",
     "suwayas_count": "Number of Suwayas"
   },
@@ -34,7 +36,8 @@
   },
   "alerts": {
     "default_ring": "Default Ring", "makkah_adhan": "Makkah Adhan", "soft_bell": "Soft Bell",
-    "birds": "Birds Chirping", "silent": "Silent", "notification": "Notification", "alarm": "Alarm", "alarm_tone": "Alarm Tone"
+    "birds": "Birds Chirping", "silent": "Silent", "notification": "Notification", "alarm": "Alarm", "alarm_tone": "Alarm Tone",
+    "notification_enabled": "Alert Enabled"
   },
   "patterns": {
     "linear": "Classic Lines", "hexagon": "Hexagons", "stone": "Stacked Stones", "trihex": "Complex Geometric"
@@ -49,7 +52,10 @@
     "show_on_dial": "Show task indicator on dial", "new_addition": "New Addition", "what_to_add": "What do you want to add?",
     "save_and_add": "Save & Add to Dial", "not_set_mandatory": "Not Set (Mandatory)", "daily": "Daily",
     "category_appearance": "Category & Look", "recurrence": "Recurrence", "date": "Date", "time": "Time",
-    "alert": "Alert", "start_time": "Start Time", "end_time": "End Time", "pattern_color": "Pattern & Color"
+    "alert": "Alert", "start_time": "Start Time", "end_time": "End Time", "pattern_color": "Pattern & Color",
+    "what_habit": "What habit do you want to build?", "what_task": "What is the task?", 
+    "recurrence_days_hint": "Recurrence days (leave empty for daily)", "no_specific_period": "No specific period",
+    "suwayas_hint": "Suwayas (Select one or more)", "flexible_suwaya": "Flexible Suwaya", "astro_connection": "Astro Connection"
   },
   "tasks": {
     "casual_task": "Casual Task", "continuous_habit": "Continuous Habit", "routine_period": "Routine Period",
@@ -57,7 +63,7 @@
     "tab_routines": "Periods", "empty_tasks": "No tasks currently.", "empty_routines": "No routine periods saved."
   },
   "routines": {
-    "manage_special_periods": "Manage Special Periods", "periods_count": "Periods", "no_routines": "No special periods added yet."
+    "manage_special_periods": "Manage Tasks, Habits & Periods", "periods_count": "Periods", "no_routines": "No special periods added yet."
   },
   "settings": {
     "title": "Settings", "search_hint": "Search settings...", "account_data": "Account & Data",
@@ -84,7 +90,9 @@
     "dial_design": "Dial Design", "choose_dial_design": "Choose Dial Design", "design_classic": "Classic Islamic", 
     "design_minimal": "Modern Minimal", "design_geometric": "Geometric", "checking": "Checking...", 
     "unavailable": "Unavailable", "not_synced_yet": "Not synced yet", "last_sync": "Last sync", 
-    "syncing": "Syncing with cloud... ☁️", "cloud_sync": "Cloud Sync", "cannot_open_link": "Cannot open link"
+    "syncing": "Syncing with cloud... ☁️", "cloud_sync": "Cloud Sync", "cannot_open_link": "Cannot open link",
+    "manual_offset": "Manual Prayer Offsets", "manual_offset_desc": "Manually adjust minutes if prayer times differ from your local mosque. (Max 30 minutes)",
+    "reset_all_offsets": "Reset All Offsets", "offsets_reset_success": "All offsets reset successfully", "no_offset": "No offset"
   },
   "astro_calc": {
     "title": "Advanced Astro Settings", "warning": "These settings are for advanced users.\nIf modified, you can always auto-detect location to reset them.",
@@ -117,7 +125,13 @@
     "snooze_system": "Smart Snooze System", "snooze_duration": "Snooze Duration:", "snooze_max": "Max Snoozes:",
     "mins_5": "5 mins", "mins_10": "10 mins", "mins_15": "15 mins", "mins_30": "30 mins", "once": "Once",
     "times_3": "3 times", "times_5": "5 times", "no_limit": "No Limit (Not recommended)", "wake_screen": "Interactive Alarm (Wakes screen)",
-    "save": "Save"
+    "system_alerts": "System Alerts", "normal_tasks_desc": "Normal task notifications", "prayers_alerts": "Strong Prayer Alerts",
+    "prayers_alerts_desc": "Alarm that uses device ringtone and bypasses silent mode", "silent_vibration": "Silent Vibration",
+    "silent_vibration_desc": "Vibration only alert", "prayer_of": "Prayer of", "adhan_time_body": "It's Adhan time, prepare for prayer.",
+    "adhan_time_short": "It's Adhan time.", "time_for": "Time for", "qiyam_body": "Divine descent time, stand and pray to your Lord.",
+    "qiyam_short": "Divine descent time has started.", "period_start": "Period Start", "routine_body": "It's time to start the specified period.",
+    "segment_time": "Segment Time", "time_for_task": "It's time for your task", "alert": "Alert", "strong_alerts": "Strong Alerts",
+    "notifications": "Notifications", "location_required": "Location permission is required to set timings."
   },
   "permissions": {
     "title": "System Permissions", "desc": "For a perfect experience and accurate timely alerts, please ensure the following permissions are granted:",
@@ -131,7 +145,7 @@
     "location_success": "Location set successfully", "change_location": "Change Location", "fetching_gps": "Fetching accurate location...",
     "update_gps": "Update GPS Location", "gps_success": "Location set successfully:", "gps_failed": "Failed to determine location. Ensure app permissions are granted.",
     "manual_select": "Manual Selection (Offline)", "start_journey": "Start Journey", "welcome": "Welcome to Suwaya",
-    "welcome_sub": "مرحباً بك في سُويعَة", "continue_btn": "Continue"
+    "welcome_sub": "Time Engineered", "continue_btn": "Continue"
   },
   "auth": {
     "secure_data": "Secure Your Cloud Data", "cloud_account": "Your Cloud Account",
@@ -159,35 +173,18 @@
     "save_use": "Save and Use", "search_country": "Search country...", "search_city_hint": "Search city...",
     "try_english_name": "Try searching in English", "location_name_required": "Location name is required",
     "lat_validation_error": "Invalid latitude (must be between -90 and 90)", "lng_validation_error": "Invalid longitude (must be between -180 and 180)",
-    "location_updated": "Location updated successfully"
+    "location_updated": "Location updated successfully", "error_gps_disabled": "Location services are disabled. Please enable them.",
+    "error_permission_denied": "Location permission denied.", "error_permission_denied_forever": "Location permission permanently denied. Please enable from settings.",
+    "error_gps_timeout": "Location request timed out. Please try again.", "current_location": "My Current Location"
   },
   "periods": {
     "fajr": "Fajr", "duha": "Duha", "dhuhr": "Dhuhr", "asr": "Asr",
-    "maghrib": "Maghrib", "middle_third": "Middle Third", "last_third": "Last Third"
+    "maghrib": "Maghrib", "middle_third": "Middle Third", "last_third": "Last Third",
+    "period_1": "First Period", "period_2": "Second Period", "period_3": "Third Period",
+    "period_4": "Fourth Period", "period_5": "Fifth Period", "period_6": "Sixth Period", "period_7": "Seventh Period"
   },
   "prayers": {
     "fajr": "Fajr", "dhuhr": "Dhuhr", "asr": "Asr", "maghrib": "Maghrib", "isha": "Isha"
-  },
-  "pomodoro": {
-    "break_remaining": "Break Remaining", "focus_remaining": "Focus Remaining",
-    "deep_relaxation": "Deep Relaxation", "in_flow": "In Flow State",
-    "balanced": "Balanced\n25/5", 
-    "no_tasks": "No tasks assigned for this Suwaya", "focus_now_on": "Focus now on:",
-    "suwaya_info": "Suwaya Info",
-    "current_time": "Current Time",
-    "time_speed": "Time Speed",
-    "actual_length": "Actual Length",
-    "customize_suwaya": "Customize Suwaya",
-    "absolute_focus": "Absolute Focus",
-    "absolute_focus_desc": "30 mins of deep work",
-    "balanced_default": "Balanced (Default)",
-    "balanced_desc": "25 mins focus + 5 mins break",
-    "relaxed": "Relaxed",
-    "relaxed_desc": "20 mins focus + 10 mins break",
-    "focus_rest": "Focus / Break"
-  },
-  "nav": {
-    "home": "Home", "tasks": "Tasks", "pomodoro": "Focus", "ibadat": "Worship"
   },
   "languages": {
     "tr": "Turkish", "ru": "Russian", "ur": "Urdu", "ar": "Arabic",
@@ -196,8 +193,8 @@
     "az": "Azerbaijani", "id": "Indonesian", "ms": "Malay", "da": "Danish",
     "de": "German", "en": "English", "es": "Spanish", "fr": "French",
     "it": "Italian", "nl": "Dutch"
-  }
-  ,"drawer": {
+  },
+  "drawer": {
     "faq": "FAQ",
     "contact": "Contact & Support",
     "about_app": "About App",
@@ -213,7 +210,13 @@
     "guest_user": "Guest User",
     "secure_data": "Secure your data ☁️",
     "tap_to_login": "Tap to login and sync",
-    "manage_account": "Manage Account & Sync"
+    "manage_account": "Manage Account & Sync",
+    "github_connection_failed": "Failed to connect to GitHub",
+    "time_engineered": "Time Engineered"
+  },
+  "alarm": {
+    "suwaya_alert": "Suwaya Alert", "time_for_task": "It's time for your task!", "snooze_10m": "Snooze 10m", 
+    "swipe_to_stop": "Swipe to stop or snooze", "stop": "Stop", "default_title": "Alert", "max_snoozes_reached": "Max snoozes reached"
   },
   "analytics": {
     "title": "Analytics & Stats",
@@ -227,7 +230,29 @@
     "hours": "Hours",
     "weekly_overview": "Weekly Overview"
   },
-
+  "pomodoro": {
+    "suwaya_info": "Suwaya Info",
+    "current_time": "Current Time",
+    "time_speed": "Time Speed",
+    "actual_length": "Actual Length",
+    "customize_suwaya": "Customize Suwaya",
+    "absolute_focus": "Absolute Focus",
+    "absolute_focus_desc": "30 mins of deep work",
+    "balanced_default": "Balanced (Default)",
+    "balanced_desc": "25 mins focus + 5 mins break",
+    "relaxed": "Relaxed",
+    "relaxed_desc": "20 mins focus + 10 mins break",
+    "focus_rest": "Focus / Break",
+    "in_flow": "In Flow State",
+    "break_remaining": "Break Remaining", 
+    "focus_remaining": "Focus Remaining",
+    "deep_relaxation": "Deep Relaxation", 
+    "balanced": "Balanced\n25/5", 
+    "no_tasks": "No tasks assigned for this Suwaya", 
+    "focus_now_on": "Focus now on:"
+  },
+  "full_astro_timeline": "Full Astro Timeline", "inbox": "Inbox", "today": "Today", 
+  "no_date": "No Date", "add_to_period": "Add to Period", "recurring": "Recurring",
   "splash": {
     "app_title_ar": "سُـويـعَـة",
     "app_title_en": "Suwaya"
@@ -251,5 +276,4 @@
     "insight_night_focus": "Your night activity is excellent, but make sure to get enough physical rest.",
     "insight_stable": "Your performance is stable and you distribute your energy well across different periods."
   }
-
 }

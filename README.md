@@ -199,7 +199,6 @@ The mathematical model and its assumptions are documented in the astronomical en
 - Location-based calculations
 - RTL and LTR interfaces
 - 22 localization files
-- Crash reporting through Firebase Crashlytics
 
 ## Product Philosophy
 

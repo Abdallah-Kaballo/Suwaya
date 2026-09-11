@@ -5,17 +5,12 @@ part 'settings_model.g.dart';
 class SettingsModel {
   Id id = 0; 
   
-  // 🌟 المزامنة
-  DateTime updatedAt = DateTime.now().toUtc();
-  bool isSynced = false;
-
   bool isFirstLaunch = true;
   String languageCode = 'ar';
   String themeMode = 'dark'; 
 
-  // 🌟 ميكانيكا الاستريك المتقدمة (Gamification)
-  int streakFreezesAvailable = 3; // رصيد أيام التجميد لحماية السلسلة
-  String dayBoundary = 'maghrib'; // 'maghrib' أو 'midnight' (تجديد اليوم)
+  int streakFreezesAvailable = 3; 
+  String dayBoundary = 'maghrib'; 
 
   String calculationMethod = 'muslim_world_league';
   String madhab = 'shafi';
@@ -83,9 +78,6 @@ class SettingsModel {
   SettingsModel clone() {
     return SettingsModel()
       ..id = id
-      // 🌟 تم إضافة الحقول المفقودة لمنع فقدان البيانات أثناء تعديل الإعدادات
-      ..updatedAt = updatedAt
-      ..isSynced = isSynced
       ..streakFreezesAvailable = streakFreezesAvailable
       ..dayBoundary = dayBoundary
       ..useAstroTimeForIbadat = useAstroTimeForIbadat

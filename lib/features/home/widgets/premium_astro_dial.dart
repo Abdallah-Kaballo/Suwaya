@@ -61,7 +61,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
     _animController.addListener(() { 
       if (_anim != null) _manualRotation.value = _anim!.value; 
     });
-    // 🌟 تم حذف المؤقت الداخلي الثقيل، نحن الآن نعتمد على المحرك مباشرة!
   }
 
   @override
@@ -196,6 +195,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
     }
   }
 
+  // 🌟 تنفيذ الطلب 2: إلزام سحب المهام بالوقوف على رأس السويعة (00) فقط
   void _handleTaskDrop() {
     if (_draggedTask == null || _dragAngle == null) return;
     
@@ -223,11 +223,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
         if (relativeAngle < 0) relativeAngle += 2 * pi;
         
         double progress = relativeAngle / sweep;
-        double suwayaFloat = progress * period.suwayasCount;
+        int sIndex = (progress * period.suwayasCount).round();
+        if (sIndex >= period.suwayasCount) sIndex = period.suwayasCount - 1; // حماية
         
-        int sIndex = suwayaFloat.floor();
         targetSuwaya = sIndex + 1;
-        targetVMin = ((suwayaFloat - sIndex) * 30).round().clamp(0, 29);
+        targetVMin = 0; // 🌟 إجبار المهمة على السقوط في الدقيقة 00
         break;
       }
     }
@@ -255,7 +255,24 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
     final distance = sqrt(dx * dx + dy * dy);
     final R = widget.size / 2;
 
-    if (distance >= R * kPeriodR && distance <= R * kOuterR) {
+    // 🌟 تنفيذ الطلب 2: إعطاء الأولوية المطلقة لدائرة الفترات الداخلية لتتجاوز الروتينات المظللة
+    if (distance <= R * kPeriodR) {
+      for (var period in state.periods) {
+        double startA = timeToAngle(period.startTime, dayStart, dayEnd) % (2 * pi);
+        double endA = timeToAngle(period.endTime, dayStart, dayEnd) % (2 * pi);
+        if (startA < 0) startA += 2 * pi;
+        if (endA < 0) endA += 2 * pi;
+        
+        bool inside = startA < endA ? (actualDialAngle >= startA && actualDialAngle <= endA) : (actualDialAngle >= startA || actualDialAngle <= endA);
+        if (inside) {
+          if (widget.onPeriodTapped != null) widget.onPeriodTapped!(period);
+          return; // خروج فوري لعدم تشغيل أي شيء آخر
+        }
+      }
+    }
+
+    // فحص المهام (على خط السكة الخارجي)
+    if (distance >= R * (kRailwayR - 0.08) && distance <= R * kOuterR) {
       DialTask? tappedTask;
       double minDiff = 0.08; 
       for (var dt in _currentDialTasks) {
@@ -272,6 +289,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
       if (tappedTask != null) {
         HapticFeedback.lightImpact();
         ref.read(highlightedTaskProvider.notifier).state = tappedTask.taskModel.id;
+        ref.read(highlightedRoutineProvider.notifier).state = null; 
         Future.delayed(const Duration(seconds: 3), () {
           if (ref.read(highlightedTaskProvider) == tappedTask!.taskModel.id) {
             ref.read(highlightedTaskProvider.notifier).state = null;
@@ -281,16 +299,35 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
       }
     }
 
-    for (var period in state.periods) {
-      double startA = timeToAngle(period.startTime, dayStart, dayEnd) % (2 * pi);
-      double endA = timeToAngle(period.endTime, dayStart, dayEnd) % (2 * pi);
-      if (startA < 0) startA += 2 * pi;
-      if (endA < 0) endA += 2 * pi;
+    // فحص الروتينات (المساحة بين الفترات والمهام)
+    if (distance > R * kPeriodR && distance < R * kRailwayR) {
+      RoutineArcData? tappedRoutine;
+      for (var arc in widget.routineArcs) {
+        double startA = arc.startAngle % (2 * pi);
+        double endA = (arc.startAngle + arc.sweepAngle) % (2 * pi);
+        if (startA < 0) startA += 2 * pi;
+        if (endA < 0) endA += 2 * pi;
+
+        bool inside = startA < endA 
+            ? (actualDialAngle >= startA && actualDialAngle <= endA) 
+            : (actualDialAngle >= startA || actualDialAngle <= endA);
+
+        if (inside) {
+          tappedRoutine = arc;
+          break;
+        }
+      }
       
-      bool inside = startA < endA ? (actualDialAngle >= startA && actualDialAngle <= endA) : (actualDialAngle >= startA || actualDialAngle <= endA);
-      if (inside) {
-        if (widget.onPeriodTapped != null) widget.onPeriodTapped!(period);
-        break;
+      if (tappedRoutine != null) {
+        HapticFeedback.lightImpact();
+        ref.read(highlightedRoutineProvider.notifier).state = tappedRoutine.id;
+        ref.read(highlightedTaskProvider.notifier).state = null; 
+        Future.delayed(const Duration(seconds: 3), () {
+          if (ref.read(highlightedRoutineProvider) == tappedRoutine!.id) {
+            ref.read(highlightedRoutineProvider.notifier).state = null;
+          }
+        });
+        return;
       }
     }
   }
@@ -311,8 +348,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
     final settings = ref.watch(settingsProvider);
     final selectedDesign = ref.watch(dialDesignProvider);
     final highlightedTaskId = ref.watch(highlightedTaskProvider);
+    final highlightedRoutineId = ref.watch(highlightedRoutineProvider); 
     
-    // 🌟 المتغير الذهبي لحل مشكلة تزامن العقرب! يقرأ الوقت مباشرة من المحرك.
     final currentTime = astroState.virtualTime; 
     
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -370,24 +407,20 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
       }
     }
 
-    // 🌟 طبقات الرسم تم تجميعها كمتغير واحد (Stack) لتمريرها كـ child
     final heavyDialStack = RepaintBoundary(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // 1. الخلفيات
           _buildLayer(BackgroundPainter(isDark: isDark, design: selectedDesign)),
           if (selectedDesign == DialDesign.classic) _buildLayer(IslamicRetePainter(isDark: isDark)), 
           if (selectedDesign == DialDesign.geometric) _buildLayer(GeometricRetePainter(isDark: isDark)),
           
-          // 2. الحلقات والفواصل
-          _buildLayer(RoutinesRingPainter(routineArcs: widget.routineArcs, isDark: isDark, design: selectedDesign)),
+          _buildLayer(RoutinesRingPainter(routineArcs: widget.routineArcs, isDark: isDark, design: selectedDesign, highlightedRoutineId: highlightedRoutineId)),
           _buildLayer(PeriodRingPainter(periods: astroState.periods, currentPeriod: astroState.currentPeriod, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, langCode: currentLang, design: selectedDesign)), 
           _buildLayer(OuterRingPainter(periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, design: selectedDesign)), 
           if (selectedDesign == DialDesign.classic) _buildLayer(CrownPainter(dayStart: dayStart, dayEnd: dayEnd)), 
           _buildLayer(DividerRingPainter(periods: astroState.periods, dayStart: dayStart, dayEnd: dayEnd, isDark: isDark, design: selectedDesign)),
 
-          // 3. المهام والعقرب (الذي يستخدم currentTime)
           _buildLayer(RailwayRingPainter(
             ibadat: astroState.ibadatTimings, nightMarkers: activeNightMarkers, 
             tasks: List.of(_currentDialTasks), 
@@ -412,10 +445,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
             onPanCancel: _onPanCancel,
             onTapUp: (details) => _handleTap(details, astroState, dayStart, dayEnd, _getCurrentTotalRotation(currentTime)),
             
-            // 🌟 السحر الحقيقي للأداء: استخدام child داخل AnimatedBuilder
             child: AnimatedBuilder(
-              animation: _manualRotation, // ينصت فقط لحركة السحب اليدوية!
-              child: heavyDialStack, // يمرر الطبقات المعقدة مرة واحدة ولا يعيد بناءها!
+              animation: _manualRotation, 
+              child: heavyDialStack, 
               builder: (context, child) {
                 double autoRotationOffset = 0.0;
                 final needleAngle = timeToAngle(currentTime, dayStart, dayEnd);
@@ -424,7 +456,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial> with Single
 
                 return Transform.rotate(
                   angle: totalRotation,
-                  child: child, // كرت الشاشة يقوم بتدوير الصورة الجاهزة، أداء خرافي!
+                  child: child, 
                 );
               },
             ),

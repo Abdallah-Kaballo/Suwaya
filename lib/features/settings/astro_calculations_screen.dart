@@ -53,8 +53,6 @@ class AstroCalculationsScreen extends ConsumerWidget {
           // 🌟 أزرار الشاشات المفقودة
           _buildActionRow(context, LucideIcons.sliders_horizontal, 'التعديل اليدوي للأوقات', 'إضافة دقائق لإزاحة وقت الصلاة', () => context.push('/settings/manual-offsets'), surfaceColor, borderColor, textColor, primaryColor, isDark),
           const SizedBox(height: 12),
-          _buildActionRow(context, LucideIcons.map, 'تغيير الدولة يدوياً', 'اختر الدولة إذا فشل نظام GPS', () => context.push('/settings/country-picker'), surfaceColor, borderColor, textColor, primaryColor, isDark),
-          const SizedBox(height: 24),
 
           _buildGroupTitle('astro_calc.calc_method'.tr(), primaryColor),
           _buildCard(surfaceColor, borderColor, [

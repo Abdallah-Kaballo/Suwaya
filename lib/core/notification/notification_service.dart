@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:easy_localization/easy_localization.dart'; 
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -35,30 +36,28 @@ class NotificationService {
     const systemAlarmSound = UriAndroidNotificationSound('content://settings/system/alarm_alert');
     const systemNotifSound = UriAndroidNotificationSound('content://settings/system/notification_sound');
 
-    await androidImplementation?.createNotificationChannel(const AndroidNotificationChannel(
-      _standardChannelId, 'إشعارات النظام',
-      description: 'إشعارات المهام العادية',
+    await androidImplementation?.createNotificationChannel(AndroidNotificationChannel(
+      _standardChannelId, 'notifications.system_alerts'.tr(),
+      description: 'notifications.normal_tasks_desc'.tr(),
       importance: Importance.high, playSound: true, sound: systemNotifSound, enableVibration: true,
     ));
     
-    await androidImplementation?.createNotificationChannel(const AndroidNotificationChannel(
-      _insistentChannelId, 'تنبيهات الصلوات القوية',
-      description: 'منبه يستخدم نغمة جهازك الرسمية ويخترق الوضع الصامت',
+    await androidImplementation?.createNotificationChannel(AndroidNotificationChannel(
+      _insistentChannelId, 'notifications.prayers_alerts'.tr(),
+      description: 'notifications.prayers_alerts_desc'.tr(),
       importance: Importance.max, playSound: true, sound: systemAlarmSound, enableVibration: true,
       audioAttributesUsage: AudioAttributesUsage.alarm,
     ));
     
-    await androidImplementation?.createNotificationChannel(const AndroidNotificationChannel(
-      _vibrateChannelId, 'الاهتزاز الصامت',
-      description: 'تنبيه بالاهتزاز فقط',
+    await androidImplementation?.createNotificationChannel(AndroidNotificationChannel(
+      _vibrateChannelId, 'notifications.silent_vibration'.tr(),
+      description: 'notifications.silent_vibration_desc'.tr(),
       importance: Importance.high, playSound: false, enableVibration: true,
     ));
   }
 
-  // 🌟 دالة مساعدة لضبط الوقت بأمان (لتفادي المنبهات المفقودة أو الوهمية)
   DateTime _getSafeScheduledTime(DateTime scheduledTime, {bool isDailyRoutine = true}) {
     if (scheduledTime.isBefore(DateTime.now())) {
-      // إذا كان روتيناً يومياً (صلاة)، نرحله للغد. أما إذا كانت مهمة عابرة نتركها لتتجاهل (return لاحقاً)
       if (isDailyRoutine) return scheduledTime.add(const Duration(days: 1));
     }
     return scheduledTime;
@@ -69,10 +68,10 @@ class NotificationService {
     bool playSound = true, bool enableVibration = true,
   }) async {
     final safeTime = _getSafeScheduledTime(scheduledTime);
-    if (safeTime.isBefore(DateTime.now())) return; // حماية أخيرة
+    if (safeTime.isBefore(DateTime.now())) return; 
 
     final androidDetails = AndroidNotificationDetails(
-      _standardChannelId, 'إشعارات النظام',
+      _standardChannelId, 'notifications.system_alerts'.tr(),
       importance: Importance.high, priority: Priority.high,
       playSound: playSound, enableVibration: enableVibration,
       sound: const UriAndroidNotificationSound('content://settings/system/notification_sound'),
@@ -88,11 +87,11 @@ class NotificationService {
     if (safeTime.isBefore(DateTime.now())) return;
 
     final androidDetails = AndroidNotificationDetails(
-      _insistentChannelId, 'تنبيهات الصلوات القوية',
+      _insistentChannelId, 'notifications.prayers_alerts'.tr(),
       importance: Importance.max, priority: Priority.max,
       playSound: true, enableVibration: true,
       category: AndroidNotificationCategory.alarm,
-      additionalFlags: Int32List.fromList(<int>[4]), // FLAG_INSISTENT
+      additionalFlags: Int32List.fromList(<int>[4]), 
       fullScreenIntent: true,
       audioAttributesUsage: AudioAttributesUsage.alarm,
       sound: const UriAndroidNotificationSound('content://settings/system/alarm_alert'),
@@ -101,12 +100,15 @@ class NotificationService {
     _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.critical);
   }
 
+  Future<void> cancel(int id) async {
+    await flutterLocalNotificationsPlugin.cancel(id);
+  }
+
   Future<void> scheduleTaskNotification({
     required int id, required String title, required String body,
     required DateTime scheduledTime,
     required bool alarmMode, required bool notifyMode, required bool vibrateMode,
   }) async {
-    // المهام العابرة لا نرحلها للغد، إذا مضت نلغيها
     if (scheduledTime.isBefore(DateTime.now())) return;
 
     String channelId = _standardChannelId;
@@ -130,7 +132,7 @@ class NotificationService {
 
     final androidDetails = AndroidNotificationDetails(
       channelId,
-      alarmMode ? 'تنبيهات قوية' : 'إشعارات',
+      alarmMode ? 'notifications.strong_alerts'.tr() : 'notifications.notifications'.tr(),
       importance: importance,
       priority: Priority.max,
       playSound: playSound,
@@ -145,7 +147,6 @@ class NotificationService {
     _safeZonedSchedule(id, title, body, scheduledTime, androidDetails, isInsistent ? InterruptionLevel.critical : InterruptionLevel.active);
   }
 
-  // 🌟 حارس أمان ضد الانهيارات في Android 14+ بسبب صلاحية Exact Alarm
   Future<void> _safeZonedSchedule(int id, String title, String body, DateTime time, AndroidNotificationDetails androidDetails, InterruptionLevel iosLevel) async {
     try {
       final iosDetails = DarwinNotificationDetails(interruptionLevel: iosLevel, presentSound: androidDetails.playSound);
@@ -165,7 +166,6 @@ class NotificationService {
   Future<void> cancelNotification(int id) async => await flutterLocalNotificationsPlugin.cancel(id);
 }
 
-// مزود الخدمة
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
 });

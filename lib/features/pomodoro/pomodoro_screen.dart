@@ -225,6 +225,28 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> with SingleTick
     final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
     final textColor = isDark ? Colors.white : Colors.black87;
 
+    // 🌟 حل مشكلة التحميل اللانهائي
+    if (astroState.periods.isEmpty) {
+      return Scaffold(
+        backgroundColor: scaffoldBgColor, 
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Theme.of(context).primaryColor),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => ref.read(astroProvider.notifier).resetToRealTime(),
+                icon: const Icon(Icons.refresh),
+                label: Text('common.retry'.tr()),
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
+              )
+            ],
+          )
+        )
+      );
+    }
+    
     if (astroState.periods.isEmpty) {
       return Scaffold(backgroundColor: scaffoldBgColor, body: const Center(child: CircularProgressIndicator()));
     }

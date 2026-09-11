@@ -84,13 +84,11 @@ class AstroState {
   }
 }
 
-// 🌟 تحديث الأسماء لتطابق معايير لغة Dart (camelCase)
 enum CalculationMethodType { muslimWorldLeague, egyptian, karachi, ummAlQura, dubai, northAmerica, kuwait, qatar, singapore, tehran, turkey, custom }
 enum MadhabType { hanafi, shafi }
 enum HighLatitudeRuleType { middleOfTheNight, seventhOfTheNight, twilightAngle }
 enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
 
-// 🌟 حماية البيانات القديمة: تجاهل الفواصل السفلية عند قراءة النصوص من قاعدة البيانات
 extension AstroStringParsers on String {
   String get _normalized => replaceAll('_', '').toLowerCase();
 
@@ -110,15 +108,14 @@ extension AstroStringParsers on String {
   );
 }
 
-// 🌟 الإضافات المفقودة التي تم استرجاعها من الكود القديم
-
+// 🌟 تعديل النصوص الصلبة إلى لغة محايدة (الإنجليزية)
 extension AstroPeriodNaming on AstroPeriod {
   String get longName {
     switch (id) {
-      case 1: return 'الفجر'; case 2: return 'الضحى'; case 3: return 'الظهر';
-      case 4: return 'العصر'; case 5: return 'المغرب';
-      case 6: return 'الثلث الأوسط'; case 7: return 'الثلث الأخير';
-      default: return 'الفترة $id';
+      case 1: return 'Fajr'; case 2: return 'Duha'; case 3: return 'Dhuhr';
+      case 4: return 'Asr'; case 5: return 'Maghrib';
+      case 6: return 'Middle Third'; case 7: return 'Last Third';
+      default: return 'Period $id';
     }
   }
   String get shortName => longName; 
@@ -128,7 +125,6 @@ extension AstroMapParsers on Map<String, int> {
   Map<PrayerKey, int> toPrayerKeyMap() {
     final map = <PrayerKey, int>{};
     forEach((key, value) {
-      // تم إضافة تحسين صغير هنا لدعم الأسماء القديمة والجديدة
       switch (key.toLowerCase()) {
         case '1': 
         case 'fajr': map[PrayerKey.fajr] = value; break;

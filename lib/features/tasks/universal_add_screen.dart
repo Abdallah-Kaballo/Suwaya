@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection; 
@@ -12,6 +11,9 @@ import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/location/permissions_provider.dart';
+
+import 'widgets/add_screen_pickers.dart';
+import 'widgets/pattern_preview_painter.dart';
 
 Color _getNeonColor(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -206,6 +208,23 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     super.dispose();
   }
 
+  bool _isTimeInPast(DateTime targetTime) {
+    return targetTime.isBefore(DateTime.now());
+  }
+
+  DateTime _calculateAstroTime(int pId, int sNum, int vMin, List<AstroPeriod> periods) {
+    try {
+      final p = periods.firstWhere((per) => per.id == pId);
+      final suwayaCount = p.suwayasCount > 0 ? p.suwayasCount : 1;
+      final microPerSuwaya = p.endTime.difference(p.startTime).inMicroseconds ~/ suwayaCount;
+      final microPerVirtualMinute = microPerSuwaya / 30.0;
+      final sIndex = (sNum - 1).clamp(0, suwayaCount - 1);
+      return p.startTime.add(Duration(microseconds: (microPerSuwaya * sIndex) + (microPerVirtualMinute * vMin).toInt()));
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
   Future<void> _saveItem() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
@@ -217,14 +236,12 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       return;
     }
 
-    HapticFeedback.heavyImpact();
-
     final periods = ref.read(astroProvider).periods;
     final navigator = Navigator.of(context);
     final scaffold = ScaffoldMessenger.of(context);
 
     if (_tabController.index == 2) {
-      // 🌟 إصلاح النقطة 3: الإشعارات العادية والمنبهات كلاهما يحتاج الصلاحية الدقيقة للعمل في خلفية Android 12+
+      // السماح بأن يكون وقت النهاية أصغر من البداية ليعبر منتصف الليل
       if (_alertLevel >= 1) {
         bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
         if (!mounted) return;
@@ -272,7 +289,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       return;
     }
 
-    // 🌟 إصلاح النقطة 3 للأنواع الأخرى
     if (_alertLevel >= 1) {
       bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
       if (!mounted) return; 
@@ -296,6 +312,28 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     task.alarmVolume = _alarmVolume;
 
     if (_hasTime) {
+      // 🌟 منع الجدولة في الماضي للمهام العابرة فقط
+      if (task.type == TaskType.casual) {
+        DateTime taskTime;
+        if (_timeMode == 2) {
+          final date = _selectedDate ?? DateTime.now();
+          taskTime = DateTime(date.year, date.month, date.day, _targetCivilHour, _targetCivilMinute, 0);
+        } else {
+           int pId = _timeMode == 1 ? _mapGlobalToLocal(_targetGlobalSuwaya, periods)['pId']! : _targetPeriodId;
+           int sNum = _timeMode == 1 ? _mapGlobalToLocal(_targetGlobalSuwaya, periods)['sNum']! : _targetLocalSuwaya;
+           
+           DateTime baseTime = _calculateAstroTime(pId, sNum, _targetVirtualMinute, periods);
+           final date = _selectedDate ?? DateTime.now();
+           taskTime = DateTime(date.year, date.month, date.day, baseTime.hour, baseTime.minute, baseTime.second);
+        }
+
+        if (_isTimeInPast(taskTime)) {
+          HapticFeedback.heavyImpact();
+          scaffold.showSnackBar(const SnackBar(content: Text('خطأ: لا يمكن جدولة مهمة عابرة في الماضي!'), backgroundColor: Colors.redAccent));
+          return;
+        }
+      }
+
       if (_timeMode == 2) {
         task.isAstroTime = false;
         task.targetCivilTimeMinutes = (_targetCivilHour * 60) + _targetCivilMinute;
@@ -326,7 +364,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
       task.recurrenceDays = _recurrenceDays.isEmpty ? null : _recurrenceDays;
     }
 
-    // 🌟 تم الحذف الجراحي لأكواد الجدولة اليدوية من هنا. المجدول المركزي سيتولى الأمر بمجرد حفظ المهمة.
     await ref.read(tasksProvider.notifier).addTask(task);
 
     if (!mounted) return; 
@@ -336,6 +373,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
   Future<void> _showTimeDialog(Color pColor, Color surface, Color text, List<AstroPeriod> periods, {bool isRoutine = false, bool isStart = false}) async {
     HapticFeedback.selectionClick();
     
+    int totalSuwayas = periods.fold(0, (sum, p) => sum + p.suwayasCount);
+    if (totalSuwayas == 0) totalSuwayas = 48;
+
     int tempMode = isRoutine ? _routineTimeMode : _timeMode;
     int tPeriodId = isRoutine ? (isStart ? _routineStartPeriodId : _routineEndPeriodId) : _targetPeriodId;
     int tLocalSuwaya = isRoutine ? (isStart ? _routineStartLocalSuwaya : _routineEndLocalSuwaya) : _targetLocalSuwaya;
@@ -378,19 +418,21 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 ],
                 
                 if (tempMode == 0)
-                  _TripleWheelPicker(
+                  TripleWheelPicker(
                     periods: periods, initialPeriodId: tPeriodId, initialSuwaya: tLocalSuwaya, initialMinute: tVirtualMinute, textColor: text, surfaceColor: surface, 
-                    // 🌟 المزامنة الذكية مع السويعة التراكمية في الخلفية
                     onChanged: (pId, sNum, vMin) { 
                       tPeriodId = pId; tLocalSuwaya = sNum; tVirtualMinute = vMin; 
                       tGlobalSuwaya = _mapLocalToGlobal(pId, sNum, periods); 
                     }
                   )
                 else if (tempMode == 1)
-                  // 🌟 عرض عجلة السويعات التراكمية لتبدأ من 1 بدلاً من 0
-                  _DoubleWheelPicker(isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tGlobalSuwaya + 1, initialVal2: tVirtualMinute, min1: 0, max1: 47, max2: 29, textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s - 1; tVirtualMinute = m; })
+                  DoubleWheelPicker(
+                    isAstro: true, label1: 'add_screen.cumulative_suwaya'.tr(), label2: 'add_screen.minute'.tr(), 
+                    initialVal1: tGlobalSuwaya, initialVal2: tVirtualMinute, min1: 0, max1: totalSuwayas - 1, max2: 29, 
+                    textColor: text, surfaceColor: surface, onChanged: (s, m) { tGlobalSuwaya = s; tVirtualMinute = m; }
+                  )
                 else
-                  _DoubleWheelPicker(isAstro: false, label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tCivilHour, initialVal2: tCivilMinute, min1: 0, max1: 23, max2: 59, textColor: text, surfaceColor: surface, onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }),
+                  DoubleWheelPicker(isAstro: false, label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(), initialVal1: tCivilHour, initialVal2: tCivilMinute, min1: 0, max1: 23, max2: 59, textColor: text, surfaceColor: surface, onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }),
 
                 const SizedBox(height: 24),
                 Row(
@@ -458,7 +500,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                   final isSelected = _routinePattern == entry.key;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: CustomPaint(size: const Size(30, 30), painter: _PatternPreviewPainter(entry.key, _routineColor)),
+                    leading: CustomPaint(size: const Size(30, 30), painter: PatternPreviewPainter(entry.key, _routineColor)),
                     title: Text(entry.value, style: TextStyle(color: isSelected ? pColor : text, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                     trailing: isSelected ? Icon(LucideIcons.circle_check, color: pColor) : null,
                     onTap: () { setDialogState(() => _routinePattern = entry.key); setState((){}); },
@@ -482,6 +524,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
     final langCode = context.locale.languageCode;
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
 
+    DateTime tempDate = _selectedDate ?? DateTime.now();
+
     await showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -498,10 +542,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                 
                 if (!isHabit)
                   CalendarDatePicker(
-                    initialDate: _selectedDate ?? DateTime.now(),
-                    firstDate: DateTime.now(),
+                    initialDate: tempDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 1)),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
-                    onDateChanged: (d) { setDialogState(() => _selectedDate = d); setState(() {}); },
+                    onDateChanged: (d) { setDialogState(() => tempDate = d); },
                   )
                 else
                   Wrap(
@@ -528,7 +572,17 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
                   ),
                 
                 const SizedBox(height: 20),
-                SizedBox(width: double.infinity, child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: pColor), onPressed: () => Navigator.pop(ctx), child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+                SizedBox(
+                  width: double.infinity, 
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: pColor), 
+                    onPressed: () {
+                      if (!isHabit) setState(() => _selectedDate = tempDate); 
+                      Navigator.pop(ctx);
+                    }, 
+                    child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+                  )
+                ),
               ],
             ),
           ),
@@ -858,238 +912,5 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen> with Si
         ),
       ),
     );
-  }
-}
-
-class _PatternPreviewPainter extends CustomPainter {
-  final String pattern;
-  final Color color;
-  _PatternPreviewPainter(this.pattern, this.color);
-  
-  @override 
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(6));
-    canvas.drawRRect(rRect, Paint()..color = color.withValues(alpha: 0.2)..style = PaintingStyle.fill);
-    canvas.drawRRect(rRect, Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 2);
-    
-    final p = Paint()..color = color..strokeWidth = 2;
-    if (pattern == 'linear') {
-      canvas.drawLine(const Offset(0, 10), const Offset(30, 10), p);
-      canvas.drawLine(const Offset(0, 20), const Offset(30, 20), p);
-    } else if (pattern == 'hexagon') {
-      canvas.drawLine(const Offset(0, 0), const Offset(30, 30), p);
-      canvas.drawLine(const Offset(30, 0), const Offset(0, 30), p);
-    } else if (pattern == 'stone') {
-      canvas.drawCircle(const Offset(10, 10), 3, p);
-      canvas.drawCircle(const Offset(20, 20), 3, p);
-    } else {
-      canvas.drawLine(const Offset(15, 0), const Offset(15, 30), p);
-      canvas.drawLine(const Offset(0, 15), const Offset(30, 15), p);
-    }
-  }
-  @override bool shouldRepaint(covariant CustomPainter old) => true;
-}
-
-class _TripleWheelPicker extends StatefulWidget {
-  final List<AstroPeriod> periods; 
-  final int initialPeriodId; 
-  final int initialSuwaya; 
-  final int initialMinute;
-  final Function(int pId, int sNum, int min) onChanged; 
-  final Color textColor; 
-  final Color surfaceColor;
-  
-  const _TripleWheelPicker({
-    required this.periods, required this.initialPeriodId, required this.initialSuwaya, 
-    required this.initialMinute, required this.onChanged, required this.textColor, 
-    required this.surfaceColor
-  });
-  
-  @override 
-  State<_TripleWheelPicker> createState() => _TripleWheelPickerState();
-}
-
-class _TripleWheelPickerState extends State<_TripleWheelPicker> {
-  late int selectedPeriodIndex, selectedSuwaya, selectedMinute;
-  late FixedExtentScrollController _periodController, _suwayaController, _minuteController;
-  
-  @override 
-  void initState() {
-    super.initState();
-    selectedPeriodIndex = widget.periods.indexWhere((p) => p.id == widget.initialPeriodId);
-    if (selectedPeriodIndex == -1) { selectedPeriodIndex = 0; }
-    selectedSuwaya = widget.initialSuwaya; 
-    selectedMinute = widget.initialMinute;
-    _periodController = FixedExtentScrollController(initialItem: selectedPeriodIndex);
-    _suwayaController = FixedExtentScrollController(initialItem: selectedSuwaya - 1);
-    _minuteController = FixedExtentScrollController(initialItem: 10000 * 30 + selectedMinute);
-  }
-  
-  @override 
-  void dispose() { 
-    _periodController.dispose(); _suwayaController.dispose(); _minuteController.dispose(); super.dispose(); 
-  }
-
-  String _getCustomPeriodName(int idx) {
-    switch (idx) {
-      case 0: return 'periods.fajr'.tr();
-      case 1: return 'periods.duha'.tr();
-      case 2: return 'periods.dhuhr'.tr();
-      case 3: return 'periods.asr'.tr();
-      case 4: return 'periods.maghrib'.tr();
-      case 5: return 'periods.middle_third'.tr();
-      case 6: return 'periods.last_third'.tr();
-      default: return '${'common.period'.tr()} ${idx + 1}';
-    }
-  }
-
-  @override 
-  Widget build(BuildContext context) {
-    if (widget.periods.isEmpty) return const SizedBox.shrink();
-    AstroPeriod currentPeriod = widget.periods[selectedPeriodIndex];
-    int maxSuwayas = currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
-    final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          children: [
-            Expanded(flex: 3, child: Center(child: Text('common.period'.tr(), style: headerStyle))),
-            const SizedBox(width: 14),
-            Expanded(flex: 2, child: Center(child: Text('common.suwaya'.tr(), style: headerStyle))),
-            const SizedBox(width: 14),
-            Expanded(flex: 2, child: Center(child: Text('add_screen.minute'.tr(), style: headerStyle))),
-          ]
-        ),
-      ),
-      const SizedBox(height: 8),
-      Directionality(
-        textDirection: TextDirection.ltr, 
-        child: SizedBox(height: 140, child: Row(children: [
-          Expanded(
-            flex: 3, 
-            child: CupertinoPicker.builder(
-              scrollController: _periodController, itemExtent: 40, 
-              onSelectedItemChanged: (i) { 
-                HapticFeedback.selectionClick(); 
-                setState(() { 
-                  selectedPeriodIndex = i; 
-                  if (selectedSuwaya > widget.periods[i].suwayasCount) { 
-                    selectedSuwaya = widget.periods[i].suwayasCount; 
-                    _suwayaController.jumpToItem(selectedSuwaya - 1); 
-                  } 
-                }); 
-                widget.onChanged(widget.periods[i].id, selectedSuwaya, selectedMinute); 
-              }, 
-              childCount: widget.periods.length, 
-              itemBuilder: (ctx, idx) => Center(child: Text(_getCustomPeriodName(idx), style: TextStyle(color: widget.textColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')))
-            )
-          ),
-          Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          
-          Expanded(
-            flex: 2, 
-            child: CupertinoPicker.builder(
-              scrollController: _suwayaController, itemExtent: 40, 
-              onSelectedItemChanged: (i) { 
-                HapticFeedback.selectionClick(); 
-                selectedSuwaya = i + 1; 
-                widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
-              }, 
-              childCount: maxSuwayas, 
-              itemBuilder: (ctx, idx) => Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text((idx).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                    Text((idx).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
-                  ],
-                ),
-              )
-            )
-          ),
-          Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          
-          Expanded(
-            flex: 2, 
-            child: CupertinoPicker.builder(
-              scrollController: _minuteController, itemExtent: 40, 
-              onSelectedItemChanged: (i) { 
-                HapticFeedback.selectionClick(); 
-                selectedMinute = i % 30; 
-                widget.onChanged(widget.periods[selectedPeriodIndex].id, selectedSuwaya, selectedMinute); 
-              }, 
-              itemBuilder: (ctx, idx) => Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text((idx % 30).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                    Text((idx % 30).toString().padLeft(2, '0'), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
-                  ],
-                ),
-              )
-            )
-          ),
-        ]))
-      )
-    ]);
-  }
-}
-
-class _DoubleWheelPicker extends StatefulWidget {
-  final bool isAstro; 
-  final String label1, label2; final int initialVal1, initialVal2, min1, max1, max2;
-  final Function(int, int) onChanged; final Color textColor, surfaceColor;
-  const _DoubleWheelPicker({required this.isAstro, required this.label1, required this.label2, required this.initialVal1, required this.initialVal2, required this.min1, required this.max1, required this.max2, required this.onChanged, required this.textColor, required this.surfaceColor});
-  @override State<_DoubleWheelPicker> createState() => _DoubleWheelPickerState();
-}
-class _DoubleWheelPickerState extends State<_DoubleWheelPicker> {
-  late int val1, val2; late FixedExtentScrollController _controller1, _controller2;
-  @override void initState() {
-    super.initState();
-    val1 = widget.initialVal1; val2 = widget.initialVal2;
-    int range1 = widget.max1 - widget.min1 + 1;
-    _controller1 = FixedExtentScrollController(initialItem: 10000 * range1 + (val1 - widget.min1));
-    _controller2 = FixedExtentScrollController(initialItem: 10000 * widget.max2 + val2);
-  }
-  @override void dispose() { _controller1.dispose(); _controller2.dispose(); super.dispose(); }
-  @override Widget build(BuildContext context) {
-    int range1 = widget.max1 - widget.min1 + 1;
-    final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
-    Color valColor = widget.isAstro ? const Color(0xFFF2C94C) : widget.textColor;
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(children: [Expanded(child: Center(child: Text(widget.label1, style: headerStyle))), const SizedBox(width: 24), Expanded(child: Center(child: Text(widget.label2, style: headerStyle)))])
-      ),
-      const SizedBox(height: 8),
-      Directionality(
-        textDirection: TextDirection.ltr, 
-        child: SizedBox(height: 140, child: Row(children: [
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller1, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val1 = (i % range1) + widget.min1; widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(
-            child: widget.isAstro ? Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
-              ],
-            ) : Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
-          ))),
-          Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-          Expanded(child: CupertinoPicker.builder(scrollController: _controller2, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); val2 = (i % (widget.max2 + 1)); widget.onChanged(val1, val2); }, itemBuilder: (ctx, idx) => Center(
-            child: widget.isAstro ? Stack(
-              alignment: Alignment.center,
-              children: [
-                Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.1..color=Colors.white)),
-                Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display')),
-              ],
-            ) : Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(color: valColor, fontSize: 24, fontWeight: FontWeight.w600, fontFamily: 'Inter')),
-          ))),
-        ]))
-      )
-    ]);
   }
 }

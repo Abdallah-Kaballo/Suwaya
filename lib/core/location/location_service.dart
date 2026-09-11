@@ -1,36 +1,34 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:easy_localization/easy_localization.dart'; 
 import 'geo_database_service.dart';
 
 class LocationException implements Exception {
   final String messageKey;
   LocationException(this.messageKey);
   @override
-  String toString() => messageKey; 
+  String toString() => messageKey.tr(); 
 }
 
 class LocationService {
-  // ==========================================
-  // 1. جلب إحداثيات GPS الأساسية
-  // ==========================================
   static Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw LocationException('error_gps_disabled');
+      throw LocationException('location_picker.error_gps_disabled');
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw LocationException('error_permission_denied');
+        throw LocationException('location_picker.error_permission_denied');
       }
     }
     
     if (permission == LocationPermission.deniedForever) {
-      throw LocationException('error_permission_denied_forever');
+      throw LocationException('location_picker.error_permission_denied_forever');
     }
 
     try {
@@ -46,29 +44,25 @@ class LocationService {
         ),
       );
     } catch (e) {
-      throw LocationException('error_gps_timeout');
+      throw LocationException('location_picker.error_gps_timeout');
     }
   }
 
-  // ==========================================
-  // 2. المحرك الذكي للموقع (Smart GPS Engine)
-  // ==========================================
   static Future<Map<String, dynamic>> fetchOfflineLocation(String langCode) async {
     Position position = await determinePosition();
     
-    // الهندسة العكسية المحلية من القاعدة المدمجة
     final localData = await GeoDatabaseService.getNearestLocationData(
       position.latitude, 
       position.longitude, 
       langCode
     );
 
-    String city = 'غير معروف';
-    String country = 'غير معروف';
+    String city = 'common.unknown'.tr();
+    String country = 'common.unknown'.tr();
     String countryCode = 'XX';
 
     if (localData != null) {
-      city = localData['cityName'] ?? 'غير معروف';
+      city = localData['cityName'] ?? 'common.unknown'.tr();
       countryCode = localData['countryCode'] ?? 'XX';
       country = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
     }

@@ -13,8 +13,9 @@ class RoutinesRingPainter extends CustomPainter {
   final List<RoutineArcData> routineArcs;
   final bool isDark;
   final DialDesign design;
+  final int? highlightedRoutineId;
   
-  RoutinesRingPainter({required this.routineArcs, required this.isDark, required this.design});
+  RoutinesRingPainter({required this.routineArcs, required this.isDark, required this.design, this.highlightedRoutineId});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -22,10 +23,13 @@ class RoutinesRingPainter extends CustomPainter {
     
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
-    final innerRadius = R * kInnerR; 
+    // 🌟 حصر مساحة تظليل الروتينات لتكون فقط فوق شريط المهام (السكة) وليس كامل المساحة
+    final innerRadius = R * kPeriodR; 
     final outerRadius = R * kRailwayR; 
     
     for (var arc in routineArcs) {
+      final isHighlighted = arc.id == highlightedRoutineId;
+
       final rectOuter = Rect.fromCircle(center: center, radius: outerRadius);
       final rectInner = Rect.fromCircle(center: center, radius: innerRadius);
 
@@ -34,31 +38,88 @@ class RoutinesRingPainter extends CustomPainter {
         ..arcTo(rectInner, arc.startAngle + arc.sweepAngle, -arc.sweepAngle, false)
         ..close();
 
+      // رسم هالة ضوئية (Glow) خلف الروتين عند التوهج
+      if (isHighlighted) {
+        canvas.drawPath(path, Paint()
+          ..color = arc.color.withValues(alpha: 0.6)
+          ..style = PaintingStyle.fill
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15.0));
+      }
+
       final fillPaint = Paint()
-        ..color = arc.color.withValues(alpha: 0.15)
+        ..color = arc.color.withValues(alpha: isHighlighted ? 0.35 : 0.15)
         ..style = PaintingStyle.fill;
       canvas.drawPath(path, fillPaint);
 
+      // رسم التظليل بناءً على النمط المختار
       if (design != DialDesign.minimal) {
         canvas.save();
         canvas.clipPath(path); 
-        final hatchPaint = Paint()..color = arc.color.withValues(alpha: 0.4)..strokeWidth = 1.0..style = PaintingStyle.stroke;
+        final patternPaint = Paint()
+          ..color = arc.color.withValues(alpha: isHighlighted ? 0.8 : 0.4)
+          ..strokeWidth = isHighlighted ? 1.5 : 1.0
+          ..style = PaintingStyle.stroke;
+          
         final bounds = path.getBounds();
-        _drawLinearGrid(canvas, bounds, hatchPaint); 
+        _drawPattern(canvas, bounds, patternPaint, arc.pattern); 
         canvas.restore();
       }
 
-      canvas.drawPath(path, Paint()..color = arc.color.withValues(alpha: 0.8)..strokeWidth = 1.5..style = PaintingStyle.stroke..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2.0));
+      canvas.drawPath(path, Paint()
+        ..color = arc.color.withValues(alpha: isHighlighted ? 1.0 : 0.8)
+        ..strokeWidth = isHighlighted ? 2.5 : 1.5
+        ..style = PaintingStyle.stroke
+        ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2.0));
     }
   }
 
-  void _drawLinearGrid(Canvas canvas, Rect bounds, Paint paint) {
+  void _drawPattern(Canvas canvas, Rect bounds, Paint paint, String pattern) {
     const double step = 6.0; 
-    for (double i = -bounds.height; i < bounds.width + bounds.height; i += step) {
-      canvas.drawLine(Offset(bounds.left + i, bounds.top), Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
+
+    if (pattern == 'linear') {
+      for (double i = -bounds.height; i < bounds.width + bounds.height; i += step) {
+        canvas.drawLine(Offset(bounds.left + i, bounds.top), Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
+      }
+    } else if (pattern == 'hexagon') {
+      for (double i = -bounds.height; i < bounds.width + bounds.height; i += step * 1.5) {
+        canvas.drawLine(Offset(bounds.left + i, bounds.top), Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
+        canvas.drawLine(Offset(bounds.left + i, bounds.bottom), Offset(bounds.left + i - bounds.height, bounds.top), paint);
+      }
+    } else if (pattern == 'stone') {
+      paint.style = PaintingStyle.fill;
+      int row = 0;
+      for (double y = bounds.top; y < bounds.bottom; y += step * 1.2) {
+        double offsetX = (row % 2 == 0) ? 0 : (step * 0.6); 
+        for (double x = bounds.left; x < bounds.right; x += step * 1.2) {
+          canvas.drawCircle(Offset(x + offsetX, y), paint.strokeWidth * 1.2, paint);
+        }
+        row++;
+      }
+    } else {
+      for (double x = bounds.left; x < bounds.right; x += step * 1.2) {
+        canvas.drawLine(Offset(x, bounds.top), Offset(x, bounds.bottom), paint);
+      }
+      for (double y = bounds.top; y < bounds.bottom; y += step * 1.2) {
+        canvas.drawLine(Offset(bounds.left, y), Offset(bounds.right, y), paint);
+      }
     }
   }
-  @override bool shouldRepaint(covariant RoutinesRingPainter old) => old.isDark != isDark || old.routineArcs.length != routineArcs.length || old.design != design;
+
+  @override 
+  bool shouldRepaint(covariant RoutinesRingPainter old) {
+    if (old.isDark != isDark || old.routineArcs.length != routineArcs.length || old.design != design || old.highlightedRoutineId != highlightedRoutineId) {
+      return true;
+    }
+    
+    for (int i = 0; i < routineArcs.length; i++) {
+      final a = old.routineArcs[i];
+      final b = routineArcs[i];
+      if (a.id != b.id || a.color != b.color || a.startAngle != b.startAngle || a.sweepAngle != b.sweepAngle || a.pattern != b.pattern) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class PeriodRingPainter extends CustomPainter {
@@ -137,7 +198,34 @@ class PeriodRingPainter extends CustomPainter {
       canvas.restore();
     }
   }
-  @override bool shouldRepaint(covariant PeriodRingPainter old) => old.currentPeriod.id != currentPeriod.id || old.isDark != isDark || old.dayStart != dayStart || old.langCode != langCode || old.design != design || old.periods.length != periods.length;
+
+  @override 
+  bool shouldRepaint(covariant PeriodRingPainter old) {
+    if (old.currentPeriod.id != currentPeriod.id ||
+        old.isDark != isDark ||
+        old.dayStart != dayStart ||
+        old.dayEnd != dayEnd ||
+        old.langCode != langCode ||
+        old.design != design ||
+        old.periods.length != periods.length) {
+      return true;
+    }
+
+    for (int i = 0; i < periods.length; i++) {
+       final a = old.periods[i];
+       final b = periods[i];
+         if (a.id != b.id ||
+          a.startTime != b.startTime ||
+          a.endTime != b.endTime ||
+          a.suwayasCount != b.suwayasCount ||
+          a.uiColor != b.uiColor ||
+          a.nameKey != b.nameKey) {
+          return true;
+        }
+      }
+
+    return false;
+  }
 }
 
 class OuterRingPainter extends CustomPainter {

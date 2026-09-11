@@ -6,13 +6,18 @@ import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/repositories/routine_repository.dart';
 
+// 🌟 مزود حالة لتتبع الروتين المتوهج حالياً
+final highlightedRoutineProvider = StateProvider<int?>((ref) => null);
+
 class RoutineArcData {
+  final int id; // 🌟 إضافة الـ ID للتعرف عليه عند اللمس
   final Color color;
   final double startAngle;
   final double sweepAngle;
   final String pattern;
 
   RoutineArcData({
+    required this.id,
     required this.color,
     required this.startAngle,
     required this.sweepAngle,
@@ -44,7 +49,6 @@ class RoutinesNotifier extends Notifier<List<RoutineModel>> {
     state = state.where((r) => r.id != id).toList();
     
     final repository = ref.read(routineRepositoryProvider);
-    // 🌟 تمت إضافة await لضمان إتمام الحذف من قاعدة البيانات قبل أي عملية أخرى
     await repository.deleteRoutine(id);
   }
 }
@@ -64,12 +68,15 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
 
   if (totalDayMicro <= 0) return arcs;
 
+  final totalSuwayas = astroState.periods.fold(0, (sum, p) => sum + p.suwayasCount);
+  final effectiveTotalSuwayas = totalSuwayas > 0 ? totalSuwayas : 48;
+
   double getAngleForTime(DateTime t) {
     return -pi / 2 + (t.difference(dayStart).inMicroseconds / totalDayMicro) * 2 * pi;
   }
 
   double getAstroAngle(int globalSuwaya, int virtualMinute) {
-    globalSuwaya %= 48; 
+    globalSuwaya %= effectiveTotalSuwayas; 
     
     int accumulatedSuwayas = 0;
     for (var p in astroState.periods) {
@@ -98,13 +105,28 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
     double sweepAngle = 0;
 
     if (r.isAstroTime) {
-      int s = r.startSuwaya ?? 0;
+      int sPId = r.startPeriodId ?? astroState.periods.first.id;
+      int sLocal = r.startSuwaya ?? 1;
       int sm = r.startVirtualMinute ?? 0;
-      int e = r.endSuwaya ?? 0;
-      int em = (r.endVirtualMinute ?? 0) + 1; 
+      
+      int ePId = r.endPeriodId ?? astroState.periods.last.id;
+      int eLocal = r.endSuwaya ?? 1;
+      int em = r.endVirtualMinute ?? 0; 
 
-      startAngle = getAstroAngle(s, sm);
-      double endAngle = getAstroAngle(e, em);
+      int getGlobal(int pId, int sNum) {
+        int g = 0;
+        for (var p in astroState.periods) {
+          if (p.id == pId) return g + sNum - 1;
+          g += p.suwayasCount;
+        }
+        return 0;
+      }
+
+      int startGlobal = getGlobal(sPId, sLocal);
+      int endGlobal = getGlobal(ePId, eLocal);
+
+      startAngle = getAstroAngle(startGlobal, sm);
+      double endAngle = getAstroAngle(endGlobal, em);
 
       sweepAngle = endAngle - startAngle;
       if (sweepAngle <= 0) sweepAngle += 2 * pi;
@@ -140,6 +162,7 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
     }
 
     arcs.add(RoutineArcData(
+      id: r.id, // 🌟 تمرير الـ ID للتعرف عليه
       color: Color(r.colorValue),
       startAngle: startAngle,
       sweepAngle: sweepAngle,

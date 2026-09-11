@@ -18,7 +18,6 @@ import '../settings/settings_provider.dart';
 import '../routines/routines_provider.dart'; 
 import '../../core/providers/ui_providers.dart'; 
 
-import '../../shared/widgets/task_card.dart';
 import 'widgets/location_header.dart'; 
 import 'widgets/premium_astro_dial.dart'; 
 import '../routines/widgets/routines_list_sheet.dart';
@@ -39,7 +38,6 @@ Color getNeonColorForCategory(TaskCategory category) {
   return const Color(0xFF18FFFF);
 }
 
-// 🌟 دالة مساعدة للحصول على ألوان الفترات بأمان
 Color _getSafePeriodColor(int id) {
   switch (id) {
     case 1: return const Color(0xFF64B5F6);
@@ -69,7 +67,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  // 🌟 شاشة Info الجديدة للقرص (تستبدل الشاشة السفلية القديمة)
   void _showPeriodInfoDialog(BuildContext context, AstroPeriod period, AstroState astroState) {
     HapticFeedback.lightImpact();
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -78,7 +75,6 @@ class HomeScreen extends ConsumerWidget {
     
     final pColor = _getSafePeriodColor(period.id);
 
-    // حساب الطول الفعلي والسرعة
     final durationMicro = period.endTime.difference(period.startTime).inMicroseconds;
     final suwayaMicro = durationMicro ~/ (period.suwayasCount > 0 ? period.suwayasCount : 1);
     final durationSecs = suwayaMicro ~/ 1000000;
@@ -90,7 +86,6 @@ class HomeScreen extends ConsumerWidget {
     final virtualMins = period.suwayasCount * 30.0;
     double speed = periodMins > 0 ? (virtualMins / periodMins) : 1.0;
 
-    // حساب السويعة التراكمية الصحيحة
     int startGlobalSuwaya = 0;
     for (var p in astroState.periods) {
       if (p.id == period.id) break;
@@ -251,6 +246,40 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildLegendChip(String title, Color color, bool isDark, bool isHighlighted, VoidCallback? onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF13131A) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isHighlighted ? color : color.withValues(alpha: 0.3), 
+            width: isHighlighted ? 2.0 : 1.5
+          ),
+          boxShadow: isHighlighted ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)] : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12, height: 12,
+              decoration: BoxDecoration(
+                color: color, 
+                shape: BoxShape.circle, 
+                boxShadow: isHighlighted ? [BoxShadow(color: color, blurRadius: 8, spreadRadius: 2)] : []
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 12, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(notificationSchedulerProvider);
@@ -263,7 +292,24 @@ class HomeScreen extends ConsumerWidget {
     final scaffoldBgColor = isDark ? Colors.black : const Color(0xFFF5F7FA);
 
     if (astroState.periods.isEmpty) {
-      return Scaffold(backgroundColor: scaffoldBgColor, body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)));
+      return Scaffold(
+        backgroundColor: scaffoldBgColor, 
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Theme.of(context).primaryColor),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => ref.read(astroProvider.notifier).resetToRealTime(),
+                icon: const Icon(Icons.refresh),
+                label: Text('common.retry'.tr()),
+                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
+              )
+            ],
+          )
+        )
+      );
     }
 
     final pColor = astroState.currentPeriod.uiColor.adapt(context);
@@ -284,6 +330,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         title: const LocationHeader(), 
+        actions: const [SizedBox(width: 48)], 
       ),
       body: RefreshIndicator(
         color: pColor, backgroundColor: surfaceColor,
@@ -304,7 +351,6 @@ class HomeScreen extends ConsumerWidget {
                       child: PremiumAstroDial(
                         size: maxSize, 
                         routineArcs: routineArcs, 
-                        // 🌟 تم استبدال الشاشة السفلية بـ Dialog النافذة المنبثقة
                         onPeriodTapped: (period) {
                           _showPeriodInfoDialog(context, period, astroState);
                         },
@@ -314,119 +360,100 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            
             SliverToBoxAdapter(
               child: Builder(
                 builder: (context) {
-                  final tasksForLegend = ref.watch(tasksProvider).todayTasks.where((t) => t.showOnDial).toList();
-                  if (tasksForLegend.isEmpty) return const SizedBox.shrink();
+                  final todayTasks = ref.watch(tasksProvider).todayTasks;
+                  final tasksForLegend = todayTasks.where((t) => t.showOnDial).toList();
+                  
+                  final routines = ref.watch(routinesProvider);
+                  final todayWeekday = DateTime.now().weekday;
+                  final activeRoutines = routines.where((r) => r.isActive && (r.recurrenceDays == null || r.recurrenceDays!.isEmpty || r.recurrenceDays!.contains(todayWeekday))).toList();
+
+                  if (activeRoutines.isEmpty && tasksForLegend.isEmpty) {
+                     return const SizedBox(height: 100);
+                  }
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('home.dial_indicators'.tr(), style: TextStyle(color: pColor, fontSize: 13, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // 🌟 تم تكبير الخط هنا إلى 16 وتكبير أيقونة القلم إلى 18
+                            Text('home.dial_indicators'.tr(), style: TextStyle(color: pColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () { 
+                                HapticFeedback.selectionClick(); 
+                                showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => const RoutinesListSheet()); 
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: pColor.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(LucideIcons.pencil, color: pColor, size: 18),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                         Wrap(
                           spacing: 8, runSpacing: 10,
-                          children: tasksForLegend.map((task) {
-                            Color tColor = getNeonColorForCategory(task.category); 
-                            final isHighlighted = ref.watch(highlightedTaskProvider) == task.id;
+                          children: [
+                            ...activeRoutines.map((r) {
+                              final isHighlighted = ref.watch(highlightedRoutineProvider) == r.id;
+                              return _buildLegendChip(r.title, Color(r.colorValue), isDark, isHighlighted, () {
+                                HapticFeedback.lightImpact();
+                                ref.read(highlightedRoutineProvider.notifier).state = r.id;
+                                ref.read(highlightedTaskProvider.notifier).state = null; 
+                                Future.delayed(const Duration(seconds: 3), () {
+                                  if (ref.read(highlightedRoutineProvider) == r.id) {
+                                    ref.read(highlightedRoutineProvider.notifier).state = null;
+                                  }
+                                });
+                              });
+                            }),
                             
-                            return GestureDetector(
-                              onTap: () {
+                            ...tasksForLegend.map((task) {
+                              Color tColor = getNeonColorForCategory(task.category); 
+                              final isHighlighted = ref.watch(highlightedTaskProvider) == task.id;
+                              
+                              return _buildLegendChip(task.title, tColor, isDark, isHighlighted, () {
                                 HapticFeedback.lightImpact();
                                 ref.read(highlightedTaskProvider.notifier).state = task.id;
+                                ref.read(highlightedRoutineProvider.notifier).state = null; 
                                 Future.delayed(const Duration(seconds: 3), () {
                                   if (ref.read(highlightedTaskProvider) == task.id) {
                                     ref.read(highlightedTaskProvider.notifier).state = null;
                                   }
                                 });
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF13131A) : Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: isHighlighted ? tColor : tColor.withValues(alpha: 0.3), 
-                                    width: isHighlighted ? 2.0 : 1.5
-                                  ),
-                                  boxShadow: isHighlighted ? [BoxShadow(color: tColor.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)] : [],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 12, height: 12,
-                                      decoration: BoxDecoration(
-                                        color: tColor, 
-                                        shape: BoxShape.circle, 
-                                        boxShadow: isHighlighted ? [BoxShadow(color: tColor, blurRadius: 8, spreadRadius: 2)] : []
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(task.title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 12, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                              });
+                            }),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Divider(color: pColor.withValues(alpha: 0.1)),
+                        const SizedBox(height: 120), 
                       ],
                     ),
                   );
                 },
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(children: [Text('home.period_tasks'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: pColor)), const SizedBox(width: 8), Icon(LucideIcons.list_todo, color: pColor.withValues(alpha: 0.5), size: 20)]),
-                    TextButton.icon(
-                      onPressed: () { HapticFeedback.selectionClick(); showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => const RoutinesListSheet()); },
-                      icon: Icon(LucideIcons.layers, color: pColor, size: 18), label: Text('home.manage_periods'.tr(), style: TextStyle(color: pColor, fontWeight: FontWeight.bold, fontSize: 13)),
-                      style: TextButton.styleFrom(backgroundColor: pColor.withValues(alpha: 0.1), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const _SliverTasksSection(),
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 90.0), 
+        padding: const EdgeInsets.only(bottom: 112.0), 
         child: PremiumExpandableFab(color: pColor, isDark: isDark, currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya),
       ),
     );
   }
 }
-
-class _SliverTasksSection extends ConsumerWidget {
-  const _SliverTasksSection();
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final astro = ref.watch(astroProvider);
-    final tasksAsync = ref.watch(currentTasksProvider);
-    if (tasksAsync.isLoading) return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: Colors.amber)));
-    final tasks = (tasksAsync.valueOrNull ?? []).where((t) => t.targetPeriodId == astro.currentPeriod.id || t.type == TaskType.permanent).toList();
-    if (tasks.isEmpty) return SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('home.no_tasks'.tr(), style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white38 : Colors.black38)))));
-    return SliverPadding(padding: const EdgeInsets.symmetric(horizontal: 24), sliver: SliverList(delegate: SliverChildBuilderDelegate((context, index) => Padding(padding: const EdgeInsets.only(bottom: 12), child: TaskCard(task: tasks[index])), childCount: tasks.length)));
-  }
-}
-
-final currentTasksProvider = FutureProvider<List<TaskModel>>((ref) async {
-  final state = ref.watch(tasksProvider); return state.nowTasks;
-});
 
 class PremiumExpandableFab extends StatefulWidget {
   final Color color; 

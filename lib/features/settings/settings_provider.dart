@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:suwaya/core/location/location_service.dart';
 import 'package:suwaya/core/location/permissions_provider.dart';
+import 'package:easy_localization/easy_localization.dart'; 
 import '../../core/repositories/settings_repository.dart';
 import 'package:suwaya/models/settings_model.dart';
 
@@ -68,16 +68,14 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   SettingsModel build() {
     _repository = ref.watch(settingsRepositoryProvider);
     
-    // 🌟 دمجنا الدالتين هنا: تحميل الإعدادات أولاً، ثم تدقيق التجميد في الخلفية
     Future.microtask(() async {
       await _loadSettings();
-      await validateAndApplyStreakFreezes(); // 🌟 التدقيق التلقائي لسلاسل الإنجاز
+      await validateAndApplyStreakFreezes(); 
     });
     
     return SettingsModel(); 
   }
  
-  // 🌟 محرك التدقيق الفني لسلاسل الإنجاز والتجميد
   Future<void> validateAndApplyStreakFreezes() async {
     final settings = state.clone();
     if (settings.lastStreakDate == null || settings.currentStreak == 0) return;
@@ -92,11 +90,9 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
     int missedDays = today.difference(lastDate).inDays - 1;
 
-    // إذا كان هناك أيام فائتة (أكثر من يوم واحد منذ آخر إنجاز)
     if (missedDays > 0) {
       bool isSaved = false;
 
-      // محاولة استهلاك رصيد التجميد لتغطية الأيام الفائتة
       while (missedDays > 0 && settings.streakFreezesAvailable > 0) {
         settings.streakFreezesAvailable -= 1;
         missedDays -= 1;
@@ -104,18 +100,12 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       }
 
       if (missedDays > 0) {
-        // نفد رصيد التجميد ولم يتم تغطية كل الأيام الفائتة 💔
         settings.currentStreak = 0;
         settings.lastStreakDate = null;
-        debugPrint('💔 ضاعت سلسلة الإنجاز. عودة للصفر.');
       } else if (isSaved) {
-        // تم إنقاذ السلسلة! نحدث التاريخ الوهمي ليكون "أمس" ليستمر اليوم بشكل طبيعي 🛡️
         settings.lastStreakDate = today.subtract(const Duration(days: 1));
-        debugPrint('🛡️ تم إنقاذ السلسلة باستخدام التجميد! الرصيد المتبقي: ${settings.streakFreezesAvailable}');
       }
 
-      settings.updatedAt = DateTime.now().toUtc();
-      settings.isSynced = false;
       await _repository.saveSettings(settings);
       state = settings;
     }
@@ -287,15 +277,20 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   Future<void> autoDetectLocation() async {
     try {
       final isLocGranted = await ref.read(permissionsProvider.notifier).ensureLocationPermission();
-      if (!isLocGranted) throw Exception('لا يمكن تحديد الموقع بدون منح الصلاحيات.');
+      if (!isLocGranted) throw Exception('permissions.location_required'.tr()); 
       final position = await LocationService.determinePosition();
       String detectedCountryCode = 'SA'; 
       try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+        final geocoding = Geocoding();
+
+        final List<Placemark> placemarks =
+          await geocoding.placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,);
         if (placemarks.isNotEmpty && placemarks.first.isoCountryCode != null) detectedCountryCode = placemarks.first.isoCountryCode!;
       } catch (_) {}
       
-      final loc = SavedLocation()..latitude = position.latitude..longitude = position.longitude..countryCode = detectedCountryCode..name = 'موقعي الحالي'..isAutoLocation = true;
+      final loc = SavedLocation()..latitude = position.latitude..longitude = position.longitude..countryCode = detectedCountryCode..name = 'location_picker.current_location'.tr()..isAutoLocation = true;
       await _repository.updateActiveLocation(loc);
       final defaults = AstroSmartDefaults.getDefaultsForCountry(detectedCountryCode);
       await updateAstroSettings(method: defaults.method, madhab: defaults.madhab, highLatRule: defaults.highLatitudeRule);

@@ -3,18 +3,30 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya/features/settings/settings_provider.dart';
 
-import '../../core/astro_engine/astro_provider.dart';
-import 'settings_provider.dart';
-// 🌟 استيراد الامتداد الذكي
-import '../../core/theme/astro_ui_extensions.dart';
+
+class _PrayerOffsetPreset {
+  final String id;
+  final String labelKey;
+  final Color uiColor;
+
+  const _PrayerOffsetPreset({required this.id, required this.labelKey, required this.uiColor});
+}
 
 class ManualOffsetsScreen extends ConsumerWidget {
   const ManualOffsetsScreen({super.key});
 
+  static const List<_PrayerOffsetPreset> _allowedPrayers = [
+    _PrayerOffsetPreset(id: '1', labelKey: 'periods.fajr', uiColor: Color(0xFF64B5F6)),
+    _PrayerOffsetPreset(id: '3', labelKey: 'periods.dhuhr', uiColor: Color(0xFFFFCA28)),
+    _PrayerOffsetPreset(id: '4', labelKey: 'periods.asr', uiColor: Color(0xFFFF9800)),
+    _PrayerOffsetPreset(id: '5', labelKey: 'periods.maghrib', uiColor: Color(0xFFE53935)),
+    _PrayerOffsetPreset(id: 'isha', labelKey: 'prayers.isha', uiColor: Color(0xFF1A237E)),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final astro = ref.watch(astroProvider);
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
 
@@ -36,18 +48,18 @@ class ManualOffsetsScreen extends ConsumerWidget {
           icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('التعديل اليدوي للمواقيت', style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
+        title: Text('settings.manual_offset'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.rotate_ccw),
             color: primaryColor,
-            tooltip: 'تصفير كل التعديلات',
+            tooltip: 'settings.reset_all_offsets'.tr(),
             onPressed: () {
                HapticFeedback.heavyImpact();
               notifier.resetAllOffsets();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: const Text('تم تصفير كل التعديلات بنجاح'), backgroundColor: Colors.green.shade800),
+                SnackBar(content: Text('settings.offsets_reset_success'.tr()), backgroundColor: Colors.green.shade800),
               );
             },
           )
@@ -69,7 +81,7 @@ class ManualOffsetsScreen extends ConsumerWidget {
                   Icon(LucideIcons.info, color: primaryColor, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('قم بضبط الدقائق يدوياً إذا كانت تختلف عن مسجد حيك المعتاد. (الحد الأقصى 59 دقيقة)', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 12, height: 1.5)),
+                    child: Text('settings.manual_offset_desc'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 12, height: 1.5)),
                   ),
                 ],
               ),
@@ -80,14 +92,14 @@ class ManualOffsetsScreen extends ConsumerWidget {
              child: ListView.builder(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
-              itemCount: astro.periods.length,
+              itemCount: _allowedPrayers.length, 
               itemBuilder: (context, index) {
-                final period = astro.periods[index];
-                final String pId = period.id.toString();
+                final prayer = _allowedPrayers[index];
+                final String pId = prayer.id;
                 final int currentOffset = settings.getManualOffset(pId);
 
-                final bool canDecrease = currentOffset > -59;
-                final bool canIncrease = currentOffset < 59;
+                final bool canDecrease = currentOffset > -30;
+                final bool canIncrease = currentOffset < 30;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -99,19 +111,18 @@ class ManualOffsetsScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      // 🌟 استخدام uiColor
-                      Container(width: 10, height: 10, decoration: BoxDecoration(color: period.uiColor, shape: BoxShape.circle)),
+                      Container(width: 10, height: 10, decoration: BoxDecoration(color: prayer.uiColor, shape: BoxShape.circle)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                            crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(period.nameKey.tr(), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(prayer.labelKey.tr(), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 2),
                             Text(
                               currentOffset == 0 
-                                  ? 'بدون تعديل' 
-                                  : (currentOffset > 0 ? '+ $currentOffset دقيقة' : '$currentOffset دقيقة'),
+                                  ? 'settings.no_offset'.tr() 
+                                  : (currentOffset > 0 ? '+ $currentOffset ${'details.minute'.tr()}' : '$currentOffset ${'details.minute'.tr()}'),
                               style: TextStyle(
                                 color: currentOffset == 0 ? hintColor : (currentOffset > 0 ? Colors.green : Colors.redAccent), 
                                 fontSize: 12, fontWeight: currentOffset == 0 ? FontWeight.normal : FontWeight.bold

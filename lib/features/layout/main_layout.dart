@@ -52,10 +52,10 @@ class MainLayout extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildNavItem(LucideIcons.list_todo, 0, currentIndex, isDark, primaryColor, 'tasks.title'.tr()),
-                _buildNavItem(LucideIcons.moon_star, 1, currentIndex, isDark, primaryColor, 'ibadat.title'.tr()),
-                _buildCenterItem(currentIndex, primaryColor, 'home.title'.tr()),
-                _buildNavItem(LucideIcons.timer, 3, currentIndex, isDark, primaryColor, 'pomodoro.title'.tr()),
+                _buildNavItem(LucideIcons.list_todo, 0, currentIndex, isDark, primaryColor, 'nav.tasks'.tr()),
+                _buildNavItem(LucideIcons.moon_star, 1, currentIndex, isDark, primaryColor, 'nav.ibadat'.tr()),
+                _buildNavItem(LucideIcons.compass, 2, currentIndex, isDark, primaryColor, 'nav.home'.tr()),
+                _buildNavItem(LucideIcons.timer, 3, currentIndex, isDark, primaryColor, 'nav.pomodoro'.tr()),
               ],
             ),
           ),
@@ -66,9 +66,8 @@ class MainLayout extends ConsumerWidget {
 
   Widget _buildNavItem(IconData icon, int index, int currentIndex, bool isDark, Color primaryColor, String label) {
     final isSelected = currentIndex == index;
-    final scale = isSelected ? 1.15 : 1.0; 
+    final scale = isSelected ? 1.05 : 1.0; 
     
-    // 🌟 دعم الوصولية وقارئ الشاشة والتعريفات المنبثقة (Tooltips)
     return Tooltip(
       message: label,
       child: Semantics(
@@ -81,48 +80,26 @@ class MainLayout extends ConsumerWidget {
             navigationShell.goBranch(index, initialLocation: index == currentIndex); 
           },
           behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutBack,
-              transformAlignment: Alignment.center, 
-              transform: Matrix4.diagonal3Values(scale, scale, 1.0), 
-              child: Icon(icon, size: 26, color: isSelected ? primaryColor : (isDark ? Colors.white54 : Colors.black45)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCenterItem(int currentIndex, Color primaryColor, String label) {
-    final isSelected = currentIndex == 2;
-    final scale = isSelected ? 1.05 : 1.0; 
-
-    return Tooltip(
-      message: label,
-      child: Semantics(
-        label: label,
-        button: true,
-        selected: isSelected,
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.mediumImpact();
-            navigationShell.goBranch(2, initialLocation: 2 == currentIndex);
-          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutBack,
             transformAlignment: Alignment.center, 
             transform: Matrix4.diagonal3Values(scale, scale, 1.0), 
-            width: 56, height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [primaryColor, primaryColor.withValues(alpha: 0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              boxShadow: [BoxShadow(color: primaryColor.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 24, color: isSelected ? primaryColor : (isDark ? Colors.white54 : Colors.black45)),
+                const SizedBox(height: 4),
+                Text(
+                  label, 
+                  style: TextStyle(
+                    fontSize: 10, 
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? primaryColor : (isDark ? Colors.white54 : Colors.black45)
+                  )
+                )
+              ],
             ),
-            child: const Icon(LucideIcons.compass, color: Colors.white, size: 28),
           ),
         ),
       ),

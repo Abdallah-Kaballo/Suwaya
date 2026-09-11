@@ -25,10 +25,6 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
   List<int> _recurrenceDays = [];
 
   List<String> _historicalTitles = [];
-  
-  List<int>? get selectedDays => null;
-  
-  get suwayaNumber => null;
 
   @override
   void initState() {
@@ -67,14 +63,16 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
 
     final task = widget.existingTask ?? TaskModel();
     task.title = title;
-    task.type = TaskType.casual; 
+    
+    // 🌟 الإصلاح 10: حفظ نوع المهمة الحقيقي والسويعة الحقيقية
+    task.type = _selectedType; 
     task.category = _selectedCategory;
     task.targetPeriodId = _selectedPeriodId;
-    task.targetSuwayas = [suwayaNumber];
+    task.targetSuwayas = _selectedSuwayas.isNotEmpty ? [_selectedSuwayas.first] : [];
 
     if (_selectedType == TaskType.casual) {
       task.targetDate = _selectedDate;
-      task.recurrenceDays = selectedDays;
+      task.recurrenceDays = null;
     } else {
       task.targetDate = null;
       task.recurrenceDays = _recurrenceDays.isEmpty ? null : _recurrenceDays;
@@ -89,6 +87,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
     final astroState = ref.watch(astroProvider);
     final isHabit = _selectedType == TaskType.permanent;
     final accentColor = isHabit ? Colors.amber : Colors.blueAccent;
+    final safeIntl = (context.locale.languageCode == 'ff' || context.locale.languageCode == 'ug') ? 'en' : context.locale.languageCode;
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -102,12 +101,11 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. نوع المهمة
             Center(
               child: SegmentedButton<TaskType>(
-                segments: const [
-                  ButtonSegment(value: TaskType.casual, label: Text('مهمة عابرة'), icon: Icon(LucideIcons.circle_check)),
-                  ButtonSegment(value: TaskType.permanent, label: Text('عادة مستمرة'), icon: Icon(LucideIcons.repeat)),
+                segments: [
+                  ButtonSegment(value: TaskType.casual, label: Text('tasks.casual_task'.tr()), icon: const Icon(LucideIcons.circle_check)),
+                  ButtonSegment(value: TaskType.permanent, label: Text('tasks.continuous_habit'.tr()), icon: const Icon(LucideIcons.repeat)),
                 ],
                 selected: {_selectedType},
                 onSelectionChanged: (set) => setState(() => _selectedType = set.first),
@@ -121,7 +119,6 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
             ),
             const SizedBox(height: 24),
 
-            // 2. عنوان المهمة مع الاقتراحات
             Autocomplete<String>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 if (textEditingValue.text.isEmpty) return const Iterable<String>.empty();
@@ -134,7 +131,6 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                     TextPosition(offset: selection.length));
               },
               fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                // مزامنة النص
                 if (_titleController.text != controller.text) {
                   controller.text = _titleController.text;
                 }
@@ -143,7 +139,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                   focusNode: focusNode,
                   style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
-                    hintText: isHabit ? 'ما هي العادة التي تريد بناءها؟' : 'ما هي المهمة؟',
+                    hintText: isHabit ? 'add_screen.what_habit'.tr() : 'add_screen.what_task'.tr(),
                     hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                     border: InputBorder.none,
                   ),
@@ -160,12 +156,11 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  // 3. التاريخ / أيام التكرار
                   if (!isHabit)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(LucideIcons.calendar, color: Colors.blueAccent),
-                      title: const Text('التاريخ', style: TextStyle(color: Colors.white)),
+                      title: Text('add_screen.date'.tr(), style: const TextStyle(color: Colors.white)),
                       trailing: Text(DateFormat('yyyy-MM-dd').format(_selectedDate!),
                           style: const TextStyle(color: Colors.blueAccent)),
                       onTap: () async {
@@ -180,8 +175,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                     )
                   else ...[
                     const SizedBox(height: 8),
-                    const Text('أيام التكرار (اتركها فارغة ليومياً)',
-                        style: TextStyle(color: Colors.white70)),
+                    Text('add_screen.recurrence_days_hint'.tr(), style: const TextStyle(color: Colors.white70)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -189,7 +183,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                         final day = index + 1;
                         final isSelected = _recurrenceDays.contains(day);
                         return FilterChip(
-                          label: Text(DateFormat('EEEE', 'ar').format(DateTime(2024, 1, day))),
+                          label: Text(DateFormat('EEEE', safeIntl).format(DateTime(2024, 1, day))),
                           selected: isSelected,
                           selectedColor: Colors.amber.withValues(alpha: 0.2),
                           checkmarkColor: Colors.amber,
@@ -210,8 +204,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
 
                   const SizedBox(height: 20),
 
-                  // 4. الفئة
-                  const Text('التصنيف', style: TextStyle(color: Colors.white70)),
+                  Text('add_screen.category_appearance'.tr(), style: const TextStyle(color: Colors.white70)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<TaskCategory>(
                     initialValue: _selectedCategory,
@@ -234,8 +227,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
 
                   const SizedBox(height: 20),
 
-                  // 5. الفترة والسويعات
-                  const Text('الارتباط الفلكي', style: TextStyle(color: Colors.white70)),
+                  Text('add_screen.astro_connection'.tr(), style: const TextStyle(color: Colors.white70)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<int?>(
                     initialValue: _selectedPeriodId,
@@ -248,7 +240,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                           borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                     items: [
-                      const DropdownMenuItem(value: null, child: Text('بدون فترة محددة')),
+                      DropdownMenuItem(value: null, child: Text('add_screen.no_specific_period'.tr())),
                       ...astroState.periods.map(
                           (p) => DropdownMenuItem(value: p.id, child: Text(p.nameKey.tr()))),
                     ],
@@ -261,8 +253,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                   ),
                   if (_selectedPeriodId != null) ...[
                     const SizedBox(height: 12),
-                    const Text('السويعات (اختر واحدة أو أكثر)',
-                        style: TextStyle(color: Colors.white54, fontSize: 12)),
+                    Text('add_screen.suwayas_hint'.tr(), style: const TextStyle(color: Colors.white54, fontSize: 12)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -274,7 +265,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                           final sNum = index + 1;
                           final isSelected = _selectedSuwayas.contains(sNum);
                           return FilterChip(
-                            label: Text('س $sNum'),
+                            label: Text('${'common.suwaya'.tr()} $sNum'),
                             selected: isSelected,
                             selectedColor: accentColor.withValues(alpha: 0.2),
                             checkmarkColor: accentColor,
@@ -298,7 +289,6 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
               ),
             ),
 
-            // 6. زر الحفظ
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -308,7 +298,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                   backgroundColor: accentColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: Text('حفظ',
+                child: Text('common.save'.tr(),
                     style: TextStyle(
                         color: isHabit ? Colors.black : Colors.white,
                         fontSize: 18,
