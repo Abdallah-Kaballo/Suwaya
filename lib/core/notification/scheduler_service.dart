@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:alarm/alarm.dart'; 
 import 'package:timezone/timezone.dart' as tz;
-
 import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../models/routine_model.dart';
@@ -127,25 +126,22 @@ class NotificationScheduler {
       final DateTime isolatedCityNow = cityNow;
 
       final List<Map<String, dynamic>> weekAstroData = await Isolate.run(() {
-        final distribution = AstroEngine.calculateAnnualSuwayaDistribution(
-          lat, lng, calcMethod, madhab, hlRule, fajrAngle, ishaAngle, 
-          isolatedCityOffset, manualOffsets: isolatedManualOffsets,
-        );
+        final distribution = SuwayaDistributor.getUniversalDistribution();
 
         final List<Map<String, dynamic>> daysData = [];
         
         for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
           final targetDate = isolatedCityNow.add(Duration(days: dayOffset));
           
-          final ibadat = AstroEngine.getIbadatTimings(
+          final ibadat = PrayerCalculator.getIbadatTimings(
             lat, lng, targetDate, calcMethod, madhab, hlRule, 
             fajrAngle, ishaAngle, isolatedCityOffset, manualOffsets: isolatedManualOffsets,
           );
           
-          final periods = AstroEngine.generatePeriodsForDay(
-            lat, lng, targetDate, calcMethod, madhab, hlRule, 
-            fajrAngle, ishaAngle, distribution, isolatedCityOffset, manualOffsets: isolatedManualOffsets,
-          );
+          final periods = SuwayaTimeEngine.generateDay(
+            lat, lng, targetDate, calcMethod, madhab, hlRule, fajrAngle, ishaAngle, 
+            isolatedCityOffset, distribution, manualOffsets: isolatedManualOffsets
+          ).periods;
           
           daysData.add({
             'targetDate': targetDate,

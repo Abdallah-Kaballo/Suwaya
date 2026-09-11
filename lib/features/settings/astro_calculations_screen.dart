@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:go_router/go_router.dart';
 
 import 'settings_provider.dart';
 
@@ -28,7 +29,7 @@ class AstroCalculationsScreen extends ConsumerWidget {
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent, elevation: 0,
-        leading: IconButton(icon: Icon(LucideIcons.arrow_right, color: textColor), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor), onPressed: () => Navigator.pop(context)),
         title: Text('astro_calc.title'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
       ),
@@ -47,6 +48,12 @@ class AstroCalculationsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+
+          // 🌟 أزرار الشاشات المفقودة
+          _buildActionRow(context, LucideIcons.sliders_horizontal, 'التعديل اليدوي للأوقات', 'إضافة دقائق لإزاحة وقت الصلاة', () => context.push('/settings/manual-offsets'), surfaceColor, borderColor, textColor, primaryColor, isDark),
+          const SizedBox(height: 12),
+          _buildActionRow(context, LucideIcons.map, 'تغيير الدولة يدوياً', 'اختر الدولة إذا فشل نظام GPS', () => context.push('/settings/country-picker'), surfaceColor, borderColor, textColor, primaryColor, isDark),
           const SizedBox(height: 24),
 
           _buildGroupTitle('astro_calc.calc_method'.tr(), primaryColor),
@@ -122,6 +129,45 @@ class AstroCalculationsScreen extends ConsumerWidget {
           ]),
           const SizedBox(height: 40),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionRow(BuildContext context, IconData icon, String title, String subtitle, VoidCallback onTap, Color surfaceColor, Color borderColor, Color textColor, Color primaryColor, bool isDark) {
+    return Material(
+      color: surfaceColor,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(border: Border.all(color: borderColor), borderRadius: BorderRadius.circular(16)),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, color: primaryColor, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(height: 2),
+                    Text(subtitle, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12)),
+                  ],
+                ),
+              ),
+              Icon(context.locale.languageCode == 'ar' ? LucideIcons.chevron_left : LucideIcons.chevron_right, color: isDark ? Colors.white38 : Colors.black38, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }

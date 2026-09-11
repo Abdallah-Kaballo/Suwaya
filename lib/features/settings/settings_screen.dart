@@ -3,28 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:suwaya/core/location/location_service.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'settings_provider.dart';
 import 'widgets/smart_location_picker.dart';
-import '../../core/sync/backup_service.dart';
-
-import '../../core/theme/app_theme.dart';
-import '../../core/theme/theme_color_provider.dart';
-import '../../core/theme/dial_design_provider.dart';
-import 'package:geolocator/geolocator.dart';
-
-
-final lastSyncTimeProvider = FutureProvider.autoDispose<DateTime?>((ref) async {
-  final prefs = await SharedPreferences.getInstance();
-  final timeStr = prefs.getString('last_sync_time');
-  if (timeStr != null) {
-    return DateTime.parse(timeStr).toLocal();
-  }
-  return null;
-});
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -51,44 +35,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.dispose();
   }
 
-  String _getThemeName(String mode) {
-    switch(mode) {
-      case 'light': return 'settings.theme_light'.tr();
-      case 'dark': return 'settings.theme_dark'.tr();
-      case 'mixed': return 'settings.theme_mixed'.tr();
-      case 'system': return 'settings.theme_system'.tr();
-      case 'midnight_blue': return 'settings.theme_midnight'.tr();
-      default: return 'settings.theme_dark'.tr();
-    }
-  }
-
-  String _getColorThemeName(AppColorTheme theme) {
-    switch(theme) {
-      case AppColorTheme.gold: return 'settings.color_gold'.tr(); 
-      case AppColorTheme.ocean: return 'settings.color_ocean'.tr();
-      case AppColorTheme.forest: return 'settings.color_forest'.tr();
-      case AppColorTheme.desert: return 'settings.color_desert'.tr();
-    }
-  }
-
-  String _getDialDesignName(DialDesign design) {
-    switch(design) {
-      case DialDesign.classic: return 'settings.design_classic'.tr();
-      case DialDesign.minimal: return 'settings.design_minimal'.tr();
-      case DialDesign.geometric: return 'settings.design_geometric'.tr();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final settingsState = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
-    
-    final activeColorTheme = ref.watch(themeColorProvider);
-    final colorNotifier = ref.read(themeColorProvider.notifier);
-
-    final activeDialDesign = ref.watch(dialDesignProvider);
-    final dialDesignNotifier = ref.read(dialDesignProvider.notifier);
     
     final currentLang = settingsState.languageCode;
     final currentLangName = _appLanguages[currentLang] ?? 'English';
@@ -96,7 +46,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final activeLocation = settingsState.activeLocation;
     final cityName = activeLocation?.name ?? 'add_screen.not_set_mandatory'.tr();
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // 🌟 إصلاح الوضع الفاتح (Light Mode): الاعتماد على الثيم الفعلي للنظام
+    final isDark = Theme.of(context).brightness == Brightness.dark; 
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).colorScheme.onSurface;
@@ -110,9 +61,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
-          onPressed: () {
-            context.pop();
-          },
+          onPressed: () => context.pop(),
         ),
         title: Text('settings.title'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
         centerTitle: true,
@@ -126,7 +75,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 color: surfaceColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: borderColor),
-                boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: TextField(
                 controller: _searchController,
@@ -134,7 +82,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
                 decoration: InputDecoration(
                   hintText: 'settings.search_hint'.tr(),
-                  hintStyle: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.3) : Colors.black38),
+                  hintStyle: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.3)),
                   prefixIcon: Icon(LucideIcons.search, color: isDark ? Colors.white54 : Colors.black54, size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -148,140 +96,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 60),
               children: [
-                _buildSettingsGroup('settings.account_data'.tr(), [
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final lastSync = ref.watch(lastSyncTimeProvider);
-                      final dateStr = lastSync.when(
-                        data: (date) => date != null 
-                            ? '${date.year}-${date.month.toString().padLeft(2,'0')}-${date.day.toString().padLeft(2,'0')}  ${date.hour.toString().padLeft(2,'0')}:${date.minute.toString().padLeft(2,'0')}'
-                            : 'settings.not_synced_yet'.tr(),
-                        loading: () => 'settings.checking'.tr(),
-                        error: (_, __) => 'settings.unavailable'.tr(),
-                      );
-                      
-                      return _buildSettingRow(
-                        icon: LucideIcons.refresh_cw, 
-                        title: 'settings.cloud_sync'.tr(), 
-                        subtitle: '${'settings.last_sync'.tr()}: $dateStr',
-                        onTap: () async {
-                          HapticFeedback.lightImpact();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('settings.syncing'.tr()), duration: const Duration(seconds: 2))
-                          );
-                          ref.invalidate(lastSyncTimeProvider); 
-                        }
-                      );
-                    },
-                  ),
-
-                  _buildSettingRow(
-                    icon: LucideIcons.cloud_download, title: 'settings.manual_backup'.tr(), subtitle: 'settings.extract_backup'.tr(), 
-                    onTap: () async {
-                      HapticFeedback.heavyImpact();
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('settings.preparing_data'.tr())));
-                      final success = await ref.read(backupServiceProvider).exportBackup();
-                      if (success && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('settings.backup_success'.tr()), backgroundColor: Colors.green));
-                      }
-                    }
-                  ),
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
                 _buildSettingsGroup('settings.notifications_alerts'.tr(), [
                   _buildSettingRow(
+                    context,
                     icon: LucideIcons.bell_ring, title: 'settings.notifications_alerts'.tr(), subtitle: 'settings.notifications_desc'.tr(), 
-                    onTap: () => context.push('/settings/notifications')
+                    onTap: () => context.push('/settings/notifications'),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.advanced_astro'.tr(), [
                   _buildSettingRow(
+                    context,
                     icon: LucideIcons.telescope, title: 'settings.astro_settings'.tr(), subtitle: 'settings.astro_desc'.tr(),
-                    onTap: () => context.push('/settings/astro')
+                    onTap: () => context.push('/settings/astro'),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.active_location'.tr(), [
                   _buildSettingRow(
+                    context,
                     icon: LucideIcons.map_pin, title: 'settings.active_location'.tr(), subtitle: cityName, 
-                    onTap: () => showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => const SmartLocationPicker())
+                    onTap: () => showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => const SmartLocationPicker()),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
                   ),
-                  _buildGpsUpdateButton(context, ref), 
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
-                _buildSettingsGroup('settings.appearance_accessibility'.tr(), [
-                  _buildSettingRow(
-                    icon: LucideIcons.palette, title: 'settings.app_appearance'.tr(), subtitle: _getThemeName(settingsState.themeMode),
-                    onTap: () => _showSelectionSheet(
-                      'settings.app_appearance'.tr(), 
-                      {'dark': 'settings.theme_dark'.tr(), 'light': 'settings.theme_light'.tr(), 'mixed': 'settings.theme_mixed'.tr(), 'system': 'settings.theme_system'.tr(), 'midnight_blue': 'settings.theme_midnight'.tr()}, 
-                      settingsState.themeMode, 
-                      (v) => notifier.updateThemeMode(v),
-                      isDark, surfaceColor, textColor, primaryColor
-                    )
-                  ),
-                  _buildSettingRow(
-                    icon: LucideIcons.droplets, 
-                    title: 'settings.app_color'.tr(), 
-                    subtitle: _getColorThemeName(activeColorTheme),
-                    onTap: () {
-                      _showSelectionSheet(
-                        'settings.choose_app_color'.tr(), 
-                        {
-                          AppColorTheme.gold.name: _getColorThemeName(AppColorTheme.gold),
-                          AppColorTheme.ocean.name: _getColorThemeName(AppColorTheme.ocean),
-                          AppColorTheme.forest.name: _getColorThemeName(AppColorTheme.forest),
-                          AppColorTheme.desert.name: _getColorThemeName(AppColorTheme.desert),
-                        }, 
-                        activeColorTheme.name, 
-                        (v) => colorNotifier.changeTheme(AppColorTheme.values.firstWhere((e) => e.name == v)),
-                        isDark, surfaceColor, textColor, primaryColor
-                      );
-                    }
-                  ),
+                  _buildGpsUpdateButton(context, ref, isDark, textColor), 
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.dial_settings'.tr(), [
                   _buildSettingRow(
-                    icon: LucideIcons.disc, 
-                    title: 'settings.dial_design'.tr(), 
-                    subtitle: _getDialDesignName(activeDialDesign),
-                    onTap: () {
-                      _showSelectionSheet(
-                        'settings.choose_dial_design'.tr(), 
-                        {
-                          DialDesign.classic.name: _getDialDesignName(DialDesign.classic),
-                          DialDesign.minimal.name: _getDialDesignName(DialDesign.minimal),
-                          DialDesign.geometric.name: _getDialDesignName(DialDesign.geometric),
-                        }, 
-                        activeDialDesign.name, 
-                        (v) => dialDesignNotifier.changeDesign(DialDesign.values.firstWhere((e) => e.name == v)),
-                        isDark, surfaceColor, textColor, primaryColor
-                      );
-                    }
-                  ),
-                  _buildSettingRow(
+                    context,
                     icon: LucideIcons.moon_star, title: 'settings.golden_night_markers'.tr(), subtitle: 'settings.markers_desc'.tr(),
-                    onTap: () => _showNightMarkersSheet(context, isDark, surfaceColor, textColor, primaryColor)
+                    onTap: () => _showNightMarkersSheet(context, isDark, surfaceColor, textColor, primaryColor),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
                   ),
                   _buildSettingRow(
+                    context,
                     icon: LucideIcons.refresh_ccw, title: 'settings.auto_rotate'.tr(), subtitle: 'settings.auto_rotate_desc'.tr(), 
                     isToggle: true, toggleValue: settingsState.isDialAutoRotating, 
-                    onToggle: (v) => notifier.updateDialAutoRotation(v) 
+                    onToggle: (v) => notifier.updateDialAutoRotation(v),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor 
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
                 _buildSettingsGroup('settings.general'.tr(), [
                   _buildSettingRow(
+                    context,
                     icon: LucideIcons.languages, title: 'settings.app_language'.tr(), subtitle: currentLangName,
-                    onTap: () => _showSelectionSheet('settings.app_language'.tr(), _appLanguages, currentLang, (v){ notifier.updateLanguage(v); context.setLocale(Locale(v)); }, isDark, surfaceColor, textColor, primaryColor)
+                    onTap: () => _showSelectionSheet('settings.app_language'.tr(), _appLanguages, currentLang, (v){ notifier.updateLanguage(v); context.setLocale(Locale(v)); }, isDark, surfaceColor, textColor, primaryColor),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
                   ),
                   _buildSettingRow(
+                    context,
                     icon: LucideIcons.shield_alert, 
                     title: 'settings.permissions'.tr(), 
                     subtitle: 'settings.permissions_desc'.tr(),
                     onTap: () => context.push('/settings/permissions'),
+                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
                   ),
                 ], isDark, surfaceColor, borderColor, textColor, primaryColor),
 
@@ -303,11 +175,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGpsUpdateButton(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color mainColor = isDark ? Colors.white : Colors.black87;
+  Widget _buildGpsUpdateButton(BuildContext context, WidgetRef ref, bool isDark, Color textColor) {
+    final Color mainColor = textColor;
     final Color iconBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05);
-
     bool isUpdating = false; 
 
     return StatefulBuilder(
@@ -328,7 +198,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
                     Text('settings.update_gps'.tr(), style: TextStyle(color: mainColor, fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
-                    Text('settings.gps_desc'.tr(), style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black45, fontSize: 12, height: 1.4)),
+                    Text('settings.gps_desc'.tr(), style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.5), fontSize: 12, height: 1.4)),
                   ],
                 ),
               ),
@@ -347,9 +217,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     onPressed: () async {
                       HapticFeedback.lightImpact();
-                      
                       final langCode = Localizations.localeOf(context).languageCode;
-                      
                       setState(() => isUpdating = true);
                       try {
                         bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -358,29 +226,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           await Geolocator.openLocationSettings();
                           return; 
                         }
-
                         final locData = await LocationService.fetchOfflineLocation(langCode);
-                        
-                        await ref.read(settingsProvider.notifier).addAndSelectLocation(
-                          locData['formattedName'], 
-                          locData['lat'],
-                          locData['lng'],
-                          locData['countryCode'],
-                        );
-
+                        await ref.read(settingsProvider.notifier).addAndSelectLocation(locData['formattedName'], locData['lat'], locData['lng'], locData['countryCode']);
                         await ref.read(settingsProvider.notifier).updateCalculationMethod(locData['method']);
                         await ref.read(settingsProvider.notifier).updateMadhab(locData['madhab']);
-
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${'settings.gps_success'.tr()} ${locData['formattedName']}'), backgroundColor: Colors.green),
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${'settings.gps_success'.tr()} ${locData['formattedName']}'), backgroundColor: Colors.green));
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('settings.gps_failed'.tr()), backgroundColor: Colors.redAccent),
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('settings.gps_failed'.tr()), backgroundColor: Colors.redAccent));
                         }
                       } finally {
                         if (mounted) setState(() => isUpdating = false);
@@ -396,7 +251,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildSettingsGroup(String label, List<Widget> rows, bool isDark, Color surfaceColor, Color borderColor, Color textColor, Color primaryColor) {
-    if (_searchQuery.isNotEmpty) return const SizedBox.shrink();
+    // 🌟 إصلاح البحث: إخفاء المجموعة فقط إذا كان البحث لا يطابق العنوان
+    if (_searchQuery.isNotEmpty && !label.toLowerCase().contains(_searchQuery)) return const SizedBox.shrink();
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
@@ -411,7 +268,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               color: surfaceColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: borderColor),
-              boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
             ),
             child: Column(
               children: rows.asMap().entries.map((entry) {
@@ -432,8 +288,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingRow({required IconData icon, required String title, String? subtitle, VoidCallback? onTap, bool isToggle = false, bool toggleValue = false, Function(bool)? onToggle}) {
-    return _SettingRow(icon: icon, title: title, subtitle: subtitle, onTap: onTap, isToggle: isToggle, toggleValue: toggleValue, onToggle: onToggle);
+  Widget _buildSettingRow(BuildContext context, {required IconData icon, required String title, String? subtitle, VoidCallback? onTap, bool isToggle = false, bool toggleValue = false, Function(bool)? onToggle, required bool isDark, required Color primaryColor, required Color textColor}) {
+    return _SettingRow(context: context, icon: icon, title: title, subtitle: subtitle, onTap: onTap, isToggle: isToggle, toggleValue: toggleValue, onToggle: onToggle, isDark: isDark, primaryColor: primaryColor, textColor: textColor);
   }
   
   void _showNightMarkersSheet(BuildContext context, bool isDark, Color surfaceColor, Color textColor, Color primaryColor) {
@@ -470,7 +326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             title: Text(entry.value.tr(), style: TextStyle(color: isSelected ? primaryColor : (isDark ? Colors.white70 : Colors.black87), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                             value: isSelected,
                             activeColor: primaryColor,
-                            checkColor: Colors.black,
+                            checkColor: Colors.white,
                             onChanged: (val) { notifier.toggleNightMarker(entry.key); },
                           );
                         }).toList(),
@@ -521,6 +377,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 class _SettingRow extends StatelessWidget {
+  final BuildContext context;
   final IconData icon;
   final String title;
   final String? subtitle;
@@ -528,14 +385,15 @@ class _SettingRow extends StatelessWidget {
   final bool isToggle;
   final bool toggleValue;
   final Function(bool)? onToggle;
+  final bool isDark;
+  final Color primaryColor;
+  final Color textColor;
 
-  const _SettingRow({required this.icon, required this.title, this.subtitle, this.onTap, this.isToggle = false, this.toggleValue = false, this.onToggle});
+  const _SettingRow({required this.context, required this.icon, required this.title, this.subtitle, this.onTap, this.isToggle = false, this.toggleValue = false, this.onToggle, required this.isDark, required this.primaryColor, required this.textColor});
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = Theme.of(context).primaryColor;
-    final Color mainColor = isDark ? Colors.white : Colors.black87;
+  Widget build(BuildContext _) {
+    final Color mainColor = textColor;
     final Color baseIconColor = isDark ? Colors.white70 : Colors.black87;
     final Color iconBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05);
 
@@ -562,7 +420,7 @@ class _SettingRow extends StatelessWidget {
                     Text(title, style: TextStyle(color: mainColor, fontSize: 15, fontWeight: FontWeight.w600)),
                     if (subtitle != null) ...[
                       const SizedBox(height: 2),
-                      Text(subtitle!, style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black45, fontSize: 12, height: 1.4)),
+                      Text(subtitle!, style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.5), fontSize: 12, height: 1.4)),
                     ],
                   ],
                 ),
@@ -580,7 +438,12 @@ class _SettingRow extends StatelessWidget {
                   ),
                 )
               else 
-                Icon(LucideIcons.chevron_left, color: isDark ? Colors.white38 : Colors.black38, size: 18),
+                // 🌟 السهم ينعكس بناءً على اتجاه لغة التطبيق
+                Icon(
+                  context.locale.languageCode == 'ar' ? LucideIcons.chevron_left : LucideIcons.chevron_right, 
+                  color: isDark ? Colors.white38 : Colors.black38, 
+                  size: 18
+                ),
             ],
           ),
         ),

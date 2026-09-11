@@ -9,8 +9,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/auth_provider.dart';
-
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
@@ -60,7 +58,7 @@ class AppDrawer extends ConsumerWidget {
       final response = await http.get(Uri.parse('https://api.github.com/repos/Abdallah-Kaballo/Suwaya/releases/latest'));
       
       if (!context.mounted) return;
-      Navigator.pop(context); // إغلاق نافذة التحميل
+      Navigator.pop(context); 
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -72,7 +70,6 @@ class AppDrawer extends ConsumerWidget {
         if (latestVersion != currentVersion) {
           _showUpdateAvailableDialog(context, latestVersion, apkUrl, primaryColor, isDark);
         } else {
-          // 🌟 التعديل الأول: عرض نافذة أنيقة تؤكد أن التطبيق محدث بدلاً من SnackBar
           showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
@@ -84,7 +81,8 @@ class AppDrawer extends ConsumerWidget {
                   Text('drawer.up_to_date'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
                 ],
               ),
-              content: Text('أنت تستخدم أحدث إصدار متاح من التطبيق (v$currentVersion). لا توجد تحديثات جديدة حالياً.', style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
+              // 🌟 استخدام الترجمة مع تمرير رقم الإصدار كمتغير
+              content: Text('${'drawer.latest_version_msg'.tr()} (v$currentVersion)', style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
               actions: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
@@ -139,170 +137,45 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  // 🌟 التعديل الثاني: شاشة المصادقة (Auth Sheet) المنبثقة من الأسفل
-  void _showAuthSheet(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).cardColor,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final user = ref.watch(currentUserProvider);
-            final isAnon = user == null;
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            final textColor = isDark ? Colors.white : Colors.black87;
-            final primaryColor = Theme.of(context).primaryColor;
-            final authService = ref.read(authServiceProvider);
-
-            final userMeta = user?.userMetadata;
-            final userName = userMeta?['full_name'] ?? userMeta?['name'] ?? 'مستخدم سويعة';
-            final userEmail = user?.email ?? '';
-            final userAvatar = userMeta?['avatar_url'];
-
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // حالة المستخدم الزائر (تسجيل الدخول)
-                    if (isAnon) ...[
-                      Icon(LucideIcons.cloud, size: 64, color: primaryColor),
-                      const SizedBox(height: 16),
-                      Text('تسجيل الدخول', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-                      Text(
-                        'قم بتسجيل الدخول لحفظ مهامك وإعداداتك، ومزامنتها عبر جميع أجهزتك بأمان عبر السحابة.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 14, height: 1.5),
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark ? Colors.white : Colors.black,
-                            foregroundColor: isDark ? Colors.black : Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          onPressed: () async {
-                            HapticFeedback.mediumImpact();
-                            try {
-                              await authService.signInWithGoogle();
-                              if (context.mounted) Navigator.pop(context);
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل تسجيل الدخول: $e'), backgroundColor: Colors.redAccent));
-                              }
-                            }
-                          },
-                          icon: const Icon(LucideIcons.globe), // أيقونة بديلة معبرة عن جوجل/الويب
-                          label: const Text('المتابعة بواسطة Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                    ] 
-                    // حالة المستخدم المسجل (تسجيل الخروج)
-                    else ...[
-                      Container(
-                        padding: userAvatar == null ? const EdgeInsets.all(24) : EdgeInsets.zero,
-                        decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), shape: BoxShape.circle),
-                        child: userAvatar != null 
-                            ? ClipOval(child: Image.network(userAvatar, width: 96, height: 96, fit: BoxFit.cover))
-                            : Icon(LucideIcons.user, color: primaryColor, size: 48),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(userName, style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Text(userEmail, style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 14)),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
-                            foregroundColor: Colors.redAccent,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Colors.redAccent)),
-                          ),
-                          onPressed: () async {
-                            HapticFeedback.heavyImpact();
-                            await authService.signOut();
-                            if (context.mounted) Navigator.pop(context);
-                          },
-                          icon: const Icon(LucideIcons.log_out),
-                          label: const Text('تسجيل الخروج', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white : Colors.black87;
 
-    final user = ref.watch(currentUserProvider);
-    final isAnon = user == null;
-    final userMeta = user?.userMetadata;
-    final userName = userMeta?['full_name'] ?? userMeta?['name'] ?? user?.email ?? 'drawer.guest_user'.tr();
-    final userAvatar = userMeta?['avatar_url'];
-
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
         child: Column(
           children: [
-            // 🌟 الترويسة تفتح الآن شاشة المصادقة (Auth Sheet)
-            InkWell(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                _showAuthSheet(context, ref);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: userAvatar == null ? const EdgeInsets.all(12) : EdgeInsets.zero,
-                      decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), shape: BoxShape.circle),
-                      child: userAvatar != null 
-                          ? ClipOval(child: Image.network(userAvatar, width: 48, height: 48, fit: BoxFit.cover))
-                          : Icon(LucideIcons.user, color: primaryColor, size: 28),
+            // 🌟 الترويسة النظيفة والثابتة للتطبيق (بدون حسابات سحابية)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: textColor.withValues(alpha: 0.05))),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
+                    child: Icon(LucideIcons.compass, color: primaryColor, size: 32),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Suwaya', style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                        const SizedBox(height: 4),
+                        Text('Time Engineered', style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 13)),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(userName, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          const SizedBox(height: 4),
-                          Text(isAnon ? 'اضغط لتسجيل الدخول' : 'اضغط لعرض الحساب', style: TextStyle(color: isAnon ? primaryColor : textColor.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      isAnon ? LucideIcons.chevron_left : LucideIcons.chevron_left,
-                      color: textColor.withValues(alpha: 0.3),
-                      size: 20,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            Divider(color: textColor.withValues(alpha: 0.05), height: 1),
             
             Expanded(
               child: ListView(
@@ -313,7 +186,7 @@ class AppDrawer extends ConsumerWidget {
                     Navigator.pop(context);
                     context.push('/settings'); 
                   }),
-                  _buildDrawerItem(context, LucideIcons.book_open, 'drawer.faq'.tr(), () {}),
+                  _buildDrawerItem(context, LucideIcons.book_open, 'drawer.faq'.tr(), () {_launchUrl('https://github.com/Abdallah-Kaballo/Suwaya/wiki');}),
                   _buildDrawerItem(context, LucideIcons.mail, 'drawer.contact'.tr(), () {
                     _launchUrl('mailto:suwaya2026@gmail.com');
                   }),

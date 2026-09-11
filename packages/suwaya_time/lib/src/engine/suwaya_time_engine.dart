@@ -1,6 +1,5 @@
 import '../models/astro_models.dart';
 import '../calculators/prayer_calculator.dart';
-import '../generators/suwaya_distributor.dart';
 import '../generators/period_generator.dart';
 
 class SuwayaTimeEngine {
@@ -9,24 +8,15 @@ class SuwayaTimeEngine {
     double lat, double lng, DateTime date, 
     CalculationMethodType methodType, MadhabType madhabType, 
     HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, List<int> cachedDistribution, {Map<PrayerKey, int>? manualOffsets} 
+    Duration cityOffset, List<int> distribution, {Map<PrayerKey, int>? manualOffsets} 
   ) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat, lng, date, methodType, madhabType, highLatRuleType, 
       customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
     );
     
-    final periods = PeriodGenerator.generatePeriods(ibadat, cachedDistribution);
+    final periods = PeriodGenerator.generatePeriods(ibadat, distribution);
     return SuwayaDay(ibadatTimings: ibadat, periods: periods);
-  }
-
-  static Future<List<int>> calculateAnnualSuwayaDistributionAsync(
-    double lat, double lng, CalculationMethodType methodType, MadhabType madhabType, 
-    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
-  ) async {
-    // 🌟 إرجاع فوري للثابت بدون استهلاك المعالج
-    return SuwayaDistributor.universalDistribution;
   }
 
   static AstroState calculateCurrentState(SuwayaDay day, DateTime now) {
@@ -78,38 +68,5 @@ class SuwayaTimeEngine {
       currentSuwaya: 1, elapsedVirtualTime: Duration.zero, suwayaProgress: 0, 
       timeSpeedMultiplier: 1.0, ibadatTimings: fallbackIbadat, currentFormattedVirtualTime: "00:00"
     );
-  }
-}
-
-// محول التوافقية (Legacy Adapter)
-class AstroEngine {
-  static IbadatTimings getIbadatTimings(
-    double lat, double lng, DateTime date, 
-    CalculationMethodType methodType, MadhabType madhabType, 
-    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
-  ) {
-    return PrayerCalculator.getIbadatTimings(lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets);
-  }
-
-  static List<int> calculateAnnualSuwayaDistribution(
-    double lat, double lng, 
-    CalculationMethodType methodType, MadhabType madhabType, 
-    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
-  ) {
-    return SuwayaDistributor.universalDistribution;
-  }
-
-  static List<AstroPeriod> generatePeriodsForDay(
-    double lat, double lng, DateTime date, 
-    CalculationMethodType methodType, MadhabType madhabType, 
-    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    List<int> distribution, Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}
-  ) {
-    final ibadat = getIbadatTimings(
-      lat, lng, date, methodType, madhabType, highLatRuleType, customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
-    );
-    return PeriodGenerator.generatePeriods(ibadat, distribution);
   }
 }

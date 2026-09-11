@@ -21,7 +21,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
   late Color accentColor;
   late int snoozeCount;
   
-  // 🌟 جسر التواصل مع نظام أندرويد للتحكم في قفل الشاشة
   static const platform = MethodChannel('com.suwaya.app/lockscreen');
   
   double _dragPosition = 0.0;
@@ -32,12 +31,11 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    
-    // 🌟 إجبار هذه الشاشة فقط على الظهور فوق القفل وإضاءة الشاشة
     _enableLockScreenVisibility();
 
-    final payload = widget.alarmSettings.payload?.split('|') ?? ['تنبيه', '0xFFD4AF37', '0'];
-    taskTitle = payload[0];
+    // 🌟 الترجمة للنصوص الافتراضية
+    final payload = widget.alarmSettings.payload?.split('|') ?? ['alarm.default_title'.tr(), '0xFFD4AF37', '0'];
+    taskTitle = payload[0] == 'تنبيه' ? 'alarm.default_title'.tr() : payload[0];
     accentColor = Color(int.tryParse(payload[1]) ?? 0xFFD4AF37);
     snoozeCount = int.tryParse(payload[2]) ?? 0;
 
@@ -47,7 +45,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
     HardwareKeyboard.instance.addHandler(_handleHardwareKeys);
   }
 
-  // 🌟 تفعيل الظهور فوق القفل
   Future<void> _enableLockScreenVisibility() async {
     try {
       await platform.invokeMethod('showOnLockScreen');
@@ -56,7 +53,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
     }
   }
 
-  // 🌟 إلغاء الظهور فوق القفل عند إغلاق المنبه
   Future<void> _disableLockScreenVisibility() async {
     try {
       await platform.invokeMethod('hideFromLockScreen');
@@ -67,7 +63,7 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
 
   @override
   void dispose() {
-    _disableLockScreenVisibility(); // 🌟 إعادة حماية التطبيق بالقفل فور الانتهاء
+    _disableLockScreenVisibility(); 
     _glowController.dispose();
     HardwareKeyboard.instance.removeHandler(_handleHardwareKeys);
     super.dispose();
@@ -135,76 +131,104 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                     Text(taskTitle, style: TextStyle(color: accentColor, fontSize: 32, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     const SizedBox(height: 8),
                     if (canSnooze)
-                      Text('غفوة ${snoozeCount + 1} من ${AlarmService.maxSnoozes}', style: const TextStyle(color: Colors.white54, fontSize: 14))
+                      // 🌟 ترجمة الغفوات
+                      Text('${'alarm.snooze'.tr()} ${snoozeCount + 1} ${'common.of'.tr()} ${AlarmService.maxSnoozes}', style: const TextStyle(color: Colors.white54, fontSize: 14))
                     else
-                      const Text('بلغت الحد الأقصى للغفوات', style: TextStyle(color: Colors.redAccent, fontSize: 14)),
+                      Text('alarm.max_snoozes_reached'.tr(), style: const TextStyle(color: Colors.redAccent, fontSize: 14)),
                   ],
                 ),
 
-                Directionality(
-                  textDirection: ui.TextDirection.ltr,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 32),
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: Colors.white24, width: 2),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // 🌟 نظام السحب + أزرار النقر البديلة لحل مشكلة الإمكانية (Accessibility)
+                Column(
+                  children: [
+                    Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 32),
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(color: Colors.white24, width: 2),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 24.0),
-                              child: Text('غفوة', style: TextStyle(color: canSnooze ? Colors.white54 : Colors.transparent, fontSize: 18, fontWeight: FontWeight.bold)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 24.0),
+                                  child: Text('alarm.snooze'.tr(), style: TextStyle(color: canSnooze ? Colors.white54 : Colors.transparent, fontSize: 18, fontWeight: FontWeight.bold)),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 24.0),
+                                  child: Text('alarm.stop'.tr(), style: const TextStyle(color: Colors.white54, fontSize: 18, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
                             ),
-                            const Padding(
-                              padding: EdgeInsets.only(right: 24.0),
-                              child: Text('إيقاف', style: TextStyle(color: Colors.white54, fontSize: 18, fontWeight: FontWeight.bold)),
+                            Positioned(
+                              left: (MediaQuery.of(context).size.width - 64) / 2 - 35 + _dragPosition,
+                              child: GestureDetector(
+                                onHorizontalDragUpdate: (details) {
+                                  setState(() {
+                                    _dragPosition += details.delta.dx;
+                                    if (!canSnooze && _dragPosition < 0) _dragPosition = 0;
+                                  });
+                                },
+                                onHorizontalDragEnd: (details) {
+                                  if (_dragPosition > _maxDragThreshold) {
+                                    _triggerStop();
+                                  } else if (_dragPosition < -_maxDragThreshold && canSnooze) {
+                                    _triggerSnooze();
+                                  } else {
+                                    setState(() => _dragPosition = 0);
+                                  }
+                                },
+                                child: AnimatedContainer(
+                                  duration: _dragPosition == 0 ? const Duration(milliseconds: 300) : Duration.zero,
+                                  curve: Curves.elasticOut,
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: _dragPosition > 50 ? Colors.redAccent : (_dragPosition < -50 ? Colors.amber : accentColor),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [BoxShadow(color: accentColor.withValues(alpha: 0.5), blurRadius: 15, spreadRadius: 2)],
+                                  ),
+                                  child: Icon(
+                                    _dragPosition > 50 ? LucideIcons.x : (_dragPosition < -50 ? Icons.snooze : LucideIcons.bell_ring),
+                                    color: Colors.white, size: 30,
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        Positioned(
-                          left: (MediaQuery.of(context).size.width - 64) / 2 - 35 + _dragPosition,
-                          child: GestureDetector(
-                            onHorizontalDragUpdate: (details) {
-                              setState(() {
-                                _dragPosition += details.delta.dx;
-                                if (!canSnooze && _dragPosition < 0) _dragPosition = 0;
-                              });
-                            },
-                            onHorizontalDragEnd: (details) {
-                              if (_dragPosition > _maxDragThreshold) {
-                                _triggerStop();
-                              } else if (_dragPosition < -_maxDragThreshold && canSnooze) {
-                                _triggerSnooze();
-                              } else {
-                                setState(() => _dragPosition = 0);
-                              }
-                            },
-                            child: AnimatedContainer(
-                              duration: _dragPosition == 0 ? const Duration(milliseconds: 300) : Duration.zero,
-                              curve: Curves.elasticOut,
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: _dragPosition > 50 ? Colors.redAccent : (_dragPosition < -50 ? Colors.amber : accentColor),
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: accentColor.withValues(alpha: 0.5), blurRadius: 15, spreadRadius: 2)],
-                              ),
-                              child: Icon(
-                                _dragPosition > 50 ? LucideIcons.x : (_dragPosition < -50 ? Icons.snooze : LucideIcons.bell_ring),
-                                color: Colors.white, size: 30,
-                              ),
-                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // 🌟 أزرار ضخمة بديلة في حال لم يفهم المستخدم نظام السحب
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (canSnooze) ...[
+                          TextButton.icon(
+                            style: TextButton.styleFrom(foregroundColor: Colors.white70, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
+                            onPressed: _triggerSnooze,
+                            icon: const Icon(Icons.snooze),
+                            label: Text('alarm.snooze'.tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
+                          const SizedBox(width: 16),
+                        ],
+                        TextButton.icon(
+                          style: TextButton.styleFrom(foregroundColor: Colors.redAccent, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16)),
+                          onPressed: _triggerStop,
+                          icon: const Icon(LucideIcons.power_off),
+                          label: Text('alarm.stop'.tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

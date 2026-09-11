@@ -45,21 +45,16 @@ dependencies:
   
   # --- Pro Stack & Firebase ---
   share_plus: ^13.2.0
-  firebase_core: ^2.27.0
-  firebase_crashlytics: ^3.4.14
 
   # --- Supabase & Sync ---
-  supabase_flutter: ^2.5.0
   uuid: ^4.3.3
   shared_preferences: ^2.5.5
-  google_sign_in: ^7.2.0
   alarm: ^5.10.0
   hijri: ^3.0.1
   url_launcher: ^6.3.2
   package_info_plus: ^10.2.1
   http: ^1.6.0
   sqflite: ^2.4.3
-  flutter_dotenv: ^6.0.1
 
   suwaya_time:
     path: packages/suwaya_time
@@ -81,7 +76,6 @@ flutter:
     - assets/db/cities.db
     - assets/icons/app_icon.png
     - assets/audio/
-    - .env
 
 flutter_launcher_icons:
   android: true

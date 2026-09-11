@@ -182,6 +182,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     );
   }
 
+  // ... (قم بنسخ الأكواد السابقة في الملف كما هي، واستبدل فقط _buildTasksList وما تحته)
+
   Widget _buildTasksList(List<TaskModel> tasks, List<AstroPeriod> periods, bool isHabit) {
     if (tasks.isEmpty) return _buildEmptyState('tasks.empty_tasks'.tr());
     return ListView.builder(
@@ -203,6 +205,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
                 _editTask(task); 
               }
             },
+            // 🌟 إضافة أيقونة النقاط الثلاث كبديل للسحب
+            onMoreOptions: () => _showOptionsSheet(context, task: task),
           ),
           onDelete: () => ref.read(tasksProvider.notifier).deleteTask(task.id),
           onEdit: () => _editTask(task),
@@ -232,11 +236,50 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
                 _editRoutine(r); 
               }
             },
+            // 🌟 إضافة أيقونة النقاط الثلاث كبديل للسحب
+            onMoreOptions: () => _showOptionsSheet(context, routine: r),
           ),
           onDelete: () => ref.read(routinesProvider.notifier).deleteRoutine(r.id),
           onEdit: () => _editRoutine(r),
         );
       },
+    );
+  }
+
+  // 🌟 نافذة الخيارات السفلية عند الضغط على النقاط الثلاث
+  void _showOptionsSheet(BuildContext context, {TaskModel? task, RoutineModel? routine}) {
+    HapticFeedback.lightImpact();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(LucideIcons.pencil, color: Colors.blueAccent),
+              title: Text('common.edit'.tr()),
+              onTap: () {
+                Navigator.pop(context);
+                if (task != null) _editTask(task);
+                if (routine != null) _editRoutine(routine);
+              },
+            ),
+            ListTile(
+              leading: const Icon(LucideIcons.trash, color: Colors.redAccent),
+              title: Text('common.delete'.tr(), style: const TextStyle(color: Colors.redAccent)),
+              onTap: () {
+                Navigator.pop(context);
+                if (task != null) ref.read(tasksProvider.notifier).deleteTask(task.id);
+                if (routine != null) ref.read(routinesProvider.notifier).deleteRoutine(routine.id);
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
     );
   }
 
@@ -277,8 +320,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
 }
 
 class _TaskRowItem extends ConsumerStatefulWidget {
-  final TaskModel task; final List<AstroPeriod> periods; final bool isSelectionMode; final bool isSelected; final VoidCallback onTap; final VoidCallback onLongPress;
-  const _TaskRowItem({required this.task, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress});
+  final TaskModel task; final List<AstroPeriod> periods; final bool isSelectionMode; final bool isSelected; final VoidCallback onTap; final VoidCallback onLongPress; final VoidCallback onMoreOptions;
+  const _TaskRowItem({required this.task, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress, required this.onMoreOptions});
   @override ConsumerState<_TaskRowItem> createState() => _TaskRowItemState();
 }
 class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
@@ -298,7 +341,6 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
       timeStr = '${(t.targetCivilTimeMinutes! ~/ 60).toString().padLeft(2, '0')}:${(t.targetCivilTimeMinutes! % 60).toString().padLeft(2, '0')}';
     } else if (t.isAstroTime && t.targetPeriodId != null && widget.periods.isNotEmpty) {
-      // 🌟 جلب السويعة التراكمية وعرضها كخانتين فقط (الخلاصة الفلكية)
       int gSuwaya = _getGlobalSuwaya(t.targetPeriodId!, t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1, widget.periods) + 1;
       timeStr = '${gSuwaya.toString().padLeft(2, '0')}:${t.targetVirtualMinute.toString().padLeft(2, '0')}';
     }
@@ -328,7 +370,7 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                   Future.delayed(const Duration(milliseconds: 400), () => ref.read(tasksProvider.notifier).toggleTaskStatus(t));
                 },
                 child: Container(
-                  margin: const EdgeInsets.only(left: 16), width: 24, height: 24,
+                  margin: const EdgeInsets.only(left: 8, right: 8), width: 24, height: 24,
                   decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: catColor, width: 2), color: _isLocalCompleted ? catColor : Colors.transparent),
                   child: _isLocalCompleted ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
                 ),
@@ -365,6 +407,14 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                 ],
               ),
             ),
+
+            // 🌟 زر النقاط الثلاث للوصولية (البديل البصري للسحب)
+            if (!widget.isSelectionMode)
+              IconButton(
+                padding: const EdgeInsets.only(left: 8),
+                constraints: const BoxConstraints(),
+                icon: Icon(Icons.more_vert, color: textColor.withValues(alpha: 0.3), size: 20),                onPressed: widget.onMoreOptions,
+              ),
           ],
         ),
       ),
@@ -373,9 +423,11 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
 }
 
 class _RoutineRowItem extends StatelessWidget {
-  final RoutineModel routine; final List<AstroPeriod> periods; final bool isSelectionMode; final bool isSelected; final VoidCallback onTap; final VoidCallback onLongPress;
-  const _RoutineRowItem({required this.routine, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress});
-  @override Widget build(BuildContext context) {
+  final RoutineModel routine; final List<AstroPeriod> periods; final bool isSelectionMode; final bool isSelected; final VoidCallback onTap; final VoidCallback onLongPress; final VoidCallback onMoreOptions;
+  const _RoutineRowItem({required this.routine, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress, required this.onMoreOptions});
+  
+  @override 
+  Widget build(BuildContext context) {
     final rColor = Color(routine.colorValue);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
@@ -385,7 +437,6 @@ class _RoutineRowItem extends StatelessWidget {
       final sm = (routine.startTimeMinutes! % 60).toString().padLeft(2, '0');
       timeStr = '${'common.civil'.tr()} (${'common.from'.tr()} $sh:$sm)';
     } else if (routine.isAstroTime && routine.startPeriodId != null) {
-      // 🌟 جلب السويعة التراكمية وعرضها كخانتين فقط للروتين الفلكي
       int gSuwaya = _getGlobalSuwaya(routine.startPeriodId!, routine.startSuwaya ?? 1, periods) + 1;
       final sm = (routine.startVirtualMinute ?? 0).toString().padLeft(2, '0');
       timeStr = '${'common.astro'.tr()} (${'common.from'.tr()} ${gSuwaya.toString().padLeft(2, '0')}:$sm)';
@@ -401,7 +452,7 @@ class _RoutineRowItem extends StatelessWidget {
         child: Row(
           children: [
             if (isSelectionMode) Padding(padding: const EdgeInsets.only(left: 12), child: Icon(isSelected ? LucideIcons.circle_check : LucideIcons.circle, color: isSelected ? Theme.of(context).primaryColor : Colors.grey)),
-            Container(margin: const EdgeInsets.only(left: 16), width: 14, height: 14, decoration: BoxDecoration(shape: BoxShape.circle, color: rColor, boxShadow: [BoxShadow(color: rColor.withValues(alpha: 0.5), blurRadius: 4)])),
+            Container(margin: const EdgeInsets.only(left: 8, right: 8), width: 14, height: 14, decoration: BoxDecoration(shape: BoxShape.circle, color: rColor, boxShadow: [BoxShadow(color: rColor.withValues(alpha: 0.5), blurRadius: 4)])),
             Expanded(child: Text(routine.title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 16, fontWeight: FontWeight.bold))),
             Directionality(
               textDirection: ui.TextDirection.ltr,
@@ -419,6 +470,14 @@ class _RoutineRowItem extends StatelessWidget {
                 ],
               ),
             ),
+            
+            // 🌟 زر النقاط الثلاث للوصولية (البديل البصري للسحب)
+            if (!isSelectionMode)
+              IconButton(
+                padding: const EdgeInsets.only(left: 8),
+                constraints: const BoxConstraints(),
+                icon: Icon(Icons.more_vert, color: isDark ? Colors.white38 : Colors.black38, size: 20),                onPressed: onMoreOptions,
+              ),
           ],
         ),
       ),

@@ -3,8 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  app_links
-  firebase_core
   geolocator_windows
   isar_community_flutter_libs
   permission_handler_windows
