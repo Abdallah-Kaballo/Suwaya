@@ -19,17 +19,50 @@ class AppDrawer extends ConsumerWidget {
     }
   }
 
-  void _showAboutDialog(BuildContext context) {
+  Future<void> _showAboutDialog(BuildContext context) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!context.mounted) return;
     showAboutDialog(
       context: context,
       applicationName: 'Suwaya',
-      applicationVersion: '1.0.0',
+      applicationVersion: packageInfo.version,
       applicationIcon: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.asset('assets/icons/app_icon.png', width: 48, height: 48, errorBuilder: (c, e, s) => const Icon(LucideIcons.compass, size: 48)),
       ),
       applicationLegalese: '© ${DateTime.now().year} Abdallah Kaballo.\nAll rights reserved.',
     );
+  }
+
+  String _normalizeVersion(String value) {
+    return value
+        .trim()
+        .replaceFirst(RegExp(r'^v', caseSensitive: false), '')
+        .split('+')
+        .first
+        .trim();
+  }
+
+  int _compareVersions(String current, String latest) {
+    final currentParts = _normalizeVersion(current)
+        .split('.')
+        .map((part) => int.tryParse(part) ?? 0)
+        .toList();
+    final latestParts = _normalizeVersion(latest)
+        .split('.')
+        .map((part) => int.tryParse(part) ?? 0)
+        .toList();
+
+    for (var index = 0; index < 3; index++) {
+      final currentPart = index < currentParts.length ? currentParts[index] : 0;
+      final latestPart = index < latestParts.length ? latestParts[index] : 0;
+
+      if (currentPart != latestPart) {
+        return currentPart.compareTo(latestPart);
+      }
+    }
+
+    return 0;
   }
 
   Future<void> _checkForUpdates(BuildContext context, Color primaryColor) async {
@@ -53,7 +86,7 @@ class AppDrawer extends ConsumerWidget {
 
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = packageInfo.version.trim();
+      final currentVersion = _normalizeVersion(packageInfo.version);
 
       final response = await http.get(Uri.parse('https://api.github.com/repos/Abdallah-Kaballo/Suwaya/releases/latest'));
       
@@ -62,12 +95,12 @@ class AppDrawer extends ConsumerWidget {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final latestVersion = data['tag_name'].toString().replaceAll('v', '').trim();
+        final latestVersion = _normalizeVersion(data['tag_name'].toString());
         final apkUrl = data['assets'] != null && data['assets'].isNotEmpty 
             ? data['assets'][0]['browser_download_url'] 
             : data['html_url']; 
 
-        if (latestVersion != currentVersion) {
+        if (_compareVersions(currentVersion, latestVersion) < 0) {
           _showUpdateAvailableDialog(context, latestVersion, apkUrl, primaryColor, isDark);
         } else {
           showDialog(
