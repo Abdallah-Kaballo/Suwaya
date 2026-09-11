@@ -5,520 +5,221 @@
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Languages](https://img.shields.io/badge/languages-22-green)](assets/translations/)
 
-Suwaya is an open-source time and productivity system that organizes the day around astronomical events rather than treating every clock hour as identical.
+Suwaya is a Flutter application that organizes the day around astronomical events and prayer times. It combines a 48-Suwaya virtual time model with tasks, routines, focus sessions, notifications, alarms, and location-aware calculations.
 
-It combines prayer times, astronomical periods, tasks, routines, focus sessions, notifications, and productivity tracking around the natural rhythm of the sun.
-
-> Suwaya is not only a prayer-times application and not only a task manager.  
-> It is an attempt to build a meaningful time layer between astronomical reality and everyday productivity.
+The project is currently local-first: settings, tasks, routines, and location data are stored on the device. The application does not currently depend on a cloud backend or user authentication.
 
 ## Contents
 
 - [Overview](#overview)
-- [Why Suwaya](#why-suwaya)
 - [How Suwaya Time Works](#how-suwaya-time-works)
-- [Features](#features)
-- [Product Philosophy](#product-philosophy)
+- [Suwaya Time Reference](#suwaya-time-reference)
+- [Current Features](#current-features)
 - [Architecture](#architecture)
 - [Repository Structure](#repository-structure)
 - [Technology Stack](#technology-stack)
-- [Requirements](#requirements)
-- [Installation](#installation)
+- [Requirements and Installation](#requirements-and-installation)
 - [Configuration](#configuration)
 - [Testing](#testing)
-- [Accuracy and Calculation Methodology](#accuracy-and-calculation-methodology)
+- [Calculation Methodology](#calculation-methodology)
 - [Localization](#localization)
-- [Data and Privacy](#data-and-privacy)
-- [Permissions](#permissions)
+- [Data, Privacy, and Permissions](#data-privacy-and-permissions)
 - [Known Limitations](#known-limitations)
-- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Security](#security)
-- [FAQ](#faq)
 - [License](#license)
-- [Acknowledgments](#acknowledgments)
 
 ## Overview
 
-Civil time presents the day as a sequence of equal clock hours:
+Civil time treats every clock hour as equal. Suwaya adds an astronomical layer based on the actual day at the selected location:
 
 ```text
-08:00  09:00  10:00  11:00
+Location + date
+      |
+      v
+Prayer and solar event calculations
+      |
+      v
+Fajr-to-Fajr periods
+      |
+      v
+48 Suwayas distributed across the periods
+      |
+      v
+Current period, virtual time, tasks, routines, and focus sessions
 ```
 
-However, the actual length of daylight and darkness changes according to location, date, season, and astronomical conditions.
-
-Suwaya models the day using astronomical events such as:
-
-- Fajr
-- Sunrise
-- Dhuhr
-- Asr
-- Maghrib
-- Isha
-- The next Fajr
-
-These events form meaningful boundaries for prayer, daily routines, focus sessions, and productivity planning.
-
-The application is designed to work offline first. Core data is stored locally, while optional authentication and cloud synchronization allow selected data to be synchronized across devices.
-
-## Why Suwaya?
-
-### The Problem
-
-Traditional productivity systems often assume that all hours of the day have the same meaning and duration.
-
-That assumption does not reflect the changing relationship between:
-
-- Daylight and darkness
-- Location and timezone
-- Seasons
-- Prayer times
-- Energy and daily routines
-
-### The Idea
-
-Suwaya adds an astronomical time layer above civil clock time.
-
-Instead of forcing every activity into fixed blocks, it allows the user to understand and organize activities according to the actual structure of the day.
-
-### The Result
-
-The same time model can support:
-
-- Prayer and worship
-- Tasks
-- Focus sessions
-- Routines
-- Reminders
-- Statistics
-- Daily planning
+The main day boundaries are Fajr, sunrise, Dhuhr, Asr, Maghrib, Isha, and the following Fajr. Period lengths vary with the calculated astronomical timings, while the complete day always contains 48 Suwayas.
 
 ## How Suwaya Time Works
 
-At a high level, the system follows this flow:
+The pure Dart `suwaya_time` package calculates prayer timings, night parts, daily periods, and the Suwaya distribution. The Flutter application supplies the active location, date, timezone offset, calculation method, Madhab, high-latitude rule, and manual prayer offsets.
 
-```text
-Location + Date
-       |
-       v
-Astronomical calculations
-       |
-       v
-Prayer and solar events
-       |
-       v
-Day and night periods
-       |
-       v
-Suwaya distribution
-       |
-       v
-Virtual time representation
-       |
-       v
-Tasks, focus sessions, routines, and statistics
-```
+The runtime engine maintains these invariants:
 
-A typical astronomical day is represented as:
-
-```text
-Fajr
-  |
-Morning
-  |
-Sunrise
-  |
-Dhuhr
-  |
-Afternoon
-  |
-Asr
-  |
-Evening
-  |
-Maghrib
-  |
-Night
-  |
-Isha
-  |
-Next Fajr
-```
-
-The day is divided into 48 Suwayas. The distribution of these units changes according to the calculated duration of the daily periods.
-
-The implementation maintains the following core invariants:
-
-- The total daily distribution is always 48 Suwayas.
+- Prayer timings are chronologically ordered.
 - Generated periods are contiguous.
-- The periods cover the actual interval from Fajr to the next Fajr.
-- Prayer times remain chronologically ordered.
+- Periods cover the interval from Fajr to the next Fajr.
+- The daily distribution contains exactly 48 Suwayas.
 - The night interval extends from Maghrib to the following Fajr.
-- Manual offsets affect only the selected prayer.
+- A manual offset changes only its selected prayer.
 
-The mathematical model and its assumptions are documented in the astronomical engine and its tests.
+The app caches a small number of generated days. Its state timer wakes at the next Suwaya boundary, while a lightweight five-second ticker updates the displayed virtual clock without rebuilding the full application state.
 
-## Features
+## Suwaya Time Reference
 
-### Time System
+For the complete calculation model, period boundaries, 48-Suwaya distribution, virtual-time mapping, timezone behavior, edge cases, and test invariants, see [Suwaya-Time.md](Suwaya-Time.md).
 
-- Astronomical day and night periods
-- 48-Suwaya daily distribution
-- Civil time and Suwaya time
-- Interactive astronomical dials
-- Prayer and solar event boundaries
+## Current Features
 
-### Productivity
+### Main experience
 
-- Task management
-- Routines
-- Pomodoro and focus sessions
-- Productivity statistics
-- Activity tracking
-- Time-aware daily planning
+- Home screen with mini and premium astronomical dials.
+- Ibadat screen with prayer timings and an astronomical timeline.
+- Tasks with date, period, Suwaya, pattern, and completion handling.
+- Routines and routine list management.
+- Pomodoro/focus screen linked to the current Suwaya progress.
+- Onboarding for language and location selection.
 
-### Prayer and Daily Rhythm
+### Calculations and device services
 
-- Prayer time calculations
-- Multiple calculation methods
-- Madhab selection
-- High-latitude rules
-- Manual prayer offsets
-- Night-part calculations
-- Fajr-to-Fajr daily period generation
-
-### Platform Features
-
-- Offline-first local storage
-- Optional cloud synchronization
-- Authentication
-- Google Sign-In support
-- Notifications
-- Alarms
-- Location-based calculations
-- RTL and LTR interfaces
-- 22 localization files
-
-## Product Philosophy
-
-Suwaya is built around these principles:
-
-1. Time should reflect the environment in which it occurs.
-2. Astronomical events provide meaningful boundaries for the day.
-3. Productivity should adapt to time instead of forcing time into rigid blocks.
-4. Core functionality should remain useful without network access.
-5. Calculations should be deterministic, understandable, and testable.
-6. Personal data should remain transparent and under the user's control.
-7. The application should support both spiritual and practical daily routines without treating them as unrelated systems.
+- Adhan-based prayer calculations with configurable method and Madhab.
+- High-latitude rules, custom Fajr/Isha angles, and manual offsets.
+- Saved locations, geocoding, and timezone-aware calculations.
+- Local notifications and alarms.
+- Permission handling for location, notifications, and alarms.
+- Light/dark themes, day-aware theme behavior, and RTL/LTR layouts.
+- 22 translation files under `assets/translations/`.
 
 ## Architecture
 
-Suwaya uses a feature-oriented Flutter architecture.
+Suwaya uses a feature-oriented Flutter architecture:
 
 ```text
-+-----------------------------+
-|         Flutter UI          |
-+-----------------------------+
-| Riverpod State Management   |
-+-----------------------------+
-| Providers and Notifiers     |
-+-----------------------------+
-| Application Services        |
-+-----------------------------+
-| Astronomical Domain Engine  |
-+-----------------------------+
-| Repositories and Isar DB    |
-+-----------------------------+
-| Optional Supabase Sync      |
-+-----------------------------+
+Flutter screens and shared widgets
+              |
+      Riverpod providers/notifiers
+              |
+ Repositories and platform services
+              |
+        Isar local database
+              |
+     Pure Dart suwaya_time package
 ```
 
-The main architectural rules are:
+Widgets render state and collect user actions. Providers and notifiers coordinate state. Repositories own Isar access, while services wrap notifications, alarms, location, and geocoding. The astronomical calculations live in `packages/suwaya_time` and do not depend on Flutter or Riverpod.
 
-- Widgets are responsible for rendering and user interaction.
-- Providers and notifiers orchestrate state and actions.
-- Repositories own application data access.
-- Services integrate with external and platform APIs.
-- The astronomical engine remains independent of Flutter and Riverpod.
-- Local storage is the primary source of truth.
-- Cloud synchronization is optional and must not replace local data.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture rules, startup sequence, state management conventions, database rules, synchronization model, and astronomical engine requirements.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the implementation rules and startup sequence.
 
 ## Repository Structure
 
 ```text
 lib/
-├── `main.dart`
-├── `firebase_options.dart`
+├── main.dart
 ├── core/
-│   ├── astro_engine/
-│   ├── bootstrap/
-│   ├── database/
-│   ├── localization/
-│   ├── location/
-│   ├── notification/
-│   ├── repositories/
-│   ├── router/
-│   ├── services/
-│   ├── sync/
-│   ├── theme/
-│   └── utils/
-├── features/
-│   ├── alarm/
-│   ├── analytics/
-│   ├── auth/
-│   ├── home/
-│   ├── ibadat/
-│   ├── layout/
-│   ├── onboarding/
-│   ├── pomodoro/
-│   ├── routines/
-│   ├── settings/
-│   ├── splash/
-│   ├── stats/
-│   └── tasks/
-├── models/
-└── shared/
-    └── widgets/
+│   ├── astro_engine/       # Flutter adapter and current astronomical state
+│   ├── bootstrap/          # Lightweight application initialization
+│   ├── database/           # Isar initialization and provider
+│   ├── localization/       # Supported locales and translation path
+│   ├── location/           # Location, geocoding, and permissions
+│   ├── notification/       # Notification services and scheduling
+│   ├── repositories/       # Task, routine, and settings persistence
+│   ├── router/             # go_router configuration
+│   ├── services/           # Alarm service
+│   ├── theme/              # Themes and astronomical UI color adapters
+│   └── providers/          # Shared UI providers
+├── features/               # Home, ibadat, tasks, routines, pomodoro, settings, etc.
+├── models/                 # Isar models and generated adapters
+└── shared/widgets/         # Reusable application widgets
+packages/suwaya_time/       # Pure Dart astronomical domain package
+Suwaya-Time.md              # Detailed Suwaya time and calculation reference
+test/                       # Domain, provider, model, and widget tests
+assets/translations/        # 22 localization files
+docs/privacy.md             # Privacy policy
 ```
-
-- `core/`: shared infrastructure, services, repositories, synchronization, and domain logic.
-- `features/`: user-facing application features.
-- `models/`: persistent Isar models and generated files.
-- `shared/`: reusable widgets and UI components.
-- `assets/translations/`: localization files.
-- `test/`: unit and widget tests.
-- `docs/`: project documentation.
 
 ## Technology Stack
 
-| Layer | Technology |
+| Area | Technology |
 |---|---|
-| Framework | Flutter |
-| Language | Dart |
+| Application | Flutter and Dart |
 | State management | Riverpod |
-| Routing | GoRouter |
-| Local database | Isar Community |
-| Cloud backend | Supabase |
-| Authentication | Supabase Auth and Google Sign-In |
-| Astronomy and prayer calculations | Adhan and custom Dart domain logic |
+| Routing | go_router |
+| Local persistence | Isar Community |
+| Prayer calculations | adhan |
+| Astronomical domain engine | Local `suwaya_time` Dart package |
 | Location | Geolocator and Geocoding |
-| Localization | Easy Localization |
+| Localization | Easy Localization and intl |
 | Notifications | Flutter Local Notifications |
-| Crash reporting | Firebase Crashlytics |
-| Charts | FL Chart |
+| Alarms | alarm |
+| Charts and animation | FL Chart and flutter_animate |
 
-## Requirements
+## Requirements and Installation
 
-- Flutter with Dart SDK `>=3.2.3 <4.0.0`
-- Android SDK for Android development
-- Xcode for iOS and macOS development
-- Platform-specific Flutter tooling for the target platform
-- A configured Firebase project for Crashlytics and platform services
-- Supabase project credentials for cloud synchronization
+Requirements:
 
-Verify the installed tools:
-
-```bash
-flutter --version
-dart --version
-flutter doctor
-```
-
-## Installation
-
-Clone the repository:
+- Flutter with Dart SDK `>=3.2.3 <4.0.0`.
+- Android, iOS, desktop, or web tooling for the target platform.
 
 ```bash
 git clone https://github.com/Abdallah-Kaballo/Suwaya.git
 cd Suwaya
-```
-
-Install dependencies:
-
-```bash
 flutter pub get
+flutter run
 ```
 
-Generate Isar files when required:
+Generate Isar adapters after changing persistent models:
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-Run the application:
-
-```bash
-flutter run
-```
-
-For a specific device:
-
-```bash
-flutter devices
-flutter run -d <device-id>
-```
-
 ## Configuration
 
-Supabase is initialized using compile-time environment values:
+The application has no required cloud credentials. Platform configuration may still be needed for location, notifications, exact alarms, and other native capabilities. Review the platform project files and request permissions only when the related feature is used.
 
-```text
-SUPABASE_URL
-SUPABASE_ANON_KEY
-```
-
-Run the application with:
-
-```bash
-flutter run \
-  --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=your-public-anon-key
-```
-
-Only public client-safe values should be passed to the application. Never include service-role keys, private API keys, or backend secrets in the application bundle.
-
-Firebase platform configuration is provided through the generated Firebase configuration files. Do not expose private credentials in source control.
+Translation assets, the city database, app icons, and notification audio are declared in `pubspec.yaml`.
 
 ## Testing
 
-Run static analysis:
-
 ```bash
 flutter analyze
-```
-
-Run all tests:
-
-```bash
 flutter test
-```
-
-Format Dart files:
-
-```bash
 dart format .
 ```
 
-The astronomical engine tests currently verify:
+The test suite covers prayer and period calculations, daylight-saving and leap-year behavior, polar/high-latitude cases, manual offsets, the 48-Suwaya distribution, virtual-time mapping, task logic, settings cloning, task providers, and widgets.
 
-- Chronological ordering of prayer times
-- Night duration and night-part coverage
-- Distribution of exactly 48 Suwayas
-- Manual prayer offsets
-- Contiguous daily periods
-- Coverage from Fajr to the following Fajr
+## Calculation Methodology
 
-## Accuracy and Calculation Methodology
-
-Astronomical results depend on:
-
-- Geographic coordinates
-- Date
-- Timezone and daylight-saving rules
-- Calculation method
-- Madhab
-- High-latitude rule
-- Manual offsets
-- Astronomical edge cases
-
-Different applications may produce different results when they use different calculation settings or rounding rules.
-
-Suwaya exposes configurable calculation inputs and tests important invariants in the domain engine. Results should be validated against trusted references before being used for critical decisions.
+Results depend on coordinates, date, timezone offset, calculation method, Madhab, high-latitude rule, custom angles, and manual offsets. Different applications can therefore produce different results. Suwaya exposes these inputs in settings and tests the domain invariants rather than claiming universal agreement with every reference implementation.
 
 ## Localization
 
-Suwaya includes localization files for 22 languages.
+Supported locales are registered in `lib/core/localization/app_locales.dart`. Translation files are stored in `assets/translations/`, with Arabic as the fallback locale. User-visible text should be localized, and both RTL and LTR layouts must be checked when adding or changing UI.
 
-Translation files are stored in:
+## Data, Privacy, and Permissions
 
-```text
-assets/translations/
-```
-
-The application supports:
-
-- Left-to-right interfaces
-- Right-to-left interfaces
-- Dynamic localized text
-- Localized date and time formatting
-
-When adding a language:
-
-1. Add the translation file under `assets/translations/`.
-2. Register the locale in the application localization configuration.
-3. Verify RTL or LTR layout behavior.
-4. Run the analyzer and tests.
-5. Check for missing or inconsistent translation keys.
-
-## Data and Privacy
-
-Most user-generated data is stored locally using Isar.
-
-Optional cloud synchronization can store selected data in Supabase when authentication and connectivity are available. Local functionality should remain usable when the network is unavailable.
-
-Location data is used to calculate astronomical and prayer times. According to the current privacy policy, location processing is performed locally and is not used to track user movements.
-
-Firebase Crashlytics is used to collect crash reports and improve application stability.
-
-Read the complete policy in [docs/privacy.md](docs/privacy.md).
-
-## Permissions
+Tasks, routines, settings, and saved locations are stored locally in Isar. Location is used to calculate prayer and astronomical times. Read [docs/privacy.md](docs/privacy.md) for the current privacy policy.
 
 | Permission | Purpose |
 |---|---|
-| Location | Astronomical and prayer-time calculations |
-| Notifications | Time-aware reminders |
-| Alarms | Scheduled alarm functionality |
-| Internet | Optional authentication, synchronization, and remote services |
-
-Permissions should be requested only when the related feature requires them.
+| Location | Location-aware calculations and saved places |
+| Notifications | Prayer, task, and routine reminders |
+| Alarms | Alarm scheduling and ringing |
+| Internet | Platform or package functionality that requires it; no cloud sync is currently configured |
 
 ## Known Limitations
 
-- Cloud synchronization requires authentication and network connectivity.
-- Astronomical results may differ between calculation methods.
-- High-latitude locations require configurable fallback rules.
-- Some platform features require additional native configuration.
-- Widget and integration test coverage is still being expanded.
-- The public documentation is evolving alongside the time model and synchronization behavior.
-
-## Roadmap
-
-The roadmap is intentionally focused on improving the reliability and understandability of the existing system.
-
-### Current Focus
-
-- Expand deterministic astronomical test coverage.
-- Document the Suwaya time model in greater detail.
-- Improve synchronization reliability.
-- Expand widget and integration tests.
-- Improve localization completeness and consistency.
-- Validate high-latitude and timezone edge cases.
-
-### Future Possibilities
-
-- More detailed time-model visualizations.
-- Broader calendar and device integrations.
-- Additional platform-specific improvements.
-- More advanced productivity analytics.
-
-Future items are exploratory and should not be interpreted as currently available features.
+- Calculation results vary between methods and high-latitude rules.
+- Some alarm and notification behavior requires platform-specific native permissions.
+- Location and timezone data can change when the user travels or changes the active location.
+- Cloud synchronization, authentication, analytics, and statistics screens are not part of the current implementation.
+- Widget and integration coverage is smaller than the domain test coverage.
 
 ## Contributing
 
-Contributions are welcome in:
-
-- Flutter and Dart development
-- Astronomical and prayer-time validation
-- Localization
-- UI and UX
-- Testing
-- Documentation
-- Accessibility
-- Performance improvements
+Keep domain calculations in `packages/suwaya_time`, persistence behind repositories, and platform APIs behind services. Add translation keys for user-visible text and tests for calculation, state, or persistence changes.
 
 Before opening a pull request:
 
@@ -528,67 +229,10 @@ flutter analyze
 flutter test
 ```
 
-Please keep changes focused, preserve the architectural boundaries described in [ARCHITECTURE.md](ARCHITECTURE.md), and include tests for changes to domain calculations or synchronization behavior.
-
 ## Security
 
-Please do not disclose security vulnerabilities publicly through regular issues.
-
-Until a dedicated security policy is added, security reports should be sent privately to the repository owner or submitted through the repository's available GitHub security reporting channels.
-
-Never commit:
-
-- Supabase service-role keys
-- Private API keys
-- Signing credentials
-- Keystores
-- Passwords
-- Personal access tokens
-
-## FAQ
-
-### Is Suwaya another prayer-times application?
-
-No. Prayer times are one of the foundations of Suwaya's time model. The application also connects astronomical periods with tasks, routines, focus sessions, notifications, and productivity tracking.
-
-### Is Suwaya time the same as civil time?
-
-No. Civil time remains the ordinary clock time used by the operating system. Suwaya time is a virtual representation based on astronomical periods and the distribution of 48 daily Suwayas.
-
-### Does Suwaya replace the normal clock?
-
-No. Suwaya complements civil time; it does not replace the system clock or standard scheduling conventions.
-
-### Can Suwaya work offline?
-
-Core local functionality is designed to work offline. Authentication and cloud synchronization require network access.
-
-### Why can prayer times differ from another application?
-
-Results can differ because of location, timezone, calculation method, Madhab, high-latitude rules, rounding, or manual offsets.
-
-### Where is user data stored?
-
-Most user data is stored locally using Isar. Selected data may be synchronized through Supabase when the user is authenticated and connected.
+Do not commit signing credentials, private API keys, passwords, or personal access tokens. Report security issues privately to the repository owner or through the repository's available GitHub security channels.
 
 ## License
 
-Suwaya is licensed under the GNU General Public License v3.0.
-
-See [LICENSE](LICENSE) for the complete license text.
-
-## Acknowledgments
-
-Suwaya is built with and inspired by the following open-source projects:
-
-- [Flutter](https://flutter.dev)
-- [Dart](https://dart.dev)
-- [Riverpod](https://riverpod.dev)
-- [Isar Community](https://pub.dev/packages/isar_community)
-- [Supabase](https://supabase.com)
-- [Adhan](https://pub.dev/packages/adhan)
-- [Easy Localization](https://pub.dev/packages/easy_localization)
-- [Firebase Crashlytics](https://firebase.google.com/products/crashlytics)
-
-The project also acknowledges the work of the developers and researchers whose astronomical and prayer-time methods make this application possible.
-```
+Suwaya is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE).

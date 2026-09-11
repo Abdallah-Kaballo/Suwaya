@@ -2,108 +2,68 @@
 
 ## 1. Purpose
 
-Suwaya is a Flutter application that combines:
+Suwaya is a Flutter application built around a pure Dart astronomical time engine. It combines prayer and solar calculations, a 48-Suwaya day model, tasks, routines, focus sessions, location, notifications, alarms, and localization.
 
-- Astronomical and Islamic prayer time calculations.
-- The Suwaya time system divided into 48 daily Suwayas.
-- Task, routine, worship, and productivity management.
-- Offline-first local storage.
-- Optional cloud synchronization.
-- Localization and RTL/LTR support.
-- Notifications, alarms, location, and background services.
+The current implementation is local-first. Isar is the application data store, and the repository contains no active authentication or cloud synchronization layer. This document describes the architecture that exists today and the boundaries to preserve when extending it.
 
-This document defines the architectural rules and conventions that must be followed when adding or modifying features.
-
----
+The detailed mathematical and behavioral reference for the time model is available in [Suwaya-Time.md](Suwaya-Time.md).
 
 ## 2. Architectural Principles
 
-### 2.1 Offline-first
+### 2.1 Local-first data
 
-Local data is the primary source of truth during normal application usage.
+Tasks, routines, settings, and saved locations are read from and written to the local Isar database. Features should remain useful without a network connection. Do not introduce a remote source of truth unless the synchronization model, conflict behavior, privacy implications, and migrations are designed first.
 
-Features must continue to work when:
+### 2.2 Dependency injection through Riverpod
 
-- The device has no network connection.
-- Supabase is unavailable.
-- The user is not authenticated.
-- Location permissions are unavailable.
-
-Cloud synchronization is an enhancement, not a requirement for the core user experience.
-
-### 2.2 Explicit dependency injection
-
-Shared services and infrastructure dependencies must be provided through Riverpod.
-
-Do not create database, authentication, synchronization, or notification service instances directly inside widgets.
-
-The Isar instance is initialized during application bootstrap and injected through `isarProvider`.
+Shared infrastructure is exposed through Riverpod providers. Widgets must not create Isar instances, repositories, notification services, alarm services, or location services directly. The initialized Isar instance is supplied through `isarProvider`.
 
 ### 2.3 Feature-oriented organization
 
-Code belongs in one of the following locations:
+- `lib/core/` contains reusable infrastructure and application services.
+- `lib/features/` contains user-facing screens, providers, and feature-specific widgets.
+- `lib/models/` contains persistent Isar models and generated adapters.
+- `lib/shared/` contains widgets reused by multiple features.
+- `packages/suwaya_time/` contains pure Dart astronomical domain logic.
 
-- `lib/core/`: reusable infrastructure and domain services.
-- `lib/features/`: user-facing features and feature-specific state.
-- `lib/models/`: persistent Isar models.
-- `lib/shared/`: reusable widgets and UI components.
-
-A feature should keep its screen, provider, state, and feature-specific widgets together whenever practical.
+Keep a feature's screen, state, and feature-specific widgets together. Put code in `core` only when it is genuinely shared or infrastructure-oriented.
 
 ### 2.4 Pure domain logic
 
-Calculations that do not require Flutter should remain independent of Flutter.
-
-The astronomical engine must not depend on:
-
-- `BuildContext`.
-- Flutter widgets.
-- Riverpod.
-- Platform-specific APIs.
-- Localization delegates.
-
-This allows the engine to be tested independently and executed in an isolate when necessary.
+The `suwaya_time` package must remain independent of Flutter, Riverpod, `BuildContext`, localization, and platform APIs. It accepts explicit calculation inputs and returns domain models. This keeps calculations deterministic and testable in a Dart-only test environment.
 
 ### 2.5 Clear ownership
-
-Each layer has one responsibility:
 
 | Layer | Responsibility |
 |---|---|
 | Screen/widget | Rendering and user interaction |
 | Provider/notifier | State orchestration and user actions |
-| Repository | Reading and writing application data |
-| Service | External systems and platform APIs |
+| Repository | Isar reads and writes |
+| Service | Platform or external API integration |
 | Model | Persistent data structure |
-| Domain engine | Deterministic business calculations |
+| `suwaya_time` | Prayer, period, distribution, and virtual-time calculations |
 
-Widgets should not contain database queries or synchronization rules.
-
----
+Widgets must not contain raw database queries, persistence rules, or complex astronomical calculations.
 
 ## 3. Project Structure
 
 ```text
 lib/
 ├── main.dart
-├── firebase_options.dart
 ├── core/
-│   ├── astro_engine/
-│   ├── bootstrap/
-│   ├── database/
-│   ├── localization/
-│   ├── location/
-│   ├── notification/
-│   ├── repositories/
-│   ├── router/
-│   ├── services/
-│   ├── sync/
-│   ├── theme/
-│   └── utils/
+│   ├── astro_engine/       # Flutter state adapter for suwaya_time
+│   ├── bootstrap/          # Early initialization
+│   ├── database/           # Isar service and provider
+│   ├── localization/       # Supported locales
+│   ├── location/           # Location, geocoding, permissions
+│   ├── notification/       # Notification service and scheduler
+│   ├── providers/          # Shared UI providers
+│   ├── repositories/       # Task, routine, and settings repositories
+│   ├── router/             # go_router configuration
+│   ├── services/           # Alarm integration
+│   └── theme/              # Themes and domain-to-UI color adapters
 ├── features/
 │   ├── alarm/
-│   ├── analytics/
-│   ├── auth/
 │   ├── home/
 │   ├── ibadat/
 │   ├── layout/
@@ -112,451 +72,153 @@ lib/
 │   ├── routines/
 │   ├── settings/
 │   ├── splash/
-│   ├── stats/
 │   └── tasks/
 ├── models/
-└── shared/
-    └── widgets/
-
+└── shared/widgets/
+packages/suwaya_time/lib/
+├── src/calculators/
+├── src/engine/
+├── src/generators/
+└── src/models/
 ```
 
-### `core`
-
-Contains application-wide infrastructure, services, and domain logic.
-
-Examples:
-
-* Database initialization.
-* Location services.
-* Notifications.
-* Authentication.
-* Synchronization.
-* Astronomical calculations.
-* Theme and localization configuration.
-
-### `features`
-
-Contains user-facing application functionality.
-
-A feature may contain:
-
-* Screen widgets.
-* Providers.
-* State classes.
-* Feature-specific UI widgets.
-* Feature-specific helpers.
-
-A feature must not access Supabase, Isar, or platform APIs directly when a core service or repository already exists.
-
-### `models`
-
-Contains Isar persistence models and generated files.
-
-Generated files such as `*.g.dart` must not be edited manually.
-
-### `shared`
-
-Contains UI components used by more than one feature.
-
-A widget belongs in `shared` only when it is genuinely reusable. Feature-specific widgets should remain inside their feature.
-
----
+Generated `*.g.dart` files are produced by Isar's generator and must not be edited manually.
 
 ## 4. Application Startup
 
-Application startup follows this sequence:
+Startup is intentionally split so database opening does not block the first loading screen:
 
-1. Flutter bindings are initialized.
-2. Time zones and error handlers are configured.
-3. Alarm services are initialized.
-4. Isar is opened through `DatabaseService`.
-5. Localization, and date formatting are initialized.
-6. Background services are initialized.
-7. The Isar instance is injected into `ProviderScope`.
-8. `EasyLocalization` wraps the application.
-9. `SuwayaApp` is rendered via `go_router`.
-10. Background synchronization begins through `GlobalSyncWrapper`.
+1. `main` awaits `AppBootstrap.initialize()`.
+2. Flutter bindings and Easy Localization are initialized.
+3. Global Flutter error handlers are registered.
+4. Notification service and alarm support are initialized.
+5. A lightweight `LoadingBootstrapScreen` is rendered.
+6. `DatabaseService.init()` opens Isar and creates default settings when needed.
+7. The resulting Isar instance is injected through `ProviderScope`.
+8. `EasyLocalization` wraps `SuwayaApp`.
+9. `MaterialApp.router` uses the Riverpod-provided `go_router` configuration.
 
-Startup failures must display a recoverable failure screen and must be reported through Crashlytics in release builds.
-
-New startup work must be:
-
-* Idempotent.
-* Safe to execute more than once.
-* Isolated from the first frame whenever possible.
-* Protected from blocking the UI unnecessarily.
-
----
+Database failures are shown through a retryable bootstrap failure screen. New startup work should be idempotent and should not unnecessarily delay the first frame.
 
 ## 5. State Management
 
-Riverpod is the standard state management solution.
+Riverpod is the state management solution.
 
-Use:
+- Use `Provider` for stateless services and repositories.
+- Use `NotifierProvider` for state with mutations, such as settings, tasks, and the current astronomical state.
+- Use `ref.watch` to rebuild widgets from state.
+- Use `ref.read(...notifier)` to trigger actions.
+- Keep providers independent of `BuildContext` where practical.
+- Represent loading, empty, fallback, and error states explicitly.
 
-* `Provider` for stateless services and repositories.
-* `FutureProvider` for asynchronous read operations.
-* `StreamProvider` for streams such as authentication state.
-* `NotifierProvider` for feature state with mutations.
-* `StateNotifierProvider` only where the existing implementation already uses it or where its semantics are required.
+`AstroNotifier` is the Flutter adapter around `SuwayaTimeEngine`. It watches calculation settings, generates or retrieves the active day, and exposes `AstroState` to the UI.
 
-State rules:
+The astronomical state uses two timers with different responsibilities:
 
-* Widgets read state with `ref.watch`.
-* Widgets trigger actions through `ref.read(...notifier)`.
-* Business mutations belong in notifiers or repositories.
-* Providers must not depend on `BuildContext`.
-* Avoid duplicating the same source of truth in multiple providers.
-* Loading, success, empty, and error states must be represented explicitly.
+- A smart state timer wakes at the next Suwaya boundary and updates Riverpod state only when the period or Suwaya changes.
+- A five-second display ticker updates `virtualTimeNotifier` for the formatted clock without forcing a full state rebuild.
 
----
+Time-dependent features such as Pomodoro should consume the shared astronomical state, especially `suwayaProgress`, rather than creating an independent ticking clock.
 
-## 6. Database Rules
+## 6. Persistence
 
-Isar is the local persistence layer.
-
-All database writes must occur inside `isar.writeTxn`.
-
-Persistent models must:
-
-* Have stable fields.
-* Use explicit defaults where appropriate.
-* Define indexes for frequently queried fields.
-* Avoid storing presentation-only values.
-* Preserve backward compatibility when fields are renamed or removed.
-
-Generated Isar files must be regenerated with the project build command and never edited manually.
-
-The database must be accessed through repositories or dedicated services. Screens should not execute raw Isar queries.
-
-### Database fallback
-
-Any fallback schema must include every model required by the application. When adding a new collection, update:
-
-* The primary Isar schema.
-* The fallback schema.
-* Migration or compatibility logic.
-* Tests covering opening and reading the database.
-
----
-
-## 7. Data Synchronization
-
-Synchronization is based on:
-
-* A stable `syncId`.
-* `updatedAt`.
-* `isSynced`.
-* `isDeleted`.
-* User ownership in Supabase.
-
-Local changes are written first and marked as unsynced. Synchronization then:
-
-1. Pulls remote changes.
-2. Applies newer remote records locally.
-3. Pushes unsynced local records.
-4. Marks successfully uploaded records as synced.
-5. Stores the last successful synchronization timestamp.
-
-Synchronization must never delete local data merely because the network request failed.
-
-Soft deletion must be used for records that need to be synchronized across devices.
-
-All timestamps exchanged with the backend must be normalized to UTC.
-
-The application currently triggers synchronization:
-
-* At application startup.
-* When returning from the background.
-* After relevant authentication events.
-
-A feature must not assume that synchronization is immediate.
-
----
-
-## 8. Astronomical Engine
-
-The astronomical engine is a pure Dart domain layer.
-
-Its responsibilities include:
-
-* Prayer time calculations.
-* High-latitude handling.
-* Madhab selection.
-* Manual prayer offsets.
-* Night-part calculations.
-* Suwaya distribution.
-* Daily period generation.
-
-Important invariants:
-
-* Prayer times must remain chronologically ordered.
-* Night parts must cover the interval from Maghrib to the next Fajr.
-* Daily periods must be contiguous.
-* The total Suwaya distribution must equal 48.
-* Manual offsets must affect only the selected prayer.
-* Generated periods must cover the actual interval from Fajr to the next Fajr.
-
-Long-running annual calculations should use the asynchronous isolate-based API.
-
-Changes to the astronomical engine must include tests for:
-
-* Normal locations.
-* High-latitude locations.
-* Manual offsets.
-* Time-zone offsets.
-* Leap years and date boundaries.
-* The Fajr-to-Fajr period interval.
-* The 48-Suwaya invariant.
-
----
-
-## 9. Time and Date Rules
-
-The application uses multiple concepts of time:
-
-* Civil time.
-* Local astronomical time.
-* UTC timestamps for synchronization and event logs.
-* The active Islamic/productivity day.
-* Suwaya and period boundaries.
-
-These concepts must not be mixed implicitly.
+Isar Community is the local persistence layer. Current collections include tasks, settings, saved geographic data, and routines.
 
 Rules:
 
-* Use UTC for cloud synchronization fields.
-* Use local time for user-facing schedules.
-* Store the active day explicitly when calculating statistics.
-* Do not derive historical statistics from the current device time.
-* Always document whether a `DateTime` is UTC or local.
-* Be careful when comparing dates across daylight-saving or travel changes.
-* **Single Source of Truth:** Time-dependent features (like Pomodoro) must **not** run their own independent `Timer.periodic`. They must passively listen to `AstroState.suwayaProgress` to prevent desync and battery drain.
+- All writes occur inside `isar.writeTxn`.
+- Access Isar through repositories or dedicated database services.
+- Keep persistent fields stable and use explicit defaults.
+- Do not store presentation-only state in models.
+- Regenerate adapters after model changes with `build_runner`.
+- Keep database initialization and default-settings creation in `DatabaseService`.
 
----
+Repositories currently include task, routine, and settings persistence. Deletion behavior must match the model's intended lifecycle; the current task and routine repositories perform direct local deletion rather than a synchronization soft-delete protocol.
 
-## 10. Localization
+## 7. Astronomical Domain Package
 
-All user-visible text must be localized.
+`packages/suwaya_time` is a pure Dart package. Its public engine:
 
-Rules:
+- Calculates prayer timings using `adhan`.
+- Applies calculation method, Madhab, high-latitude rules, custom angles, timezone offset, and manual prayer offsets.
+- Calculates night parts.
+- Generates contiguous Fajr-to-next-Fajr periods.
+- Distributes exactly 48 Suwayas across the day.
+- Maps a generated day and a current time to `AstroState`, including current period, Suwaya, progress, and virtual time.
 
-* Do not hardcode user-facing strings in widgets.
-* Add translation keys to the translation files.
-* Keep translation keys stable.
-* Support both RTL and LTR layouts.
-* Avoid assumptions about text width.
-* Test long translations and languages with different word lengths.
-* Do not use translated display text as a database identifier.
+The Flutter layer supplies settings and location, then uses the returned models for rendering and scheduling. The package must not import Flutter or Riverpod.
 
-Enums and domain values must use stable internal names. Their labels should be resolved through localization.
+Required invariants:
 
----
+- Prayer times remain chronologically ordered.
+- Periods are contiguous and cover Fajr to the following Fajr.
+- The distribution totals 48 Suwayas.
+- Night parts cover Maghrib to the next Fajr.
+- Manual offsets affect only their selected prayer.
 
-## 11. Navigation
+Changes to this package require focused tests for ordinary, high-latitude/polar, daylight-saving, leap-year, date-boundary, manual-offset, distribution, period-generation, and virtual-time cases where relevant.
 
-The application uses `go_router` for state-driven routing and deep linking, implementing `StatefulShellRoute.indexedStack` to maintain tab states seamlessly across the primary layout.
+## 8. Time and Date Rules
 
-Navigation rules:
+The application uses civil/local time for user-facing schedules and explicit UTC or location-aware values when calculating across timezones. A `DateTime`'s timezone meaning must be clear at every boundary.
 
-* Use `context.go` or `context.push` via `go_router`.
-* Keep route arguments typed.
-* Avoid passing database objects across routes.
-* Handle `context.mounted` after awaited operations.
-* Keep navigation decisions out of repositories and pure domain services.
+The active astronomical day is selected relative to Fajr and the following Fajr. Location timezone changes must invalidate the calculation fingerprint and regenerate the day. Do not use the device's current time to reinterpret historical task or routine data.
 
----
+## 9. Routing and Features
 
-## 12. Notifications, Alarms, and Permissions
+`go_router` owns navigation. The main shell uses `StatefulShellRoute.indexedStack` with four primary branches:
 
-Platform services must be accessed through dedicated services.
+- `/tasks`
+- `/ibadat`
+- `/home`
+- `/pomodoro`
 
-Screens may request a permission through a provider or service, but must not contain platform-specific implementation details.
+Splash, onboarding, task creation, the astronomical timeline, and settings screens are routed outside the primary shell. Keep route arguments small and typed where possible; do not pass Isar objects between routes.
 
-Permission flows must handle:
+## 10. Platform Services
 
-* Permission not requested.
-* Permission denied.
-* Permission permanently denied.
-* Unsupported platform behavior.
-* User cancellation.
-* Missing exact-alarm permission.
-* Notification scheduling failure.
+Platform APIs are wrapped by services and providers:
 
-Scheduling must be idempotent. Rebuilding a widget must not create duplicate notifications or alarms.
+- `LocationService` and geocoding support active and saved locations.
+- `NotificationService` and `SchedulerService` manage local notifications.
+- `AlarmService` and the alarm feature handle alarm scheduling and ringing.
+- Permission providers expose permission state to the UI.
 
----
+Permission flows must handle denied, permanently denied, unsupported, and failed states. Scheduling should be idempotent so widget rebuilds do not create duplicate alarms or notifications.
 
-## 13. UI Rules
+## 11. Localization and UI
 
-UI code should:
+All user-visible text must use Easy Localization translation keys. Supported locales are defined in `AppLocales`, with Arabic as the fallback locale. UI must support RTL and LTR, light and dark themes, and long translations.
 
-* Stay focused on rendering and interaction.
-* Use shared theme values.
-* Support light and dark themes.
-* Support RTL and LTR.
-* Handle loading, empty, and error states.
-* Avoid direct database access.
-* Avoid complex calculations inside `build`.
-* Use stable keys for dynamic lists.
-* Keep reusable widgets small and focused.
-* **Color Adaptation:** Always use the `.uiColor.adapt(context)` extension when accessing `AstroPeriod` colors in the UI to maintain domain purity.
+Keep UI focused on rendering and interaction. Use shared theme values and the `uiColor.adapt(context)` conversion when presenting astronomical domain colors. Custom dials and charts should receive prepared domain data instead of querying repositories.
 
-Custom astronomical dials and charts should receive prepared data rather than querying repositories internally.
+## 12. Testing Requirements
 
----
+The repository currently contains:
 
-## 14. Error Handling and Observability
+- Pure/domain tests for astronomy, periods, distribution, timezone behavior, and virtual-time mapping.
+- Model and provider tests for task and settings behavior.
+- Widget tests for application UI and bootstrap behavior.
 
-Expected failures should be represented in application state and shown with a useful user-facing message.
-
-Unexpected failures must:
-
-* Preserve the application from crashing where possible.
-* Include enough context for diagnosis.
-* Be reported to Crashlytics in release builds.
-* Avoid exposing secrets or private user data.
-
-Do not log:
-
-* Access tokens.
-* Supabase keys.
-* Private user information.
-* Full synchronization payloads.
-* Sensitive location data unless necessary for debugging.
-
----
-
-## 15. Testing Requirements
-
-Tests must be added according to risk.
-
-### Domain tests
-
-Required for:
-
-* Astro calculations.
-* Suwaya distribution.
-* Period boundaries.
-* Date and time behavior.
-* Manual offsets.
-
-### Repository tests
-
-Required for:
-
-* CRUD behavior.
-* Soft deletion.
-* Sync flags.
-* Migration behavior.
-* Empty database initialization.
-
-### Provider tests
-
-Required for:
-
-* State transitions.
-* Loading and error states.
-* Mutation behavior.
-* Dependency failures.
-
-### Widget tests
-
-Required for important flows such as:
-
-* Onboarding.
-* Adding a task.
-* Completing a task.
-* Changing settings.
-* Permission-related screens.
-
-Every bug fix should include a regression test when practical.
-
----
-
-## 16. Adding a New Feature
-
-When adding a feature:
-
-1. Create a directory under `lib/features`.
-2. Define the feature state and provider.
-3. Keep persistence access in a repository or service.
-4. Add localization keys.
-5. Add loading, empty, and error states.
-6. Add tests for the feature's core behavior.
-7. Check RTL and LTR layouts.
-8. Check light and dark themes.
-9. Check offline behavior.
-10. Check synchronization behavior if the feature stores user data.
-11. Run formatting, analysis, and tests.
-
----
-
-## 17. Dependency Rules
-
-Before adding a package:
-
-* Confirm that an existing package does not already solve the problem.
-* Check platform support.
-* Check maintenance status.
-* Check license compatibility.
-* Consider application size and startup cost.
-* Add the dependency to the correct section of `pubspec.yaml`.
-* Document important architectural consequences.
-
-Infrastructure packages should not be imported into pure domain code.
-
----
-
-## 18. Code Quality
-
-Before submitting changes, run:
+Add regression coverage for bug fixes when practical. Run:
 
 ```bash
 dart format .
 flutter analyze
 flutter test
-
 ```
 
-Generated code must be regenerated when models change.
+## 13. Adding a Feature
 
-A change is not complete until:
+1. Place user-facing code under `lib/features/<feature>`.
+2. Add state and mutations to a provider or notifier.
+3. Keep Isar access in a repository or database service.
+4. Add localization keys for visible text.
+5. Handle loading, empty, fallback, and error states.
+6. Reuse the shared astronomical state for time-dependent behavior.
+7. Add focused tests and check RTL/LTR plus light/dark themes.
+8. Run formatting, analysis, and tests.
 
-* The code is formatted.
-* Static analysis passes.
-* Relevant tests pass.
-* New behavior is documented where necessary.
-* No secrets are committed.
-* Platform-specific behavior has been checked.
+## 14. Definition of Done
 
----
-
-## 19. Architectural Risks to Track
-
-The following items should be reviewed as the project grows:
-
-* Synchronization is lifecycle-triggered rather than realtime.
-* Pull synchronization currently needs explicit coverage for every synchronized model.
-* Fallback database schemas must remain aligned with the primary schema.
-* Date/time semantics should be documented consistently across all models.
-* Repositories should remain the single access point for persistent data.
-* Generated Isar files must never be edited manually.
-
----
-
-## 20. Definition of Done
-
-A feature is considered complete when:
-
-* Its responsibilities are placed in the correct layer.
-* It works without network access where applicable.
-* It handles loading, empty, and error states.
-* It supports localization and RTL/LTR.
-* It supports light and dark themes.
-* It does not duplicate an existing source of truth.
-* It has appropriate tests.
-* It passes formatting, analysis, and test commands.
-* Its synchronization and migration behavior are documented.
-
-```
+A change is complete when its responsibilities remain in the correct layer, persistent writes are transactional, domain behavior has appropriate tests, user-visible text is localized, platform failures are handled, and `dart format`, `flutter analyze`, and `flutter test` pass.
