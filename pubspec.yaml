@@ -55,6 +55,8 @@ dependencies:
   suwaya_time:
     path: packages/suwaya_time
 
+  in_app_update: 5.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

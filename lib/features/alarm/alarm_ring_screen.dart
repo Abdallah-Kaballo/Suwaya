@@ -33,7 +33,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
     super.initState();
     _enableLockScreenVisibility();
 
-    // 🌟 الترجمة للنصوص الافتراضية
     final payload = widget.alarmSettings.payload?.split('|') ?? ['alarm.default_title'.tr(), '0xFFD4AF37', '0'];
     taskTitle = payload[0] == 'تنبيه' ? 'alarm.default_title'.tr() : payload[0];
     accentColor = Color(int.tryParse(payload[1]) ?? 0xFFD4AF37);
@@ -47,6 +46,7 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
 
   Future<void> _enableLockScreenVisibility() async {
     try {
+      // 🌟 استدعاء النيتف كود لإيقاظ الشاشة والظهور فوق القفل
       await platform.invokeMethod('showOnLockScreen');
     } catch (e) {
       debugPrint('Failed to show on lock screen: $e');
@@ -131,14 +131,12 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                     Text(taskTitle, style: TextStyle(color: accentColor, fontSize: 32, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                     const SizedBox(height: 8),
                     if (canSnooze)
-                      // 🌟 ترجمة الغفوات
                       Text('${'alarm.snooze'.tr()} ${snoozeCount + 1} ${'common.of'.tr()} ${AlarmService.maxSnoozes}', style: const TextStyle(color: Colors.white54, fontSize: 14))
                     else
                       Text('alarm.max_snoozes_reached'.tr(), style: const TextStyle(color: Colors.redAccent, fontSize: 14)),
                   ],
                 ),
 
-                // 🌟 نظام السحب + أزرار النقر البديلة لحل مشكلة الإمكانية (Accessibility)
                 Column(
                   children: [
                     Directionality(
@@ -207,7 +205,6 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // 🌟 أزرار ضخمة بديلة في حال لم يفهم المستخدم نظام السحب
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

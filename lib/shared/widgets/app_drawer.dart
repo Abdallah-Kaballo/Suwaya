@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -6,8 +5,8 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
+import 'package:in_app_update/in_app_update.dart'; // مكتبة تحديثات جوجل بلاي
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -34,37 +33,6 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  String _normalizeVersion(String value) {
-    return value
-        .trim()
-        .replaceFirst(RegExp(r'^v', caseSensitive: false), '')
-        .split('+')
-        .first
-        .trim();
-  }
-
-  int _compareVersions(String current, String latest) {
-    final currentParts = _normalizeVersion(current)
-        .split('.')
-        .map((part) => int.tryParse(part) ?? 0)
-        .toList();
-    final latestParts = _normalizeVersion(latest)
-        .split('.')
-        .map((part) => int.tryParse(part) ?? 0)
-        .toList();
-
-    for (var index = 0; index < 3; index++) {
-      final currentPart = index < currentParts.length ? currentParts[index] : 0;
-      final latestPart = index < latestParts.length ? latestParts[index] : 0;
-
-      if (currentPart != latestPart) {
-        return currentPart.compareTo(latestPart);
-      }
-    }
-
-    return 0;
-  }
-
   Future<void> _checkForUpdates(BuildContext context, Color primaryColor) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
@@ -85,48 +53,40 @@ class AppDrawer extends ConsumerWidget {
     );
 
     try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = _normalizeVersion(packageInfo.version);
-
-      final response = await http.get(Uri.parse('https://api.github.com/repos/Abdallah-Kaballo/Suwaya/releases/latest'));
+      // الاستعلام من متجر جوجل بلاي
+      AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
       
       if (!context.mounted) return;
-      Navigator.pop(context); 
+      Navigator.pop(context); // إغلاق نافذة التحميل
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final latestVersion = _normalizeVersion(data['tag_name'].toString());
-        final apkUrl = data['assets'] != null && data['assets'].isNotEmpty 
-            ? data['assets'][0]['browser_download_url'] 
-            : data['html_url']; 
-
-        if (_compareVersions(currentVersion, latestVersion) < 0) {
-          _showUpdateAvailableDialog(context, latestVersion, apkUrl, primaryColor, isDark);
-        } else {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: Row(
-                children: [
-                  const Icon(LucideIcons.circle_check, color: Colors.green),
-                  const SizedBox(width: 8),
-                  Text('drawer.up_to_date'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
-                ],
-              ),
-              content: Text('${'drawer.latest_version_msg'.tr()} (v$currentVersion)', style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
-              actions: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
+      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+        // بدء التحديث المرن في الخلفية
+        await InAppUpdate.startFlexibleUpdate();
+        // إشعار المستخدم باكتمال التحميل لطلب التثبيت
+        await InAppUpdate.completeFlexibleUpdate();
+      } else {
+        // لا يوجد تحديث
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            title: Row(
+              children: [
+                const Icon(LucideIcons.circle_check, color: Colors.green),
+                const SizedBox(width: 8),
+                Text('drawer.up_to_date'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
               ],
             ),
-          );
-        }
-      } else {
-        throw Exception('فشل الاتصال بـ GitHub');
+            content: Text('drawer.latest_version_msg'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
       if (!context.mounted) return;
@@ -135,38 +95,6 @@ class AppDrawer extends ConsumerWidget {
         SnackBar(content: Text('drawer.github_connection_failed'.tr()), backgroundColor: Colors.redAccent),
       );
     }
-  }
-
-  void _showUpdateAvailableDialog(BuildContext context, String newVersion, String url, Color primaryColor, bool isDark) {
-    final textColor = isDark ? Colors.white : Colors.black87;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Row(
-          children: [
-            Icon(LucideIcons.cloud_download, color: primaryColor),
-            const SizedBox(width: 8),
-            Text('drawer.update_available'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
-          ],
-        ),
-        content: Text('${'drawer.new_version_desc'.tr()} (v$newVersion)\n\n${'drawer.do_you_want_to_download'.tr()}', style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('common.cancel'.tr(), style: const TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-            onPressed: () {
-              Navigator.pop(ctx);
-              _launchUrl(url);
-            },
-            child: Text('drawer.download'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -200,7 +128,6 @@ class AppDrawer extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text('Suwaya', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                        // 🌟 تم حذف جملة "هندسة الوقت" من هنا حسب طلبك
                       ],
                     ),
                   ),

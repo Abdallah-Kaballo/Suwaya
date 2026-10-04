@@ -1,6 +1,6 @@
 import 'package:alarm/alarm.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:easy_localization/easy_localization.dart'; // 🌟
+import 'package:easy_localization/easy_localization.dart';
 
 class AlarmService {
   static const int maxSnoozes = 3;
@@ -13,18 +13,21 @@ class AlarmService {
   static Future<bool> checkAndRequestPermissions() async {
     bool allGranted = true;
     
+    // 🌟 طلب صلاحية المنبهات الدقيقة
     if (await Permission.scheduleExactAlarm.isDenied) {
       final status = await Permission.scheduleExactAlarm.request();
       if (!status.isGranted) allGranted = false;
     }
-    if (await Permission.systemAlertWindow.isDenied) {
-      final status = await Permission.systemAlertWindow.request();
-      if (!status.isGranted) allGranted = false;
-    }
+
+    // 🌟 تم إزالة طلب صلاحية SYSTEM_ALERT_WINDOW من هنا بالكامل
+
+    // 🌟 طلب صلاحية تخطي تحسين البطارية لضمان رنين المنبه في الوقت المحدد
     if (await Permission.ignoreBatteryOptimizations.isDenied) {
       final status = await Permission.ignoreBatteryOptimizations.request();
       if (!status.isGranted) allGranted = false;
     }
+
+    // 🌟 طلب صلاحية الإشعارات
     if (await Permission.notification.isDenied) {
       final status = await Permission.notification.request();
       if (!status.isGranted) allGranted = false;
@@ -55,14 +58,13 @@ class AlarmService {
       assetAudioPath: tonePath,
       loopAudio: true,
       vibrate: vibrate,
-      androidFullScreenIntent: fullScreenIntent,
+      androidFullScreenIntent: fullScreenIntent, // 🌟 هذه الخاصية هي البديل الشرعي للنافذة العائمة
       payload: '$title|$colorValue|0',
       volumeSettings: VolumeSettings.fade(
         volume: volume,
         fadeDuration: const Duration(seconds: 10),
       ),
       notificationSettings: NotificationSettings(
-        // 🌟 تطبيق الترجمة
         title: '${'notifications.alert'.tr()}: $title',
         body: 'alarm.swipe_to_stop'.tr(),
       ),
