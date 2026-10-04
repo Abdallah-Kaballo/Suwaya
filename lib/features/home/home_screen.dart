@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
+import 'package:suwaya/features/home/widgets/dial/period_metrics.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
 import 'package:suwaya/core/notification/scheduler_service.dart';
@@ -15,14 +16,15 @@ import '../../core/astro_engine/astro_provider.dart';
 import '../../models/task_model.dart';
 import '../tasks/tasks_provider.dart';
 import '../settings/settings_provider.dart';
-import '../routines/routines_provider.dart'; 
-import '../../core/providers/ui_providers.dart'; 
+import '../routines/routines_provider.dart';
+import '../../core/providers/ui_providers.dart';
 
-import 'widgets/location_header.dart'; 
-import 'widgets/premium_astro_dial.dart'; 
-import '../routines/widgets/routines_list_sheet.dart';
+import 'widgets/location_header.dart';
+import 'widgets/premium_astro_dial.dart';
+import 'widgets/dial/dial_models.dart';
 import 'widgets/mini_astro_dial.dart';
 import '../../shared/widgets/app_drawer.dart';
+import '../../shared/widgets/suwaya_time_text.dart';
 import '../../core/theme/astro_ui_extensions.dart';
 import 'package:go_router/go_router.dart';
 
@@ -38,115 +40,160 @@ Color getNeonColorForCategory(TaskCategory category) {
   return const Color(0xFF18FFFF);
 }
 
-Color _getSafePeriodColor(int id) {
-  switch (id) {
-    case 1: return const Color(0xFF64B5F6);
-    case 2: return Colors.orangeAccent;
-    case 3: return const Color(0xFFFFCA28);
-    case 4: return const Color(0xFFFF9800);
-    case 5: return const Color(0xFFE53935);
-    case 6: return const Color(0xFF3F51B5);
-    case 7: return const Color(0xFF1A237E);
-    default: return Colors.grey;
-  }
-}
-
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  Widget _buildInfoRow(String title, String value, Color textColor, Color pColor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 14)),
-          Text(value, style: TextStyle(color: pColor, fontSize: 14, fontWeight: FontWeight.normal)),
+  Future<void> _showDialItemDialog(
+    BuildContext context,
+    DialSelection selection,
+    AstroState astroState,
+    SettingsModel settings,
+  ) async {
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final civilColor = textColor.withValues(alpha: 0.82);
+    AstroPeriod? selectedPeriod;
+    if (selection.type == DialSelectionType.period) {
+      final periodId = int.tryParse(selection.id);
+      for (final period in astroState.periods) {
+        if (period.id == periodId) {
+          selectedPeriod = period;
+          break;
+        }
+      }
+    }
+    final periodMetrics = selectedPeriod == null
+        ? null
+        : PeriodMetrics.fromPeriod(selectedPeriod);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(selection.title, style: TextStyle(color: textColor)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDialTimeRow(
+              context,
+              'details.start'.tr(),
+              selection.startTime,
+              astroState,
+              settings,
+              civilColor,
+              selection.color,
+            ),
+            if (selection.endTime != null) ...[
+              const SizedBox(height: 12),
+              _buildDialTimeRow(
+                context,
+                'details.end'.tr(),
+                selection.endTime!,
+                astroState,
+                settings,
+                civilColor,
+                selection.color,
+              ),
+            ],
+            if (periodMetrics != null) ...[
+              const SizedBox(height: 16),
+              _buildPeriodMetricRow(
+                'home.suwayas_count'.tr(),
+                '${periodMetrics.suwayaCount} ${'details.suwayas'.tr()}',
+                civilColor,
+                selection.color,
+              ),
+              const SizedBox(height: 10),
+              _buildPeriodMetricRow(
+                'details.suwaya_length'.tr(),
+                _formatSuwayaDuration(periodMetrics.actualSuwayaDuration),
+                civilColor,
+                selection.color,
+              ),
+              const SizedBox(height: 10),
+              _buildPeriodMetricRow(
+                'details.flow_speed'.tr(),
+                '${periodMetrics.flowSpeed.toStringAsFixed(2)}x',
+                civilColor,
+                selection.color,
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('common.done'.tr()),
+          ),
         ],
       ),
     );
   }
 
-  void _showPeriodInfoDialog(BuildContext context, AstroPeriod period, AstroState astroState) {
-    HapticFeedback.lightImpact();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black87;
-    final surfaceColor = Theme.of(context).cardColor;
-    
-    final pColor = _getSafePeriodColor(period.id);
-
-    final durationMicro = period.endTime.difference(period.startTime).inMicroseconds;
-    final suwayaMicro = durationMicro ~/ (period.suwayasCount > 0 ? period.suwayasCount : 1);
-    final durationSecs = suwayaMicro ~/ 1000000;
-    final sMins = durationSecs ~/ 60;
-    final sSecs = durationSecs % 60;
-    final actualLengthStr = '${sMins.toString().padLeft(2, '0')}:${sSecs.toString().padLeft(2, '0')}';
-
-    final periodMins = durationMicro ~/ 60000000;
-    final virtualMins = period.suwayasCount * 30.0;
-    double speed = periodMins > 0 ? (virtualMins / periodMins) : 1.0;
-
-    int startGlobalSuwaya = 0;
-    for (var p in astroState.periods) {
-      if (p.id == period.id) break;
-      startGlobalSuwaya += p.suwayasCount;
-    }
-    int endGlobalSuwaya = startGlobalSuwaya + period.suwayasCount - 1;
-
-    String periodName = '';
-    switch(period.id) {
-      case 1: periodName = 'periods.fajr'.tr(); break;
-      case 2: periodName = 'periods.duha'.tr(); break;
-      case 3: periodName = 'periods.dhuhr'.tr(); break;
-      case 4: periodName = 'periods.asr'.tr(); break;
-      case 5: periodName = 'periods.maghrib'.tr(); break;
-      case 6: periodName = 'periods.middle_third'.tr(); break;
-      case 7: periodName = 'periods.last_third'.tr(); break;
-      default: periodName = period.nameKey.tr();
-    }
-
-    final langCode = context.locale.languageCode;
-    final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
-    final startCivil = DateFormat('hh:mm a', safeIntl).format(period.startTime);
-    final endCivil = DateFormat('hh:mm a', safeIntl).format(period.endTime);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: surfaceColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(LucideIcons.info, color: pColor, size: 32),
-              const SizedBox(height: 16),
-              Text('home.period_info'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              _buildInfoRow('common.period'.tr(), periodName, textColor, pColor),
-              _buildInfoRow('home.suwayas_count'.tr(), period.suwayasCount.toString(), textColor, pColor),
-              _buildInfoRow('pomodoro.actual_length'.tr(), actualLengthStr, textColor, pColor),
-              _buildInfoRow('pomodoro.time_speed'.tr(), '${speed.toStringAsFixed(2)}x', textColor, pColor),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Divider(color: Colors.white12),
-              ),
-              _buildInfoRow('details.start'.tr(), '${'common.suwaya'.tr()} ${startGlobalSuwaya.toString().padLeft(2, '0')} / $startCivil', textColor, pColor),
-              _buildInfoRow('details.end'.tr(), '${'common.suwaya'.tr()} ${endGlobalSuwaya.toString().padLeft(2, '0')} / $endCivil', textColor, pColor),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: pColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          ),
+  Widget _buildPeriodMetricRow(
+      String label, String value, Color labelColor, Color valueColor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Text(label, style: TextStyle(color: labelColor, fontSize: 13)),
         ),
-      )
+        const SizedBox(width: 12),
+        Text(value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+                color: valueColor, fontSize: 13, fontWeight: FontWeight.w700)),
+      ],
+    );
+  }
+
+  String _formatSuwayaDuration(Duration duration) {
+    final totalSeconds = duration.inSeconds;
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '$minutes ${'details.minute'.tr()} $seconds ${'details.sec'.tr()}';
+  }
+
+  Widget _buildDialTimeRow(
+    BuildContext context,
+    String label,
+    DateTime time,
+    AstroState astroState,
+    SettingsModel settings,
+    Color civilColor,
+    Color suwayaColor,
+  ) {
+    final suwayaTime = astroState.toGlobalSuwayaTime(time);
+    const baseStyle = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: civilColor, fontSize: 13)),
+        const SizedBox(width: 10),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ClockTimeText.civil(
+              civilTime: time,
+              civilTimeFormat: settings.civilTimeFormat,
+              locale: context.locale.languageCode,
+              style: baseStyle.copyWith(color: civilColor),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text('/',
+                  style: TextStyle(color: civilColor.withValues(alpha: 0.5))),
+            ),
+            ClockTimeText.suwaya(
+              globalSuwayaIndex: suwayaTime.suwayaIndex,
+              virtualMinute: suwayaTime.minute,
+              style: baseStyle.copyWith(color: suwayaColor),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -156,13 +203,15 @@ class HomeScreen extends ConsumerWidget {
       try {
         final location = tz.getLocation(loc.timezone!);
         final nowInTarget = tz.TZDateTime.now(location);
-        return DateTime(nowInTarget.year, nowInTarget.month, nowInTarget.day, nowInTarget.hour, nowInTarget.minute, nowInTarget.second);
+        return DateTime(nowInTarget.year, nowInTarget.month, nowInTarget.day,
+            nowInTarget.hour, nowInTarget.minute, nowInTarget.second);
       } catch (_) {}
     }
     return DateTime.now();
   }
 
-  Widget _buildTopHeader(BuildContext context, AstroState astroState, Color pColor, bool isDark, DateTime cityNow) {
+  Widget _buildTopHeader(BuildContext context, AstroState astroState,
+      Color pColor, bool isDark, DateTime cityNow, SettingsModel settings) {
     DateTime? rawFajr, rawMaghrib;
     for (var p in astroState.periods) {
       if (p.id == 1) rawFajr = p.startTime;
@@ -171,40 +220,44 @@ class HomeScreen extends ConsumerWidget {
     rawFajr ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 4, 30);
     rawMaghrib ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 18, 0);
 
-    final DateTime todayFajr = DateTime(cityNow.year, cityNow.month, cityNow.day, rawFajr.hour, rawFajr.minute);
-    final DateTime todayMaghrib = DateTime(cityNow.year, cityNow.month, cityNow.day, rawMaghrib.hour, rawMaghrib.minute);
+    final DateTime todayFajr = DateTime(
+        cityNow.year, cityNow.month, cityNow.day, rawFajr.hour, rawFajr.minute);
+    final DateTime todayMaghrib = DateTime(cityNow.year, cityNow.month,
+        cityNow.day, rawMaghrib.hour, rawMaghrib.minute);
 
     String dayNightStr = '';
     DateTime islamicDate = cityNow;
     bool isNight = false;
     final langCode = context.locale.languageCode;
-    
+
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
 
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
-      dayNightStr = '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; 
+      dayNightStr =
+          '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
     } else if (cityNow.isBefore(todayMaghrib)) {
       islamicDate = cityNow;
       isNight = false;
-      dayNightStr = '${'home.day_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; 
+      dayNightStr =
+          '${'home.day_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
     } else {
       islamicDate = cityNow.add(const Duration(days: 1));
       isNight = true;
-      dayNightStr = '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}'; 
+      dayNightStr =
+          '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
     }
-    
-    final hijriDate = HijriCalendar.fromDate(islamicDate); 
+
+    final hijriDate = HijriCalendar.fromDate(islamicDate);
     final monthName = 'hijri.m${hijriDate.hMonth}'.tr();
     final hijriStr = '${hijriDate.hDay} $monthName ${hijriDate.hYear}';
 
-    final gregorianDate = DateFormat('d MMMM yyyy', safeIntl).format(cityNow); 
-    final civilTime = DateFormat('hh:mm a', safeIntl).format(cityNow); 
+    final gregorianDate = DateFormat('d MMMM yyyy', safeIntl).format(cityNow);
     final textColor = isDark ? Colors.white : Colors.black87;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0), 
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,27 +269,60 @@ class HomeScreen extends ConsumerWidget {
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun, color: pColor, size: 24), 
+                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun,
+                        color: pColor, size: 24),
                     const SizedBox(width: 8),
                     Stack(
                       children: [
-                        Text(dayNightStr, style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
-                        Text(dayNightStr, style: TextStyle(color: pColor, fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'Tajawal')),
+                        Text(dayNightStr,
+                            style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Tajawal',
+                                foreground: Paint()
+                                  ..style = PaintingStyle.stroke
+                                  ..strokeWidth = 1.0
+                                  ..color = Colors.white)),
+                        Text(dayNightStr,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.normal,
+                                fontFamily: 'Tajawal')),
                       ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                
-                Stack(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('$civilTime • $gregorianDate', style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, fontFamily: 'Tajawal', foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
-                    Text('$civilTime • $gregorianDate', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 16, fontWeight: FontWeight.normal, fontFamily: 'Tajawal')),
+                    ClockTimeText.civil(
+                      civilTime: cityNow,
+                      civilTimeFormat: settings.civilTimeFormat,
+                      locale: safeIntl,
+                      style: TextStyle(
+                          color: textColor.withValues(alpha: 0.6),
+                          fontSize: 16,
+                          fontWeight: FontWeight.normal,
+                          fontFamily: 'Tajawal'),
+                    ),
+                    Text(' • $gregorianDate',
+                        style: TextStyle(
+                            color: textColor.withValues(alpha: 0.6),
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'Tajawal')),
                   ],
                 ),
                 const SizedBox(height: 6),
-                
-                Text('$hijriStr ${'common.ah'.tr()}', style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Tajawal', letterSpacing: 0.5)),
+                Text('$hijriStr ${'common.ah'.tr()}',
+                    style: TextStyle(
+                        color: textColor,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        fontFamily: 'Tajawal',
+                        letterSpacing: 0.5)),
               ],
             ),
           ),
@@ -246,7 +332,8 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLegendChip(String title, Color color, bool isDark, bool isHighlighted, VoidCallback? onTap) {
+  Widget _buildLegendChip(String title, Color color, bool isDark,
+      bool isHighlighted, VoidCallback? onTap) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -256,24 +343,39 @@ class HomeScreen extends ConsumerWidget {
           color: isDark ? const Color(0xFF13131A) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isHighlighted ? color : color.withValues(alpha: 0.3), 
-            width: isHighlighted ? 2.0 : 1.5
-          ),
-          boxShadow: isHighlighted ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)] : [],
+              color: isHighlighted ? color : color.withValues(alpha: 0.3),
+              width: isHighlighted ? 2.0 : 1.5),
+          boxShadow: isHighlighted
+              ? [
+                  BoxShadow(
+                      color: color.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      spreadRadius: 2)
+                ]
+              : [],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 12, height: 12,
+              width: 12,
+              height: 12,
               decoration: BoxDecoration(
-                color: color, 
-                shape: BoxShape.circle, 
-                boxShadow: isHighlighted ? [BoxShadow(color: color, blurRadius: 8, spreadRadius: 2)] : []
-              ),
+                  color: color,
+                  shape: BoxShape.circle,
+                  boxShadow: isHighlighted
+                      ? [
+                          BoxShadow(
+                              color: color, blurRadius: 8, spreadRadius: 2)
+                        ]
+                      : []),
             ),
             const SizedBox(width: 8),
-            Text(title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 12, fontWeight: FontWeight.bold)),
+            Text(title,
+                style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -285,98 +387,120 @@ class HomeScreen extends ConsumerWidget {
     ref.watch(notificationSchedulerProvider);
     final astroState = ref.watch(astroProvider);
     final routineArcs = ref.watch(routineArcsProvider);
-    final settings = ref.watch(settingsProvider); 
-    
+    final settings = ref.watch(settingsProvider);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? const Color(0xFF0D0D12) : Colors.white;
     final scaffoldBgColor = isDark ? Colors.black : const Color(0xFFF5F7FA);
 
     if (astroState.periods.isEmpty) {
       return Scaffold(
-        backgroundColor: scaffoldBgColor, 
-        body: Center(
-          child: Column(
+          backgroundColor: scaffoldBgColor,
+          body: Center(
+              child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(color: Theme.of(context).primaryColor),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () => ref.read(astroProvider.notifier).resetToRealTime(),
+                onPressed: () =>
+                    ref.read(astroProvider.notifier).resetToRealTime(),
                 icon: const Icon(Icons.refresh),
                 label: Text('common.retry'.tr()),
-                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white),
               )
             ],
-          )
-        )
-      );
+          )));
     }
 
     final pColor = astroState.currentPeriod.uiColor.adapt(context);
-    final cityNow = _getCityTime(settings); 
+    final cityNow = _getCityTime(settings);
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
-      drawer: const AppDrawer(), 
-      onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
+      drawer: const AppDrawer(),
+      onDrawerChanged: (isOpen) =>
+          ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, 
-        elevation: 0, 
-        scrolledUnderElevation: 0, 
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         leading: Builder(
           builder: (ctx) => IconButton(
-            icon: Icon(LucideIcons.menu, color: isDark ? Colors.white : Colors.black87),
+            icon: Icon(LucideIcons.menu,
+                color: isDark ? Colors.white : Colors.black87),
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
-        title: const LocationHeader(), 
-        actions: const [SizedBox(width: 48)], 
+        title: const LocationHeader(),
+        actions: const [SizedBox(width: 48)],
       ),
       body: RefreshIndicator(
-        color: pColor, backgroundColor: surfaceColor,
-        onRefresh: () async { HapticFeedback.mediumImpact(); ref.read(astroProvider.notifier).resetToRealTime(); await ref.read(settingsProvider.notifier).refreshDynamicLocationIfNeeded(); },
+        color: pColor,
+        backgroundColor: surfaceColor,
+        onRefresh: () async {
+          HapticFeedback.mediumImpact();
+          ref.read(astroProvider.notifier).resetToRealTime();
+          await ref
+              .read(settingsProvider.notifier)
+              .refreshDynamicLocationIfNeeded();
+        },
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
           slivers: [
             SliverToBoxAdapter(
-              child: _buildTopHeader(context, astroState, pColor, isDark, cityNow), 
+              child: _buildTopHeader(
+                  context, astroState, pColor, isDark, cityNow, settings),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20), 
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final maxSize = constraints.maxWidth; 
+                    final maxSize = constraints.maxWidth;
                     return RepaintBoundary(
                       child: PremiumAstroDial(
-                        size: maxSize, 
-                        routineArcs: routineArcs, 
-                        onPeriodTapped: (period) {
-                          _showPeriodInfoDialog(context, period, astroState);
-                        },
+                        size: maxSize,
+                        routineArcs: routineArcs,
+                        onItemTapped: (selection) => _showDialItemDialog(
+                          context,
+                          selection,
+                          astroState,
+                          settings,
+                        ),
                       ),
                     );
                   },
                 ),
               ),
             ),
-            
             SliverToBoxAdapter(
               child: Builder(
                 builder: (context) {
                   final todayTasks = ref.watch(tasksProvider).todayTasks;
-                  final tasksForLegend = todayTasks.where((t) => t.showOnDial).toList();
-                  
+                  final tasksForLegend =
+                      todayTasks.where((t) => t.showOnDial).toList();
+
                   final routines = ref.watch(routinesProvider);
                   final todayWeekday = DateTime.now().weekday;
-                  final activeRoutines = routines.where((r) => r.isActive && (r.recurrenceDays == null || r.recurrenceDays!.isEmpty || r.recurrenceDays!.contains(todayWeekday))).toList();
+                  final activeRoutines = routines
+                      .where((r) =>
+                          r.isActive &&
+                          (r.recurrenceDays == null ||
+                              r.recurrenceDays!.isEmpty ||
+                              r.recurrenceDays!.contains(todayWeekday)))
+                      .toList();
 
                   if (activeRoutines.isEmpty && tasksForLegend.isEmpty) {
-                     return const SizedBox(height: 100);
+                    return const SizedBox(height: 100);
                   }
 
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -384,12 +508,16 @@ class HomeScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             // 🌟 تم تكبير الخط هنا إلى 16 وتكبير أيقونة القلم إلى 18
-                            Text('home.dial_indicators'.tr(), style: TextStyle(color: pColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text('home.dial_indicators'.tr(),
+                                style: TextStyle(
+                                    color: pColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold)),
                             const SizedBox(width: 8),
                             GestureDetector(
-                              onTap: () { 
-                                HapticFeedback.selectionClick(); 
-                                showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => const RoutinesListSheet()); 
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                context.go('/tasks?tab=periods');
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(6),
@@ -397,47 +525,72 @@ class HomeScreen extends ConsumerWidget {
                                   color: pColor.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(LucideIcons.pencil, color: pColor, size: 18),
+                                child: Icon(LucideIcons.pencil,
+                                    color: pColor, size: 18),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Wrap(
-                          spacing: 8, runSpacing: 10,
+                          spacing: 8,
+                          runSpacing: 10,
                           children: [
                             ...activeRoutines.map((r) {
-                              final isHighlighted = ref.watch(highlightedRoutineProvider) == r.id;
-                              return _buildLegendChip(r.title, Color(r.colorValue), isDark, isHighlighted, () {
+                              final isHighlighted =
+                                  ref.watch(highlightedRoutineProvider) == r.id;
+                              return _buildLegendChip(
+                                  r.title,
+                                  Color(r.colorValue),
+                                  isDark,
+                                  isHighlighted, () {
                                 HapticFeedback.lightImpact();
-                                ref.read(highlightedRoutineProvider.notifier).state = r.id;
-                                ref.read(highlightedTaskProvider.notifier).state = null; 
+                                ref
+                                    .read(highlightedRoutineProvider.notifier)
+                                    .state = r.id;
+                                ref
+                                    .read(highlightedTaskProvider.notifier)
+                                    .state = null;
                                 Future.delayed(const Duration(seconds: 3), () {
-                                  if (ref.read(highlightedRoutineProvider) == r.id) {
-                                    ref.read(highlightedRoutineProvider.notifier).state = null;
+                                  if (ref.read(highlightedRoutineProvider) ==
+                                      r.id) {
+                                    ref
+                                        .read(
+                                            highlightedRoutineProvider.notifier)
+                                        .state = null;
                                   }
                                 });
                               });
                             }),
-                            
                             ...tasksForLegend.map((task) {
-                              Color tColor = getNeonColorForCategory(task.category); 
-                              final isHighlighted = ref.watch(highlightedTaskProvider) == task.id;
-                              
-                              return _buildLegendChip(task.title, tColor, isDark, isHighlighted, () {
+                              Color tColor =
+                                  getNeonColorForCategory(task.category);
+                              final isHighlighted =
+                                  ref.watch(highlightedTaskProvider) == task.id;
+
+                              return _buildLegendChip(
+                                  task.title, tColor, isDark, isHighlighted,
+                                  () {
                                 HapticFeedback.lightImpact();
-                                ref.read(highlightedTaskProvider.notifier).state = task.id;
-                                ref.read(highlightedRoutineProvider.notifier).state = null; 
+                                ref
+                                    .read(highlightedTaskProvider.notifier)
+                                    .state = task.id;
+                                ref
+                                    .read(highlightedRoutineProvider.notifier)
+                                    .state = null;
                                 Future.delayed(const Duration(seconds: 3), () {
-                                  if (ref.read(highlightedTaskProvider) == task.id) {
-                                    ref.read(highlightedTaskProvider.notifier).state = null;
+                                  if (ref.read(highlightedTaskProvider) ==
+                                      task.id) {
+                                    ref
+                                        .read(highlightedTaskProvider.notifier)
+                                        .state = null;
                                   }
                                 });
                               });
                             }),
                           ],
                         ),
-                        const SizedBox(height: 120), 
+                        const SizedBox(height: 120),
                       ],
                     ),
                   );
@@ -448,28 +601,31 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 112.0), 
-        child: PremiumExpandableFab(color: pColor, isDark: isDark, currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya),
+        padding: const EdgeInsets.only(bottom: 112.0),
+        child: PremiumExpandableFab(
+            color: pColor,
+            isDark: isDark,
+            currentPeriodId: astroState.currentPeriod.id,
+            currentSuwaya: astroState.currentSuwaya),
       ),
     );
   }
 }
 
 class PremiumExpandableFab extends StatefulWidget {
-  final Color color; 
-  final bool isDark; 
-  final int currentPeriodId; 
+  final Color color;
+  final bool isDark;
+  final int currentPeriodId;
   final int currentSuwaya;
 
-  const PremiumExpandableFab({
-    super.key, 
-    required this.color, 
-    required this.isDark, 
-    required this.currentPeriodId, 
-    required this.currentSuwaya
-  });
+  const PremiumExpandableFab(
+      {super.key,
+      required this.color,
+      required this.isDark,
+      required this.currentPeriodId,
+      required this.currentSuwaya});
 
-  @override 
+  @override
   State<PremiumExpandableFab> createState() => _PremiumExpandableFabState();
 }
 
@@ -478,12 +634,12 @@ class _PremiumExpandableFabState extends State<PremiumExpandableFab> {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       heroTag: null,
-      backgroundColor: widget.color, 
-      foregroundColor: widget.isDark ? Colors.black : Colors.white, 
-      elevation: 4, 
+      backgroundColor: widget.color,
+      foregroundColor: widget.isDark ? Colors.black : Colors.white,
+      elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      onPressed: () { 
-        HapticFeedback.lightImpact(); 
+      onPressed: () {
+        HapticFeedback.lightImpact();
         context.push('/add-task', extra: {
           'currentPeriodId': widget.currentPeriodId,
           'currentSuwaya': widget.currentSuwaya,

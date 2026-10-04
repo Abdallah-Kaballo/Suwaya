@@ -33,150 +33,160 @@ const SettingsModelSchema = CollectionSchema(
       name: r'calculationMethod',
       type: IsarType.string,
     ),
-    r'currentStreak': PropertySchema(
+    r'civilTimeFormat': PropertySchema(
       id: 3,
+      name: r'civilTimeFormat',
+      type: IsarType.string,
+    ),
+    r'currentStreak': PropertySchema(
+      id: 4,
       name: r'currentStreak',
       type: IsarType.long,
     ),
     r'customFajrAngle': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'customFajrAngle',
       type: IsarType.double,
     ),
     r'customIshaAngle': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'customIshaAngle',
       type: IsarType.double,
     ),
     r'dayBoundary': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'dayBoundary',
       type: IsarType.string,
     ),
     r'defaultHabitAlertLevel': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'defaultHabitAlertLevel',
       type: IsarType.long,
     ),
     r'defaultHabitTone': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'defaultHabitTone',
       type: IsarType.string,
     ),
     r'defaultHabitVolume': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'defaultHabitVolume',
       type: IsarType.double,
     ),
     r'defaultTaskAlertLevel': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'defaultTaskAlertLevel',
       type: IsarType.long,
     ),
     r'defaultTaskTone': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'defaultTaskTone',
       type: IsarType.string,
     ),
     r'defaultTaskVolume': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'defaultTaskVolume',
       type: IsarType.double,
     ),
+    r'dialPinMode': PropertySchema(
+      id: 14,
+      name: r'dialPinMode',
+      type: IsarType.string,
+    ),
     r'hiddenPeriods': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'hiddenPeriods',
       type: IsarType.longList,
     ),
     r'highLatitudeRule': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'highLatitudeRule',
       type: IsarType.string,
     ),
     r'isDialAutoRotating': PropertySchema(
-      id: 15,
+      id: 17,
       name: r'isDialAutoRotating',
       type: IsarType.bool,
     ),
     r'isFirstLaunch': PropertySchema(
-      id: 16,
+      id: 18,
       name: r'isFirstLaunch',
       type: IsarType.bool,
     ),
     r'languageCode': PropertySchema(
-      id: 17,
+      id: 19,
       name: r'languageCode',
       type: IsarType.string,
     ),
     r'lastStreakDate': PropertySchema(
-      id: 18,
+      id: 20,
       name: r'lastStreakDate',
       type: IsarType.dateTime,
     ),
     r'longestStreak': PropertySchema(
-      id: 19,
+      id: 21,
       name: r'longestStreak',
       type: IsarType.long,
     ),
     r'madhab': PropertySchema(
-      id: 20,
+      id: 22,
       name: r'madhab',
       type: IsarType.string,
     ),
     r'maxSnoozeCount': PropertySchema(
-      id: 21,
+      id: 23,
       name: r'maxSnoozeCount',
       type: IsarType.long,
     ),
     r'periodConfigs': PropertySchema(
-      id: 22,
+      id: 24,
       name: r'periodConfigs',
       type: IsarType.objectList,
       target: r'PeriodConfig',
     ),
     r'qiyamAlarmEnabled': PropertySchema(
-      id: 23,
+      id: 25,
       name: r'qiyamAlarmEnabled',
       type: IsarType.bool,
     ),
     r'savedLocations': PropertySchema(
-      id: 24,
+      id: 26,
       name: r'savedLocations',
       type: IsarType.objectList,
       target: r'SavedLocation',
     ),
     r'showSunrise': PropertySchema(
-      id: 25,
+      id: 27,
       name: r'showSunrise',
       type: IsarType.bool,
     ),
     r'snoozeDurationMinutes': PropertySchema(
-      id: 26,
+      id: 28,
       name: r'snoozeDurationMinutes',
       type: IsarType.long,
     ),
     r'streakFreezesAvailable': PropertySchema(
-      id: 27,
+      id: 29,
       name: r'streakFreezesAvailable',
       type: IsarType.long,
     ),
     r'suwayaNumberStyle': PropertySchema(
-      id: 28,
+      id: 30,
       name: r'suwayaNumberStyle',
       type: IsarType.string,
     ),
     r'themeMode': PropertySchema(
-      id: 29,
+      id: 31,
       name: r'themeMode',
       type: IsarType.string,
     ),
     r'useAstroTimeForIbadat': PropertySchema(
-      id: 30,
+      id: 32,
       name: r'useAstroTimeForIbadat',
       type: IsarType.bool,
     ),
     r'visibleNightParts': PropertySchema(
-      id: 31,
+      id: 33,
       name: r'visibleNightParts',
       type: IsarType.stringList,
     )
@@ -220,9 +230,11 @@ int _settingsModelEstimateSize(
     }
   }
   bytesCount += 3 + object.calculationMethod.length * 3;
+  bytesCount += 3 + object.civilTimeFormat.length * 3;
   bytesCount += 3 + object.dayBoundary.length * 3;
   bytesCount += 3 + object.defaultHabitTone.length * 3;
   bytesCount += 3 + object.defaultTaskTone.length * 3;
+  bytesCount += 3 + object.dialPinMode.length * 3;
   bytesCount += 3 + object.hiddenPeriods.length * 8;
   bytesCount += 3 + object.highLatitudeRule.length * 3;
   bytesCount += 3 + object.languageCode.length * 3;
@@ -270,45 +282,47 @@ void _settingsModelSerialize(
   );
   writer.writeStringList(offsets[1], object.activeNightMarkers);
   writer.writeString(offsets[2], object.calculationMethod);
-  writer.writeLong(offsets[3], object.currentStreak);
-  writer.writeDouble(offsets[4], object.customFajrAngle);
-  writer.writeDouble(offsets[5], object.customIshaAngle);
-  writer.writeString(offsets[6], object.dayBoundary);
-  writer.writeLong(offsets[7], object.defaultHabitAlertLevel);
-  writer.writeString(offsets[8], object.defaultHabitTone);
-  writer.writeDouble(offsets[9], object.defaultHabitVolume);
-  writer.writeLong(offsets[10], object.defaultTaskAlertLevel);
-  writer.writeString(offsets[11], object.defaultTaskTone);
-  writer.writeDouble(offsets[12], object.defaultTaskVolume);
-  writer.writeLongList(offsets[13], object.hiddenPeriods);
-  writer.writeString(offsets[14], object.highLatitudeRule);
-  writer.writeBool(offsets[15], object.isDialAutoRotating);
-  writer.writeBool(offsets[16], object.isFirstLaunch);
-  writer.writeString(offsets[17], object.languageCode);
-  writer.writeDateTime(offsets[18], object.lastStreakDate);
-  writer.writeLong(offsets[19], object.longestStreak);
-  writer.writeString(offsets[20], object.madhab);
-  writer.writeLong(offsets[21], object.maxSnoozeCount);
+  writer.writeString(offsets[3], object.civilTimeFormat);
+  writer.writeLong(offsets[4], object.currentStreak);
+  writer.writeDouble(offsets[5], object.customFajrAngle);
+  writer.writeDouble(offsets[6], object.customIshaAngle);
+  writer.writeString(offsets[7], object.dayBoundary);
+  writer.writeLong(offsets[8], object.defaultHabitAlertLevel);
+  writer.writeString(offsets[9], object.defaultHabitTone);
+  writer.writeDouble(offsets[10], object.defaultHabitVolume);
+  writer.writeLong(offsets[11], object.defaultTaskAlertLevel);
+  writer.writeString(offsets[12], object.defaultTaskTone);
+  writer.writeDouble(offsets[13], object.defaultTaskVolume);
+  writer.writeString(offsets[14], object.dialPinMode);
+  writer.writeLongList(offsets[15], object.hiddenPeriods);
+  writer.writeString(offsets[16], object.highLatitudeRule);
+  writer.writeBool(offsets[17], object.isDialAutoRotating);
+  writer.writeBool(offsets[18], object.isFirstLaunch);
+  writer.writeString(offsets[19], object.languageCode);
+  writer.writeDateTime(offsets[20], object.lastStreakDate);
+  writer.writeLong(offsets[21], object.longestStreak);
+  writer.writeString(offsets[22], object.madhab);
+  writer.writeLong(offsets[23], object.maxSnoozeCount);
   writer.writeObjectList<PeriodConfig>(
-    offsets[22],
+    offsets[24],
     allOffsets,
     PeriodConfigSchema.serialize,
     object.periodConfigs,
   );
-  writer.writeBool(offsets[23], object.qiyamAlarmEnabled);
+  writer.writeBool(offsets[25], object.qiyamAlarmEnabled);
   writer.writeObjectList<SavedLocation>(
-    offsets[24],
+    offsets[26],
     allOffsets,
     SavedLocationSchema.serialize,
     object.savedLocations,
   );
-  writer.writeBool(offsets[25], object.showSunrise);
-  writer.writeLong(offsets[26], object.snoozeDurationMinutes);
-  writer.writeLong(offsets[27], object.streakFreezesAvailable);
-  writer.writeString(offsets[28], object.suwayaNumberStyle);
-  writer.writeString(offsets[29], object.themeMode);
-  writer.writeBool(offsets[30], object.useAstroTimeForIbadat);
-  writer.writeStringList(offsets[31], object.visibleNightParts);
+  writer.writeBool(offsets[27], object.showSunrise);
+  writer.writeLong(offsets[28], object.snoozeDurationMinutes);
+  writer.writeLong(offsets[29], object.streakFreezesAvailable);
+  writer.writeString(offsets[30], object.suwayaNumberStyle);
+  writer.writeString(offsets[31], object.themeMode);
+  writer.writeBool(offsets[32], object.useAstroTimeForIbadat);
+  writer.writeStringList(offsets[33], object.visibleNightParts);
 }
 
 SettingsModel _settingsModelDeserialize(
@@ -325,48 +339,50 @@ SettingsModel _settingsModelDeserialize(
   );
   object.activeNightMarkers = reader.readStringList(offsets[1]) ?? [];
   object.calculationMethod = reader.readString(offsets[2]);
-  object.currentStreak = reader.readLong(offsets[3]);
-  object.customFajrAngle = reader.readDouble(offsets[4]);
-  object.customIshaAngle = reader.readDouble(offsets[5]);
-  object.dayBoundary = reader.readString(offsets[6]);
-  object.defaultHabitAlertLevel = reader.readLong(offsets[7]);
-  object.defaultHabitTone = reader.readString(offsets[8]);
-  object.defaultHabitVolume = reader.readDouble(offsets[9]);
-  object.defaultTaskAlertLevel = reader.readLong(offsets[10]);
-  object.defaultTaskTone = reader.readString(offsets[11]);
-  object.defaultTaskVolume = reader.readDouble(offsets[12]);
-  object.hiddenPeriods = reader.readLongList(offsets[13]) ?? [];
-  object.highLatitudeRule = reader.readString(offsets[14]);
+  object.civilTimeFormat = reader.readString(offsets[3]);
+  object.currentStreak = reader.readLong(offsets[4]);
+  object.customFajrAngle = reader.readDouble(offsets[5]);
+  object.customIshaAngle = reader.readDouble(offsets[6]);
+  object.dayBoundary = reader.readString(offsets[7]);
+  object.defaultHabitAlertLevel = reader.readLong(offsets[8]);
+  object.defaultHabitTone = reader.readString(offsets[9]);
+  object.defaultHabitVolume = reader.readDouble(offsets[10]);
+  object.defaultTaskAlertLevel = reader.readLong(offsets[11]);
+  object.defaultTaskTone = reader.readString(offsets[12]);
+  object.defaultTaskVolume = reader.readDouble(offsets[13]);
+  object.dialPinMode = reader.readString(offsets[14]);
+  object.hiddenPeriods = reader.readLongList(offsets[15]) ?? [];
+  object.highLatitudeRule = reader.readString(offsets[16]);
   object.id = id;
-  object.isDialAutoRotating = reader.readBool(offsets[15]);
-  object.isFirstLaunch = reader.readBool(offsets[16]);
-  object.languageCode = reader.readString(offsets[17]);
-  object.lastStreakDate = reader.readDateTimeOrNull(offsets[18]);
-  object.longestStreak = reader.readLong(offsets[19]);
-  object.madhab = reader.readString(offsets[20]);
-  object.maxSnoozeCount = reader.readLong(offsets[21]);
+  object.isDialAutoRotating = reader.readBool(offsets[17]);
+  object.isFirstLaunch = reader.readBool(offsets[18]);
+  object.languageCode = reader.readString(offsets[19]);
+  object.lastStreakDate = reader.readDateTimeOrNull(offsets[20]);
+  object.longestStreak = reader.readLong(offsets[21]);
+  object.madhab = reader.readString(offsets[22]);
+  object.maxSnoozeCount = reader.readLong(offsets[23]);
   object.periodConfigs = reader.readObjectList<PeriodConfig>(
-        offsets[22],
+        offsets[24],
         PeriodConfigSchema.deserialize,
         allOffsets,
         PeriodConfig(),
       ) ??
       [];
-  object.qiyamAlarmEnabled = reader.readBool(offsets[23]);
+  object.qiyamAlarmEnabled = reader.readBool(offsets[25]);
   object.savedLocations = reader.readObjectList<SavedLocation>(
-        offsets[24],
+        offsets[26],
         SavedLocationSchema.deserialize,
         allOffsets,
         SavedLocation(),
       ) ??
       [];
-  object.showSunrise = reader.readBool(offsets[25]);
-  object.snoozeDurationMinutes = reader.readLong(offsets[26]);
-  object.streakFreezesAvailable = reader.readLong(offsets[27]);
-  object.suwayaNumberStyle = reader.readString(offsets[28]);
-  object.themeMode = reader.readString(offsets[29]);
-  object.useAstroTimeForIbadat = reader.readBool(offsets[30]);
-  object.visibleNightParts = reader.readStringList(offsets[31]) ?? [];
+  object.showSunrise = reader.readBool(offsets[27]);
+  object.snoozeDurationMinutes = reader.readLong(offsets[28]);
+  object.streakFreezesAvailable = reader.readLong(offsets[29]);
+  object.suwayaNumberStyle = reader.readString(offsets[30]);
+  object.themeMode = reader.readString(offsets[31]);
+  object.useAstroTimeForIbadat = reader.readBool(offsets[32]);
+  object.visibleNightParts = reader.readStringList(offsets[33]) ?? [];
   return object;
 }
 
@@ -388,44 +404,48 @@ P _settingsModelDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 5:
       return (reader.readDouble(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 7:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readString(offset)) as P;
-    case 9:
-      return (reader.readDouble(offset)) as P;
-    case 10:
       return (reader.readLong(offset)) as P;
-    case 11:
+    case 9:
       return (reader.readString(offset)) as P;
-    case 12:
+    case 10:
       return (reader.readDouble(offset)) as P;
+    case 11:
+      return (reader.readLong(offset)) as P;
+    case 12:
+      return (reader.readString(offset)) as P;
     case 13:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readDouble(offset)) as P;
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     case 16:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 17:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 18:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 19:
-      return (reader.readLong(offset)) as P;
-    case 20:
       return (reader.readString(offset)) as P;
+    case 20:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 21:
       return (reader.readLong(offset)) as P;
     case 22:
+      return (reader.readString(offset)) as P;
+    case 23:
+      return (reader.readLong(offset)) as P;
+    case 24:
       return (reader.readObjectList<PeriodConfig>(
             offset,
             PeriodConfigSchema.deserialize,
@@ -433,9 +453,9 @@ P _settingsModelDeserializeProp<P>(
             PeriodConfig(),
           ) ??
           []) as P;
-    case 23:
+    case 25:
       return (reader.readBool(offset)) as P;
-    case 24:
+    case 26:
       return (reader.readObjectList<SavedLocation>(
             offset,
             SavedLocationSchema.deserialize,
@@ -443,19 +463,19 @@ P _settingsModelDeserializeProp<P>(
             SavedLocation(),
           ) ??
           []) as P;
-    case 25:
-      return (reader.readBool(offset)) as P;
-    case 26:
-      return (reader.readLong(offset)) as P;
     case 27:
-      return (reader.readLong(offset)) as P;
-    case 28:
-      return (reader.readString(offset)) as P;
-    case 29:
-      return (reader.readString(offset)) as P;
-    case 30:
       return (reader.readBool(offset)) as P;
+    case 28:
+      return (reader.readLong(offset)) as P;
+    case 29:
+      return (reader.readLong(offset)) as P;
+    case 30:
+      return (reader.readString(offset)) as P;
     case 31:
+      return (reader.readString(offset)) as P;
+    case 32:
+      return (reader.readBool(offset)) as P;
+    case 33:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -934,6 +954,142 @@ extension SettingsModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'calculationMethod',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'civilTimeFormat',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'civilTimeFormat',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'civilTimeFormat',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'civilTimeFormat',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'civilTimeFormat',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'civilTimeFormat',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'civilTimeFormat',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'civilTimeFormat',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'civilTimeFormat',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      civilTimeFormatIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'civilTimeFormat',
         value: '',
       ));
     });
@@ -1775,6 +1931,142 @@ extension SettingsModelQueryFilter
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dialPinMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dialPinMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dialPinMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dialPinMode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dialPinMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dialPinMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dialPinMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dialPinMode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dialPinMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      dialPinModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dialPinMode',
+        value: '',
       ));
     });
   }
@@ -3456,6 +3748,20 @@ extension SettingsModelQuerySortBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByCivilTimeFormat() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'civilTimeFormat', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByCivilTimeFormatDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'civilTimeFormat', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       sortByCurrentStreak() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentStreak', Sort.asc);
@@ -3591,6 +3897,19 @@ extension SettingsModelQuerySortBy
       sortByDefaultTaskVolumeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'defaultTaskVolume', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> sortByDialPinMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dialPinMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByDialPinModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dialPinMode', Sort.desc);
     });
   }
 
@@ -3818,6 +4137,20 @@ extension SettingsModelQuerySortThenBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByCivilTimeFormat() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'civilTimeFormat', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByCivilTimeFormatDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'civilTimeFormat', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       thenByCurrentStreak() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentStreak', Sort.asc);
@@ -3953,6 +4286,19 @@ extension SettingsModelQuerySortThenBy
       thenByDefaultTaskVolumeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'defaultTaskVolume', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> thenByDialPinMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dialPinMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByDialPinModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dialPinMode', Sort.desc);
     });
   }
 
@@ -4193,6 +4539,14 @@ extension SettingsModelQueryWhereDistinct
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+      distinctByCivilTimeFormat({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'civilTimeFormat',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
       distinctByCurrentStreak() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentStreak');
@@ -4261,6 +4615,13 @@ extension SettingsModelQueryWhereDistinct
       distinctByDefaultTaskVolume() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'defaultTaskVolume');
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct> distinctByDialPinMode(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dialPinMode', caseSensitive: caseSensitive);
     });
   }
 
@@ -4415,6 +4776,13 @@ extension SettingsModelQueryProperty
     });
   }
 
+  QueryBuilder<SettingsModel, String, QQueryOperations>
+      civilTimeFormatProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'civilTimeFormat');
+    });
+  }
+
   QueryBuilder<SettingsModel, int, QQueryOperations> currentStreakProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentStreak');
@@ -4480,6 +4848,12 @@ extension SettingsModelQueryProperty
       defaultTaskVolumeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'defaultTaskVolume');
+    });
+  }
+
+  QueryBuilder<SettingsModel, String, QQueryOperations> dialPinModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dialPinMode');
     });
   }
 

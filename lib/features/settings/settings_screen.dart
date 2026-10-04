@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'settings_provider.dart';
 import 'widgets/smart_location_picker.dart';
+import '../../core/utils/time_formatters.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -22,11 +23,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String _searchQuery = '';
 
   final Map<String, String> _appLanguages = {
-    'tr': 'Türkçe', 'ru': 'Русский', 'ur': 'اردو', 'ar': 'العربية', 'hi': 'हिन्दी',
-    'bn': 'বাংলা', 'th': 'ไทย', 'ja': '日本語', 'zh': '中文 (简体)', 'ug': 'ئۇيغۇرچە',
-    'pt': 'Português', 'ff': 'Pulaar', 'az': 'Azərbaycanca', 'id': 'Bahasa Indonesia',
-    'ms': 'Bahasa Melayu', 'da': 'Dansk', 'de': 'Deutsch', 'en': 'English',
-    'es': 'Español', 'fr': 'Français', 'it': 'Italiano', 'nl': 'Nederlands',
+    'tr': 'Türkçe',
+    'ru': 'Русский',
+    'ur': 'اردو',
+    'ar': 'العربية',
+    'hi': 'हिन्दी',
+    'bn': 'বাংলা',
+    'th': 'ไทย',
+    'ja': '日本語',
+    'zh': '中文 (简体)',
+    'ug': 'ئۇيغۇرچە',
+    'pt': 'Português',
+    'ff': 'Pulaar',
+    'az': 'Azərbaycanca',
+    'id': 'Bahasa Indonesia',
+    'ms': 'Bahasa Melayu',
+    'da': 'Dansk',
+    'de': 'Deutsch',
+    'en': 'English',
+    'es': 'Español',
+    'fr': 'Français',
+    'it': 'Italiano',
+    'nl': 'Nederlands',
   };
 
   @override
@@ -39,15 +57,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final settingsState = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
-    
+
     final currentLang = settingsState.languageCode;
     final currentLangName = _appLanguages[currentLang] ?? 'English';
 
     final activeLocation = settingsState.activeLocation;
-    final cityName = activeLocation?.name ?? 'add_screen.not_set_mandatory'.tr();
+    final cityName =
+        activeLocation?.name ?? 'add_screen.not_set_mandatory'.tr();
 
     // 🌟 إصلاح الوضع الفاتح (Light Mode): الاعتماد على الثيم الفعلي للنظام
-    final isDark = Theme.of(context).brightness == Brightness.dark; 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).colorScheme.onSurface;
@@ -60,10 +79,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
+          icon: Icon(
+              context.locale.languageCode == 'ar'
+                  ? LucideIcons.arrow_right
+                  : LucideIcons.arrow_left,
+              color: textColor),
           onPressed: () => context.pop(),
         ),
-        title: Text('settings.title'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
+        title: Text('settings.title'.tr(),
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
         centerTitle: true,
       ),
       body: Column(
@@ -79,91 +104,213 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: TextField(
                 controller: _searchController,
                 style: TextStyle(color: textColor, fontSize: 14),
-                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                onChanged: (val) =>
+                    setState(() => _searchQuery = val.toLowerCase()),
                 decoration: InputDecoration(
                   hintText: 'settings.search_hint'.tr(),
-                  hintStyle: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.3)),
-                  prefixIcon: Icon(LucideIcons.search, color: isDark ? Colors.white54 : Colors.black54, size: 18),
+                  hintStyle: TextStyle(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.3)),
+                  prefixIcon: Icon(LucideIcons.search,
+                      color: isDark ? Colors.white54 : Colors.black54,
+                      size: 18),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
           ),
-
           Expanded(
             child: ListView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 60),
               children: [
-                _buildSettingsGroup('settings.notifications_alerts'.tr(), [
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.bell_ring, title: 'settings.notifications_alerts'.tr(), subtitle: 'settings.notifications_desc'.tr(), 
-                    onTap: () => context.push('/settings/notifications'),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
-                  ),
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
-                _buildSettingsGroup('settings.advanced_astro'.tr(), [
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.telescope, title: 'settings.astro_settings'.tr(), subtitle: 'settings.astro_desc'.tr(),
-                    onTap: () => context.push('/settings/astro'),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
-                  ),
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
-                _buildSettingsGroup('settings.active_location'.tr(), [
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.map_pin, title: 'settings.active_location'.tr(), subtitle: cityName, 
-                    onTap: () => showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => const SmartLocationPicker()),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
-                  ),
-                  _buildGpsUpdateButton(context, ref, isDark, textColor), 
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
-                _buildSettingsGroup('settings.dial_settings'.tr(), [
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.moon_star, title: 'settings.golden_night_markers'.tr(), subtitle: 'settings.markers_desc'.tr(),
-                    onTap: () => _showNightMarkersSheet(context, isDark, surfaceColor, textColor, primaryColor),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
-                  ),
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.refresh_ccw, title: 'settings.auto_rotate'.tr(), subtitle: 'settings.auto_rotate_desc'.tr(), 
-                    isToggle: true, toggleValue: settingsState.isDialAutoRotating, 
-                    onToggle: (v) => notifier.updateDialAutoRotation(v),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor 
-                  ),
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
-                _buildSettingsGroup('settings.general'.tr(), [
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.languages, title: 'settings.app_language'.tr(), subtitle: currentLangName,
-                    onTap: () => _showSelectionSheet('settings.app_language'.tr(), _appLanguages, currentLang, (v){ notifier.updateLanguage(v); context.setLocale(Locale(v)); }, isDark, surfaceColor, textColor, primaryColor),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
-                  ),
-                  _buildSettingRow(
-                    context,
-                    icon: LucideIcons.shield_alert, 
-                    title: 'settings.permissions'.tr(), 
-                    subtitle: 'settings.permissions_desc'.tr(),
-                    onTap: () => context.push('/settings/permissions'),
-                    isDark: isDark, primaryColor: primaryColor, textColor: textColor
-                  ),
-                ], isDark, surfaceColor, borderColor, textColor, primaryColor),
-
+                _buildSettingsGroup(
+                    'settings.notifications_alerts'.tr(),
+                    [
+                      _buildSettingRow(context,
+                          icon: LucideIcons.bell_ring,
+                          title: 'settings.notifications_alerts'.tr(),
+                          subtitle: 'settings.notifications_desc'.tr(),
+                          onTap: () => context.push('/settings/notifications'),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                    ],
+                    isDark,
+                    surfaceColor,
+                    borderColor,
+                    textColor,
+                    primaryColor),
+                _buildSettingsGroup(
+                    'settings.advanced_astro'.tr(),
+                    [
+                      _buildSettingRow(context,
+                          icon: LucideIcons.telescope,
+                          title: 'settings.astro_settings'.tr(),
+                          subtitle: 'settings.astro_desc'.tr(),
+                          onTap: () => context.push('/settings/astro'),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                    ],
+                    isDark,
+                    surfaceColor,
+                    borderColor,
+                    textColor,
+                    primaryColor),
+                _buildSettingsGroup(
+                    'settings.active_location'.tr(),
+                    [
+                      _buildSettingRow(context,
+                          icon: LucideIcons.map_pin,
+                          title: 'settings.active_location'.tr(),
+                          subtitle: cityName,
+                          onTap: () => showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => const SmartLocationPicker()),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                      _buildGpsUpdateButton(context, ref, isDark, textColor),
+                    ],
+                    isDark,
+                    surfaceColor,
+                    borderColor,
+                    textColor,
+                    primaryColor),
+                _buildSettingsGroup(
+                    'settings.dial_settings'.tr(),
+                    [
+                      _buildSettingRow(context,
+                          icon: LucideIcons.moon_star,
+                          title: 'settings.golden_night_markers'.tr(),
+                          subtitle: 'settings.markers_desc'.tr(),
+                          onTap: () => _showNightMarkersSheet(context, isDark,
+                              surfaceColor, textColor, primaryColor),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                      _buildSettingRow(context,
+                          icon: LucideIcons.refresh_ccw,
+                          title: 'settings.auto_rotate'.tr(),
+                          subtitle: 'settings.auto_rotate_desc'.tr(),
+                          isToggle: true,
+                          toggleValue: settingsState.isDialAutoRotating,
+                          onToggle: (v) => notifier.updateDialAutoRotation(v),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                      _buildSettingRow(context,
+                          icon: LucideIcons.clock_3,
+                          title: currentLang == 'ar'
+                              ? 'ترقيم دبابيس القرص'
+                              : 'Dial pin mode',
+                          subtitle: settingsState.dialPinMode == 'civil24'
+                              ? '24 · 00–23'
+                              : '48 · 00–47',
+                          onTap: () => _showSelectionSheet(
+                                currentLang == 'ar'
+                                    ? 'ترقيم دبابيس القرص'
+                                    : 'Dial pin mode',
+                                {
+                                  'suwaya48': currentLang == 'ar'
+                                      ? 'السُوَيّعات · 48 دبوسًا'
+                                      : 'Suwaya · 48 pins',
+                                  'civil24': currentLang == 'ar'
+                                      ? 'الوقت المدني · 24 دبوسًا'
+                                      : 'Civil time · 24 pins',
+                                },
+                                settingsState.dialPinMode,
+                                notifier.updateDialPinMode,
+                                isDark,
+                                surfaceColor,
+                                textColor,
+                                primaryColor,
+                              ),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                    ],
+                    isDark,
+                    surfaceColor,
+                    borderColor,
+                    textColor,
+                    primaryColor),
+                _buildSettingsGroup(
+                    'settings.general'.tr(),
+                    [
+                      _buildSettingRow(
+                        context,
+                        icon: LucideIcons.clock_3,
+                        title: 'home.civil_time'.tr(),
+                        subtitle: _civilTimeFormatLabel(
+                            settingsState.civilTimeFormat),
+                        onTap: () => _showSelectionSheet(
+                          'home.civil_time'.tr(),
+                          {
+                            civilTimeFormatSystem: 'settings.theme_system'.tr(),
+                            civilTimeFormat12Hour: '12 h',
+                            civilTimeFormat24Hour: '24 h',
+                          },
+                          settingsState.civilTimeFormat,
+                          notifier.updateCivilTimeFormat,
+                          isDark,
+                          surfaceColor,
+                          textColor,
+                          primaryColor,
+                        ),
+                        isDark: isDark,
+                        primaryColor: primaryColor,
+                        textColor: textColor,
+                      ),
+                      _buildSettingRow(context,
+                          icon: LucideIcons.languages,
+                          title: 'settings.app_language'.tr(),
+                          subtitle: currentLangName,
+                          onTap: () => _showSelectionSheet(
+                                  'settings.app_language'.tr(),
+                                  _appLanguages,
+                                  currentLang, (v) {
+                                notifier.updateLanguage(v);
+                                context.setLocale(Locale(v));
+                              }, isDark, surfaceColor, textColor, primaryColor),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                      _buildSettingRow(context,
+                          icon: LucideIcons.shield_alert,
+                          title: 'settings.permissions'.tr(),
+                          subtitle: 'settings.permissions_desc'.tr(),
+                          onTap: () => context.push('/settings/permissions'),
+                          isDark: isDark,
+                          primaryColor: primaryColor,
+                          textColor: textColor),
+                    ],
+                    isDark,
+                    surfaceColor,
+                    borderColor,
+                    textColor,
+                    primaryColor),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Column(
                     children: [
-                      Text('Suwaya', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                      Text('Suwaya',
+                          style: TextStyle(
+                              color: isDark ? Colors.white54 : Colors.black54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2)),
                       const SizedBox(height: 6),
-                      Text('settings.version'.tr(), style: TextStyle(color: isDark ? Colors.white38 : Colors.black38, fontSize: 11, fontFamily: 'monospace')),
+                      Text('settings.version'.tr(),
+                          style: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.black38,
+                              fontSize: 11,
+                              fontFamily: 'monospace')),
                     ],
                   ),
                 ),
@@ -175,85 +322,145 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildGpsUpdateButton(BuildContext context, WidgetRef ref, bool isDark, Color textColor) {
-    final Color mainColor = textColor;
-    final Color iconBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05);
-    bool isUpdating = false; 
+  String _civilTimeFormatLabel(String format) {
+    return switch (format) {
+      civilTimeFormat12Hour => '12 h',
+      civilTimeFormat24Hour => '24 h',
+      _ => 'settings.theme_system'.tr(),
+    };
+  }
 
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 36, height: 36,
-                decoration: BoxDecoration(color: iconBgColor, borderRadius: BorderRadius.circular(10)),
-                child: const Icon(LucideIcons.crosshair, color: Colors.blueAccent, size: 18),
+  Widget _buildGpsUpdateButton(
+      BuildContext context, WidgetRef ref, bool isDark, Color textColor) {
+    final Color mainColor = textColor;
+    final Color iconBgColor = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.05);
+    bool isUpdating = false;
+
+    return StatefulBuilder(builder: (context, setState) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                  color: iconBgColor, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(LucideIcons.crosshair,
+                  color: Colors.blueAccent, size: 18),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('settings.update_gps'.tr(),
+                      style: TextStyle(
+                          color: mainColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text('settings.gps_desc'.tr(),
+                      style: TextStyle(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.4)
+                              : Colors.black.withValues(alpha: 0.5),
+                          fontSize: 12,
+                          height: 1.4)),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('settings.update_gps'.tr(), style: TextStyle(color: mainColor, fontSize: 15, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 2),
-                    Text('settings.gps_desc'.tr(), style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.5), fontSize: 12, height: 1.4)),
-                  ],
-                ),
-              ),
-              isUpdating 
+            ),
+            isUpdating
                 ? const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
                   )
                 : ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 0),
                       minimumSize: const Size(60, 32),
                     ),
                     onPressed: () async {
                       HapticFeedback.lightImpact();
-                      final langCode = Localizations.localeOf(context).languageCode;
+                      final langCode =
+                          Localizations.localeOf(context).languageCode;
                       setState(() => isUpdating = true);
                       try {
-                        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                        bool serviceEnabled =
+                            await Geolocator.isLocationServiceEnabled();
                         if (!serviceEnabled) {
                           setState(() => isUpdating = false);
                           await Geolocator.openLocationSettings();
-                          return; 
+                          return;
                         }
-                        final locData = await LocationService.fetchOfflineLocation(langCode);
-                        await ref.read(settingsProvider.notifier).addAndSelectLocation(locData['formattedName'], locData['lat'], locData['lng'], locData['countryCode']);
-                        await ref.read(settingsProvider.notifier).updateCalculationMethod(locData['method']);
-                        await ref.read(settingsProvider.notifier).updateMadhab(locData['madhab']);
+                        final locData =
+                            await LocationService.fetchOfflineLocation(
+                                langCode);
+                        await ref
+                            .read(settingsProvider.notifier)
+                            .addAndSelectLocation(
+                                locData['formattedName'],
+                                locData['lat'],
+                                locData['lng'],
+                                locData['countryCode']);
+                        await ref
+                            .read(settingsProvider.notifier)
+                            .updateCalculationMethod(locData['method']);
+                        await ref
+                            .read(settingsProvider.notifier)
+                            .updateMadhab(locData['madhab']);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${'settings.gps_success'.tr()} ${locData['formattedName']}'), backgroundColor: Colors.green));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(
+                                  '${'settings.gps_success'.tr()} ${locData['formattedName']}'),
+                              backgroundColor: Colors.green));
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('settings.gps_failed'.tr()), backgroundColor: Colors.redAccent));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('settings.gps_failed'.tr()),
+                              backgroundColor: Colors.redAccent));
                         }
                       } finally {
                         if (mounted) setState(() => isUpdating = false);
                       }
                     },
-                    child: Text('settings.update'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text('settings.update'.tr(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12)),
                   ),
-            ],
-          ),
-        );
-      }
-    );
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildSettingsGroup(String label, List<Widget> rows, bool isDark, Color surfaceColor, Color borderColor, Color textColor, Color primaryColor) {
+  Widget _buildSettingsGroup(
+      String label,
+      List<Widget> rows,
+      bool isDark,
+      Color surfaceColor,
+      Color borderColor,
+      Color textColor,
+      Color primaryColor) {
     // 🌟 إصلاح البحث: إخفاء المجموعة فقط إذا كان البحث لا يطابق العنوان
-    if (_searchQuery.isNotEmpty && !label.toLowerCase().contains(_searchQuery)) return const SizedBox.shrink();
-    
+    if (_searchQuery.isNotEmpty &&
+        !label.toLowerCase().contains(_searchQuery)) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
@@ -261,7 +468,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 8, bottom: 8),
-            child: Text(label, style: TextStyle(color: primaryColor, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+            child: Text(label,
+                style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5)),
           ),
           Container(
             decoration: BoxDecoration(
@@ -277,7 +489,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 return Column(
                   children: [
                     row,
-                    Divider(height: 1, thickness: 1, color: borderColor, indent: 56, endIndent: 16),
+                    Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: borderColor,
+                        indent: 56,
+                        endIndent: 16),
                   ],
                 );
               }).toList(),
@@ -288,82 +505,160 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSettingRow(BuildContext context, {required IconData icon, required String title, String? subtitle, VoidCallback? onTap, bool isToggle = false, bool toggleValue = false, Function(bool)? onToggle, required bool isDark, required Color primaryColor, required Color textColor}) {
-    return _SettingRow(context: context, icon: icon, title: title, subtitle: subtitle, onTap: onTap, isToggle: isToggle, toggleValue: toggleValue, onToggle: onToggle, isDark: isDark, primaryColor: primaryColor, textColor: textColor);
+  Widget _buildSettingRow(BuildContext context,
+      {required IconData icon,
+      required String title,
+      String? subtitle,
+      VoidCallback? onTap,
+      bool isToggle = false,
+      bool toggleValue = false,
+      Function(bool)? onToggle,
+      required bool isDark,
+      required Color primaryColor,
+      required Color textColor}) {
+    return _SettingRow(
+        context: context,
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        onTap: onTap,
+        isToggle: isToggle,
+        toggleValue: toggleValue,
+        onToggle: onToggle,
+        isDark: isDark,
+        primaryColor: primaryColor,
+        textColor: textColor);
   }
-  
-  void _showNightMarkersSheet(BuildContext context, bool isDark, Color surfaceColor, Color textColor, Color primaryColor) {
+
+  void _showNightMarkersSheet(BuildContext context, bool isDark,
+      Color surfaceColor, Color textColor, Color primaryColor) {
     final markers = {
-      'np_third_2': 'night_parts.third_2', 'np_sixth_3': 'night_parts.sixth_3',
-      'np_half_2': 'night_parts.half_2', 'np_sixth_4': 'night_parts.sixth_4',
-      'np_third_3': 'night_parts.third_3', 'np_sixth_5': 'night_parts.sixth_5',
+      'np_third_2': 'night_parts.third_2',
+      'np_sixth_3': 'night_parts.sixth_3',
+      'np_half_2': 'night_parts.half_2',
+      'np_sixth_4': 'night_parts.sixth_4',
+      'np_third_3': 'night_parts.third_3',
+      'np_sixth_5': 'night_parts.sixth_5',
       'np_sixth_6': 'night_parts.sixth_6',
     };
     showModalBottomSheet(
-      context: context, backgroundColor: surfaceColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      context: context,
+      backgroundColor: surfaceColor,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Consumer(
-          builder: (context, ref, child) {
-            final liveSettings = ref.watch(settingsProvider);
-            final notifier = ref.read(settingsProvider.notifier);
-            final active = liveSettings.activeNightMarkers;
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Text('settings.max_two_markers'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold))),
-                    const SizedBox(height: 16),
-                    Flexible(
-                      child: ListView(
-                        shrinkWrap: true, physics: const BouncingScrollPhysics(),
-                        children: markers.entries.map((entry) {
-                          final isSelected = active.contains(entry.key);
-                          return CheckboxListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                            title: Text(entry.value.tr(), style: TextStyle(color: isSelected ? primaryColor : (isDark ? Colors.white70 : Colors.black87), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                            value: isSelected,
-                            activeColor: primaryColor,
-                            checkColor: Colors.white,
-                            onChanged: (val) { notifier.toggleNightMarker(entry.key); },
-                          );
-                        }).toList(),
-                      ),
+        return Consumer(builder: (context, ref, child) {
+          final liveSettings = ref.watch(settingsProvider);
+          final notifier = ref.read(settingsProvider.notifier);
+          final active = liveSettings.activeNightMarkers;
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text('settings.max_two_markers'.tr(),
+                          style: TextStyle(
+                              color: textColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold))),
+                  const SizedBox(height: 16),
+                  Flexible(
+                    child: ListView(
+                      shrinkWrap: true,
+                      physics: const BouncingScrollPhysics(),
+                      children: markers.entries.map((entry) {
+                        final isSelected = active.contains(entry.key);
+                        return CheckboxListTile(
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 24),
+                          title: Text(entry.value.tr(),
+                              style: TextStyle(
+                                  color: isSelected
+                                      ? primaryColor
+                                      : (isDark
+                                          ? Colors.white70
+                                          : Colors.black87),
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal)),
+                          value: isSelected,
+                          activeColor: primaryColor,
+                          checkColor: Colors.white,
+                          onChanged: (val) {
+                            notifier.toggleNightMarker(entry.key);
+                          },
+                        );
+                      }).toList(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          }
-        );
+            ),
+          );
+        });
       },
     );
   }
 
-  void _showSelectionSheet(String title, Map<String, String> items, String selectedValue, Function(String) onSelected, bool isDark, Color surfaceColor, Color textColor, Color primaryColor) {
+  void _showSelectionSheet(
+      String title,
+      Map<String, String> items,
+      String selectedValue,
+      Function(String) onSelected,
+      bool isDark,
+      Color surfaceColor,
+      Color textColor,
+      Color primaryColor) {
     showModalBottomSheet(
-      context: context, backgroundColor: surfaceColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      context: context,
+      backgroundColor: surfaceColor,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
-            mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Text(title, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold))),
+              Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(title,
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold))),
               const SizedBox(height: 16),
               Flexible(
                 child: ListView(
-                  shrinkWrap: true, physics: const BouncingScrollPhysics(),
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
                   children: items.entries.map((entry) {
                     final isSelected = entry.key == selectedValue;
                     return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                      title: Text(entry.value, style: TextStyle(color: isSelected ? primaryColor : (isDark ? Colors.white70 : Colors.black87), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 15)),
-                      trailing: isSelected ? Icon(LucideIcons.circle_check, color: primaryColor, size: 20) : null,
-                      onTap: () { onSelected(entry.key); Navigator.pop(context); },
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 24),
+                      title: Text(entry.value,
+                          style: TextStyle(
+                              color: isSelected
+                                  ? primaryColor
+                                  : (isDark ? Colors.white70 : Colors.black87),
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              fontSize: 15)),
+                      trailing: isSelected
+                          ? Icon(LucideIcons.circle_check,
+                              color: primaryColor, size: 20)
+                          : null,
+                      onTap: () {
+                        onSelected(entry.key);
+                        Navigator.pop(context);
+                      },
                     );
                   }).toList(),
                 ),
@@ -389,27 +684,48 @@ class _SettingRow extends StatelessWidget {
   final Color primaryColor;
   final Color textColor;
 
-  const _SettingRow({required this.context, required this.icon, required this.title, this.subtitle, this.onTap, this.isToggle = false, this.toggleValue = false, this.onToggle, required this.isDark, required this.primaryColor, required this.textColor});
+  const _SettingRow(
+      {required this.context,
+      required this.icon,
+      required this.title,
+      this.subtitle,
+      this.onTap,
+      this.isToggle = false,
+      this.toggleValue = false,
+      this.onToggle,
+      required this.isDark,
+      required this.primaryColor,
+      required this.textColor});
 
   @override
   Widget build(BuildContext _) {
     final Color mainColor = textColor;
     final Color baseIconColor = isDark ? Colors.white70 : Colors.black87;
-    final Color iconBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05);
+    final Color iconBgColor = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.05);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: (isToggle || onToggle == null && isToggle) ? null : () {
-          if (onTap != null) { HapticFeedback.lightImpact(); onTap!(); }
-        },
+        onTap: (isToggle || onToggle == null && isToggle)
+            ? null
+            : () {
+                if (onTap != null) {
+                  HapticFeedback.lightImpact();
+                  onTap!();
+                }
+              },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               Container(
-                width: 36, height: 36,
-                decoration: BoxDecoration(color: iconBgColor, borderRadius: BorderRadius.circular(10)),
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                    color: iconBgColor,
+                    borderRadius: BorderRadius.circular(10)),
                 child: Icon(icon, color: baseIconColor, size: 18),
               ),
               const SizedBox(width: 14),
@@ -417,10 +733,20 @@ class _SettingRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: TextStyle(color: mainColor, fontSize: 15, fontWeight: FontWeight.w600)),
+                    Text(title,
+                        style: TextStyle(
+                            color: mainColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600)),
                     if (subtitle != null) ...[
                       const SizedBox(height: 2),
-                      Text(subtitle!, style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.5), fontSize: 12, height: 1.4)),
+                      Text(subtitle!,
+                          style: TextStyle(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.4)
+                                  : Colors.black.withValues(alpha: 0.5),
+                              fontSize: 12,
+                              height: 1.4)),
                     ],
                   ],
                 ),
@@ -433,17 +759,20 @@ class _SettingRow extends StatelessWidget {
                     onChanged: onToggle,
                     activeThumbColor: isDark ? Colors.black : Colors.white,
                     activeTrackColor: primaryColor,
-                    inactiveTrackColor: isDark ? const Color(0xFF2E3745) : Colors.black12,
-                    inactiveThumbColor: isDark ? Colors.white70 : Colors.black54,
+                    inactiveTrackColor:
+                        isDark ? const Color(0xFF2E3745) : Colors.black12,
+                    inactiveThumbColor:
+                        isDark ? Colors.white70 : Colors.black54,
                   ),
                 )
-              else 
+              else
                 // 🌟 السهم ينعكس بناءً على اتجاه لغة التطبيق
                 Icon(
-                  context.locale.languageCode == 'ar' ? LucideIcons.chevron_left : LucideIcons.chevron_right, 
-                  color: isDark ? Colors.white38 : Colors.black38, 
-                  size: 18
-                ),
+                    context.locale.languageCode == 'ar'
+                        ? LucideIcons.chevron_left
+                        : LucideIcons.chevron_right,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                    size: 18),
             ],
           ),
         ),

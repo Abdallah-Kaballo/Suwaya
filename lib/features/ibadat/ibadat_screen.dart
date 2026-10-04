@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/location/permissions_provider.dart';
+import 'package:suwaya/models/settings_model.dart';
 
 import 'package:suwaya_time/suwaya_time.dart';
 
@@ -12,21 +13,46 @@ import '../../core/astro_engine/astro_provider.dart';
 import '../settings/settings_provider.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../../core/theme/astro_ui_extensions.dart';
-import '../../core/providers/ui_providers.dart'; 
+import '../../core/providers/ui_providers.dart';
+import '../../shared/widgets/suwaya_time_text.dart';
 
 class IbadatScreen extends ConsumerWidget {
   const IbadatScreen({super.key});
 
-  String _getDisplayTime(DateTime targetTime, AstroState astroState, bool useAstro) {
-    if (!useAstro) return DateFormat('HH:mm', 'en').format(targetTime);
+  Widget _buildClockTime(BuildContext context, DateTime targetTime,
+      AstroState astroState, SettingsModel settings, bool isDark,
+      {double fontSize = 16, Color? civilColor}) {
+    final useAstro = settings.useAstroTimeForIbadat;
+    final style = TextStyle(
+      color: useAstro
+          ? const Color(0xFFF2C94C)
+          : (civilColor ?? (isDark ? Colors.white : Colors.black87)),
+      fontSize: fontSize,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    );
+    if (!useAstro) {
+      return ClockTimeText.civil(
+        civilTime: targetTime,
+        civilTimeFormat: settings.civilTimeFormat,
+        locale: context.locale.languageCode,
+        style: style,
+      );
+    }
 
-    if (astroState.periods.isEmpty) return "00:00";
+    if (astroState.periods.isEmpty) {
+      return ClockTimeText.suwaya(
+          globalSuwayaIndex: 0, virtualMinute: 0, style: style);
+    }
     double totalVirtualMinutes = 0.0;
-    
+
     for (var p in astroState.periods) {
-      if (targetTime.isAfter(p.endTime) || targetTime.isAtSameMomentAs(p.endTime)) {
+      if (targetTime.isAfter(p.endTime) ||
+          targetTime.isAtSameMomentAs(p.endTime)) {
         totalVirtualMinutes += p.suwayasCount * 30.0;
-      } else if ((targetTime.isAfter(p.startTime) || targetTime.isAtSameMomentAs(p.startTime)) && targetTime.isBefore(p.endTime)) {
+      } else if ((targetTime.isAfter(p.startTime) ||
+              targetTime.isAtSameMomentAs(p.startTime)) &&
+          targetTime.isBefore(p.endTime)) {
         final totalMicro = p.endTime.difference(p.startTime).inMicroseconds;
         final elapsedMicro = targetTime.difference(p.startTime).inMicroseconds;
         final progress = totalMicro > 0 ? (elapsedMicro / totalMicro) : 0.0;
@@ -34,13 +60,15 @@ class IbadatScreen extends ConsumerWidget {
         break;
       }
     }
-    
+
     int totalMins = totalVirtualMinutes.round();
-    int s = totalMins ~/ 30; 
-    int m = totalMins % 30;  
-    
-    if (s >= 48) { s = 0; m = 0; }
-    return '${s.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+    final globalSuwaya = (totalMins ~/ 30) % 48;
+    final virtualMinute = totalMins % 30;
+    return ClockTimeText.suwaya(
+      globalSuwayaIndex: globalSuwaya,
+      virtualMinute: virtualMinute,
+      style: style,
+    );
   }
 
   @override
@@ -53,33 +81,35 @@ class IbadatScreen extends ConsumerWidget {
     // 🌟 حل مشكلة التحميل اللانهائي هنا أيضاً
     if (astroState.periods.isEmpty) {
       return Scaffold(
-        backgroundColor: scaffoldBgColor, 
-        body: Center(
-          child: Column(
+          backgroundColor: scaffoldBgColor,
+          body: Center(
+              child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(color: Theme.of(context).primaryColor),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () => ref.read(astroProvider.notifier).resetToRealTime(),
+                onPressed: () =>
+                    ref.read(astroProvider.notifier).resetToRealTime(),
                 icon: const Icon(Icons.refresh),
                 label: Text('common.retry'.tr()),
-                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white),
               )
             ],
-          )
-        )
-      );
+          )));
     }
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
-        drawer: const AppDrawer(), 
-        onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
+        drawer: const AppDrawer(),
+        onDrawerChanged: (isOpen) =>
+            ref.read(isDrawerOpenProvider.notifier).state = isOpen,
         appBar: AppBar(
-          backgroundColor: Colors.transparent, 
+          backgroundColor: Colors.transparent,
           elevation: 0,
           leading: Builder(
             builder: (ctx) => IconButton(
@@ -87,16 +117,23 @@ class IbadatScreen extends ConsumerWidget {
               onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),
           ),
-          title: Text('ibadat.title'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor)), 
+          title: Text('ibadat.title'.tr(),
+              style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
           centerTitle: true,
           bottom: TabBar(
-            indicatorColor: Theme.of(context).primaryColor, 
-            labelColor: Theme.of(context).primaryColor, 
-            unselectedLabelColor: isDark ? Colors.white70 : Colors.black54, 
-            dividerColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+            indicatorColor: Theme.of(context).primaryColor,
+            labelColor: Theme.of(context).primaryColor,
+            unselectedLabelColor: isDark ? Colors.white70 : Colors.black54,
+            dividerColor: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05),
             tabs: [
-              Tab(text: 'ibadat.prayers_tab'.tr(), icon: const Icon(LucideIcons.moon_star)),
-              Tab(text: 'ibadat.qiyam_tab'.tr(), icon: const Icon(LucideIcons.sparkles)),
+              Tab(
+                  text: 'ibadat.prayers_tab'.tr(),
+                  icon: const Icon(LucideIcons.moon_star)),
+              Tab(
+                  text: 'ibadat.qiyam_tab'.tr(),
+                  icon: const Icon(LucideIcons.sparkles)),
             ],
           ),
         ),
@@ -110,7 +147,8 @@ class IbadatScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPrayersTab(BuildContext context, WidgetRef ref, AstroState astroState, bool isDark) {
+  Widget _buildPrayersTab(
+      BuildContext context, WidgetRef ref, AstroState astroState, bool isDark) {
     final ibadat = astroState.ibadatTimings;
     final now = astroState.virtualTime;
     final settings = ref.watch(settingsProvider);
@@ -121,25 +159,29 @@ class IbadatScreen extends ConsumerWidget {
       {'name': 'periods.asr'.tr(), 'time': ibadat.asr},
       {'name': 'periods.maghrib'.tr(), 'time': ibadat.maghrib},
       {'name': 'prayers.isha'.tr(), 'time': ibadat.isha},
-      {'name': 'periods.fajr'.tr(), 'time': ibadat.nextFajr}, 
+      {'name': 'periods.fajr'.tr(), 'time': ibadat.nextFajr},
     ];
 
-    final nextPrayer = prayers.firstWhere((p) => (p['time'] as DateTime).isAfter(now), orElse: () => prayers.last);
-    
+    final nextPrayer = prayers.firstWhere(
+        (p) => (p['time'] as DateTime).isAfter(now),
+        orElse: () => prayers.last);
+
     int sCount, mCount;
     String topLabel;
-    
+
     if (settings.useAstroTimeForIbadat) {
       topLabel = 'ibadat.virtual_remaining'.tr();
       int nowVirtualMins = _getVirtualMinutesHelper(now, astroState);
-      int nextVirtualMins = _getVirtualMinutesHelper(nextPrayer['time'] as DateTime, astroState);
-      if (nextVirtualMins <= nowVirtualMins) nextVirtualMins = 1440; 
+      int nextVirtualMins =
+          _getVirtualMinutesHelper(nextPrayer['time'] as DateTime, astroState);
+      if (nextVirtualMins <= nowVirtualMins) nextVirtualMins = 1440;
       int remainingMins = nextVirtualMins - nowVirtualMins;
       sCount = remainingMins ~/ 30;
       mCount = remainingMins % 30;
     } else {
       topLabel = 'ibadat.civil_remaining'.tr();
-      int remainingMins = (nextPrayer['time'] as DateTime).difference(now).inMinutes;
+      int remainingMins =
+          (nextPrayer['time'] as DateTime).difference(now).inMinutes;
       if (remainingMins < 0) remainingMins += 1440;
       sCount = remainingMins ~/ 60;
       mCount = remainingMins % 60;
@@ -149,75 +191,179 @@ class IbadatScreen extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
         Container(
-          padding: const EdgeInsets.all(20), margin: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(bottom: 24),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDark ? [const Color(0xFF1E2530), const Color(0xFF0B0F19)] : [Colors.white, const Color(0xFFE8ECEF)],
-              begin: Alignment.topLeft, end: Alignment.bottomRight
-            ), 
-            borderRadius: BorderRadius.circular(20), 
-            border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
-            boxShadow: [BoxShadow(color: isDark ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05), blurRadius: 20)]
-          ),
+              gradient: LinearGradient(
+                  colors: isDark
+                      ? [const Color(0xFF1E2530), const Color(0xFF0B0F19)]
+                      : [Colors.white, const Color(0xFFE8ECEF)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(20),
+              border:
+                  Border.all(color: isDark ? Colors.white12 : Colors.black12),
+              boxShadow: [
+                BoxShadow(
+                    color: isDark
+                        ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20)
+              ]),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ibadat.next_prayer'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14)),
+                  Text('ibadat.next_prayer'.tr(),
+                      style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.black54,
+                          fontSize: 14)),
                   const SizedBox(height: 4),
-                  Text(nextPrayer['name'] as String, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text(nextPrayer['name'] as String,
+                      style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(topLabel, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 11)),
+                  Text(topLabel,
+                      style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.black54,
+                          fontSize: 11)),
                   const SizedBox(height: 4),
                   Directionality(
-                    textDirection: ui.TextDirection.ltr, 
-                    child: settings.useAstroTimeForIbadat ? Stack(
-                      children: [
-                        Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.5, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=1.0..color=Colors.white)),
-                        Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 22, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.5)),
-                      ]
-                    ) : Text('- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}', style: const TextStyle(
-  color: Colors.white,
-  fontSize: 20,
-  fontWeight: FontWeight.normal,
-  fontFamily: 'Inter',
-)),
+                    textDirection: ui.TextDirection.ltr,
+                    child: settings.useAstroTimeForIbadat
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                '- ',
+                                style: TextStyle(
+                                  color: Color(0xFFF2C94C),
+                                  fontSize: 22,
+                                  fontFamily: 'Playfair Display',
+                                ),
+                              ),
+                              SuwayaTimeText(
+                                globalSuwayaIndex: sCount,
+                                minute: mCount,
+                                style: const TextStyle(
+                                  color: Color(0xFFF2C94C),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'Playfair Display',
+                                  letterSpacing: 1.5,
+                                ),
+                                separatorColor: Colors.white,
+                                separatorHeightFactor: 0.58,
+                                separatorWidth: 1.7,
+                              ),
+                            ],
+                          )
+                        : Text(
+                            '- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'Inter',
+                            )),
                   ),
                 ],
               ),
             ],
           ),
         ),
-
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildSectionTitle('ibadat.prayers_tab'.tr(), context),
             IconButton(
-              icon: Icon(LucideIcons.settings_2, color: Theme.of(context).primaryColor, size: 20),
+              icon: Icon(LucideIcons.settings_2,
+                  color: Theme.of(context).primaryColor, size: 20),
               onPressed: () => _showPrayerSettingsSheet(context, ref, isDark),
             )
           ],
         ),
-
-        _buildTimingCard(context, ref, astroState, '1', 'periods.fajr'.tr(), ibadat.fajr, LucideIcons.sunrise, const Color(0xFF64B5F6), nextPrayer['time'] == ibadat.fajr, isDark),
+        _buildTimingCard(
+            context,
+            ref,
+            astroState,
+            '1',
+            'periods.fajr'.tr(),
+            ibadat.fajr,
+            LucideIcons.sunrise,
+            const Color(0xFF64B5F6),
+            nextPrayer['time'] == ibadat.fajr,
+            isDark),
         if (settings.showSunrise)
-          _buildTimingCard(context, ref, astroState, 'sunrise', 'ibadat.sunrise'.tr(), ibadat.sunrise, LucideIcons.sun, Colors.orangeAccent, nextPrayer['time'] == ibadat.sunrise, isDark),
-        _buildTimingCard(context, ref, astroState, '3', 'periods.dhuhr'.tr(), ibadat.dhuhr, LucideIcons.sun_dim, const Color(0xFFFFCA28), nextPrayer['time'] == ibadat.dhuhr, isDark),
-        _buildTimingCard(context, ref, astroState, '4', 'periods.asr'.tr(), ibadat.asr, LucideIcons.cloud_sun, const Color(0xFFFF9800), nextPrayer['time'] == ibadat.asr, isDark),
-        _buildTimingCard(context, ref, astroState, '5', 'periods.maghrib'.tr(), ibadat.maghrib, LucideIcons.sunset, const Color(0xFFE53935), nextPrayer['time'] == ibadat.maghrib, isDark),
-        _buildTimingCard(context, ref, astroState, 'isha', 'prayers.isha'.tr(), ibadat.isha, LucideIcons.moon, const Color(0xFF1A237E), nextPrayer['time'] == ibadat.isha, isDark),
+          _buildTimingCard(
+              context,
+              ref,
+              astroState,
+              'sunrise',
+              'ibadat.sunrise'.tr(),
+              ibadat.sunrise,
+              LucideIcons.sun,
+              Colors.orangeAccent,
+              nextPrayer['time'] == ibadat.sunrise,
+              isDark),
+        _buildTimingCard(
+            context,
+            ref,
+            astroState,
+            '3',
+            'periods.dhuhr'.tr(),
+            ibadat.dhuhr,
+            LucideIcons.sun_dim,
+            const Color(0xFFFFCA28),
+            nextPrayer['time'] == ibadat.dhuhr,
+            isDark),
+        _buildTimingCard(
+            context,
+            ref,
+            astroState,
+            '4',
+            'periods.asr'.tr(),
+            ibadat.asr,
+            LucideIcons.cloud_sun,
+            const Color(0xFFFF9800),
+            nextPrayer['time'] == ibadat.asr,
+            isDark),
+        _buildTimingCard(
+            context,
+            ref,
+            astroState,
+            '5',
+            'periods.maghrib'.tr(),
+            ibadat.maghrib,
+            LucideIcons.sunset,
+            const Color(0xFFE53935),
+            nextPrayer['time'] == ibadat.maghrib,
+            isDark),
+        _buildTimingCard(
+            context,
+            ref,
+            astroState,
+            'isha',
+            'prayers.isha'.tr(),
+            ibadat.isha,
+            LucideIcons.moon,
+            const Color(0xFF1A237E),
+            nextPrayer['time'] == ibadat.isha,
+            isDark),
       ],
     );
   }
 
-  Widget _buildQiyamTab(BuildContext context, WidgetRef ref, AstroState astroState, bool isDark) {
+  Widget _buildQiyamTab(
+      BuildContext context, WidgetRef ref, AstroState astroState, bool isDark) {
     final ibadat = astroState.ibadatTimings;
     final settings = ref.watch(settingsProvider);
     final visibleNightParts = settings.visibleNightParts;
@@ -230,60 +376,111 @@ class IbadatScreen extends ConsumerWidget {
           children: [
             _buildSectionTitle('ibadat.qiyam_tab'.tr(), context),
             IconButton(
-              icon: Icon(LucideIcons.settings_2, color: Theme.of(context).primaryColor, size: 20),
-              onPressed: () => _showNightPrefsSheet(context, ref, ibadat.nightParts, isDark),
+              icon: Icon(LucideIcons.settings_2,
+                  color: Theme.of(context).primaryColor, size: 20),
+              onPressed: () =>
+                  _showNightPrefsSheet(context, ref, ibadat.nightParts, isDark),
             )
           ],
         ),
-        
         if (visibleNightParts.isEmpty)
           Center(
             child: Padding(
               padding: const EdgeInsets.all(32),
-              child: Text('ibadat.no_qiyam'.tr(), textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54)),
+              child: Text('ibadat.no_qiyam'.tr(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black54)),
             ),
           ),
-
-        ...ibadat.nightParts.where((p) => visibleNightParts.contains(p.id)).map((part) {
+        ...ibadat.nightParts
+            .where((p) => visibleNightParts.contains(p.id))
+            .map((part) {
           final isPeak = ['sixth_4', 'sixth_5', 'third_3'].contains(part.id);
-          
+
           final alertLevel = settings.getPeriodAlertLevel(part.id);
           IconData bellIcon = LucideIcons.bell_off;
           Color bellColor = isDark ? Colors.white38 : Colors.black38;
-          if (alertLevel == 1) { bellIcon = LucideIcons.bell; bellColor = Theme.of(context).primaryColor; }
-          if (alertLevel == 2) { bellIcon = LucideIcons.bell_ring; bellColor = Theme.of(context).primaryColor; }
-          
+          if (alertLevel == 1) {
+            bellIcon = LucideIcons.bell;
+            bellColor = Theme.of(context).primaryColor;
+          }
+          if (alertLevel == 2) {
+            bellIcon = LucideIcons.bell_ring;
+            bellColor = Theme.of(context).primaryColor;
+          }
+
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              boxShadow: isPeak ? [BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 15, spreadRadius: 1)] : null,
-              border: Border.all(color: isPeak ? Theme.of(context).primaryColor.withValues(alpha: 0.4) : (isDark ? Colors.white12 : Colors.black12), width: isPeak ? 1.5 : 1),
+              boxShadow: isPeak
+                  ? [
+                      BoxShadow(
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.05),
+                          blurRadius: 15,
+                          spreadRadius: 1)
+                    ]
+                  : null,
+              border: Border.all(
+                  color: isPeak
+                      ? Theme.of(context).primaryColor.withValues(alpha: 0.4)
+                      : (isDark ? Colors.white12 : Colors.black12),
+                  width: isPeak ? 1.5 : 1),
             ),
             child: Material(
-              color: isPeak ? (isDark ? const Color(0xFF1E2530) : Colors.white) : Theme.of(context).cardColor,
+              color: isPeak
+                  ? (isDark ? const Color(0xFF1E2530) : Colors.white)
+                  : Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(16),
-              clipBehavior: Clip.antiAlias, 
+              clipBehavior: Clip.antiAlias,
               child: Theme(
                 data: ThemeData().copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
-                  initiallyExpanded: isPeak, 
-                  iconColor: isPeak ? Theme.of(context).primaryColor : (isDark ? Colors.white70 : Colors.black54),
-                  collapsedIconColor: isPeak ? Theme.of(context).primaryColor : (isDark ? Colors.white70 : Colors.black54),
+                  initiallyExpanded: isPeak,
+                  iconColor: isPeak
+                      ? Theme.of(context).primaryColor
+                      : (isDark ? Colors.white70 : Colors.black54),
+                  collapsedIconColor: isPeak
+                      ? Theme.of(context).primaryColor
+                      : (isDark ? Colors.white70 : Colors.black54),
                   title: Row(
                     children: [
-                      Icon(isPeak ? LucideIcons.sparkles : LucideIcons.moon, color: isPeak ? Theme.of(context).primaryColor : Colors.purpleAccent, size: 18), 
+                      Icon(isPeak ? LucideIcons.sparkles : LucideIcons.moon,
+                          color: isPeak
+                              ? Theme.of(context).primaryColor
+                              : Colors.purpleAccent,
+                          size: 18),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(('night_parts.${part.nameKey.replaceAll("np_", "")}').tr(), style: TextStyle(color: isPeak ? Theme.of(context).primaryColor : (isDark ? Colors.white : Colors.black87), fontSize: 16, fontWeight: isPeak ? FontWeight.bold : FontWeight.w600)),
+                        child: Text(
+                            ('night_parts.${part.nameKey.replaceAll("np_", "")}')
+                                .tr(),
+                            style: TextStyle(
+                                color: isPeak
+                                    ? Theme.of(context).primaryColor
+                                    : (isDark ? Colors.white : Colors.black87),
+                                fontSize: 16,
+                                fontWeight: isPeak
+                                    ? FontWeight.bold
+                                    : FontWeight.w600)),
                       ),
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.mediumImpact();
-                          _showAlarmChoiceSheet(context, ref, part.id, ('night_parts.${part.nameKey.replaceAll("np_", "")}').tr(), isDark);
+                          _showAlarmChoiceSheet(
+                              context,
+                              ref,
+                              part.id,
+                              ('night_parts.${part.nameKey.replaceAll("np_", "")}')
+                                  .tr(),
+                              isDark);
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           child: Icon(bellIcon, color: bellColor, size: 20),
                         ),
                       ),
@@ -293,49 +490,59 @@ class IbadatScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.black.withValues(alpha: 0.2) : const Color(0xFFF9FAFB),
-                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.2)
+                            : const Color(0xFFF9FAFB),
+                        borderRadius: const BorderRadius.vertical(
+                            bottom: Radius.circular(16)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isPeak) ...[
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
                               margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(color: Theme.of(context).primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                              child: Text('ibadat.peak_time'.tr(), style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .primaryColor
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Text('ibadat.peak_time'.tr(),
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold)),
                             ),
                           ],
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('ibadat.starts_at'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                              Directionality(
-                                textDirection: ui.TextDirection.ltr, 
-                                child: settings.useAstroTimeForIbadat ? Stack(
-                                  children: [
-                                    Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.7..color=Colors.white)),
-                                    Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 15, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
-                                  ]
-                                ) : Text(_getDisplayTime(part.startTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.normal, fontFamily: 'Inter', letterSpacing: 0.0)),
-                              ),
+                              Text('ibadat.starts_at'.tr(),
+                                  style: TextStyle(
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      fontSize: 13)),
+                              _buildClockTime(context, part.startTime,
+                                  astroState, settings, isDark,
+                                  fontSize: 15),
                             ],
                           ),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('ibadat.ends_at'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                              Directionality(
-                                textDirection: ui.TextDirection.ltr, 
-                                child: settings.useAstroTimeForIbadat ? Stack(
-                                  children: [
-                                    Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.7..color=Colors.white)),
-                                    Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 15, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
-                                  ]
-                                ) : Text(_getDisplayTime(part.endTime, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.normal, fontFamily: 'Inter', letterSpacing: 0.0)),
-                              ),
+                              Text('ibadat.ends_at'.tr(),
+                                  style: TextStyle(
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      fontSize: 13)),
+                              _buildClockTime(context, part.endTime, astroState,
+                                  settings, isDark,
+                                  fontSize: 15),
                             ],
                           ),
                         ],
@@ -351,7 +558,17 @@ class IbadatScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimingCard(BuildContext context, WidgetRef ref, AstroState astroState, String periodId, String title, DateTime time, IconData icon, Color rawColor, bool isNext, bool isDark) {
+  Widget _buildTimingCard(
+      BuildContext context,
+      WidgetRef ref,
+      AstroState astroState,
+      String periodId,
+      String title,
+      DateTime time,
+      IconData icon,
+      Color rawColor,
+      bool isNext,
+      bool isDark) {
     final settings = ref.watch(settingsProvider);
     final alertLevel = settings.getPeriodAlertLevel(periodId);
 
@@ -360,28 +577,48 @@ class IbadatScreen extends ConsumerWidget {
 
     IconData bellIcon = LucideIcons.bell_off;
     Color bellColor = isDark ? Colors.white38 : Colors.black38;
-    if (alertLevel == 1) { bellIcon = LucideIcons.bell; bellColor = adaptedColor; }
-    if (alertLevel == 2) { bellIcon = LucideIcons.bell_ring; bellColor = adaptedColor; }
+    if (alertLevel == 1) {
+      bellIcon = LucideIcons.bell;
+      bellColor = adaptedColor;
+    }
+    if (alertLevel == 2) {
+      bellIcon = LucideIcons.bell_ring;
+      bellColor = adaptedColor;
+    }
 
     return Card(
       elevation: 0,
-      color: isNext ? rawColor.withValues(alpha: isDark ? 0.15 : 0.08) : Theme.of(context).cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: isNext ? adaptedColor.withValues(alpha: 0.5) : (isDark ? Colors.white12 : Colors.black12), width: 1)),
+      color: isNext
+          ? rawColor.withValues(alpha: isDark ? 0.15 : 0.08)
+          : Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+              color: isNext
+                  ? adaptedColor.withValues(alpha: 0.5)
+                  : (isDark ? Colors.white12 : Colors.black12),
+              width: 1)),
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Icon(icon, color: isNext ? adaptedColor : rawColor),
-        title: Text(title, style: TextStyle(color: isNext ? activeTextColor : (isDark ? Colors.white : Colors.black87), fontSize: 16, fontWeight: isNext ? FontWeight.bold : FontWeight.normal)),
+        title: Text(title,
+            style: TextStyle(
+                color: isNext
+                    ? activeTextColor
+                    : (isDark ? Colors.white : Colors.black87),
+                fontSize: 16,
+                fontWeight: isNext ? FontWeight.bold : FontWeight.normal)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Directionality(
-              textDirection: ui.TextDirection.ltr, 
-              child: settings.useAstroTimeForIbadat ? Stack(
-                children: [
-                  Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.5, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.95..color=Colors.white)),
-                  Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 20, fontWeight: FontWeight.normal, fontFamily: 'Playfair Display', letterSpacing: 1.5)),
-                ]
-              ) : Text(_getDisplayTime(time, astroState, settings.useAstroTimeForIbadat), style: TextStyle(color: (isNext ? activeTextColor : (isDark ? Colors.white : Colors.black87)), fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'Inter', letterSpacing: 0.0)),
+            _buildClockTime(
+              context,
+              time,
+              astroState,
+              settings,
+              isDark,
+              fontSize: 20,
+              civilColor: isNext ? activeTextColor : null,
             ),
             const SizedBox(width: 16),
             GestureDetector(
@@ -402,59 +639,106 @@ class IbadatScreen extends ConsumerWidget {
 
   Widget _buildSectionTitle(String title, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, right: 8, left: 8), 
-      child: Text(title, style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16, fontWeight: FontWeight.bold))
-    );
+        padding: const EdgeInsets.only(bottom: 12, right: 8, left: 8),
+        child: Text(title,
+            style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)));
   }
 
-  void _showAlarmChoiceSheet(BuildContext context, WidgetRef ref, String periodId, String title, bool isDark) {
+  void _showAlarmChoiceSheet(BuildContext context, WidgetRef ref,
+      String periodId, String title, bool isDark) {
     final settings = ref.read(settingsProvider);
     final currentLevel = settings.getPeriodAlertLevel(periodId);
-    final currentSound = settings.getPeriodSound(periodId, 'assets/audio/adhan.mp3');
+    final currentSound =
+        settings.getPeriodSound(periodId, 'assets/audio/adhan.mp3');
     final currentVolume = settings.getPeriodVolume(periodId, 1.0);
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${'ibadat.alert_for'.tr()} $title', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+              Text('${'ibadat.alert_for'.tr()} $title',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87)),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(LucideIcons.bell_off, color: Colors.grey),
                 title: Text('ibadat.silent'.tr()),
-                trailing: currentLevel == 0 ? Icon(LucideIcons.circle_check, color: Theme.of(context).primaryColor) : null,
+                trailing: currentLevel == 0
+                    ? Icon(LucideIcons.circle_check,
+                        color: Theme.of(context).primaryColor)
+                    : null,
                 onTap: () {
-                  ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: periodId, isEnabled: false, alertLevel: 0, soundPath: currentSound, volume: currentVolume);
+                  ref
+                      .read(settingsProvider.notifier)
+                      .updatePeriodNotificationSettings(
+                          periodId: periodId,
+                          isEnabled: false,
+                          alertLevel: 0,
+                          soundPath: currentSound,
+                          volume: currentVolume);
                   Navigator.pop(context);
                 },
               ),
               ListTile(
                 leading: const Icon(LucideIcons.bell, color: Colors.blueAccent),
                 title: Text('ibadat.notification'.tr()),
-                trailing: currentLevel == 1 ? Icon(LucideIcons.circle_check, color: Theme.of(context).primaryColor) : null,
+                trailing: currentLevel == 1
+                    ? Icon(LucideIcons.circle_check,
+                        color: Theme.of(context).primaryColor)
+                    : null,
                 onTap: () async {
-                  final isNotifGranted = await ref.read(permissionsProvider.notifier).ensureNotificationPermission();
+                  final isNotifGranted = await ref
+                      .read(permissionsProvider.notifier)
+                      .ensureNotificationPermission();
                   if (isNotifGranted) {
-                    ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: periodId, isEnabled: true, alertLevel: 1, soundPath: currentSound, volume: currentVolume);
+                    ref
+                        .read(settingsProvider.notifier)
+                        .updatePeriodNotificationSettings(
+                            periodId: periodId,
+                            isEnabled: true,
+                            alertLevel: 1,
+                            soundPath: currentSound,
+                            volume: currentVolume);
                   }
                   if (context.mounted) Navigator.pop(context);
                 },
               ),
               ListTile(
-                leading: const Icon(LucideIcons.bell_ring, color: Colors.orangeAccent),
+                leading: const Icon(LucideIcons.bell_ring,
+                    color: Colors.orangeAccent),
                 title: Text('ibadat.alarm'.tr()),
-                trailing: currentLevel == 2 ? Icon(LucideIcons.circle_check, color: Theme.of(context).primaryColor) : null,
+                trailing: currentLevel == 2
+                    ? Icon(LucideIcons.circle_check,
+                        color: Theme.of(context).primaryColor)
+                    : null,
                 onTap: () async {
-                  final isNotifGranted = await ref.read(permissionsProvider.notifier).ensureNotificationPermission();
-                  final isAlarmGranted = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
+                  final isNotifGranted = await ref
+                      .read(permissionsProvider.notifier)
+                      .ensureNotificationPermission();
+                  final isAlarmGranted = await ref
+                      .read(permissionsProvider.notifier)
+                      .ensureExactAlarmPermission();
                   if (isNotifGranted && isAlarmGranted) {
-                    ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: periodId, isEnabled: true, alertLevel: 2, soundPath: currentSound, volume: currentVolume);
+                    ref
+                        .read(settingsProvider.notifier)
+                        .updatePeriodNotificationSettings(
+                            periodId: periodId,
+                            isEnabled: true,
+                            alertLevel: 2,
+                            soundPath: currentSound,
+                            volume: currentVolume);
                   }
                   if (context.mounted) Navigator.pop(context);
                 },
@@ -466,44 +750,63 @@ class IbadatScreen extends ConsumerWidget {
     );
   }
 
-  void _showPrayerSettingsSheet(BuildContext context, WidgetRef ref, bool isDark) {
+  void _showPrayerSettingsSheet(
+      BuildContext context, WidgetRef ref, bool isDark) {
     showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) {
-        return Consumer(
-          builder: (context, ref, _) {
+        context: context,
+        backgroundColor: Theme.of(context).cardColor,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        builder: (context) {
+          return Consumer(builder: (context, ref, _) {
             final settings = ref.watch(settingsProvider);
             final notifier = ref.read(settingsProvider.notifier);
             final accentColor = Theme.of(context).primaryColor;
-            
+
             return SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('ibadat.customize_prayers'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+                    Text('ibadat.customize_prayers'.tr(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87)),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<bool>(
                         segments: [
-                          ButtonSegment(value: true, label: Text('ibadat.astro_time'.tr()), icon: const Icon(LucideIcons.moon_star)),
-                          ButtonSegment(value: false, label: Text('ibadat.civil_time'.tr()), icon: const Icon(LucideIcons.clock)),
+                          ButtonSegment(
+                              value: true,
+                              label: Text('ibadat.astro_time'.tr()),
+                              icon: const Icon(LucideIcons.moon_star)),
+                          ButtonSegment(
+                              value: false,
+                              label: Text('ibadat.civil_time'.tr()),
+                              icon: const Icon(LucideIcons.clock)),
                         ],
                         selected: {settings.useAstroTimeForIbadat},
-                        onSelectionChanged: (set) => notifier.updateUseAstroTimeForIbadat(set.first),
+                        onSelectionChanged: (set) =>
+                            notifier.updateUseAstroTimeForIbadat(set.first),
                         style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor.withValues(alpha: 0.2) : Colors.transparent), 
-                          foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor : (isDark ? Colors.white54 : Colors.black54)),
+                          backgroundColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? accentColor.withValues(alpha: 0.2)
+                                  : Colors.transparent),
+                          foregroundColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? accentColor
+                                  : (isDark ? Colors.white54 : Colors.black54)),
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
                     SwitchListTile(
-                      title: Text('ibadat.show_sunrise'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text('ibadat.show_sunrise'.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text('ibadat.show_sunrise_desc'.tr()),
                       value: settings.showSunrise,
                       activeThumbColor: accentColor,
@@ -513,46 +816,63 @@ class IbadatScreen extends ConsumerWidget {
                 ),
               ),
             );
-          }
-        );
-      }
-    );
+          });
+        });
   }
 
-  void _showNightPrefsSheet(BuildContext context, WidgetRef ref, List<NightPart> parts, bool isDark) {
+  void _showNightPrefsSheet(
+      BuildContext context, WidgetRef ref, List<NightPart> parts, bool isDark) {
     showModalBottomSheet(
-      context: context,
-      backgroundColor: Theme.of(context).cardColor,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) {
-        return Consumer(
-          builder: (context, ref, _) {
+        context: context,
+        backgroundColor: Theme.of(context).cardColor,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        builder: (context) {
+          return Consumer(builder: (context, ref, _) {
             final settings = ref.watch(settingsProvider);
             final notifier = ref.read(settingsProvider.notifier);
             final accentColor = Theme.of(context).primaryColor;
-            
+
             return SafeArea(
               child: Container(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.8),
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('ibadat.customize_qiyam'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+                    Text('ibadat.customize_qiyam'.tr(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87)),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<bool>(
                         segments: [
-                          ButtonSegment(value: true, label: Text('ibadat.astro_time'.tr()), icon: const Icon(LucideIcons.moon_star)),
-                          ButtonSegment(value: false, label: Text('ibadat.civil_time'.tr()), icon: const Icon(LucideIcons.clock)),
+                          ButtonSegment(
+                              value: true,
+                              label: Text('ibadat.astro_time'.tr()),
+                              icon: const Icon(LucideIcons.moon_star)),
+                          ButtonSegment(
+                              value: false,
+                              label: Text('ibadat.civil_time'.tr()),
+                              icon: const Icon(LucideIcons.clock)),
                         ],
                         selected: {settings.useAstroTimeForIbadat},
-                        onSelectionChanged: (set) => notifier.updateUseAstroTimeForIbadat(set.first),
+                        onSelectionChanged: (set) =>
+                            notifier.updateUseAstroTimeForIbadat(set.first),
                         style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor.withValues(alpha: 0.2) : Colors.transparent), 
-                          foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor : (isDark ? Colors.white54 : Colors.black54)),
+                          backgroundColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? accentColor.withValues(alpha: 0.2)
+                                  : Colors.transparent),
+                          foregroundColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? accentColor
+                                  : (isDark ? Colors.white54 : Colors.black54)),
                         ),
                       ),
                     ),
@@ -561,12 +881,20 @@ class IbadatScreen extends ConsumerWidget {
                       child: ListView(
                         physics: const BouncingScrollPhysics(),
                         children: parts.map((part) {
-                          final isSelected = settings.visibleNightParts.contains(part.id);
+                          final isSelected =
+                              settings.visibleNightParts.contains(part.id);
                           return CheckboxListTile(
-                            title: Text(('night_parts.${part.nameKey.replaceAll("np_", "")}').tr(), style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                            title: Text(
+                                ('night_parts.${part.nameKey.replaceAll("np_", "")}')
+                                    .tr(),
+                                style: TextStyle(
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal)),
                             value: isSelected,
                             activeColor: accentColor,
-                            onChanged: (val) => notifier.toggleVisibleNightPart(part.id),
+                            onChanged: (val) =>
+                                notifier.toggleVisibleNightPart(part.id),
                           );
                         }).toList(),
                       ),
@@ -575,19 +903,20 @@ class IbadatScreen extends ConsumerWidget {
                 ),
               ),
             );
-          }
-        );
-      }
-    );
+          });
+        });
   }
 
   int _getVirtualMinutesHelper(DateTime targetTime, AstroState astroState) {
     if (astroState.periods.isEmpty) return 0;
     double totalVirtualMinutes = 0.0;
     for (var p in astroState.periods) {
-      if (targetTime.isAfter(p.endTime) || targetTime.isAtSameMomentAs(p.endTime)) {
+      if (targetTime.isAfter(p.endTime) ||
+          targetTime.isAtSameMomentAs(p.endTime)) {
         totalVirtualMinutes += p.suwayasCount * 30.0;
-      } else if ((targetTime.isAfter(p.startTime) || targetTime.isAtSameMomentAs(p.startTime)) && targetTime.isBefore(p.endTime)) {
+      } else if ((targetTime.isAfter(p.startTime) ||
+              targetTime.isAtSameMomentAs(p.startTime)) &&
+          targetTime.isBefore(p.endTime)) {
         final totalMicro = p.endTime.difference(p.startTime).inMicroseconds;
         final elapsedMicro = targetTime.difference(p.startTime).inMicroseconds;
         final progress = totalMicro > 0 ? (elapsedMicro / totalMicro) : 0.0;

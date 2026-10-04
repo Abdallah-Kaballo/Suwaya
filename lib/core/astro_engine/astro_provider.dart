@@ -8,17 +8,21 @@ import '../../models/settings_model.dart';
 import '../../features/settings/settings_provider.dart';
 
 final virtualTimeNotifier = ValueNotifier<String>("00:00:00");
+final virtualDateTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
 final Map<String, SuwayaDay> _dayCache = {};
 
 class AstroNotifier extends Notifier<AstroState> {
   Timer? _stateTimer; // 🌟 المؤقت الذكي الذي يوقظ النظام عند السويعة التالية
-  Timer? _uiTimer;    // 🌟 مؤقت خفيف جداً يعمل فقط لتحديث الساعة الرقمية (virtualTime) دون إعادة بناء كاملة
-  
+  Timer?
+      _uiTimer; // 🌟 مؤقت خفيف جداً يعمل فقط لتحديث الساعة الرقمية (virtualTime) دون إعادة بناء كاملة
+
   int _lastPeriodId = -1;
   int _lastSuwaya = -1;
 
   Duration _getUtcOffsetForLocation(SavedLocation? loc) {
-    if (loc == null || loc.isAutoLocation == true || loc.timezone == null) return DateTime.now().timeZoneOffset;
+    if (loc == null || loc.isAutoLocation == true || loc.timezone == null) {
+      return DateTime.now().timeZoneOffset;
+    }
     try {
       return tz.TZDateTime.now(tz.getLocation(loc.timezone!)).timeZoneOffset;
     } catch (_) {
@@ -30,11 +34,18 @@ class AstroNotifier extends Notifier<AstroState> {
     if (loc != null && loc.isAutoLocation == false && loc.timezone != null) {
       try {
         final nowInTarget = tz.TZDateTime.now(tz.getLocation(loc.timezone!));
-        return DateTime.utc(nowInTarget.year, nowInTarget.month, nowInTarget.day, nowInTarget.hour, nowInTarget.minute, nowInTarget.second);
+        return DateTime.utc(
+            nowInTarget.year,
+            nowInTarget.month,
+            nowInTarget.day,
+            nowInTarget.hour,
+            nowInTarget.minute,
+            nowInTarget.second);
       } catch (_) {}
     }
     final now = DateTime.now();
-    return DateTime.utc(now.year, now.month, now.day, now.hour, now.minute, now.second);
+    return DateTime.utc(
+        now.year, now.month, now.day, now.hour, now.minute, now.second);
   }
 
   @override
@@ -51,18 +62,18 @@ class AstroNotifier extends Notifier<AstroState> {
     }));
 
     final settings = ref.read(settingsProvider);
-    final SavedLocation? loc = settings.activeLocation; 
+    final SavedLocation? loc = settings.activeLocation;
     final cityOffset = _getUtcOffsetForLocation(loc);
-    
+
     try {
       ref.onDispose(() {
         _stateTimer?.cancel();
         _uiTimer?.cancel();
       });
-      
+
       DateTime cityNow = _getCityNow(loc);
       DateTime dateToGenerate = cityNow;
-      
+
       final Map<PrayerKey, int> manualOffsetsMap = {};
       for (var c in settings.periodConfigs) {
         if (c.periodId != null) {
@@ -76,17 +87,25 @@ class AstroNotifier extends Notifier<AstroState> {
       final highLatEnum = settings.highLatitudeRule.toHighLatRule();
 
       SuwayaDay generatedDay;
-      
+
       SuwayaDay getOrGenerateDay(DateTime date) {
-        final String cacheKey = '${date.year}-${date.month}-${date.day}_$fingerprint';
+        final String cacheKey =
+            '${date.year}-${date.month}-${date.day}_$fingerprint';
         if (_dayCache.containsKey(cacheKey)) {
           return _dayCache[cacheKey]!;
         } else {
           final newDay = SuwayaTimeEngine.generateDay(
-            loc?.latitude ?? 21.4225, loc?.longitude ?? 39.8262, date, 
-            methodEnum, madhabEnum, highLatEnum, settings.customFajrAngle, settings.customIshaAngle, 
-            cityOffset, SuwayaDistributor.universalDistribution, manualOffsets: manualOffsetsMap 
-          );
+              loc?.latitude ?? 21.4225,
+              loc?.longitude ?? 39.8262,
+              date,
+              methodEnum,
+              madhabEnum,
+              highLatEnum,
+              settings.customFajrAngle,
+              settings.customIshaAngle,
+              cityOffset,
+              SuwayaDistributor.universalDistribution,
+              manualOffsets: manualOffsetsMap);
           if (_dayCache.length > 3) _dayCache.clear();
           _dayCache[cacheKey] = newDay;
           return newDay;
@@ -98,35 +117,40 @@ class AstroNotifier extends Notifier<AstroState> {
       if (cityNow.isBefore(generatedDay.ibadatTimings.fajr)) {
         dateToGenerate = dateToGenerate.subtract(const Duration(days: 1));
         generatedDay = getOrGenerateDay(dateToGenerate);
-      } else if (cityNow.isAfter(generatedDay.ibadatTimings.nextFajr) || cityNow.isAtSameMomentAs(generatedDay.ibadatTimings.nextFajr)) {
+      } else if (cityNow.isAfter(generatedDay.ibadatTimings.nextFajr) ||
+          cityNow.isAtSameMomentAs(generatedDay.ibadatTimings.nextFajr)) {
         dateToGenerate = dateToGenerate.add(const Duration(days: 1));
         generatedDay = getOrGenerateDay(dateToGenerate);
       }
 
-      final initialState = SuwayaTimeEngine.calculateCurrentState(generatedDay, cityNow);
-      
+      final initialState =
+          SuwayaTimeEngine.calculateCurrentState(generatedDay, cityNow);
+
       _lastPeriodId = initialState.currentPeriod.id;
       _lastSuwaya = initialState.currentSuwaya;
-      
-      Future.microtask(() => virtualTimeNotifier.value = initialState.currentFormattedVirtualTime);
+
+      Future.microtask(() {
+        virtualDateTimeNotifier.value = initialState.virtualTime;
+        virtualTimeNotifier.value = initialState.currentFormattedVirtualTime;
+      });
 
       _scheduleSmartStateUpdate(generatedDay, loc);
       _startUITicker(generatedDay, loc);
-      
+
       return initialState;
-      
     } catch (e) {
       debugPrint('AstroEngine Error: $e');
       return SuwayaTimeEngine.getFallbackState(_getCityNow(loc));
     }
   }
 
-  // 🌟 المؤقت الخفيف: يعمل كل 5 ثواني (بدلاً من ثانية) فقط لتحديث النص، ولا يتدخل في حالة التطبيق (State)
+  // A lightweight ticker updates the displayed time and needle without rebuilding AstroState.
   void _startUITicker(SuwayaDay day, SavedLocation? loc) {
     _uiTimer?.cancel();
-    _uiTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       final tickNow = _getCityNow(loc);
       final newState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
+      virtualDateTimeNotifier.value = tickNow;
       virtualTimeNotifier.value = newState.currentFormattedVirtualTime;
     });
   }
@@ -137,7 +161,8 @@ class AstroNotifier extends Notifier<AstroState> {
     if (day.periods.isEmpty) return;
 
     final tickNow = _getCityNow(loc);
-    if (tickNow.isAfter(day.ibadatTimings.nextFajr) || tickNow.isAtSameMomentAs(day.ibadatTimings.nextFajr)) {
+    if (tickNow.isAfter(day.ibadatTimings.nextFajr) ||
+        tickNow.isAtSameMomentAs(day.ibadatTimings.nextFajr)) {
       Future.microtask(() => ref.invalidateSelf());
       return;
     }
@@ -146,29 +171,32 @@ class AstroNotifier extends Notifier<AstroState> {
     final currentState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
     final p = currentState.currentPeriod;
     final suwayaCount = p.suwayasCount > 0 ? p.suwayasCount : 1;
-    final suwayaDurationMicroseconds = p.endTime.difference(p.startTime).inMicroseconds ~/ suwayaCount;
-    
+    final suwayaDurationMicroseconds =
+        p.endTime.difference(p.startTime).inMicroseconds ~/ suwayaCount;
+
     // موعد بداية السويعة التالية (بالتوقيت الحقيقي)
-    final nextSuwayaTime = p.startTime.add(Duration(microseconds: suwayaDurationMicroseconds * currentState.currentSuwaya));
-    
+    final nextSuwayaTime = p.startTime.add(Duration(
+        microseconds: suwayaDurationMicroseconds * currentState.currentSuwaya));
+
     // الفارق الزمني المطلوب للنوم
     final durationUntilNextSuwaya = nextSuwayaTime.difference(tickNow);
 
     // إذا كان الموعد قريباً جداً أو انقضى بشكل غريب، اضبطه على ثانية واحدة لتجنب التكرار الصفري
-    final sleepDuration = durationUntilNextSuwaya.inSeconds > 0 
-        ? durationUntilNextSuwaya 
+    final sleepDuration = durationUntilNextSuwaya.inSeconds > 0
+        ? durationUntilNextSuwaya
         : const Duration(seconds: 1);
 
     _stateTimer = Timer(sleepDuration, () {
       final newTickNow = _getCityNow(loc);
       final newState = SuwayaTimeEngine.calculateCurrentState(day, newTickNow);
-      
-      if (_lastPeriodId != newState.currentPeriod.id || _lastSuwaya != newState.currentSuwaya) {
-         _lastPeriodId = newState.currentPeriod.id;
-         _lastSuwaya = newState.currentSuwaya;
-         state = newState; 
+
+      if (_lastPeriodId != newState.currentPeriod.id ||
+          _lastSuwaya != newState.currentSuwaya) {
+        _lastPeriodId = newState.currentPeriod.id;
+        _lastSuwaya = newState.currentSuwaya;
+        state = newState;
       }
-      
+
       // جدولة النومة القادمة
       _scheduleSmartStateUpdate(day, loc);
     });
@@ -176,14 +204,25 @@ class AstroNotifier extends Notifier<AstroState> {
 
   PrayerKey? _parsePrayerKey(String? periodIdStr) {
     switch (periodIdStr) {
-      case '1': return PrayerKey.fajr; case 'sunrise': return PrayerKey.sunrise;
-      case '3': return PrayerKey.dhuhr; case '4': return PrayerKey.asr;
-      case '5': return PrayerKey.maghrib; case 'isha': return PrayerKey.isha;
-      default: return null;
+      case '1':
+        return PrayerKey.fajr;
+      case 'sunrise':
+        return PrayerKey.sunrise;
+      case '3':
+        return PrayerKey.dhuhr;
+      case '4':
+        return PrayerKey.asr;
+      case '5':
+        return PrayerKey.maghrib;
+      case 'isha':
+        return PrayerKey.isha;
+      default:
+        return null;
     }
   }
 
   void resetToRealTime() => ref.invalidateSelf();
 }
 
-final astroProvider = NotifierProvider<AstroNotifier, AstroState>(AstroNotifier.new);
+final astroProvider =
+    NotifierProvider<AstroNotifier, AstroState>(AstroNotifier.new);

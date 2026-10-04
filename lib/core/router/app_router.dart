@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:suwaya/features/ibadat/astro_timeline_screen.dart';
 import 'package:suwaya/features/settings/manual_offsets_screen.dart';
 
-import '../../features/splash/splash_screen.dart';
 import '../../features/layout/main_layout.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/tasks/tasks_screen.dart';
@@ -21,7 +20,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/settings/notifications_settings_screen.dart';
 import '../../features/settings/astro_calculations_screen.dart';
 import '../../features/settings/permissions_screen.dart';
-
+import 'startup_gate.dart';
 
 // مفتاح التوجيه الجذري (Full Screen)
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -29,14 +28,14 @@ final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: '/startup',
     routes: [
       GoRoute(
-        path: '/splash',
+        path: '/startup',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const SplashScreen(),
+        builder: (context, state) => const StartupGate(),
       ),
-      
+
       // قسم Onboarding بالكامل خارج الشريط
       GoRoute(
         path: '/onboarding',
@@ -87,7 +86,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-      
+
       // 🌟 مسار التايم لاين
       GoRoute(
         path: '/ibadat/timeline',
@@ -101,10 +100,31 @@ final routerProvider = Provider<GoRouter>((ref) {
           return MainLayout(navigationShell: navigationShell);
         },
         branches: [
-          StatefulShellBranch(routes: [GoRoute(path: '/tasks', builder: (context, state) => const TasksScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/ibadat', builder: (context, state) => const IbadatScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())]),
-          StatefulShellBranch(routes: [GoRoute(path: '/pomodoro', builder: (context, state) => const PomodoroScreen())]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/tasks',
+                builder: (context, state) => TasksScreen(
+                  initialTab:
+                      state.uri.queryParameters['tab'] == 'periods' ? 2 : 0,
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: '/ibadat',
+                builder: (context, state) => const IbadatScreen())
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: '/home', builder: (context, state) => const HomeScreen())
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+                path: '/pomodoro',
+                builder: (context, state) => const PomodoroScreen())
+          ]),
         ],
       ),
     ],

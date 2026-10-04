@@ -3,14 +3,14 @@ part 'settings_model.g.dart';
 
 @collection
 class SettingsModel {
-  Id id = 0; 
-  
+  Id id = 0;
+
   bool isFirstLaunch = true;
   String languageCode = 'ar';
-  String themeMode = 'dark'; 
+  String themeMode = 'dark';
 
-  int streakFreezesAvailable = 3; 
-  String dayBoundary = 'maghrib'; 
+  int streakFreezesAvailable = 3;
+  String dayBoundary = 'maghrib';
 
   String calculationMethod = 'muslim_world_league';
   String madhab = 'shafi';
@@ -28,42 +28,58 @@ class SettingsModel {
   bool qiyamAlarmEnabled = false;
   List<int> hiddenPeriods = [];
   bool isDialAutoRotating = true;
-  String suwayaNumberStyle = 'english'; 
-  List<String> activeNightMarkers = ['fifth_sixth']; 
+  String dialPinMode = 'suwaya48';
+  String suwayaNumberStyle = 'english';
+  List<String> activeNightMarkers = ['fifth_sixth'];
 
   List<PeriodConfig> periodConfigs = [];
 
-  bool useAstroTimeForIbadat = true; 
-  bool showSunrise = false; 
+  bool useAstroTimeForIbadat = true;
+  String civilTimeFormat = 'system';
+  bool showSunrise = false;
   List<String> visibleNightParts = ['third_3', 'sixth_4', 'sixth_5'];
 
-  int defaultTaskAlertLevel = 1; 
+  int defaultTaskAlertLevel = 1;
   String defaultTaskTone = 'assets/audio/default.mp3';
   double defaultTaskVolume = 1.0;
 
-  int defaultHabitAlertLevel = 2; 
+  int defaultHabitAlertLevel = 2;
   String defaultHabitTone = 'assets/audio/default.mp3';
   double defaultHabitVolume = 1.0;
 
-  int snoozeDurationMinutes = 10; 
-  int maxSnoozeCount = 3;         
+  int snoozeDurationMinutes = 10;
+  int maxSnoozeCount = 3;
 
   PeriodConfig? _getConfig(String pId) {
-    try { return periodConfigs.firstWhere((c) => c.periodId == pId); } 
-    catch (_) { return null; }
+    try {
+      return periodConfigs.firstWhere((c) => c.periodId == pId);
+    } catch (_) {
+      return null;
+    }
   }
 
   bool isPeriodEnabled(String pId, {bool defaultVal = true}) {
-    final smartDefault = (pId == 'sunrise' || pId.startsWith('half') || pId.startsWith('third') || pId.startsWith('sixth')) ? false : defaultVal;
+    final smartDefault = (pId == 'sunrise' ||
+            pId.startsWith('half') ||
+            pId.startsWith('third') ||
+            pId.startsWith('sixth'))
+        ? false
+        : defaultVal;
     return _getConfig(pId)?.isEnabled ?? smartDefault;
   }
 
   int getPeriodAlertLevel(String pId, [int defaultVal = 0]) {
-    final smartDefault = (pId == 'sunrise' || pId.startsWith('half') || pId.startsWith('third') || pId.startsWith('sixth')) ? 0 : defaultVal;
+    final smartDefault = (pId == 'sunrise' ||
+            pId.startsWith('half') ||
+            pId.startsWith('third') ||
+            pId.startsWith('sixth'))
+        ? 0
+        : defaultVal;
     return _getConfig(pId)?.alertLevel ?? smartDefault;
   }
 
-  String getPeriodSound(String pId, [String defaultVal = 'assets/audio/default.mp3']) {
+  String getPeriodSound(String pId,
+      [String defaultVal = 'assets/audio/default.mp3']) {
     return _getConfig(pId)?.soundPath ?? defaultVal;
   }
 
@@ -81,6 +97,7 @@ class SettingsModel {
       ..streakFreezesAvailable = streakFreezesAvailable
       ..dayBoundary = dayBoundary
       ..useAstroTimeForIbadat = useAstroTimeForIbadat
+      ..civilTimeFormat = civilTimeFormat
       ..showSunrise = showSunrise
       ..visibleNightParts = List.from(visibleNightParts)
       ..isFirstLaunch = isFirstLaunch
@@ -91,33 +108,34 @@ class SettingsModel {
       ..highLatitudeRule = highLatitudeRule
       ..customFajrAngle = customFajrAngle
       ..customIshaAngle = customIshaAngle
-      ..activeLocation = activeLocation != null 
+      ..activeLocation = activeLocation != null
           ? (SavedLocation()
-              ..name = activeLocation!.name 
-              ..latitude = activeLocation!.latitude 
-              ..longitude = activeLocation!.longitude 
-              ..countryCode = activeLocation!.countryCode 
-              ..isAutoLocation = activeLocation!.isAutoLocation 
-              ..timezone = activeLocation!.timezone
-              ..locationType = activeLocation!.locationType 
-              ..nearestCity = activeLocation!.nearestCity   
-            ) 
+            ..name = activeLocation!.name
+            ..latitude = activeLocation!.latitude
+            ..longitude = activeLocation!.longitude
+            ..countryCode = activeLocation!.countryCode
+            ..isAutoLocation = activeLocation!.isAutoLocation
+            ..timezone = activeLocation!.timezone
+            ..locationType = activeLocation!.locationType
+            ..nearestCity = activeLocation!.nearestCity)
           : null
-      ..savedLocations = savedLocations.map((l) => SavedLocation()
-              ..name = l.name 
-              ..latitude = l.latitude 
-              ..longitude = l.longitude 
-              ..countryCode = l.countryCode 
-              ..isAutoLocation = l.isAutoLocation 
-              ..timezone = l.timezone
-              ..locationType = l.locationType 
-              ..nearestCity = l.nearestCity   
-          ).toList()
+      ..savedLocations = savedLocations
+          .map((l) => SavedLocation()
+            ..name = l.name
+            ..latitude = l.latitude
+            ..longitude = l.longitude
+            ..countryCode = l.countryCode
+            ..isAutoLocation = l.isAutoLocation
+            ..timezone = l.timezone
+            ..locationType = l.locationType
+            ..nearestCity = l.nearestCity)
+          .toList()
       ..currentStreak = currentStreak
       ..longestStreak = longestStreak
       ..lastStreakDate = lastStreakDate
       ..qiyamAlarmEnabled = qiyamAlarmEnabled
       ..hiddenPeriods = List.from(hiddenPeriods)
+      ..dialPinMode = dialPinMode
       ..suwayaNumberStyle = suwayaNumberStyle
       ..activeNightMarkers = List.from(activeNightMarkers)
       ..isDialAutoRotating = isDialAutoRotating
@@ -129,13 +147,15 @@ class SettingsModel {
       ..defaultHabitVolume = defaultHabitVolume
       ..snoozeDurationMinutes = snoozeDurationMinutes
       ..maxSnoozeCount = maxSnoozeCount
-      ..periodConfigs = periodConfigs.map((c) => PeriodConfig()
-         ..periodId = c.periodId
-         ..isEnabled = c.isEnabled
-         ..alertLevel = c.alertLevel
-         ..soundPath = c.soundPath
-         ..volume = c.volume
-         ..manualOffsetMinutes = c.manualOffsetMinutes).toList();
+      ..periodConfigs = periodConfigs
+          .map((c) => PeriodConfig()
+            ..periodId = c.periodId
+            ..isEnabled = c.isEnabled
+            ..alertLevel = c.alertLevel
+            ..soundPath = c.soundPath
+            ..volume = c.volume
+            ..manualOffsetMinutes = c.manualOffsetMinutes)
+          .toList();
   }
 }
 
@@ -155,8 +175,8 @@ class SavedLocation {
 class PeriodConfig {
   String? periodId;
   bool isEnabled = true;
-  int alertLevel = 0; 
+  int alertLevel = 0;
   String? soundPath;
   double volume = 1.0;
-  int manualOffsetMinutes = 0; 
+  int manualOffsetMinutes = 0;
 }

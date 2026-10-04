@@ -1,10 +1,11 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/theme/astro_ui_extensions.dart';
+import '../../shared/widgets/suwaya_time_text.dart';
+import '../settings/settings_provider.dart';
 
 class AstroTimelineScreen extends ConsumerWidget {
   const AstroTimelineScreen({super.key});
@@ -12,12 +13,17 @@ class AstroTimelineScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final astroState = ref.watch(astroProvider);
+    final settings = ref.watch(settingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final bgColor = isDark ? Theme.of(context).scaffoldBackgroundColor : const Color(0xFFF5F7FA);
+
+    final bgColor = isDark
+        ? Theme.of(context).scaffoldBackgroundColor
+        : const Color(0xFFF5F7FA);
     final surfaceColor = isDark ? Theme.of(context).cardColor : Colors.white;
     final textColor = Theme.of(context).colorScheme.onSurface;
-    final borderColor = isDark ? Theme.of(context).dividerColor : Colors.black.withValues(alpha: 0.05);
+    final borderColor = isDark
+        ? Theme.of(context).dividerColor
+        : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -25,14 +31,21 @@ class AstroTimelineScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
+          icon: Icon(
+              context.locale.languageCode == 'ar'
+                  ? LucideIcons.arrow_right
+                  : LucideIcons.arrow_left,
+              color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('full_astro_timeline'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+        title: Text('full_astro_timeline'.tr(),
+            style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
         centerTitle: true,
       ),
       body: astroState.periods.isEmpty
-          ? Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor))
+          ? Center(
+              child: CircularProgressIndicator(
+                  color: Theme.of(context).primaryColor))
           : ListView.builder(
               padding: const EdgeInsets.all(20),
               physics: const BouncingScrollPhysics(),
@@ -40,39 +53,65 @@ class AstroTimelineScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final period = astroState.periods[index];
                 final isCurrent = astroState.currentPeriod.id == period.id;
-                
+
                 final adaptedColor = period.uiColor.adapt(context);
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: isCurrent ? period.uiColor.withValues(alpha: isDark ? 0.15 : 0.08) : surfaceColor, 
+                    color: isCurrent
+                        ? period.uiColor.withValues(alpha: isDark ? 0.15 : 0.08)
+                        : surfaceColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: isCurrent ? adaptedColor.withValues(alpha: 0.5) : borderColor, width: isCurrent ? 1.5 : 1),
-                    boxShadow: isDark ? [] : [
-                      if (!isCurrent) BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))
-                    ],
+                    border: Border.all(
+                        color: isCurrent
+                            ? adaptedColor.withValues(alpha: 0.5)
+                            : borderColor,
+                        width: isCurrent ? 1.5 : 1),
+                    boxShadow: isDark
+                        ? []
+                        : [
+                            if (!isCurrent)
+                              BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4))
+                          ],
                   ),
                   child: Theme(
-                    data: ThemeData().copyWith(dividerColor: Colors.transparent),
+                    data:
+                        ThemeData().copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       initiallyExpanded: isCurrent,
-                      iconColor: isCurrent ? adaptedColor : (isDark ? Colors.white54 : Colors.black54),
-                      collapsedIconColor: isDark ? Colors.white54 : Colors.black54,
+                      iconColor: isCurrent
+                          ? adaptedColor
+                          : (isDark ? Colors.white54 : Colors.black54),
+                      collapsedIconColor:
+                          isDark ? Colors.white54 : Colors.black54,
                       title: Row(
                         children: [
                           Container(
-                            width: 12, height: 12,
+                            width: 12,
+                            height: 12,
                             decoration: BoxDecoration(
-                              color: adaptedColor, 
-                              shape: BoxShape.circle, 
-                              boxShadow: isCurrent ? [BoxShadow(color: adaptedColor.withValues(alpha: 0.5), blurRadius: 8)] : []
-                            ),
+                                color: adaptedColor,
+                                shape: BoxShape.circle,
+                                boxShadow: isCurrent
+                                    ? [
+                                        BoxShadow(
+                                            color: adaptedColor.withValues(
+                                                alpha: 0.5),
+                                            blurRadius: 8)
+                                      ]
+                                    : []),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             '${period.id} (${period.nameKey.tr()})',
-                            style: TextStyle(color: isCurrent ? adaptedColor : textColor, fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: isCurrent ? adaptedColor : textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -80,22 +119,49 @@ class AstroTimelineScreen extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
-                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                            color: isDark
+                                ? Colors.black.withValues(alpha: 0.2)
+                                : Colors.black.withValues(alpha: 0.03),
+                            borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(16)),
                           ),
                           child: Column(
                             children: [
-                              _buildTimeRow('ibadat.starts_at'.tr(), period.startTime, context, isDark, textColor),
+                              _buildTimeRow(
+                                  'ibadat.starts_at'.tr(),
+                                  period.startTime,
+                                  context,
+                                  isDark,
+                                  textColor,
+                                  settings.civilTimeFormat),
                               const SizedBox(height: 8),
-                              _buildTimeRow('ibadat.ends_at'.tr(), period.endTime, context, isDark, textColor),
+                              _buildTimeRow(
+                                  'ibadat.ends_at'.tr(),
+                                  period.endTime,
+                                  context,
+                                  isDark,
+                                  textColor,
+                                  settings.civilTimeFormat),
                               const SizedBox(height: 8),
-                              Divider(color: isDark ? Colors.white12 : Colors.black12),
+                              Divider(
+                                  color:
+                                      isDark ? Colors.white12 : Colors.black12),
                               const SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('home.suwayas_count'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-                                  Text('${period.suwayasCount} ${'details.suwayas'.tr()}', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                                  Text('home.suwayas_count'.tr(),
+                                      style: TextStyle(
+                                          color: isDark
+                                              ? Colors.white70
+                                              : Colors.black54,
+                                          fontSize: 13)),
+                                  Text(
+                                      '${period.suwayasCount} ${'details.suwayas'.tr()}',
+                                      style: TextStyle(
+                                          color: textColor,
+                                          fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ],
@@ -110,14 +176,23 @@ class AstroTimelineScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeRow(String label, DateTime time, BuildContext context, bool isDark, Color textColor) {
+  Widget _buildTimeRow(String label, DateTime time, BuildContext context,
+      bool isDark, Color textColor, String civilTimeFormat) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-        Directionality(
-          textDirection: ui.TextDirection.ltr,
-          child: Text(TimeOfDay.fromDateTime(time).format(context), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontFamily: 'monospace', fontSize: 15)),
+        Text(label,
+            style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
+        ClockTimeText.civil(
+          civilTime: time,
+          civilTimeFormat: civilTimeFormat,
+          locale: context.locale.languageCode,
+          style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+              fontSize: 15),
         ),
       ],
     );

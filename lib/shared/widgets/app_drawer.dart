@@ -27,16 +27,22 @@ class AppDrawer extends ConsumerWidget {
       applicationVersion: packageInfo.version,
       applicationIcon: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.asset('assets/icons/app_icon.png', width: 48, height: 48, errorBuilder: (c, e, s) => const Icon(LucideIcons.compass, size: 48)),
+        child: Image.asset('assets/icons/app_icon.png',
+            width: 48,
+            height: 48,
+            errorBuilder: (c, e, s) =>
+                const Icon(LucideIcons.compass, size: 48)),
       ),
-      applicationLegalese: '© ${DateTime.now().year} Abdallah Kaballo.\nAll rights reserved.',
+      applicationLegalese:
+          '© ${DateTime.now().year} Abdallah Kaballo.\nAll rights reserved.',
     );
   }
 
-  Future<void> _checkForUpdates(BuildContext context, Color primaryColor) async {
+  Future<void> _checkForUpdates(
+      BuildContext context, Color primaryColor) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -46,7 +52,8 @@ class AppDrawer extends ConsumerWidget {
           children: [
             CircularProgressIndicator(color: primaryColor),
             const SizedBox(width: 24),
-            Text('drawer.checking_updates'.tr(), style: TextStyle(color: textColor)),
+            Text('drawer.checking_updates'.tr(),
+                style: TextStyle(color: textColor)),
           ],
         ),
       ),
@@ -55,7 +62,7 @@ class AppDrawer extends ConsumerWidget {
     try {
       // الاستعلام من متجر جوجل بلاي
       AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
-      
+
       if (!context.mounted) return;
       Navigator.pop(context); // إغلاق نافذة التحميل
 
@@ -74,15 +81,26 @@ class AppDrawer extends ConsumerWidget {
               children: [
                 const Icon(LucideIcons.circle_check, color: Colors.green),
                 const SizedBox(width: 8),
-                Text('drawer.up_to_date'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
+                Text('drawer.up_to_date'.tr(),
+                    style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18)),
               ],
             ),
-            content: Text('drawer.latest_version_msg'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.7), height: 1.5)),
+            content: Text('drawer.latest_version_msg'.tr(),
+                style: TextStyle(
+                    color: textColor.withValues(alpha: 0.7), height: 1.5)),
             actions: [
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
                 onPressed: () => Navigator.pop(ctx),
-                child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text('common.done'.tr(),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -90,9 +108,11 @@ class AppDrawer extends ConsumerWidget {
       }
     } catch (e) {
       if (!context.mounted) return;
-      Navigator.pop(context); 
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('drawer.github_connection_failed'.tr()), backgroundColor: Colors.redAccent),
+        SnackBar(
+            content: Text('drawer.github_connection_failed'.tr()),
+            backgroundColor: Colors.redAccent),
       );
     }
   }
@@ -102,6 +122,7 @@ class AppDrawer extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white : Colors.black87;
+    final brandName = context.locale.languageCode == 'ar' ? 'سٌويعة' : 'Suwaya';
 
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -112,14 +133,20 @@ class AppDrawer extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: textColor.withValues(alpha: 0.05))),
+                border: Border(
+                    bottom:
+                        BorderSide(color: textColor.withValues(alpha: 0.05))),
               ),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
-                    child: Icon(LucideIcons.compass, color: primaryColor, size: 32),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/icons/app_icon.png',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -127,39 +154,62 @@ class AppDrawer extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Suwaya', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                        Text(brandName,
+                            style: TextStyle(
+                                color: textColor,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2)),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            
             Expanded(
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
-                  _buildDrawerItem(context, LucideIcons.settings, 'settings.title'.tr(), () {
+                  _buildDrawerItem(
+                      context, LucideIcons.settings, 'settings.title'.tr(), () {
                     Navigator.pop(context);
-                    context.push('/settings'); 
+                    context.push('/settings');
                   }),
-                  _buildDrawerItem(context, LucideIcons.book_open, 'drawer.faq'.tr(), () {_launchUrl('https://github.com/Abdallah-Kaballo/Suwaya/wiki');}),
-                  _buildDrawerItem(context, LucideIcons.mail, 'drawer.contact'.tr(), () {
+                  _buildDrawerItem(
+                      context, LucideIcons.book_open, 'drawer.faq'.tr(), () {
+                    _launchUrl(
+                        'https://github.com/Abdallah-Kaballo/Suwaya/wiki');
+                  }),
+                  _buildDrawerItem(
+                      context, LucideIcons.mail, 'drawer.contact'.tr(), () {
                     _launchUrl('mailto:suwaya2026@gmail.com');
                   }),
-                  
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), child: Text('drawer.about_app'.tr(), style: TextStyle(color: primaryColor, fontSize: 12, fontWeight: FontWeight.bold))),
-                  
-                  _buildDrawerItem(context, LucideIcons.refresh_cw, 'drawer.check_updates'.tr(), () => _checkForUpdates(context, primaryColor)),
-                  
-                  _buildDrawerItem(context, LucideIcons.code, 'drawer.develop_with_us'.tr(), () {
+                  Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
+                      child: Text('drawer.about_app'.tr(),
+                          style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold))),
+                  _buildDrawerItem(
+                      context,
+                      LucideIcons.refresh_cw,
+                      'drawer.check_updates'.tr(),
+                      () => _checkForUpdates(context, primaryColor)),
+                  _buildDrawerItem(
+                      context, LucideIcons.code, 'drawer.develop_with_us'.tr(),
+                      () {
                     _launchUrl('https://github.com/Abdallah-Kaballo/Suwaya');
                   }),
-                  _buildDrawerItem(context, LucideIcons.shield, 'settings.privacy_policy'.tr(), () {
-                    _launchUrl('https://abdallah-kaballo.github.io/Suwaya/privacy.html');
+                  _buildDrawerItem(context, LucideIcons.shield,
+                      'settings.privacy_policy'.tr(), () {
+                    _launchUrl(
+                        'https://abdallah-kaballo.github.io/Suwaya/privacy.html');
                   }),
-                  _buildDrawerItem(context, LucideIcons.info, 'settings.about'.tr(), () => _showAboutDialog(context)),
+                  _buildDrawerItem(context, LucideIcons.info,
+                      'settings.about'.tr(), () => _showAboutDialog(context)),
                 ],
               ),
             ),
@@ -169,13 +219,20 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, VoidCallback onTap, {Color? iconColor, Color? textColor}) {
+  Widget _buildDrawerItem(
+      BuildContext context, IconData icon, String title, VoidCallback onTap,
+      {Color? iconColor, Color? textColor}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final defaultColor = isDark ? Colors.white70 : Colors.black87;
-    
+
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? defaultColor.withValues(alpha: 0.7), size: 22),
-      title: Text(title, style: TextStyle(color: textColor ?? defaultColor, fontSize: 15, fontWeight: FontWeight.w600)),
+      leading: Icon(icon,
+          color: iconColor ?? defaultColor.withValues(alpha: 0.7), size: 22),
+      title: Text(title,
+          style: TextStyle(
+              color: textColor ?? defaultColor,
+              fontSize: 15,
+              fontWeight: FontWeight.w600)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
       onTap: () {
         HapticFeedback.lightImpact();

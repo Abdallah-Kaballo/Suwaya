@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:easy_localization/easy_localization.dart' hide TextDirection; 
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'dart:ui' as ui;
 
 import 'tasks_provider.dart';
@@ -13,8 +13,11 @@ import '../../core/astro_engine/astro_provider.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 import '../routines/routines_provider.dart';
 import 'universal_add_screen.dart';
+import 'routine_schedule_format.dart';
 import '../../shared/widgets/app_drawer.dart';
-import '../../core/providers/ui_providers.dart'; 
+import '../../shared/widgets/suwaya_time_text.dart';
+import '../../core/providers/ui_providers.dart';
+import '../settings/settings_provider.dart';
 
 Color _getNeonColor(TaskCategory category) {
   final catStr = category.toString().toLowerCase();
@@ -38,14 +41,17 @@ int _getGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
 }
 
 class TasksScreen extends ConsumerStatefulWidget {
-  const TasksScreen({super.key});
+  final int initialTab;
+
+  const TasksScreen({super.key, this.initialTab = 0});
   @override
   ConsumerState<TasksScreen> createState() => _TasksScreenState();
 }
 
-class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProviderStateMixin {
+class _TasksScreenState extends ConsumerState<TasksScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   bool _isSelectionMode = false;
   final Set<int> _selectedTaskIds = {};
   final Set<int> _selectedRoutineIds = {};
@@ -53,7 +59,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 2),
+    );
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) _clearSelection();
     });
@@ -63,6 +73,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TasksScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialTab != widget.initialTab) {
+      _tabController.index = widget.initialTab.clamp(0, 2);
+    }
   }
 
   void _clearSelection() {
@@ -79,7 +97,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
       final targetSet = isRoutine ? _selectedRoutineIds : _selectedTaskIds;
       if (targetSet.contains(id)) {
         targetSet.remove(id);
-        if (_selectedTaskIds.isEmpty && _selectedRoutineIds.isEmpty) _isSelectionMode = false;
+        if (_selectedTaskIds.isEmpty && _selectedRoutineIds.isEmpty) {
+          _isSelectionMode = false;
+        }
       } else {
         targetSet.add(id);
       }
@@ -93,7 +113,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
         ref.read(routinesProvider.notifier).deleteRoutine(id);
       }
     } else {
-      ref.read(tasksProvider.notifier).deleteMultipleTasks(_selectedTaskIds.toList());
+      ref
+          .read(tasksProvider.notifier)
+          .deleteMultipleTasks(_selectedTaskIds.toList());
     }
     _clearSelection();
   }
@@ -110,21 +132,35 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     final astroState = ref.watch(astroProvider);
     final periods = astroState.periods;
 
-    List<TaskModel> casualTasks = allTasks.where((t) => t.type == TaskType.casual && !t.isCompleted).toList();
-    List<TaskModel> habits = allTasks.where((t) => t.type == TaskType.permanent && !t.isCompletedToday).toList();
+    List<TaskModel> casualTasks = allTasks
+        .where((t) => t.type == TaskType.casual && !t.isCompleted)
+        .toList();
+    List<TaskModel> habits = allTasks
+        .where((t) => t.type == TaskType.permanent && !t.isCompletedToday)
+        .toList();
 
     return Scaffold(
       backgroundColor: bgColor,
-      drawer: const AppDrawer(), 
-      onDrawerChanged: (isOpen) => ref.read(isDrawerOpenProvider.notifier).state = isOpen,
+      drawer: const AppDrawer(),
+      onDrawerChanged: (isOpen) =>
+          ref.read(isDrawerOpenProvider.notifier).state = isOpen,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         title: _isSelectionMode
-            ? Text('${_selectedTaskIds.length + _selectedRoutineIds.length} ${'tasks.selected'.tr()}', style: TextStyle(color: accentColor, fontWeight: FontWeight.bold))
-            : Text('tasks.suwaya_management'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.w900, fontSize: 22)),
-        leading: _isSelectionMode 
-            ? IconButton(icon: Icon(LucideIcons.x, color: textColor), onPressed: _clearSelection) 
+            ? Text(
+                '${_selectedTaskIds.length + _selectedRoutineIds.length} ${'tasks.selected'.tr()}',
+                style:
+                    TextStyle(color: accentColor, fontWeight: FontWeight.bold))
+            : Text('tasks.suwaya_management'.tr(),
+                style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 22)),
+        leading: _isSelectionMode
+            ? IconButton(
+                icon: Icon(LucideIcons.x, color: textColor),
+                onPressed: _clearSelection)
             : Builder(
                 builder: (ctx) => IconButton(
                   icon: Icon(LucideIcons.menu, color: textColor),
@@ -133,7 +169,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
               ),
         actions: [
           if (_isSelectionMode)
-            IconButton(icon: const Icon(LucideIcons.trash, color: Colors.redAccent), onPressed: _deleteSelectedItems),
+            IconButton(
+                icon: const Icon(LucideIcons.trash, color: Colors.redAccent),
+                onPressed: _deleteSelectedItems),
           const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
@@ -142,14 +180,27 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Container(
               height: 48,
-              decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: accentColor.withValues(alpha: 0.1))),
+              decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border:
+                      Border.all(color: accentColor.withValues(alpha: 0.1))),
               child: TabBar(
                 controller: _tabController,
                 indicatorSize: TabBarIndicatorSize.tab,
-                indicator: BoxDecoration(color: accentColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14), border: Border.all(color: accentColor, width: 2)),
-                labelColor: accentColor, unselectedLabelColor: textColor.withValues(alpha: 0.4),
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                tabs: [Tab(text: 'tasks.tab_casual'.tr()), Tab(text: 'tasks.tab_habits'.tr()), Tab(text: 'tasks.tab_routines'.tr())],
+                indicator: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: accentColor, width: 2)),
+                labelColor: accentColor,
+                unselectedLabelColor: textColor.withValues(alpha: 0.4),
+                labelStyle:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                tabs: [
+                  Tab(text: 'tasks.tab_casual'.tr()),
+                  Tab(text: 'tasks.tab_habits'.tr()),
+                  Tab(text: 'tasks.tab_routines'.tr())
+                ],
               ),
             ),
           ),
@@ -163,25 +214,35 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
           _buildRoutinesList(routines, periods),
         ],
       ),
-      floatingActionButton: _isSelectionMode ? null : Padding(
-        padding: const EdgeInsets.only(bottom: 90.0), 
-        child: FloatingActionButton.extended(
-          backgroundColor: accentColor,
-          onPressed: () {
-            HapticFeedback.heavyImpact();
-            showModalBottomSheet(
-              context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-              builder: (_) => UniversalAddScreen(currentPeriodId: astroState.currentPeriod.id, currentSuwaya: astroState.currentSuwaya, initialTab: _tabController.index),
-            );
-          },
-          icon: const Icon(LucideIcons.plus, color: Colors.white),
-          label: Text('common.add'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-      ),
+      floatingActionButton: _isSelectionMode
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 90.0),
+              child: FloatingActionButton.extended(
+                backgroundColor: accentColor,
+                onPressed: () {
+                  HapticFeedback.heavyImpact();
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => UniversalAddScreen(
+                        currentPeriodId: astroState.currentPeriod.id,
+                        currentSuwaya: astroState.currentSuwaya,
+                        initialTab: _tabController.index),
+                  );
+                },
+                icon: const Icon(LucideIcons.plus, color: Colors.white),
+                label: Text('common.add'.tr(),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
     );
   }
 
-  Widget _buildTasksList(List<TaskModel> tasks, List<AstroPeriod> periods, bool isHabit) {
+  Widget _buildTasksList(
+      List<TaskModel> tasks, List<AstroPeriod> periods, bool isHabit) {
     if (tasks.isEmpty) return _buildEmptyState('tasks.empty_tasks'.tr());
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
@@ -193,13 +254,19 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
           id: task.id,
           isRoutine: false,
           child: _TaskRowItem(
-            task: task, periods: periods, isSelectionMode: _isSelectionMode, isSelected: _selectedTaskIds.contains(task.id),
-            onLongPress: () { _isSelectionMode = true; _toggleSelection(task.id, false); },
-            onTap: () { 
+            task: task,
+            periods: periods,
+            isSelectionMode: _isSelectionMode,
+            isSelected: _selectedTaskIds.contains(task.id),
+            onLongPress: () {
+              _isSelectionMode = true;
+              _toggleSelection(task.id, false);
+            },
+            onTap: () {
               if (_isSelectionMode) {
-                _toggleSelection(task.id, false); 
+                _toggleSelection(task.id, false);
               } else {
-                _editTask(task); 
+                _editTask(task);
               }
             },
             onMoreOptions: () => _showOptionsSheet(context, task: task),
@@ -211,7 +278,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildRoutinesList(List<RoutineModel> routines, List<AstroPeriod> periods) {
+  Widget _buildRoutinesList(
+      List<RoutineModel> routines, List<AstroPeriod> periods) {
     if (routines.isEmpty) return _buildEmptyState('tasks.empty_routines'.tr());
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
@@ -223,30 +291,39 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
           id: r.id,
           isRoutine: true,
           child: _RoutineRowItem(
-            routine: r, periods: periods, isSelectionMode: _isSelectionMode, isSelected: _selectedRoutineIds.contains(r.id),
-            onLongPress: () { _isSelectionMode = true; _toggleSelection(r.id, true); },
-            onTap: () { 
+            routine: r,
+            periods: periods,
+            isSelectionMode: _isSelectionMode,
+            isSelected: _selectedRoutineIds.contains(r.id),
+            onLongPress: () {
+              _isSelectionMode = true;
+              _toggleSelection(r.id, true);
+            },
+            onTap: () {
               if (_isSelectionMode) {
-                _toggleSelection(r.id, true); 
+                _toggleSelection(r.id, true);
               } else {
-                _editRoutine(r); 
+                _editRoutine(r);
               }
             },
             onMoreOptions: () => _showOptionsSheet(context, routine: r),
           ),
-          onDelete: () => ref.read(routinesProvider.notifier).deleteRoutine(r.id),
+          onDelete: () =>
+              ref.read(routinesProvider.notifier).deleteRoutine(r.id),
           onEdit: () => _editRoutine(r),
         );
       },
     );
   }
 
-  void _showOptionsSheet(BuildContext context, {TaskModel? task, RoutineModel? routine}) {
+  void _showOptionsSheet(BuildContext context,
+      {TaskModel? task, RoutineModel? routine}) {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -263,11 +340,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
             ),
             ListTile(
               leading: const Icon(LucideIcons.trash, color: Colors.redAccent),
-              title: Text('common.delete'.tr(), style: const TextStyle(color: Colors.redAccent)),
+              title: Text('common.delete'.tr(),
+                  style: const TextStyle(color: Colors.redAccent)),
               onTap: () {
                 Navigator.pop(context);
-                if (task != null) ref.read(tasksProvider.notifier).deleteTask(task.id);
-                if (routine != null) ref.read(routinesProvider.notifier).deleteRoutine(routine.id);
+                if (task != null) {
+                  ref.read(tasksProvider.notifier).deleteTask(task.id);
+                }
+                if (routine != null) {
+                  ref.read(routinesProvider.notifier).deleteRoutine(routine.id);
+                }
               },
             ),
             const SizedBox(height: 16),
@@ -277,19 +359,35 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildSwipeableRow({required int id, required bool isRoutine, required Widget child, required VoidCallback onDelete, required VoidCallback onEdit}) {
+  Widget _buildSwipeableRow(
+      {required int id,
+      required bool isRoutine,
+      required Widget child,
+      required VoidCallback onDelete,
+      required VoidCallback onEdit}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
       child: Dismissible(
         key: ValueKey('swipe_${isRoutine ? "r" : "t"}_$id'),
-        direction: _isSelectionMode ? DismissDirection.none : DismissDirection.horizontal,
-        background: Container(color: Colors.redAccent, alignment: Alignment.centerRight, padding: const EdgeInsets.symmetric(horizontal: 24), child: const Icon(LucideIcons.trash, color: Colors.white)), 
-        secondaryBackground: Container(color: Colors.blueAccent, alignment: Alignment.centerLeft, padding: const EdgeInsets.symmetric(horizontal: 24), child: const Icon(LucideIcons.pencil, color: Colors.white)), 
+        direction: _isSelectionMode
+            ? DismissDirection.none
+            : DismissDirection.horizontal,
+        background: Container(
+            color: Colors.redAccent,
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: const Icon(LucideIcons.trash, color: Colors.white)),
+        secondaryBackground: Container(
+            color: Colors.blueAccent,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: const Icon(LucideIcons.pencil, color: Colors.white)),
         confirmDismiss: (dir) async {
-          if (dir == DismissDirection.startToEnd) return true; 
-          onEdit(); return false; 
+          if (dir == DismissDirection.startToEnd) return true;
+          onEdit();
+          return false;
         },
         onDismissed: (_) => onDelete(),
         child: child,
@@ -298,33 +396,69 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
   }
 
   Widget _buildEmptyState(String msg) {
-    return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(LucideIcons.layout_list, size: 64, color: Colors.grey.withValues(alpha: 0.2)), const SizedBox(height: 16), Text(msg, style: const TextStyle(color: Colors.grey))]));
+    return Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Icon(LucideIcons.layout_list,
+          size: 64, color: Colors.grey.withValues(alpha: 0.2)),
+      const SizedBox(height: 16),
+      Text(msg, style: const TextStyle(color: Colors.grey))
+    ]));
   }
 
   void _editTask(TaskModel task) {
     HapticFeedback.selectionClick();
     final astro = ref.read(astroProvider);
-    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => UniversalAddScreen(currentPeriodId: astro.currentPeriod.id, currentSuwaya: astro.currentSuwaya, existingTask: task));
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => UniversalAddScreen(
+            currentPeriodId: astro.currentPeriod.id,
+            currentSuwaya: astro.currentSuwaya,
+            existingTask: task));
   }
+
   void _editRoutine(RoutineModel r) {
     HapticFeedback.selectionClick();
     final astro = ref.read(astroProvider);
-    showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (_) => UniversalAddScreen(currentPeriodId: astro.currentPeriod.id, currentSuwaya: astro.currentSuwaya, existingRoutine: r));
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => UniversalAddScreen(
+            currentPeriodId: astro.currentPeriod.id,
+            currentSuwaya: astro.currentSuwaya,
+            existingRoutine: r));
   }
 }
 
 class _TaskRowItem extends ConsumerStatefulWidget {
-  final TaskModel task; final List<AstroPeriod> periods; final bool isSelectionMode; final bool isSelected; final VoidCallback onTap; final VoidCallback onLongPress; final VoidCallback onMoreOptions;
-  const _TaskRowItem({required this.task, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress, required this.onMoreOptions});
-  @override ConsumerState<_TaskRowItem> createState() => _TaskRowItemState();
+  final TaskModel task;
+  final List<AstroPeriod> periods;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  final VoidCallback onMoreOptions;
+  const _TaskRowItem(
+      {required this.task,
+      required this.periods,
+      required this.isSelectionMode,
+      required this.isSelected,
+      required this.onTap,
+      required this.onLongPress,
+      required this.onMoreOptions});
+  @override
+  ConsumerState<_TaskRowItem> createState() => _TaskRowItemState();
 }
 
 class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
-  bool _isLocalCompleted = false; 
+  bool _isLocalCompleted = false;
 
   @override
   Widget build(BuildContext context) {
     final t = widget.task;
+    final settings = ref.watch(settingsProvider);
     final catColor = _getNeonColor(t.category);
     final surfaceColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).colorScheme.onSurface;
@@ -332,83 +466,146 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     final langCode = context.locale.languageCode;
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
 
-    String timeStr = '--:--';
+    final clockStyle = TextStyle(
+      color: t.isAstroTime ? const Color(0xFFF2C94C) : textColor,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    );
+    Widget clockWidget = Text('--:--', style: clockStyle);
     if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
-      timeStr = '${(t.targetCivilTimeMinutes! ~/ 60).toString().padLeft(2, '0')}:${(t.targetCivilTimeMinutes! % 60).toString().padLeft(2, '0')}';
-    } else if (t.isAstroTime && t.targetPeriodId != null && widget.periods.isNotEmpty) {
-      // 🌟 الإصلاح 1: إزالة الـ +1 الوهمية ليتطابق مع العجلة (Zero-based)
-      int gSuwaya = _getGlobalSuwaya(t.targetPeriodId!, t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1, widget.periods);
-      timeStr = '${gSuwaya.toString().padLeft(2, '0')}:${t.targetVirtualMinute.toString().padLeft(2, '0')}';
+      final minutes = t.targetCivilTimeMinutes!;
+      clockWidget = ClockTimeText.civil(
+        civilTime: DateTime(2000, 1, 1, minutes ~/ 60, minutes % 60),
+        civilTimeFormat: settings.civilTimeFormat,
+        locale: langCode,
+        style: clockStyle,
+      );
+    } else if (t.isAstroTime &&
+        t.targetPeriodId != null &&
+        widget.periods.isNotEmpty) {
+      final globalSuwaya = _getGlobalSuwaya(
+        t.targetPeriodId!,
+        t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1,
+        widget.periods,
+      );
+      clockWidget = ClockTimeText.suwaya(
+        globalSuwayaIndex: globalSuwaya,
+        virtualMinute: t.targetVirtualMinute,
+        style: clockStyle,
+      );
     }
 
     String dateStr = 'add_screen.daily'.tr();
     if (t.type == TaskType.casual && t.targetDate != null) {
-      dateStr = DateFormat('d/M', safeIntl).format(t.targetDate!); 
-    } else if (t.type == TaskType.permanent && t.recurrenceDays != null && t.recurrenceDays!.isNotEmpty) {
+      dateStr = DateFormat('d/M', safeIntl).format(t.targetDate!);
+    } else if (t.type == TaskType.permanent &&
+        t.recurrenceDays != null &&
+        t.recurrenceDays!.isNotEmpty) {
       dateStr = '${t.recurrenceDays!.length} ${'common.days'.tr()}';
     }
 
     return GestureDetector(
-      onTap: widget.onTap, onLongPress: widget.onLongPress,
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        decoration: BoxDecoration(color: widget.isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : surfaceColor, border: Border.all(color: widget.isSelected ? Theme.of(context).primaryColor : Colors.transparent)),
+        decoration: BoxDecoration(
+            color: widget.isSelected
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                : surfaceColor,
+            border: Border.all(
+                color: widget.isSelected
+                    ? Theme.of(context).primaryColor
+                    : Colors.transparent)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
             if (widget.isSelectionMode)
-              Padding(padding: const EdgeInsets.only(left: 12), child: Icon(widget.isSelected ? LucideIcons.circle_check : LucideIcons.circle, color: widget.isSelected ? Theme.of(context).primaryColor : Colors.grey))
+              Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Icon(
+                      widget.isSelected
+                          ? LucideIcons.circle_check
+                          : LucideIcons.circle,
+                      color: widget.isSelected
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey))
             else
               GestureDetector(
                 onTap: () {
                   HapticFeedback.heavyImpact();
                   setState(() => _isLocalCompleted = true);
-                  Future.delayed(const Duration(milliseconds: 400), () => ref.read(tasksProvider.notifier).toggleTaskStatus(t));
+                  Future.delayed(
+                      const Duration(milliseconds: 400),
+                      () =>
+                          ref.read(tasksProvider.notifier).toggleTaskStatus(t));
                 },
                 child: Container(
-                  margin: const EdgeInsets.only(left: 8, right: 8), width: 24, height: 24,
-                  decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: catColor, width: 2), color: _isLocalCompleted ? catColor : Colors.transparent),
-                  child: _isLocalCompleted ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                  margin: const EdgeInsets.only(left: 8, right: 8),
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: catColor, width: 2),
+                      color: _isLocalCompleted ? catColor : Colors.transparent),
+                  child: _isLocalCompleted
+                      ? const Icon(Icons.check, size: 16, color: Colors.white)
+                      : null,
                 ),
               ),
-            
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 300),
-                    style: TextStyle(color: _isLocalCompleted ? Colors.grey : textColor, fontSize: 16, fontWeight: FontWeight.bold, decoration: _isLocalCompleted ? TextDecoration.lineThrough : null),
+                    style: TextStyle(
+                        color: _isLocalCompleted ? Colors.grey : textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        decoration: _isLocalCompleted
+                            ? TextDecoration.lineThrough
+                            : null),
                     child: Text(t.title),
                   ),
                   const SizedBox(height: 6),
-                  Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: catColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)), child: Text(t.category.displayName, style: TextStyle(color: catColor, fontSize: 10, fontWeight: FontWeight.bold))),
+                  Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                          color: catColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6)),
+                      child: Text(t.category.displayName,
+                          style: TextStyle(
+                              color: catColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold))),
                 ],
               ),
             ),
-            
             Directionality(
               textDirection: ui.TextDirection.ltr,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  t.isAstroTime ? Stack(
-                    children: [
-                      Text(timeStr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.75..color=Colors.white)),
-                      Text(timeStr, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
-                    ],
-                  ) : Text(timeStr, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
+                  clockWidget,
                   const SizedBox(height: 2),
-                  Text(dateStr, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.bold)),
+                  Text(dateStr,
+                      style: TextStyle(
+                          color: textColor.withValues(alpha: 0.5),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
-
             if (!widget.isSelectionMode)
               IconButton(
                 padding: const EdgeInsets.only(left: 8),
                 constraints: const BoxConstraints(),
-                icon: Icon(Icons.more_vert, color: textColor.withValues(alpha: 0.3), size: 20),                onPressed: widget.onMoreOptions,
+                icon: Icon(Icons.more_vert,
+                    color: textColor.withValues(alpha: 0.3), size: 20),
+                onPressed: widget.onMoreOptions,
               ),
           ],
         ),
@@ -417,65 +614,167 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
   }
 }
 
-class _RoutineRowItem extends StatelessWidget {
-  final RoutineModel routine; final List<AstroPeriod> periods; final bool isSelectionMode; final bool isSelected; final VoidCallback onTap; final VoidCallback onLongPress; final VoidCallback onMoreOptions;
-  const _RoutineRowItem({required this.routine, required this.periods, required this.isSelectionMode, required this.isSelected, required this.onTap, required this.onLongPress, required this.onMoreOptions});
-  
-  @override 
-  Widget build(BuildContext context) {
+class _RoutineRowItem extends ConsumerWidget {
+  final RoutineModel routine;
+  final List<AstroPeriod> periods;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  final VoidCallback onMoreOptions;
+  const _RoutineRowItem(
+      {required this.routine,
+      required this.periods,
+      required this.isSelectionMode,
+      required this.isSelected,
+      required this.onTap,
+      required this.onLongPress,
+      required this.onMoreOptions});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final rColor = Color(routine.colorValue);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    String timeStr = '--:--';
-    if (!routine.isAstroTime && routine.startTimeMinutes != null) {
-      final sh = (routine.startTimeMinutes! ~/ 60).toString().padLeft(2, '0');
-      final sm = (routine.startTimeMinutes! % 60).toString().padLeft(2, '0');
-      timeStr = '${'common.civil'.tr()} (${'common.from'.tr()} $sh:$sm)';
-    } else if (routine.isAstroTime && routine.startPeriodId != null) {
-      // 🌟 الإصلاح 2: إزالة الـ +1 الوهمية من عرض الروتين التراكمي
-      int gSuwaya = _getGlobalSuwaya(routine.startPeriodId!, routine.startSuwaya ?? 1, periods);
-      final sm = (routine.startVirtualMinute ?? 0).toString().padLeft(2, '0');
-      timeStr = '${'common.astro'.tr()} (${'common.from'.tr()} ${gSuwaya.toString().padLeft(2, '0')}:$sm)';
-    }
-
-    String recStr = routine.recurrenceDays == null || routine.recurrenceDays!.isEmpty ? 'add_screen.daily'.tr() : '${routine.recurrenceDays!.length} ${'common.days'.tr()}';
+    final clockColor = routine.isAstroTime
+        ? const Color(0xFFF2C94C)
+        : (isDark ? Colors.white : Colors.black87);
+    final clockStyle = TextStyle(
+      color: clockColor,
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+    );
+    final locale = context.locale.languageCode;
+    final startRangeTime = _routineTime(
+      isAstroTime: routine.isAstroTime,
+      periodId: routine.startPeriodId,
+      suwaya: routine.startSuwaya,
+      virtualMinute: routine.startVirtualMinute,
+      civilMinutes: routine.startTimeMinutes,
+      periods: periods,
+      style: clockStyle,
+      locale: locale,
+    );
+    final endRangeTime = _routineTime(
+      isAstroTime: routine.isAstroTime,
+      periodId: routine.endPeriodId ?? routine.startPeriodId,
+      suwaya: routine.endSuwaya ?? routine.startSuwaya,
+      virtualMinute: routine.endVirtualMinute,
+      civilMinutes: routine.endTimeMinutes,
+      periods: periods,
+      style: clockStyle,
+      locale: locale,
+    );
+    final recurrence =
+        formatRoutineRecurrence(routine.recurrenceDays, locale) ??
+            'add_screen.daily'.tr();
 
     return GestureDetector(
-      onTap: onTap, onLongPress: onLongPress,
+      onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
-        decoration: BoxDecoration(color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Theme.of(context).cardColor, border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Colors.transparent)),
+        decoration: BoxDecoration(
+            color: isSelected
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                : Theme.of(context).cardColor,
+            border: Border.all(
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Colors.transparent)),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
-            if (isSelectionMode) Padding(padding: const EdgeInsets.only(left: 12), child: Icon(isSelected ? LucideIcons.circle_check : LucideIcons.circle, color: isSelected ? Theme.of(context).primaryColor : Colors.grey)),
-            Container(margin: const EdgeInsets.only(left: 8, right: 8), width: 14, height: 14, decoration: BoxDecoration(shape: BoxShape.circle, color: rColor, boxShadow: [BoxShadow(color: rColor.withValues(alpha: 0.5), blurRadius: 4)])),
-            Expanded(child: Text(routine.title, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 16, fontWeight: FontWeight.bold))),
+            if (isSelectionMode)
+              Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Icon(
+                      isSelected
+                          ? LucideIcons.circle_check
+                          : LucideIcons.circle,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey)),
+            Container(
+                margin: const EdgeInsets.only(left: 8, right: 8),
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: rColor,
+                    boxShadow: [
+                      BoxShadow(
+                          color: rColor.withValues(alpha: 0.5), blurRadius: 4)
+                    ])),
+            Expanded(
+                child: Text(routine.title,
+                    style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold))),
             Directionality(
               textDirection: ui.TextDirection.ltr,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  routine.isAstroTime ? Stack(
-                    children: [
-                      Text(timeStr, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=0.6..color=Colors.white)),
-                      Text(timeStr, style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', letterSpacing: 1.0)),
-                    ],
-                  ) : Text(timeStr, style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Inter', letterSpacing: 0.0)),
-                  const SizedBox(height: 2),
-                  Text(recStr, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12, fontWeight: FontWeight.bold)),
+                  Directionality(
+                    textDirection: ui.TextDirection.ltr,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        startRangeTime,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: Text('→',
+                              style:
+                                  TextStyle(color: clockColor, fontSize: 12)),
+                        ),
+                        endRangeTime,
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(recurrence,
+                      style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black54,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
-            
             if (!isSelectionMode)
               IconButton(
                 padding: const EdgeInsets.only(left: 8),
                 constraints: const BoxConstraints(),
-                icon: Icon(Icons.more_vert, color: isDark ? Colors.white38 : Colors.black38, size: 20),                onPressed: onMoreOptions,
+                icon: Icon(Icons.more_vert,
+                    color: isDark ? Colors.white38 : Colors.black38, size: 20),
+                onPressed: onMoreOptions,
               ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _routineTime({
+    required bool isAstroTime,
+    required int? periodId,
+    required int? suwaya,
+    required int? virtualMinute,
+    required int? civilMinutes,
+    required List<AstroPeriod> periods,
+    required TextStyle style,
+    required String locale,
+  }) {
+    if (isAstroTime && periodId != null) {
+      return ClockTimeText.suwaya(
+        globalSuwayaIndex: _getGlobalSuwaya(periodId, suwaya ?? 1, periods),
+        virtualMinute: virtualMinute ?? 0,
+        style: style,
+      );
+    }
+    if (!isAstroTime && civilMinutes != null) {
+      return Text(formatCivilRoutineTime(civilMinutes, locale), style: style);
+    }
+    return Text('--:--', style: style);
   }
 }
