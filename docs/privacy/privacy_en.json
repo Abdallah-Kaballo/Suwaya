@@ -1,0 +1,42 @@
+[
+  {
+    "title": "1. Scope and Current Data Model",
+    "content": "The current application is local-first. It does not currently provide user accounts, authentication, cloud synchronization, or a configured remote database. Most application data is stored on the device in an Isar Community database. The current database contains data for settings, tasks, routines, and saved geographic information."
+  },
+  {
+    "title": "2. Information the Application Uses",
+    "content": "Location information: When you choose automatic location, Suwaya requests location permission and uses latitude and longitude locally to calculate prayer times, select timezone contexts, find the nearest city, and suggest calculation defaults. This data is not sent to a server.\n\nApplication data: Suwaya stores calculation preferences, language, theme, tasks, and routines locally.\n\nNotifications and alarms: Suwaya schedules local notifications and alarms through the operating system."
+  },
+  {
+    "title": "3. Information We Do Not Currently Collect",
+    "content": "The application does not intentionally collect or transmit account details, advertising identifiers, behavioral analytics, crash reports, location history, backend data through Supabase, or payment information."
+  },
+  {
+    "title": "4. Data Storage, Retention, and Deletion",
+    "content": "Local data remains on the device until you delete it through an application feature, clear the application’s storage, or uninstall the application. Suwaya does not currently retain a server-side copy of your local data."
+  },
+  {
+    "title": "5. Permissions",
+    "content": "Suwaya may request permissions for: Location (for prayer calculations), Notifications (for reminders), Exact alarms (for time-sensitive scheduling), Vibration, and Internet (for platform operations). You can revoke permissions via OS settings."
+  },
+  {
+    "title": "6. Third-Party Libraries and Platform Services",
+    "content": "Suwaya uses open-source libraries for Flutter, persistence, prayer calculations, and UI. Platform providers (Android, iOS) may process data independently under their own privacy policies."
+  },
+  {
+    "title": "7. Security",
+    "content": "Local data protection depends on your device's security. Keep your device protected. Do not use rooted or compromised devices for sensitive data if that is a concern."
+  },
+  {
+    "title": "8. Children",
+    "content": "Suwaya is not designed to knowingly collect personal information from children and does not intentionally create child user profiles or collect child data remotely."
+  },
+  {
+    "title": "9. Changes to This Policy",
+    "content": "This policy may be updated when data practices change. The 'Last updated' date indicates the latest revision."
+  },
+  {
+    "title": "10. Contact",
+    "content": "For questions or privacy concerns, contact the project maintainer by reporting an issue through the Suwaya GitHub repository:\nhttps://github.com/Abdallah-Kaballo/Suwaya"
+  }
+]

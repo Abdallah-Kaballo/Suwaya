@@ -1,3 +1,4 @@
+import 'dart:io'; // 🌟 تمت الإضافة للتحقق من منصة التشغيل
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -43,6 +44,16 @@ class AppDrawer extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
 
+    // 🌟 1. حماية: التحقق من أن النظام Android (لأن مكتبة التحديثات تعمل حصرياً مع Google Play)
+    if (!Platform.isAndroid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: const Text('التحديثات متاحة عبر متجر التطبيقات الخاص بنظامك.'),
+            backgroundColor: primaryColor),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -60,7 +71,7 @@ class AppDrawer extends ConsumerWidget {
     );
 
     try {
-      // الاستعلام من متجر جوجل بلاي
+      // 🌟 2. الاستعلام من متجر جوجل بلاي حصراً
       AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
 
       if (!context.mounted) return;
@@ -72,7 +83,7 @@ class AppDrawer extends ConsumerWidget {
         // إشعار المستخدم باكتمال التحميل لطلب التثبيت
         await InAppUpdate.completeFlexibleUpdate();
       } else {
-        // لا يوجد تحديث
+        // لا يوجد تحديث في Google Play
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -109,9 +120,11 @@ class AppDrawer extends ConsumerWidget {
     } catch (e) {
       if (!context.mounted) return;
       Navigator.pop(context);
+      
+      // 🌟 3. إزالة رسالة الخطأ المتعلقة بـ GitHub واستبدالها برسالة صريحة لـ Google Play
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('drawer.github_connection_failed'.tr()),
+        const SnackBar(
+            content: Text('فشل الاتصال بمتجر Google Play. يرجى المحاولة لاحقاً.'),
             backgroundColor: Colors.redAccent),
       );
     }
@@ -178,8 +191,8 @@ class AppDrawer extends ConsumerWidget {
                   }),
                   _buildDrawerItem(
                       context, LucideIcons.book_open, 'drawer.faq'.tr(), () {
-                    _launchUrl(
-                        'https://github.com/Abdallah-Kaballo/Suwaya/wiki');
+                    Navigator.pop(context); // إغلاق الـ Drawer
+                    context.push('/faq');   // فتح الشاشة الجديدة
                   }),
                   _buildDrawerItem(
                       context, LucideIcons.mail, 'drawer.contact'.tr(), () {
@@ -205,8 +218,8 @@ class AppDrawer extends ConsumerWidget {
                   }),
                   _buildDrawerItem(context, LucideIcons.shield,
                       'settings.privacy_policy'.tr(), () {
-                    _launchUrl(
-                        'https://abdallah-kaballo.github.io/Suwaya/privacy.html');
+                    Navigator.pop(context); // إغلاق القائمة الجانبية
+                    context.push('/privacy'); // التوجيه للشاشة الداخلية
                   }),
                   _buildDrawerItem(context, LucideIcons.info,
                       'settings.about'.tr(), () => _showAboutDialog(context)),

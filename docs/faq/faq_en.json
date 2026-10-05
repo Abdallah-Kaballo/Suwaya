@@ -1,0 +1,198 @@
+[
+  {
+    "q": "What is the Suwaya app?",
+    "a": "Suwaya is a unique productivity app that integrates task management with Islamic astronomical time. Instead of relying on a rigid civil clock, the app divides your day into 48 'Suwayas' based on the sun's movement and prayer times, helping you align your productivity with the natural rhythm of the day."
+  },
+  {
+    "q": "What is a 'Suwaya'?",
+    "a": "A Suwaya is a virtual time unit in the app that always equals 30 virtual minutes. A complete day consists of 48 Suwayas. However, its real-time duration (in regular minutes) expands and contracts depending on the length of the astronomical period it falls in (such as Fajr or Dhuhr)."
+  },
+  {
+    "q": "How does Suwaya time differ from civil time (regular clock)?",
+    "a": "Civil time divides the day into 24 strictly equal hours. Suwaya time distributes 48 units across astronomical periods. In summer, when days are longer, a daytime Suwaya is longer than 30 real minutes, and vice versa in winter, giving you natural flexibility in accomplishing your tasks."
+  },
+  {
+    "q": "What are the 7 astronomical periods in the app?",
+    "a": "The app divides the day from Fajr to the next day's Fajr into 7 continuous periods: 1. Fajr, 2. Duha, 3. Dhuhr, 4. Asr, 5. Maghrib, 6. Middle Third of the Night, 7. Last Third of the Night."
+  },
+  {
+    "q": "Does the app use sunrise as a standalone period?",
+    "a": "No, sunrise is displayed in the app as an informational marker, but the 'Fajr' period astronomically extends until the midpoint between Fajr and Dhuhr, after which the 'Duha' period begins. This ensures periods remain contiguous without gaps."
+  },
+  {
+    "q": "How is the start and end of the day calculated in Suwaya?",
+    "a": "A day in Suwaya does not begin at midnight (12:00 AM). Instead, it begins with the Fajr adhan and ends with the Fajr adhan of the following day."
+  },
+  {
+    "q": "What do the numbers on the Suwaya clock mean (e.g., 07:15)?",
+    "a": "The first number (07) represents the sequential global index of the current Suwaya out of the 48 Suwayas in the day. The second number (15) represents the virtual minutes elapsed within this specific Suwaya (from 0 to 29)."
+  },
+  {
+    "q": "How do I add a new task?",
+    "a": "From the home screen (astronomical dial) or the tasks screen, tap the floating action button (+), type the task name, select its type, category, and alert time, then tap save."
+  },
+  {
+    "q": "What is the difference between a Casual Task and a Continuous Habit?",
+    "a": "A Casual Task is a one-time to-do assigned to a specific date that disappears once completed. A Continuous Habit is a recurring task (daily or on specific weekdays) that contributes to building your achievement streak."
+  },
+  {
+    "q": "Can I link a task to astronomical time?",
+    "a": "Yes, and that is the core of the app! When adding a task, choose 'Astro Time', select a period (e.g., Dhuhr), and a specific Suwaya within it. The app will alert you at the real time corresponding to this Suwaya."
+  },
+  {
+    "q": "What happens to astronomically linked tasks when seasons change?",
+    "a": "They adapt automatically. If you link a task to 'the first Suwaya of Asr', the alert time will automatically adjust every day to match the exact Asr time in your city throughout the year."
+  },
+  {
+    "q": "How do I schedule a task at a fixed civil time (e.g., 8:00 AM)?",
+    "a": "When adding the task, select 'Civil' from the time options instead of 'By Periods' or 'Cumulative', and set your preferred hour and minute."
+  },
+  {
+    "q": "What is a 'Streak' and how do I maintain it?",
+    "a": "A Streak is a counter that tracks the number of consecutive days you have completed your continuous habits. To maintain it, make sure to check off your habits daily."
+  },
+  {
+    "q": "What are 'Streak Freezes'?",
+    "a": "Streak Freezes protect your achievement chain in case you forget or are unable to complete your tasks on a given day. The app grants you a limited number of freezes that are automatically consumed to save your streak from resetting."
+  },
+  {
+    "q": "Can I show my tasks on the astronomical dial?",
+    "a": "Yes, when adding or editing a task, enable the 'Show on Dial' option, and the task will appear as a brightly colored marker on the dial's track on the home screen."
+  },
+  {
+    "q": "How do I delete or edit a task?",
+    "a": "On the tasks screen, swipe the task to the right to delete it, or to the left to edit it. You can also long-press tasks to select multiple items and delete them in bulk."
+  },
+  {
+    "q": "What do the different task colors mean?",
+    "a": "The colors reflect the 'Task Category' (Work, Study, Sport, Worship, Entertainment, etc.) and appear in bright neon colors to make them easily distinguishable on the astronomical dial."
+  },
+  {
+    "q": "What is a Routine and how does it differ from a task?",
+    "a": "A Routine is a continuous time range (e.g., from Asr to Maghrib) dedicated to deep work or extended activities, drawn as a colored arc on the astronomical dial. A Task, on the other hand, is an event with a single alert point."
+  },
+  {
+    "q": "Can a routine span across two different astronomical periods?",
+    "a": "Absolutely. You can set the start of a routine in one period (e.g., Asr) and its end in another (e.g., Middle Third of the Night), and the app will accurately draw the arc spanning across them."
+  },
+  {
+    "q": "What do Patterns mean in a Routine?",
+    "a": "Patterns are visual textures (linear, stone, geometric) overlaid on the routine's arc on the astronomical dial to visually distinguish different routines and add an aesthetic touch to the app."
+  },
+  {
+    "q": "Can a routine alert me when it starts?",
+    "a": "Yes, you can enable a strong alarm or a silent notification for a routine from its settings, and you will be alerted as soon as its start time begins."
+  },
+  {
+    "q": "What is the Astronomical Pomodoro Timer?",
+    "a": "It is a productivity timer inspired by the Pomodoro technique, but instead of using fixed minutes, it uses a 'Suwaya' as the unit of measurement. The timer's speed dynamically adjusts based on the current astronomical time flow."
+  },
+  {
+    "q": "What does 'Time flow speed' (e.g., 1.2x) mean on the Pomodoro screen?",
+    "a": "It means that a real Suwaya in the current period is shorter than 30 civil minutes, so virtual time passes faster (at a 1.2x rate). The opposite is true if the number is less than 1."
+  },
+  {
+    "q": "How do I change the Pomodoro settings?",
+    "a": "From the Pomodoro screen, tap the 'Focus & Rest' button to choose the suitable mode: Absolute Focus (no breaks), Balanced Default (25 focus / 5 rest), or Relaxed (20 focus / 10 rest)."
+  },
+  {
+    "q": "How are prayer times calculated in the app?",
+    "a": "The app relies on an accurate astronomical library and determines times based on your geographic location (latitude and longitude) and the calculation method officially adopted in your country."
+  },
+  {
+    "q": "Can I change the calculation method or Madhab?",
+    "a": "Yes, from the side drawer, select 'Settings' > 'Astronomical Calculations', where you can choose methods such as Umm al-Qura, Muslim World League, Egyptian General Authority, and others, as well as change the Asr Madhab."
+  },
+  {
+    "q": "My prayer times differ by a few minutes from the local mosque, what should I do?",
+    "a": "We provide a 'Manual Offsets' feature within the astronomical settings. You can add or subtract minutes (up to 30 minutes) from any prayer so that the timing perfectly matches your mosque."
+  },
+  {
+    "q": "Can I manually offset the sunrise time?",
+    "a": "No, manual adjustment is only available for the five daily prayers. Sunrise remains a purely astronomical timing that cannot be manually shifted."
+  },
+  {
+    "q": "How are the night parts for Qiyam calculated?",
+    "a": "The app calculates the duration from the Maghrib adhan to the next Fajr adhan, automatically dividing it into halves, three thirds, and six sixths. You can choose which parts to display or be alerted for from the Ibadat screen settings."
+  },
+  {
+    "q": "Can I set a custom alarm for the Last Third of the night?",
+    "a": "Certainly. Go to the 'Ibadat' screen, select the 'Qiyam' tab, and tap the bell icon next to 'Last Third' to enable a waking alarm or a gentle notification."
+  },
+  {
+    "q": "How do I disable prayer alerts for specific prayers only?",
+    "a": "From the 'Ibadat' screen > 'Prayers' tab, tap the bell icon next to the prayer you want to modify, and select 'Silent'."
+  },
+  {
+    "q": "What is the difference between 'Notification' and 'Alarm' in the alert settings?",
+    "a": "A Notification appears as a brief popup with a standard alert sound. An 'Alarm' is a strong alert that wakes up the screen and continues ringing until you stop it, making it ideal for prayers or waking up."
+  },
+  {
+    "q": "Why does the app request the 'Exact Alarms' permission?",
+    "a": "Modern Android systems restrict triggering notifications at exact times to save battery. This permission is crucial to ensure prayer adhans and alarms ring at the exact second without delays."
+  },
+  {
+    "q": "Why do alarms sometimes fail to ring despite being enabled?",
+    "a": "This may be due to the 'Battery Optimization' feature on your phone, which kills background apps. Please go to your phone's settings and exempt 'Suwaya' from battery optimization."
+  },
+  {
+    "q": "Can I change the alarm or Adhan ringtone?",
+    "a": "Yes, from the side drawer, select 'Settings' > 'Notifications & Alerts', where you can customize tones for mandatory prayers (e.g., Makkah Adhan) and Qiyam (e.g., Soft Bell)."
+  },
+  {
+    "q": "How does the Snooze feature work?",
+    "a": "When an alarm rings, you can swipe the button or press the volume up/down keys to snooze. You can set the snooze duration (e.g., 5 or 10 minutes) and the maximum number of snoozes from the notifications settings."
+  },
+  {
+    "q": "How does the app determine my location?",
+    "a": "The app relies on your phone's GPS chip to determine your geographic location during initial setup. It also includes an embedded offline database to find the nearest city without internet access."
+  },
+  {
+    "q": "Does the app work offline?",
+    "a": "Yes, entirely! Suwaya is a 'Local-first' app. All your tasks, habits, city database, and prayer calculations work without needing an internet connection."
+  },
+  {
+    "q": "How do I add a location manually if GPS isn't working?",
+    "a": "From Settings, go to 'Active Location' and choose 'Manual Selection'. You can pick from the built-in list of countries and cities or manually enter your latitude and longitude coordinates."
+  },
+  {
+    "q": "What happens if I travel to another city?",
+    "a": "Update your location using the (GPS) button on the home screen or in settings. The app will update your timezone, prayer times, and recalculate Suwaya speeds based on your new location."
+  },
+  {
+    "q": "How does the app handle high latitudes (e.g., Scandinavian countries)?",
+    "a": "The app supports astronomical rules for high latitudes (such as Middle of the Night, Seventh of the Night, and Twilight Angle). You can select the appropriate rule for your city in the astronomical settings."
+  },
+  {
+    "q": "How do I change the app's language?",
+    "a": "The app supports 22 languages. From the side drawer, select 'Settings' > 'App Language' and choose your preferred language; the interface will update instantly."
+  },
+  {
+    "q": "Can I choose between Light and Dark modes?",
+    "a": "The app primarily relies on Dark Mode to save battery life and reduce eye strain, but it features dynamic color themes that adapt beautifully."
+  },
+  {
+    "q": "What color themes are available for the dial?",
+    "a": "We provide several visual identities to customize your experience: Gold (Classic), Ocean (Teal), Forest (Emerald Green), and Desert (Warm Orange). You will be able to change them from the settings."
+  },
+  {
+    "q": "How do I change the design of the astronomical dial?",
+    "a": "From Settings > Dial Settings, you can choose between the 'Classic' design with a vintage astronomical feel, a minimalist 'Minimal' design, or a 'Geometric' design based on Islamic art."
+  },
+  {
+    "q": "Can I disable the dial's auto-rotation?",
+    "a": "Yes, from 'Dial Settings', toggle off the 'Auto-Rotate Dial' option. The dial will remain fixed while only the needles move."
+  },
+  {
+    "q": "What is the difference between 24-pin and 48-pin dial numbering?",
+    "a": "The 48-pin option displays Suwaya markers (from 00 to 47) on the outer ring of the dial. The 24-pin option displays standard civil hours (from 00 to 23) to make reading civil time easier relative to astronomical periods."
+  },
+  {
+    "q": "Does the app share my data or location with third parties?",
+    "a": "Absolutely not. We fully respect your privacy. All task data, settings, and geographic locations are stored encrypted locally on your device and are never sent to any external servers."
+  },
+  {
+    "q": "Where can I find the Privacy Policy?",
+    "a": "You can access the detailed Privacy Policy via the side drawer by tapping on 'Privacy Policy'."
+  }
+]

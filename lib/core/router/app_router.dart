@@ -22,6 +22,9 @@ import '../../features/settings/astro_calculations_screen.dart';
 import '../../features/settings/permissions_screen.dart';
 import 'startup_gate.dart';
 
+import '../../features/settings/faq_screen.dart';
+import '../../features/settings/privacy_screen.dart';
+
 // مفتاح التوجيه الجذري (Full Screen)
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -73,7 +76,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+       GoRoute(
+        path: '/faq',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const FAQScreen(),
+      ),
 
+      GoRoute(
+        path: '/privacy',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PrivacyScreen(),
+      ),
+      
       // شاشة الإضافة خارج الشريط
       GoRoute(
         path: '/add-task',
