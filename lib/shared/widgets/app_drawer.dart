@@ -1,4 +1,4 @@
-import 'dart:io'; // 🌟 تمت الإضافة للتحقق من منصة التشغيل
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:go_router/go_router.dart';
-import 'package:in_app_update/in_app_update.dart'; // مكتبة تحديثات جوجل بلاي
+import 'package:in_app_update/in_app_update.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -39,14 +39,19 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  Future<void> _checkForUpdates(
-      BuildContext context, Color primaryColor) async {
+  Future<void> _checkForUpdates(BuildContext context, Color primaryColor) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
+    final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
 
-    // 🌟 1. حماية: التحقق من أن النظام Android (لأن مكتبة التحديثات تعمل حصرياً مع Google Play)
+    final rootNav = Navigator.of(context, rootNavigator: true);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // إغلاق القائمة الجانبية بطريقة آمنة
+    Navigator.pop(context);
+
     if (!Platform.isAndroid) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(
             content: const Text('التحديثات متاحة عبر متجر التطبيقات الخاص بنظامك.'),
             backgroundColor: primaryColor),
@@ -54,40 +59,48 @@ class AppDrawer extends ConsumerWidget {
       return;
     }
 
+    BuildContext? loadingDialogContext;
     showDialog(
-      context: context,
+      context: rootNav.context, 
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        content: Row(
-          children: [
-            CircularProgressIndicator(color: primaryColor),
-            const SizedBox(width: 24),
-            Text('drawer.checking_updates'.tr(),
-                style: TextStyle(color: textColor)),
-          ],
-        ),
-      ),
+      builder: (ctx) {
+        loadingDialogContext = ctx;
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            backgroundColor: scaffoldBgColor,
+            content: Row(
+              children: [
+                CircularProgressIndicator(color: primaryColor),
+                const SizedBox(width: 24),
+                Text('drawer.checking_updates'.tr(),
+                    style: TextStyle(color: textColor)),
+              ],
+            ),
+          ),
+        );
+      },
     );
 
     try {
-      // 🌟 2. الاستعلام من متجر جوجل بلاي حصراً
       AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
 
-      if (!context.mounted) return;
-      Navigator.pop(context); // إغلاق نافذة التحميل
+      if (loadingDialogContext != null && loadingDialogContext!.mounted) {
+        Navigator.pop(loadingDialogContext!);
+      }
 
       if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-        // بدء التحديث المرن في الخلفية
         await InAppUpdate.startFlexibleUpdate();
-        // إشعار المستخدم باكتمال التحميل لطلب التثبيت
         await InAppUpdate.completeFlexibleUpdate();
       } else {
-        // لا يوجد تحديث في Google Play
+        // 🌟 إرضاء المحلل: تخزين الـ context في متغير محلي وفحصه
+        final navContext = rootNav.context;
+        if (!navContext.mounted) return;
+
         showDialog(
-          context: context,
+          context: navContext,
           builder: (ctx) => AlertDialog(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: scaffoldBgColor,
             title: Row(
               children: [
                 const Icon(LucideIcons.circle_check, color: Colors.green),
@@ -118,11 +131,11 @@ class AppDrawer extends ConsumerWidget {
         );
       }
     } catch (e) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      
-      // 🌟 3. إزالة رسالة الخطأ المتعلقة بـ GitHub واستبدالها برسالة صريحة لـ Google Play
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (loadingDialogContext != null && loadingDialogContext!.mounted) {
+        Navigator.pop(loadingDialogContext!);
+      }
+
+      scaffoldMessenger.showSnackBar(
         const SnackBar(
             content: Text('فشل الاتصال بمتجر Google Play. يرجى المحاولة لاحقاً.'),
             backgroundColor: Colors.redAccent),
@@ -191,8 +204,8 @@ class AppDrawer extends ConsumerWidget {
                   }),
                   _buildDrawerItem(
                       context, LucideIcons.book_open, 'drawer.faq'.tr(), () {
-                    Navigator.pop(context); // إغلاق الـ Drawer
-                    context.push('/faq');   // فتح الشاشة الجديدة
+                    Navigator.pop(context);
+                    context.push('/faq');
                   }),
                   _buildDrawerItem(
                       context, LucideIcons.mail, 'drawer.contact'.tr(), () {
@@ -218,8 +231,8 @@ class AppDrawer extends ConsumerWidget {
                   }),
                   _buildDrawerItem(context, LucideIcons.shield,
                       'settings.privacy_policy'.tr(), () {
-                    Navigator.pop(context); // إغلاق القائمة الجانبية
-                    context.push('/privacy'); // التوجيه للشاشة الداخلية
+                    Navigator.pop(context);
+                    context.push('/privacy');
                   }),
                   _buildDrawerItem(context, LucideIcons.info,
                       'settings.about'.tr(), () => _showAboutDialog(context)),
