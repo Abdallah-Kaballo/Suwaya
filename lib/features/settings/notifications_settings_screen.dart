@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import 'settings_provider.dart';
+// 🌟 استيراد مزود الصلاحيات
+import '../../core/location/permissions_provider.dart';
 
 class NotificationsSettingsScreen extends ConsumerStatefulWidget {
   const NotificationsSettingsScreen({super.key});
@@ -66,7 +68,13 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             currentLevel: prayersLevel,
             currentTone: prayersTone,
             currentVolume: prayersVolume,
-            onSave: (level, tone, vol) {
+            onSave: (level, tone, vol) async {
+              // 🌟 طلب الصلاحيات فوراً عند التفعيل
+              if (level > 0) {
+                final perms = ref.read(permissionsProvider.notifier);
+                await perms.ensureNotificationPermission();
+                await perms.ensureExactAlarmPermission();
+              }
               final ids = ['1', '3', '4', '5', 'isha'];
               for (var id in ids) {
                 ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: id, isEnabled: true, alertLevel: level, soundPath: tone, volume: vol);
@@ -84,7 +92,13 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             currentTone: qiyamTone,
             currentVolume: qiyamVolume,
             isFadeInForced: true, 
-            onSave: (level, tone, vol) {
+            onSave: (level, tone, vol) async {
+              // 🌟 طلب الصلاحيات فوراً عند التفعيل
+              if (level > 0) {
+                final perms = ref.read(permissionsProvider.notifier);
+                await perms.ensureNotificationPermission();
+                await perms.ensureExactAlarmPermission();
+              }
               final nightIds = ['half_1', 'half_2', 'third_1', 'third_2', 'third_3', 'sixth_1', 'sixth_2', 'sixth_3', 'sixth_4', 'sixth_5', 'sixth_6'];
               for (var id in nightIds) {
                 ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: id, isEnabled: true, alertLevel: level, soundPath: tone, volume: vol);
@@ -292,9 +306,15 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             TextButton(onPressed: () => Navigator.pop(context), child: Text('common.cancel'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5)))),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: accentColor),
-              onPressed: () {
+              onPressed: () async {
+                // 🌟 طلب الصلاحيات فوراً للقيم الافتراضية إذا كانت تتطلب تنبيهاً
+                if (tempLevel > 0) {
+                  final perms = ref.read(permissionsProvider.notifier);
+                  await perms.ensureNotificationPermission();
+                  await perms.ensureExactAlarmPermission();
+                }
                 ref.read(settingsProvider.notifier).updateProductivityDefaults(isTask: !isHabit, alertLevel: tempLevel, tone: tempTone, volume: 1.0);
-                Navigator.pop(context);
+                if (context.mounted) Navigator.pop(context);
               },
               child: Text('notifications.save'.tr(), style: const TextStyle(color: Colors.white)),
             ),

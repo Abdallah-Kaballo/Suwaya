@@ -68,18 +68,24 @@ class SettingsModel {
     return _getConfig(pId)?.isEnabled ?? smartDefault;
   }
 
+  // 🌟 الإصلاح هنا: الدالة الآن تحترم خيار الإيقاف قبل إرجاع مستوى التنبيه
   int getPeriodAlertLevel(String pId, [int defaultVal = 0]) {
+    final config = _getConfig(pId);
+    if (config != null) {
+      if (!config.isEnabled) return 0; // 🌟 هذا السطر كان مفقوداً
+      return config.alertLevel;
+    }
+    
     final smartDefault = (pId == 'sunrise' ||
             pId.startsWith('half') ||
             pId.startsWith('third') ||
             pId.startsWith('sixth'))
         ? 0
         : defaultVal;
-    return _getConfig(pId)?.alertLevel ?? smartDefault;
+    return smartDefault;
   }
 
-  String getPeriodSound(String pId,
-      [String defaultVal = 'assets/audio/default.mp3']) {
+  String getPeriodSound(String pId, [String defaultVal = 'assets/audio/default.mp3']) {
     return _getConfig(pId)?.soundPath ?? defaultVal;
   }
 

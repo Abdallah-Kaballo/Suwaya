@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:alarm/alarm.dart';
@@ -106,14 +107,23 @@ class NotificationScheduler {
       List<RoutineModel> routines) async {
     if (_isScheduling) return;
 
-    final sb = StringBuffer();
-    sb.write('${settings.calculationMethod}_${settings.useAstroTimeForIbadat}');
-    for (var t in allTasks) {
-      sb.write(
-          '${t.id}_${t.isCompleted}_${t.targetPeriodId}_${t.targetVirtualMinute}_${t.notifyMode}_${t.alarmMode}');
+    // 🌟 إصلاح جذر المشكلة: إنشاء بصمة شاملة لكل الإعدادات المؤثرة
+    final sb = StringBuffer()
+      ..write('loc=${settings.activeLocation?.latitude},${settings.activeLocation?.longitude},${settings.activeLocation?.timezone};')
+      ..write('astro=${settings.calculationMethod},${settings.madhab},${settings.highLatitudeRule},${settings.customFajrAngle},${settings.customIshaAngle},${settings.useAstroTimeForIbadat};');
+
+    for (final c in settings.periodConfigs) {
+      sb.write('p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
     }
+
+    for (final t in allTasks) {
+      sb.write('t=${t.id}:${t.isCompleted}:${t.targetPeriodId}:${t.targetVirtualMinute}:${t.notifyMode}:${t.alarmMode};');
+    }
+
     sb.write(buildRoutineScheduleFingerprint(routines));
     final currentHash = sb.toString();
+
+    // إذا كانت البصمة متطابقة، لا نكرر العمل
     if (currentHash == _lastScheduleHash) return;
 
     try {
@@ -139,13 +149,10 @@ class NotificationScheduler {
       final double lat = loc.latitude;
       final double lng = loc.longitude;
 
-      final CalculationMethodType calcMethod =
-          settings.calculationMethod.toCalculationMethod();
+      final CalculationMethodType calcMethod = settings.calculationMethod.toCalculationMethod();
       final MadhabType madhab = settings.madhab.toMadhab();
-      final HighLatitudeRuleType hlRule =
-          settings.highLatitudeRule.toHighLatRule();
-      final Map<PrayerKey, int> isolatedManualOffsets =
-          manualOffsetsMap.toPrayerKeyMap();
+      final HighLatitudeRuleType hlRule = settings.highLatitudeRule.toHighLatRule();
+      final Map<PrayerKey, int> isolatedManualOffsets = manualOffsetsMap.toPrayerKeyMap();
 
       final double fajrAngle = settings.customFajrAngle;
       final double ishaAngle = settings.customIshaAngle;
@@ -202,36 +209,11 @@ class NotificationScheduler {
         final periods = dayData['periods'] as List<AstroPeriod>;
 
         final mandatoryPrayers = [
-          {
-            'id': '1',
-            'nameKey': 'period_fajr',
-            'time': ibadat.fajr,
-            'numericId': 1
-          },
-          {
-            'id': '3',
-            'nameKey': 'period_dhuhr',
-            'time': ibadat.dhuhr,
-            'numericId': 3
-          },
-          {
-            'id': '4',
-            'nameKey': 'period_asr',
-            'time': ibadat.asr,
-            'numericId': 4
-          },
-          {
-            'id': '5',
-            'nameKey': 'period_maghrib',
-            'time': ibadat.maghrib,
-            'numericId': 5
-          },
-          {
-            'id': 'isha',
-            'nameKey': 'isha',
-            'time': ibadat.isha,
-            'numericId': 9
-          },
+          {'id': '1', 'nameKey': 'period_fajr', 'time': ibadat.fajr, 'numericId': 1},
+          {'id': '3', 'nameKey': 'period_dhuhr', 'time': ibadat.dhuhr, 'numericId': 3},
+          {'id': '4', 'nameKey': 'period_asr', 'time': ibadat.asr, 'numericId': 4},
+          {'id': '5', 'nameKey': 'period_maghrib', 'time': ibadat.maghrib, 'numericId': 5},
+          {'id': 'isha', 'nameKey': 'isha', 'time': ibadat.isha, 'numericId': 9},
         ];
 
         for (var prayer in mandatoryPrayers) {
@@ -244,17 +226,14 @@ class NotificationScheduler {
             final int alertLevel = settings.getPeriodAlertLevel(pId, 0);
 
             if (alertLevel > 0) {
-              final String soundId =
-                  settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
+              final String soundId = settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
-              final int notificationId =
-                  100000 + (dayOffset * 1000) + numericId;
+              final int notificationId = 100000 + (dayOffset * 1000) + numericId;
 
               final durationUntilAlarm = pTime.difference(cityNow);
               final realAlarmTime = DateTime.now().add(durationUntilAlarm);
 
-              if (realAlarmTime
-                  .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+              if (realAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
                 continue;
               }
 
@@ -263,10 +242,7 @@ class NotificationScheduler {
                 final existing = activeAlarmMap[notificationId];
                 bool needsUpdate = true;
                 if (existing != null) {
-                  final timeDiff = existing.dateTime
-                      .difference(realAlarmTime)
-                      .inSeconds
-                      .abs();
+                  final timeDiff = existing.dateTime.difference(realAlarmTime).inSeconds.abs();
                   if (timeDiff < 60 && existing.assetAudioPath == assetPath) {
                     needsUpdate = false;
                   }
@@ -281,13 +257,12 @@ class NotificationScheduler {
                     loopAudio: true,
                     vibrate: true,
                     volumeSettings: VolumeSettings.fade(
-                      volume: 1.0,
+                      volume: settings.getPeriodVolume(pId, 1.0),
                       fadeDuration: const Duration(seconds: 3),
                       volumeEnforced: true,
                     ),
                     notificationSettings: NotificationSettings(
-                      title:
-                          '${'notifications.prayer_of'.tr()} ${nameKey.tr()}',
+                      title: '${'notifications.prayer_of'.tr()} ${nameKey.tr()}',
                       body: 'notifications.adhan_time_body'.tr(),
                       stopButton: 'alarm.stop'.tr(),
                     ),
@@ -311,22 +286,17 @@ class NotificationScheduler {
         for (var nightPart in ibadat.nightParts) {
           if (settings.visibleNightParts.contains(nightPart.id) &&
               nightPart.startTime.isAfter(cityNow)) {
-            final int alertLevel =
-                settings.getPeriodAlertLevel(nightPart.id, 0);
+            final int alertLevel = settings.getPeriodAlertLevel(nightPart.id, 0);
             if (alertLevel > 0) {
-              final String soundId = settings.getPeriodSound(
-                  nightPart.id, 'assets/audio/soft.mp3');
+              final String soundId = settings.getPeriodSound(nightPart.id, 'assets/audio/soft.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
               final int nightIdSafe = nightPart.id.hashCode.abs() % 100;
-              final int notificationId =
-                  200000 + (dayOffset * 1000) + nightIdSafe;
+              final int notificationId = 200000 + (dayOffset * 1000) + nightIdSafe;
 
-              final durationUntilAlarm =
-                  nightPart.startTime.difference(cityNow);
+              final durationUntilAlarm = nightPart.startTime.difference(cityNow);
               final realAlarmTime = DateTime.now().add(durationUntilAlarm);
 
-              if (realAlarmTime
-                  .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+              if (realAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
                 continue;
               }
 
@@ -335,10 +305,7 @@ class NotificationScheduler {
                 final existing = activeAlarmMap[notificationId];
                 bool needsUpdate = true;
                 if (existing != null) {
-                  final timeDiff = existing.dateTime
-                      .difference(realAlarmTime)
-                      .inSeconds
-                      .abs();
+                  final timeDiff = existing.dateTime.difference(realAlarmTime).inSeconds.abs();
                   if (timeDiff < 60 && existing.assetAudioPath == assetPath) {
                     needsUpdate = false;
                   }
@@ -353,13 +320,12 @@ class NotificationScheduler {
                     loopAudio: true,
                     vibrate: true,
                     volumeSettings: VolumeSettings.fade(
-                      volume: 1.0,
+                      volume: settings.getPeriodVolume(nightPart.id, 0.5),
                       fadeDuration: const Duration(seconds: 3),
                       volumeEnforced: true,
                     ),
                     notificationSettings: NotificationSettings(
-                      title:
-                          '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
+                      title: '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
                       body: 'notifications.qiyam_body'.tr(),
                       stopButton: 'alarm.stop'.tr(),
                     ),
@@ -369,8 +335,7 @@ class NotificationScheduler {
                 requiredNormalIds.add(notificationId);
                 await _service.scheduleNormalNotification(
                   id: notificationId,
-                  title:
-                      '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
+                  title: '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
                   body: 'notifications.qiyam_short'.tr(),
                   scheduledTime: realAlarmTime,
                   playSound: true,
@@ -392,35 +357,23 @@ class NotificationScheduler {
           DateTime? routineAlarmTime;
 
           if (!routine.isAstroTime && routine.startTimeMinutes != null) {
-            routineAlarmTime = DateTime(
-                targetDate.year,
-                targetDate.month,
-                targetDate.day,
-                routine.startTimeMinutes! ~/ 60,
-                routine.startTimeMinutes! % 60);
+            routineAlarmTime = DateTime(targetDate.year, targetDate.month, targetDate.day, routine.startTimeMinutes! ~/ 60, routine.startTimeMinutes! % 60);
             if (routineAlarmTime.isBefore(cityNow)) {
               routineAlarmTime = routineAlarmTime.add(const Duration(days: 1));
             }
           } else if (routine.isAstroTime && routine.startPeriodId != null) {
             try {
-              final p =
-                  periods.firstWhere((p) => p.id == routine.startPeriodId);
-              routineAlarmTime = resolveAstroRoutineTime(
-                period: p,
-                localSuwaya: routine.startSuwaya ?? 1,
-                virtualMinute: routine.startVirtualMinute ?? 0,
-              );
+              final p = periods.firstWhere((p) => p.id == routine.startPeriodId);
+              routineAlarmTime = resolveAstroRoutineTime(period: p, localSuwaya: routine.startSuwaya ?? 1, virtualMinute: routine.startVirtualMinute ?? 0);
             } catch (_) {}
           }
 
           if (routineAlarmTime != null && routineAlarmTime.isAfter(cityNow)) {
-            final int routineNotifId =
-                300000 + (dayOffset * 10000) + routine.id;
+            final int routineNotifId = 300000 + (dayOffset * 10000) + routine.id;
             final durationUntilAlarm = routineAlarmTime.difference(cityNow);
             final realAlarmTime = DateTime.now().add(durationUntilAlarm);
 
-            if (realAlarmTime
-                .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+            if (realAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
               continue;
             }
 
@@ -430,10 +383,7 @@ class NotificationScheduler {
               final existingTask = activeAlarmMap[routineNotifId];
               bool needsTaskUpdate = true;
               if (existingTask != null) {
-                final timeDiff = existingTask.dateTime
-                    .difference(realAlarmTime)
-                    .inSeconds
-                    .abs();
+                final timeDiff = existingTask.dateTime.difference(realAlarmTime).inSeconds.abs();
                 if (timeDiff < 60 && existingTask.assetAudioPath == rAsset) {
                   needsTaskUpdate = false;
                 }
@@ -447,13 +397,9 @@ class NotificationScheduler {
                   assetAudioPath: rAsset,
                   loopAudio: true,
                   vibrate: true,
-                  volumeSettings: VolumeSettings.fade(
-                      volume: routine.alarmVolume,
-                      fadeDuration: const Duration(seconds: 2),
-                      volumeEnforced: true),
+                  volumeSettings: VolumeSettings.fade(volume: routine.alarmVolume, fadeDuration: const Duration(seconds: 2), volumeEnforced: true),
                   notificationSettings: NotificationSettings(
-                    title:
-                        '${'notifications.period_start'.tr()}: ${routine.title}',
+                    title: '${'notifications.period_start'.tr()}: ${routine.title}',
                     body: 'notifications.routine_body'.tr(),
                     stopButton: 'alarm.stop'.tr(),
                   ),
@@ -481,26 +427,16 @@ class NotificationScheduler {
           }
 
           for (var task in allTasks) {
-            if (!(task.notifyMode || task.alarmMode || task.vibrateMode)) {
-              continue;
-            }
-            if (task.targetPeriodId != period.id ||
-                task.targetSuwayas.isEmpty) {
-              continue;
-            }
+            if (!(task.notifyMode || task.alarmMode || task.vibrateMode)) continue;
+            if (task.targetPeriodId != period.id || task.targetSuwayas.isEmpty) continue;
 
             bool isForThisDay = false;
             if (task.type == TaskType.casual) {
-              if (task.targetDate != null &&
-                  task.targetDate!.year == targetDate.year &&
-                  task.targetDate!.month == targetDate.month &&
-                  task.targetDate!.day == targetDate.day) {
+              if (task.targetDate != null && task.targetDate!.year == targetDate.year && task.targetDate!.month == targetDate.month && task.targetDate!.day == targetDate.day) {
                 if (!task.isCompleted) isForThisDay = true;
               }
             } else if (task.type == TaskType.permanent) {
-              if (task.recurrenceDays == null ||
-                  task.recurrenceDays!.isEmpty ||
-                  task.recurrenceDays!.contains(targetDate.weekday)) {
+              if (task.recurrenceDays == null || task.recurrenceDays!.isEmpty || task.recurrenceDays!.contains(targetDate.weekday)) {
                 if (!(dayOffset == 0 && task.isCompletedToday)) {
                   isForThisDay = true;
                 }
@@ -508,48 +444,31 @@ class NotificationScheduler {
             }
 
             if (isForThisDay) {
-              final suwayaCount =
-                  period.suwayasCount > 0 ? period.suwayasCount : 1;
-              final microPerSuwaya =
-                  period.endTime.difference(period.startTime).inMicroseconds ~/
-                      suwayaCount;
+              final suwayaCount = period.suwayasCount > 0 ? period.suwayasCount : 1;
+              final microPerSuwaya = period.endTime.difference(period.startTime).inMicroseconds ~/ suwayaCount;
               final microPerVirtualMin = microPerSuwaya ~/ 30;
 
               for (var suwayaNum in task.targetSuwayas) {
                 int effectiveSuwayaNum = suwayaNum;
-                if (effectiveSuwayaNum == -1) {
-                  effectiveSuwayaNum = (suwayaCount ~/ 2) + 1;
-                }
+                if (effectiveSuwayaNum == -1) effectiveSuwayaNum = (suwayaCount ~/ 2) + 1;
 
                 final sIndex = effectiveSuwayaNum - 1;
                 final vMin = task.targetVirtualMinute;
 
-                final taskCityTime = period.startTime.add(Duration(
-                    microseconds: (microPerSuwaya * sIndex) +
-                        (microPerVirtualMin * vMin)));
+                final taskCityTime = period.startTime.add(Duration(microseconds: (microPerSuwaya * sIndex) + (microPerVirtualMin * vMin)));
 
                 if (taskCityTime.isAfter(cityNow)) {
                   final int taskIdSafe = task.id % 1000;
-                  final int taskNotifId = 400000 +
-                      (dayOffset * 10000) +
-                      (taskIdSafe * 10) +
-                      effectiveSuwayaNum;
+                  final int taskNotifId = 400000 + (dayOffset * 10000) + (taskIdSafe * 10) + effectiveSuwayaNum;
 
                   int currentGlobalSuwaya = globalSuwayaBase + sIndex;
-                  final clockText = formatSuwayaTime(currentGlobalSuwaya, vMin,
-                      separator: '|');
-                  String timeText =
-                      "${'notifications.segment_time'.tr()} : \u2066$clockText\u2069";
+                  final clockText = formatSuwayaTime(currentGlobalSuwaya, vMin, separator: '|');
+                  String timeText = "${'notifications.segment_time'.tr()} : \u2066$clockText\u2069";
 
-                  final taskDurationUntilAlarm =
-                      taskCityTime.difference(cityNow);
-                  final realTaskAlarmTime =
-                      DateTime.now().add(taskDurationUntilAlarm);
+                  final taskDurationUntilAlarm = taskCityTime.difference(cityNow);
+                  final realTaskAlarmTime = DateTime.now().add(taskDurationUntilAlarm);
 
-                  if (realTaskAlarmTime.isBefore(
-                      DateTime.now().add(const Duration(seconds: 5)))) {
-                    continue;
-                  }
+                  if (realTaskAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) continue;
 
                   if (task.alarmMode) {
                     requiredAlarmIds.add(taskNotifId);
@@ -558,12 +477,8 @@ class NotificationScheduler {
                     final existingTask = activeAlarmMap[taskNotifId];
                     bool needsTaskUpdate = true;
                     if (existingTask != null) {
-                      final timeDiff = existingTask.dateTime
-                          .difference(realTaskAlarmTime)
-                          .inSeconds
-                          .abs();
-                      if (timeDiff < 60 &&
-                          existingTask.assetAudioPath == tAsset) {
+                      final timeDiff = existingTask.dateTime.difference(realTaskAlarmTime).inSeconds.abs();
+                      if (timeDiff < 60 && existingTask.assetAudioPath == tAsset) {
                         needsTaskUpdate = false;
                       }
                     }
@@ -576,13 +491,9 @@ class NotificationScheduler {
                         assetAudioPath: tAsset,
                         loopAudio: true,
                         vibrate: true,
-                        volumeSettings: VolumeSettings.fade(
-                            volume: task.alarmVolume,
-                            fadeDuration: const Duration(seconds: 2),
-                            volumeEnforced: true),
+                        volumeSettings: VolumeSettings.fade(volume: task.alarmVolume, fadeDuration: const Duration(seconds: 2), volumeEnforced: true),
                         notificationSettings: NotificationSettings(
-                          title:
-                              '${'notifications.time_for_task'.tr()}: ${task.title}',
+                          title: '${'notifications.time_for_task'.tr()}: ${task.title}',
                           body: timeText,
                           stopButton: 'alarm.stop'.tr(),
                         ),
@@ -592,8 +503,7 @@ class NotificationScheduler {
                     requiredNormalIds.add(taskNotifId);
                     await _service.scheduleNormalNotification(
                       id: taskNotifId,
-                      title:
-                          '${'notifications.time_for_task'.tr()}: ${task.title}',
+                      title: '${'notifications.time_for_task'.tr()}: ${task.title}',
                       body: timeText,
                       scheduledTime: realTaskAlarmTime,
                       playSound: task.notifyMode,
@@ -613,8 +523,7 @@ class NotificationScheduler {
         }
       }
 
-      final toCancelNormal =
-          _previouslyScheduledNormalIds.difference(requiredNormalIds);
+      final toCancelNormal = _previouslyScheduledNormalIds.difference(requiredNormalIds);
       for (var id in toCancelNormal) {
         try {
           await _service.cancel(id);
@@ -622,7 +531,10 @@ class NotificationScheduler {
       }
 
       _previouslyScheduledNormalIds = requiredNormalIds;
-      _lastScheduleHash = currentHash;
+      _lastScheduleHash = currentHash; // يتم التسجيل فقط بعد نجاح جميع العمليات!
+    } catch (e, stack) {
+      debugPrint('🚨 خطأ غير متوقع أثناء جدولة الإشعارات والمنبهات: $e');
+      debugPrintStack(stackTrace: stack);
     } finally {
       _isScheduling = false;
     }

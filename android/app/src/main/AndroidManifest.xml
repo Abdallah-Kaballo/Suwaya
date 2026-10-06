@@ -12,10 +12,16 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
-    <!-- صلاحيات المنبه الدقيق وإيقاظ الشاشة (الطريقة الرسمية والمعتمدة لجوجل بلاي) -->
+    <!-- 🌟 تم إضافة صلاحيات تشغيل الخدمة في الخلفية لتشغيل المنبهات بأمان -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    
+    <!-- صلاحيات المنبه الدقيق وإيقاظ الشاشة -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    
+    <!-- 🌟 تم الإبقاء على SCHEDULE_EXACT_ALARM فقط كما نصحت التوجيهات -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+    
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -24,7 +30,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- 🌟 تأمين بيانات التطبيق بمنع النسخ الاحتياطي السحابي لأندرويد -->
     <application
         android:label="Suwaya"
         android:name="${applicationName}"
@@ -59,7 +64,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- إعدادات حزمة الإشعارات والمنبهات -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>

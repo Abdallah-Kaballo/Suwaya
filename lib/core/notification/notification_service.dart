@@ -77,7 +77,8 @@ class NotificationService {
       sound: const UriAndroidNotificationSound('content://settings/system/notification_sound'),
     );
 
-    _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.active);
+    // 🌟 تم إضافة await لضمان انتظار الجدولة
+    await _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.active);
   }
 
   Future<void> scheduleInsistentAlarm({
@@ -97,7 +98,8 @@ class NotificationService {
       sound: const UriAndroidNotificationSound('content://settings/system/alarm_alert'),
     );
 
-    _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.critical);
+    // 🌟 تم إضافة await لضمان انتظار الجدولة
+    await _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.critical);
   }
 
   Future<void> cancel(int id) async {
@@ -144,7 +146,8 @@ class NotificationService {
       audioAttributesUsage: isInsistent ? AudioAttributesUsage.alarm : AudioAttributesUsage.notification,
     );
 
-    _safeZonedSchedule(id, title, body, scheduledTime, androidDetails, isInsistent ? InterruptionLevel.critical : InterruptionLevel.active);
+    // 🌟 تم إضافة await لضمان انتظار الجدولة
+    await _safeZonedSchedule(id, title, body, scheduledTime, androidDetails, isInsistent ? InterruptionLevel.critical : InterruptionLevel.active);
   }
 
   Future<void> _safeZonedSchedule(int id, String title, String body, DateTime time, AndroidNotificationDetails androidDetails, InterruptionLevel iosLevel) async {
@@ -157,8 +160,11 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      // 🌟 تمرير الخطأ وعدم ابتلاعه حتى يفهم النظام أن الجدولة فشلت ولا يضيفها للهاش
       debugPrint('🚨 فشل جدولة الإشعار بسبب نقص الصلاحيات: $e');
+      debugPrintStack(stackTrace: stack);
+      rethrow; 
     }
   }
 
