@@ -1,0 +1,618 @@
+[
+  {
+    "q": "Hvad er Suwaya?",
+    "a": "Suwaya er en innovativ app og et dagligt organiseringssystem, der tilføjer et 'naturligt tidslag' oven på standard civil tid. Baseret på din geografiske placering, solens cyklus og bønnetider opdeler appen intelligent din dag (fra Fajr til næste dags Fajr) i syv vitale perioder og fordeler 48 fleksible 'Suwayaer' over dem. Dette system forbinder smukt dine opgaver, rutiner og fokussessioner med universets naturlige rytme."
+  },
+  {
+    "q": "Hvilket problem forsøger Suwaya at løse?",
+    "a": "Civil tid (social tid) er fremragende til aftaler, men det ignorerer fuldstændigt din 'indre tid' og dagens naturlige rytme. Suwaya bygger bro over denne kløft ved at fortælle dig din faktiske position på dagen (f.eks. er du midt i Asr, eller i den sidste tredjedel af natten). Dette giver din rutine mulighed for at harmonisere med naturlige ændringer i energi og lys hele året."
+  },
+  {
+    "q": "Er Suwaya en erstatning for det almindelige ur?",
+    "a": "Nej, det er snarere den perfekte ledsager til det. Civil tid organiserer arbejdsplaner og transport, mens 'Suwaya' organiserer din personlige energi, vaner og mentale planlægning. Du kan problemfrit bruge begge systemer sammen i appen for at opnå en balance mellem dine ydre forpligtelser og din menneskelige natur."
+  },
+  {
+    "q": "Er Suwaya bare en bønnetidsapp?",
+    "a": "Bønnetider er det bankende hjerte i vores tidsmotor, men Suwaya går meget længere end det. Det tilbyder et integreret miljø til opgavestyring, rutineopfølgning, astronomiske Pomodoro-sessioner, natinddelinger og en yderst interaktiv tidsskive, der forvandler din dag til et visuelt mesterværk."
+  },
+  {
+    "q": "Er Suwaya bare en to-do app med en anden grænseflade?",
+    "a": "Den fundamentale forskel ligger i 'Tidsforbindelse'. I almindelige apps er en opgave bundet til et fast tal (f.eks. 16:00). I Suwaya er en opgave bundet til en astronomisk kontekst (f.eks. den første Suwaya efter Asr), hvilket betyder, at din tidsplan automatisk tilpasser sig skiftende årstider og solens bevægelse."
+  },
+  {
+    "q": "Hvad menes med kontekstuel eller astronomisk tid i Suwaya?",
+    "a": "Det er at beskrive tid baseret på beregnede naturlige hændelser i stedet for faste tal. Fysisk tid går som normalt, men Suwaya genpræsenterer den på en måde, der harmoniserer med din døgnrytme (Circadian Rhythm), hvilket giver dig en dybere opfattelse af tids værdi og strømning."
+  },
+  {
+    "q": "Hævder Suwaya, at civil tid er forkert?",
+    "a": "Slet ikke. Civil tid er en uundværlig teknisk og social standard i den moderne verden. Suwaya tilbyder blot en ekstra dimension med fokus på tids kvalitet og personlig produktivitet, og forbinder os igen med naturen uden at isolere os fra samfundet."
+  },
+  {
+    "q": "Hvad er en Suwaya?",
+    "a": "En Suwaya er en fleksibel tidsenhed i appen, der altid repræsenterer 30 'virtuelle' minutter. Dens genialitet ligger i det faktum, at dens varighed i den virkelige verden glat udvides og trækker sig sammen for at rumme den astronomiske periode, den falder i (som længden af Dhuhr-perioden om sommeren vs. vinteren)."
+  },
+  {
+    "q": "Er én Suwaya lig med 30 rigtige minutter?",
+    "a": "Ikke altid. Heri ligger systemets fleksibilitet; hvis den astronomiske periode er længere, udvides Suwaya elegant for at svare til mere end 30 virkelige minutter, hvilket giver dig overflod og ro til at udføre opgaver. Hvis perioden er kortere, trækker den sig sammen for at afspejle den hurtige passage af den tid."
+  },
+  {
+    "q": "Hvorfor 30 virtuelle minutter for hver Suwaya?",
+    "a": "Fordi 48 Suwayaer × 30 minutter = 1440 minutter (hvilket er præcis 24 virtuelle timer). Dette design bevarer en daglig struktur, der er velkendt for det menneskelige sind, samtidig med at tiden på intelligent vis kan tilpasse sig i baggrunden."
+  },
+  {
+    "q": "Hvorfor indeholder dagen 48 Suwayaer?",
+    "a": "Tallet 48 er et smart geometrisk design, der gør det muligt at opdele den virtuelle dag i præcise, praktiske halve times enheder. Dette giver dig et meget præcist system til at planlægge din dag uden yderligere kompleksitet."
+  },
+  {
+    "q": "Har tallet 48 en religiøs eller astronomisk oprindelse?",
+    "a": "Selve tallet er et teknisk valg, der er specifikt for Suwaya til at organisere grænsefladen smukt, mens den religiøse og astronomiske værdi stammer fra de præcist beregnede kerneperiode grænser (som bønnetider og nat-tredjedele)."
+  },
+  {
+    "q": "Hvad betyder 7776777-fordelingen?",
+    "a": "Det er den smukt afbalancerede geometriske fordeling af Suwayaer på tværs af de syv perioder i din dag: Fajr (7), Duha (7), Dhuhr (7), Asr (6), Maghrib (7), Midterste Tredjedel (7) og Sidste Tredjedel (7). Sammen udgør de din 48-Suwaya dag."
+  },
+  {
+    "q": "Er 7776777 en religiøs eller astronomisk inddeling?",
+    "a": "Periode-grænserne er afledt af præcise astronomiske og religiøse tider, men tildelingen af dette specifikke antal Suwayaer til hver periode er et matematisk design, der sigter mod at skabe en praktisk og behagelig balance i din dag."
+  },
+  {
+    "q": "Hvorfor får Asr-perioden 6 Suwayaer?",
+    "a": "For at opnå den endelige total (48) med en symmetrisk fordeling, der opretholder dagens visuelle og praktiske balance. Dette mindsker på ingen måde den astronomiske eller religiøse betydning af Asr-perioden; det er simpelthen en relativ vægtning i den matematiske ligning."
+  },
+  {
+    "q": "Kan fordelingen af Suwayaer ændres?",
+    "a": "Den tekniske motor er bygget med ekstrem fleksibilitet, men appen anvender i øjeblikket den forenede [7,7,7,6,7,7,7] fordeling som en officiel standard for at sikre oplevelsesstabilitet og tidsnøjagtighed for alle brugere."
+  },
+  {
+    "q": "Hvordan starter dagen i Suwaya?",
+    "a": "I Suwaya starter din dag naturligt og inspirerende med Fajr adhan, og slutter med Fajr adhan den følgende dag, hvilket perfekt stemmer overens med den sande start på menneskelig aktivitet og lyscyklussen."
+  },
+  {
+    "q": "Hvad betyder 'dag' og 'nat' på startskærmen?",
+    "a": "På startskærmen refererer 'dag' til perioden fra Fajr til Maghrib på den samme kalenderdag, mens 'nat' refererer til perioden fra Maghrib til det følgende Fajr. Derfor starter mandag nat ved Maghrib om søndagen og slutter ved Fajr om mandagen."
+  },
+  {
+    "q": "Hvorfor starter dagen ved Fajr og ikke ved midnat?",
+    "a": "Kronobiologiske undersøgelser indikerer, at vågen/lys-cyklussen er den primære udløser for det biologiske ur. Suwaya forbinder din start med denne naturlige begivenhed snarere end en stiv civil grænse (midnat) for at holde dig i perfekt overensstemmelse med naturen."
+  },
+  {
+    "q": "Kan dagens start sættes til Maghrib?",
+    "a": "Den primære tidsmotor er i øjeblikket designet til at spore (Fajr-til-Fajr) cyklussen som en omfattende organisatorisk ramme for produktivitet. Vi kan udforske yderligere visningstilstande i fremtiden, men den nuværende kerne fungerer på denne yderst effektive model."
+  },
+  {
+    "q": "Hvad er de syv perioder?",
+    "a": "Din dag er problemfrit opdelt i: 1) Fajr, 2) Duha, 3) Dhuhr, 4) Asr, 5) Maghrib, 6) Midterste Tredjedel af natten, og 7) Sidste Tredjedel af natten. Dette dækker hver fase af din energi og aktivitet."
+  },
+  {
+    "q": "Er alle grænser for de syv perioder uafhængige astronomiske begivenheder?",
+    "a": "De fleste er (Fajr, Dhuhr, Asr, Maghrib), mens Fajr/Duha-grænsen er et matematisk beregnet midtpunkt, og natperioderne er afledt af den præcise opdeling af tiden fra Maghrib til Fajr."
+  },
+  {
+    "q": "Er solopgang (Shuruq) en uafhængig grænse for nogen af de syv periodes?",
+    "a": "Solopgangstiden er nøjagtigt beregnet og vises som vigtig information, men vi forlængede organisatorisk 'Fajr'-perioden til midtpunktet mod Dhuhr for at sikre, at morgenarbejdsperioder forbliver kontinuerlige uden afbrydelser eller huller."
+  },
+  {
+    "q": "Er Isha en uafhængig grænse for nogen af de syv periodes?",
+    "a": "Isha vises nøjagtigt inden for bedetiderne, så du kan udføre det til tiden, men de centrale natperioder til organisering af opgaver og rutiner er bygget på naturlige natinddelinger (som tredjedele) for at matche søvn- og ro-mønstre."
+  },
+  {
+    "q": "Hvorfor hedder Duha-perioden det, hvis den ikke starter ved solopgang?",
+    "a": "Navnet bruges her som en organisatorisk beskrivelse for anden del af morgenen (fra Fajr-Dhuhr midtpunktet indtil Dhuhr). Det er ikke beregnet som en streng retsvidenskabelig (fiqh) definition for starten af Duha bønnen."
+  },
+  {
+    "q": "Hvordan beregnes midtpunktet mellem Fajr og Dhuhr?",
+    "a": "Med en præcis ligning: Motoren beregner den samlede tidsvarighed mellem Fajr og Dhuhr, tager halvdelen af det og tilføjer det til Fajr-tiden for at bestemme overgangspunktet for morgenenergien."
+  },
+  {
+    "q": "Hvordan beregner Suwaya natten?",
+    "a": "Astronomisk beregnes natten fra Maghrib indtil næste Fajr. Appen giver dig dette interval på tre overlappende måder, du kan bruge: halvdele, tre tredjedele eller seks sjettedele."
+  },
+  {
+    "q": "Er halvdelene, tredjedelene og sjettedelene 11 på hinanden følgende perioder?",
+    "a": "Nej, de er tre forskellige linser til at se præcis den samme nat. Du kan vælge at bruge tredjedele (til rutiner og Qiyam) eller sjettedele (til præcis mikro-opdeling), afhængigt af hvordan du administrerer din aften."
+  },
+  {
+    "q": "Hvordan beregnes den Sidste Tredjedel (Tahajjud)?",
+    "a": "Den samlede varighed af natten (fra Maghrib til Fajr) er opdelt i tre lige store dele; den Sidste Tredjedel — en tid for sindsro og ro — begynder præcis efter, at to tredjedele af natten er gået."
+  },
+  {
+    "q": "Afhænger den Sidste Tredjedel af civil midnat?",
+    "a": "Absolut ikke. Det er udelukkende afhængigt af nattens naturlige længde, og derfor skifter dets civile tid harmonisk med årstiderne, hvilket holder dig konstant forbundet til naturens rytme."
+  },
+  {
+    "q": "Hvordan beregnes den sande Suwaya-varighed?",
+    "a": "En simpel og smart proces: (Den astronomiske periodes sande varighed) divideret med (Antallet af Suwayaer allokeret til den). Resultatet er en Suwaya, der trækker vejret med dagen."
+  },
+  {
+    "q": "Er alle Suwayaer på en dag virkelig ens?",
+    "a": "De er nogenlunde ens inden for en enkelt periode for at give stabilitet i fokus, og de bøjer sig flydende, når du skifter fra en periode til en anden for at imødekomme de naturlige ændringer i solens bevægelse."
+  },
+  {
+    "q": "Er Suwaya'en om dagen altid længere om sommeren?",
+    "a": "Den sande varighed interagerer dynamisk med den specifikke periodelængde, geografiske placering og dato. Denne utrolige fleksibilitet er, hvad der adskiller Suwaya fra stive ure."
+  },
+  {
+    "q": "Hvad betyder hastighedsmultiplikatoren (Time Speed Multiplier)?",
+    "a": "Det er en fantastisk kognitiv indikator, der viser, hvordan 'virtuel' tid går i forhold til reel tid. Hvis multiplikatoren er mindre end 1, går tiden langsomt, og du har overflod til at opnå ting. Hvis den er over 1, går tiden hurtigt."
+  },
+  {
+    "q": "Betyder hastighedsmultiplikatoren, at fysisk tid ændres?",
+    "a": "Selvfølgelig ikke! Fysisk tid er konstant. Multiplikatoren er et visualiseringsværktøj til hastigheden af virtuelle tidsfremskridt, der hjælper dig med at mærke udvidelsen eller sammentrækningen af perioder for at styre din indsats."
+  },
+  {
+    "q": "Hvad betyder en visning som 07:12?",
+    "a": "I Suwayas verden er dette ikke 07:12 om morgenen! 07 repræsenterer det globale Suwaya-indeks (fra 0 til 47), og 12 repræsenterer de virtuelle minutter indeni. Det er en omfattende ny måde at læse din dags fremgang på."
+  },
+  {
+    "q": "Hvordan skelner jeg mellem civil tid og Suwaya-tid i grænsefladen?",
+    "a": "For at sikre en klar visuel adskillelse mellem de to systemer vises civil (social) tid i standard 24-timers format i hvidt, med et kolon mellem timer og minutter, f.eks. 00:00. Suwaya tid vises i gult inden for 48-Suwaya systemet, med en kort lodret linje «│», der adskiller Suwaya-nummeret fra de virtuelle minutter, som 07│12."
+  },
+  {
+    "q": "Starter Suwaya nummereringen fra 0 eller 1?",
+    "a": "For nemheds skyld starter nummereringen af en Suwaya inden for en periode (f.eks. den første Suwaya af Asr) fra 1. Det globale tekniske indeks, der bruges på skiven, starter fra 0 til 47."
+  },
+  {
+    "q": "Svarer den virtuelle dag til 24 timer?",
+    "a": "Ja, arkitektonisk: 48 Suwayaer × 30 minutter = 24 virtuelle timer, hvilket holder systemet dejligt velkendt og nemt for dit sind at forstå."
+  },
+  {
+    "q": "Ændrer Suwaya den sande dagslængde?",
+    "a": "Vi kan ikke ændre længden af dagen, men vi ændrer, hvordan du 'ser og udnytter' den! Suwaya genpræsenterer tid for at give dig en stærkere følelse af kontrol og overflod (Barakah)."
+  },
+  {
+    "q": "Hvordan beregner appen bønnetider?",
+    "a": "Vores motor bruger et yderst pålideligt astronomisk bibliotek (adhan), der interagerer med dine geografiske koordinater, dato, godkendte beregningsmetode og Madhab, hvilket sikrer uovertruffen nøjagtighed."
+  },
+  {
+    "q": "Bør tiderne matche alle andre apps?",
+    "a": "Små forskelle (et par minutter) er helt naturlige på grund af forskellige beregningsmetoder eller vinkelindstillinger. Vi har leveret manuelle justeringsværktøjer, så du nemt kan matche appen med din lokale moské."
+  },
+  {
+    "q": "Hvilke beregningsmetoder understøttes faktisk lige nu?",
+    "a": "Motoren understøtter nøjagtigt de vigtigste metoder (Umm al-Qura, Egyptian Authority, Karachi, Custom). Nogle andre metoder dirigeres i øjeblikket sikkert til 'Muslim World League' som standard, indtil deres præcise kortlægninger er fuldført."
+  },
+  {
+    "q": "Hvorfor er denne bemærkning vigtig?",
+    "a": "Fordi vi forpligter os til fuld gennemsigtighed. Vi sikrer, at navnet, der vises i grænsefladen, nøjagtigt afspejler den underliggende astronomiske algoritme, så du kan være helt i fred med hensyn til din tilbedelse."
+  },
+  {
+    "q": "Hvad menes der med Madhab i Asr indstillingerne?",
+    "a": "Det er en retsvidenskabelig (fiqh) mulighed, der giver fleksibilitet til at bestemme starttidspunktet for Asr-bønnen. Appen understøtter smukt både Shafi'i (flertal) og Hanafi-metoder, så de passer til din region."
+  },
+  {
+    "q": "Hvad er regler for høje breddegrader?",
+    "a": "Det er avancerede astronomiske løsninger (som Midnat, Syvendedel af Natten, Tusmørkevinkel), der sikrer nøjagtige Fajr og Isha beregninger i regioner nær polerne, hvor tusmørket ikke forsvinder klart."
+  },
+  {
+    "q": "Er Suwaya velegnet til polarområder?",
+    "a": "Ja, motoren er udstyret med regler for høje breddegrader, men på grund af disse ekstreme regioners retsvidenskabelige kompleksitet anbefales det stærkt at verificere resultaterne med de lokale islamiske centre der."
+  },
+  {
+    "q": "Kan Fajr og Isha vinklerne justeres?",
+    "a": "Bestemt. Ved at vælge beregningsmetoden 'Brugerdefineret' (Custom) har du mulighed for at indtaste præcise astronomiske vinkler, der passer til din regions specifikke standarder."
+  },
+  {
+    "q": "Kan bønnetider justeres manuelt?",
+    "a": "Ja, vi har leveret en problemfri manuel offset-funktion (±30 minutter) til de fem obligatoriske bønner, så du kan kalibrere tiderne med kirurgisk præcision for at matche din bys kalender."
+  },
+  {
+    "q": "Kan solopgang justeres manuelt?",
+    "a": "Nej, solopgang er en rent astronomisk begivenhed beregnet og vist som en naturlig reference. Den er udelukket fra manuel justering for at opretholde den nøjagtige tidsmæssige struktur af dagen."
+  },
+  {
+    "q": "Hvis jeg justerer Maghrib, ændres nattens inddeling så?",
+    "a": "Ja, meget smart! Da natten starter ved Maghrib i vores system, vil enhver justering automatisk og præcist genkalibrere længderne og grænserne for halvdelene, tredjedelene og sjettedelene."
+  },
+  {
+    "q": "Hvis jeg justerer én bøn, skifter resten af bønnerne så?",
+    "a": "Nej, den manuelle justering påvirker genialt kun den valgte bøn, hvilket giver dig total fleksibilitet til at justere hver bøn individuelt uden at forvirre resten af beregningerne."
+  },
+  {
+    "q": "Er Suwaya en religiøs tilbedelsesenhed?",
+    "a": "Nej, det er en smart teknisk og organisatorisk innovation, der har til formål at hjælpe dig med at investere din tid bedre, og er ikke en retsvidenskabelig kendelse eller en foreskrevet tilbedelsesenhed."
+  },
+  {
+    "q": "Er de syv perioder en religiøs inddeling af dagen?",
+    "a": "Det er en designmodel inspireret af velsignede tider og tilbedelsesplaner for at organisere livet bedre, men det er ikke en bindende retsvidenskabelig inddeling."
+  },
+  {
+    "q": "Giver Suwaya religiøse kendelser (Fatwaer)?",
+    "a": "Suwaya er et avanceret organisations- og beregningsværktøj, ikke en fatwa-myndighed. For præcise retsvidenskabelige (fiqh) kendelser bedes du konsultere certificerede specialister."
+  },
+  {
+    "q": "Kan ikke-muslimer bruge den?",
+    "a": "Absolut! Konceptet om at harmonisere med dagslys og naturlige cyklusser (Circadian Alignment) er et universelt koncept stærkt anbefalet af biologer for alle til at forbedre produktivitet og sundhed."
+  },
+  {
+    "q": "Hvorfor har appen brug for placeringen?",
+    "a": "Magien ligger i tilpasning! Bønnetider og længden af dags- og natperioder påvirkes direkte og unikt af dine geografiske koordinater på Jorden."
+  },
+  {
+    "q": "Skal GPS'en være tændt hele tiden?",
+    "a": "Ingen batteribekymringer! Appen henter din placering én gang og udfører derefter alle komplekse beregninger lokalt (Offline). Du behøver kun at opdatere GPS'en, når du rejser til en anden by."
+  },
+  {
+    "q": "Hvad sker der, hvis jeg rejser?",
+    "a": "Blot et enkelt tryk på opdater placering (GPS), og appen vil fejlfrit genopbygge din dag, justere tidszonen og kalibrere tiderne for Suwaya-forbundne opgaver til at passe perfekt til din nye destination."
+  },
+  {
+    "q": "Hvordan håndterer appen tidszonen?",
+    "a": "Det avancerede behandlingslag integrerer dybt tidszonen med dine koordinater for at sikre absolut præcision, når der konverteres mellem Universal Time (UTC) og lokal tid."
+  },
+  {
+    "q": "Hvordan håndterer den sommertid (DST)?",
+    "a": "Motoren er fuldt udstyret med tests til at håndtere urovergange (frem og tilbage), hvilket sikrer periodekontinuitet og absolut ingen huller i din dag."
+  },
+  {
+    "q": "Er et skudår et problem?",
+    "a": "Nej, motoren er blevet grundigt testet til at håndtere 29. februar flydende og problemfrit gå over til daggry den 1. marts."
+  },
+  {
+    "q": "Hvad sker der før daggry af den nuværende civile dato?",
+    "a": "Med den højeste intelligens anerkender appen, at 'Fajr-til-Fajr' cyklussen endnu ikke er fuldført, og viser yndefuldt den foregående Suwaya-dags data, indtil Fajr adhan ankommer."
+  },
+  {
+    "q": "Er der huller mellem perioderne?",
+    "a": "Vores omhyggelige geometriske design garanterer, at slutningen af hver periode er det nøjagtige startpunkt for den næste, og danner et perfekt, kontinuerligt loop fra Fajr indtil næste dags Fajr."
+  },
+  {
+    "q": "Hvad sker der, hvis motoren fejler i at beregne?",
+    "a": "Det robuste Fallback-system i Suwaya forhindrer nedbrud og viser en sikker midlertidig tilstand, der sikrer, at din grænseflade forbliver smukt funktionel, indtil indstillinger eller koordinater rettes."
+  },
+  {
+    "q": "Hvad er forskellen mellem en civil opgave og en Suwaya-tilknyttet opgave?",
+    "a": "En civil opgave er naglet til en bestemt time (som møder). En Suwaya-tilknyttet opgave er levende, flyder med dagens rytme, og dens civile tid ændres automatisk for at forblive i sin naturlige kontekst (f.eks. roen efter Asr)."
+  },
+  {
+    "q": "Hvad er fordelen ved for eksempel at knytte en opgave til Asr?",
+    "a": "Det garanterer mental stabilitet! Hvis din aktivitet kræver roen fra post-Asr fasen, vil appen altid advare dig på dette perfekte tidspunkt, uanset hvordan Asr adhan skifter i løbet af året."
+  },
+  {
+    "q": "Skal enhver opgave være astronomisk?",
+    "a": "Nej. Officielle aftaler, flyrejser og arbejde bruger civil tid. Suwaya giver dig total fleksibilitet til problemfrit at kombinere strenge civile aftaler med dine fleksible personlige vaner."
+  },
+  {
+    "q": "Kan civil tid og Suwaya kombineres?",
+    "a": "Ja, og dette er den ultimative moderne produktivitetsadfærd! Brug civil tid til eksterne forpligtelser, og Suwaya til at planlægge din energi, personlige mål og vaner."
+  },
+  {
+    "q": "Hvad er rutiner?",
+    "a": "En rutine er en udvidet tidsblok til dybt arbejde eller hvile (f.eks. fra Asr til Maghrib), elegant tegnet som en smuk bue på skiven, i modsætning til en opgave, der repræsenterer et øjeblikkeligt præstationspunkt."
+  },
+  {
+    "q": "Hvad er den astronomiske skive (Astro Dial)?",
+    "a": "Det er vores visuelle mesterværk! En interaktiv cirkulær tavle, der viser din dags struktur, perioder, opgaver og fremskridt, hvilket giver dig en fantastisk rummelig og direkte opfattelse af din position inden for din dag."
+  },
+  {
+    "q": "Er skiven en rigtig astrolabe?",
+    "a": "Det er en moderne, smart digital grænseflade æstetisk inspireret af den historiske astrolabe, specielt udviklet til at organisere daglig tid smukt snarere end til astronomisk feltobservation."
+  },
+  {
+    "q": "Hvad er den Astronomiske Pomodoro Timer?",
+    "a": "Det er en spektakulær opgradering af den berømte Pomodoro-teknik! I stedet for at tvinge dig til stive 25 minutter, forbinder timeren sine fremskridt til den virtuelle 'Suwaya' tid, der ånder og flyder i perfekt harmoni med din naturlige dags tempo."
+  },
+  {
+    "q": "Er 25 astronomiske Pomodoro-minutter lig med 25 rigtige minutter?",
+    "a": "Ikke nødvendigvis. Det er dens superkraft; hvis den nuværende Suwaya-tid går langsomt, udvides din fokussession yndefuldt for at drage fordel af tids overflod, og skaber en unik fokusoplevelse, der matcher din vitalitet."
+  },
+  {
+    "q": "Hvilke fokusmønstre er tilgængelige?",
+    "a": "Vi har leveret mønstre, der passer til dine varierende energiniveauer: Den Gyldne Balance (25/5), Absolut Fokus (30/0), og det Afslappede Mønster (20/10). Vælg hvad der inspirerer dig i dag."
+  },
+  {
+    "q": "Kan appen sende alarmer?",
+    "a": "Helt sikkert. Suwaya har et stærkt notifikationssystem, der holder dig dybt forbundet til bønnetider, opgaver og rutiner baseret på dine præcise præferencer."
+  },
+  {
+    "q": "Hvad er forskellen mellem en Notifikation og en Alarm?",
+    "a": "En Notifikation er en blid påmindelsesbesked. En 'Alarm' er designet til stærkt at fange din opmærksomhed, lyse skærmen op og ringe kontinuerligt, hvilket gør den til det perfekte valg til at vågne op eller til bønner."
+  },
+  {
+    "q": "Hvorfor har appen brug for notifikationstilladelse?",
+    "a": "Fordi vi ønsker at være der for dig, når du har brug for os! Uden den vil appen arbejde lydløst i baggrunden, og du vil ikke modtage de vigtige påmindelser, du har planlagt for dig selv."
+  },
+  {
+    "q": "Hvorfor har den brug for tilladelsen 'Nøjagtige Alarmer' (Exact Alarms) i Android?",
+    "a": "Moderne Android-systemer begrænser tidsplanlægning for at spare batteri. Tildeling af denne tilladelse er helt afgørende for at sikre, at adhans og dine opgavealarmer udløses på det nøjagtige sekund uden nogen frustrerende forsinkelser."
+  },
+  {
+    "q": "Er alarmen garanteret til det nøjagtige sekund?",
+    "a": "Vi har udviklet systemet med den højeste grad af pålidelighed, men nogle gange griber strenge batteristyringspolitikker fra nogle telefonproducenter ind for at forsinke det. Vi anbefaler kraftigt at undtage appen fra batterioptimering."
+  },
+  {
+    "q": "Hvorfor kan en alarm blive forsinket?",
+    "a": "Den primære årsag er systemrestriktioner (Batterioptimering), der forhindrer apps i at køre i baggrunden. Justering af denne ene indstilling i din telefon løser problemet øjeblikkeligt."
+  },
+  {
+    "q": "Fungerer Suwaya offline?",
+    "a": "Stolt, ja! Suwaya er bygget på et 'Lokalt-først' (Local-first) princip. Bønneberegninger, opgavestyring, indstillinger og bydatabasen fungerer kraftfuldt og lynhurtigt lokalt uden nogensinde at have brug for en cloud-forbindelse."
+  },
+  {
+    "q": "Fungerer FAQ offline?",
+    "a": "Takket være vores smarte cache-system, gør indlæsning af spørgsmålene blot én gang dem permanent tilgængelige for dig, selv offline i fremtiden."
+  },
+  {
+    "q": "Hvorfor kaldes FAQ-siden hybrid?",
+    "a": "Fordi den på glimrende vis kombinerer det bedste fra begge verdener: øjeblikkelige, dynamiske opdateringer fra internettet (via GitHub), og permanent lokal tilgængelighed og hastighed (via lokal cache)."
+  },
+  {
+    "q": "Kan FAQ forbedres til offline brug?",
+    "a": "Vi stræber altid efter perfektion. Vores fremtidige planer omfatter indlejring af en basiskopi i appen i tilfælde af, hvor der er absolut intet internet ved den allerførste installation."
+  },
+  {
+    "q": "Kræver Suwaya en brugerkonto?",
+    "a": "Nej. Vores stærke tro på, at tidsstyring skal være hurtig og direkte fik os til at eliminere login-kompleksiteter og obligatorisk godkendelse fuldstændigt."
+  },
+  {
+    "q": "Hvor opbevares dataene?",
+    "a": "Vi bruger den ultrahurtige (Isar) databaseteknologi, som sikrer, at dine data, opgaver og rutiner gemmes sikkert og hentes lokalt på et øjeblik."
+  },
+  {
+    "q": "Bliver mine data uploadet til en Suwaya-server?",
+    "a": "Absolut ikke. Dit privatliv er helligt for os. Appen har ingen cloud-servere til at indsamle eller synkronisere dine daglige opgaver og vaner."
+  },
+  {
+    "q": "Er de lokale data krypteret?",
+    "a": "Data opbevares sikkert i den beskyttede Sandbox, der er udpeget til appen af din enheds operativsystem. Den bedste beskyttelse af dine data er at bruge stærke adgangskoder og sikre selve enheden."
+  },
+  {
+    "q": "Er der brugsanalyser eller annoncer?",
+    "a": "Nej. Vi designede Suwaya til at være et rent, roligt miljø, der udelukkende er fokuseret på din produktivitet, langt væk fra distraktioner og sporende annoncenetværk."
+  },
+  {
+    "q": "Hvor kan jeg finde Privatlivspolitikken?",
+    "a": "Gennemsigtighed er vores princip. Du kan tydeligt og nemt læse den detaljerede privatlivspolitik indefra appen via sidemenuen."
+  },
+  {
+    "q": "Vil sletning af appen slette mine data?",
+    "a": "Ja, fordi appen sikkert gemmer data lokalt for at respektere dit privatliv, sletning af appen beder operativsystemet om at rense enheden for disse data. Vær forsigtig."
+  },
+  {
+    "q": "Er der synkronisering mellem enheder?",
+    "a": "Vores nuværende design fokuserer stærkt på privatliv og uafhængig drift (Lokalt-først), så cloud-synkronisering er ikke tilgængelig i denne version."
+  },
+  {
+    "q": "Er der en backup eller dataeksport funktion?",
+    "a": "Dette er en vigtig funktion i vores fremtidsplaner, der gør dig i stand til at opbevare en sikker kopi af dine smukke præstationer, hvis du skifter telefon."
+  },
+  {
+    "q": "Hvor mange sprog understøtter appen?",
+    "a": "Suwaya er en global app! Den understøtter stolt 22 sprog over hele verden, hvilket gør det muligt for brugere fra forskellige kulturer at opleve astronomisk harmoni på deres modersmål."
+  },
+  {
+    "q": "Understøttes arabisk og RTL (højre til venstre)?",
+    "a": "Absolut, med de højeste kvalitetsstandarder og adaptivt design (RTL), der sikrer en autentisk, indfødt og yderst behagelig arabisk brugeroplevelse."
+  },
+  {
+    "q": "Er FAQ en del af UI oversættelsesfilerne?",
+    "a": "Nej, de er smart adskilt i dynamiske JSON-filer, hvilket giver os mulighed for hurtigt at opdatere og udvide dem for at betjene dig bedre uden at vente på app store-opdateringer."
+  },
+  {
+    "q": "Hvorfor adskille FAQ fra UI-oversættelsen?",
+    "a": "Denne fleksible arkitektur giver os mulighed for øjeblikkeligt at tilføje nye spørgsmål og forklaringer som svar på dine forespørgsler, uden unødigt at puste kerne-app-filerne op."
+  },
+  {
+    "q": "Er der søgning og kategorisering inden for FAQ?",
+    "a": "Den nuværende UI viser en forenklet interaktiv liste (ExpansionTile) for direkte og nem læsning. Vi undersøger avancerede filtreringsmuligheder for fremtiden."
+  },
+  {
+    "q": "Hvorfor blev der ikke tilføjet kategorier inde i JSON nu?",
+    "a": "Vi valgte elegance og enkelhed i starten for at lette lanceringen og fremskynde levering af vital information til brugeren. Udvikling er i gang."
+  },
+  {
+    "q": "Kan kategorier tilføjes senere?",
+    "a": "Ja, bestemt! Arkitekturen er fleksibelt designet til at rumme nøgleord og kategorier for lynhurtig svarsøgning i fremtiden."
+  },
+  {
+    "q": "Er appen open source?",
+    "a": "Ja, vi tror fuldt og fast på fællesskabets magt og samarbejdende udvikling. Appens kode er gennemsigtigt offentliggjort på GitHub under GNU GPL v3.0 licensen."
+  },
+  {
+    "q": "Hvad er packages/suwaya_time?",
+    "a": "Det er projektets bankende hjerte! En uafhængig teknisk pakke, der omhyggeligt er udviklet til fejlfrit at håndtere de mest komplekse beregninger af bønnetider, perioder og virtuel tids hastighed."
+  },
+  {
+    "q": "Hvorfor afkoble motoren fra Flutter?",
+    "a": "Dette repræsenterer Ren Arkitektur (Clean Architecture). Adskillelsen sikrer hurtig og nem test af komplekse matematiske operationer uden nogen form for UI-interferens."
+  },
+  {
+    "q": "Kan motoren genbruges i fremtiden?",
+    "a": "Ja! Da den er skrevet i (Pure Dart), kan den nemt udnyttes senere til at udvikle smartwatches, web-apps eller robuste API'er."
+  },
+  {
+    "q": "Hvordan sikrer projektet nøjagtigheden af perioder?",
+    "a": "Gennem et strengt Unit Testing-lag, der sikrer fejlfri rækkefølge, ingen overlapning, og matcher nøjagtigt 48 Suwayaer med ekstrem, urokkelig præcision."
+  },
+  {
+    "q": "Beviser testene global nøjagtighed for alle tilfælde?",
+    "a": "Test dækker effektivt og effektfuldt primære regler og sager. Vi understøtter dette med løbende forbedringer for at tackle ekstreme geografiske placeringsudfordringer direkte."
+  },
+  {
+    "q": "Er der tests for høje breddegrader?",
+    "a": "Ja, vi har konstrueret tilpassede tests for vanskelige klimatiske tilfælde som kontinuerlig dag eller lang nat for at sikre bundsolid, stabil ydeevne."
+  },
+  {
+    "q": "Er der tests for sommertid (DST)?",
+    "a": "Absolut. Motoren tester sikkerheden ved overgang mellem urets ændringer frem og tilbage, hvilket sikrer periodekontinuitet og absolut ingen huller i din dag."
+  },
+  {
+    "q": "Hvad er forskellen mellem 07:12 og en kumulativ virtuel tid som 03:30?",
+    "a": "07:12 er Suwaya-nummeret og dets minutter (et genialt organisatorisk indeks). 03:30 er en kumulativ matematisk visning af virtuel tid, siden dagen begyndte. Appens UI fokuserer på det første for sin enkelhed og skønhed."
+  },
+  {
+    "q": "Kan enhver civil tid konverteres til Suwaya-tid?",
+    "a": "Ja, fremragende. Motoren kan problemfrit tage ethvert tidspunkt på din civile dag og konvertere det fejlfrit til dets rette plads i de virtuelle Suwayaer."
+  },
+  {
+    "q": "Kan Suwaya-tid konverteres til civil tid?",
+    "a": "Matematisk ja, men fordi Suwaya ændrer sig dynamisk, kræver konverteringen, at man kender den nøjagtige by og dato for at give dig den præcise civile tid i det smukke øjeblik."
+  },
+  {
+    "q": "Hvorfor skal placering og dato specificeres for at fortolke Suwaya-tid?",
+    "a": "Fordi Suwaya trækker vejret med Jorden! Den 7. Suwaya efter Asr adskiller sig i sin civile time mellem Mekka og London, og skifter fuldstændigt mellem vinter og sommer."
+  },
+  {
+    "q": "Kan jeg dele en Suwaya-tid med nogen i en anden by?",
+    "a": "Du kan dele 'konteksten' af tid (f.eks. 'lad os tale efter Asr bøn'), hvilket bærer en smuk, delt mening. Men til internationale forretningsaftaler er civil tid fortsat det mest hensigtsmæssige valg."
+  },
+  {
+    "q": "Er Suwaya velegnet til virksomheder og skoler?",
+    "a": "En inspirerende og meget skalerbar idé! Den nuværende version er designet som et (personligt) produktivitetsværktøj, mens institutionel brug kræver gruppesynkroniseringsfunktioner, som vi entusiastisk undersøger for fremtiden."
+  },
+  {
+    "q": "Kan det erstatte det officielle arbejdspladssystem?",
+    "a": "Suwaya fungerer som et genialt 'rådgivende' lag til styring af din energi under arbejdet, mens det civile ur korrekt forbliver regulatoren for love og officiel arbejdstid."
+  },
+  {
+    "q": "Kan det bruges til at regulere søvn?",
+    "a": "Vidunderligt, ja! Biologiske undersøgelser indikerer stærkt vigtigheden af at synkronisere søvn med lys/mørke cyklusser. At linke din sengetid til Suwayas natteperioder kan forbedre din hvilekvalitet betydeligt og naturligt."
+  },
+  {
+    "q": "Kan det bruges til studie, sport og arbejde?",
+    "a": "Det er den absolut perfekte ledsager til dem! Organisering af studie- og sportsperioder i overensstemmelse med din energi i morgen- eller Asr-perioderne giver dig et dybere engagement og et meget højere fokus."
+  },
+  {
+    "q": "Er der videnskabelige beviser for, at 48 Suwayaer forbedrer produktiviteten?",
+    "a": "Videnskaben om 'Kronobiologi' (Chronobiology) beviser overbevisende, at harmoni med lys/mørke cyklusser forbedrer årvågenhed og stofskifte. 48-Suwaya systemet er det smarte tekniske værktøj, vi har opfundet til nemt og praktisk at anvende denne videnskab i din dagligdag."
+  },
+  {
+    "q": "Er Suwaya det samme som videnskaben om døgnrytme (Circadian Rhythm)?",
+    "a": "Suwaya er den smukke praktiske anvendelse af denne videnskabs begreber! Mens biologi studerer, hvordan din krop reagerer på tidspunkter af dagen, giver Suwaya den elegante grænseflade, der forbinder dine planer med denne naturlige rytme for dybt at forbedre din livskvalitet."
+  },
+  {
+    "q": "Betyder en lang Suwaya om dagen, at jeg skal arbejde mere?",
+    "a": "Absolut ikke. Længden af en dagtid Suwaya om sommeren giver dig en følelse af overflod til at udføre opgaver roligt uden at skynde dig, ikke en invitation til udmattelse. Suwaya organiserer indsatsen, det øger den ikke."
+  },
+  {
+    "q": "Er en lang Suwaya en obligatorisk arbejdskvote?",
+    "a": "Nej, det er et fuldstændig frit rum. Du kan klogt allokere lange Suwayaer til arbejde, hvile, sport eller tilbedelse helt afhængigt af dit mål for dagen."
+  },
+  {
+    "q": "Hvordan vælger jeg mellem civil tid og Suwaya tid?",
+    "a": "Kort sagt: strenge eksterne forpligtelser (fly, arbejde) får civil tid. Dybe personlige mål (læsning, meditation, sport) knyttes til Suwaya, så du kan nyde en fleksibel, stressfri præstation."
+  },
+  {
+    "q": "Er det bedre at konvertere hele mit liv til Suwaya?",
+    "a": "Søg ikke perfektion, søg balance. Brug Suwaya som et styrkende værktøj til at forbedre din livskvalitet og dine personlige vaner, og brug civil tid til samfundsmæssige forpligtelser."
+  },
+  {
+    "q": "Hvad hvis Suwayaerne forvirrer mig?",
+    "a": "Skønhed ligger i enkelhed. Start med at spore din dag via de 7 store, klare perioder (Fajr, Dhuhr..), og når du er komfortabelt vant til dem, dyk ned i Suwaya præcision, når du ønsker det."
+  },
+  {
+    "q": "Skal jeg huske Suwaya numrene?",
+    "a": "Aldrig. Appens fantastiske visuelle grænseflade laver alle de tunge beregninger og viser dig blot din position visuelt, hvilket fuldstændig skåner dig for at skulle huske nogle tal."
+  },
+  {
+    "q": "Hvorfor ændres den civile tid for den samme Suwaya?",
+    "a": "Fordi Jorden roterer og Solen bevæger sig! Suwaya holder dig tæt forbundet med denne fornyede kosmiske rytme, mens dens nummer forbliver en yderst stabil indikator for din rutine inden for denne ændring."
+  },
+  {
+    "q": "Er denne ændring en fejl?",
+    "a": "Nej, det er appens absolut stærkeste funktion! Denne naturlige ændring sikrer, at din rutine (som at gå en tur efter Asr) altid vil forblive i præcis den samme passende atmosfære hele året rundt."
+  },
+  {
+    "q": "Ændres varigheden af en Suwaya inden for den samme periode?",
+    "a": "Det er yderst stabilt og næsten konstant for at give dig urokkeligt, uafbrudt fokus inden for en enkelt session, og tilpasser sig kun fleksibelt og glat, når du skifter til den næste periode for at imødekomme de naturlige ændringer i solens bevægelse."
+  },
+  {
+    "q": "Genberegner appen hvert sekund?",
+    "a": "Vores design respekterer dybt din telefons ressourcer. Appen bruger en smart, yderst økonomisk timer, der sikrer utroligt glatte skærmopdateringer uden at dræne din enheds batteri."
+  },
+  {
+    "q": "Hvor ofte opdateres den virtuelle tidsvisning?",
+    "a": "Der er en meget let, optimeret programmatisk puls (Ticker), der opdaterer skærmen, mens de komplekse kerneberegninger sker stille og effektivt i baggrunden."
+  },
+  {
+    "q": "Kræver det internet for at beregne bønnetider?",
+    "a": "Den smarte motor har slet ikke brug for internettet. Den beregner udelukkende lokalt baseret på de koordinater og indstillinger, du har konfigureret, klar til at arbejde, uanset hvor du er."
+  },
+  {
+    "q": "Hvad hvis jeg ikke giver placeringstilladelse?",
+    "a": "Vi respekterer dit valg fuldt ud. Du kan nemt bruge funktionen til manuel placering og vælge din by fra den indbyggede liste for at nyde appens fulde funktioner uden kompromis."
+  },
+  {
+    "q": "Ændrer opgaverne sig, hvis jeg skifter by?",
+    "a": "Dine dyrebare opgaver vil aldrig gå tabt. Deres tider vil blive smart og problemfrit reevalueret, så de passer til din nye bys timing, og fortsætte din produktivitet uden en eneste afbrydelse under rejsen."
+  },
+  {
+    "q": "Hvad betyder Lokalt-først (Local-first)?",
+    "a": "Det er vores faste forpligtelse, at din telefon er din fæstning. Appen udfører sine kerneoperationer (opgaver, bønner, rutiner) fuldstændigt inde i din enhed, hvilket sikrer lynhurtig hastighed, totalt privatliv og fuldstændig uafhængighed fra servere."
+  },
+  {
+    "q": "Betyder Lokalt-først kun Offline?",
+    "a": "Nej. Vi sammensmelter genialt lokal intelligens med internettets kraft, kun når det er nødvendigt for at give en opdateret oplevelse (som at hente FAQ-opdateringer fra GitHub) for at holde dig perfekt informeret."
+  },
+  {
+    "q": "Er der et login?",
+    "a": "Vi har fjernet alle barrierer. Vores stærke tro på, at tidsstyring skal være hurtig og direkte, førte os til fuldstændigt at eliminere login-kompleksiteter og obligatorisk godkendelse."
+  },
+  {
+    "q": "Er der et obligatorisk abonnement eller reklamer?",
+    "a": "Suwaya er primært et dybt fokusværktøj, så det kommer til dig med en helt reklamefri oplevelse, blottet for distraherende annoncenetværk eller obligatoriske abonnementssystemer, der hindrer din brug af kernemotoren."
+  },
+  {
+    "q": "Bør jeg udelukkende stole på Suwaya for bønnetider?",
+    "a": "Suwaya er et meget nøjagtigt beregningsværktøj. Vi anbefaler dog altid i tilfælde af mindre forskelle at matche tider med din lokale moské for total hjertets fred."
+  },
+  {
+    "q": "Hvad skal jeg gøre, hvis tiderne afviger med et par minutter?",
+    "a": "Den ultimative løsning er i dine hænder: Tjek Madhab- og beregningsmetode-indstillingerne, og brug funktionen 'Manuel Offset' til at matche din moskés timing med et enkelt tryk."
+  },
+  {
+    "q": "Hvad hvis forskellen er stor?",
+    "a": "Tjek blot dine tidszone-indstillinger eller de indtastede koordinater. For det meste vil en simpel placeringsjustering bringe perfekt nøjagtige resultater tilbage med det samme."
+  },
+  {
+    "q": "Vil solopgang (Shuruq) blive brugt som en grænse i fremtiden?",
+    "a": "Vi studerer altid nye, spændende forbedringer. At inkludere solopgang som en grænse kunne være en fantastisk fremtidig udvikling, hvis det viser sig at give en stærk merværdi for brugerne og 7776777 modellen."
+  },
+  {
+    "q": "Kan andre tidsmodeller tilføjes i fremtiden?",
+    "a": "Ja, takket være appens utroligt robuste arkitektur, er vi helt åbne for at tilbyde yderligere modeller og distributioner, der passer til vores brugeres forskelligartede og unikke præferencer."
+  },
+  {
+    "q": "Hvad er kernekonstanterne, der bør bevares?",
+    "a": "Vores identitet ligger i: syv naturlige perioder, en omfattende Fajr-til-Fajr ramme, problemfri kontinuitet og virtuel minutfleksibilitet for at skabe et virkeligt unikt organisatorisk miljø."
+  },
+  {
+    "q": "Kan farver og udseende ændres uden at ændre systemet?",
+    "a": "Ja, helt sikkert! Vi har forsynet dig med en garderobe af attraktive temaer (Klassisk, Minimal, Geometrisk) for at tilpasse din visuelle oplevelse dybt uden at røre den matematiske motors kraft."
+  },
+  {
+    "q": "Er Suwaya en genopfindelse af historiske sæsonbestemte timer?",
+    "a": "Det er en smart inspiration fra fortidens genialitet, glimrende smeltet sammen med de nyeste moderne produktivitetsteknologier, og tilbyder dig et moderne, smart digitalt værktøj, der fuldstændig overgår historiske begrænsninger."
+  },
+  {
+    "q": "Er Suwaya en videnskabelig opfindelse eller et softwareprodukt?",
+    "a": "Det er et innovativt softwareprodukt, der oversætter videnskabeligt dokumenterede naturlige rytmekoncepter (Kronobiologi) til et yderst praktisk dagligt værktøj, der hjælper dig med at leve et langt mere produktivt og harmonisk liv."
+  },
+  {
+    "q": "Kan det studeres akademisk?",
+    "a": "Det fuldstændig unikke brugergrænsefladedesign og menneskelige interaktion med tid i Suwaya gør det til rigt, spændende studiemateriale inden for teknologi og menneskelig adfærdsstyring."
+  },
+  {
+    "q": "Beviser GitHub-dokumenterne fordelene ved Suwaya?",
+    "a": "Dokumenterne forklarer klart den enorme kraft af den tekniske side. Hvad angår fordele og produktivitet, er de afhængige af videnskaben om 'Kronobiologi' og din unikke personlige oplevelse af at harmonisere smukt med din dag."
+  },
+  {
+    "q": "Hvor finder jeg den præcise tekniske reference?",
+    "a": "For ingeniører og detaljeelskere indeholder `Suwaya-Time.md` filen vedhæftet til repository'et alle de fantastiske ligninger, fordelinger og den strålende ingeniørkunst i motoren."
+  },
+  {
+    "q": "Hvor finder jeg projektstrukturen?",
+    "a": "Fuld gennemsigtighed er let tilgængelig via `README.md` og `ARCHITECTURE.md` filerne i vores åbne repository på GitHub."
+  },
+  {
+    "q": "Hvilke oplysninger er nyttige, når du rapporterer en timingfejl?",
+    "a": "Vi er glade for at betjene dig! Fortæl os venligst byen, datoen, den anvendte beregningsmetode og eventuelle forskydninger (offsets), du har foretaget, så vi kan justere motoren og levere en øjeblikkelig, perfekt løsning."
+  },
+  {
+    "q": "Hvilke oplysninger er nyttige, når du rapporterer en fejl i Suwayas?",
+    "a": "For at fremskynde vores premium support, bedes du dele Suwaya-nummeret, den civile tid og et screenshot af skiven, hvis det er muligt, og udviklingsteamet vil håndtere resten fejlfrit."
+  },
+  {
+    "q": "Hvordan opsummerer jeg Suwaya i én sætning?",
+    "a": "Suwaya er din tekniske premium ledsager, der forvandler din dag fra stive civile timer til et fleksibelt astronomisk lærred, der i massiv grad øger din produktivitet og forbinder dine vaner med universets naturlige rytme."
+  }
+]

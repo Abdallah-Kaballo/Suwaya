@@ -1,0 +1,618 @@
+[
+  {
+    "q": "Apakah Suwaya?",
+    "a": "Suwaya ialah aplikasi inovatif dan sistem organisasi harian yang menambah 'lapisan masa semula jadi' di atas masa awam standard. Berdasarkan lokasi geografi anda, kitaran matahari, dan waktu solat, aplikasi ini membahagikan hari anda (dari Subuh hingga Subuh keesokan harinya) kepada tujuh tempoh penting, dan mengagihkan 48 'Suwaya' yang fleksibel ke atasnya. Sistem ini menghubungkan tugas, rutin, dan sesi fokus anda dengan rentak semula jadi alam semesta."
+  },
+  {
+    "q": "Apakah masalah yang cuba diselesaikan oleh Suwaya?",
+    "a": "Masa awam (masa sosial) sangat baik untuk janji temu, tetapi ia mengabaikan 'masa dalaman' anda dan rentak semula jadi hari tersebut. Suwaya merapatkan jurang ini dengan memberitahu kedudukan sebenar anda dalam hari itu (contohnya, anda berada di pertengahan Asar, atau di Satu Pertiga Akhir malam). Ini membolehkan rutin anda harmoni dengan perubahan semula jadi tenaga dan cahaya sepanjang tahun."
+  },
+  {
+    "q": "Adakah Suwaya pengganti jam biasa?",
+    "a": "Tidak, sebaliknya ia adalah pelengkap yang sempurna. Masa awam mengatur jadual kerja dan pengangkutan, manakala 'Suwaya' mengatur tenaga peribadi, tabiat, dan perancangan mental anda. Anda boleh menggunakan kedua-dua sistem bersama-sama dengan lancar dalam aplikasi untuk mencapai keseimbangan antara komitmen luaran dan sifat kemanusiaan anda."
+  },
+  {
+    "q": "Adakah Suwaya hanya aplikasi waktu solat?",
+    "a": "Waktu solat adalah nadi kepada enjin masa kami, tetapi Suwaya jauh melangkaui itu. Ia menawarkan persekitaran bersepadu untuk pengurusan tugas, penjejakan rutin, sesi Pomodoro astronomi, pembahagian malam, dan dail masa interaktif yang mengubah hari anda menjadi karya seni visual."
+  },
+  {
+    "q": "Adakah Suwaya sekadar aplikasi tugas (to-do) dengan antara muka yang berbeza?",
+    "a": "Perbezaan asas terletak pada 'Hubungan Masa'. Dalam aplikasi biasa, tugas terikat pada angka yang kaku (cth., 4:00 PM). Dalam Suwaya, tugas terikat pada konteks astronomi (cth., Suwaya pertama selepas Asar), yang bermakna jadual anda akan disesuaikan secara automatik dengan perubahan musim dan pergerakan matahari."
+  },
+  {
+    "q": "Apakah yang dimaksudkan dengan masa kontekstual atau astronomi dalam Suwaya?",
+    "a": "Ia menerangkan masa berdasarkan peristiwa semula jadi yang dikira dan bukannya nombor yang kaku. Masa fizikal berlalu seperti biasa, tetapi Suwaya memaparkannya semula dengan cara yang harmoni dengan Rentak Sirkadian (jam biologi) anda, memberikan anda persepsi yang lebih mendalam tentang nilai dan aliran masa."
+  },
+  {
+    "q": "Adakah Suwaya mendakwa bahawa masa awam adalah salah?",
+    "a": "Sama sekali tidak. Masa awam ialah piawaian teknikal dan sosial yang sangat diperlukan dalam dunia moden. Suwaya hanya menawarkan dimensi tambahan yang memfokuskan kepada kualiti masa dan produktiviti peribadi, menghubungkan kita kembali dengan alam semula jadi tanpa mengasingkan kita daripada masyarakat."
+  },
+  {
+    "q": "Apakah itu Suwaya?",
+    "a": "Suwaya ialah unit masa yang fleksibel di dalam aplikasi, sentiasa mewakili 30 minit 'maya'. Kehebatannya terletak pada hakikat bahawa tempoh dunia sebenar akan mengembang dan mengecut dengan lancar untuk menampung tempoh astronomi di mana ia berada (seperti panjang tempoh Zohor pada musim panas berbanding musim sejuk)."
+  },
+  {
+    "q": "Adakah satu Suwaya bersamaan dengan 30 minit sebenar?",
+    "a": "Tidak selalu. Di sinilah letaknya fleksibiliti sistem; jika tempoh astronomi lebih panjang, Suwaya mengembang secara elegan untuk menyamai lebih daripada 30 minit sebenar, memberikan anda kelapangan dan ketenangan untuk menyelesaikan tugas. Jika tempoh tersebut lebih pendek, ia mengecut untuk mencerminkan peredaran masa yang pantas."
+  },
+  {
+    "q": "Mengapakah 30 minit maya untuk setiap Suwaya?",
+    "a": "Kerana 48 Suwaya × 30 minit = 1440 minit (yang mana tepat 24 jam maya). Reka bentuk ini mengekalkan struktur harian yang biasa bagi minda manusia, sambil membenarkan masa untuk disesuaikan secara bijak di latar belakang."
+  },
+  {
+    "q": "Mengapakah hari mengandungi 48 Suwaya?",
+    "a": "Nombor 48 ialah reka bentuk geometri pintar yang membolehkan hari maya dibahagikan kepada unit setengah jam yang tepat dan praktikal. Ini memberikan anda sistem yang sangat tepat untuk menjadualkan hari anda tanpa sebarang kerumitan."
+  },
+  {
+    "q": "Adakah nombor 48 mempunyai asal usul agama atau astronomi?",
+    "a": "Nombor itu sendiri ialah pilihan kejuruteraan khusus untuk Suwaya bagi mengatur antara muka dengan cantik, manakala nilai agama dan astronomi diperoleh daripada sempadan tempoh teras yang dikira dengan tepat (seperti waktu solat dan sepertiga malam)."
+  },
+  {
+    "q": "Apakah maksud pengagihan 7776777?",
+    "a": "Ia adalah pengagihan geometri Suwaya yang seimbang secara indah di seluruh tujuh tempoh hari anda: Subuh (7), Dhuha (7), Zohor (7), Asar (6), Maghrib (7), Sepertiga Tengah (7), dan Sepertiga Akhir (7). Kesemuanya membentuk hari 48-Suwaya anda."
+  },
+  {
+    "q": "Adakah 7776777 satu pembahagian agama atau astronomi?",
+    "a": "Sempadan tempoh diperoleh daripada masa astronomi dan agama yang tepat, tetapi memperuntukkan bilangan Suwaya khusus ini untuk setiap tempoh ialah reka bentuk matematik yang bertujuan untuk mewujudkan keseimbangan yang praktikal dan selesa pada hari anda."
+  },
+  {
+    "q": "Mengapakah tempoh Asar mendapat 6 Suwaya?",
+    "a": "Untuk mencapai jumlah akhir (48) dengan pengagihan simetri yang mengekalkan keseimbangan visual dan praktikal hari tersebut. Ini sama sekali tidak mengurangkan kepentingan astronomi atau agama bagi tempoh Asr; ia hanyalah pemberat relatif dalam persamaan matematik."
+  },
+  {
+    "q": "Bolehkah pengagihan Suwaya diubah?",
+    "a": "Enjin teknikal dibina dengan fleksibiliti yang sangat tinggi, tetapi aplikasi pada masa ini menggunakan pengagihan seragam [7,7,7,6,7,7,7] sebagai piawaian rasmi bagi memastikan kestabilan pengalaman dan ketepatan masa untuk semua pengguna."
+  },
+  {
+    "q": "Bagaimanakah hari bermula dalam Suwaya?",
+    "a": "Dalam Suwaya, hari anda bermula secara semula jadi dan memberi inspirasi dengan azan Subuh, dan berakhir dengan azan Subuh pada keesokan harinya, selaras dengan permulaan sebenar aktiviti manusia dan kitaran cahaya."
+  },
+  {
+    "q": "Apakah maksud «siang» dan «malam» pada skrin utama?",
+    "a": "Pada skrin utama, «siang» merujuk kepada tempoh dari Subuh hingga Maghrib pada hari kalendar yang sama, manakala «malam» merujuk kepada tempoh dari Maghrib hingga Subuh yang seterusnya. Oleh itu, malam Isnin bermula pada Maghrib hari Ahad dan berakhir pada Subuh hari Isnin."
+  },
+  {
+    "q": "Mengapakah hari bermula pada waktu Subuh dan bukan pada waktu tengah malam?",
+    "a": "Kajian kronobiologi menunjukkan bahawa kitaran bangun/cahaya ialah pencetus utama bagi jam biologi. Suwaya mengaitkan permulaan anda dengan peristiwa semula jadi ini dan bukannya sempadan awam yang kaku (tengah malam) untuk memastikan anda selaras dengan alam semula jadi."
+  },
+  {
+    "q": "Bolehkah permulaan hari ditetapkan pada waktu Maghrib?",
+    "a": "Enjin masa teras pada masa ini direka bentuk untuk menjejaki kitaran (Subuh ke Subuh) sebagai rangka kerja organisasi yang komprehensif untuk produktiviti. Kami mungkin meneroka mod paparan tambahan pada masa hadapan, tetapi teras semasa beroperasi pada model yang sangat berkesan ini."
+  },
+  {
+    "q": "Apakah tujuh tempoh tersebut?",
+    "a": "Hari anda dibahagikan dengan lancar kepada: 1) Subuh, 2) Dhuha, 3) Zohor, 4) Asar, 5) Maghrib, 6) Sepertiga Tengah malam, dan 7) Sepertiga Akhir malam. Ini meliputi setiap fasa tenaga dan aktiviti anda."
+  },
+  {
+    "q": "Adakah semua sempadan tujuh tempoh ini merupakan peristiwa astronomi bebas?",
+    "a": "Kebanyakannya (Subuh, Zohor, Asar, Maghrib), manakala sempadan Subuh/Dhuha ialah titik tengah yang dikira secara matematik, dan tempoh malam diperolehi daripada pembahagian tepat masa dari Maghrib hingga Subuh."
+  },
+  {
+    "q": "Adakah Matahari Terbit (Syuruq) satu sempadan bebas untuk mana-mana tujuh tempoh tersebut?",
+    "a": "Waktu matahari terbit dikira dan dipaparkan dengan tepat sebagai maklumat penting, tetapi kami memanjangkan tempoh 'Subuh' ke titik tengah ke arah Zohor untuk memastikan tempoh kerja pagi kekal berterusan tanpa gangguan."
+  },
+  {
+    "q": "Adakah Isyak satu sempadan bebas untuk mana-mana tujuh tempoh tersebut?",
+    "a": "Isyak dipaparkan dengan tepat dalam waktu ibadah supaya anda boleh menunaikannya tepat pada waktunya, tetapi tempoh malam teras untuk mengatur tugas dan rutin dibina berdasarkan pembahagian malam semula jadi (seperti sepertiga) untuk dipadankan dengan corak tidur dan ketenangan."
+  },
+  {
+    "q": "Mengapakah tempoh Dhuha dinamakan sedemikian jika ia tidak bermula pada waktu matahari terbit?",
+    "a": "Nama di sini digunakan sebagai penerangan organisasi untuk bahagian kedua pagi (dari titik tengah Subuh-Zohor hingga Zohor). Ia tidak dimaksudkan sebagai takrifan fiqh yang ketat untuk bermulanya solat Dhuha."
+  },
+  {
+    "q": "Bagaimanakah titik tengah antara Subuh dan Zohor dikira?",
+    "a": "Dengan persamaan yang tepat: Enjin mengira jumlah tempoh masa antara Subuh dan Zohor, mengambil separuh daripadanya, dan menambahkannya pada waktu Subuh untuk menentukan titik peralihan tenaga pagi."
+  },
+  {
+    "q": "Bagaimanakah Suwaya mengira waktu malam?",
+    "a": "Secara astronomi, malam dikira dari Maghrib hingga Subuh yang seterusnya. Aplikasi ini menyediakan julat ini untuk anda gunakan dengan tiga cara bertindih: separuh, tiga sepertiga, atau enam seperenam."
+  },
+  {
+    "q": "Adakah separuh, sepertiga, dan seperenam itu 11 tempoh berurutan?",
+    "a": "Tidak, ia adalah tiga lensa berbeza untuk melihat malam yang sama. Anda boleh memilih untuk menggunakan sepertiga (untuk rutin dan Qiyam) atau seperenam (untuk pembahagian mikro yang tepat), untuk disesuaikan dengan cara anda menguruskan malam anda."
+  },
+  {
+    "q": "Bagaimanakah Sepertiga Akhir dikira?",
+    "a": "Jumlah tempoh malam (dari Maghrib hingga Subuh) dibahagikan kepada tiga bahagian yang sama; Sepertiga Akhir—waktu ketenangan dan kedamaian—bermula tepat selepas dua pertiga malam telah berlalu."
+  },
+  {
+    "q": "Adakah Sepertiga Akhir bergantung pada tengah malam awam?",
+    "a": "Sama sekali tidak. Ia bergantung sepenuhnya pada panjang semula jadi malam tersebut, dan oleh itu masa awamnya beralih secara harmoni mengikut musim, memastikan anda sentiasa berhubung dengan rentak alam semula jadi."
+  },
+  {
+    "q": "Bagaimanakah tempoh sebenar Suwaya dikira?",
+    "a": "Proses yang mudah dan pintar: (Tempoh sebenar tempoh astronomi) dibahagikan dengan (Bilangan Suwaya yang diperuntukkan kepadanya). Hasilnya ialah Suwaya yang bernafas mengikut hari."
+  },
+  {
+    "q": "Adakah semua Suwaya dalam sehari benar-benar sama?",
+    "a": "Ia lebih kurang sama dalam tempoh yang sama untuk memberikan kestabilan dalam fokus, dan ia melentur secara lancar apabila anda beralih dari satu tempoh ke tempoh yang lain bagi menampung perubahan semula jadi dalam pergerakan matahari."
+  },
+  {
+    "q": "Adakah Suwaya siang hari sentiasa lebih panjang pada musim panas?",
+    "a": "Tempoh sebenar berinteraksi secara dinamik dengan panjang tempoh tertentu, lokasi geografi dan tarikh. Kelenturan yang luar biasa inilah yang membezakan Suwaya daripada jam yang kaku."
+  },
+  {
+    "q": "Apakah maksud pendarab kelajuan masa?",
+    "a": "Ia ialah penunjuk kognitif menakjubkan yang menunjukkan cara masa 'maya' berlalu berbanding dengan masa nyata. Jika pendarab kurang daripada 1, masa berlalu dengan perlahan dan anda mempunyai banyak masa untuk dicapai. Jika ia lebih daripada 1, masa berlalu dengan cepat."
+  },
+  {
+    "q": "Adakah pendarab kelajuan bermakna masa fizikal berubah?",
+    "a": "Sudah tentu tidak! Masa fizikal adalah malar. Pendarab ialah alat visualisasi untuk kadar kemajuan masa maya, yang membantu anda merasakan pengembangan atau pengecutan tempoh untuk menguruskan usaha anda."
+  },
+  {
+    "q": "Apakah maksud paparan seperti 07:12?",
+    "a": "Dalam dunia Suwaya, ini bukan 7:12 pagi! 07 mewakili indeks Suwaya global (dari 0 hingga 47), dan 12 mewakili minit maya di dalamnya. Ia merupakan cara baharu yang komprehensif untuk membaca kemajuan hari anda."
+  },
+  {
+    "q": "Bagaimanakah saya boleh membezakan masa awam daripada masa Suwaya dalam antara muka?",
+    "a": "Untuk perbezaan visual yang jelas, masa awam (sosial) dipaparkan dalam format 24 jam standard dengan warna putih, bertitik bertindih antara jam dan minit, seperti 00:00. Masa Suwaya dipaparkan dengan warna kuning dalam sistem 48-Suwaya, dengan garis menegak pendek «│» memisahkan nombor Suwaya daripada minit maya, seperti 07│12."
+  },
+  {
+    "q": "Adakah penomboran Suwaya bermula dari 0 atau 1?",
+    "a": "Untuk kemudahan anda, penomboran Suwaya dalam satu tempoh (cth., Suwaya pertama Asar) bermula dari 1. Indeks teknikal global yang digunakan pada dail bermula dari 0 hingga 47."
+  },
+  {
+    "q": "Adakah hari maya bersamaan dengan 24 jam?",
+    "a": "Ya, secara seni bina: 48 Suwaya × 30 minit = 24 jam maya, yang memastikan sistem kekal mesra dan mudah difahami oleh minda anda."
+  },
+  {
+    "q": "Adakah Suwaya menukar panjang hari sebenar?",
+    "a": "Kami tidak dapat menukar panjang hari, tetapi kami mengubah cara anda 'melihat dan menggunakannya'! Suwaya mewakili semula masa untuk memberikan anda rasa kawalan dan keberkatan (Barakah) yang lebih kuat."
+  },
+  {
+    "q": "Bagaimanakah aplikasi mengira waktu solat?",
+    "a": "Enjin kami menggunakan perpustakaan astronomi (adhan) yang sangat dipercayai yang berinteraksi dengan koordinat geografi, tarikh, kaedah pengiraan yang diluluskan, dan Mazhab anda, memastikan ketepatan yang tiada tandingan."
+  },
+  {
+    "q": "Patutkah pemasaan sepadan dengan semua aplikasi lain?",
+    "a": "Perbezaan kecil (beberapa minit) adalah perkara biasa kerana kaedah pengiraan atau tetapan sudut yang berbeza. Kami telah menyediakan alat pelarasan manual untuk memadankan aplikasi dengan masjid tempatan anda dengan mudah."
+  },
+  {
+    "q": "Apakah kaedah pengiraan yang sebenarnya disokong pada masa ini?",
+    "a": "Enjin ini menyokong kaedah utama dengan tepat (Umm al-Qura, Lembaga Mesir, Karachi, Tersuai). Beberapa kaedah lain kini dihalakan dengan selamat kepada 'Liga Muslim Dunia' secara lalai sehingga pemetaan tepatnya selesai."
+  },
+  {
+    "q": "Mengapakah nota ini penting?",
+    "a": "Kerana kami komited kepada ketelusan penuh. Kami memastikan bahawa nama yang dipaparkan dalam antara muka menggambarkan dengan tepat algoritma astronomi yang mendasarinya, supaya anda boleh berasa tenang sepenuhnya tentang ibadah anda."
+  },
+  {
+    "q": "Apakah maksud Mazhab dalam tetapan Asar?",
+    "a": "Ia ialah pilihan fiqh yang memberikan fleksibiliti untuk menentukan masa permulaan solat Asar. Aplikasi ini menyokong kaedah Syafi'i (Majoriti) dan Hanafi dengan baik agar sesuai dengan wilayah anda."
+  },
+  {
+    "q": "Apakah itu peraturan latitud tinggi?",
+    "a": "Ia ialah penyelesaian astronomi lanjutan (seperti Pertengahan Malam, Sepertujuh Malam, Sudut Senja) yang memastikan pengiraan Subuh dan Isyak yang tepat di kawasan berhampiran kutub di mana senja tidak hilang dengan jelas."
+  },
+  {
+    "q": "Adakah Suwaya sesuai untuk kawasan kutub?",
+    "a": "Ya, enjin ini dilengkapi dengan peraturan latitud tinggi, tetapi disebabkan oleh kerumitan fiqh kawasan ekstrem ini, kami amat mengesyorkan untuk mengesahkan keputusan dengan pusat Islam tempatan di sana."
+  },
+  {
+    "q": "Bolehkah sudut Subuh dan Isyak dilaraskan?",
+    "a": "Sudah tentu. Dengan memilih kaedah pengiraan 'Tersuai' (Custom), anda mempunyai keupayaan untuk memasukkan sudut astronomi tepat yang sesuai dengan standard khusus wilayah anda."
+  },
+  {
+    "q": "Bolehkah waktu solat dilaraskan secara manual?",
+    "a": "Ya, kami menyediakan ciri ofset manual yang lancar (±30 minit) untuk solat fardu lima waktu, membolehkan anda menentukur waktu dengan ketepatan pembedahan untuk memadankan kalendar bandar anda."
+  },
+  {
+    "q": "Bolehkah waktu matahari terbit dilaraskan secara manual?",
+    "a": "Tidak, matahari terbit ialah peristiwa astronomi semata-mata yang dikira dan dipaparkan sebagai rujukan semula jadi. Ia dikecualikan daripada pelarasan manual untuk mengekalkan struktur temporal hari yang tepat."
+  },
+  {
+    "q": "Jika saya melaraskan Maghrib, adakah pembahagian malam akan berubah?",
+    "a": "Ya, dengan sangat bijak! Oleh kerana malam bermula pada waktu Maghrib dalam sistem kami, sebarang pelarasan akan menentukur semula panjang dan sempadan separuh, sepertiga, dan seperenam secara automatik dan tepat."
+  },
+  {
+    "q": "Jika saya melaraskan satu solat, adakah solat yang lain akan beralih?",
+    "a": "Tidak, pelarasan manual hanya mempengaruhi solat yang dipilih, memberikan anda fleksibiliti penuh untuk melaraskan setiap solat secara individu tanpa mengelirukan pengiraan yang lain."
+  },
+  {
+    "q": "Adakah Suwaya satu unit ibadah agama?",
+    "a": "Tidak, ia adalah satu inovasi teknikal dan organisasi pintar yang bertujuan untuk membantu anda melaburkan masa anda dengan lebih baik, dan bukanlah satu ketetapan fiqh atau unit ibadah yang ditetapkan."
+  },
+  {
+    "q": "Adakah tujuh tempoh tersebut pembahagian hari secara agama?",
+    "a": "Ia ialah model reka bentuk yang diilhamkan oleh waktu-waktu yang diberkati dan jadual ibadah untuk menyusun kehidupan dengan lebih baik, tetapi ia bukanlah pembahagian fiqh yang mengikat."
+  },
+  {
+    "q": "Adakah Suwaya menyediakan ketetapan agama (Fatwa)?",
+    "a": "Suwaya ialah alat organisasi dan pengiraan yang canggih, bukannya pihak berkuasa fatwa. Untuk ketetapan fiqh yang tepat, sila rujuk pakar yang bertauliah."
+  },
+  {
+    "q": "Bolehkah orang bukan Islam menggunakannya?",
+    "a": "Sudah tentu! Konsep mengharmonikan diri dengan siang dan kitaran semula jadi (Penyelarasan Sirkadian) ialah konsep universal yang amat disyorkan oleh pakar biologi untuk semua orang bagi meningkatkan produktiviti dan kesihatan."
+  },
+  {
+    "q": "Mengapakah aplikasi ini memerlukan lokasi?",
+    "a": "Keajaiban terletak pada penyesuaian! Waktu solat dan tempoh siang dan malam secara langsung dan unik dipengaruhi oleh koordinat geografi anda di Bumi."
+  },
+  {
+    "q": "Adakah GPS perlu sentiasa dihidupkan?",
+    "a": "Tidak perlu risau tentang bateri! Aplikasi mendapatkan lokasi anda sekali dan kemudian melakukan semua pengiraan yang kompleks secara tempatan (Luar talian). Anda hanya perlu mengemas kini GPS apabila melancong ke bandar lain."
+  },
+  {
+    "q": "Apakah yang berlaku jika saya melancong?",
+    "a": "Hanya satu ketikan pada kemas kini lokasi (GPS) dan aplikasi akan membina semula hari anda dengan sempurna, melaraskan zon waktu, dan menentukur masa tugas yang dipautkan dengan Suwaya agar sesuai dengan destinasi baharu anda."
+  },
+  {
+    "q": "Bagaimanakah aplikasi mengendalikan zon waktu?",
+    "a": "Lapisan pemprosesan termaju menyepadukan zon waktu secara mendalam dengan koordinat anda bagi memastikan ketepatan mutlak semasa menukar antara Waktu Universal (UTC) dan waktu tempatan."
+  },
+  {
+    "q": "Bagaimanakah ia mengendalikan Waktu Musim Panas (DST)?",
+    "a": "Enjin ini dilengkapi sepenuhnya dengan ujian untuk mengendalikan peralihan jam (ke hadapan dan ke belakang), memastikan kesinambungan tempoh dan sama sekali tiada jurang dalam hari anda."
+  },
+  {
+    "q": "Adakah tahun lompat (Leap year) menjadi masalah?",
+    "a": "Tidak, enjin ini telah diuji dengan teliti untuk mengendalikan 29 Februari secara lancar dan beralih ke subuh 1 Mac dengan lancar."
+  },
+  {
+    "q": "Apakah yang berlaku sebelum waktu subuh tarikh awam semasa?",
+    "a": "Dengan kepintaran tertinggi, aplikasi menyedari bahawa kitaran 'Subuh ke Subuh' belum selesai, dan memaparkan data hari Suwaya sebelumnya dengan kemas sehingga azan Subuh tiba."
+  },
+  {
+    "q": "Adakah terdapat jurang antara tempoh?",
+    "a": "Reka bentuk geometri teliti kami menjamin bahawa penghujung setiap tempoh adalah titik permulaan tepat yang seterusnya, membentuk gelung berterusan yang sempurna dari Subuh sehingga Subuh pada keesokan harinya."
+  },
+  {
+    "q": "Apakah yang berlaku jika enjin gagal untuk mengira?",
+    "a": "Sistem Sandaran (Fallback) yang teguh dalam Suwaya menghalang kerosakan dan memaparkan keadaan sementara yang selamat, memastikan antara muka anda kekal berfungsi dengan cantik sehingga tetapan atau koordinat diperbetulkan."
+  },
+  {
+    "q": "Apakah perbezaan antara tugas awam (Civil Task) dan tugas yang dipautkan kepada Suwaya?",
+    "a": "Tugas awam dipaku pada jam tertentu (seperti mesyuarat). Tugas yang dipautkan kepada Suwaya adalah hidup, mengalir dengan rentak hari itu, dan masa awamnya berubah secara automatik untuk kekal dalam konteks semula jadinya (cth., ketenangan selepas Asar)."
+  },
+  {
+    "q": "Apakah kebaikan menghubungkan tugas kepada Asar, sebagai contoh?",
+    "a": "Ia menjamin kestabilan mental! Jika aktiviti anda memerlukan ketenangan fasa pasca-Asar, aplikasi akan sentiasa memberi amaran kepada anda pada masa yang sesuai ini, tanpa mengira bagaimana azan Asar berubah sepanjang tahun."
+  },
+  {
+    "q": "Adakah setiap tugas mesti berunsur astronomi?",
+    "a": "Tidak. Janji temu rasmi, penerbangan, dan kerja menggunakan masa awam. Suwaya memberi anda fleksibiliti sepenuhnya untuk menggabungkan janji temu awam yang ketat secara lancar dengan tabiat peribadi anda yang fleksibel."
+  },
+  {
+    "q": "Bolehkah masa awam dan Suwaya digabungkan?",
+    "a": "Ya, dan ini adalah tingkah laku produktiviti moden yang unggul! Gunakan masa awam untuk komitmen luar, dan Suwaya untuk merancang tenaga, matlamat peribadi, dan tabiat anda."
+  },
+  {
+    "q": "Apakah itu rutin (Routines)?",
+    "a": "Rutin ialah blok masa yang dipanjangkan untuk kerja mendalam atau rehat (cth., dari Asar ke Maghrib), dilukis dengan elegan sebagai lengkok yang cantik pada dail, tidak seperti tugas yang mewakili titik pencapaian seketika."
+  },
+  {
+    "q": "Apakah dail astronomi (Astro Dial)?",
+    "a": "Ia adalah karya agung visual kami! Papan bulat interaktif yang memaparkan struktur, tempoh, tugas, dan kemajuan hari anda, memberikan anda persepsi ruang dan langsung yang menakjubkan tentang kedudukan anda dalam hari anda."
+  },
+  {
+    "q": "Adakah dail itu merupakan astrolab (Astrolabe) sebenar?",
+    "a": "Ia merupakan antara muka digital moden yang pintar yang secara estetiknya diilhamkan oleh astrolab bersejarah, direka khusus untuk menyusun masa harian dengan cantik dan bukannya untuk cerapan astronomi lapangan."
+  },
+  {
+    "q": "Apakah Pemasa Pomodoro Astronomi?",
+    "a": "Ia ialah peningkatan yang menakjubkan bagi teknik Pomodoro yang terkenal! Daripada memaksa 25 minit yang kaku kepada anda, pemasa memautkan kemajuannya kepada masa 'Suwaya' maya, bernafas dan mengalir dalam harmoni yang sempurna dengan rentak semula jadi hari anda."
+  },
+  {
+    "q": "Adakah 25 minit Pomodoro astronomi bersamaan dengan 25 minit sebenar?",
+    "a": "Bukan semestinya. Itulah kuasa supernya; jika masa Suwaya semasa berlalu dengan perlahan, sesi fokus anda memanjang dengan lancar untuk mendapat manfaat daripada masa yang banyak, mewujudkan pengalaman fokus unik yang sepadan dengan daya hidup anda."
+  },
+  {
+    "q": "Apakah corak fokus yang tersedia?",
+    "a": "Kami telah menyediakan corak yang sesuai dengan pelbagai tahap tenaga anda: Keseimbangan Emas (25/5), Fokus Mutlak (30/0), dan Corak Santai (20/10). Pilih perkara yang memberi inspirasi kepada anda hari ini."
+  },
+  {
+    "q": "Bolehkah aplikasi menghantar makluman?",
+    "a": "Sudah tentu. Suwaya mempunyai sistem pemberitahuan berkuasa yang memastikan anda terhubung secara mendalam dengan waktu solat, tugas, dan rutin berdasarkan pilihan tepat anda."
+  },
+  {
+    "q": "Apakah perbezaan antara Pemberitahuan (Notification) dan Penggera (Alarm)?",
+    "a": "Pemberitahuan ialah mesej peringatan yang lembut. 'Penggera' direka untuk menarik perhatian anda dengan kuat, menghidupkan skrin dan berdering secara berterusan, menjadikannya pilihan yang tepat untuk bangun tidur atau untuk solat."
+  },
+  {
+    "q": "Mengapakah aplikasi memerlukan kebenaran pemberitahuan?",
+    "a": "Kerana kami mahu berada di sana untuk anda apabila anda memerlukan kami! Tanpanya, aplikasi akan berfungsi secara senyap di latar belakang dan anda tidak akan menerima peringatan penting yang telah anda jadualkan untuk diri sendiri."
+  },
+  {
+    "q": "Mengapakah ia memerlukan kebenaran 'Penggera Tepat' (Exact Alarms) di Android?",
+    "a": "Sistem Android moden menyekat penjadualan masa untuk menjimatkan bateri. Pemberian kebenaran ini adalah sangat penting bagi memastikan azan dan penggera tugas anda dicetuskan pada saat yang tepat tanpa sebarang kelewatan yang mengecewakan."
+  },
+  {
+    "q": "Adakah penggera dijamin tepat pada saatnya?",
+    "a": "Kami telah mereka bentuk sistem dengan tahap kebolehpercayaan tertinggi, tetapi ada kalanya dasar pengurusan bateri yang ketat daripada pengeluar telefon mencampur tangan untuk menangguhkannya. Kami amat mengesyorkan agar aplikasi dikecualikan daripada pengoptimuman bateri."
+  },
+  {
+    "q": "Mengapa makluman boleh ditangguhkan?",
+    "a": "Sebab utama ialah sekatan sistem (Pengoptimuman Bateri) yang menghalang aplikasi daripada berjalan di latar belakang. Melaraskan tetapan tunggal ini dalam telefon anda dapat menyelesaikan masalah dengan segera."
+  },
+  {
+    "q": "Adakah Suwaya berfungsi di luar talian (Offline)?",
+    "a": "Dengan bangganya, ya! Suwaya dibina berdasarkan prinsip 'Utamakan Tempatan' (Local-first). Pengiraan solat, pengurusan tugas, tetapan, dan pangkalan data bandar beroperasi dengan hebat dan sepantas kilat secara tempatan tanpa memerlukan sambungan awan."
+  },
+  {
+    "q": "Adakah Soalan Lazim (FAQ) berfungsi di luar talian?",
+    "a": "Terima kasih kepada sistem cache pintar kami, memuatkan soalan sekali sahaja menyediakannya secara kekal kepada anda, malah di luar talian pada masa hadapan."
+  },
+  {
+    "q": "Mengapakah halaman Soalan Lazim dipanggil hibrid?",
+    "a": "Kerana ia secara cemerlang menggabungkan yang terbaik dari kedua-dua dunia: kemas kini dinamik serta merta dari internet (melalui GitHub), dan ketersediaan serta kelajuan tempatan yang kekal (melalui cache tempatan)."
+  },
+  {
+    "q": "Bolehkah Soalan Lazim dipertingkatkan untuk penggunaan luar talian?",
+    "a": "Kami sentiasa berusaha ke arah kesempurnaan. Rancangan masa hadapan kami termasuk membenamkan salinan asas di dalam aplikasi untuk kes di mana tidak ada internet sama sekali pada pemasangan pertama."
+  },
+  {
+    "q": "Adakah Suwaya memerlukan akaun pengguna?",
+    "a": "Tidak. Keyakinan kuat kami bahawa pengurusan masa harus cepat dan langsung telah membawa kami untuk menghapuskan kerumitan log masuk dan pengesahan wajib sepenuhnya."
+  },
+  {
+    "q": "Di manakah data disimpan?",
+    "a": "Kami menggunakan teknologi pangkalan data ultra pantas (Isar), memastikan data, tugas, dan rutin anda disimpan dengan selamat dan diambil secara tempatan dalam sekelip mata."
+  },
+  {
+    "q": "Adakah data saya dimuat naik ke pelayan Suwaya?",
+    "a": "Sama sekali tidak. Privasi anda adalah suci bagi kami. Aplikasi tidak mempunyai pelayan awan untuk mengumpul atau menyegerakkan tugas dan tabiat harian anda."
+  },
+  {
+    "q": "Adakah data tempatan disulitkan?",
+    "a": "Data disimpan dengan selamat di dalam Kotak Pasir (Sandbox) yang dilindungi yang ditetapkan untuk aplikasi oleh sistem pengendalian peranti anda. Perlindungan terbaik untuk data anda ialah menggunakan kata laluan yang kuat dan melindungi peranti itu sendiri."
+  },
+  {
+    "q": "Adakah terdapat sebarang analisis penggunaan atau iklan?",
+    "a": "Tidak. Kami mereka bentuk Suwaya sebagai persekitaran yang tulen dan tenang yang memfokuskan secara eksklusif pada produktiviti anda, jauh daripada gangguan dan penjejakan rangkaian iklan."
+  },
+  {
+    "q": "Di manakah saya boleh mencari Dasar Privasi?",
+    "a": "Ketelusan ialah prinsip kami. Anda boleh membaca dasar privasi yang terperinci dengan jelas dan mudah dari dalam aplikasi melalui menu sisi."
+  },
+  {
+    "q": "Adakah memadam aplikasi akan memadamkan data saya?",
+    "a": "Ya, kerana aplikasi dengan selamat menyimpan data secara tempatan untuk menghormati privasi anda, pemadaman aplikasi meminta sistem pengendalian membersihkan peranti daripada data ini. Sila berhati-hati."
+  },
+  {
+    "q": "Adakah terdapat penyegerakan (Sync) antara peranti?",
+    "a": "Reka bentuk semasa kami sangat tertumpu pada privasi dan operasi bebas (Utamakan Tempatan), jadi penyegerakan awan tidak tersedia dalam versi ini."
+  },
+  {
+    "q": "Adakah terdapat ciri sandaran atau eksport data?",
+    "a": "Ini adalah ciri penting dalam pelan masa hadapan kami, yang membolehkan anda menyimpan salinan selamat bagi pencapaian anda yang indah sekiranya anda menukar telefon."
+  },
+  {
+    "q": "Berapakah bilangan bahasa yang disokong oleh aplikasi?",
+    "a": "Suwaya ialah aplikasi global! Ia dengan bangganya menyokong 22 bahasa di seluruh dunia, membolehkan pengguna daripada pelbagai budaya mengalami keharmonian astronomi dalam bahasa ibunda mereka."
+  },
+  {
+    "q": "Adakah bahasa Arab dan RTL (Kanan ke Kiri) disokong?",
+    "a": "Sudah tentu, dengan standard kualiti tertinggi dan reka bentuk penyesuaian (RTL) yang memastikan pengalaman pengguna Arab yang tulen, asli, dan sangat selesa."
+  },
+  {
+    "q": "Adakah Soalan Lazim sebahagian daripada fail terjemahan UI?",
+    "a": "Tidak, ia diasingkan secara pintar ke dalam fail JSON dinamik, membolehkan kami mengemas kini dan mengembangkannya dengan pantas bagi memberi perkhidmatan yang lebih baik kepada anda tanpa menunggu kemas kini gedung aplikasi."
+  },
+  {
+    "q": "Mengapa memisahkan Soalan Lazim daripada terjemahan UI?",
+    "a": "Seni bina yang fleksibel ini membolehkan kami menambah soalan dan penjelasan baharu serta-merta sebagai tindak balas kepada pertanyaan anda, tanpa mengembangkan fail aplikasi teras tanpa perlu."
+  },
+  {
+    "q": "Adakah terdapat carian dan pengkategorian dalam Soalan Lazim?",
+    "a": "UI semasa memaparkan senarai interaktif ringkas (ExpansionTile) untuk pembacaan terus dan mudah. Kami sedang meneroka pilihan penapisan lanjutan untuk masa hadapan."
+  },
+  {
+    "q": "Mengapa kategori tidak ditambahkan di dalam JSON sekarang?",
+    "a": "Kami memilih keanggunan dan kesederhanaan pada awalnya untuk memudahkan pelancaran dan mempercepatkan penyampaian maklumat penting kepada pengguna. Pembangunan masih berjalan."
+  },
+  {
+    "q": "Bolehkah kategori ditambah kemudian?",
+    "a": "Ya, sudah tentu! Seni bina direka secara fleksibel untuk menampung kata kunci dan kategori bagi pencarian jawapan secepat kilat pada masa hadapan."
+  },
+  {
+    "q": "Adakah aplikasi ini sumber terbuka (Open-Source)?",
+    "a": "Ya, kami amat percaya pada kuasa komuniti dan pembangunan kolaboratif. Kod aplikasi diterbitkan secara telus di GitHub di bawah lesen GNU GPL v3.0."
+  },
+  {
+    "q": "Apakah packages/suwaya_time?",
+    "a": "Ia ialah jantung projek yang berdegup! Pakej teknikal bebas yang dibangunkan dengan teliti untuk mengendalikan pengiraan paling kompleks bagi waktu solat, tempoh, dan kelajuan masa maya dengan sempurna."
+  },
+  {
+    "q": "Mengapa nyahgandingkan enjin daripada Flutter?",
+    "a": "Ini mewakili Seni Bina Bersih (Clean Architecture). Pengasingan memastikan pengujian operasi matematik yang kompleks secara pantas dan mudah tanpa sebarang gangguan UI."
+  },
+  {
+    "q": "Bolehkah enjin digunakan semula pada masa hadapan?",
+    "a": "Ya! Oleh kerana ia ditulis dalam (Pure Dart), ia boleh dimanfaatkan dengan mudah kemudian untuk membangunkan jam tangan pintar, aplikasi web, atau API teguh."
+  },
+  {
+    "q": "Bagaimanakah projek memastikan ketepatan tempoh?",
+    "a": "Melalui lapisan Ujian Unit (Unit Testing) yang ketat yang memastikan urutan yang sempurna, tiada pertindihan, dan dipadankan tepat dengan 48 Suwaya dengan ketepatan ekstrem dan tidak berbelah bahagi."
+  },
+  {
+    "q": "Adakah ujian tersebut membuktikan ketepatan global untuk semua kes?",
+    "a": "Ujian secara cekap dan berkesan merangkumi peraturan dan kes utama. Kami menyokong ini dengan penambahbaikan berterusan untuk menangani cabaran lokasi geografi yang melampau."
+  },
+  {
+    "q": "Adakah terdapat ujian untuk Litud Tinggi (High Latitudes)?",
+    "a": "Ya, kami telah merekayasa ujian tersuai untuk kes iklim yang sukar seperti siang berterusan atau malam yang panjang bagi memastikan prestasi yang mantap dan stabil."
+  },
+  {
+    "q": "Adakah terdapat ujian untuk Waktu Jimat Siang (DST)?",
+    "a": "Sudah tentu. Enjin menguji keselamatan peralihan antara penukaran jam ke hadapan dan ke belakang, memastikan kesinambungan tempoh dan tiada jurang langsung pada hari anda."
+  },
+  {
+    "q": "Apakah perbezaan antara 07:12 dan masa maya kumulatif seperti 03:30?",
+    "a": "07:12 ialah nombor Suwaya dan minitnya (indeks organisasi yang bijak). 03:30 ialah paparan matematik kumulatif bagi masa maya sejak hari itu bermula. UI aplikasi memfokuskan kepada yang pertama kerana kesederhanaan dan keindahannya."
+  },
+  {
+    "q": "Bolehkah mana-mana masa awam ditukar kepada masa Suwaya?",
+    "a": "Ya, cemerlang. Enjin boleh dengan lancar mengambil sebarang masa pada hari awam anda dan menukarnya dengan sempurna ke tempat yang sesuai dalam Suwaya maya."
+  },
+  {
+    "q": "Bolehkah masa Suwaya ditukar kepada masa awam?",
+    "a": "Secara matematik ya, tetapi oleh kerana Suwaya berubah secara dinamik, penukaran memerlukan mengetahui bandar dan tarikh yang tepat untuk memberi anda masa awam yang tepat pada detik yang indah itu."
+  },
+  {
+    "q": "Mengapakah lokasi dan tarikh mesti dinyatakan untuk mentafsir masa Suwaya?",
+    "a": "Kerana Suwaya bernafas bersama Bumi! Suwaya ke-7 selepas Asar berbeza jam awamnya antara Makkah dan London, serta beralih sepenuhnya antara Musim Sejuk dan Musim Panas."
+  },
+  {
+    "q": "Bolehkah saya berkongsi masa Suwaya dengan seseorang di bandar lain?",
+    "a": "Anda boleh berkongsi 'konteks' masa (cth., 'mari kita bercakap selepas solat Asar'), yang membawa makna bersama yang indah. Namun bagi janji temu perniagaan antarabangsa, masa awam tetap menjadi pilihan yang paling sesuai."
+  },
+  {
+    "q": "Adakah Suwaya sesuai untuk syarikat dan sekolah?",
+    "a": "Idea yang memberi inspirasi dan sangat berskala! Versi semasa direka sebagai alat produktiviti (peribadi), manakala penggunaan institusi memerlukan ciri penyegerakan kumpulan yang sedang kami terokai dengan bersemangat untuk masa hadapan."
+  },
+  {
+    "q": "Bolehkah ia menggantikan sistem jadual kerja rasmi?",
+    "a": "Suwaya bertindak sebagai lapisan 'penasihat' yang cemerlang untuk menguruskan tenaga anda semasa bekerja, manakala jam awam dengan betul kekal sebagai pengawal selia undang-undang dan waktu kerja rasmi."
+  },
+  {
+    "q": "Bolehkah ia digunakan untuk mengawal tidur?",
+    "a": "Pasti, ya! Kajian biologi sangat menunjukkan kepentingan menyegerakkan tidur dengan kitaran cerah/gelap. Mengaitkan waktu tidur anda kepada tempoh malam Suwaya boleh meningkatkan kualiti rehat anda secara ketara dan semula jadi."
+  },
+  {
+    "q": "Bolehkah ia digunakan untuk belajar, bersukan, dan bekerja?",
+    "a": "Ia merupakan teman yang sangat sempurna untuk semua itu! Mengatur tempoh belajar dan bersukan mengikut tenaga anda dalam tempoh Pagi atau Asar memberi anda komitmen yang lebih mendalam serta fokus yang lebih tinggi."
+  },
+  {
+    "q": "Adakah terdapat bukti saintifik yang membuktikan bahawa 48 Suwaya meningkatkan produktiviti?",
+    "a": "Sains 'Kronobiologi' membuktikan secara muktamad bahawa keharmonian dengan kitaran cerah/gelap meningkatkan kepekaan dan metabolisme. Sistem 48-Suwaya ialah alat kejuruteraan pintar yang kami cipta untuk menggunakan sains ini dalam kehidupan harian anda secara mudah dan praktikal."
+  },
+  {
+    "q": "Adakah Suwaya sama dengan sains Rentak Sirkadian (Circadian Rhythm)?",
+    "a": "Suwaya ialah aplikasi praktikal yang indah untuk konsep sains ini! Walaupun biologi mengkaji tindak balas badan anda terhadap waktu siang, Suwaya menyediakan antara muka elegan yang memautkan rancangan anda dengan rentak semula jadi ini untuk meningkatkan kualiti hidup anda dengan mendalam."
+  },
+  {
+    "q": "Adakah Suwaya siang hari yang panjang bermakna saya perlu bekerja lebih?",
+    "a": "Sama sekali tidak. Panjang Suwaya pada waktu siang pada musim panas memberi anda perasaan kelimpahan masa untuk menyiapkan tugas dengan tenang tanpa tergesa-gesa, bukan jemputan untuk keletihan. Suwaya menyusun usaha, bukan meningkatkannya."
+  },
+  {
+    "q": "Adakah Suwaya yang panjang satu kuota kerja wajib?",
+    "a": "Tidak, ia merupakan ruang yang sangat bebas. Anda boleh memperuntukkan Suwaya yang panjang kepada kerja, rehat, sukan, atau ibadah mengikut kebijaksanaan berdasarkan matlamat hari itu."
+  },
+  {
+    "q": "Bagaimanakah cara saya memilih antara masa awam dan masa Suwaya?",
+    "a": "Secara mudah: komitmen luaran yang ketat (penerbangan, kerja) menggunakan masa awam. Matlamat peribadi yang mendalam (membaca, meditasi, sukan) dipautkan kepada Suwaya supaya anda boleh menikmati pencapaian yang fleksibel dan tanpa tekanan."
+  },
+  {
+    "q": "Adakah lebih baik untuk menukar seluruh kehidupan saya kepada Suwaya?",
+    "a": "Jangan cari kesempurnaan, cari keseimbangan. Gunakan Suwaya sebagai alat pemerkasaan untuk meningkatkan kualiti hidup dan tabiat peribadi anda, serta gunakan masa awam untuk komitmen masyarakat."
+  },
+  {
+    "q": "Bagaimana jika Suwaya mengelirukan saya?",
+    "a": "Kecantikan terletak pada kesederhanaan. Mulakan dengan menjejaki hari anda melalui 7 tempoh yang besar dan jelas (Subuh, Zohor..), dan setelah anda selesa terbiasa dengannya, selami ketepatan Suwaya bila-bila masa anda mahu."
+  },
+  {
+    "q": "Adakah saya perlu menghafal nombor Suwaya?",
+    "a": "Tidak akan pernah. Antara muka visual aplikasi yang menakjubkan melakukan semua pengiraan yang berat dan hanya menunjukkan kedudukan anda secara visual, benar-benar menyelamatkan anda daripada perlu menghafal sebarang nombor."
+  },
+  {
+    "q": "Mengapakah masa awam untuk Suwaya yang sama berubah?",
+    "a": "Kerana Bumi berputar dan Matahari bergerak! Suwaya memastikan anda kekal terhubung erat dengan kitaran kosmik yang diperbaharui ini, sementara nombornya tetap menjadi penunjuk yang sangat stabil bagi rutin anda di tengah perubahan ini."
+  },
+  {
+    "q": "Adakah perubahan ini satu kesilapan?",
+    "a": "Tidak, ia merupakan ciri terkuat bagi aplikasi ini! Perubahan semula jadi ini memastikan rutin anda (seperti berjalan selepas Asar) sentiasa kekal dalam suasana tepat yang sama sepanjang tahun."
+  },
+  {
+    "q": "Adakah tempoh Suwaya berubah dalam tempoh yang sama?",
+    "a": "Ia sangat stabil dan hampir malar untuk memberikan anda tumpuan yang tidak berbelah bahagi dan tidak terganggu dalam satu sesi, hanya menyesuaikan diri secara fleksibel dan lancar apabila anda beralih ke tempoh seterusnya bagi menampung perubahan semula jadi pergerakan matahari."
+  },
+  {
+    "q": "Adakah aplikasi mengira semula setiap saat?",
+    "a": "Reka bentuk kami amat menghormati sumber telefon anda. Aplikasi ini menggunakan pemasa pintar dan sangat menjimatkan yang memastikan kemas kini paparan yang sangat lancar tanpa menghabiskan bateri peranti anda."
+  },
+  {
+    "q": "Berapa kerap paparan masa maya dikemas kini?",
+    "a": "Terdapat nadi pengaturcaraan yang sangat ringan dan dioptimumkan (Ticker) untuk mengemas kini skrin, manakala pengiraan teras kompleks berlaku secara senyap dan cekap di latar belakang."
+  },
+  {
+    "q": "Adakah ia memerlukan internet untuk mengira waktu solat?",
+    "a": "Enjin pintar langsung tidak memerlukan internet. Ia mengira sepenuhnya di peranti tempatan berdasarkan koordinat dan tetapan yang anda telah konfigurasikan, sedia untuk berfungsi di mana sahaja anda berada."
+  },
+  {
+    "q": "Bagaimana jika saya tidak memberikan keizinan lokasi?",
+    "a": "Kami menghormati sepenuhnya pilihan anda. Anda boleh menggunakan ciri lokasi manual dengan mudah dan memilih bandar anda daripada senarai terbina dalam untuk menikmati fungsi penuh aplikasi tanpa sebarang kompromi."
+  },
+  {
+    "q": "Adakah menukar bandar akan mengubah tugas?",
+    "a": "Tugas berharga anda tidak akan pernah hilang. Masa mereka akan dinilai semula secara bijak dan lancar bagi dipadankan dengan waktu bandar baharu anda, meneruskan produktiviti anda tanpa gangguan semasa perjalanan."
+  },
+  {
+    "q": "Apakah maksud Utamakan Tempatan (Local-first)?",
+    "a": "Ini adalah komitmen teguh kami bahawa telefon anda ialah kubu anda. Aplikasi ini melakukan operasi terasnya (tugas, solat, rutin) sepenuhnya di dalam peranti anda bagi memastikan kelajuan secepat kilat, privasi keseluruhan, dan kebebasan penuh daripada pelayan."
+  },
+  {
+    "q": "Adakah Utamakan Tempatan bermaksud Hanya Luar Talian (Offline-only)?",
+    "a": "Tidak. Kami menggabungkan kepintaran tempatan dengan kuasa internet dengan cemerlang hanya apabila diperlukan bagi memberikan pengalaman yang diperbaharui (seperti mengambil kemas kini Soalan Lazim daripada GitHub) agar anda kekal termaklum."
+  },
+  {
+    "q": "Adakah terdapat log masuk (Login)?",
+    "a": "Kami telah mengalih keluar semua halangan. Kepercayaan kukuh kami bahawa pengurusan masa sepatutnya pantas dan langsung mendorong kami untuk menghapuskan kerumitan log masuk serta pengesahan wajib sepenuhnya."
+  },
+  {
+    "q": "Adakah terdapat langganan wajib atau iklan?",
+    "a": "Suwaya terutamanya ialah alat untuk fokus yang mendalam, justeru ia didatangkan dengan pengalaman tanpa iklan, bebas daripada rangkaian iklan yang mengganggu atau sistem langganan wajib yang menghalang penggunaan enjin teras anda."
+  },
+  {
+    "q": "Patutkah saya bergantung sepenuhnya pada Suwaya untuk waktu solat?",
+    "a": "Suwaya merupakan alat pengiraan yang sangat tepat. Walau bagaimanapun, kami sentiasa mengesyorkan sekiranya berlaku perbezaan kecil agar masa dipadankan dengan masjid tempatan anda demi ketenangan hati sepenuhnya."
+  },
+  {
+    "q": "Apakah yang patut saya lakukan jika waktu berbeza beberapa minit?",
+    "a": "Penyelesaian muktamad ada di tangan anda: semak tetapan Mazhab dan kaedah pengiraan, serta gunakan ciri 'Ofset Manual' untuk memadankan waktu masjid anda dengan sekali ketik."
+  },
+  {
+    "q": "Bagaimana jika perbezaannya besar?",
+    "a": "Hanya periksa tetapan zon waktu anda atau koordinat yang dimasukkan. Selalunya, pelarasan lokasi yang mudah akan mengembalikan keputusan yang tepat dan sempurna serta merta."
+  },
+  {
+    "q": "Adakah Matahari Terbit (Syuruq) akan digunakan sebagai sempadan pada masa hadapan?",
+    "a": "Kami sentiasa mengkaji penambahbaikan baharu yang menarik. Memasukkan waktu matahari terbit sebagai sempadan mungkin menjadi perkembangan masa depan yang hebat jika ia terbukti memberi nilai tambah yang kukuh bagi pengguna dan model 7776777."
+  },
+  {
+    "q": "Bolehkah model masa lain ditambah pada masa hadapan?",
+    "a": "Ya, terima kasih kepada seni bina aplikasi yang sangat teguh, kami amat terbuka untuk menyediakan model dan pengagihan tambahan yang bersesuaian dengan keutamaan pengguna yang pelbagai serta unik."
+  },
+  {
+    "q": "Apakah pemalar teras yang patut dikekalkan?",
+    "a": "Identiti kami terletak pada: tujuh tempoh semula jadi, kerangka Subuh-ke-Subuh komprehensif, kesinambungan yang lancar, dan kelonggaran minit maya bagi mewujudkan persekitaran perancangan yang benar-benar unik."
+  },
+  {
+    "q": "Bolehkah warna dan penampilan diubah tanpa mengubah sistem?",
+    "a": "Ya, semestinya! Kami menyediakan himpunan tema yang menarik (Klasik, Minimal, Geometrik) bagi memperibadikan pengalaman visual anda secara mendalam tanpa menyentuh kuasa enjin matematik."
+  },
+  {
+    "q": "Adakah Suwaya satu penciptaan semula waktu bermusim mengikut sejarah?",
+    "a": "Ia merupakan ilham pintar daripada kebijaksanaan masa lampau, digabungkan dengan hebat bersama teknologi produktiviti moden terkini, memberikan anda alat digital moden yang pintar melampaui batasan sejarah sepenuhnya."
+  },
+  {
+    "q": "Adakah Suwaya sebuah penemuan saintifik atau produk perisian?",
+    "a": "Ia ialah produk perisian inovatif yang menterjemahkan konsep kitaran semula jadi berdasarkan bukti saintifik (Kronobiologi) ke dalam alat harian yang sangat praktikal yang membantu anda menjalani kehidupan yang jauh lebih produktif dan harmoni."
+  },
+  {
+    "q": "Bolehkah ia dikaji secara akademik?",
+    "a": "Reka bentuk antara muka pengguna yang unik dan interaksi manusia dengan masa di Suwaya menjadikannya bahan kajian yang kaya dan mengujakan dalam bidang teknologi dan pengurusan tingkah laku manusia."
+  },
+  {
+    "q": "Adakah dokumen GitHub membuktikan kebaikan Suwaya?",
+    "a": "Dokumen ini menerangkan dengan jelas tentang kuasa besar di sisi teknikal. Berhubung kebaikan dan produktiviti pula, ia bergantung pada ilmu sains 'Kronobiologi' serta pengalaman peribadi anda yang unik mengenai pengharmonian hari yang indah."
+  },
+  {
+    "q": "Di manakah saya boleh mencari rujukan teknikal yang tepat?",
+    "a": "Bagi jurutera dan peminat butiran terperinci, fail `Suwaya-Time.md` yang dilampirkan pada repositori mengandungi semua persamaan hebat, pengagihan, dan kejuruteraan bernas enjin tersebut."
+  },
+  {
+    "q": "Di manakah saya boleh mencari struktur projek?",
+    "a": "Ketelusan penuh mudah diakses melalui fail `README.md` dan `ARCHITECTURE.md` di dalam repositori terbuka kami di GitHub."
+  },
+  {
+    "q": "Apakah maklumat yang berguna apabila melaporkan ralat waktu?",
+    "a": "Sedia berkhidmat untuk anda! Sila maklumkan kepada kami tentang bandar, tarikh, kaedah pengiraan yang digunakan, dan sebarang ofset yang anda buat agar kami dapat menyelaras enjin tersebut dan menyediakan penyelesaian sempurna serta-merta."
+  },
+  {
+    "q": "Apakah maklumat yang berguna apabila melaporkan ralat dalam Suwaya?",
+    "a": "Bagi mempercepatkan sokongan premium kami, sila kongsi nombor Suwaya, masa awam, serta tangkapan skrin dail jika berkenaan, dan pasukan pembangun akan menguruskan hal selebihnya tanpa cela."
+  },
+  {
+    "q": "Bagaimanakah saya dapat merumuskan Suwaya dalam satu ayat?",
+    "a": "Suwaya ialah rakan teknikal premium anda yang mengubah hari anda daripada waktu awam yang kaku kepada kanvas astronomi yang fleksibel, meningkatkan produktiviti anda secara luar biasa, dan memautkan tabiat anda dengan rentak semula jadi alam semesta."
+  }
+]

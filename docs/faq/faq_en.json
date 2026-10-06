@@ -68,6 +68,10 @@
     "a": "In Suwaya, your day begins naturally and inspiringly with the Fajr adhan, and ends with the Fajr adhan of the following day, perfectly aligning with the true start of human activity and the light cycle."
   },
   {
+    "q": "What do “day” and “night” mean on the home screen?",
+    "a": "On the home screen, “day” refers to the period from Fajr to Maghrib on that same calendar day, while “night” refers to the period from Maghrib to the following Fajr. Therefore, Monday night begins at Maghrib on Sunday and ends at Fajr on Monday, while Monday day begins at Fajr on Monday and ends at Maghrib on Monday."
+  },
+  {
     "q": "Why does the day start at Fajr and not at midnight?",
     "a": "Chronobiology studies indicate that the wake/light cycle is the primary trigger for the biological clock. Suwaya links your start to this natural event rather than a rigid civil boundary (midnight) to keep you perfectly aligned with nature."
   },
@@ -138,6 +142,10 @@
   {
     "q": "What does a display like 07:12 mean?",
     "a": "In the world of Suwaya, this is not 7:12 AM! 07 represents the global Suwaya index (from 0 to 47), and 12 represents the virtual minutes inside it. It's a comprehensive new way to read your day's progress."
+  },
+  {
+    "q": "How can I distinguish civil time from Suwaya time in the Suwaya interface?",
+    "a": "For clear visual distinction between the two systems, civil (social) time is displayed in the standard 24-hour format in white, with a colon separating hours and minutes, such as 00:00. Suwaya time is displayed in yellow within the 48-Suwaya system, with a short vertical line “│” separating the Suwaya number from the virtual minutes instead of a colon, such as 07│12. This visual distinction makes it immediately clear which time system you are reading."
   },
   {
     "q": "Does Suwaya numbering start from 0 or 1?",

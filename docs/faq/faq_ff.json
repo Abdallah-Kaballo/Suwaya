@@ -1,0 +1,618 @@
+[
+  {
+    "q": "Holko woni Suwaya?",
+    "a": "Suwaya ko app keso e njuɓɓudi ñalawma fof ɓeydoori 'wakkati tagoore' e dow wakkati montor. Tuugnaade e nokkuure ma, yarlitaare naange e wakkatiiji juulde, app oo ina fecca ñalawma ma (gila Fajiri haa Fajiri garoowo) e wakkatiiji 7 teeŋtuɗi, o rennda 48 'Suwaya' newiiɗi e nder majji. Ndee njuɓɓudi ina hawta golle ma, mboowka ma, e wakkatiiji hakkille ma e dille tagoore aduna."
+  },
+  {
+    "q": "Hol caɗeele ɗe Suwaya faandii safrude?",
+    "a": "Wakkati montor (wakkati renndo) ina moƴƴi e paandaale, kono omo yejjita 'wakkati nder ma' e dille tagoore ñalawma. Suwaya ina waɗta ɗum nde o haalnata darnde ma e nder ñalawma (yeru: aɗa e caka Asiri, walla e Tatabere Sakkitorde jemma). Ɗum ina addana mboowka ma yahdude e waylooji tagoore e doole e annoore e nder hitaande."
+  },
+  {
+    "q": "Mbele Suwaya foti lomtaade montor?",
+    "a": "Alaa, ko o gollodiiɗo ɓurɗo moƴƴude. Wakkati montor ina yuɓɓina gollal e yah-ngartaa, tawi 'Suwaya' ina yuɓɓina doole ma, mboowka ma e feere hakkille ma. Aɗa waawi huutoraade njuɓɓudiiji ɗii ɗiɗi fof e nder app oo ngam heɓde fotndaa hakkunde koye ma e tagoore ma."
+  },
+  {
+    "q": "Mbele Suwaya ko app wakkatiiji juulde tan?",
+    "a": "Wakkatiiji juulde ko ɓernde fiyoore e njuɓɓudi wakkati amen, kono Suwaya ɓuri ɗum. Omo rokka nokku timmuɗo ngam njuɓɓudi golle, reende mboowka, teelte Pomodoro astro, pecce jemma, e yeeso wakkati yiilotoongo waylata ñalawma ma wonta nandola gite."
+  },
+  {
+    "q": "Mbele Suwaya ko app golle tan mo yeeso mum seerti?",
+    "a": "Keeɗngal maantinngal ko 'Jokkondiral Wakkati'. E appuuji goɗɗi, gollal ina jokkondiri e limoore jaaɗnde (yeru: 16:00). E Suwaya, gollal ina jokkondiri e astro (yeru: Suwaya arande caggal Asiri), firti ko porogaraam ma ina wayloo e hoore mum ngam yahdude e waylo sahaaji e dille naange."
+  },
+  {
+    "q": "Holko firti wakkati astro e nder Suwaya?",
+    "a": "Ko sifol wakkati tuugiingol e geɗe tagoore limtaaɗe, wonaa limoore jaaɗnde. Wakkati jiiɓru ina yaha no taweeri, kono Suwaya ina feewnitii ɗum ngam yahdude e Dille Ɓanndu ma (Circadian Rhythm), rokka ma faamde ɓurnde luggiɗde e njuuteendi e ɓoggi wakkati."
+  },
+  {
+    "q": "Mbele Suwaya ina wiya wakkati montor moƴƴaa?",
+    "a": "Eeeh, alaa. Wakkati montor ko sariya baawɗo haɓɓaade e aduna jooni. Suwaya rokkat tan ko mbaydi ɓeydaari lencitiindi e moƴƴere wakkati e mbaawka neɗɗo, ngam artirde en e tagoore tawa seernaani en e renndo."
+  },
+  {
+    "q": "Holko woni Suwaya?",
+    "a": "Suwaya ko limoore wakkati newiinde e nder app, ko saa waɗi 30 hoƴom 'majjunooɓe'. Goral mum ko njuuteendi mum goonga ina yaaja walla ustoo ngam yahdude e wakkati astro mo nde faawi (hona njuuteendi Zuhuri e ndunngu yeeso dabbunde)."
+  },
+  {
+    "q": "Mbele Suwaya foti e 30 hoƴom goonga?",
+    "a": "Wonaa sahaa fof. Ko ɗo newaare njuɓɓudi ndii woni; so wakkati astro ɓuri juutde, Suwaya ina yaaja no feewi ngam ɓura 30 hoƴom, rokka ma wakkati e deeyre ngam timminde golle. So wakkati ɓuri raɓɓiɗde, omo ustoo ngam hollirde yaawnde wakkati."
+  },
+  {
+    "q": "Holko waɗi 30 hoƴom ngam Suwaya fof?",
+    "a": "Sabu 48 Suwayaji × 30 hoƴom = 1440 hoƴom (ko ɗum woni 24 wakkati montor goonga). Ndee diidol ina reena njuɓɓudi ñalawma lencitiindi e hakkille neɗɗo, tawa wakkati ina wayloo e majjere."
+  },
+  {
+    "q": "Holko waɗi ñalawma fof ina waɗi 48 Suwaya?",
+    "a": "Limoore 48 ko diidol geometriik lencitiingol, baawngol feccude ñalawma majjuɗo e feccere wakkati laaɓtunde. Ɗum rokkat ma njuɓɓudi timmundi ngam teeltude ñalawma ma tawa a heɓaani caɗeele ɓeydaaɗe."
+  },
+  {
+    "q": "Mbele limoore 48 ina jogii asleeji diine walla astro?",
+    "a": "Limoore ndee e hoore mum ko cuɓal gollal laaɓtungal Suwaya ngam yooɓaade yeeso app oo, tawi ngalu diine e astro ina ittaa e keeri wakkatiiji teeltaaɗi (hona wakkatiiji juulde e tataɓe jemma)."
+  },
+  {
+    "q": "Holko limto 7776777 firti?",
+    "a": "Ko feccere Suwayaji fotndaaɗe e 7 wakkatiiji ñalawma ma: Fajiri (7), Duha (7), Zuhuri (7), Asiri (6), Magaribi (7), Tatabere Caka (7), e Tatabere Sakkitorde (7). Ma ɓe ndenndu waɗa 48 Suwayaji ñalawma ma."
+  },
+  {
+    "q": "Mbele 7776777 ko feccere diine walla astro?",
+    "a": "Keeri wakkatiiji ɗii ina limtaa e wakkatiiji astro e diine, kono rokkaande ndee limoore Suwayaji ngam wakkati fof ko diidol limtol ngam waɗde fotndaa e nder ñalawma ma."
+  },
+  {
+    "q": "Holko waɗi wakkati Asiri heɓi 6 Suwayaji?",
+    "a": "Ngam yettude 48 e feccere fotndaaɗe reennoore njuɓɓudi yeeso e golle ñalawma. Ɗum ustaani teddeendi Asiri e astro walla diine; ko teddeendi limtol tan e njuɓɓudi."
+  },
+  {
+    "q": "Mbele feccere Suwayaji ina waawi wayleede?",
+    "a": "Njuɓɓudi masiŋ ina mahiraa e newaare moolanaande, kono app oo huutorii [7,7,7,6,7,7,7] jooni ngam tabitinde njuɓɓudi e laaɓal wakkati ngam huutorooɓe fof."
+  },
+  {
+    "q": "Holno ñalawma fuɗɗortoo e Suwaya?",
+    "a": "E Suwaya, ñalawma ma fuɗɗotoo ko no tagoore e Noddaandu Fajiri, o joofa e Noddaandu Fajiri garoowo, fotndaa e fuɗɗoode golle neɗɗo e dille annoore."
+  },
+  {
+    "q": "Holko 'ñalawma' e 'jemma' firti e yeeso?",
+    "a": "E yeeso gado, 'ñalawma' ko gila Fajiri haa Magaribi, tawi 'jemma' ko gila Magaribi haa Fajiri garoowo. Ko ɗum waɗi jemma Altine fuɗɗotoo ko Magaribi Alal, joofa e Fajiri Altine."
+  },
+  {
+    "q": "Holko waɗi ñalawma fuɗɗotoo ko e Fajiri, wonaa e caka jemma?",
+    "a": "Jaŋde chronobiology (Chronobiology) hollitii wonde annoore ko laawol ngam faɓɓude. Suwaya jokkondiri fuɗɗoode ma e ndee tagoore ngam woyaande e wakkati montor, mbele a wona e tagoore ma."
+  },
+  {
+    "q": "Mbele ñalawma ina waawi fuɗɗeede e Magaribi?",
+    "a": "Masiŋ wakkati mahiraa ko e tigi (Fajiri haa Fajiri) ngam rokkude ñalawma golle. En mbiyi feewnaade e laabi goɗɗi e garoowo, kono mbaydi ndi gollirta ko ngol yidde."
+  },
+  {
+    "q": "Holko woni wakkatiiji 7 ɗii?",
+    "a": "Ñalawma ma feccaama e: 1) Fajiri, 2) Duha, 3) Zuhuri, 4) Asiri, 5) Magaribi, 6) Tatabere Caka jemma, e 7) Tatabere Sakkitorde jemma. Ɗum huuwti sifaaji doole ma fof."
+  },
+  {
+    "q": "Mbele keeri 7 wakkatiiji ɗii ko geɗe astro caawɗe?",
+    "a": "Ko heewi (Fajiri, Zuhuri, Asiri, Magaribi) ko non, tawi Fajiri/Duha ko hakkunde limtaaɗe, e wakkatiiji jemma ittaama e feccere laaɓtunde gila Magaribi haa Fajiri."
+  },
+  {
+    "q": "Mbele fuɗngo naange (Shuruq) ko keeri waawngi wonde e wakkatiiji 7 ɗii?",
+    "a": "Fuɗngo naange ina limtaa no moƴƴi e hollitaama, kono min paawi Fajiri haa hakkunde Zuhuri ngam tabitinde golle subaka ɗee jokkude tawa ustaaka."
+  },
+  {
+    "q": "Mbele Ichaa ko keeri waawngi wonde e wakkatiiji 7 ɗii?",
+    "a": "Ichaa holliraama no laaɓti e nder wakkatiiji juulde ngam juulde e wakkati, kono wakkatiiji jemma ngam golle mahiraa ko e feccere jemma tagoore ngam yahdude e ɗaangol."
+  },
+  {
+    "q": "Holko waɗi wakkati Duha inndiraa nii so fuɗɗotaako e fuɗngo naange?",
+    "a": "Ndee innde huutoraama ɗo ngam laaɓtinde wakkati subaka ɗiɗaɓo (gila hakkunde Fajiri-Zuhuri haa Zuhuri). Wonaa ɗum diine laaɓtuɗo ngam fuɗɗoode juulde Duha."
+  },
+  {
+    "q": "Holno hakkunde Fajiri e Zuhuri limtiraa?",
+    "a": "E limtol laaɓtungol: Masiŋ ina limta wakkati hakkunde Fajiri e Zuhuri, o ƴetta feccere, o ɓeyda e wakkati Fajiri ngam heɓde pottital doole subaka."
+  },
+  {
+    "q": "Holno Suwaya limtirta jemma?",
+    "a": "Astro, jemma ina limtee gila Magaribi haa Fajiri garoowo. App oo rokkat ma ngaal njuuteendi e laabi 3: Feccere, Tatabere, walla Jeegom."
+  },
+  {
+    "q": "Mbele Feccere, Tatabere e Jeegom ko wakkatiiji 11 jokanɗi?",
+    "a": "Alaa, ko 3 gite ceertuɗe ngam yiyde jemma gooto. Aɗa waawi huutoraade Tatabere (ngam rutiin e Qiyam) walla Jeegom (ngam feccere laaɓtunde), fawaade e njuɓɓudi ma."
+  },
+  {
+    "q": "Holno Tatabere Sakkitorde (Last Third) limtirta?",
+    "a": "Njuuteendi jemma (gila Magaribi haa Fajiri) feccaama e pecce 3 fotɗe; Tatabere Sakkitorde—wakkati deeyre—fuɗɗotoo ko e caawɗe tatabere ɗiɗi jemma."
+  },
+  {
+    "q": "Mbele Tatabere Sakkitorde ina tuugi e caka jemma montor?",
+    "a": "Alaa. Ɗum tuugii tan ko e njuuteendi jemma tagoore, ko ɗum waɗi wakkati montor mum waylotoo e sahaaji, o jokkondira ma e dille tagoore."
+  },
+  {
+    "q": "Holno njuuteendi Suwaya goonga limtirtee?",
+    "a": "Laawol newiingol: (Njuuteendi goonga wakkati astro) peccaa e (Limoore Suwayaji ɗi ndokkaa ɗum). Njeñtudi ko Suwaya foofotooɗo e ñalawma."
+  },
+  {
+    "q": "Mbele Suwayaji ñalawma fof fotata?",
+    "a": "Ɗi poti ko famɗi fof e nder wakkati gooto ngam yooɓaade hakkille, ɗi wayloo so a dilliima e wakkati goɗɗo ngam yahdude e dille naange."
+  },
+  {
+    "q": "Mbele Suwaya ñalawma ina ɓura juutde e ceedu?",
+    "a": "Njuuteendi goonga ina haalda e wakkati, nokkuure, e ñalnde. Ndee newaare ko ɗum feccata Suwaya e montoruuji jaaɗɗi."
+  },
+  {
+    "q": "Holko yaawnde wakkati (Time Speed Multiplier) firti?",
+    "a": "Ko maande paamɗiniinde holliroore holno wakkati 'majjunooɓe' yahata e wakkati goonga. So nde ustiima 1, wakkati ena nattitoo, aɗa heɓa wakkati golle. So nde ɓuri 1, wakkati ena yaawi."
+  },
+  {
+    "q": "Mbele yaawnde firti ko wakkati tagoore waylaama?",
+    "a": "Eeeh, alaa! Wakkati tagoore ko gooto. Limoore nde ko gite ngam yiyde yahrude wakkati majjunooɓe, walla ma faamu weeyo wakkatiiji ngam njuɓɓudi golle ma."
+  },
+  {
+    "q": "Holko 07:12 firti e yeeso?",
+    "a": "E aduna Suwaya, ɗum wonaa 7:12 subaka! 07 firti ko Suwaya yeeso (0 haa 47), 12 ko hoƴom majjunooɓe e nder mum. Ko laawol kesol ngam janngude yahrude ñalawma ma."
+  },
+  {
+    "q": "Holno meeftirmi wakkati montor e Suwaya e yeeso?",
+    "a": "Ngam laaɓtinde ɗum e yeeso, wakkati montor (renndo) holliraa e 24 wakkatiiji daneeji, e tati ɗiɗi hakkunde wakkati e hoƴom, bana 00:00. Wakkati Suwaya holliraa ko e njiwri e 48-Suwaya, e diidol juutngol «│» fecca limoore Suwaya e hoƴom majjunooɓe, bana 07│12."
+  },
+  {
+    "q": "Mbele limto Suwaya fuɗɗotoo ko 0 walla 1?",
+    "a": "Ngam weytinde, limto Suwaya e nder wakkati (hona Suwaya 1ɓo Asiri) fuɗɗotoo ko 1. Limto timmungo e yeeso astro fuɗɗotoo ko 0 haa 47."
+  },
+  {
+    "q": "Mbele ñalawma majjunooɓe fotata 24 wakkati?",
+    "a": "Eey, e diidol: 48 Suwayaji × 30 hoƴom = 24 wakkatiiji majjunooɓe, ngam ɓeydude weytinde njuɓɓudi ngam hakkille ma."
+  },
+  {
+    "q": "Mbele Suwaya waylata njuuteendi ñalawma goonga?",
+    "a": "Min waawaa waylude njuuteendi ñalawma, kono min wayla holno a 'yiyata e huutortoo' ɗum! Suwaya wayli wakkati ngam rokkude ma mbaawka e Barakah."
+  },
+  {
+    "q": "Holno app limtirta wakkatiiji juulde?",
+    "a": "Masiŋ amen huutoriima limtol astro laaɓtungol (adhan) ngam gollodaade e limtooji ma, ñalnde, laawol limtol jaɓaangol e Madhab ngam rokkude laaɓal moolanaangal."
+  },
+  {
+    "q": "Mbele wakkatiiji foti fotaade e appuuji goɗɗi?",
+    "a": "Ceertugol tokoosol (hoƴom) ko tagoore sabu laabi limtol walla teelte diidi. Min ndokkii ma teelte e juuɗe ngam pottita e jumaa ma e newaare."
+  },
+  {
+    "q": "Hol laabi limtol jaɓaaɗi jooni?",
+    "a": "Masiŋ ina limta laabi mawɗi (Umm al-Qura, Njuɓɓudi Ejipt, Karaci, Cuɓaaɗi). Laabi goɗɗi ndokkaama 'Dental Silme' ngam yooɓaade ɗum no moƴƴi."
+  },
+  {
+    "q": "Holko waɗi ngal binndol ina nafi?",
+    "a": "Sabu min pellitii wonde e laaɓal. Min nattinii wonde innde hollitaande nde ko laawol astro timmungol, mbele aɗa heɓa deeƴre e ibaada ma."
+  },
+  {
+    "q": "Holko Madhab firti e teelte Asiri?",
+    "a": "Ko sariya rokkata newaare ngam teeltude fuɗɗoode juulde Asiri. App oo ina rokka laabi Shafi'i (Ko heewi) e Hanafi ngam dartaade e diiwaan ma."
+  },
+  {
+    "q": "Holko woni sariyaaji dofol towngol (High Latitude)?",
+    "a": "Ko teelte astro ɓurɗe (hona Caka Jemma, Jeɗɗaɓere Jemma, Diidol Annura) ngam tabitinde limtooji Fajiri e Ichaa e nokkuuji ɓadiiɗi poliiji ɗo annura majjatta."
+  },
+  {
+    "q": "Mbele Suwaya ina waawi e nokkuuji poliiji?",
+    "a": "Eey, masiŋ ina waɗi sariyaaji dofol towngol, kono sabu saɗeende sariya e ɗiin nokkuuji, ko moƴƴi ñemmbude njeñtudi e pelle lislaam toon."
+  },
+  {
+    "q": "Mbele diidi Fajiri e Ichaa waawaa teelteede?",
+    "a": "Waawaa. So a suɓiima laawol 'Cuɓaaɗo' (Custom), aɗa waawi naatnude diidi astro laaɓtuɗi fawiiɗi e sariya diiwaan ma."
+  },
+  {
+    "q": "Mbele wakkatiiji juulde ina teeltee e juuɗe?",
+    "a": "Eey, min ndokkii ma teelte e juuɗe (±30 hoƴom) ngam juulde 5, mbele aɗa waawi pottitde wakkatiiji no moƴƴi e montor wuro ma."
+  },
+  {
+    "q": "Mbele fuɗngo naange ina teeltee e juuɗe?",
+    "a": "Alaa, fuɗngo naange ko geɗe astro limtaaɗe, holliraaɗe ngam maande. Nde ittiraama e teelte juuɗe ngam reende njuɓɓudi wakkati ñalawma."
+  },
+  {
+    "q": "So mi teeltii Magaribi, mbele pecce jemma waylotoo?",
+    "a": "Eey, e hakkille! Sabu jemma fuɗɗotoo ko Magaribi e sistem amen, kala teelte maa waylu njuuteendi e keeri pecce jemma fof."
+  },
+  {
+    "q": "So mi teeltii juulde gootol, mbele keddiiɗe ɗee waylotoo?",
+    "a": "Alaa, teelte e juuɗe waylata ko juulde suɓaande tan, rokkat ma newaare ngam teeltude juulde fof tawa a jiiɓaani limtooji keddiiɗi ɗii."
+  },
+  {
+    "q": "Mbele Suwaya ko pottital ibaada diine?",
+    "a": "Alaa, ko ɓeydaari tagoore e njuɓɓudi ngam wallude ma yahrude e wakkati ma, wonaa sariya walla pottital ibaada winndaangal."
+  },
+  {
+    "q": "Mbele wakkatiiji 7 ɗii ko feccere diine ñalawma?",
+    "a": "Ko diidol tuugiingol e wakkatiiji barke e juulde ngam yuɓɓinde nguurndam, kono wonaa feccere sariya diine farilla."
+  },
+  {
+    "q": "Mbele Suwaya rokkat sariyaaji diine (Fatwa)?",
+    "a": "Suwaya ko masiŋ njuɓɓudi e limtol, wonaa fatwa. Ngam sariyaaji laaɓtuɗi, naamndo annduɓe (ustad)."
+  },
+  {
+    "q": "Mbele waasɓe julaade ina mbaawi huutoraade ɗum?",
+    "a": "Eey waawaa! Yahrude e annoore e dille tagoore (Circadian Alignment) ko huunde nde alɗuɓe tagoore ndokkata fof ngam moƴƴinde cellal e njuɓɓudi."
+  },
+  {
+    "q": "Holko waɗi app ina yami nokkuure?",
+    "a": "Sirru ko e feewnude! Wakkatiiji juulde e njuuteendi ñalawma e jemma ina fawa e limtooji ma e dow leydi."
+  },
+  {
+    "q": "Mbele GPS ina foti oocaade sahaa fof?",
+    "a": "Hoto hul ngam batri! App oo ƴettat nokkuure ma laawol gootol, waɗa limtooji e nder ma (Offline). Aɗa haaji hesɗitinde GPS tan so a yahii wuro goɗɗo."
+  },
+  {
+    "q": "Holko waɗata so mi yahi?",
+    "a": "Meem tan hesɗitin nokkuure (GPS), app oo maa waɗtu ñalawma ma, teeltu wakkati, e pottital golle Suwaya ngam yahdude e nokkuure ma hesere."
+  },
+  {
+    "q": "Holno app gollirta e waktuuji diiwaan?",
+    "a": "Masiŋ oo ina jokkondiri wakkati e limtooji ma ngam rokkude pottital timmungal e nder waylo hakkunde Wakkati Aduna (UTC) e wakkati ma."
+  },
+  {
+    "q": "Holno nde gollirta e wakkati mbayliigu (DST)?",
+    "a": "Masiŋ oo ina taskaa e jarribooji ngam yahrude e wakkatiiji montor (yeeso e caggal), tabitinnde njuɓɓudi wakkati tawa alaa ngar-ngar."
+  },
+  {
+    "q": "Mbele hitaande juutnde (Leap year) ko caɗeele?",
+    "a": "Alaa, masiŋ oo jarribaama ngam yooɓaade 29 Februyee no moƴƴi e yahrude e 1 Mars tawa alaa caɗeele."
+  },
+  {
+    "q": "Holko waɗata yeeso fajiri ñalnde montor jooni?",
+    "a": "E hakkille mawɗo, app oo ina faami wonde dille 'Fajiri haa Fajiri' timmaani tawo, o hollira kabaaru ñalawma Suwaya ɓennuɗo haa noddaandu Fajiri yettita."
+  },
+  {
+    "q": "Mbele ina waɗi ngar-ngar hakkunde wakkatiiji?",
+    "a": "Diidol amen moolanaangol ina tabitina wonde joofnde wakkati fof ko fuɗɗoode wakkati garoowo, waɗa dille timmuɗe gila Fajiri haa Fajiri garoowo."
+  },
+  {
+    "q": "Holko waɗata so masiŋ waawaa limtude?",
+    "a": "Sistem Fallback e nder Suwaya ina haɗa caɗeele, o hollira diidol jam, ngam tabitinde yeeso ma ina golla haa teelte moƴƴinee."
+  },
+  {
+    "q": "Holko senndata gollal montor e gollal Suwaya?",
+    "a": "Gollal montor fawaa ko e wakkati moƴƴo (hona batuuji). Gollal Suwaya ko nguurngi, ena yaha e dille ñalawma, wakkati montor mum wayloo ngam heddaade e wakkati tagoore (yeru: deeyre caggal Asiri)."
+  },
+  {
+    "q": "Holko nafi jokkondirde gollal e Asiri?",
+    "a": "Ɗum rokkat deeyre hakkille! So gollal ma ina haaji deeyre caggal Asiri, app oo maa kumpit ma e ndee wakkati timmuɗo, tawa a ƴeewaani holno Asiri waylotiyankoo e hitaande."
+  },
+  {
+    "q": "Mbele gollal fof ina foti wonde astro?",
+    "a": "Alaa. Batuuji laamu, diwooje e golle huutorotoo ko wakkati montor. Suwaya rokkat ma newaare ngam hawritde gollal montor e mboowka ma."
+  },
+  {
+    "q": "Mbele wakkati montor e Suwaya ina mbaawi hawritde?",
+    "a": "Eey, ko ɗum woni jikku golle jooni! Huutoro wakkati montor ngam ballal, e Suwaya ngam yuɓɓinde doole ma, paandaale e mboowka."
+  },
+  {
+    "q": "Holko woni rutiin?",
+    "a": "Rutiin ko wakkati juutɗo ngam golle tiiɗɗe walla foofto (yeru: gila Asiri haa Magaribi), diidaa bana tawe e yeeso, tawa gollal ko toɓɓere timmungo."
+  },
+  {
+    "q": "Holko woni yeeso astro (Astro Dial)?",
+    "a": "Ko mahdi amen yiilotoondi! Yeeso taarotoongo hollitoore ñalawma ma, wakkatiiji, golle, e yahrude yeeso, rokka ma yiyngo nokkuure ma e nder ñalawma ma."
+  },
+  {
+    "q": "Mbele yeeso ngo ko Astrolabe goonga?",
+    "a": "Ko yeeso rineewe e keso lencitiingol e Astrolabe ɓooyɗo, mahiraa ko ngam yuɓɓinde wakkati ñalnde wonaa ngam ƴeewde tagoore astro e ladde."
+  },
+  {
+    "q": "Holko woni Pomodoro Astro?",
+    "a": "Ko ɓeydaari moolanaandi e teelte Pomodoro gollirteendi! Wonaa dolnude ma e 25 hoƴom, masiŋ oo ina jokkondira yahrude mum e wakkati 'Suwaya' majjunooɓe, foofotoo e yahda e ñalawma ma."
+  },
+  {
+    "q": "Mbele 25 hoƴom Pomodoro astro fotata e 25 hoƴom goonga?",
+    "a": "Wonaa sahaa fof. Ko ɗum woni doole mum; so wakkati Suwaya jooni ena yaha no moƴƴi, wakkati hakkille ma ina yaaji ngam heɓde wakkati, waɗa teelte hakkille lencitiingol e nguurndam ma."
+  },
+  {
+    "q": "Hol teelte hakkille gonɗe?",
+    "a": "Min ndokkii teelte paawiiɗe e doole ma: Fotndaa Kaŋŋe (25/5), Hakkille Timmuɗo (30/0), e Teelte Foofto (20/10). Suɓo ko weli ma hannde."
+  },
+  {
+    "q": "Mbele app ina waawi neldude hito?",
+    "a": "Eey waawaa. Suwaya ina waɗi sistem kumpital moolanaangal ngam jokkondirde ma e wakkatiiji juulde, golle e rutiin fawaade e cuɓe ma."
+  },
+  {
+    "q": "Holko senndata Kumpital (Notification) e Alarm?",
+    "a": "Kumpital ko ɓataake anndinde deeyɗo. 'Alarm' mahiraa ko ngam ƴettude hakkille ma, annoora e yeeso e waɗde hito, ngam wonde cuɓal ngal ngam finde walla juulde."
+  },
+  {
+    "q": "Holko waɗi app ina haaji yamiiroore kumpite?",
+    "a": "Sabu min njiɗi wonde toon ngam ma so a haajii! So walaa, app oo golla e nder deeyre e caggal e a heɓataa kumpite ɗe cuɓi-ɗaa ngam hoore ma."
+  },
+  {
+    "q": "Holko waɗi o haaji 'Alarm Lenciti' e Android?",
+    "a": "Sistem Android jooni ina usta wakkatiiji ngam danndude batri. Rokkaade ndee yamiiroore ko huunde waajibi ngam tabitinde noddaandu e alarm ma ina fukka e hoƴom lencitiingol tawa alaa nattito."
+  },
+  {
+    "q": "Mbele alarm maa fukka e hoƴom lencitiingol?",
+    "a": "Min mahi sistem e dow njuɓɓudi hoolaare towndi, kono sahaa fof sariyaaji batri e won e teli ina ndarta ɗum. Min mbiyi ittude app oo e sariya batri."
+  },
+  {
+    "q": "Holko waɗi hito ina waawi nattitoode?",
+    "a": "Caɗeele ɗee ko sariyaaji sistem (Danndude Batri) ɗi kaɗata appuuji gollude e caggal. Yuɓɓinde ndee teelte e telifoyn ma maa safra ɗum jooni."
+  },
+  {
+    "q": "Mbele Suwaya ina waawi golle tawa alaa enternet (Offline)?",
+    "a": "E mawnikinaare, eey! Suwaya mahiraa ko e 'Gootol Yeeso' (Local-first). Limtol juulde, njuɓɓudi golle, teelte e kabaaru wuro ina golla no moƴƴi tawa walaa jokkondiral e duule."
+  },
+  {
+    "q": "Mbele FAQ ina golla tawa alaa enternet?",
+    "a": "Sabu sistem cache amen, aafde lamnde ɗee laawol gootol maa addan ma yiyde ɗum sahaa fof, hay so tawa alaa enternet garoowo."
+  },
+  {
+    "q": "Holko waɗi hello FAQ wiya hybrid?",
+    "a": "Sabu ina waɗi ko ɓuri moƴƴude e ɗiɗi fof: hesɗitinnde jooni e enternet (e GitHub), e gollirde e sahaa fof e nder telifoyn (e cache)."
+  },
+  {
+    "q": "Mbele FAQ ina waawi moƴƴineede ngam alaa enternet?",
+    "a": "Min ƴewta sahaa fof. Paandaale amen garooje ko waɗde ko winndaa e nder app so tawa alaa enternet e fuɗɗoode."
+  },
+  {
+    "q": "Mbele Suwaya ina haaji konto (User Account)?",
+    "a": "Alaa. Hoolaare amen e njuɓɓudi wakkati yo yaaw, waɗi min ittude konto e naatgol fof."
+  },
+  {
+    "q": "Holto kabaaru am danndaa?",
+    "a": "Min huutoriima Isar database baawɗo, ngam tabitinde kabaaru ma, golle e rutiin maa danndaa, oociima e nder telifoyn."
+  },
+  {
+    "q": "Mbele kabaaru am ina yaha e server Suwaya?",
+    "a": "Qat'iyyan alaa. Sutura ma ko huunde mawnde e amen. App oo alaa server duule ngam mooftude kabaaru ma."
+  },
+  {
+    "q": "Mbele kabaaru am e telifoyn ina siraa?",
+    "a": "Kabaaru ma ina danndaa e nokkuure deenaande (Sandbox) nde sistem ma rokki app oo. Deenngal ɓurngal ko huutoraade pasword tiiɗɗo e deenaade telifoyn ma."
+  },
+  {
+    "q": "Mbele ina waɗi limtooji huutoragol walla jeeyngal?",
+    "a": "Alaa. Min mahi Suwaya ngam wonde nokku laaɓtuɗo, deeyɗo, fawiiɗo e golle ma tan, tawa alaa jeeyngal."
+  },
+  {
+    "q": "Holto njiyirmi Sariya Sutura (Privacy Policy)?",
+    "a": "Laaɓal ko sariya amen. Aɗa waawi janngude sariya sutura e nder app oo e nder limto wuro."
+  },
+  {
+    "q": "Mbele ittude app oo maa ittu kabaaru am?",
+    "a": "Eey, sabu app oo ina dannda kabaaru ma e telifoyn ngam reende sutura ma, ittude app oo firti ko itta kabaaru. Hoto yooɓo."
+  },
+  {
+    "q": "Mbele ina waɗi jokkondiral hakkunde telifoynuuji (Sync)?",
+    "a": "Diidol amen jooni fawii ko e sutura e gollal telifoyn (Local-first), ko ɗum waɗi jokkondiral duule alaa e ndee sifaa."
+  },
+  {
+    "q": "Mbele ina waɗi danndol kabaaru walla yaltinde ɗum?",
+    "a": "Ko huunde himmunde e paandaale amen, ngam rokka ma mbaawka danndude kabaaru ma so a waylii telifoyn."
+  },
+  {
+    "q": "Hol ɗemɗe foti ɗe app oo fawi?",
+    "a": "Suwaya ko app aduna! Ina fawi e 22 ɗemɗe, rokka yimɓe aduna fof huutoraade wakkati astro e ɗemngal mum en."
+  },
+  {
+    "q": "Mbele Aarabeeɓe e RTL (Ñaamo haa Nano) ina fawaa?",
+    "a": "Eey waawaa, e diidol RTL moolanaangol ngam rokka ma mbaawka janngude aarabeeɓe no moƴƴi."
+  },
+  {
+    "q": "Mbele FAQ ko e nder tarlitol UI?",
+    "a": "Alaa, ɗi peccaama e JSON ngam rokkude min mbaawka hesɗitinde ɗum tawa a fadaani hesɗitinde App Store."
+  },
+  {
+    "q": "Holko waɗi FAQ pecca e tarlitol UI?",
+    "a": "Ndee diidol newiingol ina rokka min mbaawka ɓeydude lamnde kesse e firooji ngam jaabaade ma, tawa app oo ɓuutaani."
+  },
+  {
+    "q": "Mbele ina waɗi yiylo e fannuuji e nder FAQ?",
+    "a": "UI jooni ina hollira limto newiingo (ExpansionTile) ngam janngude no moƴƴi. Min ƴewta fannuuji yiylo e garoowo."
+  },
+  {
+    "q": "Holko waɗi fannuuji ɓeydaaka e JSON jooni?",
+    "a": "Min suɓiima newaare ngam yaltinde app oo e rokkude kabaaru e yaawnde. Gollal ina jokki."
+  },
+  {
+    "q": "Mbele fannuuji ina waawi ɓeydeede caggal ɗum?",
+    "a": "Eey waawaa! Diidol ngol ina teeltaa ngam heɓde kelme e fannuuji ngam yiylo jaabawu e yaawnde."
+  },
+  {
+    "q": "Mbele app oo ko Open-Source?",
+    "a": "Eey, min njaɓi doole renndo e gollodal. Kod app oo ina yalta e GitHub e les yamiroore GNU GPL v3.0."
+  },
+  {
+    "q": "Holko woni packages/suwaya_time?",
+    "a": "Ko ɓernde fiyoore e laylaytol! Ko pake teeltaaɗo ngam gollude limtooji juulde, wakkatiiji e yaawnde wakkati majjunooɓe."
+  },
+  {
+    "q": "Holko waɗi masiŋ oo pecca e Flutter?",
+    "a": "Ɗum firti ko Mahdi Laaɓtundi (Clean Architecture). Feccere ndee ina tabitina jarribooji limtol moolanaangol tawa alaa jiiɓru UI."
+  },
+  {
+    "q": "Mbele masiŋ oo ina waawi huutoreede e garoowo?",
+    "a": "Eey! Sabu o winndaa ko e (Pure Dart), o waawaa huutoreede ngam mahde montoruuji gite, appuuji web walla API."
+  },
+  {
+    "q": "Holno laylaytol tabitinirta goonga wakkatiiji?",
+    "a": "E jarribooji (Unit Testing) laaɓtuɗi ngam tabitinde njuɓɓudi, alaa jiiɓru, e 48 Suwayaji e laaɓal."
+  },
+  {
+    "q": "Mbele jarribooji ɗii ina tabitina goonga e aduna fof?",
+    "a": "Jarribooji ɗii ina kumpita sariyaaji e geɗe laaɓtuɗe. Min mballa ɗum e moƴƴinde ngam haɓaade caɗeele nokkuuji."
+  },
+  {
+    "q": "Mbele ina waɗi jarribooji ngam dofol towngol?",
+    "a": "Eey, min mahi jarribooji ngam weeyo tiiɗngo bana ñalawma luttuka walla jemma juutɗo ngam tabitinde gollal moƴƴol."
+  },
+  {
+    "q": "Mbele ina waɗi jarribooji ngam Wakkati Dabbunde (DST)?",
+    "a": "Eey. Masiŋ oo ina jarriboo waylooji montor (yeeso e caggal) ngam tabitinde njuɓɓudi ñalawma tawa alaa jiiɓru."
+  },
+  {
+    "q": "Holko senndata 07:12 e wakkati majjunooɓe renndu bana 03:30?",
+    "a": "07:12 ko limoore Suwaya e hoƴom mum. 03:30 ko limtol wakkati majjunooɓe gila ñalawma fuɗɗii. UI app oo fawii ko e go’o ngam newaare mum e gite mum."
+  },
+  {
+    "q": "Mbele wakkati montor ina waawi waɗteede wakkati Suwaya?",
+    "a": "Eey, no moƴƴi. Masiŋ oo ina waawi ƴettude wakkati montor e nder ñalawma ma, waɗta ɗum e Suwaya majjunooɓe tawa alaa caɗeele."
+  },
+  {
+    "q": "Mbele wakkati Suwaya ina waawi waɗteede wakkati montor?",
+    "a": "E limtol eey, kono sabu Suwaya ina wayloo, waɗtude ɗum ina haaji anndude wuro e ñalnde ngam rokkude ma wakkati montor laaɓtuɗo."
+  },
+  {
+    "q": "Holko waɗi nokkuure e ñalnde foti anndeede ngam faamde wakkati Suwaya?",
+    "a": "Sabu Suwaya foofotoo ko e leydi! Suwaya 7ɓo caggal Asiri ina seerti e wakkati montor hakkunde Makka e London, o waylotoo e Ndunngu e Ceedu."
+  },
+  {
+    "q": "Mbele mi waawaa ruttude wakkati Suwaya e neɗɗo to wuro goɗɗo?",
+    "a": "Aɗa waawi ruttude 'miijo' wakkati (yeru, 'en kaal caggal juulde Asiri'), ko maana moƴƴo. Kono e batuuji aduna, wakkati montor ɓuri moƴƴude."
+  },
+  {
+    "q": "Mbele Suwaya ina waawi e sosiyateeji e duɗe?",
+    "a": "Miijo moƴƴo e moolanaango! Sifaa jooni o ko ngam gollal neɗɗo (personal), tawa njuɓɓudi sosiyatee ina haaji jokkondiral gure ɗe min ƴewtata e garoowo."
+  },
+  {
+    "q": "Mbele ina waawi lomtaade wakkati gollirde laamu?",
+    "a": "Suwaya gollata ko no 'waajinoowo' ngam yuɓɓinde doole ma e nder golle, tawa wakkati montor ko sariya e wakkati gollirde laamu."
+  },
+  {
+    "q": "Mbele ina waawi huutoreede ngam yuɓɓinde ɗaangol?",
+    "a": "E gite, eey! Jaŋde biology ina hollita himmude ɗaangol e dille annoore/niɓɓere. Jokkondirde ɗaangol ma e wakkatiiji jemma Suwaya ina moƴƴina deeyre ma."
+  },
+  {
+    "q": "Mbele ina waawi huutoreede e jannde, fijirde e golle?",
+    "a": "Ko o gollodiiɗo ɓurɗo moƴƴude! Yuɓɓinde wakkati jannde e fijirde fawaade e doole ma e Subaka walla Asiri rokkat ma doole e hakkille."
+  },
+  {
+    "q": "Mbele ina waɗi dalil gannal hollitoowo wonde 48 Suwayaji ina ɓeyda golle?",
+    "a": "Gannal 'Chronobiology' ina tabitina wonde yahrude e annoore/niɓɓere ina moƴƴina hakkille e ɓanndu. 48-Suwaya ko masiŋ mo min mahiri ngam naatnude ngal gannal e nguurndam ma."
+  },
+  {
+    "q": "Mbele Suwaya e gannal Circadian Rhythm ko gootum?",
+    "a": "Suwaya ko huutorgal ngal gannal! Tawa biology ina jannga holno ɓanndu ma gollirta e wakkati, Suwaya rokkat ma yeeso ngam jokkondirde golle ma e ngal tagoore ngam moƴƴinde nguurndam ma."
+  },
+  {
+    "q": "Mbele Suwaya juutɗo e kündüz firti ko mi foti gollude ko heewi?",
+    "a": "Qat'iyyan alaa. Njuuteendi Suwaya e ceedu rokkat ma wakkati ngam gollude e deeyre, wonaa mboowka tampere. Suwaya yuɓɓinata ko doole, o ɓeydataa ɗum."
+  },
+  {
+    "q": "Mbele Suwaya juutɗo ko golle farilla?",
+    "a": "Alaa, ko wakkati ndimaagu. Aɗa waawi huutoraade Suwaya juutɗo e golle, foofto, fijirde walla ibaada fawaade e paandaale ma ñalawma."
+  },
+  {
+    "q": "Holno cuɓirtaa hakkunde wakkati montor e wakkati Suwaya?",
+    "a": "E newaare: golle laamu (diwooje, golle) njetta ko wakkati montor. Paandaale ma (janngude, miijaade, fijirde) njetta Suwaya ngam yooɓaade wakkati e deeyre."
+  },
+  {
+    "q": "Mbele ɓuri moƴƴude waylude nguurndam am fof e Suwaya?",
+    "a": "Hoto yiylo timmungo, yiylo fotndaa. Huutoro Suwaya ngam moƴƴinde nguurndam ma e mboowka ma, e wakkati montor ngam renndo ma."
+  },
+  {
+    "q": "Holko waɗata so Suwayaji jiiɓii mi?",
+    "a": "Gite ko e newaare. Fuɗɗo e wakkatiiji 7 mawɗi (Fajiri, Zuhuri..), so a woowi, aɗa waawi naatde e limtooji Suwaya."
+  },
+  {
+    "q": "Mbele mi foti siftorde limtooji Suwaya?",
+    "a": "Alaa fof. Yeeso app oo gite maa waɗa limtooji ɗii fof, o hollira ma nokkuure ma tan, a haajaaka siftorde limoore."
+  },
+  {
+    "q": "Holko waɗi wakkati montor e Suwaya gooto waylotoo?",
+    "a": "Sabu leydi ina yiiloo, naange ina dilla! Suwaya ina jokkondiri ma e ngal tagoore, tawa limoore mum ina hedda e rutiin ma."
+  },
+  {
+    "q": "Mbele ngal waylo ko fawre?",
+    "a": "Alaa, ko diidol ɓurngol doole e app oo! Ngal waylo tagoore ina tabitina wonde rutiin ma (hona yahaade caggal Asiri) maa hedda e weeyo mum hitaande fof."
+  },
+  {
+    "q": "Mbele njuuteendi Suwaya ina wayloo e nder wakkati gooto?",
+    "a": "Omo tabiti ngam rokkude ma hakkille e nder golle, o waylotoo tan so a dilliima e wakkati goɗɗo ngam yahdude e dille naange."
+  },
+  {
+    "q": "Mbele app oo ina limta e hoƴom fof?",
+    "a": "Diidol amen ina hormii doole telifoyn ma. App oo huutorii wakkati moolanaango ngam tabitinde yeeso tawa oocaani batri ma."
+  },
+  {
+    "q": "Holno yeeso wakkati majjunooɓe hesɗitintaa?",
+    "a": "Ina waɗi ƴettaande newiinde (Ticker) ngam hesɗitinde yeeso, tawa limtooji tiiɗɗi ina njuɓɓinee e caggal e deeyre."
+  },
+  {
+    "q": "Mbele ina haaji enternet ngam limtude wakkatiiji juulde?",
+    "a": "Masiŋ oo haajaaka enternet. O limtata ko e telifoyn ma fawaade e limtooji e teelte ɗe ngaafɗaa."
+  },
+  {
+    "q": "Holko waɗata so mi rokkaani yamiiroore nokkuure?",
+    "a": "Min njaɓi cuɓal ma. Aɗa waawi huutoraade nokkuure e juuɗe ngam suɓaade wuro ma e limtooji amen ngam yooɓaade app oo fof."
+  },
+  {
+    "q": "Mbele waylude wuro ina wayla golle?",
+    "a": "Golle ma moolanaaɗe majjataa. Wakkatiiji mum en maa teeltee ngam yahdude e wuro ma keso, ngam jokkude golle ma tawa alaa ngar-ngar."
+  },
+  {
+    "q": "Holko Local-first firti?",
+    "a": "Ko aadi amen wonde telifoyn ma ko tata ma. App oo gollata ko e nder telifoyn ma (golle, juulde, rutiin) ngam yaawnde, sutura, e hortaade e serveruuji."
+  },
+  {
+    "q": "Mbele Local-first firti ko Offline-tan?",
+    "a": "Alaa. Min njilliima gannal telifoyn e enternet tan so ina haaji ngam hesɗitinde kabaaru (hona ƴettude FAQ e GitHub)."
+  },
+  {
+    "q": "Mbele ina waɗi Login?",
+    "a": "Min mbustii caɗeele fof. Hoolaare amen e njuɓɓudi wakkati yo yaaw waɗi min ittude login e naatgol fof."
+  },
+  {
+    "q": "Mbele ina waɗi njoɓdi walla jeeyngal?",
+    "a": "Suwaya ko app hakkille, o rokkat ma kabaaru tawa alaa jeeyngal walla njoɓdi tiiɗndi ngam haɗde ma huutoraade masiŋ oo."
+  },
+  {
+    "q": "Mbele mi foti hortaade e Suwaya tan ngam wakkatiiji juulde?",
+    "a": "Suwaya ko masiŋ limtol moolanaango. Kono min mbiyata sahaa fof so ina waɗi ceertugol tokosol, pottit wakkati ma e jumaa wuro ma ngam deeyre ɓernde."
+  },
+  {
+    "q": "Holko mbaɗatmi so wakkatiiji ceertii e hoƴom?",
+    "a": "Safaara ko e juuɗe ma: ƴeew Madhab e laawol limtol, huutoro 'Teelte E Juuɗe' ngam pottitde wakkati jumaa ma e meemol gootol."
+  },
+  {
+    "q": "Holko waɗata so ceertugol ngol ina mawni?",
+    "a": "Ƴeew teelte wakkati ma walla limtooji ɗi naatnuda. So a teeltii nokkuure ma tan, kabaaru goonga maa rutto jooni-jooni."
+  },
+  {
+    "q": "Mbele fuɗngo naange (Shuruq) maa huutore e garoowo?",
+    "a": "Min ƴewta sahaa fof ngam moƴƴinde app oo. Naatnude fuɗngo naange e keeri ko huunde moƴƴere e garoowo so o nafiima yimɓe e sifaa 7776777."
+  },
+  {
+    "q": "Mbele waawaa ɓeydeede diidi wakkati goɗɗi e garoowo?",
+    "a": "Eey, sabu mahdi app oo moolanaandi, min njaɓi rokkude diidi goɗɗi ngam yooɓaade cuɓe yimɓe amen ceertuɗi."
+  },
+  {
+    "q": "Hol teelte mawɗe ɗe potɗe reeneede?",
+    "a": "Asal amen ko: Wakkatiiji 7 tagoore, Fajiri haa Fajiri, golle jokkondirɗe, e newaare hoƴom majjunooɓe ngam mahde nguurndam moƴƴam."
+  },
+  {
+    "q": "Mbele noone e mbaadi ina waawi wayleede tawa sistem waylaaka?",
+    "a": "Eey, no moƴƴi! Min ndokkii ma cuɓe noone (Kiiɗɗi, Newiiɗum, Pijirlooji) ngam waylude yeeso ma tawa a meemaani masiŋ limtol oo."
+  },
+  {
+    "q": "Mbele Suwaya ko kawtal wakkatiiji kiiɗɗi?",
+    "a": "Ko ilhaam gila e gannal ɓennungal, jillaa e karallaagal hannde, ngam rokkude ma gollorgal rineewal baawngal folde wakkatiiji kiiɗɗi."
+  },
+  {
+    "q": "Mbele Suwaya ko gannal tagoore walla app?",
+    "a": "Ko app keso baɗtoowo gannal tagoore (Chronobiology) e gollorgal ñalawma ngam wallude ma wuurdude nguurndam moƴƴam e fotndaaɗam."
+  },
+  {
+    "q": "Mbele waawaa janngeede e duɗe?",
+    "a": "Diidol yeeso Suwaya e jokkondiral neɗɗo e wakkati ina waɗa ɗum deftere moolanaande ngam jaŋde e fannu karallaagal e jikkuuji neɗɗo."
+  },
+  {
+    "q": "Mbele binndanɗe GitHub ina tabitina nafoore Suwaya?",
+    "a": "Binndanɗe ɗee ina laaɓtina doole masiŋ oo. Nafoore e doole fawii ko e gannal 'Chronobiology' e keɓe ma e yahrude e ñalawma ma e gite."
+  },
+  {
+    "q": "Holto njiyirmi binndol masiŋ laaɓtungol?",
+    "a": "Ngam enjiniyeeruuji e yiɗɓe ƴeewde, fayil `Suwaya-Time.md` e nder GitHub ina waɗi limtooji, diidi e mahdi masiŋ oo fof."
+  },
+  {
+    "q": "Holto njiyirmi mahdi laylaytol (Project Structure)?",
+    "a": "Laaɓal timmungal ina yiyee e fayiluuji `README.md` e `ARCHITECTURE.md` e nder GitHub amen."
+  },
+  {
+    "q": "Hol kabaaru nafoowo so mi yiyii fawre e wakkati?",
+    "a": "Min njaaraama e mballa ma! Haalan min wuro, ñalnde, laawol limtol e teelte ɗe mbaɗɗaa, mbele min pottita masiŋ oo jooni-jooni."
+  },
+  {
+    "q": "Hol kabaaru nafoowo so mi yiyii fawre e Suwayaji?",
+    "a": "Ngam yaawnde, hollu min limoore Suwaya, wakkati montor, e natal yeeso (screenshot) so a waawii, minen min mboƴƴina ɗum no moƴƴi."
+  },
+  {
+    "q": "Holno njuɓɓinirmi Suwaya e helmere wootere?",
+    "a": "Suwaya ko gollodiiɗo ma moolanaaɗo, wayloowo ñalawma ma gila e wakkati montor tiiɗɗo haa e yeeso astro newiiɗo, ɓeyda doole ma, jokkondira mboowka ma e dille tagoore aduna fof."
+  }
+]

@@ -1,0 +1,618 @@
+[
+  {
+    "q": "Qu'est-ce que Suwaya ?",
+    "a": "Suwaya est une application innovante et un système d'organisation quotidienne qui ajoute une 'couche de temps naturel' par-dessus l'heure civile standard. En s'appuyant sur votre position géographique, le cycle du soleil et les heures de prière, l'application divise intelligemment votre journée (de l'aube à l'aube du jour suivant) en sept périodes vitales, répartissant 48 'Suwayas' flexibles entre elles. Ce système relie magnifiquement vos tâches, routines et sessions de concentration au rythme naturel de l'univers."
+  },
+  {
+    "q": "Quel problème Suwaya tente-t-il de résoudre ?",
+    "a": "L'heure civile (le temps social) est excellente pour les rendez-vous, mais elle ignore complètement votre 'horloge interne' et le rythme naturel de la journée. Suwaya comble cette lacune en vous indiquant votre position réelle dans la journée (ex. : vous êtes au milieu du Asr, ou dans le Dernier Tiers de la nuit). Cela permet à votre routine de s'harmoniser avec les changements naturels d'énergie et de lumière tout au long de l'année."
+  },
+  {
+    "q": "Suwaya remplace-t-il l'horloge classique ?",
+    "a": "Non, il en est le compagnon idéal. L'heure civile organise les horaires de travail et les transports, tandis que 'Suwaya' organise votre énergie personnelle, vos habitudes et votre planification mentale. Vous pouvez utiliser les deux systèmes ensemble de manière fluide dans l'application pour équilibrer vos engagements externes et votre nature humaine."
+  },
+  {
+    "q": "Suwaya n'est-il qu'une application d'heures de prière ?",
+    "a": "Les heures de prière sont le cœur battant de notre moteur temporel, mais Suwaya va bien au-delà. Il offre un environnement intégré pour la gestion des tâches, le suivi des routines, des sessions Pomodoro astronomiques, la division de la nuit, et un cadran interactif qui transforme votre journée en un chef-d'œuvre visuel."
+  },
+  {
+    "q": "Suwaya n'est-il qu'une application de tâches avec une interface différente ?",
+    "a": "La différence fondamentale réside dans la 'Connexion Temporelle'. Dans les applications classiques, une tâche est liée à un chiffre rigide (ex. : 16h00). Dans Suwaya, une tâche est liée à un contexte astronomique (ex. : la première Suwaya après le Asr), ce qui signifie que votre emploi du temps s'adapte automatiquement aux changements de saisons et au mouvement du soleil."
+  },
+  {
+    "q": "Que signifie le temps contextuel ou astronomique dans Suwaya ?",
+    "a": "C'est la description du temps basée sur des événements naturels calculés plutôt que sur des chiffres rigides. Le temps physique s'écoule comme d'habitude, mais Suwaya le représente d'une manière qui s'harmonise avec votre Rythme Circadien, vous donnant une perception plus profonde de la valeur du temps."
+  },
+  {
+    "q": "Suwaya prétend-il que l'heure civile est fausse ?",
+    "a": "Pas du tout. L'heure civile est une norme indispensable dans le monde moderne. Suwaya offre simplement une dimension supplémentaire axée sur la qualité du temps et la productivité personnelle, nous reconnectant à la nature sans nous isoler de la société."
+  },
+  {
+    "q": "Qu'est-ce qu'une Suwaya ?",
+    "a": "Une Suwaya est une unité de temps flexible dans l'application, représentant toujours 30 minutes 'virtuelles'. Son génie réside dans le fait que sa durée réelle s'étire et se contracte pour s'adapter à la période astronomique dans laquelle elle se trouve (comme la longueur de la période du Dhuhr en été par rapport à l'hiver)."
+  },
+  {
+    "q": "Une Suwaya équivaut-elle à 30 vraies minutes ?",
+    "a": "Pas toujours. C'est là que réside la flexibilité du système ; si la période astronomique est plus longue, la Suwaya s'allonge pour équivaloir à plus de 30 minutes réelles, vous donnant de l'abondance et du calme pour accomplir vos tâches. Si la période est plus courte, elle se contracte pour refléter la rapidité de ce temps."
+  },
+  {
+    "q": "Pourquoi 30 minutes virtuelles pour chaque Suwaya ?",
+    "a": "Parce que 48 Suwayas × 30 minutes = 1440 minutes (soit exactement 24 heures virtuelles). Cette conception préserve une structure quotidienne familière à l'esprit humain, tout en permettant au temps de fléchir intelligemment en arrière-plan."
+  },
+  {
+    "q": "Pourquoi la journée contient-elle 48 Suwayas ?",
+    "a": "Le nombre 48 est une conception géométrique intelligente qui permet de diviser la journée virtuelle en unités précises et pratiques d'une demi-heure. Cela vous donne un système très précis pour planifier votre journée sans complexité."
+  },
+  {
+    "q": "Le nombre 48 a-t-il une origine religieuse ou astronomique ?",
+    "a": "Le nombre en lui-même est un choix d'ingénierie propre à Suwaya pour organiser visuellement l'interface, tandis que la valeur religieuse et astronomique est dérivée des limites des périodes fondamentales calculées avec précision (comme les heures de prière et les tiers de la nuit)."
+  },
+  {
+    "q": "Que signifie la répartition 7776777 ?",
+    "a": "C'est la répartition géométrique équilibrée des Suwayas sur les sept périodes de votre journée : Fajr (7), Duha (7), Dhuhr (7), Asr (6), Maghrib (7), Tiers Médian (7), et Dernier Tiers (7). Ensemble, elles forment votre journée de 48 Suwayas."
+  },
+  {
+    "q": "7776777 est-elle une division religieuse ou astronomique ?",
+    "a": "Les limites des périodes sont dérivées d'heures astronomiques et religieuses précises, mais l'attribution de ce nombre spécifique de Suwayas à chaque période est une conception mathématique visant à créer un équilibre pratique et confortable dans votre journée."
+  },
+  {
+    "q": "Pourquoi la période du Asr reçoit-elle 6 Suwayas ?",
+    "a": "Pour atteindre le total final (48) avec une distribution symétrique qui maintient l'équilibre visuel et pratique de la journée. Cela ne diminue en rien l'importance astronomique ou religieuse de la période du Asr ; c'est simplement un poids relatif dans l'équation mathématique."
+  },
+  {
+    "q": "La répartition des Suwayas peut-elle être modifiée ?",
+    "a": "Le moteur technique est construit avec une flexibilité extrême, mais l'application adopte actuellement la distribution unifiée [7,7,7,6,7,7,7] comme norme officielle pour garantir la stabilité de l'expérience et la précision des horaires pour tous les utilisateurs."
+  },
+  {
+    "q": "Comment commence la journée dans Suwaya ?",
+    "a": "Dans Suwaya, votre journée commence de manière naturelle et inspirante avec l'adhan du Fajr, et se termine avec l'adhan du Fajr du jour suivant, s'alignant parfaitement avec le véritable début de l'activité humaine et du cycle de la lumière."
+  },
+  {
+    "q": "Que signifient « jour » et « nuit » sur l'écran d'accueil ?",
+    "a": "Sur l'écran d'accueil, le « jour » désigne la période allant du Fajr au Maghrib de ce jour calendaire, tandis que la « nuit » désigne la période du Maghrib jusqu'au Fajr suivant. Par conséquent, la nuit de lundi commence au Maghrib de dimanche et se termine au Fajr de lundi."
+  },
+  {
+    "q": "Pourquoi la journée commence-t-elle au Fajr et non à minuit ?",
+    "a": "Les études en chronobiologie indiquent que le cycle éveil/lumière est le principal déclencheur de l'horloge biologique. Suwaya lie votre début de journée à cet événement naturel plutôt qu'à une limite civile rigide (minuit) pour vous garder en parfaite harmonie avec la nature."
+  },
+  {
+    "q": "Le début de la journée peut-il être fixé au Maghrib ?",
+    "a": "Le moteur temporel principal est actuellement conçu pour suivre le cycle (Fajr à Fajr) comme un cadre organisationnel complet pour la productivité. Nous pourrions explorer des modes d'affichage supplémentaires à l'avenir, mais le cœur actuel fonctionne sur ce modèle très efficace."
+  },
+  {
+    "q": "Quelles sont les sept périodes ?",
+    "a": "Votre journée est divisée de manière fluide en : 1) Fajr, 2) Duha, 3) Dhuhr, 4) Asr, 5) Maghrib, 6) Tiers Médian de la nuit, et 7) Dernier Tiers de la nuit. Cela couvre chaque phase de votre énergie et de votre activité."
+  },
+  {
+    "q": "Toutes les limites des sept périodes sont-elles des événements astronomiques indépendants ?",
+    "a": "La plupart le sont (Fajr, Dhuhr, Asr, Maghrib), tandis que la limite Fajr/Duha est un point médian calculé mathématiquement, et les périodes nocturnes dérivent de la division précise du temps du Maghrib au Fajr."
+  },
+  {
+    "q": "Le lever du soleil (Chourouq) est-il une limite indépendante pour l'une des sept périodes ?",
+    "a": "L'heure du lever du soleil est calculée avec précision et affichée comme une information importante, mais nous avons étendu la période du 'Fajr' jusqu'au point médian vers le Dhuhr pour garantir que les périodes de travail matinales restent continues sans interruption."
+  },
+  {
+    "q": "L'Isha est-il une limite indépendante pour l'une des sept périodes ?",
+    "a": "L'Isha est affiché avec précision dans les heures de culte pour que vous puissiez l'accomplir à l'heure, mais les périodes nocturnes principales pour organiser les tâches et les routines sont construites sur les divisions naturelles de la nuit (comme les tiers) pour correspondre aux habitudes de sommeil et de calme."
+  },
+  {
+    "q": "Pourquoi la période du Duha est-elle nommée ainsi si elle ne commence pas au lever du soleil ?",
+    "a": "Le nom ici est utilisé comme un descripteur organisationnel pour la deuxième partie de la matinée (du point médian Fajr-Dhuhr jusqu'au Dhuhr). Il n'est pas destiné à être une définition jurisprudentielle stricte pour le début de la prière du Duha."
+  },
+  {
+    "q": "Comment est calculé le point médian entre le Fajr et le Dhuhr ?",
+    "a": "Avec une équation précise : Le moteur calcule la durée totale entre le Fajr et le Dhuhr, prend la moitié, et l'ajoute à l'heure du Fajr pour déterminer le point de transition de l'énergie matinale."
+  },
+  {
+    "q": "Comment Suwaya calcule-t-il la nuit ?",
+    "a": "Astronomiquement, la nuit est calculée du Maghrib jusqu'au Fajr suivant. L'application vous fournit cette plage de trois manières superposées à utiliser : des moitiés, trois tiers, ou six sixièmes."
+  },
+  {
+    "q": "Les moitiés, tiers et sixièmes sont-ils 11 périodes consécutives ?",
+    "a": "Non, ce sont trois lentilles différentes pour voir exactement la même nuit. Vous pouvez choisir d'utiliser les tiers (pour les routines et le Qiyam) ou les sixièmes (pour une micro-division précise), selon la façon dont vous gérez votre soirée."
+  },
+  {
+    "q": "Comment est calculé le Dernier Tiers ?",
+    "a": "La durée totale de la nuit (du Maghrib au Fajr) est divisée en trois parties égales ; le Dernier Tiers — un temps de sérénité et de calme — commence exactement après que les deux tiers de la nuit se soient écoulés."
+  },
+  {
+    "q": "Le Dernier Tiers dépend-il de minuit civil ?",
+    "a": "Absolument pas. Il repose exclusivement sur la longueur naturelle de la nuit, et par conséquent son heure civile se décale harmonieusement avec les saisons, vous gardant constamment connecté au rythme de la nature."
+  },
+  {
+    "q": "Comment est calculée la durée réelle de la Suwaya ?",
+    "a": "Un processus simple et intelligent : (La durée réelle de la période astronomique) divisée par (Le nombre de Suwayas qui lui sont allouées). Le résultat est une Suwaya qui respire avec la journée."
+  },
+  {
+    "q": "Toutes les Suwayas d'une journée sont-elles vraiment égales ?",
+    "a": "Elles sont à peu près égales au sein d'une même période pour offrir une stabilité de concentration, et elles s'adaptent de manière fluide lorsque vous passez d'une période à une autre pour s'adapter aux changements naturels du mouvement du soleil."
+  },
+  {
+    "q": "La Suwaya diurne est-elle toujours plus longue en été ?",
+    "a": "La durée réelle interagit dynamiquement avec la longueur de la période spécifique, la situation géographique et la date. Cette incroyable flexibilité est ce qui distingue Suwaya des horloges rigides."
+  },
+  {
+    "q": "Que signifie le multiplicateur de vitesse du temps ?",
+    "a": "C'est un incroyable indicateur cognitif montrant comment le temps 'virtuel' s'écoule par rapport au temps réel. Si le multiplicateur est inférieur à 1, le temps passe lentement et vous avez de l'abondance pour accomplir. S'il est supérieur à 1, le temps passe vite."
+  },
+  {
+    "q": "Le multiplicateur de vitesse signifie-t-il que le temps physique change ?",
+    "a": "Bien sûr que non ! Le temps physique est constant. Le multiplicateur est un outil de visualisation du taux de progression du temps virtuel, vous aidant à ressentir l'expansion ou la contraction des périodes pour gérer votre effort."
+  },
+  {
+    "q": "Que signifie un affichage comme 07:12 ?",
+    "a": "Dans le monde de Suwaya, ce n'est pas 7h12 du matin ! 07 représente l'index global de la Suwaya (de 0 à 47), et 12 représente les minutes virtuelles à l'intérieur de celle-ci. C'est une nouvelle façon complète de lire la progression de votre journée."
+  },
+  {
+    "q": "Comment différencier l'heure civile de l'heure Suwaya dans l'interface ?",
+    "a": "Pour une distinction visuelle claire, l'heure civile (sociale) est affichée au format standard de 24 heures en blanc, avec deux points séparant les heures des minutes (ex: 00:00). L'heure Suwaya est affichée en jaune dans le système des 48 Suwayas, avec une courte ligne verticale «│» séparant le numéro de la Suwaya des minutes virtuelles, comme 07│12."
+  },
+  {
+    "q": "La numérotation des Suwayas commence-t-elle à 0 ou 1 ?",
+    "a": "Pour votre confort, la numérotation d'une Suwaya au sein d'une période (ex. : la première Suwaya du Asr) commence à 1. L'index technique global utilisé sur le cadran va de 0 à 47."
+  },
+  {
+    "q": "La journée virtuelle équivaut-elle à 24 heures ?",
+    "a": "Oui, architecturalement : 48 Suwayas × 30 minutes = 24 heures virtuelles, ce qui garde le système familier et facile à saisir pour votre esprit."
+  },
+  {
+    "q": "Suwaya modifie-t-il la durée réelle de la journée ?",
+    "a": "Nous ne pouvons pas changer la longueur de la journée, mais nous changeons la façon dont vous la 'voyez et l'utilisez' ! Suwaya re-représente le temps pour vous donner un sentiment de contrôle et d'abondance (Barakah)."
+  },
+  {
+    "q": "Comment l'application calcule-t-il les heures de prière ?",
+    "a": "Notre moteur utilise une bibliothèque astronomique très fiable (adhan) qui interagit avec vos coordonnées géographiques, la date, la méthode de calcul approuvée et le Madhab, garantissant une précision inégalée."
+  },
+  {
+    "q": "Les horaires doivent-ils correspondre à toutes les autres applications ?",
+    "a": "De légères différences (quelques minutes) sont parfaitement naturelles en raison de méthodes de calcul ou de paramètres d'angle différents. Nous avons fourni des outils de réglage manuel pour faire correspondre facilement l'application avec votre mosquée locale."
+  },
+  {
+    "q": "Quelles méthodes de calcul sont réellement prises en charge actuellement ?",
+    "a": "Le moteur prend en charge avec précision les méthodes principales (Umm al-Qura, Autorité Égyptienne, Karachi, Personnalisé). Certaines autres méthodes sont actuellement redirigées en toute sécurité vers la 'Ligue Musulmane Mondiale' par défaut jusqu'à ce que leurs configurations exactes soient terminées."
+  },
+  {
+    "q": "Pourquoi cette remarque est-elle importante ?",
+    "a": "Parce que nous nous engageons à une transparence totale. Nous veillons à ce que le nom affiché dans l'interface reflète exactement l'algorithme astronomique sous-jacent, afin que vous puissiez être totalement en paix concernant votre culte."
+  },
+  {
+    "q": "Que signifie Madhab dans les paramètres du Asr ?",
+    "a": "C'est une option jurisprudentielle offrant une flexibilité pour déterminer l'heure de début de la prière du Asr. L'application prend magnifiquement en charge les méthodes Shafi'i (Majorité) et Hanafi pour s'adapter à votre région."
+  },
+  {
+    "q": "Que sont les règles de hautes latitudes ?",
+    "a": "Ce sont des solutions astronomiques avancées (telles que le Milieu de la Nuit, le Septième de la Nuit, l'Angle du Crépuscule) garantissant des calculs précis du Fajr et de l'Isha dans les régions proches des pôles où le crépuscule ne disparaît pas clairement."
+  },
+  {
+    "q": "Suwaya est-il adapté aux régions polaires ?",
+    "a": "Oui, le moteur est équipé des règles de hautes latitudes, mais en raison de la complexité jurisprudentielle de ces régions extrêmes, il est fortement recommandé de vérifier les résultats avec les centres islamiques locaux."
+  },
+  {
+    "q": "Les angles du Fajr et de l'Isha peuvent-ils être ajustés ?",
+    "a": "Certainement. En sélectionnant la méthode de calcul 'Personnalisé', vous avez la possibilité d'entrer des angles astronomiques précis qui correspondent aux normes spécifiques de votre région."
+  },
+  {
+    "q": "Les heures de prière peuvent-elles être ajustées manuellement ?",
+    "a": "Oui, nous avons fourni une fonction de décalage manuel fluide (±30 minutes) pour les cinq prières obligatoires, vous permettant de calibrer les heures avec une précision chirurgicale pour correspondre au calendrier de votre ville."
+  },
+  {
+    "q": "Le lever du soleil peut-il être ajusté manuellement ?",
+    "a": "Non, le lever du soleil est un événement purement astronomique calculé et affiché comme référence naturelle. Il est exclu des ajustements manuels pour maintenir la structure temporelle précise de la journée."
+  },
+  {
+    "q": "Si j'ajuste le Maghrib, la division de la nuit change-t-elle ?",
+    "a": "Oui, très intelligemment ! Parce que la nuit commence au Maghrib dans notre système, tout ajustement recalibrera automatiquement et précisément les longueurs et les limites des moitiés, tiers et sixièmes."
+  },
+  {
+    "q": "Si j'ajuste une prière, les autres prières se décalent-elles ?",
+    "a": "Non, l'ajustement manuel n'affecte brillamment que la prière sélectionnée, vous donnant une flexibilité totale pour ajuster chaque prière individuellement sans confondre le reste des calculs."
+  },
+  {
+    "q": "La Suwaya est-elle une unité d'adoration religieuse ?",
+    "a": "Non, c'est une innovation technique et organisationnelle intelligente visant à vous aider à mieux investir votre temps, et ce n'est pas une décision jurisprudentielle ou une unité d'adoration prescrite."
+  },
+  {
+    "q": "Les sept périodes sont-elles une division religieuse de la journée ?",
+    "a": "C'est un modèle de conception inspiré des moments bénis et des horaires de culte pour mieux organiser la vie, mais ce n'est pas une division jurisprudentielle contraignante."
+  },
+  {
+    "q": "Suwaya fournit-il des décisions religieuses (Fatwas) ?",
+    "a": "Suwaya est un outil d'organisation et de calcul avancé, pas une autorité de fatwa. Pour des décisions jurisprudentielles précises, veuillez consulter des spécialistes certifiés."
+  },
+  {
+    "q": "Les non-musulmans peuvent-ils l'utiliser ?",
+    "a": "Absolument ! Le concept d'harmonisation avec la lumière du jour et les cycles naturels (Alignement Circadien) est un concept universel fortement recommandé par les biologistes pour tous afin d'améliorer la productivité et la santé."
+  },
+  {
+    "q": "Pourquoi l'application a-t-elle besoin de la localisation ?",
+    "a": "La magie réside dans la personnalisation ! Les heures de prière et la durée des périodes diurnes et nocturnes sont directement et uniquement affectées par vos coordonnées géographiques sur Terre."
+  },
+  {
+    "q": "Le GPS doit-il être allumé tout le temps ?",
+    "a": "Pas d'inquiétude pour la batterie ! L'application obtient votre position une fois puis effectue tous les calculs complexes localement (Hors ligne). Vous n'avez besoin de mettre à jour le GPS que lorsque vous voyagez dans une autre ville."
+  },
+  {
+    "q": "Que se passe-t-il si je voyage ?",
+    "a": "Un simple tap sur la mise à jour de la position (GPS) et l'application reconstruira parfaitement votre journée, ajustera le fuseau horaire et calibrera les heures des tâches liées à Suwaya pour s'adapter parfaitement à votre nouvelle destination."
+  },
+  {
+    "q": "Comment l'application gère-t-elle le fuseau horaire ?",
+    "a": "La couche de traitement avancée intègre profondément le fuseau horaire avec vos coordonnées pour assurer une précision absolue lors de la conversion entre le Temps Universel (UTC) et l'heure locale."
+  },
+  {
+    "q": "Comment gère-t-elle l'Heure d'Été (DST) ?",
+    "a": "Le moteur est entièrement équipé de tests pour gérer les transitions d'horloge (avancer et reculer), garantissant la continuité des périodes et absolument aucun espace vide dans votre journée."
+  },
+  {
+    "q": "Une année bissextile est-elle un problème ?",
+    "a": "Non, le moteur a été testé de manière approfondie pour gérer de manière fluide le 29 février et passer sans problème à l'aube du 1er mars."
+  },
+  {
+    "q": "Que se passe-t-il avant l'aube de la date civile actuelle ?",
+    "a": "Avec une intelligence suprême, l'application reconnaît que le cycle 'Fajr à Fajr' n'est pas encore terminé, affichant gracieusement les données de la journée Suwaya précédente jusqu'à l'arrivée de l'adhan du Fajr."
+  },
+  {
+    "q": "Y a-t-il des espaces vides entre les périodes ?",
+    "a": "Notre conception géométrique méticuleuse garantit que la fin de chaque période est exactement le point de départ de la suivante, formant une boucle parfaite et continue du Fajr jusqu'au Fajr du jour suivant."
+  },
+  {
+    "q": "Que se passe-t-il si le moteur échoue à calculer ?",
+    "a": "Le système robuste de secours (Fallback) dans Suwaya empêche les plantages et affiche un état temporaire sûr, garantissant que votre interface reste magnifiquement fonctionnelle jusqu'à ce que les paramètres ou les coordonnées soient corrigés."
+  },
+  {
+    "q": "Quelle est la différence entre une tâche civile et une tâche liée à Suwaya ?",
+    "a": "Une tâche civile est fixée à une heure précise (comme les réunions). Une tâche liée à Suwaya est vivante, coulant avec le rythme de la journée, et son heure civile change automatiquement pour rester dans son contexte naturel (ex. : le calme après le Asr)."
+  },
+  {
+    "q": "Quel est l'avantage de lier une tâche au Asr, par exemple ?",
+    "a": "Cela garantit une stabilité mentale ! Si votre activité nécessite le calme de la phase post-Asr, l'application vous alertera toujours à ce moment parfait, quelle que soit la façon dont l'adhan du Asr se décale tout au long de l'année."
+  },
+  {
+    "q": "Chaque tâche doit-elle être astronomique ?",
+    "a": "Non. Les rendez-vous officiels, les vols et le travail utilisent l'heure civile. Suwaya vous donne une flexibilité totale pour combiner harmonieusement des rendez-vous civils stricts avec vos habitudes personnelles flexibles."
+  },
+  {
+    "q": "L'heure civile et Suwaya peuvent-elles être combinées ?",
+    "a": "Oui, et c'est le comportement de productivité moderne ultime ! Utilisez l'heure civile pour les engagements externes, et Suwaya pour planifier votre énergie, vos objectifs personnels et vos habitudes."
+  },
+  {
+    "q": "Que sont les routines ?",
+    "a": "Une routine est un bloc de temps prolongé pour un travail profond ou du repos (ex. : du Asr au Maghrib), élégamment dessiné comme un bel arc sur le cadran, contrairement à une tâche qui représente un point d'accomplissement momentané."
+  },
+  {
+    "q": "Qu'est-ce que le cadran astronomique ?",
+    "a": "C'est notre chef-d'œuvre visuel ! Un tableau circulaire interactif affichant la structure de votre journée, les périodes, les tâches et la progression, vous donnant une perception spatiale et directe époustouflante de votre position dans votre journée."
+  },
+  {
+    "q": "Le cadran est-il un véritable astrolabe ?",
+    "a": "Il s'agit d'une interface numérique moderne et intelligente inspirée esthétiquement de l'astrolabe historique, spécifiquement conçue pour organiser magnifiquement le temps quotidien plutôt que pour l'observation astronomique de terrain."
+  },
+  {
+    "q": "Qu'est-ce que le Minuteur Pomodoro Astronomique ?",
+    "a": "C'est une mise à niveau spectaculaire de la célèbre technique Pomodoro ! Au lieu de vous imposer 25 minutes rigides, le minuteur lie sa progression au temps virtuel 'Suwaya', respirant et coulant en parfaite harmonie avec le rythme naturel de votre journée."
+  },
+  {
+    "q": "25 minutes Pomodoro astronomiques équivalent-elles à 25 minutes réelles ?",
+    "a": "Pas nécessairement. C'est son superpouvoir ; si le temps Suwaya actuel s'écoule lentement, votre session de concentration s'allonge gracieusement pour bénéficier de l'abondance du temps, créant une expérience de concentration unique qui correspond à votre vitalité."
+  },
+  {
+    "q": "Quels modèles de concentration sont disponibles ?",
+    "a": "Nous avons fourni des modèles pour s'adapter à vos différents niveaux d'énergie : L'Équilibre d'Or (25/5), Concentration Absolue (30/0), et le Modèle Détendu (20/10). Choisissez ce qui vous inspire aujourd'hui."
+  },
+  {
+    "q": "L'application peut-elle envoyer des alertes ?",
+    "a": "Très certainement. Suwaya dispose d'un puissant système de notification qui vous garde profondément connecté aux heures de prière, aux tâches et aux routines en fonction exactement de vos préférences précises."
+  },
+  {
+    "q": "Quelle est la différence entre une Notification et une Alarme ?",
+    "a": "Une Notification est un doux message de rappel. Une 'Alarme' est conçue pour capter puissamment votre attention, allumant l'écran et sonnant en continu, ce qui en fait le choix parfait pour se réveiller ou pour les prières."
+  },
+  {
+    "q": "Pourquoi l'application a-t-elle besoin de la permission de notification ?",
+    "a": "Parce que nous voulons être là pour vous quand vous avez besoin de nous ! Sans cela, l'application fonctionnera silencieusement en arrière-plan et vous ne recevrez pas les rappels importants que vous avez programmés pour vous-même."
+  },
+  {
+    "q": "Pourquoi a-t-il besoin de la permission 'Alarmes Précises' dans Android ?",
+    "a": "Les systèmes Android modernes restreignent la planification du temps pour économiser la batterie. Accorder cette permission est absolument essentiel pour s'assurer que les adhans et les alarmes de vos tâches se déclenchent à la seconde exacte sans aucun retard frustrant."
+  },
+  {
+    "q": "L'alarme est-elle garantie à la seconde exacte ?",
+    "a": "Nous avons conçu le système avec le plus haut degré de fiabilité, mais parfois les politiques strictes de gestion de la batterie de certains fabricants de téléphones interviennent pour le retarder. Nous recommandons fortement d'exempter l'application de l'optimisation de la batterie."
+  },
+  {
+    "q": "Pourquoi une alerte pourrait-elle être retardée ?",
+    "a": "La raison principale est les restrictions du système (Optimisation de la Batterie) qui empêchent les applications de s'exécuter en arrière-plan. L'ajustement de ce seul paramètre dans votre téléphone résout le problème instantanément."
+  },
+  {
+    "q": "Suwaya fonctionne-t-il hors ligne ?",
+    "a": "Fièrement, oui ! Suwaya est construit sur le principe 'Local-first' (Priorité au local). Les calculs de prière, la gestion des tâches, les paramètres et la base de données des villes fonctionnent puissamment et à une vitesse fulgurante localement sans jamais avoir besoin d'une connexion cloud."
+  },
+  {
+    "q": "La FAQ fonctionne-t-elle hors ligne ?",
+    "a": "Grâce à notre système de cache intelligent, le chargement des questions une seule fois les rend disponibles en permanence pour vous, même hors ligne à l'avenir."
+  },
+  {
+    "q": "Pourquoi la page FAQ est-elle appelée hybride ?",
+    "a": "Parce qu'elle combine brillamment le meilleur des deux mondes : des mises à jour instantanées et dynamiques depuis internet (via GitHub), et une disponibilité et une vitesse locales permanentes (via le cache local)."
+  },
+  {
+    "q": "La FAQ peut-elle être améliorée pour une utilisation hors ligne ?",
+    "a": "Nous nous efforçons toujours d'atteindre la perfection. Nos plans futurs incluent l'intégration d'une copie de base dans l'application pour les cas où il n'y a absolument pas d'internet lors de la toute première installation."
+  },
+  {
+    "q": "Suwaya nécessite-t-il un compte utilisateur ?",
+    "a": "Non. Notre forte conviction que la gestion du temps doit être rapide et directe nous a conduits à éliminer complètement les complexités de connexion et l'authentification obligatoire."
+  },
+  {
+    "q": "Où les données sont-elles stockées ?",
+    "a": "Nous utilisons la technologie de base de données ultra-rapide (Isar), garantissant que vos données, tâches et routines sont enregistrées et récupérées localement en toute sécurité en un clin d'œil."
+  },
+  {
+    "q": "Mes données sont-elles téléchargées sur un serveur Suwaya ?",
+    "a": "Absolument pas. Votre vie privée est sacrée pour nous. L'application n'a pas de serveurs cloud pour collecter ou synchroniser vos tâches quotidiennes et vos habitudes."
+  },
+  {
+    "q": "Les données locales sont-elles cryptées ?",
+    "a": "Les données sont stockées en toute sécurité dans le bac à sable (Sandbox) protégé désigné pour l'application par le système d'exploitation de votre appareil. La meilleure protection pour vos données est d'utiliser des mots de passe forts et de sécuriser votre appareil lui-même."
+  },
+  {
+    "q": "Y a-t-il des analyses d'utilisation ou des publicités ?",
+    "a": "Non. Nous avons conçu Suwaya pour être un environnement pur et calme concentré exclusivement sur votre productivité, loin des distractions et des réseaux publicitaires de suivi."
+  },
+  {
+    "q": "Où puis-je trouver la Politique de Confidentialité ?",
+    "a": "La transparence est notre principe. Vous pouvez lire clairement et facilement la politique de confidentialité détaillée depuis l'intérieur de l'application via le menu latéral."
+  },
+  {
+    "q": "La suppression de l'application supprimera-t-elle mes données ?",
+    "a": "Oui, parce que l'application enregistre les données localement de manière sécurisée pour respecter votre vie privée, la suppression de l'application invite le système d'exploitation à nettoyer l'appareil de ces données. Veuillez faire attention."
+  },
+  {
+    "q": "Y a-t-il une synchronisation entre les appareils ?",
+    "a": "Notre conception actuelle se concentre fortement sur la confidentialité et le fonctionnement indépendant (Local-first), la synchronisation cloud n'est donc pas disponible dans cette version."
+  },
+  {
+    "q": "Y a-t-il une fonctionnalité de sauvegarde ou d'exportation de données ?",
+    "a": "C'est une caractéristique importante dans nos plans futurs, vous permettant de conserver une copie sûre de vos belles réalisations au cas où vous changeriez de téléphone."
+  },
+  {
+    "q": "Combien de langues l'application prend-elle en charge ?",
+    "a": "Suwaya est une application mondiale ! Elle soutient fièrement 22 langues dans le monde entier, permettant aux utilisateurs de diverses cultures d'expérimenter l'harmonie astronomique dans leur langue maternelle."
+  },
+  {
+    "q": "L'arabe et le RTL (de droite à gauche) sont-ils pris en charge ?",
+    "a": "Absolument, avec les plus hauts standards de qualité et une conception adaptative (RTL) garantissant une expérience utilisateur arabe authentique, native et très confortable."
+  },
+  {
+    "q": "La FAQ fait-elle partie des fichiers de traduction de l'interface utilisateur ?",
+    "a": "Non, elles sont intelligemment séparées dans des fichiers JSON dynamiques, ce qui nous permet de les mettre à jour et de les développer rapidement pour mieux vous servir sans attendre les mises à jour des magasins d'applications."
+  },
+  {
+    "q": "Pourquoi séparer la FAQ de la traduction de l'interface utilisateur ?",
+    "a": "Cette architecture flexible nous permet d'ajouter instantanément de nouvelles questions et explications en réponse à vos demandes, sans gonfler inutilement les fichiers principaux de l'application."
+  },
+  {
+    "q": "Y a-t-il une recherche et une catégorisation dans la FAQ ?",
+    "a": "L'interface utilisateur actuelle affiche une liste interactive simplifiée (ExpansionTile) pour une lecture directe et facile. Nous explorons des options de filtrage avancées pour l'avenir."
+  },
+  {
+    "q": "Pourquoi des catégories n'ont-elles pas été ajoutées dans le JSON maintenant ?",
+    "a": "Nous avons choisi l'élégance et la simplicité initialement pour faciliter le lancement et accélérer la fourniture d'informations vitales à l'utilisateur. Le développement est en cours."
+  },
+  {
+    "q": "Des catégories peuvent-elles être ajoutées plus tard ?",
+    "a": "Oui, certainement ! L'architecture est conçue de manière flexible pour accueillir des mots-clés et des catégories pour une recherche de réponses ultra-rapide à l'avenir."
+  },
+  {
+    "q": "L'application est-elle open-source ?",
+    "a": "Oui, nous croyons fermement en la puissance de la communauté et au développement collaboratif. Le code de l'application est publié en toute transparence sur GitHub sous la licence GNU GPL v3.0."
+  },
+  {
+    "q": "Qu'est-ce que packages/suwaya_time ?",
+    "a": "C'est le cœur battant du projet ! Un package technique indépendant soigneusement développé pour gérer sans faille les calculs les plus complexes des heures de prière, des périodes et de la vitesse du temps virtuel."
+  },
+  {
+    "q": "Pourquoi séparer le moteur de Flutter ?",
+    "a": "Cela représente l'Architecture Propre (Clean Architecture). La séparation assure un test rapide et facile des opérations mathématiques complexes sans aucune interférence de l'interface utilisateur."
+  },
+  {
+    "q": "Le moteur peut-il être réutilisé à l'avenir ?",
+    "a": "Oui ! Étant écrit en (Pure Dart), il peut facilement être exploité plus tard pour développer des montres intelligentes, des applications web ou des API robustes."
+  },
+  {
+    "q": "Comment le projet assure-t-il l'exactitude des périodes ?",
+    "a": "Grâce à une couche de Tests Unitaires (Unit Testing) stricte garantissant un séquencement sans faille, aucun chevauchement, et correspondant exactement à 48 Suwayas avec une précision extrême et inébranlable."
+  },
+  {
+    "q": "Les tests prouvent-ils la précision globale pour tous les cas ?",
+    "a": "Les tests couvrent efficacement et de manière effective les règles et cas principaux. Nous soutenons cela avec une amélioration continue pour affronter de front les défis des situations géographiques extrêmes."
+  },
+  {
+    "q": "Y a-t-il des tests pour les hautes latitudes ?",
+    "a": "Oui, nous avons conçu des tests personnalisés pour des cas climatiques difficiles comme un jour continu ou une longue nuit afin de garantir des performances solides et stables."
+  },
+  {
+    "q": "Y a-t-il des tests pour l'Heure d'Été (DST) ?",
+    "a": "Absolument. Le moteur teste la sécurité de la transition entre les changements d'horloge en avant et en arrière, garantissant la continuité des périodes et absolument aucun espace vide dans votre journée."
+  },
+  {
+    "q": "Quelle est la différence entre 07:12 et une heure virtuelle cumulative comme 03:30 ?",
+    "a": "07:12 est le numéro de Suwaya et ses minutes (un brillant index organisationnel). 03:30 est un affichage mathématique cumulatif du temps virtuel depuis le début de la journée. L'interface utilisateur de l'application se concentre sur le premier pour sa simplicité et sa beauté."
+  },
+  {
+    "q": "N'importe quelle heure civile peut-elle être convertie en heure Suwaya ?",
+    "a": "Oui, excellemment. Le moteur peut prendre de manière fluide n'importe quelle heure de votre journée civile et la convertir sans faille à sa place appropriée dans les Suwayas virtuelles."
+  },
+  {
+    "q": "L'heure Suwaya peut-elle être convertie en heure civile ?",
+    "a": "Mathématiquement oui, mais parce que la Suwaya change dynamiquement, la conversion nécessite de connaître la ville et la date exactes pour vous donner l'heure civile précise à ce moment magnifique."
+  },
+  {
+    "q": "Pourquoi la localisation et la date doivent-elles être spécifiées pour interpréter l'heure Suwaya ?",
+    "a": "Parce que Suwaya respire avec la Terre ! La 7e Suwaya après le Asr diffère dans son heure civile entre La Mecque et Londres, et change complètement entre l'hiver et l'été."
+  },
+  {
+    "q": "Puis-je partager une heure Suwaya avec quelqu'un dans une autre ville ?",
+    "a": "Vous pouvez partager le 'contexte' du temps (ex. : 'parlons après la prière du Asr'), ce qui porte une belle signification partagée. Mais pour les rendez-vous d'affaires internationaux, l'heure civile reste le choix le plus approprié."
+  },
+  {
+    "q": "Suwaya est-il adapté aux entreprises et aux écoles ?",
+    "a": "Une idée inspirante et très évolutive ! La version actuelle est conçue comme un outil de productivité (personnel), tandis que l'utilisation institutionnelle nécessite des fonctionnalités de synchronisation de groupe que nous explorons avec enthousiasme pour l'avenir."
+  },
+  {
+    "q": "Peut-il remplacer le système officiel d'horaires de travail ?",
+    "a": "Suwaya agit comme une brillante couche 'consultative' pour gérer votre énergie pendant le travail, tandis que l'horloge civile reste correctement le régulateur des lois et des heures de travail officielles."
+  },
+  {
+    "q": "Peut-il être utilisé pour réguler le sommeil ?",
+    "a": "Merveilleusement, oui ! Les études biologiques indiquent fortement l'importance de synchroniser le sommeil avec les cycles de lumière/obscurité. Lier votre heure de coucher aux périodes nocturnes de Suwaya peut améliorer considérablement et naturellement la qualité de votre repos."
+  },
+  {
+    "q": "Peut-il être utilisé pour les études, le sport et le travail ?",
+    "a": "C'est le compagnon idéal absolu pour eux ! Organiser les périodes d'étude et de sport en fonction de votre énergie le matin ou pendant les périodes de Asr vous donne un engagement plus profond et une concentration beaucoup plus élevée."
+  },
+  {
+    "q": "Y a-t-il des preuves scientifiques prouvant que 48 Suwayas améliorent la productivité ?",
+    "a": "La science de la 'Chronobiologie' prouve de manière concluante que l'harmonie avec les cycles lumière/obscurité améliore la vigilance et le métabolisme. Le système des 48 Suwayas est l'outil d'ingénierie intelligent que nous avons inventé pour appliquer facilement et pratiquement cette science dans votre vie quotidienne."
+  },
+  {
+    "q": "Suwaya est-il la même chose que la science du Rythme Circadien ?",
+    "a": "Suwaya est la belle application pratique des concepts de cette science ! Alors que la biologie étudie comment votre corps réagit aux heures du jour, Suwaya fournit l'interface élégante qui lie vos plans à ce rythme naturel pour améliorer profondément votre qualité de vie."
+  },
+  {
+    "q": "Une longue Suwaya de jour signifie-t-elle que je dois travailler plus ?",
+    "a": "Absolument pas. La longueur d'une Suwaya de jour en été vous donne un sentiment d'abondance pour accomplir des tâches calmement sans vous précipiter, pas une invitation à l'épuisement. Suwaya organise l'effort, il ne l'augmente pas."
+  },
+  {
+    "q": "Une longue Suwaya est-elle un quota de travail obligatoire ?",
+    "a": "Non, c'est un espace complètement libre. Vous pouvez sagement allouer de longues Suwayas au travail, au repos, au sport ou au culte en fonction entièrement de votre objectif pour la journée."
+  },
+  {
+    "q": "Comment choisir entre l'heure civile et l'heure Suwaya ?",
+    "a": "En termes simples : les engagements externes stricts (vol, travail) ont l'heure civile. Les objectifs personnels profonds (lecture, méditation, sport) se lient à Suwaya afin que vous puissiez profiter d'un accomplissement flexible et sans stress."
+  },
+  {
+    "q": "Est-il préférable de convertir toute ma vie à Suwaya ?",
+    "a": "Ne cherchez pas la perfection, cherchez l'équilibre. Utilisez Suwaya comme un outil responsabilisant pour améliorer votre qualité de vie et vos habitudes personnelles, et utilisez l'heure civile pour les engagements communautaires."
+  },
+  {
+    "q": "Et si les Suwayas me déroutent ?",
+    "a": "La beauté réside dans la simplicité. Commencez par suivre votre journée via les 7 grandes périodes claires (Fajr, Dhuhr..), et lorsque vous y êtes confortablement habitué, plongez dans la précision de Suwaya quand vous le souhaitez."
+  },
+  {
+    "q": "Dois-je mémoriser les numéros de Suwaya ?",
+    "a": "Jamais. L'interface visuelle époustouflante de l'application fait tous les calculs lourds et montre simplement votre position visuellement, vous épargnant complètement d'avoir à mémoriser le moindre chiffre."
+  },
+  {
+    "q": "Pourquoi l'heure civile pour la même Suwaya change-t-elle ?",
+    "a": "Parce que la Terre tourne et le Soleil bouge ! Suwaya vous garde intimement connecté à ce rythme cosmique renouvelé, tandis que son numéro reste un indicateur très stable pour votre routine au sein de ce changement."
+  },
+  {
+    "q": "Ce changement est-il une erreur ?",
+    "a": "Non, c'est la fonctionnalité la plus forte de l'application ! Ce changement naturel garantit que votre routine (comme marcher après le Asr) restera toujours exactement dans la même atmosphère appropriée tout au long de l'année."
+  },
+  {
+    "q": "La durée d'une Suwaya change-t-elle au sein d'une même période ?",
+    "a": "Elle est très stable et presque constante pour vous donner une concentration inébranlable et ininterrompue au sein d'une seule session, s'adaptant de manière flexible et fluide uniquement lorsque vous passez à la période suivante pour s'adapter aux changements naturels du mouvement du soleil."
+  },
+  {
+    "q": "L'application recalcule-t-elle chaque seconde ?",
+    "a": "Notre conception respecte profondément les ressources de votre téléphone. L'application utilise une minuterie intelligente et très économique garantissant des mises à jour d'affichage incroyablement fluides sans vider la batterie de votre appareil."
+  },
+  {
+    "q": "À quelle fréquence l'affichage du temps virtuel est-il mis à jour ?",
+    "a": "Il y a une impulsion programmatique (Ticker) très légère et optimisée qui met à jour l'écran, tandis que les calculs de base complexes se produisent silencieusement et efficacement en arrière-plan."
+  },
+  {
+    "q": "A-t-il besoin d'internet pour calculer les heures de prière ?",
+    "a": "Le moteur intelligent n'a pas du tout besoin d'internet. Il calcule entièrement localement en fonction des coordonnées et des paramètres que vous avez configurés, prêt à fonctionner où que vous soyez."
+  },
+  {
+    "q": "Et si je n'accorde pas la permission de localisation ?",
+    "a": "Nous respectons totalement votre choix. Vous pouvez facilement utiliser la fonction de localisation manuelle et sélectionner votre ville dans la liste intégrée pour profiter de toutes les fonctionnalités de l'application sans compromis."
+  },
+  {
+    "q": "Changer de ville modifie-t-il les tâches ?",
+    "a": "Vos précieuses tâches ne seront jamais perdues. Leurs heures seront réévaluées intelligemment et de manière transparente pour s'adapter au calendrier de votre nouvelle ville, poursuivant votre productivité sans une seule interruption pendant le voyage."
+  },
+  {
+    "q": "Que signifie Local-first (Priorité au Local) ?",
+    "a": "C'est notre engagement ferme que votre téléphone est votre forteresse. L'application effectue ses opérations principales (tâches, prières, routines) entièrement à l'intérieur de votre appareil, garantissant une vitesse fulgurante, une confidentialité totale et une indépendance complète des serveurs."
+  },
+  {
+    "q": "Local-first signifie-t-il uniquement hors ligne ?",
+    "a": "Non. Nous fusionnons brillamment l'intelligence locale avec la puissance d'internet uniquement lorsque cela est nécessaire pour fournir une expérience rafraîchie (comme la récupération des mises à jour de la FAQ depuis GitHub) pour vous tenir parfaitement informé."
+  },
+  {
+    "q": "Y a-t-il une connexion (Login) ?",
+    "a": "Nous avons supprimé toutes les barrières. Ouvrez l'application et commencez à organiser votre journée instantanément sans jamais avoir besoin de mémoriser de nouveaux mots de passe ou de créer des comptes encombrants."
+  },
+  {
+    "q": "Y a-t-il un abonnement obligatoire ou des publicités ?",
+    "a": "Suwaya est avant tout un outil de concentration profonde, il vous est donc livré avec une expérience totalement sans publicité, dépourvue de réseaux publicitaires distrayants ou de systèmes d'abonnement obligatoires entravant votre utilisation du moteur principal."
+  },
+  {
+    "q": "Dois-je compter uniquement sur Suwaya pour les heures de prière ?",
+    "a": "Suwaya est un outil de calcul très précis. Cependant, nous recommandons toujours en cas de différences mineures de faire correspondre les heures avec votre mosquée locale pour une paix totale du cœur."
+  },
+  {
+    "q": "Que dois-je faire si les horaires diffèrent de quelques minutes ?",
+    "a": "La solution ultime est entre vos mains : vérifiez les paramètres du Madhab et de la méthode de calcul, et utilisez la fonction de 'Décalage Manuel' pour faire correspondre l'horaire de votre mosquée en un seul clic."
+  },
+  {
+    "q": "Et si la différence est grande ?",
+    "a": "Vérifiez simplement vos paramètres de fuseau horaire ou les coordonnées saisies. La plupart du temps, un simple ajustement de la position ramènera des résultats parfaitement précis instantanément."
+  },
+  {
+    "q": "Le lever du soleil sera-t-il utilisé comme limite à l'avenir ?",
+    "a": "Nous étudions toujours de nouvelles améliorations passionnantes. L'inclusion du lever du soleil comme limite pourrait être un développement futur fantastique s'il s'avère apporter une forte valeur ajoutée aux utilisateurs et au modèle 7776777."
+  },
+  {
+    "q": "D'autres modèles temporels peuvent-ils être ajoutés à l'avenir ?",
+    "a": "Oui, grâce à l'architecture incroyablement robuste de l'application, nous sommes complètement ouverts à la fourniture de modèles et de distributions supplémentaires adaptés aux préférences diverses et uniques de nos utilisateurs."
+  },
+  {
+    "q": "Quelles sont les constantes fondamentales qui doivent être préservées ?",
+    "a": "Notre identité réside dans : sept périodes naturelles, un cadre complet de Fajr à Fajr, une continuité transparente et une flexibilité des minutes virtuelles pour créer un environnement organisationnel vraiment unique."
+  },
+  {
+    "q": "Les couleurs et l'apparence peuvent-elles être modifiées sans changer le système ?",
+    "a": "Oui, absolument ! Nous vous avons fourni une garde-robe de thèmes attrayants (Classique, Minimal, Géométrique) pour personnaliser profondément votre expérience visuelle sans toucher à la puissance du moteur mathématique."
+  },
+  {
+    "q": "Suwaya est-il une réinvention des heures saisonnières historiques ?",
+    "a": "C'est une inspiration intelligente du génie du passé, brillamment fusionnée avec les dernières technologies de productivité modernes, vous offrant un outil numérique moderne et intelligent qui surpasse complètement les limitations historiques."
+  },
+  {
+    "q": "Suwaya est-il une invention scientifique ou un produit logiciel ?",
+    "a": "C'est un produit logiciel innovant traduisant des concepts de rythme naturel scientifiquement documentés (Chronobiologie) en un outil quotidien très pratique vous aidant à vivre une vie beaucoup plus productive et harmonieuse."
+  },
+  {
+    "q": "Peut-il être étudié de manière académique ?",
+    "a": "La conception unique de l'interface utilisateur et l'interaction humaine avec le temps dans Suwaya en font un matériau riche et passionnant pour l'étude dans les domaines de la technologie et de la gestion du comportement humain."
+  },
+  {
+    "q": "Les documents GitHub prouvent-ils les avantages de Suwaya ?",
+    "a": "Les documents expliquent clairement l'immense puissance de l'aspect technique. Quant aux avantages et à la productivité, ils reposent sur la science de la 'Chronobiologie' et votre expérience personnelle unique d'harmonisation avec votre journée."
+  },
+  {
+    "q": "Où puis-je trouver la référence technique précise ?",
+    "a": "Pour les ingénieurs et les amateurs de détails, le fichier `Suwaya-Time.md` joint au dépôt contient toutes les équations étonnantes, les distributions et la brillante ingénierie du moteur."
+  },
+  {
+    "q": "Où puis-je trouver la structure du projet ?",
+    "a": "Une transparence totale est facilement disponible via les fichiers `README.md` et `ARCHITECTURE.md` dans notre dépôt ouvert sur GitHub."
+  },
+  {
+    "q": "Quelles informations sont utiles lors du signalement d'une erreur de timing ?",
+    "a": "Heureux de vous servir ! Veuillez nous indiquer la ville, la date, la méthode de calcul utilisée et tout décalage que vous avez effectué, afin que nous puissions ajuster le moteur et fournir une solution parfaite instantanée."
+  },
+  {
+    "q": "Quelles informations sont utiles lors du signalement d'une erreur dans les Suwayas ?",
+    "a": "Pour accélérer notre support premium, partagez le numéro de la Suwaya, l'heure civile et une capture d'écran du cadran si possible, et l'équipe de développement s'occupera du reste de manière irréprochable."
+  },
+  {
+    "q": "Comment puis-je résumer Suwaya en une phrase ?",
+    "a": "Suwaya est votre compagnon technique premium qui transforme votre journée de rigides heures civiles en une toile astronomique flexible, augmentant massivement votre productivité et liant vos habitudes au rythme naturel de l'univers."
+  }
+]

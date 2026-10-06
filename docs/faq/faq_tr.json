@@ -1,0 +1,618 @@
+[
+  {
+    "q": "Suwaya nedir?",
+    "a": "Suwaya, normal sivil zamanın üzerine 'doğal bir zaman katmanı' ekleyen yenilikçi bir günlük düzenleme uygulaması ve sistemidir. Coğrafi konumunuza, güneşin döngüsüne ve namaz vakitlerine dayanarak gününüzü (İmsak'tan ertesi günkü İmsak'a kadar) yedi hayati döneme ayırır ve bunlara 48 esnek 'Suwaya' dağıtır. Bu sistem görevlerinizi, rutinlerinizi ve odaklanma sürelerinizi evrenin doğal ritmine bağlar."
+  },
+  {
+    "q": "Suwaya hangi sorunu çözmeye çalışıyor?",
+    "a": "Sivil zaman (sosyal zaman) randevular için mükemmeldir, ancak 'içsel zamanınızı' ve günün doğal ritmini tamamen göz ardı eder. Suwaya, gün içindeki gerçek konumunuzu (örneğin: İkindi'nin ortasındasınız veya Gecenin Son Üçte Birindesiniz) size bildirerek bu boşluğu doldurur. Bu, rutininizin yıl boyunca enerji ve ışık değişimleriyle uyum içinde olmasını sağlar."
+  },
+  {
+    "q": "Suwaya normal saatin bir alternatifi midir?",
+    "a": "Hayır, aksine onun mükemmel bir tamamlayıcısıdır. Sivil zaman iş programlarını ve ulaşımı düzenlerken, 'Suwaya' kişisel enerjinizi, alışkanlıklarınızı ve zihinsel planlamanızı organize eder. Dışsal yükümlülükleriniz ile insan doğanız arasında bir denge kurmak için her iki sistemi de uygulama içinde sorunsuzca birlikte kullanabilirsiniz."
+  },
+  {
+    "q": "Suwaya sadece bir namaz vakitleri uygulaması mı?",
+    "a": "Namaz vakitleri zaman motorumuzun atan kalbidir, ancak Suwaya bunun çok ötesine geçer. Görev yönetimi, rutin takibi, astronomik Pomodoro oturumları, gece bölümleri ve gününüzü görsel bir şahesere dönüştüren etkileşimli bir zaman kadranı için entegre bir ortam sunar."
+  },
+  {
+    "q": "Suwaya sadece farklı bir arayüze sahip bir yapılacaklar uygulaması mı?",
+    "a": "Temel fark 'Zaman Bağlantısı'nda yatmaktadır. Normal uygulamalarda bir görev sabit bir sayıya (örneğin 16:00) bağlıdır. Suwaya'da ise görev astronomik bir bağlama (örneğin: İkindi'den sonraki ilk Suwaya) bağlıdır, bu da programınızın mevsimlerin ve güneşin hareketine otomatik olarak uyum sağlaması demektir."
+  },
+  {
+    "q": "Suwaya'da bağlamsal veya astronomik zaman ne anlama gelir?",
+    "a": "Zamanı katı sayılar yerine hesaplanmış doğal olaylara göre tanımlamaktır. Fiziksel zaman her zamanki gibi akar, ancak Suwaya onu Biyolojik Ritminizle (Sirkadiyen Ritim) uyumlu bir şekilde yeniden sunarak size zamanın değeri ve akışı hakkında daha derin bir algı kazandırır."
+  },
+  {
+    "q": "Suwaya sivil zamanın yanlış olduğunu mu iddia ediyor?",
+    "a": "Kesinlikle hayır. Sivil zaman modern dünyada vazgeçilmez bir standarttır. Suwaya sadece zamanın kalitesine ve kişisel üretkenliğe odaklanan ek bir boyut sunar, bizi toplumdan soyutlamadan doğayla yeniden bağlar."
+  },
+  {
+    "q": "Suwaya birimi nedir?",
+    "a": "Suwaya, uygulama içinde her zaman 30 'sanal' dakikayı temsil eden esnek bir zaman birimidir. Dehası, gerçek dünyadaki süresinin, içine düştüğü astronomik döneme (örneğin yazın Öğle vaktinin uzunluğu ile kışın uzunluğu arasındaki fark) uyum sağlamak için esneyip daralabilmesinde yatar."
+  },
+  {
+    "q": "Bir Suwaya 30 gerçek dakikaya mı eşittir?",
+    "a": "Her zaman değil. Sistemin esnekliği buradadır; astronomik dönem daha uzunsa, Suwaya 30 gerçek dakikadan daha fazlasına eşit olacak şekilde genişler ve görevleri yerine getirmeniz için size bolluk ve sakinlik verir. Dönem daha kısaysa, o zamanın hızlı akışını yansıtacak şekilde daralır."
+  },
+  {
+    "q": "Her Suwaya neden 30 sanal dakikadır?",
+    "a": "Çünkü 48 Suwaya × 30 dakika = 1440 dakika (tam olarak 24 sanal saat eder). Bu tasarım, insan zihninin aşina olduğu günlük yapıyı korurken, zamanın arka planda akıllıca esnemesine olanak tanır."
+  },
+  {
+    "q": "Gün neden 48 Suwaya içeriyor?",
+    "a": "48 sayısı, sanal günü hassas ve pratik yarım saatlik birimlere ayırmayı sağlayan akıllı bir geometrik tasarımdır. Bu, size karmaşıklık olmadan gününüzü planlamak için son derece doğru bir sistem sunar."
+  },
+  {
+    "q": "48 sayısının dini veya astronomik bir kökeni var mı?",
+    "a": "Sayının kendisi, arayüzü güzel bir şekilde organize etmek için Suwaya'ya özgü bir mühendislik seçimidir. Dini ve astronomik değer ise tam olarak hesaplanmış temel dönem sınırlarından (namaz vakitleri ve gecenin üçte birleri gibi) elde edilir."
+  },
+  {
+    "q": "7776777 dağılımı ne anlama geliyor?",
+    "a": "Suwayaların gününüzün yedi dönemine mükemmel dengelenmiş geometrik dağılımıdır: İmsak (7), Kuşluk (7), Öğle (7), İkindi (6), Akşam (7), Gecenin Orta Üçte Biri (7) ve Gecenin Son Üçte Biri (7). Toplamda 48 Suwayalık gününüzü oluştururlar."
+  },
+  {
+    "q": "7776777 dini veya astronomik bir bölünme midir?",
+    "a": "Dönem sınırları kesin astronomik ve dini vakitlerden türetilmiştir, ancak her döneme bu belirli sayıda Suwaya'nın tahsis edilmesi, gününüzde pratik ve rahat bir denge yaratmayı amaçlayan matematiksel bir tasarımdır."
+  },
+  {
+    "q": "İkindi dönemi neden 6 Suwaya alıyor?",
+    "a": "Günün görsel ve pratik dengesini koruyan simetrik bir dağılımla nihai toplama (48) ulaşmak için. Bu durum İkindi döneminin astronomik veya dini önemini hiçbir şekilde azaltmaz; sadece matematiksel denklemde göreceli bir ağırlıktır."
+  },
+  {
+    "q": "Suwayaların dağılımı değiştirilebilir mi?",
+    "a": "Teknik motor son derece esnek bir şekilde inşa edilmiştir, ancak uygulama şu anda tüm kullanıcılar için deneyim istikrarını ve zamanlama doğruluğunu sağlamak amacıyla birleşik [7,7,7,6,7,7,7] dağılımını resmi bir standart olarak benimsemektedir."
+  },
+  {
+    "q": "Suwaya'da gün nasıl başlar?",
+    "a": "Suwaya'da gününüz sabah ezanı (İmsak) ile doğal ve ilham verici bir şekilde başlar ve insan faaliyetinin ve ışık döngüsünün gerçek başlangıcına mükemmel bir şekilde uyum sağlayarak ertesi günün sabah ezanı ile sona erer."
+  },
+  {
+    "q": "Ana ekrandaki Gündüz ve Gece ne anlama gelir?",
+    "a": "Ana ekranda 'Gündüz', o takvim gününde İmsak'tan Akşam'a kadar olan dönemi; 'Gece' ise Akşam'dan ertesi günkü İmsak'a kadar olan dönemi ifade eder. Bu nedenle Pazartesi gecesi Pazar günü Akşam başlar ve Pazartesi İmsak'ta biter, Pazartesi günü ise Pazartesi İmsak'ta başlar ve Pazartesi Akşam'da biter."
+  },
+  {
+    "q": "Gün neden gece yarısı yerine İmsak'ta başlıyor?",
+    "a": "Kronobiyoloji çalışmaları, uyanıklık/ışık döngüsünün biyolojik saat için birincil tetikleyici olduğunu göstermektedir. Suwaya, sizi doğayla mükemmel bir uyum içinde tutmak için başlangıcınızı katı bir sivil sınır (gece yarısı) yerine bu doğal olaya bağlar."
+  },
+  {
+    "q": "Günün başlangıcı Akşam (Maghrib) olarak ayarlanabilir mi?",
+    "a": "Temel zaman motoru şu anda üretkenlik için kapsamlı bir organizasyonel çerçeve olarak (İmsak'tan İmsak'a) döngüsünü izlemek üzere tasarlanmıştır. Gelecekte ek görüntüleme modlarını keşfedebiliriz, ancak mevcut çekirdek bu oldukça etkili model üzerinde çalışmaktadır."
+  },
+  {
+    "q": "Yedi dönem nelerdir?",
+    "a": "Gününüz kesintisiz bir şekilde şunlara bölünür: 1) İmsak, 2) Kuşluk, 3) Öğle, 4) İkindi, 5) Akşam, 6) Gecenin Ortası, ve 7) Gecenin Son Üçte Biri. Bu, enerjinizin ve aktivitenizin her aşamasını kapsar."
+  },
+  {
+    "q": "Yedi dönemin tüm sınırları bağımsız astronomik olaylar mıdır?",
+    "a": "Çoğu öyledir (İmsak, Öğle, İkindi, Akşam), oysa İmsak/Kuşluk sınırı matematiksel olarak hesaplanmış bir orta noktadır ve gece dönemleri Akşam'dan İmsak'a kadar olan zamanın kesin bölümünden elde edilir."
+  },
+  {
+    "q": "Güneşin Doğuşu (İşrak) yedi dönemden herhangi biri için bağımsız bir sınır mıdır?",
+    "a": "Güneşin doğuş zamanı doğru bir şekilde hesaplanır ve önemli bir bilgi olarak gösterilir, ancak sabah çalışma sürelerinin kesinti veya boşluk olmadan devam etmesini sağlamak için 'İmsak' dönemini organizasyonel olarak Öğle vaktinin ortasına kadar uzattık."
+  },
+  {
+    "q": "Yatsı (İsha) yedi dönemden herhangi biri için bağımsız bir sınır mıdır?",
+    "a": "Yatsı, vaktinde kılabilmeniz için ibadet vakitleri içinde tam bir doğrulukla gösterilir, ancak görevleri ve rutinleri organize etmeye yönelik temel gece dönemleri, uyku ve sakinlik düzenlerine uyması için doğal gece bölümleri (üçte birler gibi) üzerine inşa edilmiştir."
+  },
+  {
+    "q": "Güneşin doğuşuyla başlamıyorsa Kuşluk dönemi neden bu şekilde adlandırılıyor?",
+    "a": "Buradaki isim, sabahın ikinci yarısı (İmsak-Öğle orta noktasından Öğle'ye kadar) için organizasyonel bir tanımlayıcı olarak kullanılmıştır. Güneş doğduktan sonra başlayan Kuşluk namazı vaktinin kesin fıkhi tanımına müdahale etmez."
+  },
+  {
+    "q": "İmsak ile Öğle arası orta nokta nasıl hesaplanır?",
+    "a": "Kesin bir denklemle: Motor, İmsak ile Öğle arasındaki toplam süreyi hesaplar, yarısını alır ve sabah enerjisinin geçiş noktasını belirlemek için bunu İmsak vaktine ekler."
+  },
+  {
+    "q": "Suwaya geceyi nasıl hesaplar?",
+    "a": "Astronomik olarak gece, Akşam'dan bir sonraki İmsak'a kadar hesaplanır. Uygulama bu aralığı size yararlanmanız için üç örtüşen şekilde sunar: yarımlar, üçte birler veya altıda birler."
+  },
+  {
+    "q": "Yarımlar, üçte birler ve altıda birler art arda gelen 11 dönem midir?",
+    "a": "Hayır, bunlar tamamen aynı geceyi görmek için üç farklı mercektir. Akşamınızı nasıl yönettiğinize uyması için üçte birleri (rutinler ve Kıyam için) veya altıda birleri (hassas mikro bölmeler için) kullanmayı seçebilirsiniz."
+  },
+  {
+    "q": "Gecenin Son Üçte Biri nasıl hesaplanır?",
+    "a": "Gecenin toplam süresi (Akşam'dan İmsak'a kadar) üç eşit parçaya bölünür; huzur ve sakinlik zamanı olan Son Üçte Birlik kısım, gecenin üçte ikisi geçtikten hemen sonra başlar."
+  },
+  {
+    "q": "Son Üçte Birlik kısım sivil gece yarısına mı bağlıdır?",
+    "a": "Kesinlikle hayır. Sadece gecenin doğal uzunluğuna dayanır ve bu nedenle sivil saati mevsimlerle uyumlu bir şekilde kayarak sizi sürekli olarak doğanın ritmine bağlı tutar."
+  },
+  {
+    "q": "Gerçek Suwaya süresi nasıl hesaplanır?",
+    "a": "Basit ve akıllı bir süreç: (Astronomik dönemin gerçek süresi) bölü (Ona tahsis edilen Suwaya sayısı). Sonuç, günle birlikte nefes alan bir Suwaya'dır."
+  },
+  {
+    "q": "Bir gündeki tüm Suwayalar gerçekten eşit midir?",
+    "a": "Odaklanmada istikrar sağlamak için tek bir dönem içinde yaklaşık olarak eşittirler ve güneşin hareketindeki doğal değişikliklere uyum sağlamak için bir dönemden diğerine geçtiğinizde esnek bir şekilde değişirler."
+  },
+  {
+    "q": "Gündüz Suwayası yazın her zaman daha mı uzundur?",
+    "a": "Gerçek süre; belirli dönemin uzunluğu, coğrafi konum ve tarih ile dinamik olarak etkileşime girer. Bu inanılmaz esneklik, Suwaya'yı katı saatlerden ayıran şeydir."
+  },
+  {
+    "q": "Zaman hızı çarpanının anlamı nedir?",
+    "a": "'Sanal' zamanın gerçek zamana kıyasla nasıl geçtiğini gösteren harika bir bilişsel göstergedir. Çarpan 1'den küçükse, zaman yavaş geçer ve başarmak için bolluğunuz vardır. 1'den büyükse, zaman hızlı geçiyordur."
+  },
+  {
+    "q": "Hız çarpanı fiziksel zamanın değiştiği anlamına mı gelir?",
+    "a": "Elbette hayır! Fiziksel zaman sabittir. Çarpan, sanal zamanın ilerleme oranını görselleştiren bir araçtır ve çabanızı yönetmek için dönemlerin genişlemesini veya daralmasını hissetmenize yardımcı olur."
+  },
+  {
+    "q": "07:12 gibi bir gösterge ne anlama gelir?",
+    "a": "Suwaya dünyasında bu sabah 7:12 değildir! 07, küresel Suwaya indeksini (0'dan 47'ye kadar), 12 ise onun içindeki sanal dakikaları temsil eder. Bu, gününüzün ilerleyişini okumanın kapsamlı ve yeni bir yoludur."
+  },
+  {
+    "q": "Suwaya arayüzünde sivil zamanı Suwaya zamanından nasıl ayırabilirim?",
+    "a": "İki sistem arasında net bir görsel ayrım yapmak için sivil (sosyal) zaman, beyaz renkte standart 24 saat formatında görüntülenir ve 00:00'da olduğu gibi saat ve dakikaları iki nokta üst üste ayırır. Suwaya zamanı ise 48 Suwaya sistemi içinde sarı renkte görüntülenir ve 07│12 gibi iki nokta üst üste yerine Suwaya numarasını sanal dakikalardan ayıran kısa dikey bir çizgi «│» bulunur."
+  },
+  {
+    "q": "Suwaya numaralandırması 0'dan mı yoksa 1'den mi başlar?",
+    "a": "Size kolaylık sağlamak için, bir dönem içindeki (örneğin İkindi'nin ilk Suwayası) numaralandırma 1'den başlar. Kadranda kullanılan küresel teknik indeks ise 0'dan 47'ye kadardır."
+  },
+  {
+    "q": "Sanal gün 24 saate eşit midir?",
+    "a": "Evet, mimari olarak: 48 Suwaya × 30 dakika = 24 sanal saat, bu da sistemi zihninizin kavraması için son derece tanıdık ve kolay tutar."
+  },
+  {
+    "q": "Suwaya gerçek gün uzunluğunu değiştirir mi?",
+    "a": "Günün uzunluğunu değiştiremeyiz, ancak onu 'nasıl gördüğünüzü ve ondan nasıl yararlandığınızı' değiştiririz! Suwaya, size daha güçlü bir kontrol ve bereket duygusu vermek için zamanı yeniden temsil eder."
+  },
+  {
+    "q": "Uygulama namaz vakitlerini nasıl hesaplıyor?",
+    "a": "Motorumuz, eşsiz bir doğruluk sağlamak için coğrafi koordinatlarınız, tarih, onaylı hesaplama yöntemi ve mezheple etkileşime giren son derece güvenilir bir astronomik kütüphane (adhan) kullanır."
+  },
+  {
+    "q": "Zamanlamalar diğer tüm uygulamalarla eşleşmeli mi?",
+    "a": "Farklı hesaplama yöntemleri veya açı ayarları nedeniyle küçük farklılıklar (birkaç dakika) tamamen doğaldır. Uygulamayı yerel caminizle kolayca eşleştirmek için manuel ayar araçları sağladık."
+  },
+  {
+    "q": "Şu anda fiilen hangi hesaplama yöntemleri destekleniyor?",
+    "a": "Motor, ana yöntemleri (Ümmü'l-Kura, Mısır İdaresi, Karaçi, Özel) tam olarak destekler. Diğer bazı yöntemler, kesin eşleşmeleri tamamlanana kadar güvenli bir varsayılan olarak şu an için 'Dünya İslam Birliği'ne yönlendirilmektedir."
+  },
+  {
+    "q": "Bu not neden önemli?",
+    "a": "Çünkü tam şeffaflığa bağlıyız. Arayüzde görüntülenen adın, arka planda çalışan kesin astronomik algoritmayı tam olarak yansıtmasını sağlıyoruz, böylece ibadetiniz konusunda tamamen huzurlu olabilirsiniz."
+  },
+  {
+    "q": "İkindi ayarlarında Mezhep ne anlama gelir?",
+    "a": "İkindi namazının başlama zamanını belirlemek için esneklik sağlayan fıkhi bir seçenektir. Uygulama, bölgenize uyması için hem Şafii (Çoğunluk) hem de Hanefi yöntemlerini güzel bir şekilde destekler."
+  },
+  {
+    "q": "Yüksek enlem kuralları nelerdir?",
+    "a": "Bunlar, alacakaranlığın açıkça kaybolmadığı kutuplara yakın bölgelerde İmsak ve Yatsı hesaplamalarının doğru yapılmasını sağlayan (Gecenin Ortası, Gecenin Yedide Biri, Alacakaranlık Açısı gibi) gelişmiş astronomik çözümlerdir."
+  },
+  {
+    "q": "Suwaya kutup bölgeleri için uygun mu?",
+    "a": "Evet, motor yüksek enlem kurallarıyla donatılmıştır, ancak bu zorlu bölgelerin fıkhi karmaşıklığı nedeniyle sonuçların oradaki yerel İslam merkezleriyle doğrulanması şiddetle tavsiye edilir."
+  },
+  {
+    "q": "İmsak ve Yatsı açıları ayarlanabilir mi?",
+    "a": "Kesinlikle. 'Özel' (Custom) hesaplama yöntemini seçerek bölgenizin belirli standartlarına uyan hassas astronomik açılar girme yetkisine sahip olursunuz."
+  },
+  {
+    "q": "Namaz vakitleri manuel olarak ayarlanabilir mi?",
+    "a": "Evet, beş farz namaz için zamanları şehrinizin takvimiyle tam olarak eşleştirecek şekilde cerrahi bir hassasiyetle kalibre etmenize olanak tanıyan kusursuz bir manuel düzeltme (±30 dakika) özelliği sunduk."
+  },
+  {
+    "q": "Güneşin doğuşu manuel olarak ayarlanabilir mi?",
+    "a": "Hayır, güneşin doğuşu, doğal bir referans olarak hesaplanan ve görüntülenen tamamen astronomik bir olaydır. Günün doğru zamansal yapısını korumak için manuel ayarın dışında tutulmuştur."
+  },
+  {
+    "q": "Akşam vaktini (Maghrib) ayarlarsam gece bölümü değişir mi?",
+    "a": "Evet, çok zekice! Sistemimizde gece Akşam ile başladığından, herhangi bir ayarlama yarımların, üçte birlerin ve altıda birlerin uzunluklarını ve sınırlarını otomatik ve doğru bir şekilde yeniden kalibre edecektir."
+  },
+  {
+    "q": "Bir namazı ayarlarsam diğer namazlar da kayar mı?",
+    "a": "Hayır, manuel ayarlama sadece seçilen namazı etkiler ve hesaplamaların geri kalanını karıştırmadan her namazı ayrı ayrı ayarlamak için size tam esneklik sağlar."
+  },
+  {
+    "q": "Suwaya dini bir ibadet birimi midir?",
+    "a": "Hayır, zamanınızı daha iyi değerlendirmenize yardımcı olmayı amaçlayan akıllı bir teknik ve organizasyonel yeniliktir ve fıkhi bir hüküm veya öngörülen bir ibadet birimi değildir."
+  },
+  {
+    "q": "Yedi dönem günün dini bir bölünmesi midir?",
+    "a": "Hayatı daha iyi organize etmek için mübarek vakitlerden ve ibadet programlarından esinlenen bir tasarım modelidir, ancak bağlayıcı bir fıkhi bölünme değildir."
+  },
+  {
+    "q": "Suwaya dini hükümler (Fetva) veriyor mu?",
+    "a": "Suwaya gelişmiş bir organizasyon ve hesaplama aracıdır, bir fetva makamı değildir. Kesin fıkhi hükümler için lütfen onaylı uzmanlara başvurun."
+  },
+  {
+    "q": "Müslüman olmayanlar kullanabilir mi?",
+    "a": "Kesinlikle! Gün ışığı ve doğal döngülerle uyum sağlama kavramı (Sirkadiyen Uyum), biyologlar tarafından üretkenliği ve sağlığı iyileştirmek için herkese şiddetle tavsiye edilen evrensel bir kavramdır."
+  },
+  {
+    "q": "Uygulama neden konuma ihtiyaç duyuyor?",
+    "a": "Sihir kişiselleştirmede yatıyor! Namaz vakitleri ile gündüz ve gece dönemlerinin uzunlukları, dünyadaki coğrafi koordinatlarınızdan doğrudan ve benzersiz bir şekilde etkilenir."
+  },
+  {
+    "q": "GPS her zaman açık mı kalmalı?",
+    "a": "Pil konusunda endişelenmeyin! Uygulama konumunuzu bir kez alır ve ardından tüm karmaşık hesaplamaları yerel olarak (Çevrimdışı) gerçekleştirir. GPS'i yalnızca başka bir şehre seyahat ettiğinizde güncellemeniz gerekir."
+  },
+  {
+    "q": "Seyahat edersem ne olur?",
+    "a": "Konumu güncelle (GPS) düğmesine tek bir dokunuşla uygulama gününüzü kusursuz bir şekilde yeniden oluşturacak, saat dilimini ayarlayacak ve Suwaya bağlantılı görevlerin zamanlarını yeni hedefinize mükemmel şekilde uyacak şekilde kalibre edecektir."
+  },
+  {
+    "q": "Uygulama saat dilimini (Timezone) nasıl işliyor?",
+    "a": "Gelişmiş işleme katmanı, Evrensel Zaman (UTC) ile yerel zaman arasında dönüştürme yaparken mutlak hassasiyet sağlamak için saat dilimini koordinatlarınızla derinlemesine entegre eder."
+  },
+  {
+    "q": "Yaz Saati Uygulamasını (DST) nasıl işliyor?",
+    "a": "Motor, saat geçişlerini (ileri ve geri) işlemek için testlerle tam donanımlıdır ve dönem sürekliliğini ve gününüzde kesinlikle boşluk olmamasını sağlar."
+  },
+  {
+    "q": "Artık yıl (Şubat 29) bir sorun mu?",
+    "a": "Hayır, motor 29 Şubat'ı akıcı bir şekilde işlemek ve 1 Mart'ın şafağına sorunsuz bir şekilde geçmek için baştan sona test edilmiştir."
+  },
+  {
+    "q": "Mevcut sivil tarihin sabahından önce ne olur?",
+    "a": "Uygulama son derece akıllı bir şekilde, 'İmsak'tan İmsak'a' döngüsünün henüz tamamlanmadığını algılar ve sabah ezanı gelene kadar önceki Suwaya gününün verilerini zarif bir şekilde görüntüler."
+  },
+  {
+    "q": "Dönemler arasında boşluk var mı?",
+    "a": "Titiz geometrik tasarımımız, her dönemin sonunun tam olarak bir sonrakinin başlangıç noktası olmasını garanti ederek, İmsak'tan ertesi günkü İmsak'a kadar mükemmel, sürekli bir döngü oluşturur."
+  },
+  {
+    "q": "Motor hesaplamada başarısız olursa ne olur?",
+    "a": "Suwaya'daki sağlam Geri Dönüş (Fallback) sistemi çökmeleri önler ve ayarlar veya koordinatlar düzeltilene kadar arayüzünüzün güzel bir şekilde işlevsel kalmasını sağlayarak güvenli bir geçici durum görüntüler."
+  },
+  {
+    "q": "Sivil bir görev ile Suwaya'ya bağlı bir görev arasındaki fark nedir?",
+    "a": "Sivil bir görev belirli bir saate çivilenmiştir (toplantılar gibi). Suwaya'ya bağlı bir görev ise canlıdır, günün ritmiyle akar ve sivil saati doğal bağlamında (örneğin İkindi'den sonraki sakinlik) kalmak için otomatik olarak değişir."
+  },
+  {
+    "q": "Örneğin bir görevi İkindi'ye bağlamanın faydası nedir?",
+    "a": "Zihinsel dengeyi garanti eder! Etkinliğiniz İkindi sonrası aşamanın sakinliğini gerektiriyorsa, uygulama yıl boyunca İkindi ezanının nasıl değiştiğine bakılmaksızın sizi her zaman bu mükemmel zamanda uyaracaktır."
+  },
+  {
+    "q": "Her görev astronomik mi olmak zorunda?",
+    "a": "Hayır. Resmi randevular, uçuşlar ve iş sivil zamanı kullanır. Suwaya size katı sivil randevuları esnek kişisel alışkanlıklarınızla sorunsuz bir şekilde birleştirmeniz için tam esneklik sunar."
+  },
+  {
+    "q": "Sivil zaman ile Suwaya birleştirilebilir mi?",
+    "a": "Evet, ve bu nihai modern üretkenlik davranışıdır! Dışsal taahhütler için sivil zamanı, enerjinizi, kişisel hedeflerinizi ve alışkanlıklarınızı planlamak için Suwaya'yı kullanın."
+  },
+  {
+    "q": "Rutinler nelerdir?",
+    "a": "Rutin, anlık bir başarı noktasını temsil eden bir görevin aksine, kadranda güzel bir yay olarak zarif bir şekilde çizilen, derin çalışma veya dinlenme (örneğin İkindi'den Akşam'a kadar) için ayrılmış genişletilmiş bir zaman dilimidir."
+  },
+  {
+    "q": "Astronomik Kadran nedir?",
+    "a": "Görsel şaheserimizdir! Gününüzün yapısını, dönemlerini, görevlerini ve ilerlemesini gösteren etkileşimli dairesel bir pano, başarılarla dolu gününüz içindeki konumunuzun çarpıcı bir mekansal ve doğrudan algısını sunar."
+  },
+  {
+    "q": "Kadran gerçek bir usturlap mı?",
+    "a": "Görselliğini tarihi usturlaptan alan, alan astronomik gözlemlerinden ziyade günlük zamanı güzel bir şekilde organize etmek için özel olarak tasarlanmış modern, akıllı bir dijital arayüzdür."
+  },
+  {
+    "q": "Astronomik Pomodoro Sayacı nedir?",
+    "a": "Ünlü Pomodoro tekniğinin muhteşem bir yükseltmesidir! Sizi her zaman katı bir 25 dakikaya zorlamak yerine, sayaç ilerlemesini sanal 'Suwaya' zamanına bağlayarak doğal gününüzün hızıyla mükemmel bir uyum içinde nefes alır ve akar."
+  },
+  {
+    "q": "25 astronomik Pomodoro dakikası 25 gerçek dakikaya eşit midir?",
+    "a": "Şart değil. Onun süper gücü budur; mevcut Suwaya zamanı yavaş geçiyorsa, odaklanma seansınız zamanın bolluğundan yararlanmak için zarifçe uzar ve canlılığınızla eşleşen benzersiz bir odaklanma deneyimi yaratır."
+  },
+  {
+    "q": "Hangi odaklanma kalıpları mevcut?",
+    "a": "Farklı enerji seviyelerinize uyacak kalıplar sağladık: Altın Denge (25/5), Mutlak Odak (30/0) ve Rahat Kalıp (20/10). Bugün size ne ilham veriyorsa onu seçin."
+  },
+  {
+    "q": "Uygulama uyarılar gönderebilir mi?",
+    "a": "Kesinlikle. Suwaya, sizi tam tercihlerinize göre namaz vakitlerine, görevlerinize ve rutinlerinize derinden bağlı tutan güçlü bir bildirim sistemine sahiptir."
+  },
+  {
+    "q": "Bildirim ile Alarm arasındaki fark nedir?",
+    "a": "Bildirim (Notification) nazik bir hatırlatma mesajıdır. 'Alarm' ise ekranı aydınlatarak ve sürekli çalarak dikkatinizi güçlü bir şekilde çekmek için tasarlanmıştır, bu da onu uyanmak veya namazlar için mükemmel bir seçim yapar."
+  },
+  {
+    "q": "Uygulama neden bildirim iznine ihtiyaç duyuyor?",
+    "a": "Çünkü ihtiyacınız olduğunda yanınızda olmak istiyoruz! Bu olmadan uygulama arka planda sessizce çalışır ve kendiniz için planladığınız önemli hatırlatıcıları alamazsınız."
+  },
+  {
+    "q": "Android'de neden 'Kesin Alarmlar' (Exact Alarms) iznine ihtiyaç duyuyor?",
+    "a": "Modern Android sistemleri pilden tasarruf etmek için zaman planlamasını kısıtlar. Ezanların ve görev alarmlarınızın herhangi bir sinir bozucu gecikme olmadan tam saniyesinde çalmasını sağlamak için bu iznin verilmesi kesinlikle gereklidir."
+  },
+  {
+    "q": "Alarmın tam saniyesinde çalacağı garanti mi?",
+    "a": "Sistemi en yüksek güvenilirlik derecesinde tasarladık, ancak bazen bazı telefon üreticilerinin katı pil yönetimi politikaları gecikmeye neden olabilir. Uygulamayı pil optimizasyonundan muaf tutmanızı şiddetle tavsiye ederiz."
+  },
+  {
+    "q": "Bir uyarı neden gecikebilir?",
+    "a": "Bunun temel nedeni, uygulamaların arka planda çalışmasını engelleyen sistem kısıtlamalarıdır (Pil Optimizasyonu). Telefonunuzdaki bu tek ayarı değiştirmek sorunu anında çözer."
+  },
+  {
+    "q": "Suwaya internet olmadan çalışır mı?",
+    "a": "Gururla evet! Suwaya 'Önce-Yerel' (Local-first) prensibi üzerine inşa edilmiştir. Namaz hesaplamaları, görev yönetimi, ayarlar ve şehirler veritabanı, bulut bağlantısına hiç ihtiyaç duymadan yerel olarak güçlü ve ışık hızında çalışır."
+  },
+  {
+    "q": "SSS (Sıkça Sorulan Sorular) internet olmadan çalışır mı?",
+    "a": "Akıllı önbelleğe alma sistemimiz sayesinde, soruları sadece bir kez yüklemek, onları gelecekte çevrimdışı olsanız bile sizin için kalıcı olarak kullanılabilir hale getirir."
+  },
+  {
+    "q": "SSS sayfası neden hibrit (karma) olarak adlandırılıyor?",
+    "a": "Çünkü her iki dünyanın da en iyisini zekice birleştiriyor: İnternetten (GitHub üzerinden) anında, dinamik güncellemeler ve (yerel önbellek aracılığıyla) kalıcı yerel kullanılabilirlik ve hız."
+  },
+  {
+    "q": "SSS çevrimdışı kullanım için iyileştirilebilir mi?",
+    "a": "Her zaman mükemmellik için çabalıyoruz. Gelecek planlarımız, ilk kurulumda hiç internetin olmadığı durumlar için uygulama içine temel bir kopyanın gömülmesini içermektedir."
+  },
+  {
+    "q": "Suwaya bir kullanıcı hesabı gerektirir mi?",
+    "a": "Hayır. Zaman yönetiminin hızlı ve doğrudan olması gerektiğine olan güçlü inancımız, oturum açma karmaşıklıklarını ve zorunlu kimlik doğrulamayı tamamen ortadan kaldırmamıza neden oldu."
+  },
+  {
+    "q": "Veriler nerede saklanıyor?",
+    "a": "Verilerinizin, görevlerinizin ve rutinlerinizin göz açıp kapayıncaya kadar güvenli bir şekilde yerel olarak kaydedilmesini ve alınmasını sağlayan ultra hızlı (Isar) veritabanı teknolojisini kullanıyoruz."
+  },
+  {
+    "q": "Verilerim bir Suwaya sunucusuna mı yükleniyor?",
+    "a": "Kesinlikle hayır. Gizliliğiniz bizim için kutsaldır. Uygulamanın günlük görevlerinizi ve alışkanlıklarınızı toplamak veya senkronize etmek için hiçbir bulut sunucusu yoktur."
+  },
+  {
+    "q": "Yerel veriler şifrelenmiş mi?",
+    "a": "Veriler, cihazınızın işletim sistemi tarafından uygulama için belirlenmiş korumalı Korumalı Alan'da (Sandbox) güvenle saklanır. Verileriniz için en iyi koruma, güçlü parolalar kullanmak ve cihazınızın kendisini güvence altına almaktır."
+  },
+  {
+    "q": "Kullanım analitiği veya reklamlar var mı?",
+    "a": "Hayır. Suwaya'yı dikkat dağıtıcı unsurlardan ve takip eden reklam ağlarından uzakta, yalnızca üretkenliğinize odaklanan saf, sakin bir ortam olacak şekilde tasarladık."
+  },
+  {
+    "q": "Gizlilik Politikasını nerede bulabilirim?",
+    "a": "Şeffaflık prensibimizdir. Ayrıntılı gizlilik politikasını yan menü üzerinden uygulama içinden açık ve kolay bir şekilde okuyabilirsiniz."
+  },
+  {
+    "q": "Uygulamayı silmek verilerimi siler mi?",
+    "a": "Evet, uygulama gizliliğinize saygı duymak için verileri güvenli bir şekilde yerel olarak kaydettiğinden, uygulamanın silinmesi işletim sisteminin cihazı bu verilerden temizlemesine neden olur. Lütfen dikkatli olun."
+  },
+  {
+    "q": "Cihazlar arasında senkronizasyon var mı?",
+    "a": "Mevcut tasarımımız büyük ölçüde gizliliğe ve bağımsız çalışmaya (Local-first) odaklanmaktadır, bu nedenle bu sürümde bulut senkronizasyonu mevcut değildir."
+  },
+  {
+    "q": "Yedekleme veya veri dışa aktarma özelliği var mı?",
+    "a": "Bu, telefonunuzu değiştirmeniz durumunda güzel başarılarınızın güvenli bir kopyasını saklamanızı sağlayacak, gelecek planlarımızda yer alan önemli bir özelliktir."
+  },
+  {
+    "q": "Uygulama kaç dili destekliyor?",
+    "a": "Suwaya küresel bir uygulamadır! Çeşitli kültürlerden kullanıcıların ana dillerinde astronomik uyumu deneyimlemelerine olanak tanıyan dünya çapında 22 dili gururla destekler."
+  },
+  {
+    "q": "Arapça ve Sağdan Sola (RTL) destekleniyor mu?",
+    "a": "Kesinlikle, otantik, yerel ve son derece rahat bir Arapça kullanıcı deneyimi sağlayan en yüksek kalite standartları ve uyarlanabilir tasarım (RTL) ile."
+  },
+  {
+    "q": "SSS, arayüz çeviri dosyalarının bir parçası mı?",
+    "a": "Hayır, akıllıca dinamik JSON dosyalarına ayrılmışlardır; bu, uygulama mağazası güncellemelerini beklemeden size daha iyi hizmet vermek için bunları hızla güncellememize ve genişletmemize olanak tanır."
+  },
+  {
+    "q": "SSS neden arayüz çevirisinden ayrıldı?",
+    "a": "Bu esnek mimari, temel uygulama dosyalarını gereksiz yere şişirmeden sorularınıza yanıt olarak anında yeni sorular ve açıklamalar eklememize olanak tanır."
+  },
+  {
+    "q": "SSS içinde arama ve kategorizasyon var mı?",
+    "a": "Mevcut kullanıcı arayüzü, doğrudan ve kolay okuma için basitleştirilmiş etkileşimli bir liste (ExpansionTile) görüntüler. Gelecek için gelişmiş filtreleme seçeneklerini araştırıyoruz."
+  },
+  {
+    "q": "JSON içine kategoriler neden şimdi eklenmedi?",
+    "a": "Başlangıçta piyasaya sürülmeyi kolaylaştırmak ve kullanıcıya hayati bilgileri sunmayı hızlandırmak için zarafet ve sadeliği seçtik. Geliştirme devam etmektedir."
+  },
+  {
+    "q": "Kategoriler daha sonra eklenebilir mi?",
+    "a": "Evet, kesinlikle! Mimari, gelecekte yıldırım hızında yanıt araması için anahtar kelimeleri ve kategorileri barındıracak şekilde esnek bir şekilde tasarlanmıştır."
+  },
+  {
+    "q": "Uygulama açık kaynaklı mı?",
+    "a": "Evet, topluluğun gücüne ve işbirliğine dayalı gelişime güçlü bir şekilde inanıyoruz. Uygulamanın kodu şeffaf bir şekilde GitHub'da GNU GPL v3.0 lisansı altında yayınlanmıştır."
+  },
+  {
+    "q": "packages/suwaya_time nedir?",
+    "a": "Projenin atan kalbidir! Namaz vakitleri, dönemler ve sanal zaman hızının en karmaşık hesaplamalarını kusursuz bir şekilde ele almak için özenle geliştirilmiş bağımsız bir teknik pakettir."
+  },
+  {
+    "q": "Motor neden Flutter'dan ayrıldı?",
+    "a": "Bu, Temiz Mimariyi (Clean Architecture) temsil eder. Ayrım, herhangi bir kullanıcı arayüzü müdahalesi olmadan karmaşık matematiksel işlemlerin hızlı ve kolay bir şekilde test edilmesini sağlar."
+  },
+  {
+    "q": "Motor gelecekte yeniden kullanılabilir mi?",
+    "a": "Evet! Saf Dart (Pure Dart) ile yazıldığı için, daha sonra akıllı saatler, web uygulamaları veya sağlam API'ler geliştirmek için kolayca kullanılabilir."
+  },
+  {
+    "q": "Proje, dönemlerin doğruluğunu nasıl sağlıyor?",
+    "a": "Kusursuz dizilimi, örtüşme olmamasını ve tam olarak 48 Suwaya'nın aşırı, sarsılmaz bir hassasiyetle eşleşmesini sağlayan sıkı bir Birim Testi (Unit Testing) katmanı aracılığıyla."
+  },
+  {
+    "q": "Testler tüm durumlar için küresel doğruluğu kanıtlıyor mu?",
+    "a": "Testler, temel kuralları ve durumları verimli ve etkili bir şekilde kapsar. Bunu, aşırı coğrafi konum zorluklarıyla doğrudan başa çıkmak için sürekli iyileştirmeyle destekliyoruz."
+  },
+  {
+    "q": "Yüksek enlemler için testler var mı?",
+    "a": "Evet, kaya gibi sağlam, istikrarlı bir performans sağlamak için sürekli gündüz veya uzun gece gibi zorlu iklim durumları için özel testler geliştirdik."
+  },
+  {
+    "q": "Yaz Saati Uygulaması (DST) için testler var mı?",
+    "a": "Kesinlikle. Motor, saatlerin ileri ve geri alınması arasındaki geçişlerin güvenliğini test ederek dönem sürekliliğini ve gününüzde kesinlikle boşluk olmamasını sağlar."
+  },
+  {
+    "q": "07:12 ile 03:30 gibi kümülatif sanal zaman arasındaki fark nedir?",
+    "a": "07:12 Suwaya numarası ve dakikalarıdır (harika bir organizasyonel indeks). 03:30 ise gün başladığından beri sanal zamanın kümülatif matematiksel gösterimidir. Uygulamanın arayüzü basitliği ve güzelliği için ilkine odaklanır."
+  },
+  {
+    "q": "Herhangi bir sivil zaman Suwaya zamanına dönüştürülebilir mi?",
+    "a": "Evet, mükemmel bir şekilde. Motor, sivil gününüzdeki herhangi bir zamanı sorunsuzca alıp sanal Suwayalar içindeki uygun yerine kusursuz bir şekilde dönüştürebilir."
+  },
+  {
+    "q": "Suwaya zamanı sivil zamana dönüştürülebilir mi?",
+    "a": "Matematiksel olarak evet, ancak Suwaya dinamik olarak değiştiğinden, dönüştürme işlemi size o güzel andaki kesin sivil zamanı vermek için tam şehri ve tarihi bilmeyi gerektirir."
+  },
+  {
+    "q": "Suwaya zamanını yorumlamak için neden konum ve tarih belirtilmelidir?",
+    "a": "Çünkü Suwaya Dünya ile birlikte nefes alır! İkindi'den sonraki 7. Suwaya'nın sivil saati Mekke ile Londra arasında farklılık gösterir ve Kış ile Yaz arasında tamamen değişir."
+  },
+  {
+    "q": "Suwaya zamanını başka bir şehirdeki biriyle paylaşabilir miyim?",
+    "a": "Zamanın 'bağlamını' paylaşabilirsiniz (örneğin 'İkindi namazından sonra konuşalım'), ki bu güzel, ortak bir anlam taşır. Ancak uluslararası iş randevuları için sivil zaman en uygun seçenek olmaya devam etmektedir."
+  },
+  {
+    "q": "Suwaya şirketler ve okullar için uygun mu?",
+    "a": "İlham verici ve son derece ölçeklenebilir bir fikir! Mevcut sürüm (kişisel) bir üretkenlik aracı olarak tasarlanmıştır, kurumsal kullanım ise gelecekte heyecanla araştırdığımız grup senkronizasyon özellikleri gerektirir."
+  },
+  {
+    "q": "Resmi çalışma programı sisteminin yerini alabilir mi?",
+    "a": "Suwaya, çalışma sırasında enerjinizi yönetmek için mükemmel bir 'danışmanlık' katmanı görevi görürken, sivil saat yasalar ve resmi çalışma saatleri için doğru düzenleyici olmaya devam eder."
+  },
+  {
+    "q": "Uykuyu düzenlemek için kullanılabilir mi?",
+    "a": "Harika bir şekilde evet! Biyolojik çalışmalar, uykuyu aydınlık/karanlık döngüleriyle senkronize etmenin önemini güçlü bir şekilde göstermektedir. Uyku zamanınızı Suwaya'nın gece dönemlerine bağlamak, dinlenme kalitenizi önemli ölçüde ve doğal olarak artırabilir."
+  },
+  {
+    "q": "Ders çalışmak, spor yapmak ve çalışmak için kullanılabilir mi?",
+    "a": "Bunlar için kesinlikle mükemmel bir arkadaştır! Sabah veya İkindi dönemlerindeki enerjinize göre çalışma ve spor dönemlerini düzenlemek size daha derin bir bağlılık ve çok daha yüksek bir odaklanma sağlar."
+  },
+  {
+    "q": "48 Suwaya'nın üretkenliği artırdığını kanıtlayan bilimsel kanıt var mı?",
+    "a": "'Kronobiyoloji' bilimi, aydınlık/karanlık döngüleriyle uyumun uyanıklığı ve metabolizmayı geliştirdiğini kesin olarak kanıtlamaktadır. 48 Suwaya sistemi, bu bilimi günlük yaşamınızda kolay ve pratik bir şekilde uygulamak için icat ettiğimiz akıllı mühendislik aracıdır."
+  },
+  {
+    "q": "Suwaya Sirkadiyen Ritim bilimiyle aynı şey midir?",
+    "a": "Suwaya bu bilimin kavramlarının güzel ve pratik bir uygulamasıdır! Biyoloji vücudunuzun günün saatlerine nasıl tepki verdiğini incelerken, Suwaya yaşam kalitenizi derinden artırmak için planlarınızı bu doğal ritme bağlayan zarif bir arayüz sağlar."
+  },
+  {
+    "q": "Uzun bir gündüz Suwayası daha fazla çalışmam gerektiği anlamına mı gelir?",
+    "a": "Kesinlikle hayır. Yazın gündüz Suwayasının uzunluğu, görevleri acele etmeden, sakince yerine getirmeniz için size bir bolluk hissi verir, tükenmişliğe bir davet değildir. Suwaya çabayı organize eder, artırmaz."
+  },
+  {
+    "q": "Uzun bir Suwaya zorunlu bir çalışma kotası mıdır?",
+    "a": "Hayır, tamamen özgür bir alandır. Uzun Suwayaları gün için hedefinize tamamen bağlı olarak akıllıca çalışmaya, dinlenmeye, spora veya ibadete ayırabilirsiniz."
+  },
+  {
+    "q": "Sivil zaman ile Suwaya zamanı arasında nasıl seçim yaparım?",
+    "a": "Basitçe söylemek gerekirse: katı dışsal yükümlülüklere (uçuş, iş) sivil zaman verilir. Derin kişisel hedefler (okuma, meditasyon, spor) esnek ve stressiz başarının tadını çıkarabilmeniz için Suwaya'ya bağlanır."
+  },
+  {
+    "q": "Tüm hayatımı Suwaya'ya dönüştürmek daha mı iyidir?",
+    "a": "Mükemmelliği değil, dengeyi arayın. Suwaya'yı yaşam kalitenizi ve kişisel alışkanlıklarınızı geliştirmek için güçlendirici bir araç olarak kullanın ve toplumsal yükümlülükler için sivil zamanı kullanın."
+  },
+  {
+    "q": "Suwayalar kafamı karıştırırsa ne yapmalıyım?",
+    "a": "Güzellik sadeliktedir. Gününüzü 7 büyük ve net dönem (İmsak, Öğle vb.) üzerinden takip etmeye başlayın ve rahatça alıştığınızda, dilediğiniz zaman Suwaya hassasiyetine dalın."
+  },
+  {
+    "q": "Suwaya numaralarını ezberlemek zorunda mıyım?",
+    "a": "Asla. Uygulamanın çarpıcı görsel arayüzü tüm ağır hesaplamaları yapar ve konumunuzu görsel olarak basitçe göstererek sizi herhangi bir sayıyı ezberlemekten tamamen kurtarır."
+  },
+  {
+    "q": "Aynı Suwaya'nın sivil zamanı neden değişiyor?",
+    "a": "Çünkü Dünya dönüyor ve Güneş hareket ediyor! Suwaya sizi bu yenilenen kozmik ritme derinden bağlı tutarken, numarası bu değişim içinde rutininiz için son derece istikrarlı bir gösterge olmaya devam eder."
+  },
+  {
+    "q": "Bu değişim bir hata mıdır?",
+    "a": "Hayır, bu uygulamanın mutlak en güçlü özelliğidir! Bu doğal değişim, rutininizin (İkindi'den sonra yürüyüş yapmak gibi) tüm yıl boyunca her zaman tam olarak aynı uygun atmosferde kalmasını sağlar."
+  },
+  {
+    "q": "Bir Suwaya'nın süresi aynı dönem içinde değişir mi?",
+    "a": "Tek bir oturumda size sarsılmaz ve kesintisiz bir odaklanma sağlamak için son derece istikrarlı ve neredeyse sabittir, güneşin hareketindeki doğal değişikliklere uyum sağlamak için yalnızca bir sonraki döneme geçtiğinizde esnek ve sorunsuz bir şekilde uyum sağlar."
+  },
+  {
+    "q": "Uygulama her saniye yeniden mi hesaplıyor?",
+    "a": "Tasarımımız telefonunuzun kaynaklarına derinden saygı duyar. Uygulama, cihazınızın pilini tüketmeden inanılmaz derecede pürüzsüz ekran güncellemeleri sağlayan akıllı, son derece ekonomik bir zamanlayıcı kullanır."
+  },
+  {
+    "q": "Sanal zaman ekranı ne sıklıkla güncellenir?",
+    "a": "Ekranı güncelleyen çok hafif, optimize edilmiş bir programatik nabız (Ticker) bulunurken, karmaşık çekirdek hesaplamaları arka planda sessiz ve verimli bir şekilde gerçekleşir."
+  },
+  {
+    "q": "Namaz vakitlerini hesaplamak için internete ihtiyacı var mı?",
+    "a": "Akıllı motorun internete hiç ihtiyacı yoktur. Nerede olursanız olun çalışmaya hazır şekilde, yapılandırdığınız koordinatlara ve ayarlara dayanarak tamamen yerel olarak hesaplar."
+  },
+  {
+    "q": "Konum izni vermezsem ne olur?",
+    "a": "Seçiminize tamamen saygı duyuyoruz. Uygulamanın tüm özelliklerinden ödün vermeden yararlanmak için manuel konum özelliğini kolayca kullanabilir ve yerleşik listeden şehrinizi seçebilirsiniz."
+  },
+  {
+    "q": "Şehri değiştirmek görevleri değiştirir mi?",
+    "a": "Değerli görevleriniz asla kaybolmaz. Zamanları, seyahatiniz sırasında tek bir kesinti olmadan üretkenliğinizi sürdürerek yeni şehrinizin zamanlamasına mükemmel bir şekilde uyacak şekilde akıllıca ve sorunsuz bir şekilde yeniden değerlendirilecektir."
+  },
+  {
+    "q": "Önce-Yerel (Local-first) ne anlama geliyor?",
+    "a": "Bu, telefonunuzun sizin kaleniz olduğuna dair kesin taahhüdümüzdür. Uygulama, temel işlemlerini (görevler, namazlar, rutinler) tamamen cihazınızın içinde gerçekleştirerek ışık hızı, tam gizlilik ve sunuculardan tam bağımsızlık sağlar."
+  },
+  {
+    "q": "Önce-Yerel, Sadece Çevrimdışı anlamına mı gelir?",
+    "a": "Hayır. Yerel zekayı internetin gücüyle, yalnızca sizi kusursuz bir şekilde bilgilendirmek için yenilenmiş bir deneyim sağlamak (GitHub'dan SSS güncellemelerini almak gibi) gerektiğinde mükemmel bir şekilde birleştiriyoruz."
+  },
+  {
+    "q": "Giriş (Login) var mı?",
+    "a": "Tüm engelleri kaldırdık. Zaman yönetiminin hızlı ve doğrudan olması gerektiğine olan güçlü inancımız, yeni parolalar ezberlemeye veya zahmetli hesaplar oluşturmaya gerek kalmadan uygulamayı açıp gününüzü anında organize etmeye başlamanızı sağladı."
+  },
+  {
+    "q": "Zorunlu bir abonelik veya reklamlar var mı?",
+    "a": "Suwaya öncelikle bir derin odaklanma aracıdır, bu nedenle çekirdek motoru kullanımınızı engelleyen dikkat dağıtıcı reklam ağlarından veya zorunlu abonelik sistemlerinden tamamen yoksun, tamamen reklamsız bir deneyimle size gelir."
+  },
+  {
+    "q": "Namaz vakitleri için sadece Suwaya'ya mı güvenmeliyim?",
+    "a": "Suwaya son derece doğru bir hesaplama aracıdır. Bununla birlikte, tam bir kalp huzuru için küçük farklılıklar durumunda zamanları yerel caminizle eşleştirmenizi her zaman öneririz."
+  },
+  {
+    "q": "Zamanlamalar birkaç dakika farklılık gösterirse ne yapmalıyım?",
+    "a": "Nihai çözüm ellerinizde: Mezhep ve hesaplama yöntemi ayarlarını kontrol edin ve tek bir dokunuşla caminizin zamanlamasını eşleştirmek için 'Manuel Zaman Ayarı' özelliğini kullanın."
+  },
+  {
+    "q": "Farklılık büyükse ne olur?",
+    "a": "Saat dilimi ayarlarınızı veya girilen koordinatları kontrol etmeniz yeterlidir. Çoğunlukla, basit bir konum ayarı, mükemmel derecede doğru sonuçları anında geri getirecektir."
+  },
+  {
+    "q": "Güneşin doğuşu (İşrak) gelecekte bir sınır olarak kullanılacak mı?",
+    "a": "Her zaman yeni, heyecan verici iyileştirmeler üzerinde çalışıyoruz. Güneşin doğuşunu bir sınır olarak dahil etmek, kullanıcılar ve 7776777 modeli için güçlü bir katma değer sağladığını kanıtlarsa, harika bir gelecekteki gelişme olabilir."
+  },
+  {
+    "q": "Gelecekte başka zaman modelleri eklenebilir mi?",
+    "a": "Evet, uygulamanın inanılmaz derecede sağlam mimarisi sayesinde, kullanıcılarımızın çeşitli ve benzersiz tercihlerine uyan ek modeller ve dağılımlar sunmaya tamamen açığız."
+  },
+  {
+    "q": "Korunması gereken temel sabitler nelerdir?",
+    "a": "Kimliğimiz şunlarda yatmaktadır: yedi doğal dönem, kapsamlı bir İmsak'tan İmsak'a çerçeve, kusursuz süreklilik ve gerçekten benzersiz bir organizasyon ortamı yaratmak için sanal dakika esnekliği."
+  },
+  {
+    "q": "Sistemi değiştirmeden renkler ve görünüm değiştirilebilir mi?",
+    "a": "Evet, kesinlikle! Matematiksel motorun gücüne dokunmadan görsel deneyiminizi derinden özelleştirmek için size muhteşem bir çekici temalar gardırobu (Klasik, Minimal, Geometrik) sunduk."
+  },
+  {
+    "q": "Suwaya, tarihi mevsimsel saatlerin yeniden icadı mıdır?",
+    "a": "Geçmişin dehasından gelen akıllı bir ilhamdır ve tarihi sınırlamaları tamamen aşan modern, akıllı bir dijital araç sunmak için en son modern üretkenlik teknolojileriyle mükemmel bir şekilde birleştirilmiştir."
+  },
+  {
+    "q": "Suwaya bilimsel bir icat mı yoksa bir yazılım ürünü mü?",
+    "a": "Bilimsel olarak belgelenmiş doğal ritim kavramlarını (Kronobiyoloji), çok daha üretken ve uyumlu bir yaşam sürmenize yardımcı olan son derece pratik bir günlük araca dönüştüren yenilikçi bir yazılım ürünüdür."
+  },
+  {
+    "q": "Akademik olarak incelenebilir mi?",
+    "a": "Son derece benzersiz kullanıcı arayüzü tasarımı ve Suwaya'da insanın zamanla etkileşimi, onu teknoloji ve insan davranış yönetimi alanlarında zengin, heyecan verici bir çalışma materyali haline getirmektedir."
+  },
+  {
+    "q": "GitHub belgeleri Suwaya'nın faydalarını kanıtlıyor mu?",
+    "a": "Belgeler teknik tarafın muazzam gücünü açıkça açıklamaktadır. Faydalara ve üretkenliğe gelince, bunlar 'Kronobiyoloji' bilimine ve gününüzle güzel bir şekilde uyum sağlama konusundaki benzersiz kişisel deneyiminize dayanmaktadır."
+  },
+  {
+    "q": "Kesin teknik referansı nerede bulabilirim?",
+    "a": "Mühendisler ve detay sevenler için, depoya ekli `Suwaya-Time.md` dosyası tüm inanılmaz denklemleri, dağılımları ve motorun parlak mühendisliğini içerir."
+  },
+  {
+    "q": "Proje yapısını nerede bulabilirim?",
+    "a": "GitHub'daki açık depomuzdaki `README.md` ve `ARCHITECTURE.md` dosyaları aracılığıyla tam şeffaflık kolayca sağlanmaktadır."
+  },
+  {
+    "q": "Bir zamanlama hatası bildirirken hangi bilgiler faydalıdır?",
+    "a": "Size hizmet etmekten mutluluk duyarız! Lütfen bize şehri, tarihi, kullanılan hesaplama yöntemini ve yaptığınız tüm manuel düzeltmeleri söyleyin, böylece motoru ayarlayabilir ve anında mükemmel bir çözüm sunabiliriz."
+  },
+  {
+    "q": "Suwayalarla ilgili bir hatayı bildirirken hangi bilgiler faydalıdır?",
+    "a": "Premium desteğimizi hızlandırmak için Suwaya numarasını, sivil saati ve mümkünse kadranın bir ekran görüntüsünü paylaşın, geliştirme ekibi gerisini kusursuz bir şekilde halledecektir."
+  },
+  {
+    "q": "Suwaya'yı tek bir cümleyle nasıl özetlerim?",
+    "a": "Suwaya, gününüzü katı sivil saatlerden, üretkenliğinizi muazzam ölçüde artıran ve alışkanlıklarınızı evrenin doğal ritmine bağlayan esnek bir astronomik tuvale dönüştüren birinci sınıf teknik yol arkadaşınızdır."
+  }
+]
