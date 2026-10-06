@@ -1,7 +1,7 @@
 name: suwaya
 description: "A new Astro-Productivity application."
 publish_to: 'none'
-version: 2.0.3
+version: 2.0.3+4
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
@@ -57,7 +57,7 @@ dependencies:
 
   in_app_update: 5.0.0
 
-  purchases_flutter: ^8.0.0
+  purchases_flutter: ^10.14.0
 
 dev_dependencies:
   flutter_test:
