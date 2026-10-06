@@ -21,11 +21,16 @@ class PrivacySection {
 
 // مزود جلب سياسة الخصوصية
 final privacyProvider = FutureProvider.family.autoDispose<List<PrivacySection>, String>((ref, langCode) async {
-  final prefs = await SharedPreferences.getInstance();
-  final cacheKey = 'suwaya_privacy_cache_$langCode';
   
-  // 🌟 الرابط المباشر لملف الخصوصية على GitHub
-  final url = 'https://raw.githubusercontent.com/Abdallah-Kaballo/Suwaya/main/docs/privacy/privacy_$langCode.json';
+  // 🌟 تطبيق آلية السقوط الآمن (Fallback)
+  // إذا كانت اللغة عربية نستخدم 'ar'، وأي لغة أخرى نستخدم 'en' كمرجع قانوني
+  final targetLang = (langCode == 'ar') ? 'ar' : 'en';
+
+  final prefs = await SharedPreferences.getInstance();
+  final cacheKey = 'suwaya_privacy_cache_$targetLang';
+  
+  // 🌟 الرابط المباشر لملف الخصوصية على GitHub يعتمد الآن على targetLang
+  final url = 'https://raw.githubusercontent.com/Abdallah-Kaballo/Suwaya/main/docs/privacy/privacy_$targetLang.json';
 
   try {
     final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));

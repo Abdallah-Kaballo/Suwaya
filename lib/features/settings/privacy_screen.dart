@@ -33,7 +33,7 @@ class PrivacyScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'settings.privacy_policy'.tr(), // الترجمة موجودة مسبقاً لديك
+          'settings.privacy_policy'.tr(),
           style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: true,
@@ -114,7 +114,7 @@ class PrivacyScreen extends ConsumerWidget {
             Icon(LucideIcons.wifi_off, size: 64, color: primaryColor.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
             Text(
-              'لا يمكن تحميل سياسة الخصوصية حالياً. يرجى التحقق من اتصالك بالإنترنت.',
+              'privacy.offline_error'.tr(), // 🌟 تم التحديث هنا
               textAlign: TextAlign.center,
               style: TextStyle(color: textColor, fontSize: 16, height: 1.5),
             ),

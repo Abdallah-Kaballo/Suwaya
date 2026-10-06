@@ -285,7 +285,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final scaffold = ScaffoldMessenger.of(context);
 
     if (_tabController.index == 2) {
-      // السماح بأن يكون وقت النهاية أصغر من البداية ليعبر منتصف الليل
       if (_alertLevel >= 1) {
         bool hasPermissions = await ref
             .read(permissionsProvider.notifier)
@@ -381,7 +380,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     task.alarmVolume = _alarmVolume;
 
     if (_hasTime) {
-      // منع الجدولة في الماضي للمهام العابرة فقط
       if (task.type == TaskType.casual) {
         DateTime taskTime;
         if (_timeMode == 2) {
@@ -405,8 +403,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
         if (_isTimeInPast(taskTime)) {
           HapticFeedback.heavyImpact();
-          scaffold.showSnackBar(const SnackBar(
-              content: Text('خطأ: لا يمكن جدولة مهمة عابرة في الماضي!'),
+          scaffold.showSnackBar(SnackBar(
+              content: Text('add_screen.past_time_error'.tr()),
               backgroundColor: Colors.redAccent));
           return;
         }
@@ -790,9 +788,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                                   DateTime.now().month,
                                   DateTime.now().day))
                               ? DateTime.now()
-                              : tempDate, // 🌟 ضمان أن initialDate ليس في الماضي
-                          firstDate: DateTime
-                              .now(), // 🌟 هذا السطر يمنع المستخدم من اختيار أي يوم يسبق اليوم الحالي
+                              : tempDate, 
+                          firstDate: DateTime.now(), 
                           lastDate:
                               DateTime.now().add(const Duration(days: 365)),
                           onDateChanged: (d) {

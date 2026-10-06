@@ -65,7 +65,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final cityName =
         activeLocation?.name ?? 'add_screen.not_set_mandatory'.tr();
 
-    // 🌟 إصلاح الوضع الفاتح (Light Mode): الاعتماد على الثيم الفعلي للنظام
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = Theme.of(context).cardColor;
@@ -206,23 +205,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           textColor: textColor),
                       _buildSettingRow(context,
                           icon: LucideIcons.clock_3,
-                          title: currentLang == 'ar'
-                              ? 'ترقيم دبابيس القرص'
-                              : 'Dial pin mode',
+                          title: 'settings.dial_pin_mode'.tr(), // 🌟 تم الاستبدال
                           subtitle: settingsState.dialPinMode == 'civil24'
                               ? '24 · 00–23'
                               : '48 · 00–47',
                           onTap: () => _showSelectionSheet(
-                                currentLang == 'ar'
-                                    ? 'ترقيم دبابيس القرص'
-                                    : 'Dial pin mode',
+                                'settings.dial_pin_mode'.tr(), // 🌟 تم الاستبدال
                                 {
-                                  'suwaya48': currentLang == 'ar'
-                                      ? 'السُوَيّعات · 48 دبوسًا'
-                                      : 'Suwaya · 48 pins',
-                                  'civil24': currentLang == 'ar'
-                                      ? 'الوقت المدني · 24 دبوسًا'
-                                      : 'Civil time · 24 pins',
+                                  'suwaya48': 'settings.dial_pin_48'.tr(), // 🌟 تم الاستبدال
+                                  'civil24': 'settings.dial_pin_24'.tr(), // 🌟 تم الاستبدال
                                 },
                                 settingsState.dialPinMode,
                                 notifier.updateDialPinMode,
@@ -299,7 +290,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Column(
                     children: [
-                      Text('Suwaya',
+                      Text('app_name'.tr(), // 🌟 تم الاستبدال لدعم الاسم العربي "سُويعة"
                           style: TextStyle(
                               color: isDark ? Colors.white54 : Colors.black54,
                               fontSize: 13,
@@ -455,7 +446,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       Color borderColor,
       Color textColor,
       Color primaryColor) {
-    // 🌟 إصلاح البحث: إخفاء المجموعة فقط إذا كان البحث لا يطابق العنوان
     if (_searchQuery.isNotEmpty &&
         !label.toLowerCase().contains(_searchQuery)) {
       return const SizedBox.shrink();
@@ -766,7 +756,6 @@ class _SettingRow extends StatelessWidget {
                   ),
                 )
               else
-                // 🌟 السهم ينعكس بناءً على اتجاه لغة التطبيق
                 Icon(
                     context.locale.languageCode == 'ar'
                         ? LucideIcons.chevron_left

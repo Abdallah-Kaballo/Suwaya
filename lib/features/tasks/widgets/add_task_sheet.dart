@@ -64,7 +64,6 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
     final task = widget.existingTask ?? TaskModel();
     task.title = title;
     
-    // 🌟 الإصلاح 10: حفظ نوع المهمة الحقيقي والسويعة الحقيقية
     task.type = _selectedType; 
     task.category = _selectedCategory;
     task.targetPeriodId = _selectedPeriodId;
@@ -219,7 +218,7 @@ class _TaskEditorSheetState extends ConsumerState<TaskEditorSheet> {
                     items: TaskCategory.values.map((cat) {
                       return DropdownMenuItem(
                         value: cat,
-                        child: Text(cat.displayName),
+                        child: Text(cat.displayName), // مفترض أنها تترجم داخلياً
                       );
                     }).toList(),
                     onChanged: (val) => setState(() => _selectedCategory = val!),

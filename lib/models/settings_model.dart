@@ -36,7 +36,7 @@ class SettingsModel {
 
   bool useAstroTimeForIbadat = true;
   String civilTimeFormat = 'system';
-  bool showSunrise = false;
+  bool showSunrise = true;
   List<String> visibleNightParts = ['third_3', 'sixth_4', 'sixth_5'];
 
   int defaultTaskAlertLevel = 1;

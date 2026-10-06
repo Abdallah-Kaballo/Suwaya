@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:alarm/alarm.dart';
 
 class AlarmRingScreen extends StatelessWidget {
@@ -33,9 +34,13 @@ class AlarmRingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🌟 التحديث الجديد: قراءة البيانات من notificationSettings
-    final title = alarmSettings.notificationSettings.title;
-    final body = alarmSettings.notificationSettings.body;
+    // 🌟 التحديث الجديد: قراءة البيانات مع مفاتيح الـ Fallback
+    final title = alarmSettings.notificationSettings.title.isNotEmpty 
+        ? alarmSettings.notificationSettings.title 
+        : 'alarm_screen.default_title'.tr();
+    final body = alarmSettings.notificationSettings.body.isNotEmpty 
+        ? alarmSettings.notificationSettings.body 
+        : 'alarm_screen.default_body'.tr();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0F19), // لون ليلي عميق
@@ -52,13 +57,13 @@ class AlarmRingScreen extends StatelessWidget {
             Column(
               children: [
                 Text(
-                  title.isNotEmpty ? title : 'تنبيه سُويعَة',
+                  title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  body.isNotEmpty ? body : 'حان وقت إنجاز مهمتك!',
+                  body,
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.white70, fontSize: 18),
                 ),
@@ -79,7 +84,7 @@ class AlarmRingScreen extends StatelessWidget {
                       child: const Icon(LucideIcons.moon, color: Colors.white, size: 32),
                     ),
                     const SizedBox(height: 12),
-                    const Text('غفوة 10د', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                    Text('alarm_screen.snooze'.tr(), style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 
@@ -93,7 +98,7 @@ class AlarmRingScreen extends StatelessWidget {
                       child: const Icon(LucideIcons.power, color: Colors.black, size: 40),
                     ),
                     const SizedBox(height: 12),
-                    const Text('إيقاف', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text('alarm_screen.stop'.tr(), style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 18)),
                   ],
                 ),
               ],

@@ -265,7 +265,8 @@ class RailwayRingPainter extends CustomPainter {
           text: text,
           style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w900,
+              // 🌟 تم تعديل الخط ليكون عادياً (ليس عريضاً) لإطار النص
+              fontWeight: FontWeight.normal,
               fontFamily: 'Tajawal',
               foreground: Paint()
                 ..style = PaintingStyle.stroke
@@ -282,7 +283,8 @@ class RailwayRingPainter extends CustomPainter {
           style: TextStyle(
               color: color,
               fontSize: 13,
-              fontWeight: FontWeight.w900,
+              // 🌟 تم تعديل الخط ليكون عادياً (ليس عريضاً) لحشو النص
+              fontWeight: FontWeight.normal,
               fontFamily: 'Tajawal',
               shadows: [
                 Shadow(
@@ -637,7 +639,6 @@ class DynamicNeedlePainter extends CustomPainter {
         TileMode.repeated,
       );
 
-    // 🌟 تنفيذ الطلب 9: زيادة توهج العقرب وإبرازه بخط أبيض ناصع
     canvas.drawLine(
         Offset(0, -needleStart),
         Offset(0, -needleLength),
@@ -655,7 +656,6 @@ class DynamicNeedlePainter extends CustomPainter {
           ..strokeCap = StrokeCap.round
           ..style = PaintingStyle.stroke);
 
-    // قلب ناصع البياض للعقرب ليكون بارزاً
     canvas.drawLine(
         Offset(0, -needleStart),
         Offset(0, -needleLength),

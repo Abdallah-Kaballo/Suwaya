@@ -48,7 +48,6 @@ class FAQScreen extends ConsumerWidget {
             color: primaryColor,
             backgroundColor: surfaceColor,
             onRefresh: () async {
-              // 🌟 تحديث إجباري عند سحب الشاشة للأسفل
               ref.invalidate(faqProvider(langCode));
             },
             child: ListView.builder(
@@ -112,8 +111,9 @@ class FAQScreen extends ConsumerWidget {
           children: [
             Icon(LucideIcons.wifi_off, size: 64, color: primaryColor.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
+            // 🌟 تم تطبيق مفتاح الترجمة هنا
             Text(
-              'يبدو أنك غير متصل بالإنترنت ولم يسبق تحميل الأسئلة.', // يمكنك لاحقاً إضافة مفتاح ترجمة لها
+              'faq.offline_error'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: textColor, fontSize: 16, height: 1.5),
             ),

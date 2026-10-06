@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
@@ -48,7 +49,7 @@ class _LoadingBootstrapScreenState extends State<LoadingBootstrapScreen> {
         ),
       );
     } catch (e, stackTrace) {
-      debugPrint('💥 فشل في التهيئة: $e\n$stackTrace');
+      debugPrint('💥 Failure in initialization: $e\n$stackTrace');
       if (!mounted) return;
       runApp(BootstrapFailureScreen(error: e.toString(), onRetry: _loadDatabase));
     }
@@ -74,11 +75,15 @@ class BootstrapFailureScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // استخدمنا TextDirection ثابت لضمان ظهور شاشة الخطأ بشكل سليم قبل تهيئة EasyLocalization
+    // 🌟 جلب لغة نظام التشغيل لتحديد النصوص لأن EasyLocalization لم تُهيأ بعد
+    final isAr = ui.PlatformDispatcher.instance.locale.languageCode == 'ar';
+    final errorTitle = isAr ? 'عذراً، حدث خطأ أثناء بدء التشغيل' : 'Sorry, a startup error occurred';
+    final retryText = isAr ? 'إعادة المحاولة' : 'Retry';
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
         child: Scaffold(
           backgroundColor: const Color(0xFF13131A),
           body: SafeArea(
@@ -89,7 +94,7 @@ class BootstrapFailureScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 64),
                   const SizedBox(height: 24),
-                  const Text('عذراً، حدث خطأ أثناء بدء التشغيل', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(errorTitle, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -107,7 +112,7 @@ class BootstrapFailureScreen extends StatelessWidget {
                         onRetry();
                       },
                       icon: const Icon(Icons.refresh),
-                      label: const Text('إعادة المحاولة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      label: Text(retryText, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                 ],

@@ -209,7 +209,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     }
   }
 
-  // 🌟 تنفيذ الطلب 2: إلزام سحب المهام بالوقوف على رأس السويعة (00) فقط
   void _handleTaskDrop() {
     if (_draggedTask == null || _dragAngle == null) return;
 
@@ -242,11 +241,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         double progress = relativeAngle / sweep;
         int sIndex = (progress * period.suwayasCount).round();
         if (sIndex >= period.suwayasCount) {
-          sIndex = period.suwayasCount - 1; // حماية
+          sIndex = period.suwayasCount - 1; 
         }
 
         targetSuwaya = sIndex + 1;
-        targetVMin = 0; // 🌟 إجبار المهمة على السقوط في الدقيقة 00
+        targetVMin = 0; 
         break;
       }
     }
@@ -540,6 +539,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               isDark: isDark,
               design: selectedDesign,
               highlightedRoutineId: highlightedRoutineId)),
+          
           _buildLayer(PeriodRingPainter(
               periods: astroState.periods,
               currentPeriod: astroState.currentPeriod,
@@ -549,6 +549,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               langCode: currentLang,
               design: selectedDesign,
               highlightedPeriodId: _highlightedPeriodId)),
+
           _buildLayer(OuterRingPainter(
               periods: astroState.periods,
               dayStart: dayStart,
@@ -731,7 +732,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               Text(suwayaText,
                   style: TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.normal,
                       fontFamily: 'Tajawal',
                       foreground: Paint()
                         ..style = PaintingStyle.stroke
@@ -741,7 +742,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                   style: const TextStyle(
                       color: astroGold,
                       fontSize: 11,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.normal,
                       fontFamily: 'Tajawal')),
             ],
           ),
@@ -750,7 +751,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               style: TextStyle(
                   color: isDark ? Colors.white : Colors.black87,
                   fontSize: 13,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.normal,
                   shadows: const [
                     Shadow(color: Colors.black54, blurRadius: 4)
                   ])),

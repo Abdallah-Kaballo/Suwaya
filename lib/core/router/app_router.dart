@@ -24,6 +24,7 @@ import 'startup_gate.dart';
 
 import '../../features/settings/faq_screen.dart';
 import '../../features/settings/privacy_screen.dart';
+import '../../features/settings/support_screen.dart';
 
 // مفتاح التوجيه الجذري (Full Screen)
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -38,8 +39,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const StartupGate(),
       ),
-
-      // قسم Onboarding بالكامل خارج الشريط
       GoRoute(
         path: '/onboarding',
         parentNavigatorKey: rootNavigatorKey,
@@ -50,8 +49,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const OnboardingLocationScreen(),
       ),
-
-      // قسم الإعدادات وشاشاتها الفرعية خارج الشريط
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
@@ -69,7 +66,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'permissions',
             builder: (context, state) => const PermissionsScreen(),
           ),
-          // 🌟 إضافة المسارات الجديدة هنا
           GoRoute(
             path: 'manual-offsets',
             builder: (context, state) => const ManualOffsetsScreen(),
@@ -81,14 +77,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const FAQScreen(),
       ),
-
       GoRoute(
         path: '/privacy',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const PrivacyScreen(),
       ),
-      
-      // شاشة الإضافة خارج الشريط
       GoRoute(
         path: '/add-task',
         parentNavigatorKey: rootNavigatorKey,
@@ -100,15 +93,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-
-      // 🌟 مسار التايم لاين
+      GoRoute(
+        path: '/support',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SupportScreen(),
+      ),
       GoRoute(
         path: '/ibadat/timeline',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AstroTimelineScreen(),
       ),
-
-      // الحاوية المغلقة: أصبحت تحتوي على 4 شاشات أساسية فقط
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);
@@ -132,7 +126,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
-                path: '/home', builder: (context, state) => const HomeScreen())
+                path: '/home', 
+                builder: (context, state) => const HomeScreen()) 
           ]),
           StatefulShellBranch(routes: [
             GoRoute(

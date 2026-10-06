@@ -507,7 +507,6 @@ class HomeScreen extends ConsumerWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // 🌟 تم تكبير الخط هنا إلى 16 وتكبير أيقونة القلم إلى 18
                             Text('home.dial_indicators'.tr(),
                                 style: TextStyle(
                                     color: pColor,

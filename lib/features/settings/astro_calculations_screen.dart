@@ -50,8 +50,15 @@ class AstroCalculationsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
-          // 🌟 أزرار الشاشات المفقودة
-          _buildActionRow(context, LucideIcons.sliders_horizontal, 'التعديل اليدوي للأوقات', 'إضافة دقائق لإزاحة وقت الصلاة', () => context.push('/settings/manual-offsets'), surfaceColor, borderColor, textColor, primaryColor, isDark),
+          // 🌟 تم تطبيق مفاتيح الترجمة هنا
+          _buildActionRow(
+            context, 
+            LucideIcons.sliders_horizontal, 
+            'astro_calc.manual_offset_title'.tr(), 
+            'astro_calc.manual_offset_subtitle'.tr(), 
+            () => context.push('/settings/manual-offsets'), 
+            surfaceColor, borderColor, textColor, primaryColor, isDark
+          ),
           const SizedBox(height: 12),
 
           _buildGroupTitle('astro_calc.calc_method'.tr(), primaryColor),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:suwaya/features/settings/supporter_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -24,7 +25,7 @@ class AppDrawer extends ConsumerWidget {
     if (!context.mounted) return;
     showAboutDialog(
       context: context,
-      applicationName: 'Suwaya',
+      applicationName: 'app_name'.tr(),
       applicationVersion: packageInfo.version,
       applicationIcon: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -34,6 +35,7 @@ class AppDrawer extends ConsumerWidget {
             errorBuilder: (c, e, s) =>
                 const Icon(LucideIcons.compass, size: 48)),
       ),
+      // 🌟 تم إرجاع سطر حقوق النشر ليكون ثابتاً (Hardcoded) كما طلبت
       applicationLegalese:
           '© ${DateTime.now().year} Abdallah Kaballo.\nAll rights reserved.',
     );
@@ -47,13 +49,12 @@ class AppDrawer extends ConsumerWidget {
     final rootNav = Navigator.of(context, rootNavigator: true);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    // إغلاق القائمة الجانبية بطريقة آمنة
     Navigator.pop(context);
 
     if (!Platform.isAndroid) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-            content: const Text('التحديثات متاحة عبر متجر التطبيقات الخاص بنظامك.'),
+            content: Text('drawer.ios_update_msg'.tr()),
             backgroundColor: primaryColor),
       );
       return;
@@ -93,7 +94,6 @@ class AppDrawer extends ConsumerWidget {
         await InAppUpdate.startFlexibleUpdate();
         await InAppUpdate.completeFlexibleUpdate();
       } else {
-        // 🌟 إرضاء المحلل: تخزين الـ context في متغير محلي وفحصه
         final navContext = rootNav.context;
         if (!navContext.mounted) return;
 
@@ -136,8 +136,8 @@ class AppDrawer extends ConsumerWidget {
       }
 
       scaffoldMessenger.showSnackBar(
-        const SnackBar(
-            content: Text('فشل الاتصال بمتجر Google Play. يرجى المحاولة لاحقاً.'),
+        SnackBar(
+            content: Text('drawer.update_error_msg'.tr()),
             backgroundColor: Colors.redAccent),
       );
     }
@@ -148,7 +148,6 @@ class AppDrawer extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white : Colors.black87;
-    final brandName = context.locale.languageCode == 'ar' ? 'سٌويعة' : 'Suwaya';
 
     return Drawer(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -180,12 +179,38 @@ class AppDrawer extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(brandName,
-                            style: TextStyle(
-                                color: textColor,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2)),
+                        Row(
+                          children: [
+                            Text('app_name'.tr(),
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2)),
+                            const SizedBox(width: 8),
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final tier = ref.watch(supporterProvider);
+                                if (tier == SupporterTier.none) return const SizedBox.shrink();
+                                
+                                IconData badgeIcon;
+                                Color badgeColor;
+                                switch (tier) {
+                                  case SupporterTier.bronze:
+                                    badgeIcon = LucideIcons.medal; badgeColor = const Color(0xFFCD7F32); break;
+                                  case SupporterTier.silver:
+                                    badgeIcon = LucideIcons.award; badgeColor = const Color(0xFFC0C0C0); break;
+                                  case SupporterTier.gold:
+                                    badgeIcon = LucideIcons.crown; badgeColor = const Color(0xFFFFD700); break;
+                                  case SupporterTier.diamond:
+                                    badgeIcon = LucideIcons.gem; badgeColor = const Color(0xFF00E5FF); break;
+                                  default: return const SizedBox.shrink();
+                                }
+                                return Icon(badgeIcon, color: badgeColor, size: 24);
+                              },
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -219,6 +244,14 @@ class AppDrawer extends ConsumerWidget {
                               color: primaryColor,
                               fontSize: 12,
                               fontWeight: FontWeight.bold))),
+                  _buildDrawerItem(
+                      context,
+                      LucideIcons.heart_handshake,
+                      'drawer.support_app'.tr(),
+                      () {
+                    Navigator.pop(context);
+                    context.push('/support');
+                  }, iconColor: const Color(0xFFFFD700)),
                   _buildDrawerItem(
                       context,
                       LucideIcons.refresh_cw,

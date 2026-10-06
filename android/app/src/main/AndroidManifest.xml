@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     
+    <!-- صلاحية الدفع عبر جوجل بلاي -->
+    <uses-permission android:name="com.android.vending.BILLING" />
+
     <!-- صلاحيات الموقع للفلك -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
