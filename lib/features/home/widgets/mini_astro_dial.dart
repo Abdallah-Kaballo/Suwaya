@@ -48,7 +48,7 @@ class _MiniDialPainter extends CustomPainter {
     double currentAngle = -pi / 2;
 
     for (var period in periods) {
-      final sweepAngle = (period.suwayasCount / 48) * 2 * pi;
+      final sweepAngle = (period.suwayasCount / 24) * 2 * pi;
 
       final paint = Paint()
         ..color = period.uiColor.withValues(alpha: 0.2)
@@ -100,31 +100,17 @@ class _MiniDialPainter extends CustomPainter {
 
       String pName = '';
       switch (period.id) {
-        case 1:
-          pName = 'periods.fajr'.tr();
-          break;
-        case 2:
-          pName = 'periods.duha'.tr();
-          break;
-        case 3:
-          pName = 'periods.dhuhr'.tr();
-          break;
-        case 4:
-          pName = 'periods.asr'.tr();
-          break;
-        case 5:
-          pName = 'periods.maghrib'.tr();
-          break;
-        case 6:
-          pName = 'periods.middle_third'.tr();
-          break;
-        case 7:
-          pName = 'periods.last_third'.tr();
-          break;
+        case 1: pName = 'periods.maghrib'.tr(); break;
+        // 🌟 ضمان الأسماء المفقودة
+        case 2: pName = 'periods.isha'.tr(); if(pName == 'periods.isha') pName = 'العشاء'; break;
+        case 3: pName = 'نصف الليل الثاني'; break; 
+        case 4: pName = 'periods.fajr'.tr(); break;
+        case 5: pName = 'periods.duha'.tr(); break;
+        case 6: pName = 'periods.dhuhr'.tr(); break;
+        case 7: pName = 'periods.asr'.tr(); break;
       }
 
-      String outerText =
-          pName.isNotEmpty ? '${period.id}\n($pName)' : period.id.toString();
+      String outerText = pName.isNotEmpty ? '${period.id}\n($pName)' : period.id.toString();
 
       final outerTextR = radius + 15;
       final outerP = Offset(center.dx + outerTextR * cos(middleAngle),

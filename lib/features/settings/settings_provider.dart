@@ -543,9 +543,22 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
   Future<void> toggleVisibleNightPart(String partId) async {
     final newState = state.clone();
+    
     if (newState.visibleNightParts.contains(partId)) {
       newState.visibleNightParts.remove(partId);
     } else {
+      // 🌟 تطبيق قاعدة التعارض الذكية عند الإضافة
+      if (partId == 'third_3') {
+        newState.visibleNightParts.remove('sixth_5');
+        newState.visibleNightParts.remove('sixth_6');
+      } else if (partId == 'sixth_5' || partId == 'sixth_6') {
+        newState.visibleNightParts.remove('third_3');
+      } else if (partId == 'half_2') {
+        newState.visibleNightParts.remove('sixth_4');
+      } else if (partId == 'sixth_4') {
+        newState.visibleNightParts.remove('half_2');
+      }
+      
       newState.visibleNightParts.add(partId);
     }
 
@@ -565,6 +578,13 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     newState.visibleNightParts
         .sort((a, b) => order.indexOf(a).compareTo(order.indexOf(b)));
 
+    state = newState;
+    await _repository.saveSettings(newState);
+  }
+
+  // 🌟 دالة تحديث نمط الرموز
+  Future<void> updateSuwayaIconMode(String mode) async {
+    final newState = state.clone()..suwayaIconMode = mode;
     state = newState;
     await _repository.saveSettings(newState);
   }

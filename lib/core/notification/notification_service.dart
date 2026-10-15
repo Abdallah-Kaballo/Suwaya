@@ -13,9 +13,10 @@ class NotificationService {
   
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  static const String _standardChannelId = 'suwaya_system_standard_v2';
-  static const String _insistentChannelId = 'suwaya_system_alarm_v2';
-  static const String _vibrateChannelId = 'suwaya_system_vibrate_v2';
+  // 🌟 قنوات الجيل الثالث (V3) لإجبار أندرويد على مسح الذاكرة القديمة
+  static const String _standardChannelId = 'suwaya_system_standard_v3';
+  static const String _insistentChannelId = 'suwaya_system_alarm_v3';
+  static const String _vibrateChannelId = 'suwaya_system_vibrate_v3';
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -26,16 +27,25 @@ class NotificationService {
     const InitializationSettings initSettings = InitializationSettings(android: androidSettings, iOS: iosSettings);
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
-    await _createChannels();
+    await _createAndSweepChannels();
   }
 
-  Future<void> _createChannels() async {
+  // 🌟 منظف القنوات الذكي (Sweeper)
+  Future<void> _createAndSweepChannels() async {
     if (!Platform.isAndroid) return;
     final androidImplementation = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
     
+    // مسح قنوات V2 القديمة المعطوبة
+    try {
+      await androidImplementation?.deleteNotificationChannel('suwaya_system_standard_v2');
+      await androidImplementation?.deleteNotificationChannel('suwaya_system_alarm_v2');
+      await androidImplementation?.deleteNotificationChannel('suwaya_system_vibrate_v2');
+    } catch (_) {} // نتجاهل الخطأ إذا لم تكن موجودة
+
     const systemAlarmSound = UriAndroidNotificationSound('content://settings/system/alarm_alert');
     const systemNotifSound = UriAndroidNotificationSound('content://settings/system/notification_sound');
 
+    // إنشاء القنوات الجديدة بقوة قصوى
     await androidImplementation?.createNotificationChannel(AndroidNotificationChannel(
       _standardChannelId, 'notifications.system_alerts'.tr(),
       description: 'notifications.normal_tasks_desc'.tr(),
@@ -77,29 +87,7 @@ class NotificationService {
       sound: const UriAndroidNotificationSound('content://settings/system/notification_sound'),
     );
 
-    // 🌟 تم إضافة await لضمان انتظار الجدولة
     await _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.active);
-  }
-
-  Future<void> scheduleInsistentAlarm({
-    required int id, required String title, required String body, required DateTime scheduledTime,
-  }) async {
-    final safeTime = _getSafeScheduledTime(scheduledTime);
-    if (safeTime.isBefore(DateTime.now())) return;
-
-    final androidDetails = AndroidNotificationDetails(
-      _insistentChannelId, 'notifications.prayers_alerts'.tr(),
-      importance: Importance.max, priority: Priority.max,
-      playSound: true, enableVibration: true,
-      category: AndroidNotificationCategory.alarm,
-      additionalFlags: Int32List.fromList(<int>[4]), 
-      fullScreenIntent: true,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      sound: const UriAndroidNotificationSound('content://settings/system/alarm_alert'),
-    );
-
-    // 🌟 تم إضافة await لضمان انتظار الجدولة
-    await _safeZonedSchedule(id, title, body, safeTime, androidDetails, InterruptionLevel.critical);
   }
 
   Future<void> cancel(int id) async {
@@ -146,7 +134,6 @@ class NotificationService {
       audioAttributesUsage: isInsistent ? AudioAttributesUsage.alarm : AudioAttributesUsage.notification,
     );
 
-    // 🌟 تم إضافة await لضمان انتظار الجدولة
     await _safeZonedSchedule(id, title, body, scheduledTime, androidDetails, isInsistent ? InterruptionLevel.critical : InterruptionLevel.active);
   }
 
@@ -160,16 +147,13 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
-    } catch (e, stack) {
-      // 🌟 تمرير الخطأ وعدم ابتلاعه حتى يفهم النظام أن الجدولة فشلت ولا يضيفها للهاش
+    } catch (e) {
       debugPrint('🚨 فشل جدولة الإشعار بسبب نقص الصلاحيات: $e');
-      debugPrintStack(stackTrace: stack);
       rethrow; 
     }
   }
 
   Future<void> cancelAll() async => await flutterLocalNotificationsPlugin.cancelAll();
-  Future<void> cancelNotification(int id) async => await flutterLocalNotificationsPlugin.cancel(id);
 }
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {

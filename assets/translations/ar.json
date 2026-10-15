@@ -54,7 +54,7 @@
   },
   "home": {
     "night_of": "ليلة",
-    "day_of": "يوم",
+    "day_of": "نهار",
     "civil_time": "الوقت المدني",
     "astro_time": "الوقت الفلكي",
     "dial_indicators": "مؤشرات القرص (روتينات ومهام)",

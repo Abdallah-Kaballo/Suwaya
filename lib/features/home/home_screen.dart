@@ -1,9 +1,10 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
 import 'package:suwaya/features/home/widgets/dial/period_metrics.dart';
 import 'package:suwaya_time/suwaya_time.dart';
@@ -18,13 +19,13 @@ import '../tasks/tasks_provider.dart';
 import '../settings/settings_provider.dart';
 import '../routines/routines_provider.dart';
 import '../../core/providers/ui_providers.dart';
+import '../../core/utils/time_formatters.dart';
 
 import 'widgets/location_header.dart';
 import 'widgets/premium_astro_dial.dart';
 import 'widgets/dial/dial_models.dart';
 import 'widgets/mini_astro_dial.dart';
 import '../../shared/widgets/app_drawer.dart';
-import '../../shared/widgets/suwaya_time_text.dart';
 import '../../core/theme/astro_ui_extensions.dart';
 import 'package:go_router/go_router.dart';
 
@@ -40,8 +41,39 @@ Color getNeonColorForCategory(TaskCategory category) {
   return const Color(0xFF18FFFF);
 }
 
-class HomeScreen extends ConsumerWidget {
+// 🌟 1. تحويل الشاشة إلى StatefulWidget لدعم حفظ الحالة
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+// 🌟 2. إضافة AutomaticKeepAliveClientMixin لمنع إعادة الرسم
+class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAliveClientMixin {
+  
+  // 🌟 3. تفعيل حفظ الحالة
+  @override
+  bool get wantKeepAlive => true;
+
+  ({int globalIndex, int minute}) _getDynamicOrFixedAstroTime(DialSelection selection, AstroState state, DateTime time, bool isEnd) {
+    if (selection.type == DialSelectionType.prayer || selection.type == DialSelectionType.period) {
+      return getFixedAstroTime(selection.id, state, isEnd: isEnd);
+    } else {
+      DateTime evalTime = isEnd ? time.subtract(const Duration(microseconds: 1)) : time;
+      final mockState = SuwayaTimeEngine.calculateCurrentState(
+          SuwayaDay(ibadatTimings: state.ibadatTimings, cycleAnchors: state.cycleAnchors, periods: state.periods), 
+          evalTime
+      );
+      int global = 0;
+      if (mockState.currentSuwayaTime.phase == SuwayaPhase.day) {
+          global = 12 + mockState.currentSuwayaTime.phaseSlotNumber - 1;
+      } else {
+          global = mockState.currentSuwayaTime.phaseSlotNumber - 1;
+      }
+      return (globalIndex: global, minute: mockState.currentSuwayaTime.virtualMinute);
+    }
+  }
 
   Future<void> _showDialItemDialog(
     BuildContext context,
@@ -67,7 +99,12 @@ class HomeScreen extends ConsumerWidget {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(selection.title, style: TextStyle(color: textColor)),
+        // 🌟 4. توسيط النص في النافذة المنبثقة
+        title: Text(
+          selection.title, 
+          textAlign: TextAlign.center, 
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold)
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -79,6 +116,8 @@ class HomeScreen extends ConsumerWidget {
               settings,
               civilColor,
               selection.color,
+              selection,
+              false,
             ),
             if (selection.endTime != null) ...[
               const SizedBox(height: 12),
@@ -90,6 +129,8 @@ class HomeScreen extends ConsumerWidget {
                 settings,
                 civilColor,
                 selection.color,
+                selection,
+                true,
               ),
             ],
             if (periodMetrics != null) ...[
@@ -159,12 +200,23 @@ class HomeScreen extends ConsumerWidget {
     SettingsModel settings,
     Color civilColor,
     Color suwayaColor,
+    DialSelection selection,
+    bool isEnd
   ) {
-    final suwayaTime = astroState.toGlobalSuwayaTime(time);
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
     const baseStyle = TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
+    );
+
+    final fixedTime = _getDynamicOrFixedAstroTime(selection, astroState, time, isEnd);
+    final formattedSuwaya = formatSuwayaTime(
+      fixedTime.globalIndex, 
+      fixedTime.minute, 
+      separator: '|', 
+      isRTL: isRTL,
+      iconMode: settings.suwayaIconMode,
     );
 
     return Row(
@@ -175,21 +227,29 @@ class HomeScreen extends ConsumerWidget {
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            ClockTimeText.civil(
-              civilTime: time,
-              civilTimeFormat: settings.civilTimeFormat,
-              locale: context.locale.languageCode,
-              style: baseStyle.copyWith(color: civilColor),
+            Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(
+                formatCivilTime(
+                  time,
+                  format: settings.civilTimeFormat,
+                  locale: context.locale.languageCode,
+                  context: context,
+                ),
+                style: baseStyle.copyWith(color: civilColor),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: Text('/',
                   style: TextStyle(color: civilColor.withValues(alpha: 0.5))),
             ),
-            ClockTimeText.suwaya(
-              globalSuwayaIndex: suwayaTime.suwayaIndex,
-              virtualMinute: suwayaTime.minute,
-              style: baseStyle.copyWith(color: suwayaColor),
+            Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(
+                formattedSuwaya,
+                style: baseStyle.copyWith(color: suwayaColor),
+              ),
             ),
           ],
         ),
@@ -214,8 +274,8 @@ class HomeScreen extends ConsumerWidget {
       Color pColor, bool isDark, DateTime cityNow, SettingsModel settings) {
     DateTime? rawFajr, rawMaghrib;
     for (var p in astroState.periods) {
-      if (p.id == 1) rawFajr = p.startTime;
-      if (p.id == 5) rawMaghrib = p.startTime;
+      if (p.periodKey == PeriodKey.nightMidnightFajr) rawFajr = p.endTime;
+      if (p.periodKey == PeriodKey.nightMaghribIsha) rawMaghrib = p.startTime;
     }
     rawFajr ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 4, 30);
     rawMaghrib ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 18, 0);
@@ -231,29 +291,27 @@ class HomeScreen extends ConsumerWidget {
     final langCode = context.locale.languageCode;
 
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
+    final dayName = DateFormat('EEEE', safeIntl).format(islamicDate);
 
+    // 🌟 5. تغيير المسمى إلى نهار وليلة
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
-      dayNightStr =
-          '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
+      dayNightStr = 'ليلة $dayName';
     } else if (cityNow.isBefore(todayMaghrib)) {
       islamicDate = cityNow;
       isNight = false;
-      dayNightStr =
-          '${'home.day_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
+      dayNightStr = 'نهار $dayName';
     } else {
       islamicDate = cityNow.add(const Duration(days: 1));
       isNight = true;
-      dayNightStr =
-          '${'home.night_of'.tr()} ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
+      dayNightStr = 'ليلة ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
     }
 
     final hijriDate = HijriCalendar.fromDate(islamicDate);
     final monthName = 'hijri.m${hijriDate.hMonth}'.tr();
     final hijriStr = '${hijriDate.hDay} $monthName ${hijriDate.hYear}';
 
-    final gregorianDate = DateFormat('d MMMM yyyy', safeIntl).format(cityNow);
     final textColor = isDark ? Colors.white : Colors.black87;
 
     return Padding(
@@ -293,33 +351,12 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ClockTimeText.civil(
-                      civilTime: cityNow,
-                      civilTimeFormat: settings.civilTimeFormat,
-                      locale: safeIntl,
-                      style: TextStyle(
-                          color: textColor.withValues(alpha: 0.6),
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                          fontFamily: 'Tajawal'),
-                    ),
-                    Text(' • $gregorianDate',
-                        style: TextStyle(
-                            color: textColor.withValues(alpha: 0.6),
-                            fontSize: 16,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: 'Tajawal')),
-                  ],
-                ),
+                // 🌟 6. تم حذف سطر الساعة المدنية والتاريخ الميلادي من هنا بالكامل
                 const SizedBox(height: 6),
                 Text('$hijriStr ${'common.ah'.tr()}',
                     style: TextStyle(
                         color: textColor,
-                        fontSize: 22,
+                        fontSize: 22, 
                         fontWeight: FontWeight.w900,
                         fontFamily: 'Tajawal',
                         letterSpacing: 0.5)),
@@ -382,8 +419,85 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  void _showDialMarkersSettingsSheet(BuildContext context, WidgetRef ref, AstroState astroState, SettingsModel settings, Color pColor, bool isDark) {
+    HapticFeedback.selectionClick();
+    
+    // الأجزاء التي نريد التحكم بها من القرص مباشرة
+    final dialParts = [
+      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'half_2'))
+        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'half_2'),
+      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'third_3'))
+        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'third_3'),
+      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'sixth_4'))
+        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'sixth_4'),
+      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'sixth_5'))
+        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'sixth_5'),
+      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'sixth_6'))
+        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'sixth_6'),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('home.dial_markers_settings'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
+                const SizedBox(height: 16),
+                
+                Consumer(builder: (context, ref, _) {
+                   final currentSettings = ref.watch(settingsProvider);
+                   return SwitchListTile(
+                    title: Text('ibadat.show_sunrise'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    value: currentSettings.showSunrise,
+                    activeThumbColor: pColor,
+                    secondary: const Icon(LucideIcons.sun, color: Colors.orangeAccent),
+                    onChanged: (val) => ref.read(settingsProvider.notifier).updateShowSunrise(val),
+                  );
+                }),
+                const Divider(height: 1),
+                
+                ...dialParts.map((part) {
+                  return Consumer(builder: (context, ref, _) {
+                    final currentSettings = ref.watch(settingsProvider);
+                    final isSelected = currentSettings.visibleNightParts.contains(part.id);
+                    return CheckboxListTile(
+                      title: Text(('night_parts.${part.nameKey.replaceAll("np_", "")}').tr(),
+                          style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                      value: isSelected,
+                      activeColor: pColor,
+                      secondary: Icon(LucideIcons.sparkles, color: isSelected ? pColor : Colors.grey),
+                      onChanged: (val) => ref.read(settingsProvider.notifier).toggleVisibleNightPart(part.id),
+                    );
+                  });
+                }),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: pColor),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    // 🌟 7. استدعاء الدالة الأم لحفظ الحالة (Super Build)
+    super.build(context);
+    
     ref.watch(notificationSchedulerProvider);
     final astroState = ref.watch(astroProvider);
     final routineArcs = ref.watch(routineArcsProvider);
@@ -420,6 +534,10 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
+      // 🌟 8. تفعيل إيماءة السحب الجانبي (Drawer Drag Gesture)
+      drawerEnableOpenDragGesture: true,
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+      
       drawer: const AppDrawer(),
       onDrawerChanged: (isOpen) =>
           ref.read(isDrawerOpenProvider.notifier).state = isOpen,
@@ -435,7 +553,23 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
         title: const LocationHeader(),
-        actions: const [SizedBox(width: 48)],
+        actions: [
+          // 🌟 9. زر التحويل العالمي بين السويعي والمدني
+          Consumer(builder: (context, ref, _) {
+            final settings = ref.watch(settingsProvider);
+            return IconButton(
+              icon: Icon(
+                settings.useAstroTimeForIbadat ? LucideIcons.clock : LucideIcons.moon_star,
+                color: Theme.of(context).primaryColor,
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(settingsProvider.notifier).updateUseAstroTimeForIbadat(!settings.useAstroTimeForIbadat);
+              },
+            );
+          }),
+          const SizedBox(width: 8),
+        ],
       ),
       body: RefreshIndicator(
         color: pColor,
@@ -458,25 +592,56 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final maxSize = constraints.maxWidth;
-                    return RepaintBoundary(
-                      child: PremiumAstroDial(
-                        size: maxSize,
-                        routineArcs: routineArcs,
-                        onItemTapped: (selection) => _showDialItemDialog(
-                          context,
-                          selection,
-                          astroState,
-                          settings,
+                child: Column( 
+                  children: [
+                    // 🌟 10. زر القلم الجديد أعلى القرص
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showDialMarkersSettingsSheet(context, ref, astroState, settings, pColor, isDark),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: pColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: pColor.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(LucideIcons.pencil, color: pColor, size: 14),
+                                const SizedBox(width: 6),
+                                Text('home.edit_dial'.tr(), style: TextStyle(color: pColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxSize = constraints.maxWidth;
+                        return RepaintBoundary(
+                          child: PremiumAstroDial(
+                            size: maxSize,
+                            routineArcs: routineArcs,
+                            onItemTapped: (selection) => _showDialItemDialog(
+                              context,
+                              selection,
+                              astroState,
+                              settings,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
+
             SliverToBoxAdapter(
               child: Builder(
                 builder: (context) {
@@ -605,7 +770,7 @@ class HomeScreen extends ConsumerWidget {
             color: pColor,
             isDark: isDark,
             currentPeriodId: astroState.currentPeriod.id,
-            currentSuwaya: astroState.currentSuwaya),
+            currentSuwaya: astroState.currentSuwayaTime.periodLocalSlotNumber),
       ),
     );
   }

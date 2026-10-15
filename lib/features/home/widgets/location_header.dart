@@ -74,44 +74,50 @@ class LocationHeader extends ConsumerWidget {
       );
     }
 
-    final latStr = loc.latitude.toStringAsFixed(4);
-    final lngStr = loc.longitude.toStringAsFixed(4);
+    final latStr = loc.latitude.toStringAsFixed(3); // تقليل الأرقام العشرية لتوفير المساحة
+    final lngStr = loc.longitude.toStringAsFixed(3);
     
+    // 🌟 تصميم مدمج وأنيق يمنع القص ويتسع داخل الـ AppBar
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center, // توسيط رأسي
       children: [
+        // السطر الأول: الأيقونة + الإحداثيات (أو الاسم) في سطر واحد
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(type == 'gps' ? LucideIcons.satellite : LucideIcons.navigation, size: 14, color: isDark ? Colors.white54 : Colors.black54),
+            Icon(type == 'gps' ? LucideIcons.satellite : LucideIcons.navigation, size: 14, color: textColor),
             const SizedBox(width: 6),
-            Text('header.current_location'.tr(), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12)),
+            if (type == 'gps')
+              Directionality(
+                textDirection: ui.TextDirection.ltr,
+                child: Text(
+                  '$latStr°N, $lngStr°E',
+                  style: TextStyle(color: textColor, fontSize: 13, fontFamily: 'monospace', letterSpacing: 0.5, fontWeight: FontWeight.bold),
+                ),
+              )
+            else
+              Text(
+                loc.name, 
+                style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold),
+              ),
           ],
         ),
-        const SizedBox(height: 4),
-        if (type == 'gps')
-          Directionality(
-            textDirection: ui.TextDirection.ltr,
-            child: Text(
-              '$latStr°N, $lngStr°E',
-              style: TextStyle(color: textColor, fontSize: 14, fontFamily: 'monospace', letterSpacing: 1.0, fontWeight: FontWeight.bold),
-            ),
-          )
-        else
-          Text(
-            loc.name, 
-            style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold),
-          ),
-        const SizedBox(height: 4),
+        
+        const SizedBox(height: 2), // مسافة صغيرة جداً
+        
+        // السطر الثاني: أقرب مدينة
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(LucideIcons.map_pin, size: 14, color: accentColor),
+            Icon(LucideIcons.map_pin, size: 12, color: accentColor),
             const SizedBox(width: 4),
             Text(
               '${'header.nearest_city'.tr()} $city',
-              style: TextStyle(color: accentColor, fontSize: 13, fontWeight: FontWeight.bold),
+              style: TextStyle(color: accentColor, fontSize: 12, fontWeight: FontWeight.bold),
             ),
           ],
         ),

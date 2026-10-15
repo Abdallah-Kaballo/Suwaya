@@ -11,6 +11,9 @@ class RoutineModel {
   bool isAstroTime = true;
   String pattern = 'linear';
 
+  // 🌟 إضافة إصدار النموذج للروتينات أيضاً
+  int scheduleModelVersion = 2;
+
   int? startTimeMinutes;
   int? endTimeMinutes;
 

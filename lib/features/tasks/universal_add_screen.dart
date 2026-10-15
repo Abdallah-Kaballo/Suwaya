@@ -1,8 +1,10 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:easy_localization/easy_localization.dart';
 
 import 'tasks_provider.dart';
 import '../routines/routines_provider.dart';
@@ -13,6 +15,7 @@ import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/location/permissions_provider.dart';
 import '../../features/settings/settings_provider.dart';
 import '../../shared/widgets/suwaya_time_text.dart';
+import '../../core/utils/time_formatters.dart';
 
 import 'widgets/add_screen_pickers.dart';
 import 'widgets/pattern_preview_painter.dart';
@@ -31,7 +34,7 @@ Color _getNeonColor(TaskCategory category) {
 
 class UniversalAddScreen extends ConsumerStatefulWidget {
   final int currentPeriodId;
-  final int currentSuwaya;
+  final int currentSuwaya; // هذه القيمة حالياً من 1 إلى 24 أو حسب الفترة
   final int initialTab;
   final TaskModel? existingTask;
   final RoutineModel? existingRoutine;
@@ -65,27 +68,24 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   double _alarmVolume = 1.0;
 
   bool _hasTime = false;
-  int _timeMode = 0;
-  late int _targetPeriodId;
-  late int _targetLocalSuwaya;
+  // 🌟 0: سويعي (Astro), 1: مدني (Civil)
+  int _timeMode = 0; 
+  
+  // المتغيرات السويعية (محولة من وإلى Global 0-23)
   int _targetGlobalSuwaya = 0;
   int _targetVirtualMinute = 0;
+  
+  // المتغيرات المدنية
   int _targetCivilHour = 8;
   int _targetCivilMinute = 0;
 
   int _routineTimeMode = 0;
-  late int _routineStartPeriodId;
-  late int _routineStartLocalSuwaya;
-  int _routineStartGlobalSuwaya = 0,
-      _routineStartVirtualMinute = 0,
-      _routineStartCivilHour = 8,
-      _routineStartCivilMinute = 0;
-  late int _routineEndPeriodId;
-  late int _routineEndLocalSuwaya;
-  int _routineEndGlobalSuwaya = 1,
-      _routineEndVirtualMinute = 0,
-      _routineEndCivilHour = 10,
-      _routineEndCivilMinute = 0;
+  int _routineStartGlobalSuwaya = 0, _routineStartVirtualMinute = 0;
+  int _routineStartCivilHour = 8, _routineStartCivilMinute = 0;
+  
+  int _routineEndGlobalSuwaya = 1, _routineEndVirtualMinute = 0;
+  int _routineEndCivilHour = 10, _routineEndCivilMinute = 0;
+  
   String _routinePattern = 'linear';
   Color _routineColor = const Color(0xFF00E5FF);
   final List<int> _routineRecurrenceDays = [];
@@ -97,24 +97,14 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   void initState() {
     super.initState();
     int startTab = widget.existingRoutine != null ? 2 : widget.initialTab;
-    _tabController =
-        TabController(length: 3, vsync: this, initialIndex: startTab);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: startTab);
     _selectedDate = DateTime.now();
 
-    final periods = ref.read(astroProvider).periods;
-    _targetPeriodId = widget.currentPeriodId;
-    _targetLocalSuwaya = widget.currentSuwaya;
-    _targetGlobalSuwaya =
-        _mapLocalToGlobal(_targetPeriodId, _targetLocalSuwaya, periods);
-
-    _routineStartPeriodId = widget.currentPeriodId;
-    _routineStartLocalSuwaya = widget.currentSuwaya;
-    _routineStartGlobalSuwaya = _targetGlobalSuwaya;
-    _routineEndPeriodId = widget.currentPeriodId;
-    _routineEndLocalSuwaya = widget.currentSuwaya < 3
-        ? widget.currentSuwaya + 1
-        : widget.currentSuwaya;
-    _routineEndGlobalSuwaya = _targetGlobalSuwaya + 1;
+    // افتراضيات (نجلبها من القرص)
+    // بما أننا لا نعرف الفهرس العالمي من PeriodId مباشرة، سنفترض 0 مؤقتاً
+    _targetGlobalSuwaya = 0; 
+    _routineStartGlobalSuwaya = 0;
+    _routineEndGlobalSuwaya = 1;
 
     if (widget.existingTask != null) {
       final t = widget.existingTask!;
@@ -127,19 +117,15 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       _alarmTone = t.alarmTone;
       _alarmVolume = t.alarmVolume;
 
-      if (t.isAstroTime &&
-          t.targetPeriodId != null &&
-          t.targetSuwayas.isNotEmpty) {
+      if (t.isAstroTime) {
         _hasTime = true;
         _timeMode = 0;
-        _targetPeriodId = t.targetPeriodId!;
-        _targetLocalSuwaya = t.targetSuwayas.first;
+        // لاستخراج Global Suwaya يجب أن نعلم الفترات
         _targetVirtualMinute = t.targetVirtualMinute;
-        _targetGlobalSuwaya =
-            _mapLocalToGlobal(_targetPeriodId, _targetLocalSuwaya, periods);
+        // سيتم حسابه لاحقاً داخل Build أو بتمريره
       } else if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
         _hasTime = true;
-        _timeMode = 2;
+        _timeMode = 1; // 1 يعني مدني
         _targetCivilHour = t.targetCivilTimeMinutes! ~/ 60;
         _targetCivilMinute = t.targetCivilTimeMinutes! % 60;
       }
@@ -150,41 +136,17 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       _titleController.text = r.title;
       _routineColor = Color(r.colorValue);
       _routinePattern = r.pattern;
-      if (r.recurrenceDays != null) {
-        _routineRecurrenceDays.addAll(r.recurrenceDays!);
-      }
+      if (r.recurrenceDays != null) _routineRecurrenceDays.addAll(r.recurrenceDays!);
       _alertLevel = r.alertLevel;
       _alarmTone = r.alarmTone;
       _alarmVolume = r.alarmVolume;
 
       if (r.isAstroTime) {
-        if (r.startPeriodId != null && r.endPeriodId != null) {
-          _routineTimeMode = 0;
-          _routineStartPeriodId = r.startPeriodId!;
-          _routineStartLocalSuwaya = r.startSuwaya ?? 1;
-          _routineStartVirtualMinute = r.startVirtualMinute ?? 0;
-          _routineEndPeriodId = r.endPeriodId!;
-          _routineEndLocalSuwaya = r.endSuwaya ?? 1;
-          _routineEndVirtualMinute = r.endVirtualMinute ?? 0;
-          _routineStartGlobalSuwaya = _mapLocalToGlobal(
-              _routineStartPeriodId, _routineStartLocalSuwaya, periods);
-          _routineEndGlobalSuwaya = _mapLocalToGlobal(
-              _routineEndPeriodId, _routineEndLocalSuwaya, periods);
-        } else {
-          _routineTimeMode = 1;
-          _routineStartGlobalSuwaya = r.startSuwaya ?? 1;
-          _routineStartVirtualMinute = r.startVirtualMinute ?? 0;
-          _routineEndGlobalSuwaya = r.endSuwaya ?? 2;
-          _routineEndVirtualMinute = r.endVirtualMinute ?? 0;
-          final sMap = _mapGlobalToLocal(_routineStartGlobalSuwaya, periods);
-          _routineStartPeriodId = sMap['pId']!;
-          _routineStartLocalSuwaya = sMap['sNum']!;
-          final eMap = _mapGlobalToLocal(_routineEndGlobalSuwaya, periods);
-          _routineEndPeriodId = eMap['pId']!;
-          _routineEndLocalSuwaya = eMap['sNum']!;
-        }
+        _routineTimeMode = 0;
+        _routineStartVirtualMinute = r.startVirtualMinute ?? 0;
+        _routineEndVirtualMinute = r.endVirtualMinute ?? 0;
       } else {
-        _routineTimeMode = 2;
+        _routineTimeMode = 1;
         if (r.startTimeMinutes != null) {
           _routineStartCivilHour = r.startTimeMinutes! ~/ 60;
           _routineStartCivilMinute = r.startTimeMinutes! % 60;
@@ -196,9 +158,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       }
     }
 
-    _tabController.addListener(() {
-      setState(() {});
-    });
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -218,17 +178,28 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     };
   }
 
-  int _mapLocalToGlobal(int pId, int sNum, List<AstroPeriod> periods) {
-    int global = 0;
-    for (var p in periods) {
-      if (p.id == pId) return global + sNum - 1;
-      global += p.suwayasCount;
-    }
-    return 0;
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // 🌟 دوال التحويل بين واجهة المستخدم (1-12 ليل/نهار) والفهرس العالمي (0-23)
+  int _uiToGlobal(int uiHour, bool isNight) {
+    if (isNight) return uiHour - 1; // 1 ليل -> 0
+    return uiHour + 11; // 1 نهار -> 12
+  }
+
+  ({int uiHour, bool isNight}) _globalToUi(int globalIndex) {
+    globalIndex = globalIndex.clamp(0, 23);
+    final isNight = globalIndex < 12;
+    final uiHour = isNight ? globalIndex + 1 : globalIndex - 11;
+    return (uiHour: uiHour, isNight: isNight);
   }
 
   Map<String, int> _mapGlobalToLocal(int global, List<AstroPeriod> periods) {
-    int remaining = global;
+    int remaining = global.clamp(0, 23);
     for (var p in periods) {
       if (remaining < p.suwayasCount) {
         return {'pId': p.id, 'sNum': remaining + 1};
@@ -239,34 +210,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     return {'pId': periods.last.id, 'sNum': periods.last.suwayasCount};
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  bool _isTimeInPast(DateTime targetTime) {
-    return targetTime.isBefore(DateTime.now());
-  }
-
-  DateTime _calculateAstroTime(
-      int pId, int sNum, int vMin, List<AstroPeriod> periods) {
-    try {
-      final p = periods.firstWhere((per) => per.id == pId);
-      final suwayaCount = p.suwayasCount > 0 ? p.suwayasCount : 1;
-      final microPerSuwaya =
-          p.endTime.difference(p.startTime).inMicroseconds ~/ suwayaCount;
-      final microPerVirtualMinute = microPerSuwaya / 30.0;
-      final sIndex = (sNum - 1).clamp(0, suwayaCount - 1);
-      return p.startTime.add(Duration(
-          microseconds: (microPerSuwaya * sIndex) +
-              (microPerVirtualMinute * vMin).toInt()));
-    } catch (_) {
-      return DateTime.now();
-    }
-  }
-
   Future<void> _saveItem() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) return;
@@ -274,9 +217,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     if (_tabController.index != 2 && !_hasTime) {
       HapticFeedback.heavyImpact();
       setState(() => _timeError = true);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('add_screen.time_required'.tr()),
-          backgroundColor: Colors.redAccent));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('add_screen.time_required'.tr()), backgroundColor: Colors.redAccent));
       return;
     }
 
@@ -286,14 +227,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     if (_tabController.index == 2) {
       if (_alertLevel >= 1) {
-        bool hasPermissions = await ref
-            .read(permissionsProvider.notifier)
-            .ensureExactAlarmPermission();
+        bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
         if (!mounted) return;
         if (!hasPermissions) {
-          scaffold.showSnackBar(SnackBar(
-              content: Text('add_screen.permissions_required'.tr()),
-              backgroundColor: Colors.redAccent));
+          scaffold.showSnackBar(SnackBar(content: Text('add_screen.permissions_required'.tr()), backgroundColor: Colors.redAccent));
           return;
         }
       }
@@ -303,46 +240,29 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       routine.colorValue = _routineColor.toARGB32();
       routine.pattern = _routinePattern;
       routine.isActive = true;
-      routine.recurrenceDays =
-          _routineRecurrenceDays.isEmpty ? null : _routineRecurrenceDays;
+      routine.recurrenceDays = _routineRecurrenceDays.isEmpty ? null : _routineRecurrenceDays;
       routine.alertLevel = _alertLevel;
       routine.alarmTone = _alarmTone;
       routine.alarmVolume = _alarmVolume;
 
-      if (_routineTimeMode == 2) {
+      if (_routineTimeMode == 1) { // المدني
         routine.isAstroTime = false;
-        routine.startTimeMinutes =
-            (_routineStartCivilHour * 60) + _routineStartCivilMinute;
-        routine.endTimeMinutes =
-            (_routineEndCivilHour * 60) + _routineEndCivilMinute;
-        routine.startPeriodId = null;
-        routine.startSuwaya = null;
-        routine.startVirtualMinute = null;
-        routine.endPeriodId = null;
-        routine.endSuwaya = null;
-        routine.endVirtualMinute = null;
-      } else {
+        routine.startTimeMinutes = (_routineStartCivilHour * 60) + _routineStartCivilMinute;
+        routine.endTimeMinutes = (_routineEndCivilHour * 60) + _routineEndCivilMinute;
+        routine.startPeriodId = null; routine.startSuwaya = null; routine.startVirtualMinute = null;
+        routine.endPeriodId = null; routine.endSuwaya = null; routine.endVirtualMinute = null;
+      } else { // السويعي
         routine.isAstroTime = true;
-        routine.startTimeMinutes = null;
-        routine.endTimeMinutes = null;
+        routine.startTimeMinutes = null; routine.endTimeMinutes = null;
 
-        if (_routineTimeMode == 1) {
-          final sm = _mapGlobalToLocal(_routineStartGlobalSuwaya, periods);
-          routine.startPeriodId = sm['pId'];
-          routine.startSuwaya = sm['sNum'];
-          routine.startVirtualMinute = _routineStartVirtualMinute;
-          final em = _mapGlobalToLocal(_routineEndGlobalSuwaya, periods);
-          routine.endPeriodId = em['pId'];
-          routine.endSuwaya = em['sNum'];
-          routine.endVirtualMinute = _routineEndVirtualMinute;
-        } else {
-          routine.startPeriodId = _routineStartPeriodId;
-          routine.startSuwaya = _routineStartLocalSuwaya;
-          routine.startVirtualMinute = _routineStartVirtualMinute;
-          routine.endPeriodId = _routineEndPeriodId;
-          routine.endSuwaya = _routineEndLocalSuwaya;
-          routine.endVirtualMinute = _routineEndVirtualMinute;
-        }
+        final sm = _mapGlobalToLocal(_routineStartGlobalSuwaya, periods);
+        routine.startPeriodId = sm['pId'];
+        routine.startSuwaya = sm['sNum'];
+        routine.startVirtualMinute = _routineStartVirtualMinute;
+        final em = _mapGlobalToLocal(_routineEndGlobalSuwaya, periods);
+        routine.endPeriodId = em['pId'];
+        routine.endSuwaya = em['sNum'];
+        routine.endVirtualMinute = _routineEndVirtualMinute;
       }
 
       await ref.read(routinesProvider.notifier).addRoutine(routine);
@@ -352,27 +272,20 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     }
 
     if (_alertLevel >= 1) {
-      bool hasPermissions = await ref
-          .read(permissionsProvider.notifier)
-          .ensureExactAlarmPermission();
+      bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
       if (!mounted) return;
       if (!hasPermissions) {
-        scaffold.showSnackBar(SnackBar(
-            content: Text('add_screen.permissions_required'.tr()),
-            backgroundColor: Colors.redAccent));
+        scaffold.showSnackBar(SnackBar(content: Text('add_screen.permissions_required'.tr()), backgroundColor: Colors.redAccent));
         return;
       }
     }
 
     final task = widget.existingTask ?? TaskModel();
     task.title = title;
-    task.type =
-        _tabController.index == 1 ? TaskType.permanent : TaskType.casual;
+    task.type = _tabController.index == 1 ? TaskType.permanent : TaskType.casual;
     task.category = _selectedCategory;
     task.showOnDial = _showOnDial;
-    task.dialShortName =
-        _showOnDial ? (title.length > 6 ? title.substring(0, 6) : title) : '';
-
+    task.dialShortName = _showOnDial ? (title.length > 6 ? title.substring(0, 6) : title) : '';
     task.alarmMode = _alertLevel == 2;
     task.notifyMode = _alertLevel >= 1;
     task.vibrateMode = _alertLevel == 2;
@@ -380,56 +293,17 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     task.alarmVolume = _alarmVolume;
 
     if (_hasTime) {
-      if (task.type == TaskType.casual) {
-        DateTime taskTime;
-        if (_timeMode == 2) {
-          final date = _selectedDate ?? DateTime.now();
-          taskTime = DateTime(date.year, date.month, date.day, _targetCivilHour,
-              _targetCivilMinute, 0);
-        } else {
-          int pId = _timeMode == 1
-              ? _mapGlobalToLocal(_targetGlobalSuwaya, periods)['pId']!
-              : _targetPeriodId;
-          int sNum = _timeMode == 1
-              ? _mapGlobalToLocal(_targetGlobalSuwaya, periods)['sNum']!
-              : _targetLocalSuwaya;
-
-          DateTime baseTime =
-              _calculateAstroTime(pId, sNum, _targetVirtualMinute, periods);
-          final date = _selectedDate ?? DateTime.now();
-          taskTime = DateTime(date.year, date.month, date.day, baseTime.hour,
-              baseTime.minute, baseTime.second);
-        }
-
-        if (_isTimeInPast(taskTime)) {
-          HapticFeedback.heavyImpact();
-          scaffold.showSnackBar(SnackBar(
-              content: Text('add_screen.past_time_error'.tr()),
-              backgroundColor: Colors.redAccent));
-          return;
-        }
-      }
-
-      if (_timeMode == 2) {
+      if (_timeMode == 1) {
         task.isAstroTime = false;
-        task.targetCivilTimeMinutes =
-            (_targetCivilHour * 60) + _targetCivilMinute;
-        task.targetPeriodId = null;
-        task.targetSuwayas = [];
-        task.targetVirtualMinute = 0;
+        task.targetCivilTimeMinutes = (_targetCivilHour * 60) + _targetCivilMinute;
+        task.targetPeriodId = null; task.targetSuwayas = []; task.targetVirtualMinute = 0;
       } else {
         task.isAstroTime = true;
         task.targetCivilTimeMinutes = null;
         task.targetVirtualMinute = _targetVirtualMinute;
-
-        if (_timeMode == 1) {
-          final mapped = _mapGlobalToLocal(_targetGlobalSuwaya, periods);
-          task.targetPeriodId = mapped['pId'];
-          task.targetSuwayas = [mapped['sNum']!];
-        } else {
-          task.targetPeriodId = _targetPeriodId;
-          task.targetSuwayas = [_targetLocalSuwaya];
-        }
+        final mapped = _mapGlobalToLocal(_targetGlobalSuwaya, periods);
+        task.targetPeriodId = mapped['pId'];
+        task.targetSuwayas = [mapped['sNum']!];
       }
     }
 
@@ -442,215 +316,118 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     }
 
     await ref.read(tasksProvider.notifier).addTask(task);
-
     if (!mounted) return;
     navigator.pop();
   }
 
-  Future<void> _showTimeDialog(
-      Color pColor, Color surface, Color text, List<AstroPeriod> periods,
-      {bool isRoutine = false, bool isStart = false}) async {
+  Future<void> _showTimeDialog(Color pColor, Color surface, Color text, {bool isRoutine = false, bool isStart = false}) async {
     HapticFeedback.selectionClick();
-
-    int totalSuwayas = periods.fold(0, (sum, p) => sum + p.suwayasCount);
-    if (totalSuwayas == 0) totalSuwayas = 48;
+    final settings = ref.read(settingsProvider);
+    final iconMode = settings.suwayaIconMode;
 
     int tempMode = isRoutine ? _routineTimeMode : _timeMode;
-    int tPeriodId = isRoutine
-        ? (isStart ? _routineStartPeriodId : _routineEndPeriodId)
-        : _targetPeriodId;
-    int tLocalSuwaya = isRoutine
-        ? (isStart ? _routineStartLocalSuwaya : _routineEndLocalSuwaya)
-        : _targetLocalSuwaya;
-    int tGlobalSuwaya = isRoutine
-        ? (isStart ? _routineStartGlobalSuwaya : _routineEndGlobalSuwaya)
-        : _targetGlobalSuwaya;
-    int tVirtualMinute = isRoutine
-        ? (isStart ? _routineStartVirtualMinute : _routineEndVirtualMinute)
-        : _targetVirtualMinute;
-    int tCivilHour = isRoutine
-        ? (isStart ? _routineStartCivilHour : _routineEndCivilHour)
-        : _targetCivilHour;
-    int tCivilMinute = isRoutine
-        ? (isStart ? _routineStartCivilMinute : _routineEndCivilMinute)
-        : _targetCivilMinute;
+    
+    int tGlobalSuwaya = isRoutine ? (isStart ? _routineStartGlobalSuwaya : _routineEndGlobalSuwaya) : _targetGlobalSuwaya;
+    int tVirtualMinute = isRoutine ? (isStart ? _routineStartVirtualMinute : _routineEndVirtualMinute) : _targetVirtualMinute;
+    int tCivilHour = isRoutine ? (isStart ? _routineStartCivilHour : _routineEndCivilHour) : _targetCivilHour;
+    int tCivilMinute = isRoutine ? (isStart ? _routineStartCivilMinute : _routineEndCivilMinute) : _targetCivilMinute;
 
     await showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-              builder: (context, setDialogState) => Dialog(
-                backgroundColor: surface,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                          isRoutine
-                              ? (isStart
-                                  ? 'add_screen.select_start_time'.tr()
-                                  : 'add_screen.select_end_time'.tr())
-                              : 'add_screen.pin_exact_time'.tr(),
-                          style: TextStyle(
-                              color: text,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      if (!isRoutine) ...[
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: SegmentedButton<int>(
-                            segments: [
-                              ButtonSegment(
-                                  value: 0,
-                                  label: Text('add_screen.by_periods'.tr())),
-                              ButtonSegment(
-                                  value: 1,
-                                  label: Text('add_screen.cumulative'.tr())),
-                              ButtonSegment(
-                                  value: 2,
-                                  label: Text('add_screen.civil'.tr()))
-                            ],
-                            selected: {tempMode},
-                            onSelectionChanged: (set) {
-                              HapticFeedback.selectionClick();
-                              setDialogState(() {
-                                tempMode = set.first;
-                                _timeMode = tempMode;
-                              });
-                            },
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith((states) =>
-                                        states.contains(WidgetState.selected)
-                                            ? pColor.withValues(alpha: 0.2)
-                                            : Colors.transparent),
-                                foregroundColor:
-                                    WidgetStateProperty.resolveWith((states) =>
-                                        states.contains(WidgetState.selected)
-                                            ? pColor
-                                            : text.withValues(alpha: 0.5))),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                      if (tempMode == 0)
-                        TripleWheelPicker(
-                            periods: periods,
-                            initialPeriodId: tPeriodId,
-                            initialSuwaya: tLocalSuwaya,
-                            initialMinute: tVirtualMinute,
-                            textColor: text,
-                            surfaceColor: surface,
-                            onChanged: (pId, sNum, vMin) {
-                              tPeriodId = pId;
-                              tLocalSuwaya = sNum;
-                              tVirtualMinute = vMin;
-                              tGlobalSuwaya =
-                                  _mapLocalToGlobal(pId, sNum, periods);
-                            })
-                      else if (tempMode == 1)
-                        DoubleWheelPicker(
-                            isAstro: true,
-                            label1: 'add_screen.cumulative_suwaya'.tr(),
-                            label2: 'add_screen.minute'.tr(),
-                            initialVal1: tGlobalSuwaya,
-                            initialVal2: tVirtualMinute,
-                            min1: 0,
-                            max1: totalSuwayas - 1,
-                            max2: 29,
-                            textColor: text,
-                            surfaceColor: surface,
-                            onChanged: (s, m) {
-                              tGlobalSuwaya = s;
-                              tVirtualMinute = m;
-                            })
-                      else
-                        DoubleWheelPicker(
-                            isAstro: false,
-                            label1: 'add_screen.civil_hour'.tr(),
-                            label2: 'add_screen.minute'.tr(),
-                            initialVal1: tCivilHour,
-                            initialVal2: tCivilMinute,
-                            min1: 0,
-                            max1: 23,
-                            max2: 59,
-                            textColor: text,
-                            surfaceColor: surface,
-                            onChanged: (h, m) {
-                              tCivilHour = h;
-                              tCivilMinute = m;
-                            }),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                              child: OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                          color: Colors.redAccent)),
-                                  onPressed: () {
-                                    Navigator.pop(ctx);
-                                  },
-                                  child: Text('common.cancel'.tr(),
-                                      style: const TextStyle(
-                                          color: Colors.redAccent)))),
-                          const SizedBox(width: 8),
-                          Expanded(
-                              flex: 2,
-                              child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: pColor),
-                                  onPressed: () {
-                                    setState(() {
-                                      if (isRoutine) {
-                                        if (isStart) {
-                                          _routineStartPeriodId = tPeriodId;
-                                          _routineStartLocalSuwaya =
-                                              tLocalSuwaya;
-                                          _routineStartGlobalSuwaya =
-                                              tGlobalSuwaya;
-                                          _routineStartVirtualMinute =
-                                              tVirtualMinute;
-                                          _routineStartCivilHour = tCivilHour;
-                                          _routineStartCivilMinute =
-                                              tCivilMinute;
-                                        } else {
-                                          _routineEndPeriodId = tPeriodId;
-                                          _routineEndLocalSuwaya = tLocalSuwaya;
-                                          _routineEndGlobalSuwaya =
-                                              tGlobalSuwaya;
-                                          _routineEndVirtualMinute =
-                                              tVirtualMinute;
-                                          _routineEndCivilHour = tCivilHour;
-                                          _routineEndCivilMinute = tCivilMinute;
-                                        }
-                                      } else {
-                                        _hasTime = true;
-                                        _timeError = false;
-                                        _targetPeriodId = tPeriodId;
-                                        _targetLocalSuwaya = tLocalSuwaya;
-                                        _targetGlobalSuwaya = tGlobalSuwaya;
-                                        _targetVirtualMinute = tVirtualMinute;
-                                        _targetCivilHour = tCivilHour;
-                                        _targetCivilMinute = tCivilMinute;
-                                      }
-                                    });
-                                    Navigator.pop(ctx);
-                                  },
-                                  child: Text('common.confirm'.tr(),
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)))),
-                        ],
-                      )
-                    ],
-                  ),
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          backgroundColor: surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isRoutine ? (isStart ? 'add_screen.select_start_time'.tr() : 'add_screen.select_end_time'.tr()) : 'add_screen.pin_exact_time'.tr(),
+                  style: TextStyle(color: text, fontSize: 18, fontWeight: FontWeight.bold)
                 ),
-              ),
-            ));
+                const SizedBox(height: 16),
+                if (!isRoutine) ...[
+                  // 🌟 تبويبين فقط الآن!
+                  SegmentedButton<int>(
+                    segments: [
+                      ButtonSegment(value: 0, label: Text('ibadat.astro_time'.tr())),
+                      ButtonSegment(value: 1, label: Text('add_screen.civil'.tr()))
+                    ],
+                    selected: {tempMode},
+                    onSelectionChanged: (set) {
+                      HapticFeedback.selectionClick();
+                      setDialogState(() {
+                        tempMode = set.first;
+                        _timeMode = tempMode;
+                      });
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? pColor.withValues(alpha: 0.2) : Colors.transparent),
+                      foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? pColor : text.withValues(alpha: 0.5))
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                
+                if (tempMode == 0) // السويعي الجديد
+                  Builder(builder: (context) {
+                    final uiData = _globalToUi(tGlobalSuwaya);
+                    return AstroTimePicker(
+                      initialHour: uiData.uiHour,
+                      initialMinute: tVirtualMinute,
+                      initialIsNight: uiData.isNight,
+                      textColor: text,
+                      surfaceColor: surface,
+                      accentColor: pColor,
+                      iconMode: iconMode,
+                      onChanged: (h, m, isNight) {
+                        tGlobalSuwaya = _uiToGlobal(h, isNight);
+                        tVirtualMinute = m;
+                      }
+                    );
+                  })
+                else // المدني 
+                  DoubleWheelPicker(
+                    label1: 'add_screen.civil_hour'.tr(), label2: 'add_screen.minute'.tr(),
+                    initialVal1: tCivilHour, initialVal2: tCivilMinute,
+                    min1: 0, max1: 23, max2: 59,
+                    textColor: text, surfaceColor: surface,
+                    onChanged: (h, m) { tCivilHour = h; tCivilMinute = m; }
+                  ),
+
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(child: OutlinedButton(style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.redAccent)), onPressed: () => Navigator.pop(ctx), child: Text('common.cancel'.tr(), style: const TextStyle(color: Colors.redAccent)))),
+                    const SizedBox(width: 8),
+                    Expanded(flex: 2, child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: pColor), onPressed: () {
+                      setState(() {
+                        if (isRoutine) {
+                          if (isStart) {
+                            _routineStartGlobalSuwaya = tGlobalSuwaya; _routineStartVirtualMinute = tVirtualMinute;
+                            _routineStartCivilHour = tCivilHour; _routineStartCivilMinute = tCivilMinute;
+                          } else {
+                            _routineEndGlobalSuwaya = tGlobalSuwaya; _routineEndVirtualMinute = tVirtualMinute;
+                            _routineEndCivilHour = tCivilHour; _routineEndCivilMinute = tCivilMinute;
+                          }
+                        } else {
+                          _hasTime = true; _timeError = false;
+                          _targetGlobalSuwaya = tGlobalSuwaya; _targetVirtualMinute = tVirtualMinute;
+                          _targetCivilHour = tCivilHour; _targetCivilMinute = tCivilMinute;
+                        }
+                      });
+                      Navigator.pop(ctx);
+                    }, child: Text('common.confirm'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      )
+    );
   }
 
   Future<void> _showRoutinePatternDialog(
@@ -1102,19 +879,13 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final surfaceColor = isDark ? const Color(0xFF13131A) : Colors.white;
     final accentColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white : Colors.black87;
-    final periods = ref.watch(astroProvider).periods;
-
+    
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-            icon: Icon(LucideIcons.x, color: textColor),
-            onPressed: () => Navigator.pop(context)),
-        title: Text('add_screen.new_addition'.tr(),
-            style: TextStyle(
-                color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.transparent, elevation: 0,
+        leading: IconButton(icon: Icon(LucideIcons.x, color: textColor), onPressed: () => Navigator.pop(context)),
+        title: Text('add_screen.new_addition'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -1124,114 +895,50 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
             children: [
               Container(
                 height: 48,
-                decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border:
-                        Border.all(color: accentColor.withValues(alpha: 0.1))),
+                decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: accentColor.withValues(alpha: 0.1))),
                 child: TabBar(
-                  controller: _tabController,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicator: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: accentColor, width: 2)),
-                  labelColor: accentColor,
-                  unselectedLabelColor: textColor.withValues(alpha: 0.4),
-                  labelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14),
-                  tabs: [
-                    Tab(text: 'tasks.casual_task'.tr()),
-                    Tab(text: 'tasks.continuous_habit'.tr()),
-                    Tab(text: 'tasks.routine_period'.tr())
-                  ],
+                  controller: _tabController, indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: BoxDecoration(color: accentColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14), border: Border.all(color: accentColor, width: 2)),
+                  labelColor: accentColor, unselectedLabelColor: textColor.withValues(alpha: 0.4),
+                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  tabs: [Tab(text: 'tasks.casual_task'.tr()), Tab(text: 'tasks.continuous_habit'.tr()), Tab(text: 'tasks.routine_period'.tr())],
                 ),
               ),
               const SizedBox(height: 24),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(20),
-                    border:
-                        Border.all(color: accentColor.withValues(alpha: 0.2))),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: accentColor.withValues(alpha: 0.2))),
                 child: TextField(
-                  controller: _titleController,
-                  autofocus: true,
-                  style: TextStyle(
-                      color: textColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900),
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'add_screen.what_to_add'.tr(),
-                      hintStyle:
-                          TextStyle(color: textColor.withValues(alpha: 0.3))),
+                  controller: _titleController, autofocus: true,
+                  style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900),
+                  decoration: InputDecoration(border: InputBorder.none, hintText: 'add_screen.what_to_add'.tr(), hintStyle: TextStyle(color: textColor.withValues(alpha: 0.3))),
                 ),
               ),
               const SizedBox(height: 24),
               Expanded(
                 child: TabBarView(
-                  controller: _tabController,
-                  physics: const NeverScrollableScrollPhysics(),
+                  controller: _tabController, physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    _buildDashboardGrid(
-                        textColor, surfaceColor, accentColor, periods, false),
-                    _buildDashboardGrid(
-                        textColor, surfaceColor, accentColor, periods, true),
-                    _buildRoutineDashboardGrid(
-                        textColor, surfaceColor, accentColor, periods),
+                    _buildDashboardGrid(textColor, surfaceColor, accentColor, false),
+                    _buildDashboardGrid(textColor, surfaceColor, accentColor, true),
+                    _buildRoutineDashboardGrid(textColor, surfaceColor, accentColor),
                   ],
                 ),
               ),
               Row(
                 children: [
-                  if (widget.existingTask != null ||
-                      widget.existingRoutine != null) ...[
-                    Expanded(
-                        flex: 1,
-                        child: SizedBox(
-                            height: 60,
-                            child: OutlinedButton(
-                                onPressed: () {
-                                  if (widget.existingTask != null) {
-                                    ref
-                                        .read(tasksProvider.notifier)
-                                        .deleteTask(widget.existingTask!.id);
-                                  } else if (widget.existingRoutine != null) {
-                                    ref
-                                        .read(routinesProvider.notifier)
-                                        .deleteRoutine(
-                                            widget.existingRoutine!.id);
-                                  }
-                                  Navigator.pop(context);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(
-                                        color: Colors.redAccent),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20))),
-                                child: const Icon(LucideIcons.trash,
-                                    color: Colors.redAccent)))),
+                  if (widget.existingTask != null || widget.existingRoutine != null) ...[
+                    Expanded(flex: 1, child: SizedBox(height: 60, child: OutlinedButton(onPressed: () {
+                      if (widget.existingTask != null) {
+                      ref.read(tasksProvider.notifier).deleteTask(widget.existingTask!.id);
+                      } else if (widget.existingRoutine != null) {
+                      ref.read(routinesProvider.notifier).deleteRoutine(widget.existingRoutine!.id);
+                      }
+                      Navigator.pop(context);
+                    }, style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.redAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: const Icon(LucideIcons.trash, color: Colors.redAccent)))),
                     const SizedBox(width: 12),
                   ],
-                  Expanded(
-                      flex: 3,
-                      child: SizedBox(
-                          height: 60,
-                          child: ElevatedButton(
-                              onPressed: _saveItem,
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: accentColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
-                              child: Text('add_screen.save_and_add'.tr(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold))))),
+                  Expanded(flex: 3, child: SizedBox(height: 60, child: ElevatedButton(onPressed: _saveItem, style: ElevatedButton.styleFrom(backgroundColor: accentColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: Text('add_screen.save_and_add'.tr(), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))))),
                 ],
               ),
               const SizedBox(height: 16),
@@ -1242,234 +949,93 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
-  Widget _buildDashboardGrid(Color textColor, Color surfaceColor,
-      Color accentColor, List<AstroPeriod> periods, bool isHabit) {
+  Widget _buildDashboardGrid(Color textColor, Color surfaceColor, Color accentColor, bool isHabit) {
     String timeStr = 'add_screen.not_set_mandatory'.tr();
     Widget? timePreview;
     final settings = ref.watch(settingsProvider);
-    final previewStyle = TextStyle(
-      color: _timeMode == 2 ? textColor : const Color(0xFFF2C94C),
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter',
-    );
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+
     if (_hasTime) {
-      if (_timeMode == 2) {
+      if (_timeMode == 1) { // مدني
         timePreview = ClockTimeText.civil(
           civilTime: DateTime(2000, 1, 1, _targetCivilHour, _targetCivilMinute),
           civilTimeFormat: settings.civilTimeFormat,
           locale: context.locale.languageCode,
-          style: previewStyle,
+          style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter'),
         );
-      } else {
-        timePreview = ClockTimeText.suwaya(
-          globalSuwayaIndex: _targetGlobalSuwaya,
-          virtualMinute: _targetVirtualMinute,
-          style: previewStyle,
+      } else { // سويعي 
+        timePreview = Text(
+          formatSuwayaTime(_targetGlobalSuwaya, _targetVirtualMinute, separator: '|', isRTL: isRTL, iconMode: settings.suwayaIconMode),
+          style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter'),
         );
       }
     }
 
-    String dateStr = isHabit
-        ? (_recurrenceDays.isEmpty
-            ? 'add_screen.daily'.tr()
-            : '${_recurrenceDays.length} ${'common.days'.tr()}')
-        : DateFormat('MM/dd').format(_selectedDate!);
-    String alertStr = _alertLevel == 0
-        ? 'alerts.silent'.tr()
-        : (_alertLevel == 1 ? 'alerts.notification'.tr() : 'alerts.alarm'.tr());
-    String catStr = _selectedCategory.displayName;
+    String dateStr = isHabit ? (_recurrenceDays.isEmpty ? 'add_screen.daily'.tr() : '${_recurrenceDays.length} ${'common.days'.tr()}') : DateFormat('MM/dd').format(_selectedDate!);
+    String alertStr = _alertLevel == 0 ? 'alerts.silent'.tr() : (_alertLevel == 1 ? 'alerts.notification'.tr() : 'alerts.alarm'.tr());
+    
     return Column(
       children: [
         Row(
           children: [
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.category_appearance'.tr(),
-                catStr,
-                LucideIcons.palette,
-                _showOnDial,
-                false,
-                () => _showCategoryDialDialog(
-                    accentColor, surfaceColor, textColor)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.category_appearance'.tr(), _selectedCategory.displayName, LucideIcons.palette, _showOnDial, false, () => _showCategoryDialDialog(accentColor, surfaceColor, textColor)),
             const SizedBox(width: 12),
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                isHabit ? 'add_screen.recurrence'.tr() : 'add_screen.date'.tr(),
-                dateStr,
-                LucideIcons.calendar,
-                false,
-                false,
-                () => _showDateRecurrenceDialog(
-                    accentColor, surfaceColor, textColor, false)),
+            _buildGridCard(surfaceColor, accentColor, textColor, isHabit ? 'add_screen.recurrence'.tr() : 'add_screen.date'.tr(), dateStr, LucideIcons.calendar, false, false, () => _showDateRecurrenceDialog(accentColor, surfaceColor, textColor, false)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.time'.tr(),
-                timeStr,
-                LucideIcons.clock,
-                _hasTime,
-                (_timeError && !_hasTime),
-                () => _showTimeDialog(
-                    accentColor, surfaceColor, textColor, periods),
-                valueWidget: timePreview),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.time'.tr(), timeStr, LucideIcons.clock, _hasTime, (_timeError && !_hasTime), () => _showTimeDialog(accentColor, surfaceColor, textColor), valueWidget: timePreview),
             const SizedBox(width: 12),
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.alert'.tr(),
-                alertStr,
-                _alertLevel == 2 ? LucideIcons.alarm_clock : LucideIcons.bell,
-                _alertLevel > 0,
-                false,
-                () => _showAlertsDialog(accentColor, surfaceColor, textColor)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.alert'.tr(), alertStr, _alertLevel == 2 ? LucideIcons.alarm_clock : LucideIcons.bell, _alertLevel > 0, false, () => _showAlertsDialog(accentColor, surfaceColor, textColor)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildRoutineDashboardGrid(Color textColor, Color surfaceColor,
-      Color accentColor, List<AstroPeriod> periods) {
-    String recurrenceStr = _routineRecurrenceDays.isEmpty
-        ? 'add_screen.daily'.tr()
-        : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
-    String startStr = '', endStr = '';
+  Widget _buildRoutineDashboardGrid(Color textColor, Color surfaceColor, Color accentColor) {
+    String recurrenceStr = _routineRecurrenceDays.isEmpty ? 'add_screen.daily'.tr() : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
     final settings = ref.watch(settingsProvider);
-    final routineClockStyle = TextStyle(
-      color: _routineTimeMode == 2 ? textColor : const Color(0xFFF2C94C),
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      fontFamily: 'Inter',
-    );
-    Widget startPreview;
-    Widget endPreview;
-
-    if (_routineTimeMode == 2) {
-      startPreview = ClockTimeText.civil(
-        civilTime: DateTime(
-            2000, 1, 1, _routineStartCivilHour, _routineStartCivilMinute),
-        civilTimeFormat: settings.civilTimeFormat,
-        locale: context.locale.languageCode,
-        style: routineClockStyle,
-      );
-      endPreview = ClockTimeText.civil(
-        civilTime:
-            DateTime(2000, 1, 1, _routineEndCivilHour, _routineEndCivilMinute),
-        civilTimeFormat: settings.civilTimeFormat,
-        locale: context.locale.languageCode,
-        style: routineClockStyle,
-      );
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+    
+    Widget startPreview; Widget endPreview;
+    if (_routineTimeMode == 1) {
+      startPreview = ClockTimeText.civil(civilTime: DateTime(2000, 1, 1, _routineStartCivilHour, _routineStartCivilMinute), civilTimeFormat: settings.civilTimeFormat, locale: context.locale.languageCode, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter'));
+      endPreview = ClockTimeText.civil(civilTime: DateTime(2000, 1, 1, _routineEndCivilHour, _routineEndCivilMinute), civilTimeFormat: settings.civilTimeFormat, locale: context.locale.languageCode, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter'));
     } else {
-      startPreview = ClockTimeText.suwaya(
-        globalSuwayaIndex: _routineStartGlobalSuwaya,
-        virtualMinute: _routineStartVirtualMinute,
-        style: routineClockStyle,
-      );
-      endPreview = ClockTimeText.suwaya(
-        globalSuwayaIndex: _routineEndGlobalSuwaya,
-        virtualMinute: _routineEndVirtualMinute,
-        style: routineClockStyle,
-      );
+      startPreview = Text(formatSuwayaTime(_routineStartGlobalSuwaya, _routineStartVirtualMinute, separator: '|', isRTL: isRTL, iconMode: settings.suwayaIconMode), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter'));
+      endPreview = Text(formatSuwayaTime(_routineEndGlobalSuwaya, _routineEndVirtualMinute, separator: '|', isRTL: isRTL, iconMode: settings.suwayaIconMode), style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Inter'));
     }
 
     return Column(
       children: [
         Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 16),
+          width: double.infinity, margin: const EdgeInsets.only(bottom: 16),
           child: SegmentedButton<int>(
             segments: [
-              ButtonSegment(
-                  value: 0, label: Text('add_screen.by_periods'.tr())),
-              ButtonSegment(
-                  value: 1, label: Text('add_screen.cumulative_suwaya'.tr())),
-              ButtonSegment(value: 2, label: Text('add_screen.civil'.tr()))
+              ButtonSegment(value: 0, label: Text('ibadat.astro_time'.tr())),
+              ButtonSegment(value: 1, label: Text('add_screen.civil'.tr()))
             ],
             selected: {_routineTimeMode},
-            onSelectionChanged: (set) {
-              HapticFeedback.selectionClick();
-              setState(() => _routineTimeMode = set.first);
-            },
-            style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith((states) =>
-                    states.contains(WidgetState.selected)
-                        ? accentColor.withValues(alpha: 0.2)
-                        : Colors.transparent),
-                foregroundColor: WidgetStateProperty.resolveWith((states) =>
-                    states.contains(WidgetState.selected)
-                        ? accentColor
-                        : textColor.withValues(alpha: 0.5))),
+            onSelectionChanged: (set) { HapticFeedback.selectionClick(); setState(() => _routineTimeMode = set.first); },
+            style: ButtonStyle(backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor.withValues(alpha: 0.2) : Colors.transparent), foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor : textColor.withValues(alpha: 0.5))),
           ),
         ),
         Row(
           children: [
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.start_time'.tr(),
-                startStr,
-                LucideIcons.sunset,
-                true,
-                false,
-                () => _showTimeDialog(
-                    accentColor, surfaceColor, textColor, periods,
-                    isRoutine: true, isStart: true),
-                valueWidget: startPreview),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), '', LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, isRoutine: true, isStart: true), valueWidget: startPreview),
             const SizedBox(width: 12),
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.end_time'.tr(),
-                endStr,
-                LucideIcons.sunrise,
-                true,
-                false,
-                () => _showTimeDialog(
-                    accentColor, surfaceColor, textColor, periods,
-                    isRoutine: true, isStart: false),
-                valueWidget: endPreview),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), '', LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, isRoutine: true, isStart: false), valueWidget: endPreview),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.pattern_color'.tr(),
-                _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(),
-                LucideIcons.paint_bucket,
-                true,
-                false,
-                () => _showRoutinePatternDialog(
-                    accentColor, surfaceColor, textColor)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.pattern_color'.tr(), _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(), LucideIcons.paint_bucket, true, false, () => _showRoutinePatternDialog(accentColor, surfaceColor, textColor)),
             const SizedBox(width: 12),
-            _buildGridCard(
-                surfaceColor,
-                accentColor,
-                textColor,
-                'add_screen.recurrence'.tr(),
-                recurrenceStr,
-                LucideIcons.calendar_days,
-                false,
-                false,
-                () => _showDateRecurrenceDialog(
-                    accentColor, surfaceColor, textColor, true)),
+            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.recurrence'.tr(), recurrenceStr, LucideIcons.calendar_days, false, false, () => _showDateRecurrenceDialog(accentColor, surfaceColor, textColor, true)),
           ],
         ),
       ],

@@ -1,11 +1,15 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/theme/astro_ui_extensions.dart';
 import '../../shared/widgets/suwaya_time_text.dart';
 import '../settings/settings_provider.dart';
+import '../../core/utils/time_formatters.dart'; // 🌟 جلب الخريطة الثابتة
+import '../../models/settings_model.dart'; 
 
 class AstroTimelineScreen extends ConsumerWidget {
   const AstroTimelineScreen({super.key});
@@ -133,7 +137,10 @@ class AstroTimelineScreen extends ConsumerWidget {
                                   context,
                                   isDark,
                                   textColor,
-                                  settings.civilTimeFormat),
+                                  settings,
+                                  astroState,
+                                  period.id.toString(),
+                                  false),
                               const SizedBox(height: 8),
                               _buildTimeRow(
                                   'ibadat.ends_at'.tr(),
@@ -141,7 +148,10 @@ class AstroTimelineScreen extends ConsumerWidget {
                                   context,
                                   isDark,
                                   textColor,
-                                  settings.civilTimeFormat),
+                                  settings,
+                                  astroState,
+                                  period.id.toString(),
+                                  true),
                               const SizedBox(height: 8),
                               Divider(
                                   color:
@@ -176,24 +186,40 @@ class AstroTimelineScreen extends ConsumerWidget {
     );
   }
 
+  // 🌟 تحديث الدالة لتقبل الإعدادات والمعرف (id) لطباعة الوقت السويعي الدقيق
   Widget _buildTimeRow(String label, DateTime time, BuildContext context,
-      bool isDark, Color textColor, String civilTimeFormat) {
+      bool isDark, Color textColor, SettingsModel settings, AstroState state, String periodId, bool isEnd) {
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+    final fixedTime = getFixedAstroTime(periodId, state, isEnd: isEnd);
+    final suwayaStr = formatSuwayaTime(fixedTime.globalIndex, fixedTime.minute, separator: '|', isRTL: isRTL, iconMode: settings.suwayaIconMode);
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: TextStyle(
-                color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
-        ClockTimeText.civil(
-          civilTime: time,
-          civilTimeFormat: civilTimeFormat,
-          locale: context.locale.languageCode,
-          style: TextStyle(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Inter',
-              fontSize: 15),
-        ),
+        Text(label, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13)),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ClockTimeText.civil(
+              civilTime: time,
+              civilTimeFormat: settings.civilTimeFormat,
+              locale: context.locale.languageCode,
+              style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                  fontSize: 15),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text('/', style: TextStyle(color: textColor.withValues(alpha: 0.5))),
+            ),
+            Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(suwayaStr, style: const TextStyle(color: Color(0xFFF2C94C), fontWeight: FontWeight.w600, fontFamily: 'Inter', fontSize: 15)),
+            ),
+          ]
+        )
       ],
     );
   }

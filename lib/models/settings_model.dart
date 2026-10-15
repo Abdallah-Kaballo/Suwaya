@@ -25,6 +25,11 @@ class SettingsModel {
   int longestStreak = 0;
   DateTime? lastStreakDate;
 
+  String timeDisplayMode = 'suwaya';
+  
+  // 🌟 الخيار الجديد: 'emoji' (☀️/🌑) أو 'text' (ن/ل - D/N)
+  String suwayaIconMode = 'emoji'; 
+
   bool qiyamAlarmEnabled = false;
   List<int> hiddenPeriods = [];
   bool isDialAutoRotating = true;
@@ -37,7 +42,7 @@ class SettingsModel {
   bool useAstroTimeForIbadat = true;
   String civilTimeFormat = 'system';
   bool showSunrise = true;
-  List<String> visibleNightParts = ['third_3', 'sixth_4', 'sixth_5'];
+  List<String> visibleNightParts = ['sixth_5'];
 
   int defaultTaskAlertLevel = 1;
   String defaultTaskTone = 'assets/audio/default.mp3';
@@ -59,29 +64,17 @@ class SettingsModel {
   }
 
   bool isPeriodEnabled(String pId, {bool defaultVal = true}) {
-    final smartDefault = (pId == 'sunrise' ||
-            pId.startsWith('half') ||
-            pId.startsWith('third') ||
-            pId.startsWith('sixth'))
-        ? false
-        : defaultVal;
+    final smartDefault = (pId == 'sunrise' || pId.startsWith('half') || pId.startsWith('third') || pId.startsWith('sixth')) ? false : defaultVal;
     return _getConfig(pId)?.isEnabled ?? smartDefault;
   }
 
-  // 🌟 الإصلاح هنا: الدالة الآن تحترم خيار الإيقاف قبل إرجاع مستوى التنبيه
   int getPeriodAlertLevel(String pId, [int defaultVal = 0]) {
     final config = _getConfig(pId);
     if (config != null) {
-      if (!config.isEnabled) return 0; // 🌟 هذا السطر كان مفقوداً
+      if (!config.isEnabled) return 0; 
       return config.alertLevel;
     }
-    
-    final smartDefault = (pId == 'sunrise' ||
-            pId.startsWith('half') ||
-            pId.startsWith('third') ||
-            pId.startsWith('sixth'))
-        ? 0
-        : defaultVal;
+    final smartDefault = (pId == 'sunrise' || pId.startsWith('half') || pId.startsWith('third') || pId.startsWith('sixth')) ? 0 : defaultVal;
     return smartDefault;
   }
 
@@ -112,30 +105,10 @@ class SettingsModel {
       ..calculationMethod = calculationMethod
       ..madhab = madhab
       ..highLatitudeRule = highLatitudeRule
-      ..customFajrAngle = customFajrAngle
-      ..customIshaAngle = customIshaAngle
-      ..activeLocation = activeLocation != null
-          ? (SavedLocation()
-            ..name = activeLocation!.name
-            ..latitude = activeLocation!.latitude
-            ..longitude = activeLocation!.longitude
-            ..countryCode = activeLocation!.countryCode
-            ..isAutoLocation = activeLocation!.isAutoLocation
-            ..timezone = activeLocation!.timezone
-            ..locationType = activeLocation!.locationType
-            ..nearestCity = activeLocation!.nearestCity)
-          : null
-      ..savedLocations = savedLocations
-          .map((l) => SavedLocation()
-            ..name = l.name
-            ..latitude = l.latitude
-            ..longitude = l.longitude
-            ..countryCode = l.countryCode
-            ..isAutoLocation = l.isAutoLocation
-            ..timezone = l.timezone
-            ..locationType = l.locationType
-            ..nearestCity = l.nearestCity)
-          .toList()
+      ..timeDisplayMode = timeDisplayMode
+      ..suwayaIconMode = suwayaIconMode // 🌟 استنساخ الحقل الجديد
+      ..activeLocation = activeLocation != null ? (SavedLocation()..name = activeLocation!.name..latitude = activeLocation!.latitude..longitude = activeLocation!.longitude..countryCode = activeLocation!.countryCode..isAutoLocation = activeLocation!.isAutoLocation..timezone = activeLocation!.timezone..locationType = activeLocation!.locationType..nearestCity = activeLocation!.nearestCity) : null
+      ..savedLocations = savedLocations.map((l) => SavedLocation()..name = l.name..latitude = l.latitude..longitude = l.longitude..countryCode = l.countryCode..isAutoLocation = l.isAutoLocation..timezone = l.timezone..locationType = l.locationType..nearestCity = l.nearestCity).toList()
       ..currentStreak = currentStreak
       ..longestStreak = longestStreak
       ..lastStreakDate = lastStreakDate
@@ -153,15 +126,7 @@ class SettingsModel {
       ..defaultHabitVolume = defaultHabitVolume
       ..snoozeDurationMinutes = snoozeDurationMinutes
       ..maxSnoozeCount = maxSnoozeCount
-      ..periodConfigs = periodConfigs
-          .map((c) => PeriodConfig()
-            ..periodId = c.periodId
-            ..isEnabled = c.isEnabled
-            ..alertLevel = c.alertLevel
-            ..soundPath = c.soundPath
-            ..volume = c.volume
-            ..manualOffsetMinutes = c.manualOffsetMinutes)
-          .toList();
+      ..periodConfigs = periodConfigs.map((c) => PeriodConfig()..periodId = c.periodId..isEnabled = c.isEnabled..alertLevel = c.alertLevel..soundPath = c.soundPath..volume = c.volume..manualOffsetMinutes = c.manualOffsetMinutes).toList();
   }
 }
 

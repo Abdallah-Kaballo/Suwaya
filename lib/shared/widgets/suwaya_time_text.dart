@@ -1,47 +1,42 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/time_formatters.dart';
+import '../../features/settings/settings_provider.dart';
 
-class ClockTimeText extends StatelessWidget {
+class ClockTimeText extends ConsumerWidget {
   final DateTime? civilTime;
   final int? globalSuwayaIndex;
   final int? virtualMinute;
   final String civilTimeFormat;
   final String locale;
   final TextStyle style;
-  final Color? separatorColor;
-  final double separatorHeightFactor;
-  final double separatorWidth;
 
   const ClockTimeText.civil({
     super.key,
-    required DateTime this.civilTime,
+    required this.civilTime,
     required this.civilTimeFormat,
     required this.locale,
     required this.style,
   })  : globalSuwayaIndex = null,
-        virtualMinute = null,
-        separatorColor = null,
-        separatorHeightFactor = 0.48,
-        separatorWidth = 1.5;
+        virtualMinute = null;
 
   const ClockTimeText.suwaya({
     super.key,
-    required int this.globalSuwayaIndex,
-    required int this.virtualMinute,
+    required this.globalSuwayaIndex,
+    required this.virtualMinute,
     required this.style,
-    this.separatorColor,
-    this.separatorHeightFactor = 0.48,
-    this.separatorWidth = 1.5,
   })  : civilTime = null,
         civilTimeFormat = civilTimeFormatSystem,
         locale = 'en';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+
     if (civilTime != null) {
       return Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: ui.TextDirection.ltr, // 🌟 إجبار الأرقام المدنية على الاتجاه الصحيح
         child: Text(
           formatCivilTime(
             civilTime!,
@@ -49,18 +44,20 @@ class ClockTimeText extends StatelessWidget {
             locale: locale,
             context: context,
           ),
-          style: style,
+          // 🌟 تثبيت اللون الأبيض دائماً للمدني
+          style: style.copyWith(color: Colors.white),
         ),
       );
     }
 
+    final settings = ref.watch(settingsProvider);
     return SuwayaTimeText(
       globalSuwayaIndex: globalSuwayaIndex!,
       minute: virtualMinute!,
-      style: style,
-      separatorColor: separatorColor,
-      separatorHeightFactor: separatorHeightFactor,
-      separatorWidth: separatorWidth,
+      // 🌟 تثبيت اللون الذهبي دائماً للسويعي
+      style: style.copyWith(color: const Color(0xFFF2C94C)),
+      iconMode: settings.suwayaIconMode,
+      isRTL: isRTL,
     );
   }
 }
@@ -69,54 +66,57 @@ class SuwayaTimeText extends StatelessWidget {
   final int globalSuwayaIndex;
   final int minute;
   final TextStyle style;
-  final Color? separatorColor;
-  final double separatorHeightFactor;
-  final double separatorWidth;
+  final String iconMode;
+  final bool isRTL;
 
   const SuwayaTimeText({
     super.key,
     required this.globalSuwayaIndex,
     required this.minute,
     required this.style,
-    this.separatorColor,
-    this.separatorHeightFactor = 0.48,
-    this.separatorWidth = 1.5,
+    required this.iconMode,
+    required this.isRTL,
   });
 
   @override
   Widget build(BuildContext context) {
-    final fontSize =
-        style.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
+    final parts = getSuwayaTimeParts(globalSuwayaIndex, minute, isRTL, iconMode);
+    final fontSize = style.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
+    
+    // 🌟 الفاصل العمودي (خط رأسي أبيض قصير دائماً)
     final separator = Container(
-      width: separatorWidth,
-      height: fontSize * separatorHeightFactor,
-      margin: EdgeInsets.symmetric(horizontal: fontSize * 0.08),
+      width: 1.5,
+      height: fontSize * 0.58,
+      margin: EdgeInsets.symmetric(horizontal: fontSize * 0.15),
       decoration: BoxDecoration(
-        color: separatorColor ?? Colors.white,
-        borderRadius: BorderRadius.circular(separatorWidth / 2),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(1.0),
       ),
     );
-    final formattedTime = formatSuwayaTime(globalSuwayaIndex, minute);
-    final separatorIndex = formattedTime.indexOf(':');
 
-    return Semantics(
-      label: formatSuwayaTime(globalSuwayaIndex, minute, separator: '|'),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: RichText(
-          text: TextSpan(
-            style: style,
-            children: [
-              TextSpan(text: formattedTime.substring(0, separatorIndex)),
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: separator,
-              ),
-              TextSpan(text: formattedTime.substring(separatorIndex + 1)),
-            ],
-          ),
-        ),
+    // 🌟 إجبار الأرقام لتكون (يسار: سويعة، يمين: دقيقة) بدون أن تنقلب
+    final numbersWidget = Directionality(
+      textDirection: ui.TextDirection.ltr,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(parts.suwayaStr, style: style),
+          separator,
+          Text(parts.minStr, style: style),
+        ],
       ),
+    );
+
+    final iconWidget = Text(parts.icon, style: style.copyWith(fontFamily: 'Tajawal'));
+
+    // 🌟 وضع الإيموجي في المكان الصحيح (يسار في العربي، يمين في الإنجليزي)
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: isRTL 
+          ? [iconWidget, const SizedBox(width: 4), numbersWidget] 
+          : [numbersWidget, const SizedBox(width: 4), iconWidget],
     );
   }
 }

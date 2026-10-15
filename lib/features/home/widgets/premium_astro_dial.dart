@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/theme/astro_ui_extensions.dart';
+import 'package:suwaya/core/utils/time_formatters.dart';
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
 import 'package:suwaya/features/home/widgets/dial/dial_models.dart';
 import 'package:suwaya/features/home/widgets/dial/painters/background_painters.dart';
@@ -15,7 +16,7 @@ import 'package:suwaya/features/home/widgets/dial/time_speed_indicator.dart';
 import 'package:suwaya/features/routines/routines_provider.dart';
 import 'package:suwaya/features/settings/settings_provider.dart';
 import 'package:suwaya/features/tasks/tasks_provider.dart';
-import 'package:suwaya/shared/widgets/suwaya_time_text.dart';
+import 'package:suwaya/models/settings_model.dart';
 
 import 'package:suwaya_time/suwaya_time.dart';
 
@@ -426,17 +427,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   }
 
   String _periodTitle(AstroPeriod period) {
-    final key = switch (period.id) {
-      1 => 'periods.fajr',
-      2 => 'periods.duha',
-      3 => 'periods.dhuhr',
-      4 => 'periods.asr',
-      5 => 'periods.maghrib',
-      6 => 'periods.middle_third',
-      7 => 'periods.last_third',
-      _ => period.nameKey,
-    };
-    return key.tr();
+    switch (period.id) {
+      case 1: return 'periods.maghrib'.tr();
+      case 2: return 'prayers.isha'.tr(); // 🌟 تم تصحيح المفتاح
+      case 3: return 'ibadat.qiyam_tab'.tr(); // 🌟 تم تصحيح المفتاح
+      case 4: return 'periods.fajr'.tr();
+      case 5: return 'periods.duha'.tr();
+      case 6: return 'periods.dhuhr'.tr();
+      case 7: return 'periods.asr'.tr();
+      default: return period.nameKey.tr();
+    }
   }
 
   double _getCurrentTotalRotation(DateTime currentTime) {
@@ -461,7 +461,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     final highlightedRoutineId = ref.watch(highlightedRoutineProvider);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currentLang = context.locale.languageCode;
 
     if (astroState.periods.isEmpty) {
       return SizedBox(width: widget.size, height: widget.size);
@@ -492,7 +491,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                     : task.targetSuwayas.first - 1)
                 : suwayaCount ~/ 2;
             sIndex = sIndex.clamp(0, suwayaCount - 1);
-            final microPerVirtualMinute = microPerSuwaya / 30.0;
+            
+            final microPerVirtualMinute = microPerSuwaya / 60.0;
             taskTime = p.startTime.add(Duration(
                 microseconds: (microPerSuwaya * sIndex) +
                     (microPerVirtualMinute * task.targetVirtualMinute)
@@ -528,12 +528,12 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _buildLayer(
-              BackgroundPainter(isDark: isDark, design: selectedDesign)),
+          _buildLayer(BackgroundPainter(isDark: isDark, design: selectedDesign)),
           if (selectedDesign == DialDesign.classic)
             _buildLayer(IslamicRetePainter(isDark: isDark)),
           if (selectedDesign == DialDesign.geometric)
             _buildLayer(GeometricRetePainter(isDark: isDark)),
+
           _buildLayer(RoutinesRingPainter(
               routineArcs: widget.routineArcs,
               isDark: isDark,
@@ -546,7 +546,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               dayStart: dayStart,
               dayEnd: dayEnd,
               isDark: isDark,
-              langCode: currentLang,
+              langCode: context.locale.languageCode,
               design: selectedDesign,
               highlightedPeriodId: _highlightedPeriodId)),
 
@@ -556,7 +556,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               dayEnd: dayEnd,
               isDark: isDark,
               design: selectedDesign,
-              pinMode: settings.dialPinMode)),
+              // 🌟 التحويل الذكي للدبابيس (24 مدني أو سويعات)
+              pinMode: settings.useAstroTimeForIbadat ? settings.dialPinMode : 'civil24')),
           if (selectedDesign == DialDesign.classic)
             _buildLayer(CrownPainter(dayStart: dayStart, dayEnd: dayEnd)),
           _buildLayer(DividerRingPainter(
@@ -575,11 +576,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               isDark: isDark,
               draggedTask: _draggedTask,
               dragAngle: _dragAngle,
-              langCode: currentLang,
+              langCode: context.locale.languageCode,
               design: selectedDesign,
               highlightedTaskId: highlightedTaskId,
               highlightedMarkerId: _highlightedMarkerId,
-              dialPinMode: settings.dialPinMode)),
+              dialPinMode: settings.useAstroTimeForIbadat ? settings.dialPinMode : 'civil24')),
         ],
       ),
     );
@@ -641,7 +642,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             },
           ),
           _buildCenterGlow(isDark, selectedDesign),
-          _buildCentralTime(astroState, textColor, isDark),
+          _buildCentralTime(astroState, textColor, isDark, settings), 
         ],
       ),
     );
@@ -689,95 +690,86 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     );
   }
 
-  Widget _buildCentralTime(AstroState state, Color textColor, bool isDark) {
-    final int displaySuwaya = state.currentSuwaya;
-    final String suwayaText =
-        '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
+  // 🌟 تحديث المعاملات لتستقبل settings
+  Widget _buildCentralTime(AstroState state, Color textColor, bool isDark, SettingsModel settings) {
+    
+    // 🌟 1. حالة الوقت المدني (تصميم رقمي أنيق وبسيط)
+    if (!settings.useAstroTimeForIbadat) {
+      return Container(
+        width: widget.size * 0.55, // عرض كافٍ لمنع خروج AM/PM
+        alignment: Alignment.center,
+        child: ValueListenableBuilder<DateTime>(
+          valueListenable: virtualDateTimeNotifier,
+          builder: (context, liveTime, child) {
+            // الاستعانة بدالة التحويل الرسمية في التطبيق لضبط الصيغة (12 أو 24)
+            final String civilTimeString = formatCivilTime(
+              liveTime,
+              format: settings.civilTimeFormat,
+              locale: context.locale.languageCode,
+              context: context,
+            );
 
-    String currentPeriodName = '';
-    switch (state.currentPeriod.id) {
-      case 1:
-        currentPeriodName = 'periods.fajr'.tr();
-        break;
-      case 2:
-        currentPeriodName = 'periods.duha'.tr();
-        break;
-      case 3:
-        currentPeriodName = 'periods.dhuhr'.tr();
-        break;
-      case 4:
-        currentPeriodName = 'periods.asr'.tr();
-        break;
-      case 5:
-        currentPeriodName = 'periods.maghrib'.tr();
-        break;
-      case 6:
-        currentPeriodName = 'periods.middle_third'.tr();
-        break;
-      case 7:
-        currentPeriodName = 'periods.last_third'.tr();
-        break;
-      default:
-        currentPeriodName = state.currentPeriod.nameKey.tr();
+            return Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Text(
+                civilTimeString,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 34, // حجم كبير وواضح
+                  fontWeight: FontWeight.w700, 
+                  color: astroGold,
+                  fontFamily: 'Inter',
+                  letterSpacing: 1.0,
+                ),
+              ),
+            );
+          },
+        ),
+      );
     }
 
-    return Directionality(
-      textDirection: ui.TextDirection.ltr,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            children: [
-              Text(suwayaText,
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'Tajawal',
-                      foreground: Paint()
-                        ..style = PaintingStyle.stroke
-                        ..strokeWidth = 0.8
-                        ..color = Colors.white)),
-              Text(suwayaText,
-                  style: const TextStyle(
+    // 🌟 2. حالة الوقت السويعي (الكود الفلكي الموجود مسبقاً)
+    final int displaySuwaya = state.currentSuwayaTime.periodLocalSlotNumber;
+    final String suwayaText = '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
+
+    return Container(
+      width: widget.size * 0.50, 
+      alignment: Alignment.center,
+      child: Directionality(
+        textDirection: ui.TextDirection.ltr, 
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, 
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(suwayaText, style: TextStyle(fontSize: 12, fontFamily: 'Tajawal', fontWeight: FontWeight.bold, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 1.0..color = Colors.white)),
+                Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(_periodTitle(state.currentPeriod), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.bold, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)])),
+            const SizedBox(height: 4),
+            ValueListenableBuilder<String>(
+                valueListenable: virtualTimeNotifier,
+                builder: (context, virtualTime, child) {
+                  return Text(
+                    virtualTime,
+                    style: const TextStyle(
+                      fontSize: 28, 
+                      fontWeight: FontWeight.w600, 
                       color: astroGold,
-                      fontSize: 11,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'Tajawal')),
-            ],
-          ),
-          const SizedBox(height: 1),
-          Text(currentPeriodName,
-              style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 13,
-                  fontWeight: FontWeight.normal,
-                  shadows: const [
-                    Shadow(color: Colors.black54, blurRadius: 4)
-                  ])),
-          const SizedBox(height: 2),
-          ValueListenableBuilder<String>(
-              valueListenable: virtualTimeNotifier,
-              builder: (context, virtualTime, child) {
-                final parts = virtualTime.split(':');
-                final globalSuwaya = int.tryParse(parts.first) ?? 0;
-                final virtualMinute =
-                    parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
-                return SuwayaTimeText(
-                  globalSuwayaIndex: globalSuwaya,
-                  minute: virtualMinute,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.normal,
-                    color: astroGold,
-                    fontFamily: 'Playfair Display',
-                    letterSpacing: 2.0,
-                  ),
-                );
-              }),
-          const SizedBox(height: 2),
-          const TimeSpeedIndicator(),
-        ],
+                      fontFamily: 'Inter',
+                      letterSpacing: 1.0,
+                    ),
+                  );
+                }),
+            const SizedBox(height: 4),
+            const TimeSpeedIndicator(),
+          ],
+        ),
       ),
     );
   }

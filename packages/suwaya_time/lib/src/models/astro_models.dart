@@ -1,212 +1,118 @@
-class AstroPeriod {
-  final int id;
-  final String name;
-  final String nameKey;
-  final DateTime startTime;
-  final DateTime endTime;
-  final int suwayasCount;
-  final int colorValue;
+/// يحدد النطاق العام للسويعة (ليل أم نهار)
+enum SuwayaPhase {
+  night, day;
+  bool get isNight => this == SuwayaPhase.night;
+  bool get isDay => this == SuwayaPhase.day;
+}
 
-  AstroPeriod({
-    required this.id,
-    required this.name,
-    required this.nameKey,
-    required this.startTime,
-    required this.endTime,
-    required this.suwayasCount,
-    required this.colorValue,
+enum PeriodKey {
+  nightMaghribIsha, nightIshaMidnight, nightMidnightFajr, nightFajrSunrise,
+  daySunriseDhuhr, dayDhuhrAsr, dayAsrMaghrib;
+}
+
+class SuwayaCycleAnchors {
+  final DateTime cycleStartMaghrib, cycleIsha, sharIMidnight, cycleFajr, cycleSunrise, cycleDhuhr, cycleAsr, cycleEndMaghrib;
+
+  const SuwayaCycleAnchors({
+    required this.cycleStartMaghrib, required this.cycleIsha, required this.sharIMidnight,
+    required this.cycleFajr, required this.cycleSunrise, required this.cycleDhuhr,
+    required this.cycleAsr, required this.cycleEndMaghrib,
+  });
+
+  bool get isValidSequence {
+    return cycleStartMaghrib.isBefore(cycleIsha) && cycleIsha.isBefore(sharIMidnight) &&
+           sharIMidnight.isBefore(cycleFajr) && cycleFajr.isBefore(cycleSunrise) &&
+           cycleSunrise.isBefore(cycleDhuhr) && cycleDhuhr.isBefore(cycleAsr) &&
+           cycleAsr.isBefore(cycleEndMaghrib);
+  }
+}
+
+class SuwayaClockTime {
+  final SuwayaPhase phase;
+  final int phaseSlotNumber;
+  final PeriodKey periodKey;
+  final int periodLocalSlotNumber;
+  final double slotProgress;
+  final DateTime cycleStartDate;
+  final DateTime instant;
+
+  const SuwayaClockTime({
+    required this.phase, required this.phaseSlotNumber, required this.periodKey,
+    required this.periodLocalSlotNumber, required this.slotProgress,
+    required this.cycleStartDate, required this.instant,
+  });
+
+  int get virtualMinute => ((slotProgress * 3600) ~/ 60).clamp(0, 59);
+  int get virtualSecond => ((slotProgress * 3600).floor() % 60).clamp(0, 59);
+}
+
+class AstroPeriod {
+  final int id; 
+  final PeriodKey periodKey; 
+  final String nameKey;
+  final DateTime startTime, endTime;
+  final int suwayasCount, colorValue;
+
+  const AstroPeriod({
+    required this.id, required this.periodKey, required this.nameKey,
+    required this.startTime, required this.endTime,
+    required this.suwayasCount, required this.colorValue,
   });
 
   Duration get totalDuration => endTime.difference(startTime);
 }
 
 class NightPart {
-  final String id;
-  final String nameKey;
-  final DateTime startTime;
-  final DateTime endTime;
+  final String id, nameKey;
+  final DateTime startTime, endTime;
 
-  NightPart(
-      {required this.id,
-      required this.nameKey,
-      required this.startTime,
-      required this.endTime});
+  const NightPart({required this.id, required this.nameKey, required this.startTime, required this.endTime});
 }
 
 class IbadatTimings {
   final DateTime fajr, sunrise, dhuhr, asr, maghrib, isha, nextFajr;
   final List<NightPart> nightParts;
 
-  IbadatTimings({
-    required this.fajr,
-    required this.sunrise,
-    required this.dhuhr,
-    required this.asr,
-    required this.maghrib,
-    required this.isha,
-    required this.nextFajr,
-    required this.nightParts,
+  const IbadatTimings({
+    required this.fajr, required this.sunrise, required this.dhuhr, required this.asr,
+    required this.maghrib, required this.isha, required this.nextFajr, required this.nightParts,
   });
 }
 
 class SuwayaDay {
   final IbadatTimings ibadatTimings;
+  final SuwayaCycleAnchors cycleAnchors; 
   final List<AstroPeriod> periods;
 
-  SuwayaDay({required this.ibadatTimings, required this.periods});
+  const SuwayaDay({required this.ibadatTimings, required this.cycleAnchors, required this.periods});
 }
 
 class AstroState {
   final DateTime virtualTime;
   final List<AstroPeriod> periods;
   final AstroPeriod currentPeriod;
-  final int currentSuwaya;
-  final Duration elapsedVirtualTime;
-  final double suwayaProgress;
+  final SuwayaClockTime currentSuwayaTime; 
   final double timeSpeedMultiplier;
   final IbadatTimings ibadatTimings;
-  final String currentFormattedVirtualTime;
+  final SuwayaCycleAnchors cycleAnchors;
 
-  AstroState({
-    required this.virtualTime,
-    required this.periods,
-    required this.currentPeriod,
-    required this.currentSuwaya,
-    required this.elapsedVirtualTime,
-    required this.suwayaProgress,
-    required this.timeSpeedMultiplier,
-    required this.ibadatTimings,
-    required this.currentFormattedVirtualTime,
+  const AstroState({
+    required this.virtualTime, required this.periods, required this.currentPeriod,
+    required this.currentSuwayaTime, required this.timeSpeedMultiplier,
+    required this.ibadatTimings, required this.cycleAnchors,
   });
-
-  ({int suwayaIndex, int minute}) toGlobalSuwayaTime(DateTime targetTime) {
-    if (periods.isEmpty) return (suwayaIndex: 0, minute: 0);
-
-    var globalSuwayaBase = 0;
-    var totalSuwayas = 0;
-    for (final period in periods) {
-      totalSuwayas += period.suwayasCount > 0 ? period.suwayasCount : 0;
-    }
-
-    for (final period in periods) {
-      final suwayaCount = period.suwayasCount > 0 ? period.suwayasCount : 0;
-      if (suwayaCount == 0) continue;
-
-      final isInPeriod = !targetTime.isBefore(period.startTime) &&
-          targetTime.isBefore(period.endTime);
-      if (isInPeriod) {
-        final periodDuration =
-            period.endTime.difference(period.startTime).inMicroseconds;
-        if (periodDuration <= 0) {
-          return (suwayaIndex: globalSuwayaBase, minute: 0);
-        }
-
-        final elapsed = targetTime.difference(period.startTime).inMicroseconds;
-        final virtualMinutes =
-            (elapsed / periodDuration * suwayaCount * 30).floor();
-        return (
-          suwayaIndex: globalSuwayaBase + virtualMinutes ~/ 30,
-          minute: virtualMinutes % 30,
-        );
-      }
-      globalSuwayaBase += suwayaCount;
-    }
-
-    // The final boundary is the start of the next Suwaya day.
-    if (totalSuwayas > 0 && !targetTime.isBefore(periods.last.endTime)) {
-      return (suwayaIndex: 0, minute: 0);
-    }
-
-    return (suwayaIndex: 0, minute: 0);
-  }
-
-  String toVirtualTime(DateTime targetTime) {
-    if (periods.isEmpty) return "00:00";
-    double totalVirtualMinutes = 0.0;
-
-    for (var p in periods) {
-      if (targetTime.isAfter(p.endTime) ||
-          targetTime.isAtSameMomentAs(p.endTime)) {
-        totalVirtualMinutes += p.suwayasCount * 30.0;
-      } else if ((targetTime.isAfter(p.startTime) ||
-              targetTime.isAtSameMomentAs(p.startTime)) &&
-          targetTime.isBefore(p.endTime)) {
-        final totalMicro = p.endTime.difference(p.startTime).inMicroseconds;
-        final elapsedMicro = targetTime.difference(p.startTime).inMicroseconds;
-        final progress = totalMicro > 0 ? (elapsedMicro / totalMicro) : 0.0;
-        totalVirtualMinutes += progress * (p.suwayasCount * 30.0);
-        break;
-      }
-    }
-    int totalMins = totalVirtualMinutes.round();
-    int h = totalMins ~/ 60;
-    int m = totalMins % 60;
-    if (h == 24 && m == 0) h = 0;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-  }
 }
 
-enum CalculationMethodType {
-  muslimWorldLeague,
-  egyptian,
-  karachi,
-  ummAlQura,
-  dubai,
-  northAmerica,
-  kuwait,
-  qatar,
-  singapore,
-  tehran,
-  turkey,
-  custom
-}
-
+enum CalculationMethodType { muslimWorldLeague, egyptian, karachi, ummAlQura, dubai, northAmerica, kuwait, qatar, singapore, tehran, turkey, custom }
 enum MadhabType { hanafi, shafi }
-
 enum HighLatitudeRuleType { middleOfTheNight, seventhOfTheNight, twilightAngle }
-
 enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
 
 extension AstroStringParsers on String {
   String get _normalized => replaceAll('_', '').toLowerCase();
-
-  CalculationMethodType toCalculationMethod() => CalculationMethodType.values
-      .firstWhere((e) => e.name.toLowerCase() == _normalized,
-          orElse: () => CalculationMethodType.muslimWorldLeague);
-
-  MadhabType toMadhab() =>
-      MadhabType.values.firstWhere((e) => e.name.toLowerCase() == _normalized,
-          orElse: () => MadhabType.shafi);
-
-  HighLatitudeRuleType toHighLatRule() => HighLatitudeRuleType.values
-      .firstWhere((e) => e.name.toLowerCase() == _normalized,
-          orElse: () => HighLatitudeRuleType.middleOfTheNight);
-}
-
-// 🌟 تعديل النصوص الصلبة إلى لغة محايدة (الإنجليزية)
-extension AstroPeriodNaming on AstroPeriod {
-  String get longName {
-    switch (id) {
-      case 1:
-        return 'Fajr';
-      case 2:
-        return 'Duha';
-      case 3:
-        return 'Dhuhr';
-      case 4:
-        return 'Asr';
-      case 5:
-        return 'Maghrib';
-      case 6:
-        return 'Middle Third';
-      case 7:
-        return 'Last Third';
-      default:
-        return 'Period $id';
-    }
-  }
-
-  String get shortName => longName;
+  CalculationMethodType toCalculationMethod() => CalculationMethodType.values.firstWhere((e) => e.name.toLowerCase() == _normalized, orElse: () => CalculationMethodType.muslimWorldLeague);
+  MadhabType toMadhab() => MadhabType.values.firstWhere((e) => e.name.toLowerCase() == _normalized, orElse: () => MadhabType.shafi);
+  HighLatitudeRuleType toHighLatRule() => HighLatitudeRuleType.values.firstWhere((e) => e.name.toLowerCase() == _normalized, orElse: () => HighLatitudeRuleType.middleOfTheNight);
 }
 
 extension AstroMapParsers on Map<String, int> {
@@ -214,28 +120,12 @@ extension AstroMapParsers on Map<String, int> {
     final map = <PrayerKey, int>{};
     forEach((key, value) {
       switch (key.toLowerCase()) {
-        case '1':
-        case 'fajr':
-          map[PrayerKey.fajr] = value;
-          break;
-        case 'sunrise':
-          map[PrayerKey.sunrise] = value;
-          break;
-        case '3':
-        case 'dhuhr':
-          map[PrayerKey.dhuhr] = value;
-          break;
-        case '4':
-        case 'asr':
-          map[PrayerKey.asr] = value;
-          break;
-        case '5':
-        case 'maghrib':
-          map[PrayerKey.maghrib] = value;
-          break;
-        case 'isha':
-          map[PrayerKey.isha] = value;
-          break;
+        case '1': case 'fajr': map[PrayerKey.fajr] = value; break;
+        case 'sunrise': map[PrayerKey.sunrise] = value; break;
+        case '3': case 'dhuhr': map[PrayerKey.dhuhr] = value; break;
+        case '4': case 'asr': map[PrayerKey.asr] = value; break;
+        case '5': case 'maghrib': map[PrayerKey.maghrib] = value; break;
+        case 'isha': map[PrayerKey.isha] = value; break;
       }
     });
     return map;

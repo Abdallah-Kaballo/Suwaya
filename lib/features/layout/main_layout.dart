@@ -22,18 +22,23 @@ class MainLayout extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: bgColor,
+      // 🌟 تم إزالة extendBody: true إذا كانت تسبب تداخلاً مع القرص (جربها)
+      // إذا كان تصميمك يعتمد على أن الشريط يطفو فوق المحتوى، أعدها إلى true.
       extendBody: true, 
-      body: navigationShell,
+      
+      // 🌟 التعديل السحري: فصل الشاشات في طبقات مستقلة لمنع إعادة رسم الكل
+      body: RepaintBoundary(child: navigationShell),
+      
       bottomNavigationBar: AnimatedSlide(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOutCubic,
         offset: isDrawerOpen ? const Offset(0, 1.5) : Offset.zero,
-        child: _buildFloatingNavBar(navigationShell.currentIndex, isDark, primaryColor),
+        child: _buildFloatingNavBar(navigationShell.currentIndex, isDark, primaryColor, navigationShell), // 🌟 تمرير Shell
       ),
     );
   }
 
-  Widget _buildFloatingNavBar(int currentIndex, bool isDark, Color primaryColor) {
+  Widget _buildFloatingNavBar(int currentIndex, bool isDark, Color primaryColor, StatefulNavigationShell shell) {
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
@@ -46,16 +51,17 @@ class MainLayout extends ConsumerWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(36),
+          // 🌟 تقليل قوة الـ Blur يخفف الضغط جداً على الشاشات القديمة
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), 
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildNavItem(LucideIcons.list_todo, 0, currentIndex, isDark, primaryColor, 'nav.tasks'.tr()),
-                _buildNavItem(LucideIcons.moon_star, 1, currentIndex, isDark, primaryColor, 'nav.ibadat'.tr()),
-                _buildNavItem(LucideIcons.compass, 2, currentIndex, isDark, primaryColor, 'nav.home'.tr()),
-                _buildNavItem(LucideIcons.timer, 3, currentIndex, isDark, primaryColor, 'nav.pomodoro'.tr()),
+                _buildNavItem(LucideIcons.list_todo, 0, currentIndex, isDark, primaryColor, 'nav.tasks'.tr(), shell),
+                _buildNavItem(LucideIcons.moon_star, 1, currentIndex, isDark, primaryColor, 'nav.ibadat'.tr(), shell),
+                _buildNavItem(LucideIcons.compass, 2, currentIndex, isDark, primaryColor, 'nav.home'.tr(), shell),
+                _buildNavItem(LucideIcons.timer, 3, currentIndex, isDark, primaryColor, 'nav.pomodoro'.tr(), shell),
               ],
             ),
           ),
@@ -64,7 +70,7 @@ class MainLayout extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, int index, int currentIndex, bool isDark, Color primaryColor, String label) {
+  Widget _buildNavItem(IconData icon, int index, int currentIndex, bool isDark, Color primaryColor, String label, StatefulNavigationShell shell) {
     final isSelected = currentIndex == index;
     final scale = isSelected ? 1.05 : 1.0; 
     
@@ -76,8 +82,11 @@ class MainLayout extends ConsumerWidget {
         selected: isSelected,
         child: GestureDetector(
           onTap: () {
+            // 🌟 لا داعي لتنفيذ الانتقال إذا كنا في نفس الشاشة (يمنع إعادة البناء الوهمية)
+            if (index == currentIndex) return; 
+            
             HapticFeedback.selectionClick();
-            navigationShell.goBranch(index, initialLocation: index == currentIndex); 
+            shell.goBranch(index, initialLocation: index == currentIndex); 
           },
           behavior: HitTestBehavior.opaque,
           child: AnimatedContainer(

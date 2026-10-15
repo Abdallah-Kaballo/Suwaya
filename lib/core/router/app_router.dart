@@ -90,6 +90,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           return UniversalAddScreen(
             currentPeriodId: extra['currentPeriodId'] ?? 1,
             currentSuwaya: extra['currentSuwaya'] ?? 1,
+            initialTab: extra['initialTab'] ?? 0, // 🌟 استقبال التبويب
+            existingTask: extra['existingTask'],  // 🌟 استقبال المهمة للتعديل
+            existingRoutine: extra['existingRoutine'], // 🌟 استقبال الروتين للتعديل
           );
         },
       ),

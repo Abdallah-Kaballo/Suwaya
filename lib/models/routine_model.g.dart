@@ -77,28 +77,33 @@ const RoutineModelSchema = CollectionSchema(
       name: r'recurrenceDays',
       type: IsarType.longList,
     ),
-    r'startPeriodId': PropertySchema(
+    r'scheduleModelVersion': PropertySchema(
       id: 12,
+      name: r'scheduleModelVersion',
+      type: IsarType.long,
+    ),
+    r'startPeriodId': PropertySchema(
+      id: 13,
       name: r'startPeriodId',
       type: IsarType.long,
     ),
     r'startSuwaya': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'startSuwaya',
       type: IsarType.long,
     ),
     r'startTimeMinutes': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'startTimeMinutes',
       type: IsarType.long,
     ),
     r'startVirtualMinute': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'startVirtualMinute',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'title',
       type: IsarType.string,
     )
@@ -167,11 +172,12 @@ void _routineModelSerialize(
   writer.writeBool(offsets[9], object.isAstroTime);
   writer.writeString(offsets[10], object.pattern);
   writer.writeLongList(offsets[11], object.recurrenceDays);
-  writer.writeLong(offsets[12], object.startPeriodId);
-  writer.writeLong(offsets[13], object.startSuwaya);
-  writer.writeLong(offsets[14], object.startTimeMinutes);
-  writer.writeLong(offsets[15], object.startVirtualMinute);
-  writer.writeString(offsets[16], object.title);
+  writer.writeLong(offsets[12], object.scheduleModelVersion);
+  writer.writeLong(offsets[13], object.startPeriodId);
+  writer.writeLong(offsets[14], object.startSuwaya);
+  writer.writeLong(offsets[15], object.startTimeMinutes);
+  writer.writeLong(offsets[16], object.startVirtualMinute);
+  writer.writeString(offsets[17], object.title);
 }
 
 RoutineModel _routineModelDeserialize(
@@ -194,11 +200,12 @@ RoutineModel _routineModelDeserialize(
   object.isAstroTime = reader.readBool(offsets[9]);
   object.pattern = reader.readString(offsets[10]);
   object.recurrenceDays = reader.readLongList(offsets[11]);
-  object.startPeriodId = reader.readLongOrNull(offsets[12]);
-  object.startSuwaya = reader.readLongOrNull(offsets[13]);
-  object.startTimeMinutes = reader.readLongOrNull(offsets[14]);
-  object.startVirtualMinute = reader.readLongOrNull(offsets[15]);
-  object.title = reader.readString(offsets[16]);
+  object.scheduleModelVersion = reader.readLong(offsets[12]);
+  object.startPeriodId = reader.readLongOrNull(offsets[13]);
+  object.startSuwaya = reader.readLongOrNull(offsets[14]);
+  object.startTimeMinutes = reader.readLongOrNull(offsets[15]);
+  object.startVirtualMinute = reader.readLongOrNull(offsets[16]);
+  object.title = reader.readString(offsets[17]);
   return object;
 }
 
@@ -234,7 +241,7 @@ P _routineModelDeserializeProp<P>(
     case 11:
       return (reader.readLongList(offset)) as P;
     case 12:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 13:
       return (reader.readLongOrNull(offset)) as P;
     case 14:
@@ -242,6 +249,8 @@ P _routineModelDeserializeProp<P>(
     case 15:
       return (reader.readLongOrNull(offset)) as P;
     case 16:
+      return (reader.readLongOrNull(offset)) as P;
+    case 17:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1378,6 +1387,62 @@ extension RoutineModelQueryFilter
   }
 
   QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      scheduleModelVersionEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'scheduleModelVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      scheduleModelVersionGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'scheduleModelVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      scheduleModelVersionLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'scheduleModelVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
+      scheduleModelVersionBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'scheduleModelVersion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterFilterCondition>
       startPeriodIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1957,6 +2022,20 @@ extension RoutineModelQuerySortBy
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy>
+      sortByScheduleModelVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy>
+      sortByScheduleModelVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.desc);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> sortByStartPeriodId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'startPeriodId', Sort.asc);
@@ -2179,6 +2258,20 @@ extension RoutineModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy>
+      thenByScheduleModelVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy>
+      thenByScheduleModelVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.desc);
+    });
+  }
+
   QueryBuilder<RoutineModel, RoutineModel, QAfterSortBy> thenByStartPeriodId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'startPeriodId', Sort.asc);
@@ -2326,6 +2419,13 @@ extension RoutineModelQueryWhereDistinct
   }
 
   QueryBuilder<RoutineModel, RoutineModel, QDistinct>
+      distinctByScheduleModelVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'scheduleModelVersion');
+    });
+  }
+
+  QueryBuilder<RoutineModel, RoutineModel, QDistinct>
       distinctByStartPeriodId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'startPeriodId');
@@ -2439,6 +2539,13 @@ extension RoutineModelQueryProperty
       recurrenceDaysProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'recurrenceDays');
+    });
+  }
+
+  QueryBuilder<RoutineModel, int, QQueryOperations>
+      scheduleModelVersionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'scheduleModelVersion');
     });
   }
 

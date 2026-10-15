@@ -167,7 +167,10 @@ class _OnboardingLocationScreenState extends ConsumerState<OnboardingLocationScr
                         onPressed: isLocationSet ? () async {
                           HapticFeedback.heavyImpact();
                           
-                          await ref.read(permissionsProvider.notifier).requestInitialPermissions();
+                          final perms = ref.read(permissionsProvider.notifier);
+                          await perms.ensureNotificationPermission();
+                          await perms.ensureExactAlarmPermission();
+                          await perms.ensureLocationPermission();
                           await ref.read(settingsProvider.notifier).completeOnboarding();
                           
                           if (!context.mounted) return;

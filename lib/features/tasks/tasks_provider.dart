@@ -66,7 +66,10 @@ class TasksNotifier extends Notifier<TasksState> {
   void _refreshFromMemory(List<TaskModel> allTasks) {
     final astroState = ref.read(astroProvider);
     final currentPeriodId = astroState.periods.isNotEmpty ? astroState.currentPeriod.id : null;
-    final currentSuwaya = astroState.currentSuwaya;
+    
+    // 🌟 الإصلاح هنا: المسار الصحيح للوصول إلى رقم السويعة
+    final currentSuwaya = astroState.currentSuwayaTime.periodLocalSlotNumber;
+    
     final now = DateTime.now();
     final weekday = now.weekday;
 
@@ -74,7 +77,6 @@ class TasksNotifier extends Notifier<TasksState> {
     final List<TaskModel> todayList = [];
     final List<TaskModel> horizonList = [];
 
-    // 🌟 Cache لحفظ نتائج החישوب أثناء الفرز وتوفير المعالج
     final Map<int, Map<String, int>> astroCache = {};
 
     for (var task in allTasks) {
@@ -113,7 +115,6 @@ class TasksNotifier extends Notifier<TasksState> {
       }
     }
 
-    // 🌟 استخدام المخبأ (Cache) في الفرز بدلاً من الحساب الثقيل المتكرر
     todayList.sort((a, b) {
       final astroA = astroCache[a.id];
       final astroB = astroCache[b.id];
@@ -220,9 +221,7 @@ class TasksNotifier extends Notifier<TasksState> {
       if (isAchievedNow) {
         ref.read(settingsProvider.notifier).updateGlobalStreak();
       }
-    } catch (_) {
-      // تم تجاهل الخطأ عمداً لتفادي انهيار الاختبارات عند عدم توفر المزود
-    }
+    } catch (_) {}
   }
 
   Future<void> rescheduleTask(TaskModel task, int periodId, int suwaya, int vMin) async {

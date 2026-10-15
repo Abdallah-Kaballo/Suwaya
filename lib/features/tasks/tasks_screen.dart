@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:go_router/go_router.dart';
 import 'dart:ui' as ui;
 
 import 'tasks_provider.dart';
@@ -12,7 +13,6 @@ import '../../core/astro_engine/astro_provider.dart';
 
 import 'package:suwaya_time/suwaya_time.dart';
 import '../routines/routines_provider.dart';
-import 'universal_add_screen.dart';
 import 'routine_schedule_format.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../../shared/widgets/suwaya_time_text.dart';
@@ -222,15 +222,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
                 backgroundColor: accentColor,
                 onPressed: () {
                   HapticFeedback.heavyImpact();
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => UniversalAddScreen(
-                        currentPeriodId: astroState.currentPeriod.id,
-                        currentSuwaya: astroState.currentSuwaya,
-                        initialTab: _tabController.index),
-                  );
+                  // 🌟 التوجيه الموحد كصفحة كاملة مع تمرير التبويب الحالي
+                  context.push('/add-task', extra: {
+                    'currentPeriodId': astroState.currentPeriod.id,
+                    'currentSuwaya': astroState.currentSuwayaTime.periodLocalSlotNumber,
+                    'initialTab': _tabController.index,
+                  });
                 },
                 icon: const Icon(LucideIcons.plus, color: Colors.white),
                 label: Text('common.add'.tr(),
@@ -408,27 +405,25 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
   void _editTask(TaskModel task) {
     HapticFeedback.selectionClick();
     final astro = ref.read(astroProvider);
-    showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => UniversalAddScreen(
-            currentPeriodId: astro.currentPeriod.id,
-            currentSuwaya: astro.currentSuwaya,
-            existingTask: task));
+    // 🌟 التوجيه للشاشة الشاملة مع تحديد نوع التبويب لحماية نوع المهمة
+    context.push('/add-task', extra: {
+      'currentPeriodId': astro.currentPeriod.id,
+      'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
+      'existingTask': task,
+      'initialTab': task.type == TaskType.permanent ? 1 : 0, // 0 للعابرة، 1 للمستمرة
+    });
   }
 
   void _editRoutine(RoutineModel r) {
     HapticFeedback.selectionClick();
     final astro = ref.read(astroProvider);
-    showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => UniversalAddScreen(
-            currentPeriodId: astro.currentPeriod.id,
-            currentSuwaya: astro.currentSuwaya,
-            existingRoutine: r));
+    // 🌟 التوجيه للشاشة الشاملة على تبويب الروتين مباشرة
+    context.push('/add-task', extra: {
+      'currentPeriodId': astro.currentPeriod.id,
+      'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
+      'existingRoutine': r,
+      'initialTab': 2, // 2 للروتين
+    });
   }
 }
 

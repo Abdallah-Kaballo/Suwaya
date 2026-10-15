@@ -203,28 +203,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           isDark: isDark,
                           primaryColor: primaryColor,
                           textColor: textColor),
-                      _buildSettingRow(context,
-                          icon: LucideIcons.clock_3,
-                          title: 'settings.dial_pin_mode'.tr(), // 🌟 تم الاستبدال
-                          subtitle: settingsState.dialPinMode == 'civil24'
-                              ? '24 · 00–23'
-                              : '48 · 00–47',
-                          onTap: () => _showSelectionSheet(
-                                'settings.dial_pin_mode'.tr(), // 🌟 تم الاستبدال
-                                {
-                                  'suwaya48': 'settings.dial_pin_48'.tr(), // 🌟 تم الاستبدال
-                                  'civil24': 'settings.dial_pin_24'.tr(), // 🌟 تم الاستبدال
-                                },
-                                settingsState.dialPinMode,
-                                notifier.updateDialPinMode,
-                                isDark,
-                                surfaceColor,
-                                textColor,
-                                primaryColor,
-                              ),
-                          isDark: isDark,
-                          primaryColor: primaryColor,
-                          textColor: textColor),
                     ],
                     isDark,
                     surfaceColor,
@@ -290,7 +268,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Column(
                     children: [
-                      Text('app_name'.tr(), // 🌟 تم الاستبدال لدعم الاسم العربي "سُويعة"
+                      Text('app_name'.tr(), 
                           style: TextStyle(
                               color: isDark ? Colors.white54 : Colors.black54,
                               fontSize: 13,

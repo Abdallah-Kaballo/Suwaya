@@ -98,49 +98,54 @@ const TaskModelSchema = CollectionSchema(
       name: r'recurrenceDays',
       type: IsarType.longList,
     ),
-    r'showOnDial': PropertySchema(
+    r'scheduleModelVersion': PropertySchema(
       id: 16,
+      name: r'scheduleModelVersion',
+      type: IsarType.long,
+    ),
+    r'showOnDial': PropertySchema(
+      id: 17,
       name: r'showOnDial',
       type: IsarType.bool,
     ),
     r'targetCivilTimeMinutes': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'targetCivilTimeMinutes',
       type: IsarType.long,
     ),
     r'targetDate': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'targetDate',
       type: IsarType.dateTime,
     ),
     r'targetPeriodId': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'targetPeriodId',
       type: IsarType.long,
     ),
     r'targetSuwayas': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'targetSuwayas',
       type: IsarType.longList,
     ),
     r'targetVirtualMinute': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'targetVirtualMinute',
       type: IsarType.long,
     ),
     r'title': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'title',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'type',
       type: IsarType.byte,
       enumMap: _TaskModeltypeEnumValueMap,
     ),
     r'vibrateMode': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'vibrateMode',
       type: IsarType.bool,
     )
@@ -246,15 +251,16 @@ void _taskModelSerialize(
   writer.writeLong(offsets[13], object.migrationCount);
   writer.writeBool(offsets[14], object.notifyMode);
   writer.writeLongList(offsets[15], object.recurrenceDays);
-  writer.writeBool(offsets[16], object.showOnDial);
-  writer.writeLong(offsets[17], object.targetCivilTimeMinutes);
-  writer.writeDateTime(offsets[18], object.targetDate);
-  writer.writeLong(offsets[19], object.targetPeriodId);
-  writer.writeLongList(offsets[20], object.targetSuwayas);
-  writer.writeLong(offsets[21], object.targetVirtualMinute);
-  writer.writeString(offsets[22], object.title);
-  writer.writeByte(offsets[23], object.type.index);
-  writer.writeBool(offsets[24], object.vibrateMode);
+  writer.writeLong(offsets[16], object.scheduleModelVersion);
+  writer.writeBool(offsets[17], object.showOnDial);
+  writer.writeLong(offsets[18], object.targetCivilTimeMinutes);
+  writer.writeDateTime(offsets[19], object.targetDate);
+  writer.writeLong(offsets[20], object.targetPeriodId);
+  writer.writeLongList(offsets[21], object.targetSuwayas);
+  writer.writeLong(offsets[22], object.targetVirtualMinute);
+  writer.writeString(offsets[23], object.title);
+  writer.writeByte(offsets[24], object.type.index);
+  writer.writeBool(offsets[25], object.vibrateMode);
 }
 
 TaskModel _taskModelDeserialize(
@@ -283,17 +289,18 @@ TaskModel _taskModelDeserialize(
   object.migrationCount = reader.readLong(offsets[13]);
   object.notifyMode = reader.readBool(offsets[14]);
   object.recurrenceDays = reader.readLongList(offsets[15]);
-  object.showOnDial = reader.readBool(offsets[16]);
-  object.targetCivilTimeMinutes = reader.readLongOrNull(offsets[17]);
-  object.targetDate = reader.readDateTimeOrNull(offsets[18]);
-  object.targetPeriodId = reader.readLongOrNull(offsets[19]);
-  object.targetSuwayas = reader.readLongList(offsets[20]) ?? [];
-  object.targetVirtualMinute = reader.readLong(offsets[21]);
-  object.title = reader.readString(offsets[22]);
+  object.scheduleModelVersion = reader.readLong(offsets[16]);
+  object.showOnDial = reader.readBool(offsets[17]);
+  object.targetCivilTimeMinutes = reader.readLongOrNull(offsets[18]);
+  object.targetDate = reader.readDateTimeOrNull(offsets[19]);
+  object.targetPeriodId = reader.readLongOrNull(offsets[20]);
+  object.targetSuwayas = reader.readLongList(offsets[21]) ?? [];
+  object.targetVirtualMinute = reader.readLong(offsets[22]);
+  object.title = reader.readString(offsets[23]);
   object.type =
-      _TaskModeltypeValueEnumMap[reader.readByteOrNull(offsets[23])] ??
+      _TaskModeltypeValueEnumMap[reader.readByteOrNull(offsets[24])] ??
           TaskType.casual;
-  object.vibrateMode = reader.readBool(offsets[24]);
+  object.vibrateMode = reader.readBool(offsets[25]);
   return object;
 }
 
@@ -338,23 +345,25 @@ P _taskModelDeserializeProp<P>(
     case 15:
       return (reader.readLongList(offset)) as P;
     case 16:
-      return (reader.readBool(offset)) as P;
-    case 17:
-      return (reader.readLongOrNull(offset)) as P;
-    case 18:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 19:
-      return (reader.readLongOrNull(offset)) as P;
-    case 20:
-      return (reader.readLongList(offset) ?? []) as P;
-    case 21:
       return (reader.readLong(offset)) as P;
+    case 17:
+      return (reader.readBool(offset)) as P;
+    case 18:
+      return (reader.readLongOrNull(offset)) as P;
+    case 19:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 20:
+      return (reader.readLongOrNull(offset)) as P;
+    case 21:
+      return (reader.readLongList(offset) ?? []) as P;
     case 22:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 23:
+      return (reader.readString(offset)) as P;
+    case 24:
       return (_TaskModeltypeValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskType.casual) as P;
-    case 24:
+    case 25:
       return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2013,6 +2022,62 @@ extension TaskModelQueryFilter
     });
   }
 
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      scheduleModelVersionEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'scheduleModelVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      scheduleModelVersionGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'scheduleModelVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      scheduleModelVersionLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'scheduleModelVersion',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      scheduleModelVersionBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'scheduleModelVersion',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition> showOnDialEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -2813,6 +2878,20 @@ extension TaskModelQuerySortBy on QueryBuilder<TaskModel, TaskModel, QSortBy> {
     });
   }
 
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy>
+      sortByScheduleModelVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy>
+      sortByScheduleModelVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByShowOnDial() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'showOnDial', Sort.asc);
@@ -3096,6 +3175,20 @@ extension TaskModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy>
+      thenByScheduleModelVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy>
+      thenByScheduleModelVersionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scheduleModelVersion', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByShowOnDial() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'showOnDial', Sort.asc);
@@ -3297,6 +3390,13 @@ extension TaskModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<TaskModel, TaskModel, QDistinct>
+      distinctByScheduleModelVersion() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'scheduleModelVersion');
+    });
+  }
+
   QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByShowOnDial() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'showOnDial');
@@ -3459,6 +3559,13 @@ extension TaskModelQueryProperty
       recurrenceDaysProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'recurrenceDays');
+    });
+  }
+
+  QueryBuilder<TaskModel, int, QQueryOperations>
+      scheduleModelVersionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'scheduleModelVersion');
     });
   }
 

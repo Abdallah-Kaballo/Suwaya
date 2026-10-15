@@ -75,7 +75,8 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
 
   final totalSuwayas =
       astroState.periods.fold(0, (sum, p) => sum + p.suwayasCount);
-  final effectiveTotalSuwayas = totalSuwayas > 0 ? totalSuwayas : 48;
+  // 🌟 الإصلاح 1: النموذج الجديد يتكون من 24 سويعة (12 ليل + 12 نهار) بدلاً من 48
+  final effectiveTotalSuwayas = totalSuwayas > 0 ? totalSuwayas : 24;
 
   double getAngleForTime(DateTime t) {
     return -pi / 2 +
@@ -84,6 +85,7 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
 
   double getAstroAngle(int globalSuwaya, int virtualMinute) {
     globalSuwaya %= effectiveTotalSuwayas;
+    final safeMinute = virtualMinute.clamp(0, 59);
 
     int accumulatedSuwayas = 0;
     for (var p in astroState.periods) {
@@ -96,7 +98,8 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
         if (sweep <= 0) sweep += 2 * pi;
 
         double anglePerSuwaya = sweep / p.suwayasCount;
-        double exactLocal = localSuwaya + (virtualMinute / 30.0);
+        // 🌟 الإصلاح 2: السويعة الواحدة تتكون من 60 دقيقة افتراضية بدلاً من 30
+        double exactLocal = localSuwaya + (safeMinute / 60.0);
 
         return pStartAngle + (exactLocal * anglePerSuwaya);
       }
@@ -116,16 +119,19 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
     if (r.isAstroTime) {
       int sPId = r.startPeriodId ?? astroState.periods.first.id;
       int sLocal = r.startSuwaya ?? 1;
-      int sm = r.startVirtualMinute ?? 0;
+      int sm = (r.startVirtualMinute ?? 0).clamp(0, 59);
 
       int ePId = r.endPeriodId ?? astroState.periods.last.id;
       int eLocal = r.endSuwaya ?? 1;
-      int em = r.endVirtualMinute ?? 0;
+      int em = (r.endVirtualMinute ?? 0).clamp(0, 59);
 
       int getGlobal(int pId, int sNum) {
         int g = 0;
         for (var p in astroState.periods) {
-          if (p.id == pId) return g + sNum - 1;
+          if (p.id == pId) {
+            final count = p.suwayasCount > 0 ? p.suwayasCount : 1;
+            return g + (sNum - 1).clamp(0, count - 1);
+          }
           g += p.suwayasCount;
         }
         return 0;
@@ -141,11 +147,13 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
         );
         final count = period.suwayasCount > 0 ? period.suwayasCount : 1;
         final localIndex = (localSuwaya - 1).clamp(0, count - 1);
+        final safeMinute = minute.clamp(0, 59);
         final microsPerSuwaya =
             period.endTime.difference(period.startTime).inMicroseconds ~/ count;
+        // 🌟 الإصلاح 3: القسمة على 60.0 بدلاً من 30 لحساب الوقت الفعلي بدقة
         return period.startTime.add(Duration(
           microseconds: microsPerSuwaya * localIndex +
-              (microsPerSuwaya * minute / 30).round(),
+              (microsPerSuwaya * safeMinute / 60.0).round(),
         ));
       }
 
@@ -189,7 +197,7 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
     }
 
     arcs.add(RoutineArcData(
-      id: r.id, // 🌟 تمرير الـ ID للتعرف عليه
+      id: r.id,
       color: Color(r.colorValue),
       startAngle: startAngle,
       sweepAngle: sweepAngle,

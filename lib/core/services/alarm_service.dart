@@ -1,39 +1,67 @@
 import 'package:alarm/alarm.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+class ParsedAlarmData {
+  final String title;
+  final String body;
+  final int colorValue;
+  final int snoozeCount;
+
+  const ParsedAlarmData({
+    required this.title,
+    required this.body,
+    required this.colorValue,
+    required this.snoozeCount,
+  });
+}
+
 class AlarmService {
-  static const int maxSnoozes = 3;
-  static const int snoozeMinutes = 5;
+  static const int defaultMaxSnoozes = 3;
+  static const int defaultSnoozeMinutes = 5;
 
   static Future<void> init() async {
     await Alarm.init();
   }
 
-  static Future<bool> checkAndRequestPermissions() async {
-    bool allGranted = true;
-    
-    // 🌟 طلب صلاحية المنبهات الدقيقة
-    if (await Permission.scheduleExactAlarm.isDenied) {
-      final status = await Permission.scheduleExactAlarm.request();
-      if (!status.isGranted) allGranted = false;
+  /// 🌟 استخراج ذكي لبيانات المنبه يدعم كلاً من payload و notificationSettings
+  static ParsedAlarmData parseAlarmSettings(AlarmSettings settings) {
+    final notifTitle = settings.notificationSettings.title;
+    final notifBody = settings.notificationSettings.body;
+
+    final fallbackTitle = notifTitle.isNotEmpty
+        ? notifTitle
+        : 'alarm.default_title'.tr();
+    final fallbackBody = notifBody.isNotEmpty
+        ? notifBody
+        : 'alarm.swipe_to_stop'.tr();
+
+    final rawPayload = settings.payload;
+    if (rawPayload == null || rawPayload.trim().isEmpty) {
+      return ParsedAlarmData(
+        title: fallbackTitle,
+        body: fallbackBody,
+        colorValue: 0xFFD4AF37,
+        snoozeCount: 0,
+      );
     }
 
-    // 🌟 تم إزالة طلب صلاحية SYSTEM_ALERT_WINDOW من هنا بالكامل
+    final parts = rawPayload.split('|');
+    final payloadTitle = (parts.isNotEmpty && parts[0].isNotEmpty && parts[0] != 'تنبيه')
+        ? parts[0]
+        : fallbackTitle;
+    final colorVal = parts.length > 1
+        ? (int.tryParse(parts[1]) ?? 0xFFD4AF37)
+        : 0xFFD4AF37;
+    final snoozes = parts.length > 2
+        ? (int.tryParse(parts[2]) ?? 0)
+        : 0;
 
-    // 🌟 طلب صلاحية تخطي تحسين البطارية لضمان رنين المنبه في الوقت المحدد
-    if (await Permission.ignoreBatteryOptimizations.isDenied) {
-      final status = await Permission.ignoreBatteryOptimizations.request();
-      if (!status.isGranted) allGranted = false;
-    }
-
-    // 🌟 طلب صلاحية الإشعارات
-    if (await Permission.notification.isDenied) {
-      final status = await Permission.notification.request();
-      if (!status.isGranted) allGranted = false;
-    }
-
-    return allGranted;
+    return ParsedAlarmData(
+      title: payloadTitle,
+      body: fallbackBody,
+      colorValue: colorVal,
+      snoozeCount: snoozes,
+    );
   }
 
   static Future<void> scheduleAlarm({
@@ -46,7 +74,6 @@ class AlarmService {
     bool fullScreenIntent = true,
     bool vibrate = true,
   }) async {
-    
     DateTime safeTime = dateTime;
     if (safeTime.isBefore(DateTime.now())) {
       safeTime = safeTime.add(const Duration(days: 1));
@@ -54,37 +81,45 @@ class AlarmService {
 
     final alarmSettings = AlarmSettings(
       id: id,
-      dateTime: safeTime, 
+      dateTime: safeTime,
       assetAudioPath: tonePath,
       loopAudio: true,
       vibrate: vibrate,
-      androidFullScreenIntent: fullScreenIntent, // 🌟 هذه الخاصية هي البديل الشرعي للنافذة العائمة
+      androidFullScreenIntent: fullScreenIntent,
       payload: '$title|$colorValue|0',
       volumeSettings: VolumeSettings.fade(
         volume: volume,
-        fadeDuration: const Duration(seconds: 10),
+        fadeDuration: const Duration(seconds: 5),
+        volumeEnforced: true,
       ),
       notificationSettings: NotificationSettings(
         title: '${'notifications.alert'.tr()}: $title',
         body: 'alarm.swipe_to_stop'.tr(),
+        stopButton: 'alarm.stop'.tr(),
       ),
     );
 
     await Alarm.set(alarmSettings: alarmSettings);
   }
 
-  static Future<void> snooze(AlarmSettings currentSettings) async {
-    final payloadParts = currentSettings.payload?.split('|') ?? [];
-    int currentSnoozes = payloadParts.length > 2 ? int.tryParse(payloadParts[2]) ?? 0 : 0;
+  /// 🌟 غفوة ذكية تحترم إعدادات المستخدم وتحتفظ بعدد الغفوات حتى للمنبهات المجدولة عبر SchedulerService
+  static Future<void> snooze(
+    AlarmSettings currentSettings, {
+    int snoozeMinutes = defaultSnoozeMinutes,
+    int maxSnoozes = defaultMaxSnoozes,
+  }) async {
+    final parsed = parseAlarmSettings(currentSettings);
 
-    if (currentSnoozes >= maxSnoozes) return;
-    final newPayload = '${payloadParts[0]}|${payloadParts[1]}|${currentSnoozes + 1}';
+    if (parsed.snoozeCount >= maxSnoozes) return;
+
+    final newPayload =
+        '${parsed.title}|${parsed.colorValue}|${parsed.snoozeCount + 1}';
 
     final newSettings = currentSettings.copyWith(
-      dateTime: DateTime.now().add(const Duration(minutes: snoozeMinutes)),
-      payload: () => newPayload, 
+      dateTime: DateTime.now().add(Duration(minutes: snoozeMinutes)),
+      payload: () => newPayload,
     );
-    
+
     await Alarm.stop(currentSettings.id);
     await Alarm.set(alarmSettings: newSettings);
   }

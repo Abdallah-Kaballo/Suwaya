@@ -482,104 +482,42 @@ class RailwayRingPainter extends CustomPainter {
 class CrownPainter extends CustomPainter {
   final DateTime dayStart;
   final DateTime dayEnd;
+
   CrownPainter({required this.dayStart, required this.dayEnd});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
-    final angle = timeToAngle(dayStart, dayStart, dayEnd);
+    final maghribAngle = timeToAngle(dayStart, dayStart, dayEnd);
+
+    // 🌟 التاج يلتصق بالحافة الخارجية للقرص (خلف الدبابيس مباشرة)
+    final edgeR = R * kRailwayR; 
 
     canvas.save();
     canvas.translate(center.dx, center.dy);
-    canvas.rotate(angle + pi / 2);
-    canvas.translate(0, -R * kRailwayR);
+    canvas.rotate(maghribAngle + pi / 2);
+    canvas.translate(0, -edgeR);
 
-    final scale = R / 185.0;
-    canvas.scale(scale, scale);
+    // 🌟 رسم مثلث الأسطرلاب الكلاسيكي المدبب نحو الخارج
+    final path = Path();
+    path.moveTo(-10, 0); // القاعدة اليسرى
+    path.lineTo(10, 0);  // القاعدة اليمنى
+    path.lineTo(0, -18); // الرأس المدبب نحو الخارج
+    path.close();
 
-    final Path base = Path()
-      ..moveTo(-14, 0)
-      ..lineTo(-8, -6)
-      ..quadraticBezierTo(0, -8, 8, -6)
-      ..lineTo(14, 0)
-      ..close();
-    final shader = const LinearGradient(colors: [goldLight, goldBase, goldDark])
-        .createShader(const Rect.fromLTRB(-15, -30, 15, 0));
-    final metalPaint = Paint()..shader = shader;
+    // تعبئة ذهبية وتحديد أبيض خفيف
+    canvas.drawPath(path, Paint()..color = const Color(0xFFF2C94C)..style = PaintingStyle.fill);
+    canvas.drawPath(path, Paint()..color = Colors.white70..style = PaintingStyle.stroke..strokeWidth = 1.5);
 
-    canvas.drawPath(
-        base,
-        Paint()
-          ..color = Colors.black
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3));
-    canvas.drawPath(base, metalPaint);
-    canvas.drawPath(
-        base,
-        Paint()
-          ..color = Colors.black87
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0);
-
-    final Rect hoopRect =
-        Rect.fromCircle(center: const Offset(0, -16), radius: 14);
-    canvas.drawArc(
-        hoopRect,
-        0,
-        2 * pi,
-        false,
-        Paint()
-          ..color = Colors.black
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5.0
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2));
-    canvas.drawArc(
-        hoopRect,
-        0,
-        2 * pi,
-        false,
-        Paint()
-          ..shader = shader
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 4.0);
-    canvas.drawArc(
-        hoopRect,
-        0,
-        2 * pi,
-        false,
-        Paint()
-          ..color = Colors.black87
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0);
-
-    canvas.drawCircle(const Offset(0, -32), 4.0, metalPaint);
-    canvas.drawCircle(
-        const Offset(0, -32),
-        4.0,
-        Paint()
-          ..color = Colors.black87
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0);
-
-    canvas.drawLine(
-        const Offset(-6, -2),
-        const Offset(-6, -5),
-        Paint()
-          ..color = Colors.black54
-          ..strokeWidth = 1.5);
-    canvas.drawLine(
-        const Offset(6, -2),
-        const Offset(6, -5),
-        Paint()
-          ..color = Colors.black54
-          ..strokeWidth = 1.5);
-    canvas.drawCircle(const Offset(0, -4), 2.5, Paint()..color = Colors.white);
+    // مسمار دائري صغير في قاعدة التاج لمزيد من الأصالة
+    canvas.drawCircle(const Offset(0, 0), 3.0, Paint()..color = Colors.white);
 
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant CrownPainter old) => false;
+  bool shouldRepaint(covariant CrownPainter old) => old.dayStart != dayStart || old.dayEnd != dayEnd;
 }
 
 class DynamicNeedlePainter extends CustomPainter {

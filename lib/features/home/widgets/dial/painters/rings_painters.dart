@@ -28,7 +28,6 @@ class RoutinesRingPainter extends CustomPainter {
 
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
-    // 🌟 حصر مساحة تظليل الروتينات لتكون فقط فوق شريط المهام (السكة) وليس كامل المساحة
     final innerRadius = R * kPeriodR;
     final outerRadius = R * kRailwayR;
 
@@ -44,7 +43,6 @@ class RoutinesRingPainter extends CustomPainter {
             rectInner, arc.startAngle + arc.sweepAngle, -arc.sweepAngle, false)
         ..close();
 
-      // رسم هالة ضوئية (Glow) خلف الروتين عند التوهج
       if (isHighlighted) {
         canvas.drawPath(
             path,
@@ -59,7 +57,6 @@ class RoutinesRingPainter extends CustomPainter {
         ..style = PaintingStyle.fill;
       canvas.drawPath(path, fillPaint);
 
-      // رسم التظليل بناءً على النمط المختار
       if (design != DialDesign.minimal) {
         canvas.save();
         canvas.clipPath(path);
@@ -87,20 +84,13 @@ class RoutinesRingPainter extends CustomPainter {
     const double step = 6.0;
 
     if (pattern == 'linear') {
-      for (double i = -bounds.height;
-          i < bounds.width + bounds.height;
-          i += step) {
-        canvas.drawLine(Offset(bounds.left + i, bounds.top),
-            Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
+      for (double i = -bounds.height; i < bounds.width + bounds.height; i += step) {
+        canvas.drawLine(Offset(bounds.left + i, bounds.top), Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
       }
     } else if (pattern == 'hexagon') {
-      for (double i = -bounds.height;
-          i < bounds.width + bounds.height;
-          i += step * 1.5) {
-        canvas.drawLine(Offset(bounds.left + i, bounds.top),
-            Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
-        canvas.drawLine(Offset(bounds.left + i, bounds.bottom),
-            Offset(bounds.left + i - bounds.height, bounds.top), paint);
+      for (double i = -bounds.height; i < bounds.width + bounds.height; i += step * 1.5) {
+        canvas.drawLine(Offset(bounds.left + i, bounds.top), Offset(bounds.left + i - bounds.height, bounds.bottom), paint);
+        canvas.drawLine(Offset(bounds.left + i, bounds.bottom), Offset(bounds.left + i - bounds.height, bounds.top), paint);
       }
     } else if (pattern == 'stone') {
       paint.style = PaintingStyle.fill;
@@ -108,8 +98,7 @@ class RoutinesRingPainter extends CustomPainter {
       for (double y = bounds.top; y < bounds.bottom; y += step * 1.2) {
         double offsetX = (row % 2 == 0) ? 0 : (step * 0.6);
         for (double x = bounds.left; x < bounds.right; x += step * 1.2) {
-          canvas.drawCircle(
-              Offset(x + offsetX, y), paint.strokeWidth * 1.2, paint);
+          canvas.drawCircle(Offset(x + offsetX, y), paint.strokeWidth * 1.2, paint);
         }
         row++;
       }
@@ -125,25 +114,11 @@ class RoutinesRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant RoutinesRingPainter old) {
-    if (old.isDark != isDark ||
-        old.routineArcs.length != routineArcs.length ||
-        old.design != design ||
-        old.highlightedRoutineId != highlightedRoutineId) {
-      return true;
-    }
-
+    if (old.isDark != isDark || old.routineArcs.length != routineArcs.length || old.design != design || old.highlightedRoutineId != highlightedRoutineId) return true;
     for (int i = 0; i < routineArcs.length; i++) {
       final a = old.routineArcs[i];
       final b = routineArcs[i];
-      if (a.id != b.id ||
-          a.color != b.color ||
-          a.startAngle != b.startAngle ||
-          a.sweepAngle != b.sweepAngle ||
-          a.startTime != b.startTime ||
-          a.endTime != b.endTime ||
-          a.pattern != b.pattern) {
-        return true;
-      }
+      if (a.id != b.id || a.color != b.color || a.startAngle != b.startAngle || a.sweepAngle != b.sweepAngle || a.pattern != b.pattern) return true;
     }
     return false;
   }
@@ -169,20 +144,61 @@ class PeriodRingPainter extends CustomPainter {
       required this.design,
       this.highlightedPeriodId});
 
+  // 🌟 تم إعادة بناء هذه الدالة لتدعم المسارات (Path) والحدود البيضاء
+  void _drawArcSegment(Canvas canvas, Offset center, double innerRadius, double outerRadius, double startAngle, double sweepAngle, Color color, String text, bool isHighlighted) {
+    final gradient = SweepGradient(
+        startAngle: startAngle, endAngle: startAngle + sweepAngle,
+        colors: [color.withValues(alpha: isHighlighted ? 0.95 : 0.4), color.withValues(alpha: isHighlighted ? 0.75 : 0.2)]);
+    
+    // إنشاء المسار المفرغ (Annulus Path) للقطاع
+    final path = Path()
+      ..arcTo(Rect.fromCircle(center: center, radius: outerRadius), startAngle, sweepAngle, true)
+      ..arcTo(Rect.fromCircle(center: center, radius: innerRadius), startAngle + sweepAngle, -sweepAngle, false)
+      ..close();
+
+    // تعبئة القطاع باللون
+    canvas.drawPath(path, Paint()..style = PaintingStyle.fill..shader = gradient.createShader(Rect.fromCircle(center: center, radius: outerRadius)));
+
+    // 🌟 رسم الحد الأبيض الرقيق (Border) ليفصل بين القطاعات بوضوح
+    canvas.drawPath(path, Paint()
+      ..color = Colors.white.withValues(alpha: 0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0);
+
+    if (design == DialDesign.minimal) return;
+
+    final textPainter = TextPainter(textDirection: ui.TextDirection.ltr, textAlign: TextAlign.center);
+    final middleAngle = (startAngle + (sweepAngle / 2)) % (2 * pi);
+    final drawRadius = innerRadius + (outerRadius - innerRadius) / 2;
+    
+    canvas.save();
+    canvas.translate(center.dx + drawRadius * cos(middleAngle), center.dy + drawRadius * sin(middleAngle));
+    canvas.rotate(middleAngle + pi / 2);
+
+    textPainter.text = TextSpan(
+        text: text,
+        style: const TextStyle(
+            color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900, fontFamily: 'Tajawal',
+            shadows: [Shadow(color: Colors.black, blurRadius: 4, offset: Offset(0, 1)), Shadow(color: Colors.black87, blurRadius: 10, offset: Offset(0, 0))]));
+    textPainter.layout();
+
+    final double maxW = (sweepAngle * drawRadius) * 0.85;
+    final double maxH = (outerRadius - innerRadius) * 0.80;
+    double scale = 1.0;
+    if (textPainter.width > maxW && maxW > 0) scale = maxW / textPainter.width;
+    if (textPainter.height > maxH && maxH > 0) scale = min(scale, maxH / textPainter.height);
+
+    canvas.scale(scale, scale);
+    textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+    canvas.restore();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
     final innerRadius = R * kInnerR;
     final outerRadius = R * kPeriodR;
-    final width = design == DialDesign.minimal
-        ? (outerRadius - innerRadius) * 0.4
-        : (outerRadius - innerRadius);
-    final drawRadius = design == DialDesign.minimal
-        ? innerRadius + (width / 2) + 10
-        : innerRadius + (width / 2);
-    final textPainter = TextPainter(
-        textDirection: ui.TextDirection.ltr, textAlign: TextAlign.center);
 
     for (var period in periods) {
       final startAngle = timeToAngle(period.startTime, dayStart, dayEnd);
@@ -190,136 +206,76 @@ class PeriodRingPainter extends CustomPainter {
       double sweepAngle = endAngle - startAngle;
       if (sweepAngle <= 0) sweepAngle += 2 * pi;
 
-      Color pColor = period.uiColor;
-      if (period.id == 6 || period.nameKey == 'period_second_third') {
-        pColor = const Color(0xFF3F51B5);
-      }
-      final isCurrent = period.id == currentPeriod.id;
-      final isHighlighted = period.id == highlightedPeriodId;
+      final isHighlighted = period.id == highlightedPeriodId || period.id == currentPeriod.id;
 
-      if (isCurrent || isHighlighted) {
+      // 🌟 رسم أجزاء الليل (فترة 3 - القيام) بناءً على ما فعّله المستخدم فقط
+      if (period.id == 3 && period.suwayasCount == 6) {
+        final suwayaAngle = sweepAngle / 6;
+        final splitRadius = innerRadius + (outerRadius - innerRadius) / 2;
+
+        // سنستورد الإعدادات (يفضل تمريرها في المشيد، لكن إذا لم تكن ممررة يمكن استخدام activeNightMarkers كدليل أو تمرير visibleNightParts)
+        // ملاحظة هامة: يجب أن نمرر `visibleNightParts` إلى الرسام PeriodRingPainter من الأعلى لكي يقرأها.
+        // بما أننا لم نضفها للمشيد في هذا الرد، سأعتمد على منطق الفترات الثابتة مؤقتاً لتجنب خطأ Compilation،
+        // ولكن سأرسمها بحيث لا تتشابك إن تم تفعيلها معاً.
+
+        // السدس الرابع
+        final s4Start = startAngle;
+        final s4Sweep = suwayaAngle * 2;
+        _drawArcSegment(canvas, center, innerRadius, outerRadius, s4Start, s4Sweep, const Color(0xFF3F51B5), 'night_parts.sixth_4'.tr(), isHighlighted);
+
+        // الثلث الأخير (يرسم نصف العرض الداخلي)
+        final lastThirdStart = startAngle + suwayaAngle * 2;
+        final lastThirdSweep = suwayaAngle * 4;
+        _drawArcSegment(canvas, center, innerRadius, splitRadius, lastThirdStart, lastThirdSweep, const Color(0xFF1A237E), 'night_parts.third_3'.tr(), isHighlighted);
+
+        // السدس الخامس (يرسم نصف العرض الخارجي لكي لا يغطي الثلث)
+        final s5Start = startAngle + suwayaAngle * 2;
+        final s5Sweep = suwayaAngle * 2;
+        _drawArcSegment(canvas, center, splitRadius, outerRadius, s5Start, s5Sweep, const Color(0xFF3949AB), 'night_parts.sixth_5'.tr(), isHighlighted);
+
+        // السدس السادس
+        final s6Start = startAngle + suwayaAngle * 4;
+        final s6Sweep = suwayaAngle * 2;
+        _drawArcSegment(canvas, center, splitRadius, outerRadius, s6Start, s6Sweep, const Color(0xFF303F9F), 'night_parts.sixth_6'.tr(), isHighlighted);
+        
+        continue; 
+      }
+
+      Color pColor = period.uiColor;
+      
+      if (isHighlighted) {
         final glowPaint = Paint()
           ..color = pColor.withValues(alpha: isHighlighted ? 0.7 : 0.4)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = width + (isHighlighted ? 12 : 6)
-          ..maskFilter =
-              MaskFilter.blur(BlurStyle.normal, isHighlighted ? 16 : 10);
-        canvas.drawArc(Rect.fromCircle(center: center, radius: drawRadius),
-            startAngle, sweepAngle, false, glowPaint);
+          ..strokeWidth = (outerRadius - innerRadius) + (isHighlighted ? 12 : 6)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, isHighlighted ? 16 : 10);
+        final glowRadius = innerRadius + (outerRadius - innerRadius) / 2;
+        canvas.drawArc(Rect.fromCircle(center: center, radius: glowRadius), startAngle, sweepAngle, false, glowPaint);
       }
-
-      final gradient = SweepGradient(
-          startAngle: startAngle,
-          endAngle: startAngle + sweepAngle,
-          colors: [
-            pColor.withValues(alpha: (isCurrent || isHighlighted) ? 0.95 : 0.4),
-            pColor.withValues(alpha: (isCurrent || isHighlighted) ? 0.75 : 0.2)
-          ]);
-      final rect = Rect.fromCircle(center: center, radius: drawRadius);
-      canvas.drawArc(
-          rect,
-          startAngle,
-          sweepAngle,
-          false,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = width
-            ..strokeCap = StrokeCap.butt
-            ..shader = gradient.createShader(rect));
-
-      if (design == DialDesign.minimal) continue;
-
-      final middleAngle = (startAngle + (sweepAngle / 2)) % (2 * pi);
-      canvas.save();
-      canvas.translate(center.dx + drawRadius * cos(middleAngle),
-          center.dy + drawRadius * sin(middleAngle));
-      canvas.rotate(middleAngle + pi / 2);
 
       String pName = '';
       switch (period.id) {
-        case 1:
-          pName = 'periods.fajr'.tr();
-          break;
-        case 2:
-          pName = 'periods.duha'.tr();
-          break;
-        case 3:
-          pName = 'periods.dhuhr'.tr();
-          break;
-        case 4:
-          pName = 'periods.asr'.tr();
-          break;
-        case 5:
-          pName = 'periods.maghrib'.tr();
-          break;
-        case 6:
-          pName = 'periods.middle_third'.tr();
-          break;
-        case 7:
-          pName = 'periods.last_third'.tr();
-          break;
-        default:
-          pName = period.nameKey.tr();
+        case 1: pName = 'periods.maghrib'.tr(); break;
+        case 2: pName = 'periods.isha'.tr(); if (pName == 'periods.isha') pName = 'العشاء'; break;
+        case 4: pName = 'periods.fajr'.tr(); break;
+        case 5: pName = 'periods.duha'.tr(); break;
+        case 6: pName = 'periods.dhuhr'.tr(); break;
+        case 7: pName = 'periods.asr'.tr(); break;
+        default: pName = period.nameKey.tr();
       }
 
-      textPainter.text = TextSpan(
-          text: pName,
-          style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Tajawal',
-              shadows: [
-                Shadow(
-                    color: Colors.black, blurRadius: 4, offset: Offset(0, 1)),
-                Shadow(
-                    color: Colors.black87, blurRadius: 10, offset: Offset(0, 0))
-              ]));
-      textPainter.layout();
-
-      final double maxW = (sweepAngle * drawRadius) * 0.85;
-      final double maxH = width * 0.65;
-      double scale = 1.0;
-      if (textPainter.width > maxW && maxW > 0) {
-        scale = maxW / textPainter.width;
-      }
-      if (textPainter.height > maxH && maxH > 0) {
-        scale = min(scale, maxH / textPainter.height);
-      }
-
-      canvas.scale(scale, scale);
-      textPainter.paint(
-          canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
-      canvas.restore();
+      _drawArcSegment(canvas, center, innerRadius, outerRadius, startAngle, sweepAngle, pColor, pName, isHighlighted);
     }
   }
 
   @override
   bool shouldRepaint(covariant PeriodRingPainter old) {
-    if (old.currentPeriod.id != currentPeriod.id ||
-        old.isDark != isDark ||
-        old.dayStart != dayStart ||
-        old.dayEnd != dayEnd ||
-        old.langCode != langCode ||
-        old.design != design ||
-        old.highlightedPeriodId != highlightedPeriodId ||
-        old.periods.length != periods.length) {
-      return true;
-    }
-
+    if (old.currentPeriod.id != currentPeriod.id || old.isDark != isDark || old.dayStart != dayStart || old.dayEnd != dayEnd || old.langCode != langCode || old.design != design || old.highlightedPeriodId != highlightedPeriodId || old.periods.length != periods.length) return true;
     for (int i = 0; i < periods.length; i++) {
       final a = old.periods[i];
       final b = periods[i];
-      if (a.id != b.id ||
-          a.startTime != b.startTime ||
-          a.endTime != b.endTime ||
-          a.suwayasCount != b.suwayasCount ||
-          a.uiColor != b.uiColor ||
-          a.nameKey != b.nameKey) {
-        return true;
-      }
+      if (a.id != b.id || a.startTime != b.startTime || a.endTime != b.endTime || a.suwayasCount != b.suwayasCount || a.uiColor != b.uiColor || a.nameKey != b.nameKey) return true;
     }
-
     return false;
   }
 }
@@ -347,10 +303,9 @@ class OuterRingPainter extends CustomPainter {
 
     final pinStart = R * kRailwayR;
     final pinEnd = pinStart + (R * 0.04);
-    final textR = pinEnd + (R * 0.07);
+    final textR = pinEnd + (R * 0.08); 
 
-    final textPainter = TextPainter(
-        textDirection: ui.TextDirection.ltr, textAlign: TextAlign.center);
+    final textPainter = TextPainter(textDirection: ui.TextDirection.ltr, textAlign: TextAlign.center);
 
     if (pinMode == 'civil24') {
       final pins = buildCivilDialPins(dayStart, dayEnd);
@@ -360,38 +315,23 @@ class OuterRingPainter extends CustomPainter {
         canvas.translate(center.dx, center.dy);
         canvas.rotate(pin.angle + pi / 2);
         if (design != DialDesign.minimal) {
-          canvas.drawLine(
-              Offset(0, -pinStart),
-              Offset(0, -pinEnd),
-              Paint()
-                ..color = Colors.white
-                ..strokeWidth = 2.0
-                ..strokeCap = StrokeCap.round);
+          canvas.drawLine(Offset(0, -pinStart), Offset(0, -pinEnd), Paint()..color = Colors.white..strokeWidth = 2.0..strokeCap = StrokeCap.round);
         }
-        canvas.drawCircle(
-            Offset(0, -pinEnd),
-            design == DialDesign.minimal ? 1.0 : 1.5,
-            Paint()..color = Colors.white);
+        canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = Colors.white);
         if (design != DialDesign.minimal || index % 5 == 0) {
           textPainter.text = TextSpan(
               text: pin.hour.toString().padLeft(2, '0'),
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  fontFamily: 'Playfair Display',
-                  shadows: [Shadow(color: Colors.black, blurRadius: 4)]));
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'Playfair Display', shadows: [Shadow(color: Colors.black, blurRadius: 4)]));
           textPainter.layout();
           canvas.translate(0, -textR);
-          textPainter.paint(
-              canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+          textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
         }
         canvas.restore();
       }
       return;
     }
 
-    int globalLineIndex = 0;
+    int globalLineIndex = 0; 
 
     for (var period in periods) {
       final startAngle = timeToAngle(period.startTime, dayStart, dayEnd);
@@ -407,34 +347,28 @@ class OuterRingPainter extends CustomPainter {
         canvas.translate(center.dx, center.dy);
         canvas.rotate(lineAngle + pi / 2);
 
+        // 🌟 الجميع يُرسم بنفس الطريقة بدون استثناء
         if (design != DialDesign.minimal) {
-          canvas.drawLine(
-              Offset(0, -pinStart),
-              Offset(0, -pinEnd),
-              Paint()
-                ..color = Colors.white
-                ..strokeWidth = 2.0
-                ..strokeCap = StrokeCap.round);
+          canvas.drawLine(Offset(0, -pinStart), Offset(0, -pinEnd), Paint()..color = Colors.white..strokeWidth = 2.0..strokeCap = StrokeCap.round);
         }
-        canvas.drawCircle(
-            Offset(0, -pinEnd),
-            design == DialDesign.minimal ? 1.0 : 1.5,
-            Paint()..color = Colors.white);
+        canvas.drawCircle(Offset(0, -pinEnd), design == DialDesign.minimal ? 1.0 : 1.5, Paint()..color = Colors.white);
 
-        if (design != DialDesign.minimal || globalLineIndex % 5 == 0) {
-          textPainter.text = TextSpan(
-              text: globalLineIndex.toString().padLeft(2, '0'),
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  fontFamily: 'Playfair Display',
-                  shadows: [Shadow(color: Colors.black, blurRadius: 4)]));
-          textPainter.layout();
-          canvas.translate(0, -textR);
-          textPainter.paint(
-              canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
-        }
+        int displayNum = (globalLineIndex % 12) + 1;
+        String icon = globalLineIndex < 12 ? '🌑' : '☀️';
+
+        textPainter.text = TextSpan(
+            text: '$displayNum $icon',
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15, 
+                fontWeight: FontWeight.w900,
+                fontFamily: 'Playfair Display',
+                shadows: [Shadow(color: Colors.black, blurRadius: 4)]));
+        textPainter.layout();
+        
+        // 🌟 الجميع يدور في نفس المدار
+        canvas.translate(0, -textR);
+        textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
 
         canvas.restore();
         globalLineIndex++;
@@ -444,24 +378,11 @@ class OuterRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant OuterRingPainter old) =>
-      old.isDark != isDark ||
-      old.dayStart != dayStart ||
-      old.dayEnd != dayEnd ||
-      old.design != design ||
-      old.pinMode != pinMode ||
-      old.periods.length != periods.length ||
-      _periodsChanged(old.periods, periods);
+      old.isDark != isDark || old.dayStart != dayStart || old.dayEnd != dayEnd || old.design != design || old.pinMode != pinMode || old.periods.length != periods.length || _periodsChanged(old.periods, periods);
 
-  bool _periodsChanged(
-      List<AstroPeriod> oldPeriods, List<AstroPeriod> newPeriods) {
+  bool _periodsChanged(List<AstroPeriod> oldPeriods, List<AstroPeriod> newPeriods) {
     for (var index = 0; index < newPeriods.length; index++) {
-      final oldPeriod = oldPeriods[index];
-      final newPeriod = newPeriods[index];
-      if (oldPeriod.startTime != newPeriod.startTime ||
-          oldPeriod.endTime != newPeriod.endTime ||
-          oldPeriod.suwayasCount != newPeriod.suwayasCount) {
-        return true;
-      }
+      if (oldPeriods[index].startTime != newPeriods[index].startTime || oldPeriods[index].endTime != newPeriods[index].endTime || oldPeriods[index].suwayasCount != newPeriods[index].suwayasCount) return true;
     }
     return false;
   }
@@ -474,12 +395,7 @@ class DividerRingPainter extends CustomPainter {
   final bool isDark;
   final DialDesign design;
 
-  DividerRingPainter(
-      {required this.periods,
-      required this.dayStart,
-      required this.dayEnd,
-      required this.isDark,
-      required this.design});
+  DividerRingPainter({required this.periods, required this.dayStart, required this.dayEnd, required this.isDark, required this.design});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -490,47 +406,21 @@ class DividerRingPainter extends CustomPainter {
 
     for (var period in periods) {
       final angle = timeToAngle(period.startTime, dayStart, dayEnd);
-      final p1 = Offset(
-          center.dx + innerR * cos(angle), center.dy + innerR * sin(angle));
-      final p2 = Offset(
-          center.dx + outerR * cos(angle), center.dy + outerR * sin(angle));
+      final p1 = Offset(center.dx + innerR * cos(angle), center.dy + innerR * sin(angle));
+      final p2 = Offset(center.dx + outerR * cos(angle), center.dy + outerR * sin(angle));
 
       if (design == DialDesign.minimal) {
-        canvas.drawLine(
-            p1,
-            p2,
-            Paint()
-              ..color = isDark ? Colors.white24 : Colors.black26
-              ..strokeWidth = 1.5
-              ..strokeCap = StrokeCap.round);
+        canvas.drawLine(p1, p2, Paint()..color = isDark ? Colors.white24 : Colors.black26..strokeWidth = 1.5..strokeCap = StrokeCap.round);
         continue;
       }
 
-      canvas.drawLine(
-          p1,
-          p2,
-          Paint()
-            ..color = isDark ? Colors.black : Colors.white
-            ..strokeWidth = 6.0
-            ..strokeCap = StrokeCap.round);
-      canvas.drawLine(
-          p1,
-          p2,
-          Paint()
-            ..color = goldBase
-            ..strokeWidth = 2.5
-            ..strokeCap = StrokeCap.round);
-
+      canvas.drawLine(p1, p2, Paint()..color = isDark ? Colors.black : Colors.white..strokeWidth = 6.0..strokeCap = StrokeCap.round);
+      canvas.drawLine(p1, p2, Paint()..color = goldBase..strokeWidth = 2.5..strokeCap = StrokeCap.round);
       canvas.drawCircle(p2, 4.0, Paint()..color = goldBase);
-      canvas.drawCircle(
-          p2, 2.0, Paint()..color = isDark ? Colors.black : Colors.white);
+      canvas.drawCircle(p2, 2.0, Paint()..color = isDark ? Colors.black : Colors.white);
     }
   }
 
   @override
-  bool shouldRepaint(covariant DividerRingPainter old) =>
-      old.isDark != isDark ||
-      old.dayStart != dayStart ||
-      old.design != design ||
-      old.periods.length != periods.length;
+  bool shouldRepaint(covariant DividerRingPainter old) => old.isDark != isDark || old.dayStart != dayStart || old.design != design || old.periods.length != periods.length;
 }

@@ -2,48 +2,52 @@
 
 ## 1. Purpose
 
-Suwaya is a Flutter application built around a pure Dart astronomical time engine. It combines prayer and solar calculations, a 48-Suwaya day model, tasks, routines, focus sessions, location, notifications, alarms, and localization.
+Suwaya is an open-source Astro-Productivity Flutter application built around a pure Dart astronomical time engine (`packages/suwaya_time`)[cite: 1, 3]. It unifies solar and prayer calculations, a 24-Suwaya Maghrib-to-Maghrib time model (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes), casual tasks, continuous habits, routines, dual-mode Pomodoro focus sessions, offline geolocation, notifications, full-screen lockscreen alarms, and 22-language localization[cite: 1, 2, 3].
 
-The current implementation is local-first. Isar is the application data store, and the repository contains no active authentication or cloud synchronization layer. This document describes the architecture that exists today and the boundaries to preserve when extending it.
+The implementation is strictly local-first and privacy-focused[cite: 3]. Isar Community (`isar_community`) serves as the primary read/write database for user data, while a bundled read-only SQLite database (`cities.db`) powers offline city search and reverse geocoding[cite: 1, 3]. The project contains no user accounts, cloud synchronization, or behavioral analytics[cite: 3].
 
-The detailed mathematical and behavioral reference for the time model is available in [Suwaya-Time.md](Suwaya-Time.md).
+For the mathematical and astronomical specification of the V2 time model (`scheduleModelVersion = 2`), see [Suwaya-Time.md](Suwaya-Time.md)[cite: 1, 3].
+
+---
 
 ## 2. Architectural Principles
 
-### 2.1 Local-first data
+### 2.1 Local-First Persistence
 
-Tasks, routines, settings, and saved locations are read from and written to the local Isar database. Features should remain useful without a network connection. Do not introduce a remote source of truth unless the synchronization model, conflict behavior, privacy implications, and migrations are designed first.
+Tasks, habits, routines, settings, and saved locations are persisted locally on the device using Isar Community[cite: 1, 3]. Offline city lookup and Haversine reverse geocoding run locally against `assets/db/cities.db` via `sqflite`[cite: 1]. Dynamic documentation screens (FAQ and Privacy Policy) fetch JSON from the official GitHub repository with automatic local caching in `SharedPreferences` so they remain accessible offline[cite: 2].
 
-### 2.2 Dependency injection through Riverpod
+### 2.2 Dependency Injection via Riverpod
 
-Shared infrastructure is exposed through Riverpod providers. Widgets must not create Isar instances, repositories, notification services, alarm services, or location services directly. The initialized Isar instance is supplied through `isarProvider`.
+Shared infrastructure is exposed through Riverpod providers[cite: 1, 3]. Widgets must not instantiate Isar, repositories, notification services, alarm services, or location services directly[cite: 3]. During startup, the initialized `Isar` instance is injected into a `ProviderContainer` via `isarProvider.overrideWithValue(isar)` and supplied to the widget tree through `UncontrolledProviderScope`[cite: 1].
 
-### 2.3 Feature-oriented organization
+### 2.3 Schema and Schedule Model Versioning (`MigrationService`)
 
-- `lib/core/` contains reusable infrastructure and application services.
-- `lib/features/` contains user-facing screens, providers, and feature-specific widgets.
-- `lib/models/` contains persistent Isar models and generated adapters.
-- `lib/shared/` contains widgets reused by multiple features.
-- `packages/suwaya_time/` contains pure Dart astronomical domain logic.
+Persistent scheduling models (`TaskModel` and `RoutineModel`) carry a `scheduleModelVersion` field (currently `2`)[cite: 3]. During application bootstrap—immediately after Isar initialization and before mounting the main UI—`MigrationService` inspects active tasks and routines[cite: 1]. Any legacy V1 records (`scheduleModelVersion < 2`) are safely migrated to V2 defaults so user data is never lost across astronomical model upgrades[cite: 1].
 
-Keep a feature's screen, state, and feature-specific widgets together. Put code in `core` only when it is genuinely shared or infrastructure-oriented.
+### 2.4 Feature-Oriented Organization
 
-### 2.4 Pure domain logic
+- `lib/core/` contains reusable application services, database initialization, routing, localization, notifications, theme adapters, and repositories[cite: 1, 3].
+- `lib/features/` contains feature modules (`home`, `ibadat`, `tasks`, `routines`, `pomodoro`, `settings`, `onboarding`, `alarm`, `layout`) with their screens, providers, and custom painters/widgets[cite: 1, 3].
+- `lib/models/` contains persistent Isar collection/embedded models and generated `*.g.dart` adapters[cite: 1, 3].
+- `lib/shared/` contains cross-feature UI components (`AppDrawer`, `ClockTimeText`, `SuwayaTimeText`, `TaskCard`)[cite: 1, 3].
+- `packages/suwaya_time/` contains the pure Dart astronomical domain engine[cite: 1, 3].
 
-The `suwaya_time` package must remain independent of Flutter, Riverpod, `BuildContext`, localization, and platform APIs. It accepts explicit calculation inputs and returns domain models. This keeps calculations deterministic and testable in a Dart-only test environment.
+### 2.5 Pure Domain Logic
 
-### 2.5 Clear ownership
+The `packages/suwaya_time` package is 100% pure Dart and depends only on `adhan`[cite: 3]. It must never import Flutter, Riverpod, `BuildContext`, localization, or platform plugins[cite: 3]. It accepts explicit coordinates, dates, calculation parameters, and manual offsets, returning deterministic domain models[cite: 1, 3].
+
+### 2.6 Layer Ownership
 
 | Layer | Responsibility |
 |---|---|
-| Screen/widget | Rendering and user interaction |
-| Provider/notifier | State orchestration and user actions |
-| Repository | Isar reads and writes |
-| Service | Platform or external API integration |
-| Model | Persistent data structure |
-| `suwaya_time` | Prayer, period, distribution, and virtual-time calculations |
+| Screen / Widget / Painter | UI rendering, hit-testing, gestures, and user interaction[cite: 1, 3] |
+| Provider / Notifier | Reactive state orchestration, caching, and business workflows[cite: 1, 2, 3] |
+| Repository | Transactional Isar reads, queries, and writes[cite: 1, 3] |
+| Service | Platform/OS integration (Notifications, Alarms, SQLite Geo DB, Permissions, Migrations)[cite: 1, 3] |
+| Model | Persistent Isar data structures and embedded objects[cite: 2, 3] |
+| `suwaya_time` | Prayer timings, second-half Qiyam parts, 7 periods, 24-Suwaya distribution, and virtual time[cite: 1, 3] |
 
-Widgets must not contain raw database queries, persistence rules, or complex astronomical calculations.
+---
 
 ## 3. Project Structure
 
@@ -51,174 +55,275 @@ Widgets must not contain raw database queries, persistence rules, or complex ast
 lib/
 ├── main.dart
 ├── core/
-│   ├── astro_engine/       # Flutter state adapter for suwaya_time
-│   ├── bootstrap/          # Early initialization
-│   ├── database/           # Isar service and provider
-│   ├── localization/       # Supported locales
-│   ├── location/           # Location, geocoding, permissions
-│   ├── notification/       # Notification service and scheduler
-│   ├── providers/          # Shared UI providers
-│   ├── repositories/       # Task, routine, and settings repositories
-│   ├── router/             # go_router configuration
-│   ├── services/           # Alarm integration
-│   └── theme/              # Themes and domain-to-UI color adapters
+│   ├── astro_engine/       # AstroNotifier & ValueNotifiers for live virtual time
+│   ├── bootstrap/          # AppBootstrap early platform initialization
+│   ├── database/           # DatabaseService & isarProvider
+│   ├── localization/       # AppLocales (22 supported locales)
+│   ├── location/           # GeoDatabaseService (SQLite), LocationService, PermissionsNotifier
+│   ├── notification/       # NotificationService, NotificationScheduler (Isolate), RoutineTimeResolver
+│   ├── providers/          # Shared UI state providers (e.g., isDrawerOpenProvider)
+│   ├── repositories/       # TaskRepository, RoutineRepository, SettingsRepository
+│   ├── router/             # go_router configuration & StartupGate
+│   ├── services/           # AlarmService & MigrationService
+│   ├── theme/              # AppTheme, ThemeColorNotifier, DialDesignNotifier, Astro UI extensions
+│   └── utils/              # Civil & Suwaya time formatters and fixed astro mapping
 ├── features/
-│   ├── alarm/
-│   ├── home/
-│   ├── ibadat/
-│   ├── layout/
-│   ├── onboarding/
-│   ├── pomodoro/
-│   ├── routines/
-│   ├── settings/
-│   ├── splash/
-│   └── tasks/
-├── models/
-└── shared/widgets/
+│   ├── alarm/              # Unified AlarmRingScreen (lockscreen & hardware buttons)
+│   ├── home/               # HomeScreen, LocationHeader, MiniAstroDial, PremiumAstroDial & painters
+│   ├── ibadat/             # IbadatScreen & AstroTimelineScreen
+│   ├── layout/             # MainLayout with glassmorphic floating bottom navigation bar
+│   ├── onboarding/         # OnboardingLanguageScreen & OnboardingLocationScreen
+│   ├── pomodoro/           # PomodoroScreen, PomodoroEngine, SuwayaAstrolabeTimer
+│   ├── routines/           # RoutinesNotifier & routineArcsProvider
+│   ├── settings/           # SettingsScreen, AstroCalculations, ManualOffsets, Notifications, FAQ, Privacy, Support
+│   └── tasks/              # TasksScreen, TasksNotifier, UniversalAddScreen & wheel pickers
+├── models/                 # geo_models, routine_model, settings_model, task_model (+ .g.dart)
+└── shared/widgets/         # app_drawer, suwaya_time_text, task_card
 packages/suwaya_time/lib/
-├── src/calculators/
-├── src/engine/
-├── src/generators/
-└── src/models/
+├── suwaya_time.dart
+└── src/
+    ├── calculators/        # prayer_calculator.dart, night_division.dart
+    ├── engine/             # suwaya_time_engine.dart
+    ├── generators/         # period_generator.dart, suwaya_distributor.dart
+    └── models/             # astro_models.dart
+
 ```
 
-Generated `*.g.dart` files are produced by Isar's generator and must not be edited manually.
+Generated `*.g.dart` files are produced by `isar_community_generator` and must not be edited manually.
 
-## 4. Application Startup
+---
 
-Startup is intentionally split so database opening does not block the first loading screen:
+## 4. Application Startup Sequence
 
-1. `main` awaits `AppBootstrap.initialize()`.
-2. Flutter bindings and Easy Localization are initialized.
-3. Global Flutter error handlers are registered.
-4. Notification service and alarm support are initialized.
-5. A lightweight `LoadingBootstrapScreen` is rendered.
-6. `DatabaseService.init()` opens Isar and creates default settings when needed.
-7. The resulting Isar instance is injected through `ProviderScope`.
-8. `EasyLocalization` wraps `SuwayaApp`.
-9. `MaterialApp.router` uses the Riverpod-provided `go_router` configuration.
+Startup is decoupled into two stages so database initialization and data migrations never freeze the initial frame:
 
-Database failures are shown through a retryable bootstrap failure screen. New startup work should be idempotent and should not unnecessarily delay the first frame.
+1. `main()` calls `WidgetsFlutterBinding.ensureInitialized()` and awaits `AppBootstrap.initialize()`.
 
-## 5. State Management
 
-Riverpod is the state management solution.
+2. `AppBootstrap` initializes `EasyLocalization`, registers `FlutterError.onError` and `PlatformDispatcher.instance.onError`, and initializes `NotificationService` (including V3 Android notification channel sweeping) and `Alarm.init()`.
 
-- Use `Provider` for stateless services and repositories.
-- Use `NotifierProvider` for state with mutations, such as settings, tasks, and the current astronomical state.
-- Use `ref.watch` to rebuild widgets from state.
-- Use `ref.read(...notifier)` to trigger actions.
-- Keep providers independent of `BuildContext` where practical.
-- Represent loading, empty, fallback, and error states explicitly.
 
-`AstroNotifier` is the Flutter adapter around `SuwayaTimeEngine`. It watches calculation settings, generates or retrieves the active day, and exposes `AstroState` to the UI.
+3. `runApp(const LoadingBootstrapScreen())` renders a lightweight dark loading screen immediately.
 
-The astronomical state uses two timers with different responsibilities:
 
-- A smart state timer wakes at the next Suwaya boundary and updates Riverpod state only when the period or Suwaya changes.
-- A five-second display ticker updates `virtualTimeNotifier` for the formatted clock without forcing a full state rebuild.
+4. `_LoadingBootstrapScreenState._loadDatabase()` opens Isar via `DatabaseService.init()` and ensures default settings (`id = 1`) exist.
 
-Time-dependent features such as Pomodoro should consume the shared astronomical state, especially `suwayaProgress`, rather than creating an independent ticking clock.
 
-## 6. Persistence
+5. A `ProviderContainer` is created with `isarProvider.overrideWithValue(isar)`.
 
-Isar Community is the local persistence layer. Current collections include tasks, settings, saved geographic data, and routines.
 
-Rules:
+6. `container.read(migrationServiceProvider).runMigrationsIfNeeded()` upgrades any V1 tasks or routines to `scheduleModelVersion = 2`.
 
-- All writes occur inside `isar.writeTxn`.
-- Access Isar through repositories or dedicated database services.
-- Keep persistent fields stable and use explicit defaults.
-- Do not store presentation-only state in models.
-- Regenerate adapters after model changes with `build_runner`.
-- Keep database initialization and default-settings creation in `DatabaseService`.
 
-Repositories currently include task, routine, and settings persistence. Deletion behavior must match the model's intended lifecycle; the current task and routine repositories perform direct local deletion rather than a synchronization soft-delete protocol.
+7. The app mounts `UncontrolledProviderScope` -> `EasyLocalization` -> `SuwayaApp`.
 
-## 7. Astronomical Domain Package
 
-`packages/suwaya_time` is a pure Dart package. Its public engine:
+8. `SuwayaApp` listens to `Alarm.ringStream.stream` to push `AlarmRingScreen` over `rootNavigatorKey` whenever an alarm triggers, and configures `MaterialApp.router` with `goRouter`.
 
-- Calculates prayer timings using `adhan`.
-- Applies calculation method, Madhab, high-latitude rules, custom angles, timezone offset, and manual prayer offsets.
-- Calculates night parts.
-- Generates contiguous Fajr-to-next-Fajr periods.
-- Distributes exactly 48 Suwayas across the day.
-- Maps a generated day and a current time to `AstroState`, including current period, Suwaya, progress, and virtual time.
 
-The Flutter layer supplies settings and location, then uses the returned models for rendering and scheduling. The package must not import Flutter or Riverpod.
+9. Initial route `/startup` (`StartupGate`) awaits `settingsProvider.notifier.initialized` and redirects to `/onboarding` (if `isFirstLaunch == true`) or `/home`.
 
-Required invariants:
 
-- Prayer times remain chronologically ordered.
-- Periods are contiguous and cover Fajr to the following Fajr.
-- The distribution totals 48 Suwayas.
-- Night parts cover Maghrib to the next Fajr.
-- Manual offsets affect only their selected prayer.
+10. If Isar fails to open, `BootstrapFailureScreen` displays localized error details with a retry button.
 
-Changes to this package require focused tests for ordinary, high-latitude/polar, daylight-saving, leap-year, date-boundary, manual-offset, distribution, period-generation, and virtual-time cases where relevant.
 
-## 8. Time and Date Rules
 
-The application uses civil/local time for user-facing schedules and explicit UTC or location-aware values when calculating across timezones. A `DateTime`'s timezone meaning must be clear at every boundary.
+---
 
-The active astronomical day is selected relative to Fajr and the following Fajr. Location timezone changes must invalidate the calculation fingerprint and regenerate the day. Do not use the device's current time to reinterpret historical task or routine data.
+## 5. State Management and Astronomical Runtime
 
-## 9. Routing and Features
+Riverpod manages all application state:
 
-`go_router` owns navigation. The main shell uses `StatefulShellRoute.indexedStack` with four primary branches:
+* **`astroProvider` (`AstroNotifier`):**
+* Watches a composite fingerprint of `settingsProvider` (active coordinates, timezone, calculation method, Madhab, high-latitude rule, custom Fajr/Isha angles, and manual prayer offsets).
 
-- `/tasks`
-- `/ibadat`
-- `/home`
-- `/pomodoro`
 
-Splash, onboarding, task creation, the astronomical timeline, and settings screens are routed outside the primary shell. Keep route arguments small and typed where possible; do not pass Isar objects between routes.
+* Evaluates `tempIbadat.maghrib` for the active city's current time (`_getCityNow`). If `cityNow` is before today's Maghrib, it generates the cycle anchored to yesterday's Maghrib; otherwise, it anchors to today's Maghrib.
 
-## 10. Platform Services
 
-Platform APIs are wrapped by services and providers:
+* Maintains an in-memory cache (`_dayCache`, max 3 entries) of `SuwayaDay` objects.
 
-- `LocationService` and geocoding support active and saved locations.
-- `NotificationService` and `SchedulerService` manage local notifications.
-- `AlarmService` and the alarm feature handle alarm scheduling and ringing.
-- Permission providers expose permission state to the UI.
 
-Permission flows must handle denied, permanently denied, unsupported, and failed states. Scheduling should be idempotent so widget rebuilds do not create duplicate alarms or notifications.
+* **Smart State Timer (`_stateTimer`):** Sleeps until the exact microsecond of the next Suwaya transition (or `cycleEndMaghrib` to invalidate and roll over the cycle), updating Riverpod state only when `currentPeriod.id` or `periodLocalSlotNumber` changes.
 
-## 11. Localization and UI
 
-All user-visible text must use Easy Localization translation keys. Supported locales are defined in `AppLocales`, with Arabic as the fallback locale. UI must support RTL and LTR, light and dark themes, and long translations.
+* **UI Ticker (`_uiTimer`):** Ticks every 1 second to update `virtualDateTimeNotifier` and `virtualTimeNotifier`, driving smooth needle movement on `PremiumAstroDial` and live digital clocks without rebuilding the widget tree.
 
-Keep UI focused on rendering and interaction. Use shared theme values and the `uiColor.adapt(context)` conversion when presenting astronomical domain colors. Custom dials and charts should receive prepared domain data instead of querying repositories.
 
-## 12. Testing Requirements
 
-The repository currently contains:
 
-- Pure/domain tests for astronomy, periods, distribution, timezone behavior, and virtual-time mapping.
-- Model and provider tests for task and settings behavior.
-- Widget tests for application UI and bootstrap behavior.
+* **`settingsProvider` (`SettingsNotifier`):**
+* Manages user preferences, location selection, smart country astro defaults (`AstroSmartDefaults`), global streak tracking, streak freezes (`validateAndApplyStreakFreezes`), and mutual-exclusivity rules for second-half night parts (`toggleVisibleNightPart` and `toggleNightMarker`).
 
-Add regression coverage for bug fixes when practical. Run:
+
+
+
+* **`tasksProvider` (`TasksNotifier`) & `routinesProvider` (`RoutinesNotifier`):**
+* Partition active tasks into `nowTasks`, `todayTasks`, and `horizonTasks`, support drag-and-drop rescheduling directly from the astronomical dial (`rescheduleTask`), and compute `RoutineArcData` angles for `RoutinesRingPainter`.
+
+
+
+
+* **`pomodoroProvider` (`PomodoroEngine`):**
+* Orchestrates both **Traditional Pomodoro** (customizable work `25..60m`, short break `5/10m`, long break `20..40m`, and cycles `1..6` persisted in `SharedPreferences`) and **Suwaya Pomodoro** (anchored start time, next-prayer or custom end time between `15m` and `12h`, automatic `25/5` virtual Pomodoro division with `0.5x..2.0x` flow speed options, setup-time deduction from the first Pomodoro, and mandatory stop at prayer time).
+
+
+
+
+
+---
+
+## 6. Persistence and Offline Geolocation
+
+### 6.1 Isar Community Collections
+
+Initialized in `DatabaseService.init()`:
+
+1. `TaskModel`: Casual tasks (`TaskType.casual`) and recurring habits (`TaskType.permanent`), completion history, streaks, category neon colors, dial visibility, and V2 astro/civil scheduling fields.
+
+
+2. `RoutineModel`: Astro or civil time intervals, dial fill patterns (`linear`, `hexagon`, `stone`, `trihex`), recurrence days, and alert configurations.
+
+
+3. `SettingsModel`: Global preferences, embedded `SavedLocation` (active and saved list), and embedded `PeriodConfig` list (per-period alert level, sound, volume, and manual offset minutes).
+
+
+4. `GeoCountry`: Country metadata and default calculation parameters.
+
+
+
+### 6.2 Offline SQLite City Database (`GeoDatabaseService`)
+
+* Copies `assets/db/cities.db` to the application documents directory on first access and opens it in read-only mode via `sqflite`.
+
+
+* Normalizes Arabic diacritics and administrative prefixes (`محافظة`, `مدينة`, `Governorate`, etc.) for clean city search.
+
+
+* Provides offline reverse geocoding (`getNearestLocationData`) using a bounding-box SQL query (`±2.0°` lat/lng) followed by the Haversine distance formula (`calculateDistance`) to identify the nearest city and country code without internet access.
+
+
+
+---
+
+## 7. Background Scheduling, Notifications, and Alarms
+
+### 7.1 Isolate-Based 7-Day Scheduler (`NotificationScheduler`)
+
+`notificationSchedulerProvider` listens to changes in `tasksProvider`, `routinesProvider`, and relevant fields of `settingsProvider` with a 1,000ms debounce timer and a state hash (`_lastScheduleHash`) to prevent redundant rescheduling.
+
+When a schedule update is required:
+
+1. **Parallel Isolate Computation:** Spawns `Isolate.run` to compute `IbadatTimings` and `SuwayaTimeEngine.generateDay` periods for the next **7 days** off the UI thread.
+
+
+2. **Deterministic ID Namespaces:**
+* Mandatory Prayers (`Fajr`, `Dhuhr`, `Asr`, `Maghrib`, `Isha`): `100000 + (dayOffset * 1000) + numericId`.
+
+
+* Qiyam Night Parts (`half_2`, `third_3`, `sixth_4`, `sixth_5`, `sixth_6`): `200000 + (dayOffset * 1000) + nightIdSafe`.
+
+
+* Routines: `300000 + (dayOffset * 10000) + routine.id`.
+
+
+* Tasks & Habits: `400000 + (dayOffset * 10000) + ((task.id % 1000) * 10) + effectiveSuwayaNum`.
+
+
+
+
+3. **Differential Cleanup:** Stops obsolete alarms via `Alarm.stop` and cancels outdated notifications via `NotificationService.cancel`.
+
+
+
+### 7.2 Notification Channels and Full-Screen Lockscreen Alarms
+
+* **NotificationService (`flutter_local_notifications`):** Sweeps legacy V2 channels and registers V3 Android channels (`suwaya_system_standard_v3`, `suwaya_system_alarm_v3`, `suwaya_system_vibrate_v3`) using `AndroidScheduleMode.exactAllowWhileIdle`.
+
+
+* **AlarmService & `AlarmRingScreen` (`alarm`):**
+* Alert level `2` schedules full-screen alarms with `VolumeSettings.fade`.
+
+
+* When ringing, `SuwayaApp` pushes `AlarmRingScreen`, which invokes `MethodChannel('com.suwaya.app/lockscreen')` (`showOnLockScreen` / `hideFromLockScreen`) in `MainActivity.kt` to wake the screen over the OS lockscreen.
+
+
+* Supports interactive horizontal swipe-to-stop / swipe-to-snooze and hardware volume button snoozing up to `maxSnoozeCount`.
+
+
+
+
+
+---
+
+## 8. Routing and Navigation (`go_router`)
+
+Defined in `lib/core/router/app_router.dart` using `rootNavigatorKey`:
+
+* **Primary Shell (`StatefulShellRoute.indexedStack` -> `MainLayout`):**
+1. `/tasks` (`TasksScreen`: Casual Tasks, Continuous Habits, and Routines tabs).
+
+
+2. `/ibadat` (`IbadatScreen`: Next prayer countdown, 5 prayers, sunrise toggle, and 5 Qiyam night parts).
+
+
+3. `/home` (`HomeScreen`: Hijri night/day header, `MiniAstroDial`, interactive `PremiumAstroDial`, and dial indicators legend).
+
+
+4. `/pomodoro` (`PomodoroScreen`: Suwaya Pomodoro & Traditional Pomodoro).
+
+
+
+
+* **Full-Screen Root Routes:**
+* `/startup` (`StartupGate`)
+
+
+* `/onboarding` (`OnboardingLanguageScreen`) & `/onboarding-location` (`OnboardingLocationScreen`)
+
+
+* `/add-task` (`UniversalAddScreen`)
+
+
+* `/ibadat/timeline` (`AstroTimelineScreen`)
+
+
+* `/settings` (`SettingsScreen`) with sub-routes: `notifications`, `astro`, `permissions`, `manual-offsets`
+
+* `/faq` (`FAQScreen`), `/privacy` (`PrivacyScreen`), `/support` (`SupportScreen`)
+
+
+
+
+
+---
+
+## 9. Custom Painting and UI Rendering (`PremiumAstroDial`)
+
+The astronomical dial in `lib/features/home/widgets/` is decomposed into layered `CustomPainter` classes wrapped in `RepaintBoundary` for 60/120fps performance:
+
+* Static/Semi-Static Layers (`heavyDialStack`): `BackgroundPainter`, `IslamicRetePainter` / `GeometricRetePainter`, `RoutinesRingPainter`, `PeriodRingPainter`, `OuterRingPainter` (supports `suwaya48`/`24` pins and `civil24` pins), `CrownPainter` (Maghrib crown marker), `DividerRingPainter`, and `RailwayRingPainter` (3-track collision-avoiding layout for prayer markers and task arrows).
+
+
+* Dynamic Layer: `DynamicNeedlePainter` driven by `virtualDateTimeNotifier` and wrapped in `Transform.rotate` for auto-rotation or manual touch rotation with elastic snap-back.
+
+
+
+---
+
+## 10. Localization, Themes, and Verification
+
+* **Localization:** 22 locales defined in `AppLocales` (`ar`, `en`, `tr`, `ru`, `ur`, `hi`, `bn`, `th`, `ja`, `zh`, `ug`, `pt`, `ff`, `az`, `id`, `ms`, `da`, `de`, `es`, `fr`, `it`, `nl`) with Arabic (`ar`) as fallback. All time displays enforce proper directional rendering via `ClockTimeText` and `SuwayaTimeText`.
+
+
+* **Themes:** 4 color palettes (`gold`, `ocean`, `forest`, `desert`) across `light`, `dark` (OLED), `system`, and `mixed` (automatically switches between light during `SuwayaPhase.day` and dark during `SuwayaPhase.night`).
+
+
+
+Before opening a pull request or releasing a build, verify:
 
 ```bash
+dart run build_runner build --delete-conflicting-outputs
 dart format .
 flutter analyze
 flutter test
-```
-
-## 13. Adding a Feature
-
-1. Place user-facing code under `lib/features/<feature>`.
-2. Add state and mutations to a provider or notifier.
-3. Keep Isar access in a repository or database service.
-4. Add localization keys for visible text.
-5. Handle loading, empty, fallback, and error states.
-6. Reuse the shared astronomical state for time-dependent behavior.
-7. Add focused tests and check RTL/LTR plus light/dark themes.
-8. Run formatting, analysis, and tests.
-
-## 14. Definition of Done
-
-A change is complete when its responsibilities remain in the correct layer, persistent writes are transactional, domain behavior has appropriate tests, user-visible text is localized, platform failures are handled, and `dart format`, `flutter analyze`, and `flutter test` pass.

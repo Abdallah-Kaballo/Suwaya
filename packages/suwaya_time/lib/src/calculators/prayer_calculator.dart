@@ -28,50 +28,76 @@ class PrayerCalculator {
     return params;
   }
 
+  static DateTime _applyOffset(DateTime time, PrayerKey key, Map<PrayerKey, int> allowedManualOffsets) {
+    if (allowedManualOffsets.containsKey(key)) {
+      return time.add(Duration(minutes: allowedManualOffsets[key]!));
+    }
+    return time;
+  }
+
   static IbadatTimings getIbadatTimings(double lat, double lng, DateTime date, CalculationMethodType methodType, MadhabType madhabType, HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}) {
     final coordinates = Coordinates(lat, lng);
     final params = _getParams(methodType, madhabType, highLatRuleType, customFajr, customIsha);
     final today = PrayerTimes(coordinates, DateComponents.from(date), params);
     final tomorrow = PrayerTimes(coordinates, DateComponents.from(date.add(const Duration(days: 1))), params);
 
-    // 🌟 حماية المحرك: تقييد الإزاحات وتطبيقها على الصلوات الخمس فقط
     final allowedManualOffsets = <PrayerKey, int>{};
     if (manualOffsets != null) {
       for (final entry in manualOffsets.entries) {
-        final key = entry.key;
-        final value = entry.value.clamp(-30, 30); 
-
-        if (key == PrayerKey.fajr ||
-            key == PrayerKey.dhuhr ||
-            key == PrayerKey.asr ||
-            key == PrayerKey.maghrib ||
-            key == PrayerKey.isha) {
-          allowedManualOffsets[key] = value;
-        }
+        if (entry.key != PrayerKey.sunrise) allowedManualOffsets[entry.key] = entry.value.clamp(-30, 30);
       }
     }
 
-    DateTime applyOffset(DateTime time, PrayerKey key) {
-      if (allowedManualOffsets.containsKey(key)) {
-        return time.add(Duration(minutes: allowedManualOffsets[key]!));
-      }
-      return time;
-    }
-
-    final fajr = applyOffset(today.fajr.toUtc().add(cityOffset), PrayerKey.fajr);
-    // 🌟 الشروق لا يقبل الإزاحة اليدوية
+    final fajr = _applyOffset(today.fajr.toUtc().add(cityOffset), PrayerKey.fajr, allowedManualOffsets);
     final sunrise = today.sunrise.toUtc().add(cityOffset); 
-    final dhuhr = applyOffset(today.dhuhr.toUtc().add(cityOffset), PrayerKey.dhuhr);
-    final asr = applyOffset(today.asr.toUtc().add(cityOffset), PrayerKey.asr);
-    final maghrib = applyOffset(today.maghrib.toUtc().add(cityOffset), PrayerKey.maghrib);
-    final isha = applyOffset(today.isha.toUtc().add(cityOffset), PrayerKey.isha);
-    
-    final nextFajr = applyOffset(tomorrow.fajr.toUtc().add(cityOffset), PrayerKey.fajr);
+    final dhuhr = _applyOffset(today.dhuhr.toUtc().add(cityOffset), PrayerKey.dhuhr, allowedManualOffsets);
+    final asr = _applyOffset(today.asr.toUtc().add(cityOffset), PrayerKey.asr, allowedManualOffsets);
+    final maghrib = _applyOffset(today.maghrib.toUtc().add(cityOffset), PrayerKey.maghrib, allowedManualOffsets);
+    final isha = _applyOffset(today.isha.toUtc().add(cityOffset), PrayerKey.isha, allowedManualOffsets);
+    final nextFajr = _applyOffset(tomorrow.fajr.toUtc().add(cityOffset), PrayerKey.fajr, allowedManualOffsets);
 
     return IbadatTimings(
       fajr: fajr, sunrise: sunrise, dhuhr: dhuhr, asr: asr, 
       maghrib: maghrib, isha: isha, nextFajr: nextFajr, 
-      nightParts: NightDivision.calculateNightParts(maghrib, nextFajr),
+      nightParts: NightDivision.calculateNightParts(maghrib, nextFajr), // 🌟 دقة سويعية جديدة
+    );
+  }
+
+  static SuwayaCycleAnchors getCycleAnchors(double lat, double lng, DateTime targetDate, CalculationMethodType methodType, MadhabType madhabType, HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, Duration cityOffset, {Map<PrayerKey, int>? manualOffsets}) {
+    final coordinates = Coordinates(lat, lng);
+    final params = _getParams(methodType, madhabType, highLatRuleType, customFajr, customIsha);
+    
+    final dayD = PrayerTimes(coordinates, DateComponents.from(targetDate), params);
+    final dayDPlus1 = PrayerTimes(coordinates, DateComponents.from(targetDate.add(const Duration(days: 1))), params);
+
+    final allowedManualOffsets = <PrayerKey, int>{};
+    if (manualOffsets != null) {
+      for (final entry in manualOffsets.entries) {
+        if (entry.key != PrayerKey.sunrise) allowedManualOffsets[entry.key] = entry.value.clamp(-30, 30);
+      }
+    }
+
+    final cycleStartMaghrib = _applyOffset(dayD.maghrib.toUtc().add(cityOffset), PrayerKey.maghrib, allowedManualOffsets);
+    final cycleIsha = _applyOffset(dayD.isha.toUtc().add(cityOffset), PrayerKey.isha, allowedManualOffsets);
+    
+    final cycleFajr = _applyOffset(dayDPlus1.fajr.toUtc().add(cityOffset), PrayerKey.fajr, allowedManualOffsets);
+    final cycleSunrise = dayDPlus1.sunrise.toUtc().add(cityOffset);
+    final cycleDhuhr = _applyOffset(dayDPlus1.dhuhr.toUtc().add(cityOffset), PrayerKey.dhuhr, allowedManualOffsets);
+    final cycleAsr = _applyOffset(dayDPlus1.asr.toUtc().add(cityOffset), PrayerKey.asr, allowedManualOffsets);
+    final cycleEndMaghrib = _applyOffset(dayDPlus1.maghrib.toUtc().add(cityOffset), PrayerKey.maghrib, allowedManualOffsets);
+
+    final nightMicroseconds = cycleFajr.difference(cycleStartMaghrib).inMicroseconds;
+    final sharIMidnight = cycleStartMaghrib.add(Duration(microseconds: nightMicroseconds ~/ 2));
+
+    return SuwayaCycleAnchors(
+      cycleStartMaghrib: cycleStartMaghrib,
+      cycleIsha: cycleIsha,
+      sharIMidnight: sharIMidnight,
+      cycleFajr: cycleFajr,
+      cycleSunrise: cycleSunrise,
+      cycleDhuhr: cycleDhuhr,
+      cycleAsr: cycleAsr,
+      cycleEndMaghrib: cycleEndMaghrib,
     );
   }
 }

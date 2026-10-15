@@ -170,23 +170,33 @@ const SettingsModelSchema = CollectionSchema(
       name: r'streakFreezesAvailable',
       type: IsarType.long,
     ),
-    r'suwayaNumberStyle': PropertySchema(
+    r'suwayaIconMode': PropertySchema(
       id: 30,
+      name: r'suwayaIconMode',
+      type: IsarType.string,
+    ),
+    r'suwayaNumberStyle': PropertySchema(
+      id: 31,
       name: r'suwayaNumberStyle',
       type: IsarType.string,
     ),
     r'themeMode': PropertySchema(
-      id: 31,
+      id: 32,
       name: r'themeMode',
       type: IsarType.string,
     ),
+    r'timeDisplayMode': PropertySchema(
+      id: 33,
+      name: r'timeDisplayMode',
+      type: IsarType.string,
+    ),
     r'useAstroTimeForIbadat': PropertySchema(
-      id: 32,
+      id: 34,
       name: r'useAstroTimeForIbadat',
       type: IsarType.bool,
     ),
     r'visibleNightParts': PropertySchema(
-      id: 33,
+      id: 35,
       name: r'visibleNightParts',
       type: IsarType.stringList,
     )
@@ -256,8 +266,10 @@ int _settingsModelEstimateSize(
           SavedLocationSchema.estimateSize(value, offsets, allOffsets);
     }
   }
+  bytesCount += 3 + object.suwayaIconMode.length * 3;
   bytesCount += 3 + object.suwayaNumberStyle.length * 3;
   bytesCount += 3 + object.themeMode.length * 3;
+  bytesCount += 3 + object.timeDisplayMode.length * 3;
   bytesCount += 3 + object.visibleNightParts.length * 3;
   {
     for (var i = 0; i < object.visibleNightParts.length; i++) {
@@ -319,10 +331,12 @@ void _settingsModelSerialize(
   writer.writeBool(offsets[27], object.showSunrise);
   writer.writeLong(offsets[28], object.snoozeDurationMinutes);
   writer.writeLong(offsets[29], object.streakFreezesAvailable);
-  writer.writeString(offsets[30], object.suwayaNumberStyle);
-  writer.writeString(offsets[31], object.themeMode);
-  writer.writeBool(offsets[32], object.useAstroTimeForIbadat);
-  writer.writeStringList(offsets[33], object.visibleNightParts);
+  writer.writeString(offsets[30], object.suwayaIconMode);
+  writer.writeString(offsets[31], object.suwayaNumberStyle);
+  writer.writeString(offsets[32], object.themeMode);
+  writer.writeString(offsets[33], object.timeDisplayMode);
+  writer.writeBool(offsets[34], object.useAstroTimeForIbadat);
+  writer.writeStringList(offsets[35], object.visibleNightParts);
 }
 
 SettingsModel _settingsModelDeserialize(
@@ -379,10 +393,12 @@ SettingsModel _settingsModelDeserialize(
   object.showSunrise = reader.readBool(offsets[27]);
   object.snoozeDurationMinutes = reader.readLong(offsets[28]);
   object.streakFreezesAvailable = reader.readLong(offsets[29]);
-  object.suwayaNumberStyle = reader.readString(offsets[30]);
-  object.themeMode = reader.readString(offsets[31]);
-  object.useAstroTimeForIbadat = reader.readBool(offsets[32]);
-  object.visibleNightParts = reader.readStringList(offsets[33]) ?? [];
+  object.suwayaIconMode = reader.readString(offsets[30]);
+  object.suwayaNumberStyle = reader.readString(offsets[31]);
+  object.themeMode = reader.readString(offsets[32]);
+  object.timeDisplayMode = reader.readString(offsets[33]);
+  object.useAstroTimeForIbadat = reader.readBool(offsets[34]);
+  object.visibleNightParts = reader.readStringList(offsets[35]) ?? [];
   return object;
 }
 
@@ -474,8 +490,12 @@ P _settingsModelDeserializeProp<P>(
     case 31:
       return (reader.readString(offset)) as P;
     case 32:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 33:
+      return (reader.readString(offset)) as P;
+    case 34:
+      return (reader.readBool(offset)) as P;
+    case 35:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -3195,6 +3215,142 @@ extension SettingsModelQueryFilter
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'suwayaIconMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'suwayaIconMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'suwayaIconMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'suwayaIconMode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'suwayaIconMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'suwayaIconMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'suwayaIconMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'suwayaIconMode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'suwayaIconMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      suwayaIconModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'suwayaIconMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
       suwayaNumberStyleEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -3461,6 +3617,142 @@ extension SettingsModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'timeDisplayMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'timeDisplayMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'timeDisplayMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'timeDisplayMode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'timeDisplayMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'timeDisplayMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'timeDisplayMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'timeDisplayMode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'timeDisplayMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      timeDisplayModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'timeDisplayMode',
         value: '',
       ));
     });
@@ -4079,6 +4371,20 @@ extension SettingsModelQuerySortBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortBySuwayaIconMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'suwayaIconMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortBySuwayaIconModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'suwayaIconMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       sortBySuwayaNumberStyle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'suwayaNumberStyle', Sort.asc);
@@ -4102,6 +4408,20 @@ extension SettingsModelQuerySortBy
       sortByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByTimeDisplayMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeDisplayMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByTimeDisplayModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeDisplayMode', Sort.desc);
     });
   }
 
@@ -4480,6 +4800,20 @@ extension SettingsModelQuerySortThenBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenBySuwayaIconMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'suwayaIconMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenBySuwayaIconModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'suwayaIconMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       thenBySuwayaNumberStyle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'suwayaNumberStyle', Sort.asc);
@@ -4503,6 +4837,20 @@ extension SettingsModelQuerySortThenBy
       thenByThemeModeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'themeMode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByTimeDisplayMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeDisplayMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByTimeDisplayModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeDisplayMode', Sort.desc);
     });
   }
 
@@ -4718,6 +5066,14 @@ extension SettingsModelQueryWhereDistinct
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+      distinctBySuwayaIconMode({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'suwayaIconMode',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
       distinctBySuwayaNumberStyle({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'suwayaNumberStyle',
@@ -4729,6 +5085,14 @@ extension SettingsModelQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+      distinctByTimeDisplayMode({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'timeDisplayMode',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -4957,6 +5321,13 @@ extension SettingsModelQueryProperty
   }
 
   QueryBuilder<SettingsModel, String, QQueryOperations>
+      suwayaIconModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'suwayaIconMode');
+    });
+  }
+
+  QueryBuilder<SettingsModel, String, QQueryOperations>
       suwayaNumberStyleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'suwayaNumberStyle');
@@ -4966,6 +5337,13 @@ extension SettingsModelQueryProperty
   QueryBuilder<SettingsModel, String, QQueryOperations> themeModeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'themeMode');
+    });
+  }
+
+  QueryBuilder<SettingsModel, String, QQueryOperations>
+      timeDisplayModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'timeDisplayMode');
     });
   }
 

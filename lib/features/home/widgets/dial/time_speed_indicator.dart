@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-
 import '../../../../core/astro_engine/astro_provider.dart';
 import '../../../../core/theme/astro_ui_extensions.dart';
 
@@ -25,18 +24,16 @@ class TimeSpeedIndicator extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(speedMultiplier >= 1.0 ? LucideIcons.zap : LucideIcons.hourglass,
-              color: pColor, size: 10),
+          Icon(speedMultiplier >= 1.0 ? LucideIcons.zap : LucideIcons.hourglass, color: pColor, size: 10),
           const SizedBox(width: 4),
-          Stack(
-            children: [
-              Text('${speedMultiplier.toStringAsFixed(1)}x',
-                  style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: 'Playfair Display',
-                      color: Colors.white)),
-            ],
+          Text(
+            // 🌟 التعديل: رقمين بعد الفاصلة
+            '${speedMultiplier.toStringAsFixed(2)}x',
+            style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.normal,
+                fontFamily: 'Playfair Display',
+                color: Colors.white),
           ),
         ],
       ),

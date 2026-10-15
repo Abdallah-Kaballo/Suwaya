@@ -1,5 +1,7 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 const civilTimeFormatSystem = 'system';
 const civilTimeFormat12Hour = '12-hour';
@@ -14,15 +16,105 @@ String formatCivilTime(
   if (format == civilTimeFormatSystem) {
     return TimeOfDay.fromDateTime(time).format(context);
   }
-
   final safeLocale = locale == 'ff' || locale == 'ug' ? 'en' : locale;
-  final pattern = format == civilTimeFormat12Hour ? 'h:mm a' : 'HH:mm';
-  return DateFormat(pattern, safeLocale).format(time);
+  
+  if (format == civilTimeFormat12Hour) {
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+    final pattern = isRTL ? 'a h:mm' : 'h:mm a';
+    return DateFormat(pattern, safeLocale).format(time);
+  } else {
+    return DateFormat('HH:mm', safeLocale).format(time);
+  }
 }
 
-String formatSuwayaTime(int globalSuwayaIndex, int minute,
-    {String separator = ':'}) {
-  final normalizedIndex = globalSuwayaIndex + (minute ~/ 30);
-  final normalizedMinute = minute % 30;
-  return '${normalizedIndex.toString().padLeft(2, '0')}$separator${normalizedMinute.toString().padLeft(2, '0')}';
+String getSuwayaIcon(bool isNight, bool isRTL, String iconMode) {
+  if (iconMode == 'text') {
+    return isNight ? (isRTL ? 'ل' : 'N') : (isRTL ? 'ن' : 'D');
+  }
+  return isNight ? '🌑' : '☀️';
+}
+
+({String suwayaStr, String minStr, String icon}) getSuwayaTimeParts(int globalSuwayaIndex, int minute, bool isRTL, String iconMode) {
+  globalSuwayaIndex = globalSuwayaIndex.clamp(0, 23);
+  final isNight = globalSuwayaIndex < 12;
+  final localSlot = isNight ? globalSuwayaIndex + 1 : globalSuwayaIndex - 11;
+  
+  final slotStr = localSlot.toString().padLeft(2, '0');
+  final minStr = minute.toString().padLeft(2, '0');
+  final icon = getSuwayaIcon(isNight, isRTL, iconMode);
+  
+  return (suwayaStr: slotStr, minStr: minStr, icon: icon);
+}
+
+String formatSuwayaClockTime(SuwayaClockTime time, {String separator = '|', required bool isRTL, String iconMode = 'emoji'}) {
+  final slotStr = time.phaseSlotNumber.toString().padLeft(2, '0');
+  final minStr = time.virtualMinute.toString().padLeft(2, '0');
+  final icon = getSuwayaIcon(time.phase.isNight, isRTL, iconMode); 
+  final timeString = '$slotStr$separator$minStr';
+  return isRTL ? '$icon $timeString' : '$timeString $icon';
+}
+
+String formatSuwayaTime(int globalSuwayaIndex, int minute, {String separator = '|', bool isRTL = true, String iconMode = 'emoji'}) {
+  final parts = getSuwayaTimeParts(globalSuwayaIndex, minute, isRTL, iconMode);
+  final timeString = '${parts.suwayaStr}$separator${parts.minStr}';
+  return isRTL ? '${parts.icon} $timeString' : '$timeString ${parts.icon}';
+}
+
+// 🌟 الخريطة الفلكية الثابتة (نسخة ذكية تقرأ المعرفات من أي شاشة بدون أخطاء)
+({int globalIndex, int minute}) getFixedAstroTime(String id, AstroState state, {bool isEnd = false}) {
+  int getCount(PeriodKey k) {
+      try { return state.periods.firstWhere((p) => p.periodKey == k).suwayasCount; } 
+      catch (_) { return 1; }
+  }
+  
+  int startG = 0;
+  int length = 0;
+  final sid = id.toLowerCase();
+  
+  // 🌟 استخدام contains لالتقاط المعرف سواء كان 'dhuhr' أو 'prayer_dhuhr'
+  if (sid == '1' || sid.contains('maghrib')) {
+      startG = 0; length = getCount(PeriodKey.nightMaghribIsha);
+  } else if (sid == '2' || sid.contains('isha')) {
+      startG = getCount(PeriodKey.nightMaghribIsha); length = getCount(PeriodKey.nightIshaMidnight);
+  } else if (sid == '3' || sid.contains('qiyam')) {
+      startG = getCount(PeriodKey.nightMaghribIsha) + getCount(PeriodKey.nightIshaMidnight); length = getCount(PeriodKey.nightMidnightFajr);
+  } else if (sid == '4' || sid.contains('fajr')) {
+      startG = 11; length = 1;
+  } else if (sid == '5' || sid.contains('duha') || sid.contains('sunrise')) {
+      startG = 12; length = getCount(PeriodKey.daySunriseDhuhr);
+  } else if (sid == '6' || sid.contains('dhuhr')) {
+      startG = 12 + getCount(PeriodKey.daySunriseDhuhr); length = getCount(PeriodKey.dayDhuhrAsr);
+  } else if (sid == '7' || sid.contains('asr')) {
+      startG = 12 + getCount(PeriodKey.daySunriseDhuhr) + getCount(PeriodKey.dayDhuhrAsr); length = getCount(PeriodKey.dayAsrMaghrib);
+  } else if (sid.contains('half_1')) {
+      startG = 0; length = 6;
+  } else if (sid.contains('half_2')) {
+      startG = 6; length = 6;
+  } else if (sid.contains('third_1')) {
+      startG = 0; length = 4;
+  } else if (sid.contains('third_2')) {
+      startG = 4; length = 4;
+  } else if (sid.contains('third_3')) {
+      startG = 7; length = 4;
+  } else if (sid.contains('sixth_1')) {
+      startG = 0; length = 2;
+  } else if (sid.contains('sixth_2')) {
+      startG = 2; length = 2;
+  } else if (sid.contains('sixth_3')) {
+      startG = 4; length = 2;
+  } else if (sid.contains('sixth_4')) {
+      startG = 5; length = 2;
+  } else if (sid.contains('sixth_5')) {
+      startG = 7; length = 2;
+  } else if (sid.contains('sixth_6')) {
+      startG = 9; length = 2;
+  } else {
+      startG = 0; length = 1; // Fallback
+  }
+  
+  if (isEnd) {
+      int endTotalMinutes = (startG * 60) + (length * 60) - 1;
+      return (globalIndex: (endTotalMinutes ~/ 60) % 24, minute: endTotalMinutes % 60);
+  }
+  return (globalIndex: startG % 24, minute: 0);
 }

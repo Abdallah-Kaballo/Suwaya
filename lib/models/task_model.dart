@@ -39,6 +39,9 @@ class TaskModel {
   @Index()
   DateTime? targetDate;
 
+  // 🌟 التعديل الجوهري: إضافة إصدار النموذج للتفرقة بين جداول 48 القديمة و 24 الجديدة
+  int scheduleModelVersion = 2;
+
   @Index()
   int? targetPeriodId;
 

@@ -8,10 +8,13 @@ DateTime resolveAstroRoutineTime({
 }) {
   final count = period.suwayasCount > 0 ? period.suwayasCount : 1;
   final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
-  final minute = virtualMinute.clamp(0, 29);
+  
+  // 🌟 التعديل: السويعة الآن 60 دقيقة افتراضية
+  final minute = virtualMinute.clamp(0, 59); 
   final periodDuration = period.totalDuration.inMicroseconds;
-  final denominator = count * 30;
-  final requestedUnits = suwayaIndex * 30 + minute;
+  final denominator = count * 60; 
+  final requestedUnits = suwayaIndex * 60 + minute; 
+  
   final numerator = periodDuration * requestedUnits;
   final offsetMicroseconds = (numerator + denominator - 1) ~/ denominator;
 
@@ -22,7 +25,7 @@ String buildRoutineScheduleFingerprint(Iterable<RoutineModel> routines) {
   final buffer = StringBuffer();
   for (final routine in routines) {
     buffer.write('${routine.id}_${routine.title}_${routine.isActive}_'
-        '${routine.isAstroTime}_'
+        '${routine.isAstroTime}_${routine.scheduleModelVersion}_' // 🌟 تضمين الإصدار في البصمة
         '${routine.alertLevel}_${routine.startPeriodId}_'
         '${routine.startSuwaya}_${routine.startVirtualMinute}_'
         '${routine.startTimeMinutes}_${routine.endPeriodId}_'
