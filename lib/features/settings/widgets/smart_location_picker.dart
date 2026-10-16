@@ -157,6 +157,13 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     final localData = await GeoDatabaseService.getNearestLocationData(lat, lng, langCode);
     String countryCode = 'CUSTOM';
     String countryName = 'common.unknown'.tr();
+    String? timezone;
+    if (localData != null) {
+      countryCode = localData['countryCode'] ?? 'CUSTOM';
+      timezone = localData['timezone'] as String?;
+      countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
+    }
+    await notifier.addAndSelectLocation(name, lat, lng, countryCode, timezone: timezone);
 
     if (localData != null) {
       countryCode = localData['countryCode'] ?? 'CUSTOM';
@@ -259,6 +266,7 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                   locData['lat'],
                   locData['lng'],
                   locData['countryCode'],
+                  timezone: locData['timezone'],
                   locationType: 'gps',             
                   nearestCity: locData['city'],    
                 );

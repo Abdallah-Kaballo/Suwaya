@@ -107,6 +107,7 @@ class _OnboardingLocationScreenState extends ConsumerState<OnboardingLocationScr
                               locData['lat'],
                               locData['lng'],
                               locData['countryCode'],
+                              timezone: locData['timezone'],
                               locationType: 'gps',             
                               nearestCity: locData['city'],    
                             );

@@ -35,22 +35,46 @@ class TasksNotifier extends Notifier<TasksState> {
 
   Map<String, int>? _getDynamicAstro(TaskModel task, AstroState astroState, DateTime now) {
     if (task.isAstroTime && task.targetPeriodId != null) {
-      return {'pId': task.targetPeriodId!, 'sNum': task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 0};
+      return {
+        'pId': task.targetPeriodId!,
+        'sNum': task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 0
+      };
     }
-    if (!task.isAstroTime && task.targetCivilTimeMinutes != null && astroState.periods.isNotEmpty) {
-      DateTime dt = DateTime(now.year, now.month, now.day, task.targetCivilTimeMinutes! ~/ 60, task.targetCivilTimeMinutes! % 60);
+    if (!task.isAstroTime &&
+        task.targetCivilTimeMinutes != null &&
+        astroState.periods.isNotEmpty) {
       final pStart = astroState.periods.first.startTime;
-      DateTime pStartNoSecs = DateTime(pStart.year, pStart.month, pStart.day, pStart.hour, pStart.minute);
-      
+      final DateTime pStartNoSecs = DateTime.utc(
+        pStart.year,
+        pStart.month,
+        pStart.day,
+        pStart.hour,
+        pStart.minute,
+      );
+      DateTime dt = DateTime.utc(
+        pStart.year,
+        pStart.month,
+        pStart.day,
+        task.targetCivilTimeMinutes! ~/ 60,
+        task.targetCivilTimeMinutes! % 60,
+      );
+
       if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
-      if (dt.isAfter(astroState.periods.last.endTime)) dt = dt.subtract(const Duration(days: 1));
+      if (dt.isAfter(astroState.periods.last.endTime)) {
+        dt = dt.subtract(const Duration(days: 1));
+      }
       if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
 
       for (var p in astroState.periods) {
-        if ((dt.isAfter(p.startTime) || dt.isAtSameMomentAs(p.startTime)) && (dt.isBefore(p.endTime) || dt.isAtSameMomentAs(p.endTime))) {
-          final suwayaDuration = p.endTime.difference(p.startTime).inMicroseconds / (p.suwayasCount > 0 ? p.suwayasCount : 1);
+        if ((dt.isAfter(p.startTime) || dt.isAtSameMomentAs(p.startTime)) &&
+            (dt.isBefore(p.endTime) || dt.isAtSameMomentAs(p.endTime))) {
+          final suwayaDuration =
+              p.endTime.difference(p.startTime).inMicroseconds /
+                  (p.suwayasCount > 0 ? p.suwayasCount : 1);
           final elapsed = dt.difference(p.startTime).inMicroseconds;
-          int sIndex = (elapsed / suwayaDuration).floor().clamp(0, (p.suwayasCount > 0 ? p.suwayasCount : 1) - 1);
+          int sIndex = (elapsed / suwayaDuration)
+              .floor()
+              .clamp(0, (p.suwayasCount > 0 ? p.suwayasCount : 1) - 1);
           return {'pId': p.id, 'sNum': sIndex + 1};
         }
       }

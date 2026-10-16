@@ -268,7 +268,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Column(
                     children: [
-                      Text('app_name'.tr(), 
+                      Text('app_name'.tr(),
                           style: TextStyle(
                               color: isDark ? Colors.white54 : Colors.black54,
                               fontSize: 13,
@@ -498,14 +498,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         textColor: textColor);
   }
 
+  // 🌟 علامات الليل الذهبية الخمس المعتمدة للنصف الثاني من الليل فقط
   void _showNightMarkersSheet(BuildContext context, bool isDark,
       Color surfaceColor, Color textColor, Color primaryColor) {
     final markers = {
-      'np_third_2': 'night_parts.third_2',
-      'np_sixth_3': 'night_parts.sixth_3',
       'np_half_2': 'night_parts.half_2',
-      'np_sixth_4': 'night_parts.sixth_4',
       'np_third_3': 'night_parts.third_3',
+      'np_sixth_4': 'night_parts.sixth_4',
       'np_sixth_5': 'night_parts.sixth_5',
       'np_sixth_6': 'night_parts.sixth_6',
     };

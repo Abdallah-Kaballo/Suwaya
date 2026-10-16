@@ -3,7 +3,6 @@ import 'package:suwaya_time/suwaya_time.dart';
 
 void main() {
   group('اختبارات خطوط العرض المتطرفة (High Latitude & Polar Tests)', () {
-    
     test('1. اختبار ستوكهولم (السويد) في ذروة الصيف (شمس منتصف الليل تقريباً)', () {
       const lat = 59.3293;
       const lng = 18.0686;
@@ -11,27 +10,32 @@ void main() {
       const cityOffset = Duration(hours: 2); // توقيت صيفي
 
       final ibadat = PrayerCalculator.getIbadatTimings(
-        lat, lng, date, 
-        CalculationMethodType.muslimWorldLeague, 
-        MadhabType.shafi, 
-        HighLatitudeRuleType.middleOfTheNight, 
-        18.0, 18.0, 
-        cityOffset
+        lat,
+        lng,
+        date,
+        CalculationMethodType.muslimWorldLeague,
+        MadhabType.shafi,
+        HighLatitudeRuleType.middleOfTheNight,
+        18.0,
+        18.0,
+        cityOffset,
       );
 
-      // في خطوط العرض العليا جداً صيفاً، الفجر قد يتطابق مع الشروق تماماً
-      // لذلك نتأكد أن تسلسل النهار والليل الإجمالي منطقي دون افتراض وجود مسافة بين الفجر والشروق
-      expect(ibadat.dhuhr.isAfter(ibadat.fajr), isTrue, reason: 'الظهر يجب أن يكون بعد الفجر');
-      expect(ibadat.maghrib.isAfter(ibadat.dhuhr), isTrue, reason: 'المغرب يجب أن يكون بعد الظهر');
-      expect(ibadat.nextFajr.isAfter(ibadat.maghrib), isTrue, reason: 'فجر اليوم التالي يجب أن يكون بعد المغرب');
+      expect(ibadat.dhuhr.isAfter(ibadat.fajr), isTrue,
+          reason: 'الظهر يجب أن يكون بعد الفجر');
+      expect(ibadat.maghrib.isAfter(ibadat.dhuhr), isTrue,
+          reason: 'المغرب يجب أن يكون بعد الظهر');
+      expect(ibadat.nextFajr.isAfter(ibadat.maghrib), isTrue,
+          reason: 'فجر اليوم التالي يجب أن يكون بعد المغرب');
 
-      // التأكد من أن أجزاء الليل لم تنهار رغم قصر الليل الشديد
-      expect(ibadat.nightParts.length, equals(11), reason: 'يجب أن يقسم الليل إلى 11 جزءاً دائماً');
-      
+      // 🌟 التأكد من توليد أجزاء النصف الثاني من الليل الخمسة المعتمدة
+      expect(ibadat.nightParts.length, equals(5),
+          reason: 'يجب أن يحتوي النصف الثاني من الليل على 5 أجزاء معتمدة');
+
       for (var part in ibadat.nightParts) {
         final duration = part.endTime.difference(part.startTime);
-        // قد يكون الليل قصيراً لدرجة أن بعض الأجزاء تقترب من الصفر، لكن لا يجب أن تكون سالبة أبداً!
-        expect(duration.inMicroseconds, greaterThanOrEqualTo(0), reason: 'لا يجب أن يكون هناك وقت سالب');
+        expect(duration.inMicroseconds, greaterThanOrEqualTo(0),
+            reason: 'لا يجب أن يكون هناك وقت سالب');
       }
     });
 
@@ -42,20 +46,24 @@ void main() {
       const cityOffset = Duration(hours: 1);
 
       final ibadat = PrayerCalculator.getIbadatTimings(
-        lat, lng, date, 
-        CalculationMethodType.muslimWorldLeague, 
-        MadhabType.shafi, 
-        HighLatitudeRuleType.seventhOfTheNight, 
-        18.0, 18.0, 
-        cityOffset
+        lat,
+        lng,
+        date,
+        CalculationMethodType.muslimWorldLeague,
+        MadhabType.shafi,
+        HighLatitudeRuleType.seventhOfTheNight,
+        18.0,
+        18.0,
+        cityOffset,
       );
 
       final daylightHours = ibadat.maghrib.difference(ibadat.fajr).inHours;
       final nightHours = ibadat.nextFajr.difference(ibadat.maghrib).inHours;
 
-      expect(daylightHours, lessThan(9), reason: 'النهار في أوسلو شتاءً يجب أن يكون قصيراً جداً');
-      // 🌟 تم الإصلاح: استخدام greaterThanOrEqualTo لتجنب مشكلة إهمال الكسور في دالة inHours
-      expect(nightHours, greaterThanOrEqualTo(15), reason: 'الليل يجب أن يكون 15 ساعة أو أكثر');
+      expect(daylightHours, lessThan(9),
+          reason: 'النهار في أوسلو شتاءً يجب أن يكون قصيراً جداً');
+      expect(nightHours, greaterThanOrEqualTo(15),
+          reason: 'الليل يجب أن يكون 15 ساعة أو أكثر');
     });
   });
 }

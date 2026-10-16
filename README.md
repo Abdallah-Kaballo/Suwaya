@@ -7,7 +7,7 @@
 
 Suwaya is an open-source Astro-Productivity Flutter application that organizes the day around astronomical events and prayer times[cite: 3]. It combines a 24-Suwaya Maghrib-to-Maghrib virtual time model (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes) with casual tasks, continuous habits, routines, dual-mode Pomodoro focus sessions, offline geolocation, notifications, full-screen lockscreen alarms, and multi-language support[cite: 1, 2, 3].
 
-The project is strictly local-first and privacy-focused: settings, tasks, routines, and saved locations are stored locally using Isar Community, while offline city search relies on a bundled SQLite database (`cities.db`)[cite: 1, 3]. The application does not require a cloud backend or user authentication[cite: 3].
+The project is strictly local-first and privacy-focused: settings, tasks, routines, and saved locations are stored locally using Isar Community, while offline city search relies on a bundled SQLite database (`Cities_V1.1.db`)[cite: 1, 3]. The application does not require a cloud backend or user authentication[cite: 3].
 
 ## Contents
 
@@ -112,7 +112,7 @@ For the complete calculation model, period boundaries, 24-Suwaya distribution, v
 * High-latitude rules, custom Fajr/Isha angles, and manual offsets.
 
 
-* Offline city search and Haversine reverse geocoding via a bundled SQLite database (`cities.db`).
+* Offline city search and Haversine reverse geocoding via a bundled SQLite database (`Cities_V1.1.db`).
 
 
 * Background 7-day notification and alarm scheduling via `Isolate.run`.
@@ -242,7 +242,7 @@ dart run build_runner build --delete-conflicting-outputs
 
 The application has no required cloud credentials. Platform configuration may still be needed for location, notifications, exact alarms, and wake-lock capabilities. Review platform project files and request permissions only when the related feature is used.
 
-Translation assets, the city database (`cities.db`), app icons, and notification audio are declared in `pubspec.yaml`.
+Translation assets, the city database (`Cities_V1.1.db`), app icons, and notification audio are declared in `pubspec.yaml`.
 
 ## Testing
 

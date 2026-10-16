@@ -60,61 +60,66 @@ String formatSuwayaTime(int globalSuwayaIndex, int minute, {String separator = '
   return isRTL ? '${parts.icon} $timeString' : '$timeString ${parts.icon}';
 }
 
-// 🌟 الخريطة الفلكية الثابتة (نسخة ذكية تقرأ المعرفات من أي شاشة بدون أخطاء)
+// 🌟 الخريطة الفلكية الثابتة للنظام الجديد (V2: 24 سويعة + 5 أجزاء لقيام الليل)
 ({int globalIndex, int minute}) getFixedAstroTime(String id, AstroState state, {bool isEnd = false}) {
   int getCount(PeriodKey k) {
-      try { return state.periods.firstWhere((p) => p.periodKey == k).suwayasCount; } 
-      catch (_) { return 1; }
+    try {
+      return state.periods.firstWhere((p) => p.periodKey == k).suwayasCount;
+    } catch (_) {
+      return 1;
+    }
   }
   
   int startG = 0;
   int length = 0;
   final sid = id.toLowerCase();
   
-  // 🌟 استخدام contains لالتقاط المعرف سواء كان 'dhuhr' أو 'prayer_dhuhr'
   if (sid == '1' || sid.contains('maghrib')) {
-      startG = 0; length = getCount(PeriodKey.nightMaghribIsha);
+    startG = 0;
+    length = getCount(PeriodKey.nightMaghribIsha);
   } else if (sid == '2' || sid.contains('isha')) {
-      startG = getCount(PeriodKey.nightMaghribIsha); length = getCount(PeriodKey.nightIshaMidnight);
-  } else if (sid == '3' || sid.contains('qiyam')) {
-      startG = getCount(PeriodKey.nightMaghribIsha) + getCount(PeriodKey.nightIshaMidnight); length = getCount(PeriodKey.nightMidnightFajr);
+    startG = getCount(PeriodKey.nightMaghribIsha);
+    length = getCount(PeriodKey.nightIshaMidnight);
+  } else if (sid == '3' || sid.contains('qiyam') || sid.contains('half_2')) {
+    // 🌟 النصف الثاني من الليل (الفترة 3): يبدأ من الفهرس العالمي 5 (السويعة 06 🌑) بطول 6 سويعات
+    startG = 5;
+    length = 6;
   } else if (sid == '4' || sid.contains('fajr')) {
-      startG = 11; length = 1;
+    startG = 11;
+    length = 1;
   } else if (sid == '5' || sid.contains('duha') || sid.contains('sunrise')) {
-      startG = 12; length = getCount(PeriodKey.daySunriseDhuhr);
+    startG = 12;
+    length = getCount(PeriodKey.daySunriseDhuhr);
   } else if (sid == '6' || sid.contains('dhuhr')) {
-      startG = 12 + getCount(PeriodKey.daySunriseDhuhr); length = getCount(PeriodKey.dayDhuhrAsr);
+    startG = 12 + getCount(PeriodKey.daySunriseDhuhr);
+    length = getCount(PeriodKey.dayDhuhrAsr);
   } else if (sid == '7' || sid.contains('asr')) {
-      startG = 12 + getCount(PeriodKey.daySunriseDhuhr) + getCount(PeriodKey.dayDhuhrAsr); length = getCount(PeriodKey.dayAsrMaghrib);
-  } else if (sid.contains('half_1')) {
-      startG = 0; length = 6;
-  } else if (sid.contains('half_2')) {
-      startG = 6; length = 6;
-  } else if (sid.contains('third_1')) {
-      startG = 0; length = 4;
-  } else if (sid.contains('third_2')) {
-      startG = 4; length = 4;
+    startG = 12 + getCount(PeriodKey.daySunriseDhuhr) + getCount(PeriodKey.dayDhuhrAsr);
+    length = getCount(PeriodKey.dayAsrMaghrib);
   } else if (sid.contains('third_3')) {
-      startG = 7; length = 4;
-  } else if (sid.contains('sixth_1')) {
-      startG = 0; length = 2;
-  } else if (sid.contains('sixth_2')) {
-      startG = 2; length = 2;
-  } else if (sid.contains('sixth_3')) {
-      startG = 4; length = 2;
+    // 🌟 الثلث الأخير من الليل: 4 سويعات (من 08|00 🌑 إلى 11|59 🌑)
+    startG = 7;
+    length = 4;
   } else if (sid.contains('sixth_4')) {
-      startG = 5; length = 2;
+    // 🌟 السدس الرابع: سويعتان (من 06|00 🌑 إلى 07|59 🌑)
+    startG = 5;
+    length = 2;
   } else if (sid.contains('sixth_5')) {
-      startG = 7; length = 2;
+    // 🌟 السدس الخامس: سويعتان (من 08|00 🌑 إلى 09|59 🌑)
+    startG = 7;
+    length = 2;
   } else if (sid.contains('sixth_6')) {
-      startG = 9; length = 2;
+    // 🌟 السدس السادس: سويعتان (من 10|00 🌑 إلى 11|59 🌑)
+    startG = 9;
+    length = 2;
   } else {
-      startG = 0; length = 1; // Fallback
+    startG = 0;
+    length = 1;
   }
   
   if (isEnd) {
-      int endTotalMinutes = (startG * 60) + (length * 60) - 1;
-      return (globalIndex: (endTotalMinutes ~/ 60) % 24, minute: endTotalMinutes % 60);
+    final int endTotalMinutes = (startG * 60) + (length * 60) - 1;
+    return (globalIndex: (endTotalMinutes ~/ 60) % 24, minute: endTotalMinutes % 60);
   }
   return (globalIndex: startG % 24, minute: 0);
 }

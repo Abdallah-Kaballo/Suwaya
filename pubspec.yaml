@@ -73,7 +73,7 @@ flutter:
 
   assets:
     - assets/translations/
-    - assets/db/cities.db
+    - assets/db/Cities_V1.1.db
     - assets/icons/app_icon.png
     - assets/audio/
 

@@ -691,17 +691,17 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   }
 
   // 🌟 تحديث المعاملات لتستقبل settings
+  // 🌟 تحديث الدالة لعرض الثواني في الوقت السويعي وجعل أيقونة الطور خلفية كاملة للمركز
   Widget _buildCentralTime(AstroState state, Color textColor, bool isDark, SettingsModel settings) {
     
-    // 🌟 1. حالة الوقت المدني (تصميم رقمي أنيق وبسيط)
+    // 🌟 1. حالة الوقت المدني (تبقى كما هي بتنسيقها الأنيق)
     if (!settings.useAstroTimeForIbadat) {
       return Container(
-        width: widget.size * 0.55, // عرض كافٍ لمنع خروج AM/PM
+        width: widget.size * 0.55,
         alignment: Alignment.center,
         child: ValueListenableBuilder<DateTime>(
           valueListenable: virtualDateTimeNotifier,
           builder: (context, liveTime, child) {
-            // الاستعانة بدالة التحويل الرسمية في التطبيق لضبط الصيغة (12 أو 24)
             final String civilTimeString = formatCivilTime(
               liveTime,
               format: settings.civilTimeFormat,
@@ -715,7 +715,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                 civilTimeString,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 34, // حجم كبير وواضح
+                  fontSize: 34,
                   fontWeight: FontWeight.w700, 
                   color: astroGold,
                   fontFamily: 'Inter',
@@ -728,48 +728,113 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       );
     }
 
-    // 🌟 2. حالة الوقت السويعي (الكود الفلكي الموجود مسبقاً)
-    final int displaySuwaya = state.currentSuwayaTime.periodLocalSlotNumber;
+    // 🌟 2. حالة الوقت السويعي (مع إضافة الثواني وإحاطة الطور كخلفية مركزية)
+    final int displaySuwaya = state.currentSuwayaTime.phaseSlotNumber;
     final String suwayaText = '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
+    final bool isNight = state.currentSuwayaTime.phase.isNight;
 
     return Container(
-      width: widget.size * 0.50, 
+      width: widget.size * 0.52, 
+      height: widget.size * 0.52, // 🌟 جعل الحاوية دائرية متوافقة تماماً مع مساحة المركز
       alignment: Alignment.center,
-      child: Directionality(
-        textDirection: ui.TextDirection.ltr, 
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center, 
-          children: [
-            Stack(
-              alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        // 🌟 خلفية الطور (قمر للليل وشمس للنهار) تملأ المركز 100% بدون زيادة أو نقصان
+        color: isNight ? const Color(0xFF0A0E1A) : const Color(0xFF1F1A05),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 🌟 وضع رمز الطور (🌑 أو ☀️) كخلفية شفافة تملأ 100% من المساحة المركزية خلف النصوص
+          Positioned.fill(
+            child: Center(
+              child: Opacity(
+                opacity: 0.18, // شفافة ومثالية لضمان قراءة الأرقام فوقها بوضوح تام
+                child: Text(
+                  isNight ? '🌑' : '☀️',
+                  style: TextStyle(
+                    fontSize: widget.size * 0.28, // حجم يملأ الدائرة المركزية بدقة
+                    fontFamily: 'Tajawal',
+                  ),
+                ),
+              ),
+            ),
+          ),
+          
+          // محتوى النصوص في وسط المركز تماماً
+          Directionality(
+            textDirection: ui.TextDirection.ltr, 
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center, 
               children: [
-                Text(suwayaText, style: TextStyle(fontSize: 12, fontFamily: 'Tajawal', fontWeight: FontWeight.bold, foreground: Paint()..style = PaintingStyle.stroke..strokeWidth = 1.0..color = Colors.white)),
-                Text(suwayaText, style: const TextStyle(color: astroGold, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
+                // نص رقم السويعة من الفترة
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      suwayaText, 
+                      style: const TextStyle(
+                        fontSize: 11, 
+                        fontFamily: 'Tajawal', 
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      suwayaText, 
+                      style: const TextStyle(
+                        color: astroGold, 
+                        fontSize: 11, 
+                        fontWeight: FontWeight.bold, 
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _periodTitle(state.currentPeriod), 
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87, 
+                    fontSize: 13, 
+                    fontWeight: FontWeight.bold, 
+                    shadows: const [Shadow(color: Colors.black54, blurRadius: 4)],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                
+                // 🌟 عرض الوقت السويعي بالثواني المتدفقة بالصيغة المطلوبة: 00|00|00
+                ValueListenableBuilder<DateTime>(
+                  valueListenable: virtualDateTimeNotifier,
+                  builder: (context, liveTime, child) {
+                    // حساب الثواني الافتراضية الحية من حالة المحرك الحالية
+                    final int virtualSecs = state.currentSuwayaTime.virtualSecond;
+                    final String slotStr = state.currentSuwayaTime.phaseSlotNumber.toString().padLeft(2, '0');
+                    final String minStr = state.currentSuwayaTime.virtualMinute.toString().padLeft(2, '0');
+                    final String secStr = virtualSecs.toString().padLeft(2, '0');
+                    
+                    final formattedTimeWithSeconds = '$slotStr|$minStr|$secStr';
+
+                    return Text(
+                      formattedTimeWithSeconds,
+                      style: const TextStyle(
+                        fontSize: 24, // تم تصغير الحجم قليلاً ليتسع للثواني الثلاثية براحة داخل المركز
+                        fontWeight: FontWeight.w600, 
+                        color: astroGold,
+                        fontFamily: 'Inter',
+                        letterSpacing: 0.5,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 4),
+                const TimeSpeedIndicator(),
               ],
             ),
-            const SizedBox(height: 2),
-            Text(_periodTitle(state.currentPeriod), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontSize: 14, fontWeight: FontWeight.bold, shadows: const [Shadow(color: Colors.black54, blurRadius: 4)])),
-            const SizedBox(height: 4),
-            ValueListenableBuilder<String>(
-                valueListenable: virtualTimeNotifier,
-                builder: (context, virtualTime, child) {
-                  return Text(
-                    virtualTime,
-                    style: const TextStyle(
-                      fontSize: 28, 
-                      fontWeight: FontWeight.w600, 
-                      color: astroGold,
-                      fontFamily: 'Inter',
-                      letterSpacing: 1.0,
-                    ),
-                  );
-                }),
-            const SizedBox(height: 4),
-            const TimeSpeedIndicator(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

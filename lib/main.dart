@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:alarm/alarm.dart';
+import 'package:alarm/utils/alarm_set.dart';
 
 import 'core/bootstrap/app_bootstrap.dart';
 import 'core/database/database_provider.dart';
@@ -181,22 +182,24 @@ class SuwayaApp extends ConsumerStatefulWidget {
 }
 
 class _SuwayaAppState extends ConsumerState<SuwayaApp> {
-  StreamSubscription<AlarmSettings>? _alarmSubscription;
+  StreamSubscription<AlarmSet>? _alarmSubscription;
   int? _activeRingingAlarmId;
 
   @override
   void initState() {
     super.initState();
-    // 🌟 الاستماع المباشر لأحداث رنين المنبه وفتح شاشة الرنين تلقائياً
-    _alarmSubscription = Alarm.ringStream.stream.listen(_onAlarmRinging);
+    // 🌟 استخدام التدفق الحديث Alarm.ringing بدلاً من ringStream المهمل
+    _alarmSubscription = Alarm.ringing.listen((AlarmSet alarmSet) {
+      if (alarmSet.alarms.isNotEmpty) {
+        _onAlarmRinging(alarmSet.alarms.first);
+      }
+    });
   }
 
   Future<void> _onAlarmRinging(AlarmSettings alarmSettings) async {
-    // منع فتح الشاشة مرتين لنفس المنبه النشط
     if (_activeRingingAlarmId == alarmSettings.id) return;
     _activeRingingAlarmId = alarmSettings.id;
 
-    // التأكد من جاهزية شجرة التوجيه (خاصة عند إيقاظ التطبيق من حالة الإغلاق التام)
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final navState = rootNavigatorKey.currentState;
       if (navState != null) {
@@ -228,7 +231,6 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp> {
         final hour = DateTime.now().hour;
         return hour >= 6 && hour < 18;
       }
-      // 🌟 التوافق مع النموذج الفلكي: التحقق من طور النهار
       return state.currentSuwayaTime.phase.isDay;
     }));
 

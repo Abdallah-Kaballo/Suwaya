@@ -37,9 +37,8 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
     final surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
-    const accentColor = Color(0xFFD4AF37); // اللون الذهبي المميز للتطبيق
+    const accentColor = Color(0xFFD4AF37);
 
-    // استخراج الإعدادات الحالية
     final int prayersLevel = settings.getPeriodAlertLevel('1', 0);
     final String prayersTone = settings.getPeriodSound('1', 'assets/audio/adhan.mp3');
     final double prayersVolume = settings.getPeriodVolume('1', 1.0);
@@ -87,7 +86,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
           
           const SizedBox(height: 20),
 
-          // 🌟 قسم قيام الليل
+          // 🌟 قسم قيام الليل (الأجزاء الخمسة للنصف الثاني من الليل فقط)
           _buildPremiumCard(
             context: context, isDark: isDark, surfaceColor: surfaceColor, textColor: textColor, accentColor: const Color(0xFF8B5CF6),
             icon: LucideIcons.sparkles,
@@ -99,7 +98,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             isFadeInForced: true,
             onSave: (level, tone, vol) async {
               if (level > 0) await _requestPermissions(ref);
-              final nightIds = ['half_1', 'half_2', 'third_1', 'third_2', 'third_3', 'sixth_1', 'sixth_2', 'sixth_3', 'sixth_4', 'sixth_5', 'sixth_6'];
+              const nightIds = ['half_2', 'third_3', 'sixth_4', 'sixth_5', 'sixth_6'];
               for (var id in nightIds) {
                 ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: id, isEnabled: true, alertLevel: level, soundPath: tone, volume: vol);
               }
@@ -121,21 +120,19 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     );
   }
 
-  // دالة ذكية لطلب الصلاحيات بشكل صامت قبل الحفظ
   Future<void> _requestPermissions(WidgetRef ref) async {
     final perms = ref.read(permissionsProvider.notifier);
     await perms.ensureNotificationPermission();
     await perms.ensureExactAlarmPermission();
   }
 
-  // 🌟 الكارت الاحترافي الجديد
   Widget _buildPremiumCard({
     required BuildContext context, required bool isDark, required Color surfaceColor, required Color textColor, required Color accentColor,
     required IconData icon, required String title, required String subtitle, required int currentLevel, required String currentTone, required double currentVolume,
     bool isFadeInForced = false, required Function(int, String, double) onSave,
   }) {
     bool isEnabled = currentLevel > 0;
-    int mode = currentLevel == 0 ? 1 : currentLevel; // 1 = Notification, 2 = Alarm
+    int mode = currentLevel == 0 ? 1 : currentLevel;
 
     return Container(
       decoration: BoxDecoration(
@@ -146,7 +143,6 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          // رأس الكارت (مفتاح التفعيل)
           Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -173,17 +169,15 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                   onChanged: (val) {
                     HapticFeedback.lightImpact();
                     if (val) {
-                      onSave(mode, currentTone, currentVolume); // تفعيل بآخر إعداد
+                      onSave(mode, currentTone, currentVolume);
                     } else {
-                      onSave(0, currentTone, currentVolume); // تعطيل (Silent)
+                      onSave(0, currentTone, currentVolume);
                     }
                   },
                 ),
               ],
             ),
           ),
-          
-          // الإعدادات المتقدمة (تظهر فقط عند التفعيل)
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -197,8 +191,6 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  
-                  // اختيار نوع التنبيه (Segmented Control)
                   Container(
                     decoration: BoxDecoration(
                       color: isDark ? Colors.black : const Color(0xFFF1F5F9),
@@ -218,15 +210,12 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                       ],
                     ),
                   ),
-
-                  // إعدادات المنبه القوي (تظهر فقط إذا كان Mode == 2)
                   AnimatedSize(
                     duration: const Duration(milliseconds: 300),
                     child: mode == 2 ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 24),
-                        // اختيار النغمة
                         GestureDetector(
                           onTap: () => _showTonePicker(context, currentTone, surfaceColor, textColor, accentColor, (selectedTone) {
                             onSave(2, selectedTone, currentVolume);
@@ -249,10 +238,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                             ),
                           ),
                         ),
-                        
                         const SizedBox(height: 20),
-                        
-                        // التحكم بالصوت
                         Row(
                           children: [
                             Icon(LucideIcons.volume_1, color: textColor.withValues(alpha: 0.4), size: 18),
@@ -269,14 +255,13 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                                 child: Slider(
                                   value: currentVolume, min: 0.1, max: 1.0,
                                   onChangeEnd: (val) => onSave(2, currentTone, val),
-                                  onChanged: (val) {}, // يتم الحفظ عند الإفلات
+                                  onChanged: (val) {},
                                 ),
                               ),
                             ),
                             Icon(LucideIcons.volume_2, color: textColor.withValues(alpha: 0.4), size: 18),
                           ],
                         ),
-
                         if (isFadeInForced)
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0, right: 4),
@@ -377,9 +362,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     );
   }
 
-  // (تم الإبقاء على دالة _showDefaultsDialog القديمة هنا لضمان عمل الإنتاجية، سيتم تحسينها لاحقاً إذا أردت)
   void _showDefaultsDialog(BuildContext context, dynamic settings, bool isHabit, bool isDark, Color surfaceColor, Color textColor, Color accentColor) {
-    // الكود كما هو في النسخة السابقة لعدم الإطالة (يمكنك استخدام القديم هنا مؤقتاً).
     int tempLevel = isHabit ? settings.defaultHabitAlertLevel : settings.defaultTaskAlertLevel;
     String tempTone = isHabit ? settings.defaultHabitTone : settings.defaultTaskTone;
     if (!_availableTones.containsKey(tempTone)) tempTone = 'assets/audio/default.mp3';
@@ -396,7 +379,6 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             children: [
               Text('notifications.defaults_title'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              // يمكنك وضع Dropdowns مبسطة هنا أو Segmented controls
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: accentColor, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
                 onPressed: () {

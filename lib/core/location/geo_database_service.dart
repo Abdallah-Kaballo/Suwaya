@@ -18,10 +18,10 @@ class GeoDatabaseService {
     if (_database != null) return;
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final path = join(dir.path, "cities.db");
+      final path = join(dir.path, "Cities_V1.1.db");
 
       if (!File(path).existsSync()) {
-        final data = await rootBundle.load("assets/db/cities.db");
+        final data = await rootBundle.load("assets/db/Cities_V1.1.db");
         final bytes = data.buffer.asUint8List();
         await File(path).writeAsBytes(bytes, flush: true);
       }
@@ -144,7 +144,7 @@ class GeoDatabaseService {
     
     double limit = 2.0; 
     final results = await _database!.rawQuery('''
-      SELECT name_ar, name_en, country_code, lat, lng
+      SELECT name_ar, name_en, country_code, lat, lng, timezone
       FROM cities
       WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?
     ''', [lat - limit, lat + limit, lng - limit, lng + limit]);
@@ -170,6 +170,7 @@ class GeoDatabaseService {
       return {
         'cityName': cityName,
         'countryCode': closest['country_code'],
+        'timezone': closest['timezone'], // 🌟 إرجاع المنطقة الزمنية
       };
     }
     return null;

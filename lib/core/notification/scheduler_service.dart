@@ -44,10 +44,13 @@ final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
 
   ref.listen(settingsProvider.select((s) {
     final sb = StringBuffer()
-      ..write('loc=${s.activeLocation?.latitude},${s.activeLocation?.longitude},${s.activeLocation?.timezone};')
-      ..write('astro=${s.calculationMethod},${s.madhab},${s.highLatitudeRule},${s.customFajrAngle},${s.customIshaAngle},${s.useAstroTimeForIbadat};');
+      ..write(
+          'loc=${s.activeLocation?.latitude},${s.activeLocation?.longitude},${s.activeLocation?.timezone};')
+      ..write(
+          'astro=${s.calculationMethod},${s.madhab},${s.highLatitudeRule},${s.customFajrAngle},${s.customIshaAngle},${s.useAstroTimeForIbadat};');
     for (var c in s.periodConfigs) {
-      sb.write('p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
+      sb.write(
+          'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
     }
     return sb.toString();
   }), (prev, nextFingerprint) {
@@ -66,55 +69,125 @@ class NotificationScheduler {
 
   NotificationScheduler(this._service);
 
-  Duration _getUtcOffsetForLocation(SavedLocation? loc) {
-    if (loc == null || loc.isAutoLocation == true || loc.timezone == null) {
-      return DateTime.now().timeZoneOffset;
+  /// 🌟 حساب الـ UTC Offset لأي يوم مستهدف مع مراعاة التوقيت الصيفي والشتوي (DST)
+  Duration _getUtcOffsetForDate(SavedLocation? loc, DateTime targetDate) {
+    if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
+      try {
+        final location = tz.getLocation(loc.timezone!);
+        final targetInTz = tz.TZDateTime(
+          location,
+          targetDate.year,
+          targetDate.month,
+          targetDate.day,
+          12,
+        );
+        return targetInTz.timeZoneOffset;
+      } catch (_) {}
     }
-    try {
-      final location = tz.getLocation(loc.timezone!);
-      final nowInTarget = tz.TZDateTime.now(location);
-      return nowInTarget.timeZoneOffset;
-    } catch (e) {
-      return DateTime.now().timeZoneOffset;
-    }
+    return DateTime(
+      targetDate.year,
+      targetDate.month,
+      targetDate.day,
+      12,
+    ).timeZoneOffset;
   }
 
+  /// 🌟 إصلاح حرج: إرجاع وقت المدينة دائماً بصيغة DateTime.utc الموحدة (Wall-Clock UTC)
   DateTime _getCityNow(SavedLocation? loc) {
-    if (loc == null || loc.isAutoLocation == true || loc.timezone == null) {
-      return DateTime.now();
+    if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
+      try {
+        final location = tz.getLocation(loc.timezone!);
+        final nowInTarget = tz.TZDateTime.now(location);
+        return DateTime.utc(
+          nowInTarget.year,
+          nowInTarget.month,
+          nowInTarget.day,
+          nowInTarget.hour,
+          nowInTarget.minute,
+          nowInTarget.second,
+        );
+      } catch (_) {}
     }
-    try {
-      final location = tz.getLocation(loc.timezone!);
-      final nowInTarget = tz.TZDateTime.now(location);
-      return DateTime.utc(nowInTarget.year, nowInTarget.month, nowInTarget.day,
-          nowInTarget.hour, nowInTarget.minute, nowInTarget.second);
-    } catch (e) {
-      return DateTime.now();
+    final now = DateTime.now();
+    return DateTime.utc(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+      now.second,
+    );
+  }
+
+  /// 🌟 تحويل وقت الحدث (Wall-Clock UTC في المدينة) إلى وقت الجهاز الفعلي مع تعويض أي تغير في التوقيت الصيفي/الشتوي
+  DateTime _resolveRealDeviceAlarmTime({
+    required DateTime targetCityWallTime,
+    required DateTime cityNowWallTime,
+    required SavedLocation? loc,
+  }) {
+    if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
+      try {
+        final location = tz.getLocation(loc.timezone!);
+        final nowTz = tz.TZDateTime.now(location);
+        final targetTz = tz.TZDateTime(
+          location,
+          targetCityWallTime.year,
+          targetCityWallTime.month,
+          targetCityWallTime.day,
+          targetCityWallTime.hour,
+          targetCityWallTime.minute,
+          targetCityWallTime.second,
+        );
+        final realDuration = targetTz.difference(nowTz);
+        return DateTime.now().add(realDuration);
+      } catch (_) {}
     }
+
+    // في حال الاعتماد على توقيت الجهاز المحليに直接
+    final targetLocal = DateTime(
+      targetCityWallTime.year,
+      targetCityWallTime.month,
+      targetCityWallTime.day,
+      targetCityWallTime.hour,
+      targetCityWallTime.minute,
+      targetCityWallTime.second,
+    );
+    return targetLocal;
   }
 
   String _getAssetAudioPath(String? soundId) {
     if (soundId == null || soundId.isEmpty || soundId == 'default') {
-      return 'assets/audio/default.mp3'; 
+      return 'assets/audio/default.mp3';
     }
     if (soundId.contains('assets/')) return soundId;
     return 'assets/audio/$soundId.mp3';
   }
 
-  Future<void> scheduleAhead(SettingsModel settings, List<TaskModel> allTasks, List<RoutineModel> routines) async {
+  Future<void> scheduleAhead(
+    SettingsModel settings,
+    List<TaskModel> allTasks,
+    List<RoutineModel> routines,
+  ) async {
     if (_isScheduling) return;
 
+    final loc = settings.activeLocation;
+    final cityNow = _getCityNow(loc);
+    final todayOffset = _getUtcOffsetForDate(loc, cityNow);
+
     final sb = StringBuffer()
-      ..write('loc=${settings.activeLocation?.latitude},${settings.activeLocation?.longitude},${settings.activeLocation?.timezone};')
-      ..write('astro=${settings.calculationMethod},${settings.madhab},${settings.highLatitudeRule},${settings.customFajrAngle},${settings.customIshaAngle},${settings.useAstroTimeForIbadat};');
+      ..write(
+          'loc=${loc?.latitude},${loc?.longitude},${loc?.timezone},offset=${todayOffset.inMinutes};')
+      ..write(
+          'astro=${settings.calculationMethod},${settings.madhab},${settings.highLatitudeRule},${settings.customFajrAngle},${settings.customIshaAngle},${settings.useAstroTimeForIbadat};');
 
     for (final c in settings.periodConfigs) {
-      sb.write('p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
+      sb.write(
+          'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
     }
 
     for (final t in allTasks) {
-      // 🌟 تم إضافة scheduleModelVersion للبصمة لضمان إعادة الجدولة عند الترحيل للإصدار 2
-      sb.write('t=${t.id}:${t.isCompleted}:${t.targetPeriodId}:${t.targetVirtualMinute}:${t.notifyMode}:${t.alarmMode}:${t.scheduleModelVersion};');
+      sb.write(
+          't=${t.id}:${t.isCompleted}:${t.targetPeriodId}:${t.targetVirtualMinute}:${t.notifyMode}:${t.alarmMode}:${t.scheduleModelVersion};');
     }
 
     sb.write(buildRoutineScheduleFingerprint(routines));
@@ -125,7 +198,6 @@ class NotificationScheduler {
     try {
       _isScheduling = true;
 
-      final loc = settings.activeLocation;
       if (loc == null) return;
 
       final activeAlarms = await Alarm.getAlarms();
@@ -134,9 +206,6 @@ class NotificationScheduler {
       final Set<int> requiredAlarmIds = {};
       final Set<int> requiredNormalIds = {};
 
-      final cityOffset = _getUtcOffsetForLocation(loc);
-      final cityNow = _getCityNow(loc);
-
       final manualOffsetsMap = {
         for (var c in settings.periodConfigs)
           if (c.periodId != null) c.periodId!: c.manualOffsetMinutes
@@ -144,30 +213,58 @@ class NotificationScheduler {
 
       final double lat = loc.latitude;
       final double lng = loc.longitude;
-      final CalculationMethodType calcMethod = settings.calculationMethod.toCalculationMethod();
+      final CalculationMethodType calcMethod =
+          settings.calculationMethod.toCalculationMethod();
       final MadhabType madhab = settings.madhab.toMadhab();
-      final HighLatitudeRuleType hlRule = settings.highLatitudeRule.toHighLatRule();
-      final Map<PrayerKey, int> isolatedManualOffsets = manualOffsetsMap.toPrayerKeyMap();
+      final HighLatitudeRuleType hlRule =
+          settings.highLatitudeRule.toHighLatRule();
+      final Map<PrayerKey, int> isolatedManualOffsets =
+          manualOffsetsMap.toPrayerKeyMap();
       final double fajrAngle = settings.customFajrAngle;
       final double ishaAngle = settings.customIshaAngle;
-      final Duration isolatedCityOffset = cityOffset;
       final DateTime isolatedCityNow = cityNow;
+
+      // 🌟 حساب فرق التوقيت الصيفي/الشتوي لكل يوم من الأيام الـ 7 القادمة على حدة قبل تمريرها للـ Isolate
+      final List<Duration> weekCityOffsets = List.generate(
+        7,
+        (dayOffset) => _getUtcOffsetForDate(
+          loc,
+          isolatedCityNow.add(Duration(days: dayOffset)),
+        ),
+      );
 
       final List<Map<String, dynamic>> weekAstroData = await Isolate.run(() {
         final List<Map<String, dynamic>> daysData = [];
 
         for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
           final targetDate = isolatedCityNow.add(Duration(days: dayOffset));
+          final dayCityOffset = weekCityOffsets[dayOffset];
 
           final ibadat = PrayerCalculator.getIbadatTimings(
-            lat, lng, targetDate, calcMethod, madhab, hlRule, fajrAngle, ishaAngle, isolatedCityOffset,
+            lat,
+            lng,
+            targetDate,
+            calcMethod,
+            madhab,
+            hlRule,
+            fajrAngle,
+            ishaAngle,
+            dayCityOffset,
             manualOffsets: isolatedManualOffsets,
           );
 
-          // 🌟 تم إزالة معامل الـ distribution هنا ليقرأ من المحرك مباشرة
           final periods = SuwayaTimeEngine.generateDay(
-                  lat, lng, targetDate, calcMethod, madhab, hlRule, fajrAngle, ishaAngle, isolatedCityOffset,
-                  manualOffsets: isolatedManualOffsets).periods;
+            lat,
+            lng,
+            targetDate,
+            calcMethod,
+            madhab,
+            hlRule,
+            fajrAngle,
+            ishaAngle,
+            dayCityOffset,
+            manualOffsets: isolatedManualOffsets,
+          ).periods;
 
           daysData.add({
             'targetDate': targetDate,
@@ -186,11 +283,36 @@ class NotificationScheduler {
 
         // 🌟 1. الصلوات المفروضة
         final mandatoryPrayers = [
-          {'id': '1', 'nameKey': 'period_fajr', 'time': ibadat.fajr, 'numericId': 1},
-          {'id': '3', 'nameKey': 'period_dhuhr', 'time': ibadat.dhuhr, 'numericId': 3},
-          {'id': '4', 'nameKey': 'period_asr', 'time': ibadat.asr, 'numericId': 4},
-          {'id': '5', 'nameKey': 'period_maghrib', 'time': ibadat.maghrib, 'numericId': 5},
-          {'id': 'isha', 'nameKey': 'isha', 'time': ibadat.isha, 'numericId': 9},
+          {
+            'id': '1',
+            'nameKey': 'period_fajr',
+            'time': ibadat.fajr,
+            'numericId': 1
+          },
+          {
+            'id': '3',
+            'nameKey': 'period_dhuhr',
+            'time': ibadat.dhuhr,
+            'numericId': 3
+          },
+          {
+            'id': '4',
+            'nameKey': 'period_asr',
+            'time': ibadat.asr,
+            'numericId': 4
+          },
+          {
+            'id': '5',
+            'nameKey': 'period_maghrib',
+            'time': ibadat.maghrib,
+            'numericId': 5
+          },
+          {
+            'id': 'isha',
+            'nameKey': 'isha',
+            'time': ibadat.isha,
+            'numericId': 9
+          },
         ];
 
         for (var prayer in mandatoryPrayers) {
@@ -203,43 +325,56 @@ class NotificationScheduler {
             final int alertLevel = settings.getPeriodAlertLevel(pId, 0);
 
             if (alertLevel > 0) {
-              final String soundId = settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
+              final String soundId =
+                  settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
               final int notificationId = 100000 + (dayOffset * 1000) + numericId;
 
-              final durationUntilAlarm = pTime.difference(cityNow);
-              final realAlarmTime = DateTime.now().add(durationUntilAlarm);
+              final realAlarmTime = _resolveRealDeviceAlarmTime(
+                targetCityWallTime: pTime,
+                cityNowWallTime: cityNow,
+                loc: loc,
+              );
 
-              if (realAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) continue;
+              if (realAlarmTime
+                  .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+                continue;
+              }
 
               if (alertLevel == 2) {
                 requiredAlarmIds.add(notificationId);
                 final existing = activeAlarmMap[notificationId];
                 bool needsUpdate = true;
                 if (existing != null) {
-                  final timeDiff = existing.dateTime.difference(realAlarmTime).inSeconds.abs();
-                  if (timeDiff < 60 && existing.assetAudioPath == assetPath) needsUpdate = false;
+                  final timeDiff =
+                      existing.dateTime.difference(realAlarmTime).inSeconds.abs();
+                  if (timeDiff < 60 && existing.assetAudioPath == assetPath) {
+                    needsUpdate = false;
+                  }
                 }
 
                 if (needsUpdate) {
-                  await Alarm.set(alarmSettings: AlarmSettings(
-                    id: notificationId,
-                    dateTime: realAlarmTime,
-                    assetAudioPath: assetPath,
-                    loopAudio: true,
-                    vibrate: true,
-                    androidFullScreenIntent: true,
-                    volumeSettings: VolumeSettings.fade(
-                      volume: settings.getPeriodVolume(pId, 1.0),
-                      fadeDuration: const Duration(seconds: 3),
-                      volumeEnforced: true,
+                  await Alarm.set(
+                    alarmSettings: AlarmSettings(
+                      id: notificationId,
+                      dateTime: realAlarmTime,
+                      assetAudioPath: assetPath,
+                      loopAudio: true,
+                      vibrate: true,
+                      androidFullScreenIntent: true,
+                      volumeSettings: VolumeSettings.fade(
+                        volume: settings.getPeriodVolume(pId, 1.0),
+                        fadeDuration: const Duration(seconds: 3),
+                        volumeEnforced: true,
+                      ),
+                      notificationSettings: NotificationSettings(
+                        title:
+                            '${'notifications.prayer_of'.tr()} ${nameKey.tr()}',
+                        body: 'notifications.adhan_time_body'.tr(),
+                        stopButton: 'alarm.stop'.tr(),
+                      ),
                     ),
-                    notificationSettings: NotificationSettings(
-                      title: '${'notifications.prayer_of'.tr()} ${nameKey.tr()}',
-                      body: 'notifications.adhan_time_body'.tr(),
-                      stopButton: 'alarm.stop'.tr(),
-                    ),
-                  ));
+                  );
                 }
               } else if (alertLevel == 1) {
                 requiredNormalIds.add(notificationId);
@@ -258,53 +393,69 @@ class NotificationScheduler {
 
         // 🌟 2. قيام الليل
         for (var nightPart in ibadat.nightParts) {
-          if (settings.visibleNightParts.contains(nightPart.id) && nightPart.startTime.isAfter(cityNow)) {
+          if (settings.visibleNightParts.contains(nightPart.id) &&
+              nightPart.startTime.isAfter(cityNow)) {
             final int alertLevel = settings.getPeriodAlertLevel(nightPart.id, 0);
             if (alertLevel > 0) {
-              final String soundId = settings.getPeriodSound(nightPart.id, 'assets/audio/soft.mp3');
+              final String soundId = settings.getPeriodSound(
+                  nightPart.id, 'assets/audio/soft.mp3');
               final String assetPath = _getAssetAudioPath(soundId);
               final int nightIdSafe = nightPart.id.hashCode.abs() % 100;
-              final int notificationId = 200000 + (dayOffset * 1000) + nightIdSafe;
+              final int notificationId =
+                  200000 + (dayOffset * 1000) + nightIdSafe;
 
-              final durationUntilAlarm = nightPart.startTime.difference(cityNow);
-              final realAlarmTime = DateTime.now().add(durationUntilAlarm);
+              final realAlarmTime = _resolveRealDeviceAlarmTime(
+                targetCityWallTime: nightPart.startTime,
+                cityNowWallTime: cityNow,
+                loc: loc,
+              );
 
-              if (realAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) continue;
+              if (realAlarmTime
+                  .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+                continue;
+              }
 
               if (alertLevel == 2) {
                 requiredAlarmIds.add(notificationId);
                 final existing = activeAlarmMap[notificationId];
                 bool needsUpdate = true;
                 if (existing != null) {
-                  final timeDiff = existing.dateTime.difference(realAlarmTime).inSeconds.abs();
-                  if (timeDiff < 60 && existing.assetAudioPath == assetPath) needsUpdate = false;
+                  final timeDiff =
+                      existing.dateTime.difference(realAlarmTime).inSeconds.abs();
+                  if (timeDiff < 60 && existing.assetAudioPath == assetPath) {
+                    needsUpdate = false;
+                  }
                 }
 
                 if (needsUpdate) {
-                  await Alarm.set(alarmSettings: AlarmSettings(
-                    id: notificationId,
-                    dateTime: realAlarmTime,
-                    assetAudioPath: assetPath,
-                    loopAudio: true,
-                    vibrate: true,
-                    androidFullScreenIntent: true,
-                    volumeSettings: VolumeSettings.fade(
-                      volume: settings.getPeriodVolume(nightPart.id, 0.5),
-                      fadeDuration: const Duration(seconds: 3),
-                      volumeEnforced: true,
+                  await Alarm.set(
+                    alarmSettings: AlarmSettings(
+                      id: notificationId,
+                      dateTime: realAlarmTime,
+                      assetAudioPath: assetPath,
+                      loopAudio: true,
+                      vibrate: true,
+                      androidFullScreenIntent: true,
+                      volumeSettings: VolumeSettings.fade(
+                        volume: settings.getPeriodVolume(nightPart.id, 0.5),
+                        fadeDuration: const Duration(seconds: 3),
+                        volumeEnforced: true,
+                      ),
+                      notificationSettings: NotificationSettings(
+                        title:
+                            '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
+                        body: 'notifications.qiyam_body'.tr(),
+                        stopButton: 'alarm.stop'.tr(),
+                      ),
                     ),
-                    notificationSettings: NotificationSettings(
-                      title: '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
-                      body: 'notifications.qiyam_body'.tr(),
-                      stopButton: 'alarm.stop'.tr(),
-                    ),
-                  ));
+                  );
                 }
               } else if (alertLevel == 1) {
                 requiredNormalIds.add(notificationId);
                 await _service.scheduleNormalNotification(
                   id: notificationId,
-                  title: '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
+                  title:
+                      '${'notifications.time_for'.tr()} ${nightPart.nameKey.tr()}',
                   body: 'notifications.qiyam_short'.tr(),
                   scheduledTime: realAlarmTime,
                   playSound: true,
@@ -318,25 +469,48 @@ class NotificationScheduler {
         // 🌟 3. قسم الروتين (Routines)
         for (var routine in routines) {
           if (!routine.isActive || routine.alertLevel == 0) continue;
-          if (routine.recurrenceDays != null && routine.recurrenceDays!.isNotEmpty && !routine.recurrenceDays!.contains(targetDate.weekday)) continue;
+          if (routine.recurrenceDays != null &&
+              routine.recurrenceDays!.isNotEmpty &&
+              !routine.recurrenceDays!.contains(targetDate.weekday)) {
+            continue;
+          }
 
           DateTime? routineAlarmTime;
           if (!routine.isAstroTime && routine.startTimeMinutes != null) {
-            routineAlarmTime = DateTime(targetDate.year, targetDate.month, targetDate.day, routine.startTimeMinutes! ~/ 60, routine.startTimeMinutes! % 60);
-            if (routineAlarmTime.isBefore(cityNow)) routineAlarmTime = routineAlarmTime.add(const Duration(days: 1));
+            routineAlarmTime = DateTime.utc(
+              targetDate.year,
+              targetDate.month,
+              targetDate.day,
+              routine.startTimeMinutes! ~/ 60,
+              routine.startTimeMinutes! % 60,
+            );
+            if (routineAlarmTime.isBefore(cityNow)) {
+              routineAlarmTime = routineAlarmTime.add(const Duration(days: 1));
+            }
           } else if (routine.isAstroTime && routine.startPeriodId != null) {
             try {
-              final p = periods.firstWhere((p) => p.id == routine.startPeriodId);
-              routineAlarmTime = resolveAstroRoutineTime(period: p, localSuwaya: routine.startSuwaya ?? 1, virtualMinute: routine.startVirtualMinute ?? 0);
+              final p =
+                  periods.firstWhere((p) => p.id == routine.startPeriodId);
+              routineAlarmTime = resolveAstroRoutineTime(
+                period: p,
+                localSuwaya: routine.startSuwaya ?? 1,
+                virtualMinute: routine.startVirtualMinute ?? 0,
+              );
             } catch (_) {}
           }
 
           if (routineAlarmTime != null && routineAlarmTime.isAfter(cityNow)) {
             final int routineNotifId = 300000 + (dayOffset * 10000) + routine.id;
-            final durationUntilAlarm = routineAlarmTime.difference(cityNow);
-            final realAlarmTime = DateTime.now().add(durationUntilAlarm);
+            final realAlarmTime = _resolveRealDeviceAlarmTime(
+              targetCityWallTime: routineAlarmTime,
+              cityNowWallTime: cityNow,
+              loc: loc,
+            );
 
-            if (realAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) continue;
+            if (realAlarmTime
+                .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+              continue;
+            }
 
             if (routine.alertLevel == 2) {
               requiredAlarmIds.add(routineNotifId);
@@ -344,19 +518,49 @@ class NotificationScheduler {
               final existingTask = activeAlarmMap[routineNotifId];
               bool needsTaskUpdate = true;
               if (existingTask != null) {
-                if (existingTask.dateTime.difference(realAlarmTime).inSeconds.abs() < 60 && existingTask.assetAudioPath == rAsset) needsTaskUpdate = false;
+                if (existingTask.dateTime
+                            .difference(realAlarmTime)
+                            .inSeconds
+                            .abs() <
+                        60 &&
+                    existingTask.assetAudioPath == rAsset) {
+                  needsTaskUpdate = false;
+                }
               }
 
               if (needsTaskUpdate) {
-                await Alarm.set(alarmSettings: AlarmSettings(
-                  id: routineNotifId, dateTime: realAlarmTime, assetAudioPath: rAsset, loopAudio: true, vibrate: true, androidFullScreenIntent: true,
-                  volumeSettings: VolumeSettings.fade(volume: routine.alarmVolume, fadeDuration: const Duration(seconds: 2), volumeEnforced: true),
-                  notificationSettings: NotificationSettings(title: '${'notifications.period_start'.tr()}: ${routine.title}', body: 'notifications.routine_body'.tr(), stopButton: 'alarm.stop'.tr()),
-                ));
+                await Alarm.set(
+                  alarmSettings: AlarmSettings(
+                    id: routineNotifId,
+                    dateTime: realAlarmTime,
+                    assetAudioPath: rAsset,
+                    loopAudio: true,
+                    vibrate: true,
+                    androidFullScreenIntent: true,
+                    volumeSettings: VolumeSettings.fade(
+                      volume: routine.alarmVolume,
+                      fadeDuration: const Duration(seconds: 2),
+                      volumeEnforced: true,
+                    ),
+                    notificationSettings: NotificationSettings(
+                      title:
+                          '${'notifications.period_start'.tr()}: ${routine.title}',
+                      body: 'notifications.routine_body'.tr(),
+                      stopButton: 'alarm.stop'.tr(),
+                    ),
+                  ),
+                );
               }
             } else if (routine.alertLevel == 1) {
               requiredNormalIds.add(routineNotifId);
-              await _service.scheduleNormalNotification(id: routineNotifId, title: '${'notifications.period_start'.tr()}: ${routine.title}', body: 'notifications.routine_body'.tr(), scheduledTime: realAlarmTime, playSound: true, enableVibration: true);
+              await _service.scheduleNormalNotification(
+                id: routineNotifId,
+                title: '${'notifications.period_start'.tr()}: ${routine.title}',
+                body: 'notifications.routine_body'.tr(),
+                scheduledTime: realAlarmTime,
+                playSound: true,
+                enableVibration: true,
+              );
             }
           }
         }
@@ -370,37 +574,75 @@ class NotificationScheduler {
           }
 
           for (var task in allTasks) {
-            if (!(task.notifyMode || task.alarmMode || task.vibrateMode)) continue;
-            if (task.targetPeriodId != period.id || task.targetSuwayas.isEmpty) continue;
+            if (!(task.notifyMode || task.alarmMode || task.vibrateMode)) {
+              continue;
+            }
+            if (task.targetPeriodId != period.id ||
+                task.targetSuwayas.isEmpty) {
+              continue;
+            }
 
             bool isForThisDay = false;
             if (task.type == TaskType.casual) {
-              if (task.targetDate != null && task.targetDate!.year == targetDate.year && task.targetDate!.month == targetDate.month && task.targetDate!.day == targetDate.day) {
+              if (task.targetDate != null &&
+                  task.targetDate!.year == targetDate.year &&
+                  task.targetDate!.month == targetDate.month &&
+                  task.targetDate!.day == targetDate.day) {
                 if (!task.isCompleted) isForThisDay = true;
               }
             } else if (task.type == TaskType.permanent) {
-              if (task.recurrenceDays == null || task.recurrenceDays!.isEmpty || task.recurrenceDays!.contains(targetDate.weekday)) {
-                if (!(dayOffset == 0 && task.isCompletedToday)) isForThisDay = true;
+              if (task.recurrenceDays == null ||
+                  task.recurrenceDays!.isEmpty ||
+                  task.recurrenceDays!.contains(targetDate.weekday)) {
+                if (!(dayOffset == 0 && task.isCompletedToday)) {
+                  isForThisDay = true;
+                }
               }
             }
 
             if (isForThisDay) {
-              final suwayaCount = period.suwayasCount > 0 ? period.suwayasCount : 1;
-              final microPerSuwaya = period.endTime.difference(period.startTime).inMicroseconds ~/ suwayaCount;
-              // 🌟 التعديل الجوهري: القسمة على 60 بدلاً من 30 لدقة التوقيت
-              final microPerVirtualMin = microPerSuwaya ~/ 60; 
+              final suwayaCount =
+                  period.suwayasCount > 0 ? period.suwayasCount : 1;
+              final microPerSuwaya = period.endTime
+                      .difference(period.startTime)
+                      .inMicroseconds ~/
+                  suwayaCount;
+              final microPerVirtualMin = microPerSuwaya ~/ 60;
 
               for (var suwayaNum in task.targetSuwayas) {
-                int effectiveSuwayaNum = suwayaNum == -1 ? (suwayaCount ~/ 2) + 1 : suwayaNum;
-                final taskCityTime = period.startTime.add(Duration(microseconds: (microPerSuwaya * (effectiveSuwayaNum - 1)) + (microPerVirtualMin * task.targetVirtualMinute)));
+                int effectiveSuwayaNum =
+                    suwayaNum == -1 ? (suwayaCount ~/ 2) + 1 : suwayaNum;
+                final taskCityTime = period.startTime.add(
+                  Duration(
+                    microseconds:
+                        (microPerSuwaya * (effectiveSuwayaNum - 1)) +
+                            (microPerVirtualMin * task.targetVirtualMinute),
+                  ),
+                );
 
                 if (taskCityTime.isAfter(cityNow)) {
-                  final int taskNotifId = 400000 + (dayOffset * 10000) + ((task.id % 1000) * 10) + effectiveSuwayaNum;
-                  final clockText = formatSuwayaTime(globalSuwayaBase + (effectiveSuwayaNum - 1), task.targetVirtualMinute, separator: '|');
-                  String timeText = "${'notifications.segment_time'.tr()} : \u2066$clockText\u2069";
-                  final realTaskAlarmTime = DateTime.now().add(taskCityTime.difference(cityNow));
+                  final int taskNotifId = 400000 +
+                      (dayOffset * 10000) +
+                      ((task.id % 1000) * 10) +
+                      effectiveSuwayaNum;
+                  final clockText = formatSuwayaTime(
+                    globalSuwayaBase + (effectiveSuwayaNum - 1),
+                    task.targetVirtualMinute,
+                    separator: '|',
+                  );
+                  String timeText =
+                      "${'notifications.segment_time'.tr()} : \u2066$clockText\u2069";
 
-                  if (realTaskAlarmTime.isBefore(DateTime.now().add(const Duration(seconds: 5)))) continue;
+                  final realTaskAlarmTime = _resolveRealDeviceAlarmTime(
+                    targetCityWallTime: taskCityTime,
+                    cityNowWallTime: cityNow,
+                    loc: loc,
+                  );
+
+                  if (realTaskAlarmTime.isBefore(
+                      DateTime.now().add(const Duration(seconds: 5)))) {
+                    continue;
+                  }
 
                   if (task.alarmMode) {
                     requiredAlarmIds.add(taskNotifId);
@@ -408,19 +650,50 @@ class NotificationScheduler {
                     final existingTask = activeAlarmMap[taskNotifId];
                     bool needsTaskUpdate = true;
                     if (existingTask != null) {
-                      if (existingTask.dateTime.difference(realTaskAlarmTime).inSeconds.abs() < 60 && existingTask.assetAudioPath == tAsset) needsTaskUpdate = false;
+                      if (existingTask.dateTime
+                                  .difference(realTaskAlarmTime)
+                                  .inSeconds
+                                  .abs() <
+                              60 &&
+                          existingTask.assetAudioPath == tAsset) {
+                        needsTaskUpdate = false;
+                      }
                     }
 
                     if (needsTaskUpdate) {
-                      await Alarm.set(alarmSettings: AlarmSettings(
-                        id: taskNotifId, dateTime: realTaskAlarmTime, assetAudioPath: tAsset, loopAudio: true, vibrate: true, androidFullScreenIntent: true,
-                        volumeSettings: VolumeSettings.fade(volume: task.alarmVolume, fadeDuration: const Duration(seconds: 2), volumeEnforced: true),
-                        notificationSettings: NotificationSettings(title: '${'notifications.time_for_task'.tr()}: ${task.title}', body: timeText, stopButton: 'alarm.stop'.tr()),
-                      ));
+                      await Alarm.set(
+                        alarmSettings: AlarmSettings(
+                          id: taskNotifId,
+                          dateTime: realTaskAlarmTime,
+                          assetAudioPath: tAsset,
+                          loopAudio: true,
+                          vibrate: true,
+                          androidFullScreenIntent: true,
+                          volumeSettings: VolumeSettings.fade(
+                            volume: task.alarmVolume,
+                            fadeDuration: const Duration(seconds: 2),
+                            volumeEnforced: true,
+                          ),
+                          notificationSettings: NotificationSettings(
+                            title:
+                                '${'notifications.time_for_task'.tr()}: ${task.title}',
+                            body: timeText,
+                            stopButton: 'alarm.stop'.tr(),
+                          ),
+                        ),
+                      );
                     }
                   } else {
                     requiredNormalIds.add(taskNotifId);
-                    await _service.scheduleNormalNotification(id: taskNotifId, title: '${'notifications.time_for_task'.tr()}: ${task.title}', body: timeText, scheduledTime: realTaskAlarmTime, playSound: task.notifyMode, enableVibration: task.vibrateMode);
+                    await _service.scheduleNormalNotification(
+                      id: taskNotifId,
+                      title:
+                          '${'notifications.time_for_task'.tr()}: ${task.title}',
+                      body: timeText,
+                      scheduledTime: realTaskAlarmTime,
+                      playSound: task.notifyMode,
+                      enableVibration: task.vibrateMode,
+                    );
                   }
                 }
               }
@@ -435,7 +708,8 @@ class NotificationScheduler {
         }
       }
 
-      final toCancelNormal = _previouslyScheduledNormalIds.difference(requiredNormalIds);
+      final toCancelNormal =
+          _previouslyScheduledNormalIds.difference(requiredNormalIds);
       for (var id in toCancelNormal) {
         try {
           await _service.cancel(id);
@@ -443,10 +717,10 @@ class NotificationScheduler {
       }
 
       _previouslyScheduledNormalIds = requiredNormalIds;
-      _lastScheduleHash = currentHash; 
-      
+      _lastScheduleHash = currentHash;
     } catch (e) {
-      debugPrint('🚨 خطأ استثنائي أثناء الجدولة. تم إلغاء تحديث الهاش لإعادة المحاولة لاحقاً: $e');
+      debugPrint(
+          '🚨 خطأ استثنائي أثناء الجدولة. تم إلغاء تحديث الهاش لإعادة المحاولة لاحقاً: $e');
     } finally {
       _isScheduling = false;
     }
