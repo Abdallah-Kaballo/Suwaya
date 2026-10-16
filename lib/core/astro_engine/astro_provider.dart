@@ -7,7 +7,7 @@ import 'package:suwaya_time/suwaya_time.dart';
 import '../../models/settings_model.dart';
 import '../../features/settings/settings_provider.dart';
 
-final virtualTimeNotifier = ValueNotifier<String>("00:00");
+final virtualTimeNotifier = ValueNotifier<String>("00|00|00");
 final virtualDateTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
 final Map<String, SuwayaDay> _dayCache = {};
 
@@ -19,12 +19,14 @@ class AstroNotifier extends Notifier<AstroState> {
   int _lastSuwaya = -1;
 
   /// 🌟 حساب فرق التوقيت (UTC Offset) لموقع وتاريخ محددين مع مراعاة التوقيت الصيفي والشتوي (DST)
-  Duration _getUtcOffsetForLocation(SavedLocation? loc, [DateTime? referenceDate]) {
+  Duration _getUtcOffsetForLocation(
+    SavedLocation? loc, [
+    DateTime? referenceDate,
+  ]) {
     if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
       try {
         final location = tz.getLocation(loc.timezone!);
         if (referenceDate != null) {
-          // نأخذ منتصف النهار (12:00) للتاريخ المرجعي لضمان الحصول على الـ Offset المستقر لذلك اليوم بعد أي تحول فجري للـ DST
           final targetTzTime = tz.TZDateTime(
             location,
             referenceDate.year,
@@ -49,7 +51,7 @@ class AstroNotifier extends Notifier<AstroState> {
     return DateTime.now().timeZoneOffset;
   }
 
-  /// 🌟 جلب الوقت الحالي للمدينة بصيغة Wall-Clock UTC الموحدة
+  /// 🌟 جلب الوقت الحالي للمدينة شاملاً أجزاء الثانية لضمان تدفق الثواني السويعية بنعومة
   DateTime _getCityNow(SavedLocation? loc) {
     if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
       try {
@@ -61,6 +63,8 @@ class AstroNotifier extends Notifier<AstroState> {
           nowInTarget.hour,
           nowInTarget.minute,
           nowInTarget.second,
+          nowInTarget.millisecond,
+          nowInTarget.microsecond,
         );
       } catch (_) {}
     }
@@ -72,12 +76,17 @@ class AstroNotifier extends Notifier<AstroState> {
       now.hour,
       now.minute,
       now.second,
+      now.millisecond,
+      now.microsecond,
     );
   }
 
-  // 🌟 إرجاع الوقت بالصيغة الذهبية | مع الإيموجي أو الحرف المناسب
+  // 🌟 إرجاع الوقت السويعي بالصيغة الثلاثية 00|00|00 بدون إيموجي جانبي
   String _formatVirtualTime(SuwayaClockTime ct) {
-    return '${ct.phaseSlotNumber.toString().padLeft(2, '0')}|${ct.virtualMinute.toString().padLeft(2, '0')} ${ct.phase.isDay ? '☀️' : '🌑'}';
+    final s = ct.phaseSlotNumber.toString().padLeft(2, '0');
+    final m = ct.virtualMinute.toString().padLeft(2, '0');
+    final sec = ct.virtualSecond.toString().padLeft(2, '0');
+    return '$s|$m|$sec';
   }
 
   @override
@@ -116,7 +125,6 @@ class AstroNotifier extends Notifier<AstroState> {
       final madhabEnum = settings.madhab.toMadhab();
       final highLatEnum = settings.highLatitudeRule.toHighLatRule();
 
-      // 🌟 استخراج توقيت المغرب لليوم الحالي فقط لمعرفة أي دورة نختار
       final tempIbadat = PrayerCalculator.getIbadatTimings(
         loc?.latitude ?? 21.4225,
         loc?.longitude ?? 39.8262,
@@ -134,10 +142,10 @@ class AstroNotifier extends Notifier<AstroState> {
           ? cityNow.subtract(const Duration(days: 1))
           : cityNow;
 
-      final Duration cycleOffset = _getUtcOffsetForLocation(loc, dateToGenerate);
+      final Duration cycleOffset =
+          _getUtcOffsetForLocation(loc, dateToGenerate);
 
       SuwayaDay getOrGenerateDay(DateTime date) {
-        // 🌟 تضمين فرق التوقيت بالدقائق في الكاش لضمان إعادة الحساب إذا حدث تحول صيفي/شتوي
         final String cacheKey =
             '${date.year}-${date.month}-${date.day}_${cycleOffset.inMinutes}_${currentOffset.inMinutes}_$fingerprint';
         if (_dayCache.containsKey(cacheKey)) {
@@ -184,14 +192,21 @@ class AstroNotifier extends Notifier<AstroState> {
     }
   }
 
+  /// 🌟 نبض سريع (100ms) لتحديث الثواني السويعية بالسرعة الحالية دون إعادة رسم عقرب القرص إلا كل ثانية
   void _startUITicker(SuwayaDay day, SavedLocation? loc) {
     _uiTimer?.cancel();
-    _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    int lastCivilSecond = -1;
+    _uiTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       final tickNow = _getCityNow(loc);
       final newState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
-      virtualDateTimeNotifier.value = tickNow;
+
       virtualTimeNotifier.value =
           _formatVirtualTime(newState.currentSuwayaTime);
+
+      if (tickNow.second != lastCivilSecond) {
+        lastCivilSecond = tickNow.second;
+        virtualDateTimeNotifier.value = tickNow;
+      }
     });
   }
 
@@ -206,7 +221,6 @@ class AstroNotifier extends Notifier<AstroState> {
     final tickNow = _getCityNow(loc);
     final nowOffset = _getUtcOffsetForLocation(loc, tickNow);
 
-    // 🌟 إعادة البناء عند نهاية الدورة (المغرب القادم) أو إذا تغير فرق التوقيت الصيفي/الشتوي فجأة
     if (nowOffset != activeOffset ||
         tickNow.isAfter(day.cycleAnchors.cycleEndMaghrib) ||
         tickNow.isAtSameMomentAs(day.cycleAnchors.cycleEndMaghrib)) {

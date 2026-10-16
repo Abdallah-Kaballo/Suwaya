@@ -41,7 +41,6 @@ Color getNeonColorForCategory(TaskCategory category) {
   return const Color(0xFF18FFFF);
 }
 
-// 🌟 1. تحويل الشاشة إلى StatefulWidget لدعم حفظ الحالة
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -49,29 +48,41 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-// 🌟 2. إضافة AutomaticKeepAliveClientMixin لمنع إعادة الرسم
-class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAliveClientMixin {
-  
-  // 🌟 3. تفعيل حفظ الحالة
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
-  ({int globalIndex, int minute}) _getDynamicOrFixedAstroTime(DialSelection selection, AstroState state, DateTime time, bool isEnd) {
-    if (selection.type == DialSelectionType.prayer || selection.type == DialSelectionType.period) {
+  ({int globalIndex, int minute}) _getDynamicOrFixedAstroTime(
+    DialSelection selection,
+    AstroState state,
+    DateTime time,
+    bool isEnd,
+  ) {
+    if (selection.type == DialSelectionType.prayer ||
+        selection.type == DialSelectionType.period) {
       return getFixedAstroTime(selection.id, state, isEnd: isEnd);
     } else {
-      DateTime evalTime = isEnd ? time.subtract(const Duration(microseconds: 1)) : time;
+      DateTime evalTime =
+          isEnd ? time.subtract(const Duration(microseconds: 1)) : time;
       final mockState = SuwayaTimeEngine.calculateCurrentState(
-          SuwayaDay(ibadatTimings: state.ibadatTimings, cycleAnchors: state.cycleAnchors, periods: state.periods), 
-          evalTime
+        SuwayaDay(
+          ibadatTimings: state.ibadatTimings,
+          cycleAnchors: state.cycleAnchors,
+          periods: state.periods,
+        ),
+        evalTime,
       );
       int global = 0;
       if (mockState.currentSuwayaTime.phase == SuwayaPhase.day) {
-          global = 12 + mockState.currentSuwayaTime.phaseSlotNumber - 1;
+        global = 12 + mockState.currentSuwayaTime.phaseSlotNumber - 1;
       } else {
-          global = mockState.currentSuwayaTime.phaseSlotNumber - 1;
+        global = mockState.currentSuwayaTime.phaseSlotNumber - 1;
       }
-      return (globalIndex: global, minute: mockState.currentSuwayaTime.virtualMinute);
+      return (
+        globalIndex: global,
+        minute: mockState.currentSuwayaTime.virtualMinute,
+      );
     }
   }
 
@@ -99,11 +110,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        // 🌟 4. توسيط النص في النافذة المنبثقة
         title: Text(
-          selection.title, 
-          textAlign: TextAlign.center, 
-          style: TextStyle(color: textColor, fontWeight: FontWeight.bold)
+          selection.title,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -169,7 +179,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
   }
 
   Widget _buildPeriodMetricRow(
-      String label, String value, Color labelColor, Color valueColor) {
+    String label,
+    String value,
+    Color labelColor,
+    Color valueColor,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -177,10 +191,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
           child: Text(label, style: TextStyle(color: labelColor, fontSize: 13)),
         ),
         const SizedBox(width: 12),
-        Text(value,
-            textAlign: TextAlign.end,
-            style: TextStyle(
-                color: valueColor, fontSize: 13, fontWeight: FontWeight.w700)),
+        Text(
+          value,
+          textAlign: TextAlign.end,
+          style: TextStyle(
+            color: valueColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ],
     );
   }
@@ -201,7 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
     Color civilColor,
     Color suwayaColor,
     DialSelection selection,
-    bool isEnd
+    bool isEnd,
   ) {
     final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
     const baseStyle = TextStyle(
@@ -210,11 +229,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
       fontFamily: 'Inter',
     );
 
-    final fixedTime = _getDynamicOrFixedAstroTime(selection, astroState, time, isEnd);
+    final fixedTime =
+        _getDynamicOrFixedAstroTime(selection, astroState, time, isEnd);
     final formattedSuwaya = formatSuwayaTime(
-      fixedTime.globalIndex, 
-      fixedTime.minute, 
-      separator: '|', 
+      fixedTime.globalIndex,
+      fixedTime.minute,
+      separator: '|',
       isRTL: isRTL,
       iconMode: settings.suwayaIconMode,
     );
@@ -241,8 +261,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text('/',
-                  style: TextStyle(color: civilColor.withValues(alpha: 0.5))),
+              child: Text(
+                '/',
+                style: TextStyle(color: civilColor.withValues(alpha: 0.5)),
+              ),
             ),
             Directionality(
               textDirection: ui.TextDirection.ltr,
@@ -263,15 +285,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
       try {
         final location = tz.getLocation(loc.timezone!);
         final nowInTarget = tz.TZDateTime.now(location);
-        return DateTime(nowInTarget.year, nowInTarget.month, nowInTarget.day,
-            nowInTarget.hour, nowInTarget.minute, nowInTarget.second);
+        return DateTime(
+          nowInTarget.year,
+          nowInTarget.month,
+          nowInTarget.day,
+          nowInTarget.hour,
+          nowInTarget.minute,
+          nowInTarget.second,
+        );
       } catch (_) {}
     }
     return DateTime.now();
   }
 
-  Widget _buildTopHeader(BuildContext context, AstroState astroState,
-      Color pColor, bool isDark, DateTime cityNow, SettingsModel settings) {
+  Widget _buildTopHeader(
+    BuildContext context,
+    AstroState astroState,
+    Color pColor,
+    bool isDark,
+    DateTime cityNow,
+    SettingsModel settings,
+  ) {
     DateTime? rawFajr, rawMaghrib;
     for (var p in astroState.periods) {
       if (p.periodKey == PeriodKey.nightMidnightFajr) rawFajr = p.endTime;
@@ -281,9 +315,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
     rawMaghrib ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 18, 0);
 
     final DateTime todayFajr = DateTime(
-        cityNow.year, cityNow.month, cityNow.day, rawFajr.hour, rawFajr.minute);
-    final DateTime todayMaghrib = DateTime(cityNow.year, cityNow.month,
-        cityNow.day, rawMaghrib.hour, rawMaghrib.minute);
+      cityNow.year,
+      cityNow.month,
+      cityNow.day,
+      rawFajr.hour,
+      rawFajr.minute,
+    );
+    final DateTime todayMaghrib = DateTime(
+      cityNow.year,
+      cityNow.month,
+      cityNow.day,
+      rawMaghrib.hour,
+      rawMaghrib.minute,
+    );
 
     String dayNightStr = '';
     DateTime islamicDate = cityNow;
@@ -293,7 +337,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
     final dayName = DateFormat('EEEE', safeIntl).format(islamicDate);
 
-    // 🌟 5. تغيير المسمى إلى نهار وليلة
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
@@ -327,39 +370,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(isNight ? LucideIcons.moon : LucideIcons.sun,
-                        color: pColor, size: 24),
+                    Icon(
+                      isNight ? LucideIcons.moon : LucideIcons.sun,
+                      color: pColor,
+                      size: 24,
+                    ),
                     const SizedBox(width: 8),
                     Stack(
                       children: [
-                        Text(dayNightStr,
-                            style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.normal,
-                                fontFamily: 'Tajawal',
-                                foreground: Paint()
-                                  ..style = PaintingStyle.stroke
-                                  ..strokeWidth = 1.0
-                                  ..color = Colors.white)),
-                        Text(dayNightStr,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.normal,
-                                fontFamily: 'Tajawal')),
+                        Text(
+                          dayNightStr,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'Tajawal',
+                            foreground: Paint()
+                              ..style = PaintingStyle.stroke
+                              ..strokeWidth = 1.0
+                              ..color = Colors.white,
+                          ),
+                        ),
+                        Text(
+                          dayNightStr,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
-                // 🌟 6. تم حذف سطر الساعة المدنية والتاريخ الميلادي من هنا بالكامل
                 const SizedBox(height: 6),
-                Text('$hijriStr ${'common.ah'.tr()}',
-                    style: TextStyle(
-                        color: textColor,
-                        fontSize: 22, 
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Tajawal',
-                        letterSpacing: 0.5)),
+                Text(
+                  '$hijriStr ${'common.ah'.tr()}',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    fontFamily: 'Tajawal',
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ],
             ),
           ),
@@ -369,8 +423,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
     );
   }
 
-  Widget _buildLegendChip(String title, Color color, bool isDark,
-      bool isHighlighted, VoidCallback? onTap) {
+  Widget _buildLegendChip(
+    String title,
+    Color color,
+    bool isDark,
+    bool isHighlighted,
+    VoidCallback? onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -380,14 +439,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
           color: isDark ? const Color(0xFF13131A) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-              color: isHighlighted ? color : color.withValues(alpha: 0.3),
-              width: isHighlighted ? 2.0 : 1.5),
+            color: isHighlighted ? color : color.withValues(alpha: 0.3),
+            width: isHighlighted ? 2.0 : 1.5,
+          ),
           boxShadow: isHighlighted
               ? [
                   BoxShadow(
-                      color: color.withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      spreadRadius: 2)
+                    color: color.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
                 ]
               : [],
         ),
@@ -398,106 +459,178 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
               width: 12,
               height: 12,
               decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  boxShadow: isHighlighted
-                      ? [
-                          BoxShadow(
-                              color: color, blurRadius: 8, spreadRadius: 2)
-                        ]
-                      : []),
+                color: color,
+                shape: BoxShape.circle,
+                boxShadow: isHighlighted
+                    ? [BoxShadow(color: color, blurRadius: 8, spreadRadius: 2)]
+                    : [],
+              ),
             ),
             const SizedBox(width: 8),
-            Text(title,
-                style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _showDialMarkersSettingsSheet(BuildContext context, WidgetRef ref, AstroState astroState, SettingsModel settings, Color pColor, bool isDark) {
+  /// 🌟 النافذة الموحدة المطورة: الشروق وأسفله أوقات الليل الخمسة بنفس التصميم (SwitchListTile)
+  void _showDialMarkersSettingsSheet(
+    BuildContext context,
+    WidgetRef ref,
+    AstroState astroState,
+    SettingsModel settings,
+    Color pColor,
+    bool isDark,
+  ) {
     HapticFeedback.selectionClick();
-    
-    // الأجزاء التي نريد التحكم بها من القرص مباشرة
+
+    const orderedNightIds = [
+      'half_2',
+      'third_3',
+      'sixth_4',
+      'sixth_5',
+      'sixth_6',
+    ];
     final dialParts = [
-      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'half_2'))
-        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'half_2'),
-      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'third_3'))
-        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'third_3'),
-      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'sixth_4'))
-        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'sixth_4'),
-      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'sixth_5'))
-        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'sixth_5'),
-      if (astroState.ibadatTimings.nightParts.any((p) => p.id == 'sixth_6'))
-        astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == 'sixth_6'),
+      for (final id in orderedNightIds)
+        if (astroState.ibadatTimings.nightParts.any((p) => p.id == id))
+          astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == id),
     ];
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('home.dial_markers_settings'.tr(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
-                const SizedBox(height: 16),
-                
-                Consumer(builder: (context, ref, _) {
-                   final currentSettings = ref.watch(settingsProvider);
-                   return SwitchListTile(
-                    title: Text('ibadat.show_sunrise'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                    value: currentSettings.showSunrise,
-                    activeThumbColor: pColor,
-                    secondary: const Icon(LucideIcons.sun, color: Colors.orangeAccent),
-                    onChanged: (val) => ref.read(settingsProvider.notifier).updateShowSunrise(val),
-                  );
-                }),
-                const Divider(height: 1),
-                
-                ...dialParts.map((part) {
-                  return Consumer(builder: (context, ref, _) {
-                    final currentSettings = ref.watch(settingsProvider);
-                    final isSelected = currentSettings.visibleNightParts.contains(part.id);
-                    return CheckboxListTile(
-                      title: Text(('night_parts.${part.nameKey.replaceAll("np_", "")}').tr(),
-                          style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                      value: isSelected,
-                      activeColor: pColor,
-                      secondary: Icon(LucideIcons.sparkles, color: isSelected ? pColor : Colors.grey),
-                      onChanged: (val) => ref.read(settingsProvider.notifier).toggleVisibleNightPart(part.id),
-                    );
-                  });
-                }),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: pColor),
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('common.done'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
+        return Consumer(
+          builder: (context, ref, _) {
+            final currentSettings = ref.watch(settingsProvider);
+            final notifier = ref.read(settingsProvider.notifier);
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: (isDark ? Colors.white : Colors.black)
+                            .withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'home.dial_markers_settings'.tr(),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 🌟 صف الشروق
+                    SwitchListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      title: Text(
+                        'ibadat.show_sunrise'.tr(),
+                        style: TextStyle(
+                          fontWeight: currentSettings.showSunrise
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      value: currentSettings.showSunrise,
+                      activeThumbColor: pColor,
+                      secondary: const Icon(
+                        LucideIcons.sun,
+                        color: Colors.orangeAccent,
+                      ),
+                      onChanged: (val) {
+                        HapticFeedback.selectionClick();
+                        notifier.updateShowSunrise(val);
+                      },
+                    ),
+                    const Divider(height: 12),
+
+                    // 🌟 أوقات الليل الخمسة بنفس تصميم صف الشروق تماماً (SwitchListTile)
+                    ...dialParts.map((part) {
+                      final isSelected =
+                          currentSettings.visibleNightParts.contains(part.id);
+                      return SwitchListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 4),
+                        title: Text(
+                          ('night_parts.${part.nameKey.replaceAll("np_", "")}')
+                              .tr(),
+                          style: TextStyle(
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                        ),
+                        value: isSelected,
+                        activeThumbColor: pColor,
+                        secondary: Icon(
+                          LucideIcons.sparkles,
+                          color: isSelected ? pColor : Colors.grey,
+                        ),
+                        onChanged: (_) {
+                          HapticFeedback.selectionClick();
+                          notifier.toggleVisibleNightPart(part.id);
+                        },
+                      );
+                    }),
+
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: pColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'common.done'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
-      }
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🌟 7. استدعاء الدالة الأم لحفظ الحالة (Super Build)
     super.build(context);
-    
+
     ref.watch(notificationSchedulerProvider);
     final astroState = ref.watch(astroProvider);
     final routineArcs = ref.watch(routineArcsProvider);
@@ -509,9 +642,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
 
     if (astroState.periods.isEmpty) {
       return Scaffold(
-          backgroundColor: scaffoldBgColor,
-          body: Center(
-              child: Column(
+        backgroundColor: scaffoldBgColor,
+        body: Center(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(color: Theme.of(context).primaryColor),
@@ -522,11 +655,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                 icon: const Icon(Icons.refresh),
                 label: Text('common.retry'.tr()),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white),
-              )
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ],
-          )));
+          ),
+        ),
+      );
     }
 
     final pColor = astroState.currentPeriod.uiColor.adapt(context);
@@ -534,10 +670,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
-      // 🌟 8. تفعيل إيماءة السحب الجانبي (Drawer Drag Gesture)
       drawerEnableOpenDragGesture: true,
       drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
-      
       drawer: const AppDrawer(),
       onDrawerChanged: (isOpen) =>
           ref.read(isDrawerOpenProvider.notifier).state = isOpen,
@@ -547,27 +681,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
         scrolledUnderElevation: 0,
         leading: Builder(
           builder: (ctx) => IconButton(
-            icon: Icon(LucideIcons.menu,
-                color: isDark ? Colors.white : Colors.black87),
+            icon: Icon(
+              LucideIcons.menu,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
             onPressed: () => Scaffold.of(ctx).openDrawer(),
           ),
         ),
         title: const LocationHeader(),
         actions: [
-          // 🌟 9. زر التحويل العالمي بين السويعي والمدني
-          Consumer(builder: (context, ref, _) {
-            final settings = ref.watch(settingsProvider);
-            return IconButton(
-              icon: Icon(
-                settings.useAstroTimeForIbadat ? LucideIcons.clock : LucideIcons.moon_star,
-                color: Theme.of(context).primaryColor,
-              ),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                ref.read(settingsProvider.notifier).updateUseAstroTimeForIbadat(!settings.useAstroTimeForIbadat);
-              },
-            );
-          }),
+          Consumer(
+            builder: (context, ref, _) {
+              final settings = ref.watch(settingsProvider);
+              return IconButton(
+                icon: Icon(
+                  settings.useAstroTimeForIbadat
+                      ? LucideIcons.clock
+                      : LucideIcons.moon_star,
+                  color: Theme.of(context).primaryColor,
+                ),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  ref
+                      .read(settingsProvider.notifier)
+                      .updateUseAstroTimeForIbadat(
+                        !settings.useAstroTimeForIbadat,
+                      );
+                },
+              );
+            },
+          ),
           const SizedBox(width: 8),
         ],
       ),
@@ -583,37 +726,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
         },
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics()),
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           slivers: [
             SliverToBoxAdapter(
               child: _buildTopHeader(
-                  context, astroState, pColor, isDark, cityNow, settings),
+                context,
+                astroState,
+                pColor,
+                isDark,
+                cityNow,
+                settings,
+              ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Column( 
+                child: Column(
                   children: [
-                    // 🌟 10. زر القلم الجديد أعلى القرص
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () => _showDialMarkersSettingsSheet(context, ref, astroState, settings, pColor, isDark),
+                          onTap: () => _showDialMarkersSettingsSheet(
+                            context,
+                            ref,
+                            astroState,
+                            settings,
+                            pColor,
+                            isDark,
+                          ),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
                             margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
                               color: pColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: pColor.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: pColor.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(LucideIcons.pencil, color: pColor, size: 14),
+                                Icon(
+                                  LucideIcons.pencil,
+                                  color: pColor,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 6),
-                                Text('home.edit_dial'.tr(), style: TextStyle(color: pColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text(
+                                  'home.edit_dial'.tr(),
+                                  style: TextStyle(
+                                    color: pColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -641,7 +813,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                 ),
               ),
             ),
-
             SliverToBoxAdapter(
               child: Builder(
                 builder: (context) {
@@ -652,11 +823,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                   final routines = ref.watch(routinesProvider);
                   final todayWeekday = DateTime.now().weekday;
                   final activeRoutines = routines
-                      .where((r) =>
-                          r.isActive &&
-                          (r.recurrenceDays == null ||
-                              r.recurrenceDays!.isEmpty ||
-                              r.recurrenceDays!.contains(todayWeekday)))
+                      .where(
+                        (r) =>
+                            r.isActive &&
+                            (r.recurrenceDays == null ||
+                                r.recurrenceDays!.isEmpty ||
+                                r.recurrenceDays!.contains(todayWeekday)),
+                      )
                       .toList();
 
                   if (activeRoutines.isEmpty && tasksForLegend.isEmpty) {
@@ -664,19 +837,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                   }
 
                   return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('home.dial_indicators'.tr(),
-                                style: TextStyle(
-                                    color: pColor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
+                            Text(
+                              'home.dial_indicators'.tr(),
+                              style: TextStyle(
+                                color: pColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () {
@@ -689,8 +867,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                                   color: pColor.withValues(alpha: 0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(LucideIcons.pencil,
-                                    color: pColor, size: 18),
+                                child: Icon(
+                                  LucideIcons.pencil,
+                                  color: pColor,
+                                  size: 18,
+                                ),
                               ),
                             ),
                           ],
@@ -704,27 +885,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                               final isHighlighted =
                                   ref.watch(highlightedRoutineProvider) == r.id;
                               return _buildLegendChip(
-                                  r.title,
-                                  Color(r.colorValue),
-                                  isDark,
-                                  isHighlighted, () {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(highlightedRoutineProvider.notifier)
-                                    .state = r.id;
-                                ref
-                                    .read(highlightedTaskProvider.notifier)
-                                    .state = null;
-                                Future.delayed(const Duration(seconds: 3), () {
-                                  if (ref.read(highlightedRoutineProvider) ==
-                                      r.id) {
-                                    ref
-                                        .read(
-                                            highlightedRoutineProvider.notifier)
-                                        .state = null;
-                                  }
-                                });
-                              });
+                                r.title,
+                                Color(r.colorValue),
+                                isDark,
+                                isHighlighted,
+                                () {
+                                  HapticFeedback.lightImpact();
+                                  ref
+                                      .read(
+                                        highlightedRoutineProvider.notifier,
+                                      )
+                                      .state = r.id;
+                                  ref
+                                      .read(highlightedTaskProvider.notifier)
+                                      .state = null;
+                                  Future.delayed(
+                                    const Duration(seconds: 3),
+                                    () {
+                                      if (ref.read(
+                                            highlightedRoutineProvider,
+                                          ) ==
+                                          r.id) {
+                                        ref
+                                            .read(
+                                              highlightedRoutineProvider
+                                                  .notifier,
+                                            )
+                                            .state = null;
+                                      }
+                                    },
+                                  );
+                                },
+                              );
                             }),
                             ...tasksForLegend.map((task) {
                               Color tColor =
@@ -733,24 +925,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
                                   ref.watch(highlightedTaskProvider) == task.id;
 
                               return _buildLegendChip(
-                                  task.title, tColor, isDark, isHighlighted,
-                                  () {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(highlightedTaskProvider.notifier)
-                                    .state = task.id;
-                                ref
-                                    .read(highlightedRoutineProvider.notifier)
-                                    .state = null;
-                                Future.delayed(const Duration(seconds: 3), () {
-                                  if (ref.read(highlightedTaskProvider) ==
-                                      task.id) {
-                                    ref
-                                        .read(highlightedTaskProvider.notifier)
-                                        .state = null;
-                                  }
-                                });
-                              });
+                                task.title,
+                                tColor,
+                                isDark,
+                                isHighlighted,
+                                () {
+                                  HapticFeedback.lightImpact();
+                                  ref
+                                      .read(highlightedTaskProvider.notifier)
+                                      .state = task.id;
+                                  ref
+                                      .read(
+                                        highlightedRoutineProvider.notifier,
+                                      )
+                                      .state = null;
+                                  Future.delayed(
+                                    const Duration(seconds: 3),
+                                    () {
+                                      if (ref.read(highlightedTaskProvider) ==
+                                          task.id) {
+                                        ref
+                                            .read(
+                                              highlightedTaskProvider.notifier,
+                                            )
+                                            .state = null;
+                                      }
+                                    },
+                                  );
+                                },
+                              );
                             }),
                           ],
                         ),
@@ -767,10 +970,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with AutomaticKeepAlive
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 112.0),
         child: PremiumExpandableFab(
-            color: pColor,
-            isDark: isDark,
-            currentPeriodId: astroState.currentPeriod.id,
-            currentSuwaya: astroState.currentSuwayaTime.periodLocalSlotNumber),
+          color: pColor,
+          isDark: isDark,
+          currentPeriodId: astroState.currentPeriod.id,
+          currentSuwaya: astroState.currentSuwayaTime.periodLocalSlotNumber,
+        ),
       ),
     );
   }
@@ -782,12 +986,13 @@ class PremiumExpandableFab extends StatefulWidget {
   final int currentPeriodId;
   final int currentSuwaya;
 
-  const PremiumExpandableFab(
-      {super.key,
-      required this.color,
-      required this.isDark,
-      required this.currentPeriodId,
-      required this.currentSuwaya});
+  const PremiumExpandableFab({
+    super.key,
+    required this.color,
+    required this.isDark,
+    required this.currentPeriodId,
+    required this.currentSuwaya,
+  });
 
   @override
   State<PremiumExpandableFab> createState() => _PremiumExpandableFabState();
@@ -804,10 +1009,13 @@ class _PremiumExpandableFabState extends State<PremiumExpandableFab> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       onPressed: () {
         HapticFeedback.lightImpact();
-        context.push('/add-task', extra: {
-          'currentPeriodId': widget.currentPeriodId,
-          'currentSuwaya': widget.currentSuwaya,
-        });
+        context.push(
+          '/add-task',
+          extra: {
+            'currentPeriodId': widget.currentPeriodId,
+            'currentSuwaya': widget.currentSuwaya,
+          },
+        );
       },
       child: const Icon(LucideIcons.plus, size: 28),
     );

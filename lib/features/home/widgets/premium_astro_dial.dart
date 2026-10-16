@@ -30,12 +30,13 @@ class PremiumAstroDial extends ConsumerStatefulWidget {
   final Function(AstroPeriod)? onPeriodTapped;
   final Future<void> Function(DialSelection)? onItemTapped;
 
-  const PremiumAstroDial(
-      {super.key,
-      required this.size,
-      required this.routineArcs,
-      this.onPeriodTapped,
-      this.onItemTapped});
+  const PremiumAstroDial({
+    super.key,
+    required this.size,
+    required this.routineArcs,
+    this.onPeriodTapped,
+    this.onItemTapped,
+  });
 
   @override
   ConsumerState<PremiumAstroDial> createState() => _PremiumAstroDialState();
@@ -65,7 +66,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   void initState() {
     super.initState();
     _animController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1500));
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
     _animController.addListener(() {
       if (_anim != null) _manualRotation.value = _anim!.value;
     });
@@ -151,7 +154,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   void _snapBack() {
     if (_manualRotation.value != 0.0) {
       _anim = Tween<double>(begin: _manualRotation.value, end: 0.0).animate(
-          CurvedAnimation(parent: _animController, curve: Curves.elasticOut));
+        CurvedAnimation(parent: _animController, curve: Curves.elasticOut),
+      );
       _animController.forward(from: 0.0);
     }
   }
@@ -242,11 +246,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         double progress = relativeAngle / sweep;
         int sIndex = (progress * period.suwayasCount).round();
         if (sIndex >= period.suwayasCount) {
-          sIndex = period.suwayasCount - 1; 
+          sIndex = period.suwayasCount - 1;
         }
 
         targetSuwaya = sIndex + 1;
-        targetVMin = 0; 
+        targetVMin = 0;
         break;
       }
     }
@@ -254,7 +258,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     if (targetPeriod != null) {
       HapticFeedback.lightImpact();
       ref.read(tasksProvider.notifier).rescheduleTask(
-          _draggedTask!, targetPeriod.id, targetSuwaya, targetVMin);
+            _draggedTask!,
+            targetPeriod.id,
+            targetSuwaya,
+            targetVMin,
+          );
     }
     setState(() {
       _draggedTask = null;
@@ -301,8 +309,14 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     });
   }
 
-  void _handleTap(TapUpDetails details, AstroState state, DateTime dayStart,
-      DateTime dayEnd, double totalRotation, DialDesign design) {
+  void _handleTap(
+    TapUpDetails details,
+    AstroState state,
+    DateTime dayStart,
+    DateTime dayEnd,
+    double totalRotation,
+    DialDesign design,
+  ) {
     if (_cachedBox == null) return;
     final center = _cachedBox!.size.center(Offset.zero);
     final touch = _cachedBox!.globalToLocal(details.globalPosition);
@@ -340,14 +354,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         if (sweep <= 0) sweep += 2 * pi;
         if (_angleInSweep(actualDialAngle, startAngle, sweep)) {
           HapticFeedback.lightImpact();
-          _selectDialItem(DialSelection(
-            id: period.id.toString(),
-            type: DialSelectionType.period,
-            title: _periodTitle(period),
-            startTime: period.startTime,
-            endTime: period.endTime,
-            color: period.uiColor,
-          ));
+          _selectDialItem(
+            DialSelection(
+              id: period.id.toString(),
+              type: DialSelectionType.period,
+              title: _periodTitle(period),
+              startTime: period.startTime,
+              endTime: period.endTime,
+              color: period.uiColor,
+            ),
+          );
           if (widget.onItemTapped == null) {
             widget.onPeriodTapped?.call(period);
           }
@@ -376,13 +392,15 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       final item = tappedMarker.item;
       final isTask = item.taskModel != null;
       HapticFeedback.lightImpact();
-      _selectDialItem(DialSelection(
-        id: isTask ? item.taskModel!.id.toString() : item.id,
-        type: isTask ? DialSelectionType.task : DialSelectionType.prayer,
-        title: isTask ? item.taskModel!.title : item.text,
-        startTime: item.time,
-        color: item.color,
-      ));
+      _selectDialItem(
+        DialSelection(
+          id: isTask ? item.taskModel!.id.toString() : item.id,
+          type: isTask ? DialSelectionType.task : DialSelectionType.prayer,
+          title: isTask ? item.taskModel!.title : item.text,
+          startTime: item.time,
+          color: item.color,
+        ),
+      );
       return;
     }
 
@@ -394,14 +412,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               routines.where((item) => item.id == arc.id).firstOrNull;
           if (routine == null) return;
           HapticFeedback.lightImpact();
-          _selectDialItem(DialSelection(
-            id: routine.id.toString(),
-            type: DialSelectionType.routine,
-            title: routine.title,
-            startTime: arc.startTime,
-            endTime: arc.endTime,
-            color: arc.color,
-          ));
+          _selectDialItem(
+            DialSelection(
+              id: routine.id.toString(),
+              type: DialSelectionType.routine,
+              title: routine.title,
+              startTime: arc.startTime,
+              endTime: arc.endTime,
+              color: arc.color,
+            ),
+          );
           return;
         }
       }
@@ -420,22 +440,32 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       }
     }
     if (settings.showSunrise) {
-      markers
-          .add({'n': 'ibadat.sunrise'.tr(), 't': state.ibadatTimings.sunrise});
+      markers.add({
+        'n': 'ibadat.sunrise'.tr(),
+        't': state.ibadatTimings.sunrise,
+      });
     }
     return markers;
   }
 
   String _periodTitle(AstroPeriod period) {
     switch (period.id) {
-      case 1: return 'periods.maghrib'.tr();
-      case 2: return 'prayers.isha'.tr(); // 🌟 تم تصحيح المفتاح
-      case 3: return 'ibadat.qiyam_tab'.tr(); // 🌟 تم تصحيح المفتاح
-      case 4: return 'periods.fajr'.tr();
-      case 5: return 'periods.duha'.tr();
-      case 6: return 'periods.dhuhr'.tr();
-      case 7: return 'periods.asr'.tr();
-      default: return period.nameKey.tr();
+      case 1:
+        return 'periods.maghrib'.tr();
+      case 2:
+        return 'prayers.isha'.tr();
+      case 3:
+        return 'ibadat.qiyam_tab'.tr();
+      case 4:
+        return 'periods.fajr'.tr();
+      case 5:
+        return 'periods.duha'.tr();
+      case 6:
+        return 'periods.dhuhr'.tr();
+      case 7:
+        return 'periods.asr'.tr();
+      default:
+        return period.nameKey.tr();
     }
   }
 
@@ -445,7 +475,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     if (astro.periods.isEmpty) return 0.0;
     double autoRotationOffset = 0.0;
     final needleAngle = timeToAngle(
-        currentTime, astro.periods.first.startTime, astro.periods.last.endTime);
+      currentTime,
+      astro.periods.first.startTime,
+      astro.periods.last.endTime,
+    );
     if (settings.isDialAutoRotating) {
       autoRotationOffset = -(needleAngle + pi / 2);
     }
@@ -491,21 +524,29 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                     : task.targetSuwayas.first - 1)
                 : suwayaCount ~/ 2;
             sIndex = sIndex.clamp(0, suwayaCount - 1);
-            
+
             final microPerVirtualMinute = microPerSuwaya / 60.0;
-            taskTime = p.startTime.add(Duration(
+            taskTime = p.startTime.add(
+              Duration(
                 microseconds: (microPerSuwaya * sIndex) +
-                    (microPerVirtualMinute * task.targetVirtualMinute)
-                        .toInt()));
+                    (microPerVirtualMinute * task.targetVirtualMinute).toInt(),
+              ),
+            );
           } else if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
-            DateTime pStartNoSecs = DateTime.utc(dayStart.year, dayStart.month,
-                dayStart.day, dayStart.hour, dayStart.minute);
+            DateTime pStartNoSecs = DateTime.utc(
+              dayStart.year,
+              dayStart.month,
+              dayStart.day,
+              dayStart.hour,
+              dayStart.minute,
+            );
             DateTime dt = DateTime.utc(
-                dayStart.year,
-                dayStart.month,
-                dayStart.day,
-                task.targetCivilTimeMinutes! ~/ 60,
-                task.targetCivilTimeMinutes! % 60);
+              dayStart.year,
+              dayStart.month,
+              dayStart.day,
+              task.targetCivilTimeMinutes! ~/ 60,
+              task.targetCivilTimeMinutes! % 60,
+            );
             if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
             if (dt.isAfter(dayEnd)) dt = dt.subtract(const Duration(days: 1));
             if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
@@ -514,11 +555,14 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           if (taskTime != null) {
             Color tColor = getNeonColorForCategory(task.category);
             String formattedName = task.dialShortName ?? task.title;
-            _currentDialTasks.add(DialTask(
+            _currentDialTasks.add(
+              DialTask(
                 taskModel: task,
                 shortName: formattedName.replaceAll('\n', ' '),
                 time: taskTime,
-                color: tColor));
+                color: tColor,
+              ),
+            );
           }
         } catch (_) {}
       }
@@ -533,14 +577,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             _buildLayer(IslamicRetePainter(isDark: isDark)),
           if (selectedDesign == DialDesign.geometric)
             _buildLayer(GeometricRetePainter(isDark: isDark)),
-
-          _buildLayer(RoutinesRingPainter(
+          _buildLayer(
+            RoutinesRingPainter(
               routineArcs: widget.routineArcs,
               isDark: isDark,
               design: selectedDesign,
-              highlightedRoutineId: highlightedRoutineId)),
-          
-          _buildLayer(PeriodRingPainter(
+              highlightedRoutineId: highlightedRoutineId,
+            ),
+          ),
+          _buildLayer(
+            PeriodRingPainter(
               periods: astroState.periods,
               currentPeriod: astroState.currentPeriod,
               dayStart: dayStart,
@@ -548,25 +594,34 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               isDark: isDark,
               langCode: context.locale.languageCode,
               design: selectedDesign,
-              highlightedPeriodId: _highlightedPeriodId)),
-
-          _buildLayer(OuterRingPainter(
+              highlightedPeriodId: _highlightedPeriodId,
+            ),
+          ),
+          _buildLayer(
+            OuterRingPainter(
               periods: astroState.periods,
               dayStart: dayStart,
               dayEnd: dayEnd,
               isDark: isDark,
               design: selectedDesign,
-              // 🌟 التحويل الذكي للدبابيس (24 مدني أو سويعات)
-              pinMode: settings.useAstroTimeForIbadat ? settings.dialPinMode : 'civil24')),
+              pinMode: settings.useAstroTimeForIbadat
+                  ? settings.dialPinMode
+                  : 'civil24',
+            ),
+          ),
           if (selectedDesign == DialDesign.classic)
             _buildLayer(CrownPainter(dayStart: dayStart, dayEnd: dayEnd)),
-          _buildLayer(DividerRingPainter(
+          _buildLayer(
+            DividerRingPainter(
               periods: astroState.periods,
               dayStart: dayStart,
               dayEnd: dayEnd,
               isDark: isDark,
-              design: selectedDesign)),
-          _buildLayer(RailwayRingPainter(
+              design: selectedDesign,
+            ),
+          ),
+          _buildLayer(
+            RailwayRingPainter(
               ibadat: astroState.ibadatTimings,
               nightMarkers: activeNightMarkers,
               tasks: List.of(_currentDialTasks),
@@ -580,10 +635,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               design: selectedDesign,
               highlightedTaskId: highlightedTaskId,
               highlightedMarkerId: _highlightedMarkerId,
-              dialPinMode: settings.useAstroTimeForIbadat ? settings.dialPinMode : 'civil24')),
+              dialPinMode: settings.useAstroTimeForIbadat
+                  ? settings.dialPinMode
+                  : 'civil24',
+            ),
+          ),
         ],
       ),
     );
+
+    final bool isDayPhase = astroState.currentSuwayaTime.phase.isDay;
 
     return SizedBox(
       width: widget.size,
@@ -598,13 +659,15 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                 alignment: Alignment.center,
                 children: [
                   heavyDialStack,
-                  _buildLayer(DynamicNeedlePainter(
-                    currentTime: liveTime,
-                    dayStart: dayStart,
-                    dayEnd: dayEnd,
-                    isDark: isDark,
-                    design: selectedDesign,
-                  )),
+                  _buildLayer(
+                    DynamicNeedlePainter(
+                      currentTime: liveTime,
+                      dayStart: dayStart,
+                      dayEnd: dayEnd,
+                      isDark: isDark,
+                      design: selectedDesign,
+                    ),
+                  ),
                 ],
               );
               return GestureDetector(
@@ -641,200 +704,262 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               );
             },
           ),
-          _buildCenterGlow(isDark, selectedDesign),
-          _buildCentralTime(astroState, textColor, isDark, settings), 
+          _buildCenterGlow(isDark, selectedDesign, isDayPhase),
+          _buildCentralTime(astroState, textColor, isDark, settings),
         ],
       ),
     );
   }
 
   Widget _buildLayer(CustomPainter painter) => SizedBox(
-      width: widget.size,
-      height: widget.size,
-      child: CustomPaint(painter: painter));
-
-  Widget _buildCenterGlow(bool isDark, DialDesign design) {
-    if (design == DialDesign.minimal) {
-      return Container(
-        width: widget.size * (kInnerR - 0.02),
-        height: widget.size * (kInnerR - 0.02),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isDark ? const Color(0xFF13131A) : const Color(0xFFF8F9FA),
-          border: Border.all(
-              color: isDark ? Colors.white12 : Colors.black12, width: 1.5),
-        ),
+        width: widget.size,
+        height: widget.size,
+        child: CustomPaint(painter: painter),
       );
-    }
+
+  /// 🌟 خلفية الدائرة المركزية: إيموجي الشمس (☀️) أو القمر (🌑) يملأ 100% من الدائرة المركزية بدون زيادة أو نقصان
+  Widget _buildCenterGlow(bool isDark, DialDesign design, bool isDayPhase) {
+    final double centerDiameter = widget.size * (kInnerR - 0.02);
+    final String bgEmoji = isDayPhase ? '☀️' : '🌑';
 
     return Container(
-      width: widget.size * (kInnerR - 0.02),
-      height: widget.size * (kInnerR - 0.02),
+      width: centerDiameter,
+      height: centerDiameter,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isDark
-            ? const Color(0xFF0D0D14).withValues(alpha: 0.85)
-            : const Color(0xFFF0F4F8).withValues(alpha: 0.9),
-        border: Border.all(color: goldBase.withValues(alpha: 0.7), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-              color: isDark ? Colors.black87 : Colors.white,
-              blurRadius: 20,
-              spreadRadius: 4),
-          BoxShadow(
-              color: goldBase.withValues(alpha: 0.1),
-              blurRadius: 10,
-              spreadRadius: 1),
-        ],
+        boxShadow: design == DialDesign.minimal
+            ? []
+            : [
+                BoxShadow(
+                  color: isDark ? Colors.black87 : Colors.white,
+                  blurRadius: 20,
+                  spreadRadius: 4,
+                ),
+                BoxShadow(
+                  color: goldBase.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+      ),
+      child: ClipOval(
+        child: Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: [
+            // قاعدة لونية خلف الإيموجي
+            ColoredBox(
+              color: isDark ? const Color(0xFF0D0D14) : const Color(0xFFF0F4F8),
+            ),
+
+            // 🌟 إيموجي الشمس أو القمر مكبّر بدقة ليملأ 100% من حافة الدائرة المركزية إلى حافتها
+            FittedBox(
+              fit: BoxFit.cover,
+              child: Transform.scale(
+                scale: 1.28,
+                child: Text(
+                  bgEmoji,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 100,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+            ),
+
+            // طبقة تظليل شفافة ناعمة لإبراز الساعة الذهبية 00|00|00 في المركز
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black.withValues(alpha: isDayPhase ? 0.32 : 0.38),
+                border: Border.all(
+                  color: design == DialDesign.minimal
+                      ? (isDark ? Colors.white12 : Colors.black12)
+                      : goldBase.withValues(alpha: 0.75),
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // 🌟 تحديث المعاملات لتستقبل settings
-  // 🌟 تحديث الدالة لعرض الثواني في الوقت السويعي وجعل أيقونة الطور خلفية كاملة للمركز
-  Widget _buildCentralTime(AstroState state, Color textColor, bool isDark, SettingsModel settings) {
-    
-    // 🌟 1. حالة الوقت المدني (تبقى كما هي بتنسيقها الأنيق)
-    if (!settings.useAstroTimeForIbadat) {
-      return Container(
-        width: widget.size * 0.55,
-        alignment: Alignment.center,
-        child: ValueListenableBuilder<DateTime>(
-          valueListenable: virtualDateTimeNotifier,
-          builder: (context, liveTime, child) {
-            final String civilTimeString = formatCivilTime(
-              liveTime,
-              format: settings.civilTimeFormat,
-              locale: context.locale.languageCode,
-              context: context,
-            );
+  /// 🌟 محتوى المركز: وضع الساعة السويعية 00|00|00 في نقطة المنتصف الهندسي للدائرة تماماً
+  Widget _buildCentralTime(
+    AstroState state,
+    Color textColor,
+    bool isDark,
+    SettingsModel settings,
+  ) {
+    final double centerDiameter = widget.size * (kInnerR - 0.02);
 
-            return Directionality(
-              textDirection: ui.TextDirection.ltr,
-              child: Text(
-                civilTimeString,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w700, 
-                  color: astroGold,
-                  fontFamily: 'Inter',
-                  letterSpacing: 1.0,
-                ),
-              ),
-            );
-          },
+    // 1. حالة الوقت المدني
+    if (!settings.useAstroTimeForIbadat) {
+      return SizedBox(
+        width: centerDiameter,
+        height: centerDiameter,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: ValueListenableBuilder<DateTime>(
+              valueListenable: virtualDateTimeNotifier,
+              builder: (context, liveTime, child) {
+                final String civilTimeString = formatCivilTime(
+                  liveTime,
+                  format: settings.civilTimeFormat,
+                  locale: context.locale.languageCode,
+                  context: context,
+                );
+
+                return FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Directionality(
+                    textDirection: ui.TextDirection.ltr,
+                    child: Text(
+                      civilTimeString,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color: astroGold,
+                        fontFamily: 'Inter',
+                        letterSpacing: 1.0,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black87,
+                            blurRadius: 8,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       );
     }
 
-    // 🌟 2. حالة الوقت السويعي (مع إضافة الثواني وإحاطة الطور كخلفية مركزية)
-    final int displaySuwaya = state.currentSuwayaTime.phaseSlotNumber;
-    final String suwayaText = '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
-    final bool isNight = state.currentSuwayaTime.phase.isNight;
+    // 2. حالة الوقت السويعي (00|00|00 في وسط المركز تماماً)
+    final int displaySuwaya = state.currentSuwayaTime.periodLocalSlotNumber;
+    final String suwayaText =
+        '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
 
-    return Container(
-      width: widget.size * 0.52, 
-      height: widget.size * 0.52, // 🌟 جعل الحاوية دائرية متوافقة تماماً مع مساحة المركز
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        // 🌟 خلفية الطور (قمر للليل وشمس للنهار) تملأ المركز 100% بدون زيادة أو نقصان
-        color: isNight ? const Color(0xFF0A0E1A) : const Color(0xFF1F1A05),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // 🌟 وضع رمز الطور (🌑 أو ☀️) كخلفية شفافة تملأ 100% من المساحة المركزية خلف النصوص
-          Positioned.fill(
-            child: Center(
-              child: Opacity(
-                opacity: 0.18, // شفافة ومثالية لضمان قراءة الأرقام فوقها بوضوح تام
-                child: Text(
-                  isNight ? '🌑' : '☀️',
-                  style: TextStyle(
-                    fontSize: widget.size * 0.28, // حجم يملأ الدائرة المركزية بدقة
-                    fontFamily: 'Tajawal',
-                  ),
-                ),
-              ),
-            ),
-          ),
-          
-          // محتوى النصوص في وسط المركز تماماً
-          Directionality(
-            textDirection: ui.TextDirection.ltr, 
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center, 
-              children: [
-                // نص رقم السويعة من الفترة
-                Stack(
-                  alignment: Alignment.center,
+    return SizedBox(
+      width: centerDiameter,
+      height: centerDiameter,
+      child: Directionality(
+        textDirection: ui.TextDirection.ltr,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 🌟 القسم العلوي (فوق المنتصف): رقم السويعة واسم الفترة
+            Align(
+              alignment: const Alignment(0.0, -0.62),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      suwayaText, 
-                      style: const TextStyle(
-                        fontSize: 11, 
-                        fontFamily: 'Tajawal', 
-                        fontWeight: FontWeight.bold,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Text(
+                            suwayaText,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontFamily: 'Tajawal',
+                              fontWeight: FontWeight.bold,
+                              foreground: Paint()
+                                ..style = PaintingStyle.stroke
+                                ..strokeWidth = 1.0
+                                ..color = Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            suwayaText,
+                            style: const TextStyle(
+                              color: astroGold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Tajawal',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      suwayaText, 
-                      style: const TextStyle(
-                        color: astroGold, 
-                        fontSize: 11, 
-                        fontWeight: FontWeight.bold, 
-                        fontFamily: 'Tajawal',
+                    const SizedBox(height: 1),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _periodTitle(state.currentPeriod),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(color: Colors.black, blurRadius: 6),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _periodTitle(state.currentPeriod), 
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87, 
-                    fontSize: 13, 
-                    fontWeight: FontWeight.bold, 
-                    shadows: const [Shadow(color: Colors.black54, blurRadius: 4)],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                
-                // 🌟 عرض الوقت السويعي بالثواني المتدفقة بالصيغة المطلوبة: 00|00|00
-                ValueListenableBuilder<DateTime>(
-                  valueListenable: virtualDateTimeNotifier,
-                  builder: (context, liveTime, child) {
-                    // حساب الثواني الافتراضية الحية من حالة المحرك الحالية
-                    final int virtualSecs = state.currentSuwayaTime.virtualSecond;
-                    final String slotStr = state.currentSuwayaTime.phaseSlotNumber.toString().padLeft(2, '0');
-                    final String minStr = state.currentSuwayaTime.virtualMinute.toString().padLeft(2, '0');
-                    final String secStr = virtualSecs.toString().padLeft(2, '0');
-                    
-                    final formattedTimeWithSeconds = '$slotStr|$minStr|$secStr';
+              ),
+            ),
 
-                    return Text(
-                      formattedTimeWithSeconds,
-                      style: const TextStyle(
-                        fontSize: 24, // تم تصغير الحجم قليلاً ليتسع للثواني الثلاثية براحة داخل المركز
-                        fontWeight: FontWeight.w600, 
-                        color: astroGold,
-                        fontFamily: 'Inter',
-                        letterSpacing: 0.5,
+            // 🌟 نقطة المنتصف الهندسي تماماً: الساعة السويعية 00|00|00
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: ValueListenableBuilder<String>(
+                  valueListenable: virtualTimeNotifier,
+                  builder: (context, virtualTime, child) {
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        virtualTime,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: astroGold,
+                          fontFamily: 'Inter',
+                          letterSpacing: 1.0,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black,
+                              blurRadius: 8,
+                              offset: Offset(0, 1),
+                            ),
+                            Shadow(
+                              color: Colors.black87,
+                              blurRadius: 14,
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
-                const SizedBox(height: 4),
-                const TimeSpeedIndicator(),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            // 🌟 القسم السفلي (تحت المنتصف): مؤشر سرعة التدفق
+            const Align(
+              alignment: Alignment(0.0, 0.65),
+              child: TimeSpeedIndicator(),
+            ),
+          ],
+        ),
       ),
     );
   }
