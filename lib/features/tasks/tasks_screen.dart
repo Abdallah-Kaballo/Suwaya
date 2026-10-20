@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:go_router/go_router.dart';
 import 'dart:ui' as ui;
 
+import '../../core/utils/time_formatters.dart';
 import 'tasks_provider.dart';
 import '../../models/task_model.dart';
 import '../../models/routine_model.dart';
@@ -135,9 +136,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
     List<TaskModel> casualTasks = allTasks
         .where((t) => t.type == TaskType.casual && !t.isCompleted)
         .toList();
-    List<TaskModel> habits = allTasks
-        .where((t) => t.type == TaskType.permanent && !t.isCompletedToday)
-        .toList();
+    List<TaskModel> habits = allTasks.where((t) {
+      if (t.type != TaskType.permanent) return false;
+      final logicalToday = getLogicalDateForMode(
+        isAstroTime: t.isAstroTime,
+        astroState: astroState,
+        civilReference: virtualDateTimeNotifier.value,
+      );
+      return !t.isCompletedOnDate(logicalToday);
+    }).toList();
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -217,22 +224,31 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
       floatingActionButton: _isSelectionMode
           ? null
           : Padding(
-              padding: const EdgeInsets.only(bottom: 90.0),
-              child: FloatingActionButton.extended(
+              padding: const EdgeInsets.only(bottom: 112.0),
+              child: FloatingActionButton(
+                heroTag: null,
                 backgroundColor: accentColor,
+                foregroundColor:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black
+                        : Colors.white,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 onPressed: () {
-                  HapticFeedback.heavyImpact();
-                  // 🌟 التوجيه الموحد كصفحة كاملة مع تمرير التبويب الحالي
-                  context.push('/add-task', extra: {
-                    'currentPeriodId': astroState.currentPeriod.id,
-                    'currentSuwaya': astroState.currentSuwayaTime.periodLocalSlotNumber,
-                    'initialTab': _tabController.index,
-                  });
+                  HapticFeedback.lightImpact();
+                  context.push(
+                    '/add-task',
+                    extra: {
+                      'currentPeriodId': astroState.currentPeriod.id,
+                      'currentSuwaya':
+                          astroState.currentSuwayaTime.periodLocalSlotNumber,
+                      'initialTab': _tabController.index,
+                    },
+                  );
                 },
-                icon: const Icon(LucideIcons.plus, color: Colors.white),
-                label: Text('common.add'.tr(),
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Icon(LucideIcons.plus, size: 28),
               ),
             ),
     );

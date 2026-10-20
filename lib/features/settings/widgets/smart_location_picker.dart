@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:suwaya/core/location/geo_database_service.dart';
-import 'package:suwaya/core/location/location_service.dart';
 import '../settings_provider.dart';
 
 enum LocationStep { method, manualChoice, dropdowns, coordinates, savedLocations }
@@ -59,7 +57,6 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
   List<Map<String, dynamic>> _cities = [];
   bool _isLoadingData = true;
   bool _isLoadingCities = false;
-  bool _isFetchingGps = false; 
 
   final _nameController = TextEditingController();
   final _latController = TextEditingController();
@@ -163,8 +160,9 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
       timezone = localData['timezone'] as String?;
       countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
     }
-    await notifier.addAndSelectLocation(name, lat, lng, countryCode, timezone: timezone);
 
+    await notifier.addAndSelectLocation(name, lat, lng, countryCode, timezone: timezone);
+    
     if (localData != null) {
       countryCode = localData['countryCode'] ?? 'CUSTOM';
       countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
@@ -238,86 +236,48 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     }
   }
 
+  /// 🌟 التعديل 6: الاكتفاء بالاختيار اليدوي والمواقع المحفوظة داخل نافذة الموقع النشط
   Widget _buildMethodStep(bool isDark, Color textColor, Color primaryColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           ElevatedButton.icon(
-            icon: _isFetchingGps 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Icon(LucideIcons.crosshair, size: 20), 
-            label: Text(_isFetchingGps ? 'onboarding.fetching_gps'.tr() : 'onboarding.update_gps'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 60),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 0,
+            icon: const Icon(LucideIcons.map, size: 20),
+            label: Text(
+              'onboarding.manual_select'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
-            onPressed: _isFetchingGps ? null : () async {
-              setState(() => _isFetchingGps = true);
-              try { 
-                final langCode = Localizations.localeOf(context).languageCode;
-                final locData = await LocationService.fetchOfflineLocation(langCode);
-                
-                await ref.read(settingsProvider.notifier).addAndSelectLocation(
-                  locData['formattedName'], 
-                  locData['lat'],
-                  locData['lng'],
-                  locData['countryCode'],
-                  timezone: locData['timezone'],
-                  locationType: 'gps',             
-                  nearestCity: locData['city'],    
-                );
-
-                await ref.read(settingsProvider.notifier).updateCalculationMethod(locData['method']);
-                await ref.read(settingsProvider.notifier).updateMadhab(locData['madhab']);
-
-                if (!mounted) return; 
-
-                Navigator.pop(context); 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${'onboarding.gps_success'.tr()} ${locData['formattedName']}'), backgroundColor: Colors.green),
-                );
-                
-              } catch (e) {
-                if (!mounted) return;
-
-                final errorMsg = e.toString().toLowerCase();
-                if (errorMsg.contains('gps_disabled') || errorMsg.contains('disabled') || errorMsg.contains('location services are disabled')) {
-                  Geolocator.openLocationSettings();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('onboarding.gps_failed'.tr()),
-                      backgroundColor: Colors.redAccent.shade700,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              } finally {
-                if (mounted) setState(() => _isFetchingGps = false);
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          
-          ElevatedButton.icon(
-            icon: const Icon(LucideIcons.map, size: 20), label: Text('onboarding.manual_select'.tr()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05), foregroundColor: textColor,
-              minimumSize: const Size(double.infinity, 60), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), elevation: 0,
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
+              foregroundColor: textColor,
+              minimumSize: const Size(double.infinity, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
             ),
             onPressed: () => setState(() => _step = LocationStep.manualChoice),
           ),
           const SizedBox(height: 16),
-
           ElevatedButton.icon(
-            icon: const Icon(LucideIcons.bookmark, size: 20), label: Text('location_picker.saved_locations'.tr()),
+            icon: const Icon(LucideIcons.bookmark, size: 20),
+            label: Text(
+              'location_picker.saved_locations'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05), foregroundColor: textColor,
-              minimumSize: const Size(double.infinity, 60), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), elevation: 0,
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
+              foregroundColor: textColor,
+              minimumSize: const Size(double.infinity, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
             ),
             onPressed: () => setState(() => _step = LocationStep.savedLocations),
           ),

@@ -1,4 +1,3 @@
-import 'dart:math' show pi, cos, sin;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,19 +5,26 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya_time/suwaya_time.dart';
+import 'dart:math' show pi, cos, sin;
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/notification/routine_time_resolver.dart';
 import '../../core/providers/ui_providers.dart';
 import '../../core/utils/time_formatters.dart';
 import '../../models/settings_model.dart';
+import '../../models/task_model.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../settings/settings_provider.dart';
+import '../tasks/tasks_provider.dart';
 import '../tasks/widgets/add_screen_pickers.dart';
 import 'pomodoro_provider.dart';
 
-/// دالة ترجمة ذكية مع نص احتياطي فوري لضمان عدم ظهور أي مفاتيح خام في الواجهة
-String _tr(BuildContext context, String key, String arFallback, String enFallback) {
+String _tr(
+  BuildContext context,
+  String key,
+  String arFallback,
+  String enFallback,
+) {
   final translated = key.tr();
   if (translated != key) return translated;
   final isAr = context.locale.languageCode == 'ar';
@@ -31,86 +37,200 @@ class PomodoroScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pomodoroState = ref.watch(pomodoroProvider);
-    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(pomodoroProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
+    final scaffoldBgColor = pomodoroState.isFullScreen
+        ? Colors.black
+        : Theme.of(context).scaffoldBackgroundColor;
     final textColor = isDark ? Colors.white : Colors.black87;
     final primaryColor = Theme.of(context).primaryColor;
 
     final isSubView = pomodoroState.currentView != PomodoroView.selector;
+    final isTimerView =
+        pomodoroState.currentView == PomodoroView.traditional ||
+            pomodoroState.currentView == PomodoroView.suwayaActive;
 
-    return Scaffold(
-      backgroundColor: scaffoldBgColor,
-      drawerEnableOpenDragGesture: !isSubView,
-      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
-      drawer: const AppDrawer(),
-      onDrawerChanged: (isOpen) =>
-          ref.read(isDrawerOpenProvider.notifier).state = isOpen,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: isSubView
-            ? IconButton(
-                icon: Icon(
-                  context.locale.languageCode == 'ar'
-                      ? LucideIcons.arrow_right
-                      : LucideIcons.arrow_left,
-                  color: textColor,
+    return PopScope(
+      canPop: !pomodoroState.isFullScreen && !isSubView,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (pomodoroState.isFullScreen) {
+          notifier.setFullScreen(false);
+        } else if (isSubView) {
+          notifier.backToSelector();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: scaffoldBgColor,
+        drawerEnableOpenDragGesture:
+            !isSubView && !pomodoroState.isFullScreen,
+        drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+        drawer: const AppDrawer(),
+        onDrawerChanged: (isOpen) =>
+            ref.read(isDrawerOpenProvider.notifier).state = isOpen,
+        appBar: pomodoroState.isFullScreen
+            ? null
+            : AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                titleSpacing: 4,
+                leading: isSubView
+                    ? IconButton(
+                        icon: Icon(
+                          context.locale.languageCode == 'ar'
+                              ? LucideIcons.arrow_right
+                              : LucideIcons.arrow_left,
+                          color: textColor,
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          notifier.backToSelector();
+                        },
+                      )
+                    : Builder(
+                        builder: (ctx) => IconButton(
+                          icon: Icon(LucideIcons.menu, color: textColor),
+                          onPressed: () => Scaffold.of(ctx).openDrawer(),
+                        ),
+                      ),
+                title: Text(
+                  'nav.pomodoro'.tr(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                  ),
                 ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  ref.read(pomodoroProvider.notifier).backToSelector();
-                },
-              )
-            : Builder(
-                builder: (ctx) => IconButton(
-                  icon: Icon(LucideIcons.menu, color: textColor),
-                  onPressed: () => Scaffold.of(ctx).openDrawer(),
-                ),
+                actions: [
+                  // 🌟 زر كتم/تفعيل صوت جرس الجلسات
+                  if (isTimerView)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: pomodoroState.isMuted
+                          ? _tr(
+                              context,
+                              'pomodoro.unmute',
+                              'تفعيل الصوت',
+                              'Unmute',
+                            )
+                          : _tr(
+                              context,
+                              'pomodoro.mute',
+                              'كتم الصوت',
+                              'Mute',
+                            ),
+                      icon: Icon(
+                        pomodoroState.isMuted
+                            ? LucideIcons.volume_x
+                            : LucideIcons.volume_2,
+                        color: pomodoroState.isMuted
+                            ? Colors.grey
+                            : primaryColor,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        notifier.toggleMute();
+                      },
+                    ),
+
+                  // 🌟 زر وضع ملء الشاشة الغامر
+                  if (isTimerView)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: _tr(
+                        context,
+                        'pomodoro.fullscreen',
+                        'ملء الشاشة',
+                        'Full Screen',
+                      ),
+                      icon: Icon(
+                        LucideIcons.maximize_2,
+                        color: primaryColor,
+                        size: 19,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        notifier.toggleFullScreen();
+                      },
+                    ),
+
+                  // 🌟 زر إعدادات البومودورو التقليدي
+                  if (pomodoroState.currentView == PomodoroView.traditional)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: _tr(
+                        context,
+                        'settings.title',
+                        'الإعدادات',
+                        'Settings',
+                      ),
+                      icon: Icon(
+                        LucideIcons.settings_2,
+                        color: primaryColor,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        _showTraditionalSettingsSheet(context, ref);
+                      },
+                    ),
+
+                  // 🌟 مفتاح الوقت السُويعي الموحد
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final settings = ref.watch(settingsProvider);
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _tr(
+                              context,
+                              'common.suwaya_time',
+                              'الوقت السُويعي',
+                              'Suwaya Time',
+                            ),
+                            style: TextStyle(
+                              color: settings.useAstroTimeForIbadat
+                                  ? primaryColor
+                                  : (isDark
+                                      ? Colors.white70
+                                      : Colors.black54),
+                              fontSize: 11.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Transform.scale(
+                            scale: 0.70,
+                            child: Switch(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              value: settings.useAstroTimeForIbadat,
+                              activeThumbColor:
+                                  isDark ? Colors.black : Colors.white,
+                              activeTrackColor: primaryColor,
+                              onChanged: (val) {
+                                HapticFeedback.lightImpact();
+                                ref
+                                    .read(settingsProvider.notifier)
+                                    .updateUseAstroTimeForIbadat(val);
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                ],
               ),
-        title: Text(
-          'nav.pomodoro'.tr(),
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+        body: SafeArea(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            child: _buildCurrentView(pomodoroState.currentView),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          // 🌟 زر إعدادات البومودورو التقليدي في الأعلى عند فتح الوضع التقليدي
-          if (pomodoroState.currentView == PomodoroView.traditional)
-            IconButton(
-              tooltip: _tr(context, 'settings.title', 'الإعدادات', 'Settings'),
-              icon: Icon(LucideIcons.settings_2, color: primaryColor),
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                _showTraditionalSettingsSheet(context, ref);
-              },
-            ),
-
-          // 🌟 زر التحويل العالمي بين التوقيت السويعي والتوقيت المدني (مماثل للرئيسية والعبادات)
-          IconButton(
-            icon: Icon(
-              settings.useAstroTimeForIbadat
-                  ? LucideIcons.clock
-                  : LucideIcons.moon_star,
-              color: primaryColor,
-            ),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              ref
-                  .read(settingsProvider.notifier)
-                  .updateUseAstroTimeForIbadat(!settings.useAstroTimeForIbadat);
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 280),
-          child: _buildCurrentView(pomodoroState.currentView),
         ),
       ),
     );
@@ -131,6 +251,291 @@ class PomodoroScreen extends ConsumerWidget {
 }
 
 // ============================================================================
+// شريط ربط المهمة ("أركز الآن على...") مع الإنجاز السريع
+// ============================================================================
+class _LinkedTaskBar extends ConsumerWidget {
+  final Color accentColor;
+  final bool isCompact;
+
+  const _LinkedTaskBar({
+    required this.accentColor,
+    this.isCompact = false,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final linkedTaskId = ref.watch(
+      pomodoroProvider.select((s) => s.linkedTaskId),
+    );
+    final tasksState = ref.watch(tasksProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    TaskModel? linkedTask;
+    if (linkedTaskId != null) {
+      for (final t in tasksState.allTasks) {
+        if (t.id == linkedTaskId) {
+          linkedTask = t;
+          break;
+        }
+      }
+    }
+
+    return GestureDetector(
+      onTap: () => _showTaskPickerSheet(context, ref),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: isCompact ? 8 : 10,
+        ),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: linkedTask != null
+                ? accentColor.withValues(alpha: 0.45)
+                : (isDark ? Colors.white12 : Colors.black12),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              LucideIcons.target,
+              size: 16,
+              color: linkedTask != null
+                  ? accentColor
+                  : textColor.withValues(alpha: 0.5),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                linkedTask != null
+                    ? linkedTask.title
+                    : _tr(
+                        context,
+                        'pomodoro.select_focus_task',
+                        'اختر مهمة للتركيز عليها (اختياري)',
+                        'Select a task to focus on (optional)',
+                      ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: linkedTask != null
+                      ? textColor
+                      : textColor.withValues(alpha: 0.55),
+                  fontSize: 13,
+                  fontWeight: linkedTask != null
+                      ? FontWeight.bold
+                      : FontWeight.w500,
+                ),
+              ),
+            ),
+            if (linkedTask != null) ...[
+              const SizedBox(width: 10),
+              // 🌟 زر إنجاز المهمة السريع مباشرة من شاشة البومودورو
+              InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  HapticFeedback.heavyImpact();
+                  ref
+                      .read(tasksProvider.notifier)
+                      .toggleTaskStatus(linkedTask!);
+                  ref
+                      .read(pomodoroProvider.notifier)
+                      .selectLinkedTask(null);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        _tr(
+                          context,
+                          'pomodoro.task_completed_msg',
+                          'تم إنجاز المهمة بنجاح! 🎯',
+                          'Task completed! 🎯',
+                        ),
+                      ),
+                      backgroundColor: Colors.green.shade700,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.green.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        LucideIcons.check,
+                        size: 13,
+                        color: Colors.green,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'common.done'.tr(),
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(width: 6),
+              Icon(
+                LucideIcons.chevron_down,
+                size: 15,
+                color: textColor.withValues(alpha: 0.4),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTaskPickerSheet(BuildContext context, WidgetRef ref) {
+    HapticFeedback.selectionClick();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).cardColor;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final primaryColor = Theme.of(context).primaryColor;
+
+    final todayTasks = ref.read(tasksProvider).todayTasks;
+    final currentLinkedId = ref.read(pomodoroProvider).linkedTaskId;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: textColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                _tr(
+                  context,
+                  'pomodoro.select_focus_task',
+                  'اختر مهمة للتركيز عليها',
+                  'Select a Task to Focus On',
+                ),
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (todayTasks.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Text(
+                    'tasks.empty_tasks'.tr(),
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                )
+              else
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: todayTasks.length,
+                    itemBuilder: (context, index) {
+                      final task = todayTasks[index];
+                      final isSelected = task.id == currentLinkedId;
+                      return ListTile(
+                        leading: Icon(
+                          isSelected
+                              ? LucideIcons.circle_check
+                              : LucideIcons.circle,
+                          color: isSelected ? primaryColor : Colors.grey,
+                        ),
+                        title: Text(
+                          task.title,
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(
+                          task.category.displayName,
+                          style: TextStyle(
+                            color: textColor.withValues(alpha: 0.5),
+                            fontSize: 12,
+                          ),
+                        ),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(pomodoroProvider.notifier)
+                              .selectLinkedTask(task.id);
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              if (currentLinkedId != null) ...[
+                const Divider(),
+                TextButton.icon(
+                  onPressed: () {
+                    ref
+                        .read(pomodoroProvider.notifier)
+                        .selectLinkedTask(null);
+                    Navigator.pop(ctx);
+                  },
+                  icon: const Icon(LucideIcons.x, color: Colors.redAccent),
+                  label: Text(
+                    _tr(
+                      context,
+                      'pomodoro.unlink_task',
+                      'إلغاء ربط المهمة',
+                      'Unlink Task',
+                    ),
+                    style: const TextStyle(color: Colors.redAccent),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
 // 1. شاشة الاختيار الرئيسية (بومودورو سُويعي / بومودورو تقليدي)
 // ============================================================================
 class _ModeSelectorView extends ConsumerWidget {
@@ -139,11 +544,44 @@ class _ModeSelectorView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).primaryColor;
+    final dailyCount = ref.watch(
+      pomodoroProvider.select((s) => s.dailyCompletedSessions),
+    );
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // 🌟 شارة عداد الإنجاز اليومي للبومودورو
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: primaryColor.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.flame, color: primaryColor, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  context.locale.languageCode == 'ar'
+                      ? 'إنجاز اليوم: $dailyCount جلسات تركيز'
+                      : 'Completed Today: $dailyCount focus sessions',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const Spacer(),
           Text(
             'pomodoro.choose_mode'.tr(),
@@ -153,8 +591,9 @@ class _ModeSelectorView extends ConsumerWidget {
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          const SizedBox(height: 32),
-          // 🌟 خيار البومودورو السُويعي
+          const SizedBox(height: 16),
+          _LinkedTaskBar(accentColor: primaryColor),
+          const SizedBox(height: 24),
           _buildModeCard(
             context: context,
             title: 'pomodoro.suwaya_mode'.tr(),
@@ -167,7 +606,6 @@ class _ModeSelectorView extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 16),
-          // 🌟 خيار البومودورو التقليدي
           _buildModeCard(
             context: context,
             title: 'pomodoro.traditional'.tr(),
@@ -207,7 +645,7 @@ class _ModeSelectorView extends ConsumerWidget {
               color: color.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 8),
-            )
+            ),
           ],
         ),
         child: Row(
@@ -257,7 +695,7 @@ class _ModeSelectorView extends ConsumerWidget {
 }
 
 // ============================================================================
-// 2. شاشة البومودورو التقليدي + نافذة إعداداته المخصصة
+// 2. شاشة البومودورو التقليدي (تدعم الأسطرلاب ووضع ملء الشاشة والوضع الأفقي)
 // ============================================================================
 class _TraditionalTimerView extends ConsumerWidget {
   const _TraditionalTimerView({super.key});
@@ -266,7 +704,8 @@ class _TraditionalTimerView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pomodoroProvider);
     final notifier = ref.read(pomodoroProvider.notifier);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        state.isFullScreen || Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
 
     final int remInt = state.remainingSeconds.ceil();
@@ -283,18 +722,222 @@ class _TraditionalTimerView extends ConsumerWidget {
       PomodoroPhase.work => 'pomodoro.in_flow'.tr(),
       PomodoroPhase.shortBreak => 'pomodoro.deep_relaxation'.tr(),
       PomodoroPhase.longBreak => _tr(
-          context, 'pomodoro.long_break', 'راحة طويلة', 'Long Break'),
+          context,
+          'pomodoro.long_break',
+          'راحة طويلة',
+          'Long Break',
+        ),
     };
 
     final totalCycles = state.traditionalSettings.cyclesBeforeLongBreak;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    Widget buildControls() {
+      if (state.status == PomodoroStatus.idle) {
+        return SizedBox(
+          width: 220,
+          height: 54,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: activeColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              elevation: 4,
+            ),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              notifier.startTraditional();
+            },
+            icon: const Icon(LucideIcons.play, size: 20),
+            label: Text(
+              _tr(context, 'pomodoro.start', 'بدء', 'Start'),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton.filledTonal(
+            style: IconButton.styleFrom(
+              backgroundColor: isDark ? Colors.white10 : Colors.black12,
+              padding: const EdgeInsets.all(15),
+            ),
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              notifier.resetTraditional();
+            },
+            icon: Icon(LucideIcons.rotate_ccw, color: textColor, size: 21),
+            tooltip: _tr(
+              context,
+              'pomodoro.reset',
+              'إيقاف وإعادة',
+              'Stop & Reset',
+            ),
+          ),
+          const SizedBox(width: 18),
+          SizedBox(
+            height: 56,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: activeColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 26),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                if (state.status == PomodoroStatus.running) {
+                  notifier.pauseTraditional();
+                } else {
+                  notifier.resumeTraditional();
+                }
+              },
+              icon: Icon(
+                state.status == PomodoroStatus.running
+                    ? LucideIcons.pause
+                    : LucideIcons.play,
+                size: 21,
+              ),
+              label: Text(
+                state.status == PomodoroStatus.running
+                    ? _tr(context, 'pomodoro.pause', 'إيقاف مؤقت', 'Pause')
+                    : _tr(context, 'pomodoro.resume', 'استئناف', 'Resume'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 18),
+          IconButton.filledTonal(
+            style: IconButton.styleFrom(
+              backgroundColor: isDark ? Colors.white10 : Colors.black12,
+              padding: const EdgeInsets.all(15),
+            ),
+            onPressed: notifier.skipTraditionalPhase,
+            icon: Icon(
+              LucideIcons.skip_forward,
+              color: textColor,
+              size: 21,
+            ),
+            tooltip: _tr(context, 'pomodoro.skip', 'تخطي', 'Skip'),
+          ),
+        ],
+      );
+    }
+
+    Widget buildCycleDots() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(totalCycles, (index) {
+          final cycleNum = index + 1;
+          final isCompleted = cycleNum < state.currentCycle ||
+              (cycleNum == state.currentCycle &&
+                  state.phase == PomodoroPhase.longBreak);
+          final isCurrent = cycleNum == state.currentCycle &&
+              state.phase != PomodoroPhase.longBreak;
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: isCurrent ? 22 : 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: (isCompleted || isCurrent)
+                  ? activeColor
+                  : textColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          );
+        }),
+      );
+    }
+
+    if (isLandscape) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Center(
+                child: _buildLargeZenTimerDial(
+                  context: context,
+                  progress: state.phaseProgress,
+                  minutesStr: m,
+                  secondsStr: s,
+                  phaseLabel: phaseLabel,
+                  isBreak: state.isBreak,
+                  activeColor: activeColor,
+                  isDark: isDark,
+                  forcedSize: 250,
+                  onDoubleTap: () {
+                    HapticFeedback.lightImpact();
+                    notifier.toggleFullScreen();
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _LinkedTaskBar(accentColor: activeColor, isCompact: true),
+                  const SizedBox(height: 16),
+                  buildCycleDots(),
+                  const SizedBox(height: 24),
+                  buildControls(),
+                  if (state.isFullScreen) ...[
+                    const SizedBox(height: 16),
+                    TextButton.icon(
+                      onPressed: () => notifier.setFullScreen(false),
+                      icon: const Icon(
+                        LucideIcons.minimize_2,
+                        color: Colors.white54,
+                        size: 16,
+                      ),
+                      label: Text(
+                        _tr(
+                          context,
+                          'pomodoro.exit_fullscreen',
+                          'خروج من ملء الشاشة',
+                          'Exit Full Screen',
+                        ),
+                        style: const TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        state.isFullScreen ? 16 : 8,
+        20,
+        state.isFullScreen ? 24 : 100,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // شريط معلومات النظام والدورات
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -306,232 +949,63 @@ class _TraditionalTimerView extends ConsumerWidget {
                   fontSize: 15,
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: activeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${state.traditionalSettings.workMinutes}/${state.traditionalSettings.shortBreakMinutes} · ${state.currentCycle}/$totalCycles',
-                  style: TextStyle(
-                    color: activeColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 28),
-
-          // حلقة المؤقت
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 300,
-                height: 300,
-                child: CustomPaint(
-                  painter: _ZenTimerPainter(
-                    progress: state.phaseProgress,
-                    activeColor: activeColor,
-                    isDark: isDark,
-                  ),
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
+              Row(
                 children: [
-                  Directionality(
-                    textDirection: ui.TextDirection.ltr,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Text(
-                          '$m:$s',
-                          style: TextStyle(
-                            fontSize: 76,
-                            fontWeight: FontWeight.normal,
-                            fontFamily: 'Playfair Display',
-                            foreground: Paint()
-                              ..style = PaintingStyle.stroke
-                              ..strokeWidth = 3.5
-                              ..color = Colors.white,
-                          ),
-                        ),
-                        Text(
-                          '$m:$s',
-                          style: const TextStyle(
-                            fontSize: 76,
-                            fontWeight: FontWeight.normal,
-                            color: Color(0xFFF2C94C),
-                            fontFamily: 'Playfair Display',
-                          ),
-                        ),
-                      ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: activeColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${state.traditionalSettings.workMinutes}/${state.traditionalSettings.shortBreakMinutes} · ${state.currentCycle}/$totalCycles',
+                      style: TextStyle(
+                        color: activeColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        state.isBreak
-                            ? LucideIcons.coffee
-                            : LucideIcons.sparkles,
-                        color: activeColor,
-                        size: 16,
+                  if (state.isFullScreen) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(
+                        LucideIcons.minimize_2,
+                        color: Colors.white70,
+                        size: 20,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        phaseLabel,
-                        style: TextStyle(
-                          color: activeColor,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+                      onPressed: () => notifier.setFullScreen(false),
+                    ),
+                  ],
                 ],
               ),
             ],
           ),
-
-          const SizedBox(height: 24),
-
-          // مؤشر الدورات البصري (Cycle Dots)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(totalCycles, (index) {
-              final cycleNum = index + 1;
-              final isCompleted = cycleNum < state.currentCycle ||
-                  (cycleNum == state.currentCycle &&
-                      state.phase == PomodoroPhase.longBreak);
-              final isCurrent = cycleNum == state.currentCycle &&
-                  state.phase != PomodoroPhase.longBreak;
-
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                margin: const EdgeInsets.symmetric(horizontal: 5),
-                width: isCurrent ? 22 : 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: (isCompleted || isCurrent)
-                      ? activeColor
-                      : textColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              );
-            }),
+          const SizedBox(height: 12),
+          _LinkedTaskBar(accentColor: activeColor, isCompact: true),
+          SizedBox(height: state.isFullScreen ? 28 : 18),
+          _buildLargeZenTimerDial(
+            context: context,
+            progress: state.phaseProgress,
+            minutesStr: m,
+            secondsStr: s,
+            phaseLabel: phaseLabel,
+            isBreak: state.isBreak,
+            activeColor: activeColor,
+            isDark: isDark,
+            onDoubleTap: () {
+              HapticFeedback.lightImpact();
+              notifier.toggleFullScreen();
+            },
           ),
-
-          const SizedBox(height: 36),
-
-          // 🌟 أزرار التحكم: قبل البدء يظهر زر البدء، وبعد البدء تظهر أزرار الإيقاف والتخطي
-          if (state.status == PomodoroStatus.idle)
-            SizedBox(
-              width: 220,
-              height: 56,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: activeColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  elevation: 4,
-                ),
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  notifier.startTraditional();
-                },
-                icon: const Icon(LucideIcons.play, size: 20),
-                label: Text(
-                  _tr(context, 'pomodoro.start', 'بدء', 'Start'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            )
-          else
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // زر الإيقاف / إعادة الضبط
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    backgroundColor: isDark ? Colors.white10 : Colors.black12,
-                    padding: const EdgeInsets.all(16),
-                  ),
-                  onPressed: () {
-                    HapticFeedback.mediumImpact();
-                    notifier.resetTraditional();
-                  },
-                  icon: Icon(LucideIcons.rotate_ccw, color: textColor, size: 22),
-                  tooltip: _tr(context, 'pomodoro.reset', 'إيقاف وإعادة', 'Stop & Reset'),
-                ),
-                const SizedBox(width: 20),
-
-                // زر الإيقاف المؤقت / الاستئناف
-                SizedBox(
-                  height: 60,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: activeColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      if (state.status == PomodoroStatus.running) {
-                        notifier.pauseTraditional();
-                      } else {
-                        notifier.resumeTraditional();
-                      }
-                    },
-                    icon: Icon(
-                      state.status == PomodoroStatus.running
-                          ? LucideIcons.pause
-                          : LucideIcons.play,
-                      size: 22,
-                    ),
-                    label: Text(
-                      state.status == PomodoroStatus.running
-                          ? _tr(context, 'pomodoro.pause', 'إيقاف مؤقت', 'Pause')
-                          : _tr(context, 'pomodoro.resume', 'استئناف', 'Resume'),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 20),
-
-                // زر التخطي (Skip)
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    backgroundColor: isDark ? Colors.white10 : Colors.black12,
-                    padding: const EdgeInsets.all(16),
-                  ),
-                  onPressed: notifier.skipTraditionalPhase,
-                  icon:
-                      Icon(LucideIcons.skip_forward, color: textColor, size: 22),
-                  tooltip: _tr(context, 'pomodoro.skip', 'تخطي', 'Skip'),
-                ),
-              ],
-            ),
-
-          const SizedBox(height: 100),
+          const SizedBox(height: 20),
+          buildCycleDots(),
+          const SizedBox(height: 28),
+          buildControls(),
         ],
       ),
     );
@@ -633,8 +1107,12 @@ void _showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
-                        _tr(context, 'pomodoro.traditional_settings',
-                            'إعدادات البومودورو التقليدي', 'Traditional Pomodoro Settings'),
+                        _tr(
+                          context,
+                          'pomodoro.traditional_settings',
+                          'إعدادات البومودورو التقليدي',
+                          'Traditional Pomodoro Settings',
+                        ),
                         style: TextStyle(
                           color: textColor,
                           fontSize: 18,
@@ -644,8 +1122,12 @@ void _showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
                     ),
                     const SizedBox(height: 24),
                     buildChipSelector(
-                      title: _tr(context, 'pomodoro.work_duration',
-                          'طول البومودورو (العمل الصافي)', 'Pomodoro Duration (Work)'),
+                      title: _tr(
+                        context,
+                        'pomodoro.work_duration',
+                        'طول البومودورو (العمل الصافي)',
+                        'Pomodoro Duration (Work)',
+                      ),
                       options: workOptions,
                       selectedValue: currentSettings.workMinutes,
                       unit: minUnit,
@@ -654,8 +1136,12 @@ void _showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
                       ),
                     ),
                     buildChipSelector(
-                      title: _tr(context, 'pomodoro.short_break_duration',
-                          'طول الراحة القصيرة', 'Short Break Duration'),
+                      title: _tr(
+                        context,
+                        'pomodoro.short_break_duration',
+                        'طول الراحة القصيرة',
+                        'Short Break Duration',
+                      ),
                       options: shortBreakOptions,
                       selectedValue: currentSettings.shortBreakMinutes,
                       unit: minUnit,
@@ -664,8 +1150,12 @@ void _showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
                       ),
                     ),
                     buildChipSelector(
-                      title: _tr(context, 'pomodoro.long_break_duration',
-                          'طول الراحة الطويلة', 'Long Break Duration'),
+                      title: _tr(
+                        context,
+                        'pomodoro.long_break_duration',
+                        'طول الراحة الطويلة',
+                        'Long Break Duration',
+                      ),
                       options: longBreakOptions,
                       selectedValue: currentSettings.longBreakMinutes,
                       unit: minUnit,
@@ -674,8 +1164,12 @@ void _showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
                       ),
                     ),
                     buildChipSelector(
-                      title: _tr(context, 'pomodoro.cycles_before_long_break',
-                          'الراحة الطويلة بعد كل (عدد البومودورو)', 'Long Break After Every'),
+                      title: _tr(
+                        context,
+                        'pomodoro.cycles_before_long_break',
+                        'الراحة الطويلة بعد كل (عدد البومودورو)',
+                        'Long Break After Every',
+                      ),
                       options: cyclesOptions,
                       selectedValue: currentSettings.cyclesBeforeLongBreak,
                       unit: '',
@@ -726,8 +1220,8 @@ class _SuwayaSetupView extends ConsumerStatefulWidget {
 }
 
 class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
-  late final DateTime _anchoredStartTime; // دقيقة البداية عند فتح الصفحة
-  bool? _localStartUseAstroOverride; // يتيح للمستخدم تبديل عرض وقت البداية للموازي المدني/السويعي
+  late final DateTime _anchoredStartTime;
+  bool? _localStartUseAstroOverride;
 
   bool _useDefaultNextPrayer = true;
   DateTime? _customEndTime;
@@ -739,7 +1233,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
   @override
   void initState() {
     super.initState();
-    // 🌟 تثبيت دقيقة البداية لحظة دخول المستخدم لهذه الصفحة
     final cityNow = virtualDateTimeNotifier.value;
     _anchoredStartTime = DateTime.utc(
       cityNow.year,
@@ -750,17 +1243,33 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
     );
   }
 
-  /// استخراج الفهرس العالمي (0..23) والدقيقة الافتراضية (0..59) لأي وقت فعلي
   ({int globalIndex, int minute}) _dateTimeToAstroParts(
-      DateTime time, AstroState astroState) {
+    DateTime time,
+    AstroState astroState,
+  ) {
     if (astroState.periods.isEmpty) return (globalIndex: 0, minute: 0);
+
+    final anchors = astroState.cycleAnchors;
+    final cycleDuration =
+        anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib);
+
+    if (time.isAtSameMomentAs(anchors.cycleEndMaghrib)) {
+      return (globalIndex: 0, minute: 0);
+    }
+
+    DateTime evalTime = time;
+    if (evalTime.isAfter(anchors.cycleEndMaghrib) &&
+        cycleDuration.inMinutes > 0) {
+      evalTime = evalTime.subtract(cycleDuration);
+    }
+
     final mockState = SuwayaTimeEngine.calculateCurrentState(
       SuwayaDay(
         ibadatTimings: astroState.ibadatTimings,
         cycleAnchors: astroState.cycleAnchors,
         periods: astroState.periods,
       ),
-      time,
+      evalTime,
     );
     final int global = mockState.currentSuwayaTime.phase == SuwayaPhase.day
         ? 12 + mockState.currentSuwayaTime.phaseSlotNumber - 1
@@ -771,9 +1280,11 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
     );
   }
 
-  /// تحويل الفهرس العالمي (0..23) والدقيقة الافتراضية (0..59) إلى وقت فعلي DateTime
   DateTime _astroPartsToDateTime(
-      int globalIndex, int virtualMinute, AstroState astroState) {
+    int globalIndex,
+    int virtualMinute,
+    AstroState astroState,
+  ) {
     int remaining = globalIndex.clamp(0, 23);
     AstroPeriod targetPeriod = astroState.periods.last;
     int localSuwaya = targetPeriod.suwayasCount;
@@ -794,38 +1305,44 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
     );
 
     if (!resolved.isAfter(_anchoredStartTime)) {
-      resolved = resolved.add(const Duration(days: 1));
+      final cycleDuration = astroState.cycleAnchors.cycleEndMaghrib
+          .difference(astroState.cycleAnchors.cycleStartMaghrib);
+      resolved = resolved.add(
+        cycleDuration.inMinutes > 0 ? cycleDuration : const Duration(days: 1),
+      );
     }
     return resolved;
   }
 
-  /// تحديد الصلاة القادمة من الصلوات الخمس المفروضة
   void _resolveNextPrayer(AstroState astro) {
-    final ibadat = astro.ibadatTimings;
-    final candidates = [
-      (name: 'periods.fajr'.tr(), time: ibadat.fajr),
-      (name: 'periods.dhuhr'.tr(), time: ibadat.dhuhr),
-      (name: 'periods.asr'.tr(), time: ibadat.asr),
-      (name: 'periods.maghrib'.tr(), time: ibadat.maghrib),
-      (name: 'prayers.isha'.tr(), time: ibadat.isha),
-      (name: 'periods.fajr'.tr(), time: ibadat.nextFajr),
+    final now = virtualDateTimeNotifier.value;
+    final referenceTime =
+        now.isAfter(_anchoredStartTime) ? now : _anchoredStartTime;
+
+    final anchors = astro.cycleAnchors;
+
+    final orderedCyclePrayers = <({String name, DateTime time})>[
+      (name: 'prayers.isha'.tr(), time: anchors.cycleIsha),
+      (name: 'periods.fajr'.tr(), time: anchors.cycleFajr),
+      (name: 'periods.dhuhr'.tr(), time: anchors.cycleDhuhr),
+      (name: 'periods.asr'.tr(), time: anchors.cycleAsr),
+      (name: 'periods.maghrib'.tr(), time: anchors.cycleEndMaghrib),
     ];
 
-    // نرتب الصلوات زمنياً ونختار أول صلاة تأتي بعد وقت البداية
-    final sorted = List.of(candidates)
-      ..sort((a, b) => a.time.compareTo(b.time));
-
-    for (final p in sorted) {
-      if (p.time.isAfter(_anchoredStartTime)) {
+    for (final p in orderedCyclePrayers) {
+      if (p.time.isAfter(referenceTime)) {
         _nextPrayerName = p.name;
         _nextPrayerTime = p.time;
         return;
       }
     }
 
-    // احتياطي إذا تجاوز الكل
-    _nextPrayerName = sorted.first.name;
-    _nextPrayerTime = sorted.first.time.add(const Duration(days: 1));
+    final cycleDuration =
+        anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib);
+    _nextPrayerName = 'prayers.isha'.tr();
+    _nextPrayerTime = anchors.cycleIsha.add(
+      cycleDuration.inMinutes > 0 ? cycleDuration : const Duration(days: 1),
+    );
   }
 
   String _formatDisplayedTime({
@@ -854,7 +1371,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
     );
   }
 
-  /// التحقق من شرط المدة (لا يقل عن 15 دقيقة ولا يزيد عن 12 ساعة/سويعة)
   ({bool isValid, String? errorMessage}) _validateEndTime({
     required DateTime candidateEnd,
     required AstroState astroState,
@@ -880,7 +1396,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
       int diffVirtualMins = endVirtualMins - startVirtualMins;
       if (diffVirtualMins <= 0) diffVirtualMins += 1440;
 
-      // كما نتحقق من الوقت الفعلي الموازي لضمان عدم تجاوز 12 ساعة
       final actualMins = candidateEnd.difference(_anchoredStartTime).inMinutes;
       if (diffVirtualMins < 15 || actualMins < 15) {
         return (
@@ -924,6 +1439,12 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
     return (isValid: true, errorMessage: null);
   }
 
+  bool _isCivil12HourActive(BuildContext context, String civilTimeFormat) {
+    if (civilTimeFormat == civilTimeFormat12Hour) return true;
+    if (civilTimeFormat == civilTimeFormat24Hour) return false;
+    return !(MediaQuery.maybeAlwaysUse24HourFormatOf(context) ?? false);
+  }
+
   Future<void> _showEndTimePickerDialog({
     required BuildContext context,
     required AstroState astroState,
@@ -935,8 +1456,8 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
     final surface = Theme.of(context).cardColor;
     final text = isDark ? Colors.white : Colors.black87;
     final pColor = Theme.of(context).primaryColor;
+    final use12Hour = _isCivil12HourActive(context, settings.civilTimeFormat);
 
-    // 0: سويعي، 1: مدني (يبدأ حسب ما ثبته المستخدم في التطبيق)
     int pickerTimeMode = settings.useAstroTimeForIbadat ? 0 : 1;
 
     final initialAstro =
@@ -975,8 +1496,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // التبديل بين السويعي والمدني داخل النافذة
                   SegmentedButton<int>(
                     segments: [
                       ButtonSegment(
@@ -1010,7 +1529,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   if (pickerTimeMode == 0)
                     AstroTimePicker(
                       initialHour: uiHour,
@@ -1037,6 +1555,7 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                       min1: 0,
                       max1: 23,
                       max2: 59,
+                      is12HourMode: use12Hour,
                       textColor: text,
                       surfaceColor: surface,
                       onChanged: (h, m) {
@@ -1047,7 +1566,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                         }
                       },
                     ),
-
                   if (dialogError != null) ...[
                     const SizedBox(height: 12),
                     Text(
@@ -1060,7 +1578,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                       ),
                     ),
                   ],
-
                   const SizedBox(height: 20),
                   Row(
                     children: [
@@ -1161,8 +1678,9 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
 
     _resolveNextPrayer(astroState);
 
-    final DateTime effectiveEndTime =
-        _useDefaultNextPrayer ? _nextPrayerTime! : (_customEndTime ?? _nextPrayerTime!);
+    final DateTime effectiveEndTime = _useDefaultNextPrayer
+        ? _nextPrayerTime!
+        : (_customEndTime ?? _nextPrayerTime!);
 
     final bool startDisplayAstro =
         _localStartUseAstroOverride ?? settings.useAstroTimeForIbadat;
@@ -1218,7 +1736,8 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🌟 1. بطاقة البداية (الوقت الحالي بالسويعي مع إمكانية التبديل للمدني الموازي)
+          _LinkedTaskBar(accentColor: primaryColor, isCompact: true),
+          const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -1266,8 +1785,10 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                     });
                   },
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -1308,10 +1829,7 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // 🌟 2. بطاقة النهاية (الافتراضي: الصلاة القادمة، أو تخصيص وقت بين 15 د و 12 س)
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -1327,8 +1845,11 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                   children: [
                     Row(
                       children: [
-                        Icon(LucideIcons.moon_star,
-                            size: 16, color: primaryColor),
+                        Icon(
+                          LucideIcons.moon_star,
+                          size: 16,
+                          color: primaryColor,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'details.end'.tr(),
@@ -1340,13 +1861,16 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                         ),
                       ],
                     ),
-                    // أزرار التبديل بين (الصلاة القادمة) و (تحديد يدوي)
                     Row(
                       children: [
                         ChoiceChip(
                           label: Text(
-                            _tr(context, 'ibadat.next_prayer',
-                                'الصلاة القادمة', 'Next Prayer'),
+                            _tr(
+                              context,
+                              'ibadat.next_prayer',
+                              'الصلاة القادمة',
+                              'Next Prayer',
+                            ),
                             style: const TextStyle(fontSize: 12),
                           ),
                           selected: _useDefaultNextPrayer,
@@ -1362,7 +1886,12 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                         const SizedBox(width: 8),
                         ChoiceChip(
                           label: Text(
-                            _tr(context, 'astro_calc.custom', 'مخصص', 'Custom'),
+                            _tr(
+                              context,
+                              'pomodoro.custom_time',
+                              'وقت مخصص',
+                              'Custom Time',
+                            ),
                             style: const TextStyle(fontSize: 12),
                           ),
                           selected: !_useDefaultNextPrayer,
@@ -1399,10 +1928,15 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                           children: [
                             Text(
                               _useDefaultNextPrayer
-                                  ? 'pomodoro.ends_at'
-                                      .tr(args: [_nextPrayerName])
-                                  : _tr(context, 'add_screen.end_time',
-                                      'وقت النهاية المحدد', 'Selected End Time'),
+                                  ? 'pomodoro.ends_at'.tr(
+                                      args: [_nextPrayerName],
+                                    )
+                                  : _tr(
+                                      context,
+                                      'add_screen.end_time',
+                                      'وقت النهاية المحدد',
+                                      'Selected End Time',
+                                    ),
                               style: TextStyle(
                                 color: textColor,
                                 fontSize: 16,
@@ -1450,10 +1984,7 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
               ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // 🌟 3. قسم خيارات التقسيم وسرعة التدفق (25/5 بين 0.5x و 2.0x)
           if (!validation.isValid || flowOptions.isEmpty)
             Container(
               width: double.infinity,
@@ -1461,13 +1992,17 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
               decoration: BoxDecoration(
                 color: Colors.redAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
-                border:
-                    Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: Colors.redAccent.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 children: [
-                  const Icon(LucideIcons.clock,
-                      color: Colors.redAccent, size: 32),
+                  const Icon(
+                    LucideIcons.clock,
+                    color: Colors.redAccent,
+                    size: 32,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     validation.errorMessage ?? 'pomodoro.time_too_short'.tr(),
@@ -1494,8 +2029,10 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: primaryColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
@@ -1512,7 +2049,6 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
               ],
             ),
             const SizedBox(height: 12),
-
             ...List.generate(flowOptions.length, (index) {
               final opt = flowOptions[index];
               final isSelected = _selectedOptionIndex == index;
@@ -1549,8 +2085,10 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.only(bottom: 10),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? primaryColor.withValues(alpha: 0.12)
@@ -1603,10 +2141,7 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
                 ),
               );
             }),
-
             const SizedBox(height: 20),
-
-            // 🌟 4. زر التأكيد والبدء (مع خصم وقت الإعداد من البومودورو الأول)
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -1655,17 +2190,20 @@ class _SuwayaSetupViewState extends ConsumerState<_SuwayaSetupView> {
 // ============================================================================
 // 4. شاشة المؤقت السُويعي النشط (_SuwayaActiveTimerView)
 // ============================================================================
+// ============================================================================
+// 4. شاشة المؤقت السُويعي النشط (_SuwayaActiveTimerView)
+// ============================================================================
 class _SuwayaActiveTimerView extends ConsumerWidget {
   const _SuwayaActiveTimerView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pomodoroProvider);
+    final notifier = ref.read(pomodoroProvider.notifier);
     final config = state.suwayaConfig;
 
     if (config == null) return const SizedBox.shrink();
 
-    // إشعار انتهاء الجلسة عند بلوغ وقت النهاية / الصلاة
     if (state.isFinished) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
@@ -1673,10 +2211,14 @@ class _SuwayaActiveTimerView extends ConsumerWidget {
           context: context,
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
-            title:
-                Text('pomodoro.time_up_prayer'.tr(), textAlign: TextAlign.center),
-            content:
-                Text('pomodoro.time_up_desc'.tr(), textAlign: TextAlign.center),
+            title: Text(
+              'pomodoro.time_up_prayer'.tr(),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              'pomodoro.time_up_desc'.tr(),
+              textAlign: TextAlign.center,
+            ),
             actions: [
               Center(
                 child: ElevatedButton(
@@ -1685,34 +2227,173 @@ class _SuwayaActiveTimerView extends ConsumerWidget {
                   ),
                   onPressed: () {
                     Navigator.pop(ctx);
-                    ref.read(pomodoroProvider.notifier).acknowledgeFinish();
+                    notifier.acknowledgeFinish();
                   },
                   child: Text(
                     'common.done'.tr(),
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         );
       });
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark =
+        state.isFullScreen || Theme.of(context).brightness == Brightness.dark;
     final int remInt = state.remainingSeconds.ceil();
     final String m = (remInt ~/ 60).toString().padLeft(2, '0');
     final String s = (remInt % 60).toString().padLeft(2, '0');
 
     final Color activeColor =
         state.isBreak ? const Color(0xFF64B5F6) : const Color(0xFFE53935);
+    final String phaseLabel = state.isBreak
+        ? 'pomodoro.deep_relaxation'.tr()
+        : 'pomodoro.in_flow'.tr();
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+    Widget buildPrePrayerWarningBanner() {
+      if (!state.isPrePrayerWarningActive) return const SizedBox.shrink();
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.amber.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.6)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.bell_ring, color: Colors.amber, size: 16),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                context.locale.languageCode == 'ar'
+                    ? 'اقترب الميقات (${config.endLabel}) — اختم فكرتك بهدوء'
+                    : 'Approaching ${config.endLabel} — wrap up your current thought',
+                style: const TextStyle(
+                  color: Colors.amber,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget buildEndSessionButton() {
+      return GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          notifier.backToSelector();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.white10 : Colors.black12,
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                LucideIcons.x,
+                color: isDark ? Colors.white70 : Colors.black87,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'pomodoro.end_session'.tr(),
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (isLandscape) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Center(
+                child: _buildLargeZenTimerDial(
+                  context: context,
+                  progress: state.phaseProgress,
+                  minutesStr: m,
+                  secondsStr: s,
+                  phaseLabel: phaseLabel,
+                  isBreak: state.isBreak,
+                  activeColor: activeColor,
+                  isDark: isDark,
+                  forcedSize: 250,
+                  onDoubleTap: () {
+                    HapticFeedback.lightImpact();
+                    notifier.toggleFullScreen();
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  buildPrePrayerWarningBanner(),
+                  _LinkedTaskBar(accentColor: activeColor, isCompact: true),
+                  const SizedBox(height: 20),
+                  buildEndSessionButton(),
+                  if (state.isFullScreen) ...[
+                    const SizedBox(height: 12),
+                    TextButton.icon(
+                      onPressed: () => notifier.setFullScreen(false),
+                      icon: const Icon(
+                        LucideIcons.minimize_2,
+                        color: Colors.white54,
+                        size: 16,
+                      ),
+                      label: Text(
+                        _tr(
+                          context,
+                          'pomodoro.exit_fullscreen',
+                          'خروج من ملء الشاشة',
+                          'Exit Full Screen',
+                        ),
+                        style: const TextStyle(color: Colors.white54),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        state.isFullScreen ? 16 : 8,
+        20,
+        state.isFullScreen ? 24 : 100,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -1722,141 +2403,184 @@ class _SuwayaActiveTimerView extends ConsumerWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: activeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${config.flowSpeed.toStringAsFixed(2)}x',
-                  style: TextStyle(
-                    color: activeColor,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: activeColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${config.flowSpeed.toStringAsFixed(2)}x',
+                      style: TextStyle(
+                        color: activeColor,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
                   ),
-                ),
+                  if (state.isFullScreen) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(
+                        LucideIcons.minimize_2,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                      onPressed: () => notifier.setFullScreen(false),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
-        ),
-        const Spacer(flex: 2),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              width: 310,
-              height: 310,
-              child: CustomPaint(
-                painter: _ZenTimerPainter(
-                  progress: state.phaseProgress,
-                  activeColor: activeColor,
-                  isDark: isDark,
-                ),
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Directionality(
-                  textDirection: ui.TextDirection.ltr,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Text(
-                        '$m:$s',
-                        style: TextStyle(
-                          fontSize: 80,
-                          fontWeight: FontWeight.normal,
-                          fontFamily: 'Playfair Display',
-                          foreground: Paint()
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = 4.0
-                            ..color = Colors.white,
-                        ),
-                      ),
-                      Text(
-                        '$m:$s',
-                        style: const TextStyle(
-                          fontSize: 80,
-                          fontWeight: FontWeight.normal,
-                          color: Color(0xFFF2C94C),
-                          fontFamily: 'Playfair Display',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      state.isBreak
-                          ? LucideIcons.coffee
-                          : LucideIcons.sparkles,
-                      color: activeColor,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      state.isBreak
-                          ? 'pomodoro.deep_relaxation'.tr()
-                          : 'pomodoro.in_flow'.tr(),
-                      style: TextStyle(
-                        color: activeColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 40),
-        GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            ref.read(pomodoroProvider.notifier).backToSelector();
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white10 : Colors.black12,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  LucideIcons.x,
-                  color: isDark ? Colors.white70 : Colors.black87,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'pomodoro.end_session'.tr(),
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(height: 10),
+          buildPrePrayerWarningBanner(),
+          _LinkedTaskBar(accentColor: activeColor, isCompact: true),
+          SizedBox(height: state.isFullScreen ? 28 : 18),
+          _buildLargeZenTimerDial(
+            context: context,
+            progress: state.phaseProgress,
+            minutesStr: m,
+            secondsStr: s,
+            phaseLabel: phaseLabel,
+            isBreak: state.isBreak,
+            activeColor: activeColor,
+            isDark: isDark,
+            onDoubleTap: () {
+              HapticFeedback.lightImpact();
+              notifier.toggleFullScreen();
+            },
           ),
-        ),
-        const Spacer(flex: 3),
-      ],
+          const SizedBox(height: 28),
+          buildEndSessionButton(),
+        ],
+      ),
     );
   }
 }
 
 // ============================================================================
-// رسام حلقة المؤقت (_ZenTimerPainter)
+// 5. الدائرة المكبّرة الموحدة ورسام الحلقة (_ZenTimerPainter)
 // ============================================================================
+Widget _buildLargeZenTimerDial({
+  required BuildContext context,
+  required double progress,
+  required String minutesStr,
+  required String secondsStr,
+  required String phaseLabel,
+  required bool isBreak,
+  required Color activeColor,
+  required bool isDark,
+  required VoidCallback onDoubleTap,
+  double? forcedSize,
+}) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final double availableWidth = constraints.maxWidth.isFinite
+          ? constraints.maxWidth
+          : MediaQuery.of(context).size.width - 40;
+      final double dialSize =
+          forcedSize ?? (availableWidth * 0.92).clamp(280.0, 420.0);
+      final double timeFontSize = (dialSize * 0.29).clamp(80.0, 118.0);
+
+      return GestureDetector(
+        onDoubleTap: onDoubleTap,
+        child: SizedBox(
+          width: dialSize,
+          height: dialSize,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: dialSize,
+                height: dialSize,
+                child: CustomPaint(
+                  painter: _ZenTimerPainter(
+                    progress: progress,
+                    activeColor: activeColor,
+                    isDark: isDark,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: dialSize * 0.08),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Directionality(
+                        textDirection: ui.TextDirection.ltr,
+                        child: Text(
+                          '$minutesStr:$secondsStr',
+                          style: TextStyle(
+                            fontSize: timeFontSize,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFFF2C94C),
+                            fontFamily: 'Inter',
+                            letterSpacing: 2.0,
+                            fontFeatures: const [
+                              ui.FontFeature.tabularFigures(),
+                            ],
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.65),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: activeColor.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isBreak
+                                ? LucideIcons.coffee
+                                : LucideIcons.sparkles,
+                            color: activeColor,
+                            size: 17,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            phaseLabel,
+                            style: TextStyle(
+                              color: activeColor,
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 class _ZenTimerPainter extends CustomPainter {
   final double progress;
   final Color activeColor;
@@ -1871,21 +2595,38 @@ class _ZenTimerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
+    final radius = (size.width / 2) - 10;
 
     final trackPaint = Paint()
       ..color = isDark
-          ? Colors.white.withValues(alpha: 0.06)
-          : Colors.black.withValues(alpha: 0.06)
+          ? Colors.white.withValues(alpha: 0.08)
+          : Colors.black.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5;
+      ..strokeWidth = 6.0;
     canvas.drawCircle(center, radius, trackPaint);
 
     final safeProgress = progress.clamp(0.0, 1.0);
+
+    if (safeProgress > 0) {
+      final glowPaint = Paint()
+        ..color = activeColor.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 12.0
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -pi / 2,
+        safeProgress * 2 * pi,
+        false,
+        glowPaint,
+      );
+    }
+
     final progressPaint = Paint()
       ..color = activeColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 6.5
+      ..strokeWidth = 8.5
       ..strokeCap = StrokeCap.round;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
@@ -1900,11 +2641,11 @@ class _ZenTimerPainter extends CustomPainter {
       center.dx + cos(knobAngle) * radius,
       center.dy + sin(knobAngle) * radius,
     );
-    canvas.drawCircle(knobCenter, 8, Paint()..color = activeColor);
+    canvas.drawCircle(knobCenter, 10, Paint()..color = activeColor);
     canvas.drawCircle(
       knobCenter,
-      4,
-      Paint()..color = isDark ? Colors.black : Colors.white,
+      4.5,
+      Paint()..color = isDark ? const Color(0xFF121316) : Colors.white,
     );
   }
 

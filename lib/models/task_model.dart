@@ -81,4 +81,13 @@ class TaskModel {
            lastCompletedDate!.month == now.month &&
            lastCompletedDate!.day == now.day;
   }
+
+  /// 🌟 فحص إنجاز المهمة/العادة بناءً على التاريخ المنطقي (السويعي من المغرب أو المدني من منتصف الليل)
+  bool isCompletedOnDate(DateTime logicalDate) {
+    if (type == TaskType.casual) return isCompleted;
+    if (lastCompletedDate == null) return false;
+    return lastCompletedDate!.year == logicalDate.year &&
+           lastCompletedDate!.month == logicalDate.month &&
+           lastCompletedDate!.day == logicalDate.day;
+  }
 }

@@ -14,10 +14,10 @@ import 'package:suwaya/models/settings_model.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/astro_engine/astro_provider.dart';
-import '../../models/task_model.dart';
 import '../tasks/tasks_provider.dart';
 import '../settings/settings_provider.dart';
 import '../routines/routines_provider.dart';
+import '../ibadat/ibadat_screen.dart';
 import '../../core/providers/ui_providers.dart';
 import '../../core/utils/time_formatters.dart';
 
@@ -28,18 +28,6 @@ import 'widgets/mini_astro_dial.dart';
 import '../../shared/widgets/app_drawer.dart';
 import '../../core/theme/astro_ui_extensions.dart';
 import 'package:go_router/go_router.dart';
-
-Color getNeonColorForCategory(TaskCategory category) {
-  final catStr = category.toString().toLowerCase();
-  if (catStr.contains('work')) return const Color(0xFF00E5FF);
-  if (catStr.contains('study')) return const Color(0xFF00E676);
-  if (catStr.contains('sport')) return const Color(0xFFFF3D00);
-  if (catStr.contains('worship')) return const Color(0xFFFFC400);
-  if (catStr.contains('entertainment')) return const Color(0xFFFF4081);
-  if (catStr.contains('personal')) return const Color(0xFFD500F9);
-  if (catStr.contains('social')) return const Color(0xFF76FF03);
-  return const Color(0xFF18FFFF);
-}
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -86,6 +74,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
+
+  /// 🌟 حساب عدد السويعات لأجزاء الليل الخمسة
+  int? _getNightPartSuwayasCount(String id) {
+    final sid = id.toLowerCase();
+    if (sid.contains('half_2')) return 6;
+    if (sid.contains('third_3')) return 4;
+    if (sid.contains('sixth_4') ||
+        sid.contains('sixth_5') ||
+        sid.contains('sixth_6')) {
+      return 2;
+    }
+    return null;
+  }
+
   Future<void> _showDialItemDialog(
     BuildContext context,
     DialSelection selection,
@@ -94,19 +96,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   ) async {
     final textColor = Theme.of(context).colorScheme.onSurface;
     final civilColor = textColor.withValues(alpha: 0.82);
-    AstroPeriod? selectedPeriod;
+
+    PeriodMetrics? periodMetrics;
+
     if (selection.type == DialSelectionType.period) {
       final periodId = int.tryParse(selection.id);
       for (final period in astroState.periods) {
         if (period.id == periodId) {
-          selectedPeriod = period;
+          periodMetrics = PeriodMetrics.fromPeriod(period);
           break;
         }
       }
+    } else if (selection.endTime != null) {
+      // 🌟 التعديل 10: حساب مقاييس (عدد السويعات، طول السويعة، وسرعة التدفق) لأوقات الليل الخمسة
+      final nightSuwayas = _getNightPartSuwayasCount(selection.id);
+      if (nightSuwayas != null && nightSuwayas > 0) {
+        final tempPeriod = AstroPeriod(
+          id: 3,
+          periodKey: PeriodKey.nightMidnightFajr,
+          nameKey: selection.id,
+          startTime: selection.startTime,
+          endTime: selection.endTime!,
+          suwayasCount: nightSuwayas,
+          colorValue: selection.color.toARGB32(),
+        );
+        periodMetrics = PeriodMetrics.fromPeriod(tempPeriod);
+      }
     }
-    final periodMetrics = selectedPeriod == null
-        ? null
-        : PeriodMetrics.fromPeriod(selectedPeriod);
+
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -298,6 +315,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return DateTime.now();
   }
 
+  /// 🌟 دالة مساعدة تضمن ظهور كلمة (نهار/ليلة) متبوعة باسم يوم الأسبوع دائماً في كل اللغات
+  String _formatDayNightTitle(BuildContext context, bool isNight, String dayName) {
+    final key = isNight ? 'home.night_of' : 'home.day_of';
+    final translated = key.tr(args: [dayName]);
+
+    // إذا كانت الترجمة موجودة وتحتوي بالفعل على اسم اليوم
+    if (translated != key && translated.contains(dayName)) {
+      return translated;
+    }
+    // إذا كانت الترجمة موجودة ككلمة (نهار / ليلة) بدون {} نلحق بها اسم اليوم
+    if (translated != key) {
+      return '$translated $dayName';
+    }
+
+    // نص احتياطي فوري
+    final isAr = context.locale.languageCode == 'ar';
+    if (isAr) {
+      return isNight ? 'ليلة $dayName' : 'نهار $dayName';
+    }
+    return isNight ? 'Night of $dayName' : 'Day of $dayName';
+  }
+
   Widget _buildTopHeader(
     BuildContext context,
     AstroState astroState,
@@ -329,27 +368,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       rawMaghrib.minute,
     );
 
-    String dayNightStr = '';
-    DateTime islamicDate = cityNow;
-    bool isNight = false;
     final langCode = context.locale.languageCode;
-
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
-    final dayName = DateFormat('EEEE', safeIntl).format(islamicDate);
+
+    // 🌟 التعديل 3: تحديد التاريخ الإسلامي أولاً ثم استخراج اسم يوم الأسبوع وإظهاره بجانب نهار/ليلة
+    late final DateTime islamicDate;
+    late final bool isNight;
 
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
-      dayNightStr = 'ليلة $dayName';
     } else if (cityNow.isBefore(todayMaghrib)) {
       islamicDate = cityNow;
       isNight = false;
-      dayNightStr = 'نهار $dayName';
     } else {
       islamicDate = cityNow.add(const Duration(days: 1));
       isNight = true;
-      dayNightStr = 'ليلة ${DateFormat('EEEE', safeIntl).format(islamicDate)}';
     }
+
+    final String dayName = DateFormat('EEEE', safeIntl).format(islamicDate);
+    final String dayNightStr = _formatDayNightTitle(context, isNight, dayName);
 
     final hijriDate = HijriCalendar.fromDate(islamicDate);
     final monthName = 'hijri.m${hijriDate.hMonth}'.tr();
@@ -387,13 +425,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             foreground: Paint()
                               ..style = PaintingStyle.stroke
                               ..strokeWidth = 1.0
-                              ..color = Colors.white,
+                              ..color = textColor,
                           ),
                         ),
                         Text(
                           dayNightStr,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: textColor,
                             fontSize: 22,
                             fontWeight: FontWeight.normal,
                             fontFamily: 'Tajawal',
@@ -462,7 +500,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 color: color,
                 shape: BoxShape.circle,
                 boxShadow: isHighlighted
-                    ? [BoxShadow(color: color, blurRadius: 8, spreadRadius: 2)]
+                    ? [
+                        BoxShadow(
+                          color: color,
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ]
                     : [],
               ),
             ),
@@ -481,152 +525,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  /// 🌟 النافذة الموحدة المطورة: الشروق وأسفله أوقات الليل الخمسة بنفس التصميم (SwitchListTile)
-  void _showDialMarkersSettingsSheet(
-    BuildContext context,
-    WidgetRef ref,
-    AstroState astroState,
-    SettingsModel settings,
-    Color pColor,
-    bool isDark,
-  ) {
-    HapticFeedback.selectionClick();
-
-    const orderedNightIds = [
-      'half_2',
-      'third_3',
-      'sixth_4',
-      'sixth_5',
-      'sixth_6',
-    ];
-    final dialParts = [
-      for (final id in orderedNightIds)
-        if (astroState.ibadatTimings.nightParts.any((p) => p.id == id))
-          astroState.ibadatTimings.nightParts.firstWhere((p) => p.id == id),
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final currentSettings = ref.watch(settingsProvider);
-            final notifier = ref.read(settingsProvider.notifier);
-
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: (isDark ? Colors.white : Colors.black)
-                            .withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'home.dial_markers_settings'.tr(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 🌟 صف الشروق
-                    SwitchListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      title: Text(
-                        'ibadat.show_sunrise'.tr(),
-                        style: TextStyle(
-                          fontWeight: currentSettings.showSunrise
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                        ),
-                      ),
-                      value: currentSettings.showSunrise,
-                      activeThumbColor: pColor,
-                      secondary: const Icon(
-                        LucideIcons.sun,
-                        color: Colors.orangeAccent,
-                      ),
-                      onChanged: (val) {
-                        HapticFeedback.selectionClick();
-                        notifier.updateShowSunrise(val);
-                      },
-                    ),
-                    const Divider(height: 12),
-
-                    // 🌟 أوقات الليل الخمسة بنفس تصميم صف الشروق تماماً (SwitchListTile)
-                    ...dialParts.map((part) {
-                      final isSelected =
-                          currentSettings.visibleNightParts.contains(part.id);
-                      return SwitchListTile(
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 4),
-                        title: Text(
-                          ('night_parts.${part.nameKey.replaceAll("np_", "")}')
-                              .tr(),
-                          style: TextStyle(
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w500,
-                          ),
-                        ),
-                        value: isSelected,
-                        activeThumbColor: pColor,
-                        secondary: Icon(
-                          LucideIcons.sparkles,
-                          color: isSelected ? pColor : Colors.grey,
-                        ),
-                        onChanged: (_) {
-                          HapticFeedback.selectionClick();
-                          notifier.toggleVisibleNightPart(part.id);
-                        },
-                      );
-                    }),
-
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: pColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          'common.done'.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -638,7 +536,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? const Color(0xFF0D0D12) : Colors.white;
-    final scaffoldBgColor = isDark ? Colors.black : const Color(0xFFF5F7FA);
+    final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
 
     if (astroState.periods.isEmpty) {
       return Scaffold(
@@ -679,6 +577,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        titleSpacing: 4,
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: Icon(
@@ -690,28 +589,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ),
         title: const LocationHeader(),
         actions: [
+          // 🌟 مفتاح التبديل (Switch) للوقت السُويعي في الشريط العلوي
           Consumer(
             builder: (context, ref, _) {
               final settings = ref.watch(settingsProvider);
-              return IconButton(
-                icon: Icon(
-                  settings.useAstroTimeForIbadat
-                      ? LucideIcons.clock
-                      : LucideIcons.moon_star,
-                  color: Theme.of(context).primaryColor,
-                ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  ref
-                      .read(settingsProvider.notifier)
-                      .updateUseAstroTimeForIbadat(
-                        !settings.useAstroTimeForIbadat,
-                      );
-                },
+              final primaryColor = Theme.of(context).primaryColor;
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'common.suwaya_time'.tr(),
+                    style: TextStyle(
+                      color: settings.useAstroTimeForIbadat
+                          ? primaryColor
+                          : (isDark ? Colors.white70 : Colors.black54),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      value: settings.useAstroTimeForIbadat,
+                      activeThumbColor: isDark ? Colors.black : Colors.white,
+                      activeTrackColor: primaryColor,
+                      onChanged: (val) {
+                        HapticFeedback.lightImpact();
+                        ref
+                            .read(settingsProvider.notifier)
+                            .updateUseAstroTimeForIbadat(val);
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
         ],
       ),
       body: RefreshIndicator(
@@ -741,56 +656,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _showDialMarkersSettingsSheet(
-                            context,
-                            ref,
-                            astroState,
-                            settings,
-                            pColor,
-                            isDark,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
+                    // 🌟 زر تعديل القرص في أعلى يسار القرص (عند اللغات RTL) وأعلى يمينه (عند اللغات LTR)
+                    // 🌟 التعديل 2: وضع زر تخصيص القرص على اليمين في اللغات RTL وعلى اليسار في اللغات LTR
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 20,
+                        bottom: 8,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () => showDialAndIbadatMarkersSheet(
+                              context,
+                              astroState,
                             ),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: pColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: pColor.withValues(alpha: 0.3),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: pColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: pColor.withValues(alpha: 0.35),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    LucideIcons.sliders_horizontal,
+                                    color: pColor,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'home.edit_dial'.tr() != 'home.edit_dial'
+                                        ? 'home.edit_dial'.tr()
+                                        : (context.locale.languageCode == 'ar'
+                                            ? 'تخصيص القرص'
+                                            : 'Customize Dial'),
+                                    style: TextStyle(
+                                      color: pColor,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  LucideIcons.pencil,
-                                  color: pColor,
-                                  size: 14,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'home.edit_dial'.tr(),
-                                  style: TextStyle(
-                                    color: pColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     LayoutBuilder(
                       builder: (context, constraints) {
@@ -820,17 +742,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   final tasksForLegend =
                       todayTasks.where((t) => t.showOnDial).toList();
 
+      
                   final routines = ref.watch(routinesProvider);
-                  final todayWeekday = DateTime.now().weekday;
-                  final activeRoutines = routines
-                      .where(
-                        (r) =>
-                            r.isActive &&
-                            (r.recurrenceDays == null ||
-                                r.recurrenceDays!.isEmpty ||
-                                r.recurrenceDays!.contains(todayWeekday)),
-                      )
-                      .toList();
+                  final activeRoutines = routines.where((r) {
+                    if (!r.isActive) return false;
+                    if (r.recurrenceDays == null || r.recurrenceDays!.isEmpty) {
+                      return true;
+                    }
+                    final logicalDate = getLogicalDateForMode(
+                      isAstroTime: r.isAstroTime,
+                      astroState: astroState,
+                      civilReference: cityNow,
+                    );
+                    return r.recurrenceDays!.contains(logicalDate.weekday);
+                  }).toList();
 
                   if (activeRoutines.isEmpty && tasksForLegend.isEmpty) {
                     return const SizedBox(height: 100);
@@ -892,9 +817,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 () {
                                   HapticFeedback.lightImpact();
                                   ref
-                                      .read(
-                                        highlightedRoutineProvider.notifier,
-                                      )
+                                      .read(highlightedRoutineProvider.notifier)
                                       .state = r.id;
                                   ref
                                       .read(highlightedTaskProvider.notifier)
@@ -903,8 +826,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     const Duration(seconds: 3),
                                     () {
                                       if (ref.read(
-                                            highlightedRoutineProvider,
-                                          ) ==
+                                              highlightedRoutineProvider) ==
                                           r.id) {
                                         ref
                                             .read(
@@ -935,9 +857,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                       .read(highlightedTaskProvider.notifier)
                                       .state = task.id;
                                   ref
-                                      .read(
-                                        highlightedRoutineProvider.notifier,
-                                      )
+                                      .read(highlightedRoutineProvider.notifier)
                                       .state = null;
                                   Future.delayed(
                                     const Duration(seconds: 3),

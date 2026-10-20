@@ -73,8 +73,10 @@ flutter:
 
   assets:
     - assets/translations/
-    - assets/db/Cities_V1.1.db
+    - assets/db/Cities_V2.db
     - assets/icons/app_icon.png
+    - assets/icons/sun.png
+    - assets/icons/moon.png
     - assets/audio/
 
 flutter_launcher_icons:

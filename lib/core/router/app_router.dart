@@ -10,6 +10,7 @@ import '../../features/tasks/tasks_screen.dart';
 import '../../features/ibadat/ibadat_screen.dart';
 import '../../features/pomodoro/pomodoro_screen.dart';
 import '../../features/tasks/universal_add_screen.dart';
+import '../../features/calendar/calendar_screen.dart';
 
 // مسارات Onboarding
 import '../../features/onboarding/onboarding_language_screen.dart';
@@ -90,9 +91,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           return UniversalAddScreen(
             currentPeriodId: extra['currentPeriodId'] ?? 1,
             currentSuwaya: extra['currentSuwaya'] ?? 1,
-            initialTab: extra['initialTab'] ?? 0, // 🌟 استقبال التبويب
-            existingTask: extra['existingTask'],  // 🌟 استقبال المهمة للتعديل
-            existingRoutine: extra['existingRoutine'], // 🌟 استقبال الروتين للتعديل
+            initialTab: extra['initialTab'] ?? 0,
+            existingTask: extra['existingTask'],
+            existingRoutine: extra['existingRoutine'],
+            initialDate: extra['initialDate'] as DateTime?, // 🌟 دعم التاريخ المحدد من التقويم
           );
         },
       ),
@@ -122,21 +124,40 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(routes: [
-            GoRoute(
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/ibadat',
-                builder: (context, state) => const IbadatScreen())
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-                path: '/home', 
-                builder: (context, state) => const HomeScreen()) 
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
+                builder: (context, state) => const IbadatScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          // 🌟 الفرع الرابع (index 3): شاشة التقويم والرزنامة المزدوجة
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/calendar',
+                builder: (context, state) => const CalendarScreen(),
+              ),
+            ],
+          ),
+          // 🌟 الفرع الخامس (index 4): شاشة البومودورو
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: '/pomodoro',
-                builder: (context, state) => const PomodoroScreen())
-          ]),
+                builder: (context, state) => const PomodoroScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],

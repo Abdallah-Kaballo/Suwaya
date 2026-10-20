@@ -15,8 +15,12 @@ import '../../shared/widgets/app_drawer.dart';
 import '../../core/theme/astro_ui_extensions.dart';
 import '../../core/providers/ui_providers.dart';
 
-/// 🌟 نافذة موحدة للتحكم في إظهار الشروق وأوقات الليل الخمسة (تُفتح من شاشة العبادات ومن الزر أعلى القرص)
-void showDialAndIbadatMarkersSheet(BuildContext context, AstroState astroState) {
+/// 🌟 نافذة موحدة للتحكم في التدوير التلقائي للقرص، الشروق، وأوقات الليل الخمسة
+/// تُفتح من زر تعديل القرص في الشاشة الرئيسية ومن زر الإعدادات في شاشة العبادات
+void showDialAndIbadatMarkersSheet(
+  BuildContext context,
+  AstroState astroState,
+) {
   HapticFeedback.selectionClick();
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -45,15 +49,15 @@ void showDialAndIbadatMarkersSheet(BuildContext context, AstroState astroState) 
           final textColor = isDark ? Colors.white : Colors.black87;
 
           return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     width: 40,
                     height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(bottom: 14),
                     decoration: BoxDecoration(
                       color: textColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(2),
@@ -69,14 +73,53 @@ void showDialAndIbadatMarkersSheet(BuildContext context, AstroState astroState) 
                   ),
                   const SizedBox(height: 12),
 
-                  // 🌟 1. زر إظهار الشروق
+                  // 🌟 1. التدوير التلقائي للقرص (منقول من شاشة الإعدادات)
                   SwitchListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    dense: true,
+                    title: Text(
+                      'settings.auto_rotate'.tr(),
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14.5,
+                        fontWeight: settings.isDialAutoRotating
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'settings.auto_rotate_desc'.tr(),
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.55),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    value: settings.isDialAutoRotating,
+                    activeThumbColor: pColor,
+                    secondary: Icon(
+                      LucideIcons.refresh_ccw,
+                      color: settings.isDialAutoRotating ? pColor : Colors.grey,
+                      size: 20,
+                    ),
+                    onChanged: (val) {
+                      HapticFeedback.lightImpact();
+                      notifier.updateDialAutoRotation(val);
+                    },
+                  ),
+                  Divider(
+                    height: 8,
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+
+                  // 🌟 2. إظهار الشروق
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    dense: true,
                     title: Text(
                       'ibadat.show_sunrise'.tr(),
                       style: TextStyle(
                         color: textColor,
-                        fontSize: 15,
+                        fontSize: 14.5,
                         fontWeight: settings.showSunrise
                             ? FontWeight.bold
                             : FontWeight.w500,
@@ -101,7 +144,7 @@ void showDialAndIbadatMarkersSheet(BuildContext context, AstroState astroState) 
                     color: isDark ? Colors.white12 : Colors.black12,
                   ),
 
-                  // 🌟 2. أوقات الليل الخمسة بنفس تصميم زر الشروق تماماً (SwitchListTile)
+                  // 🌟 3. أوقات الليل الخمسة بنفس تصميم زر الشروق (SwitchListTile)
                   ...availableNightParts.map((part) {
                     final isSelected =
                         settings.visibleNightParts.contains(part.id);
@@ -111,11 +154,12 @@ void showDialAndIbadatMarkersSheet(BuildContext context, AstroState astroState) 
 
                     return SwitchListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      dense: true,
                       title: Text(
                         partTitle,
                         style: TextStyle(
                           color: textColor,
-                          fontSize: 15,
+                          fontSize: 14.5,
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.w500,
                         ),
@@ -134,10 +178,10 @@ void showDialAndIbadatMarkersSheet(BuildContext context, AstroState astroState) 
                     );
                   }),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
-                    height: 48,
+                    height: 46,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: pColor,
@@ -273,6 +317,7 @@ class IbadatScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 48,
+        titleSpacing: 4,
         leading: Builder(
           builder: (ctx) => IconButton(
             icon: Icon(LucideIcons.menu, color: textColor),
@@ -281,46 +326,64 @@ class IbadatScreen extends ConsumerWidget {
         ),
         title: Text(
           'ibadat.title'.tr(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: textColor,
-            fontSize: 17,
+            fontSize: 16.5,
           ),
         ),
-        centerTitle: true,
         actions: [
-          // 🌟 زر التحويل العالمي بين التوقيت السويعي والتوقيت المدني
+          // 🌟 مفتاح التبديل (Switch) للوقت السُويعي وبجانبه عبارة "الوقت السُويعي"
           Consumer(
             builder: (context, ref, _) {
               final settings = ref.watch(settingsProvider);
-              return IconButton(
-                icon: Icon(
-                  settings.useAstroTimeForIbadat
-                      ? LucideIcons.clock
-                      : LucideIcons.moon_star,
-                  color: Theme.of(context).primaryColor,
-                ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  ref
-                      .read(settingsProvider.notifier)
-                      .updateUseAstroTimeForIbadat(
-                        !settings.useAstroTimeForIbadat,
-                      );
-                },
+              final primaryColor = Theme.of(context).primaryColor;
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'common.suwaya_time'.tr(),
+                    style: TextStyle(
+                      color: settings.useAstroTimeForIbadat
+                          ? primaryColor
+                          : (isDark ? Colors.white70 : Colors.black54),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Transform.scale(
+                    scale: 0.72,
+                    child: Switch(
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      value: settings.useAstroTimeForIbadat,
+                      activeThumbColor: isDark ? Colors.black : Colors.white,
+                      activeTrackColor: primaryColor,
+                      onChanged: (val) {
+                        HapticFeedback.lightImpact();
+                        ref
+                            .read(settingsProvider.notifier)
+                            .updateUseAstroTimeForIbadat(val);
+                      },
+                    ),
+                  ),
+                ],
               );
             },
           ),
-          // 🌟 زر فتح النافذة الموحدة للشروق وأوقات الليل
+          // 🌟 زر فتح النافذة الموحدة لإعدادات القرص وأوقات الليل
           IconButton(
+            visualDensity: VisualDensity.compact,
             icon: Icon(
               LucideIcons.settings_2,
               color: Theme.of(context).primaryColor,
+              size: 20,
             ),
             onPressed: () =>
                 showDialAndIbadatMarkersSheet(context, astroState),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
         ],
       ),
       body: SafeArea(
@@ -330,7 +393,6 @@ class IbadatScreen extends ConsumerWidget {
     );
   }
 
-  /// 🌟 واجهة متكاملة تعرض جميع العناصر في شاشة واحدة دون الحاجة للتمرير (Scroll)
   Widget _buildDashboardBody(
     BuildContext context,
     WidgetRef ref,
@@ -338,278 +400,332 @@ class IbadatScreen extends ConsumerWidget {
     bool isDark,
   ) {
     final ibadat = astroState.ibadatTimings;
-    final now = astroState.virtualTime;
     final settings = ref.watch(settingsProvider);
-
-    final mandatoryPrayers = [
-      {'name': 'periods.fajr'.tr(), 'time': ibadat.fajr},
-      {'name': 'periods.dhuhr'.tr(), 'time': ibadat.dhuhr},
-      {'name': 'periods.asr'.tr(), 'time': ibadat.asr},
-      {'name': 'periods.maghrib'.tr(), 'time': ibadat.maghrib},
-      {'name': 'prayers.isha'.tr(), 'time': ibadat.isha},
-    ];
-
-    Map<String, dynamic> nextPrayer = mandatoryPrayers.first;
-    int minDiff = 1440;
-    for (var p in mandatoryPrayers) {
-      final DateTime pTime = p['time'] as DateTime;
-      int diff = (pTime.hour * 60 + pTime.minute) - (now.hour * 60 + now.minute);
-      if (diff <= 0) diff += 1440;
-      if (diff < minDiff) {
-        minDiff = diff;
-        nextPrayer = p;
-      }
-    }
-
-    final int remainingMins = minDiff;
-    int sCount, mCount;
-    String topLabel;
-
-    if (settings.useAstroTimeForIbadat) {
-      topLabel = 'ibadat.virtual_remaining'.tr();
-      final int virtualRemaining =
-          (remainingMins * astroState.timeSpeedMultiplier).round();
-      sCount = virtualRemaining ~/ 60;
-      mCount = virtualRemaining % 60;
-    } else {
-      topLabel = 'ibadat.civil_remaining'.tr();
-      sCount = remainingMins ~/ 60;
-      mCount = remainingMins % 60;
-    }
-
-    final prayerRowsData = <Map<String, dynamic>>[
-      {
-        'id': 'fajr',
-        'title': 'periods.fajr'.tr(),
-        'time': ibadat.fajr,
-        'icon': LucideIcons.sunrise,
-        'color': const Color(0xFF64B5F6),
-        'isNext': nextPrayer['time'] == ibadat.fajr,
-      },
-      if (settings.showSunrise)
-        {
-          'id': 'sunrise',
-          'title': 'ibadat.sunrise'.tr(),
-          'time': ibadat.sunrise,
-          'icon': LucideIcons.sun,
-          'color': Colors.orangeAccent,
-          'isNext': false,
-        },
-      {
-        'id': 'dhuhr',
-        'title': 'periods.dhuhr'.tr(),
-        'time': ibadat.dhuhr,
-        'icon': LucideIcons.sun_dim,
-        'color': const Color(0xFFFFCA28),
-        'isNext': nextPrayer['time'] == ibadat.dhuhr,
-      },
-      {
-        'id': 'asr',
-        'title': 'periods.asr'.tr(),
-        'time': ibadat.asr,
-        'icon': LucideIcons.cloud_sun,
-        'color': const Color(0xFFFF9800),
-        'isNext': nextPrayer['time'] == ibadat.asr,
-      },
-      {
-        'id': 'maghrib',
-        'title': 'periods.maghrib'.tr(),
-        'time': ibadat.maghrib,
-        'icon': LucideIcons.sunset,
-        'color': const Color(0xFFE53935),
-        'isNext': nextPrayer['time'] == ibadat.maghrib,
-      },
-      {
-        'id': 'isha',
-        'title': 'prayers.isha'.tr(),
-        'time': ibadat.isha,
-        'icon': LucideIcons.moon,
-        'color': const Color(0xFF1A237E),
-        'isNext': nextPrayer['time'] == ibadat.isha,
-      },
-    ];
-
-    final visibleNightParts = ibadat.nightParts
-        .where((p) => settings.visibleNightParts.contains(p.id))
-        .toList();
-
     final bottomSafe = MediaQuery.of(context).padding.bottom;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // حساب الكثافة الرأسية لضمان ظهور كل البطاقات في شاشة واحدة بدون تمرير
-        final int totalCards =
-            prayerRowsData.length + visibleNightParts.length;
-        final bool isCompact =
-            constraints.maxHeight < 680 || totalCards >= 8;
+    return ValueListenableBuilder<DateTime>(
+      valueListenable: virtualDateTimeNotifier,
+      builder: (context, liveNow, _) {
+        final mandatoryPrayers = [
+          {
+            'id': 'fajr',
+            'name': 'periods.fajr'.tr(),
+            'time': ibadat.fajr,
+          },
+          {
+            'id': 'dhuhr',
+            'name': 'periods.dhuhr'.tr(),
+            'time': ibadat.dhuhr,
+          },
+          {
+            'id': 'asr',
+            'name': 'periods.asr'.tr(),
+            'time': ibadat.asr,
+          },
+          {
+            'id': 'maghrib',
+            'name': 'periods.maghrib'.tr(),
+            'time': ibadat.maghrib,
+          },
+          {
+            'id': 'isha',
+            'name': 'prayers.isha'.tr(),
+            'time': ibadat.isha,
+          },
+        ];
 
-        final double cardGap = isCompact ? 5.0 : 7.0;
-        final double prayerTitleFontSize = isCompact ? 15.0 : 16.5;
-        final double prayerClockFontSize = isCompact ? 14.5 : 16.0;
-        final double qiyamTitleFontSize = isCompact ? 13.5 : 15.0;
-        final double qiyamClockFontSize = isCompact ? 13.0 : 14.0;
+        Map<String, dynamic> nextPrayer = mandatoryPrayers.first;
+        int minDiffSecs = 86400;
+        final int nowTotalSecs =
+            liveNow.hour * 3600 + liveNow.minute * 60 + liveNow.second;
 
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16, 4, 16, bottomSafe + 90),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 🌟 1. بطاقة الصلاة القادمة المدمجة
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: isCompact ? 10 : 13,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? [const Color(0xFF1E2530), const Color(0xFF0B0F19)]
-                        : [Colors.white, const Color(0xFFE8ECEF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDark ? Colors.white12 : Colors.black12,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark
-                          ? Theme.of(context)
-                              .primaryColor
-                              .withValues(alpha: 0.08)
-                          : Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 12,
+        for (var p in mandatoryPrayers) {
+          final DateTime pTime = p['time'] as DateTime;
+          final int pTotalSecs =
+              pTime.hour * 3600 + pTime.minute * 60 + pTime.second;
+          int diffSecs = pTotalSecs - nowTotalSecs;
+          if (diffSecs <= 0) diffSecs += 86400;
+          if (diffSecs < minDiffSecs) {
+            minDiffSecs = diffSecs;
+            nextPrayer = p;
+          }
+        }
+
+        int sCount, mCount;
+        String topLabel;
+
+        if (settings.useAstroTimeForIbadat) {
+          topLabel = 'ibadat.virtual_remaining'.tr();
+
+          // 🌟 حساب اللحظة السويعية الحالية بدقة من المحرك الفلكي
+          final liveAstroState = SuwayaTimeEngine.calculateCurrentState(
+            SuwayaDay(
+              ibadatTimings: astroState.ibadatTimings,
+              cycleAnchors: astroState.cycleAnchors,
+              periods: astroState.periods,
+            ),
+            liveNow,
+          );
+          final ct = liveAstroState.currentSuwayaTime;
+          final int currentGlobalIndex = ct.phase.isNight
+              ? (ct.phaseSlotNumber - 1)
+              : (12 + ct.phaseSlotNumber - 1);
+          final int currentVirtualTotalMins =
+              (currentGlobalIndex * 60) + ct.virtualMinute;
+
+          // 🌟 جلب الموقع السويعي الثابت للصلاة القادمة (مثلاً الظهر = الفهرس 18 أي السويعة 07|00 ☀️)
+          final targetAstro = getFixedAstroTime(
+            nextPrayer['id'] as String,
+            astroState,
+            isEnd: false,
+          );
+          final int targetVirtualTotalMins =
+              (targetAstro.globalIndex * 60) + targetAstro.minute;
+
+          // 🌟 طرح الموقعين السويعيين مباشرةً (1440 دقيقة افتراضية = 24 سويعة)
+          int virtualRemainingMins =
+              targetVirtualTotalMins - currentVirtualTotalMins;
+          if (virtualRemainingMins <= 0) {
+            virtualRemainingMins += 1440;
+          }
+
+          sCount = virtualRemainingMins ~/ 60;
+          mCount = virtualRemainingMins % 60;
+        } else {
+          topLabel = 'ibadat.civil_remaining'.tr();
+          final int remainingMins = (minDiffSecs / 60).ceil();
+          sCount = remainingMins ~/ 60;
+          mCount = remainingMins % 60;
+        }
+
+        final prayerRowsData = <Map<String, dynamic>>[
+          {
+            'id': 'fajr',
+            'title': 'periods.fajr'.tr(),
+            'time': ibadat.fajr,
+            'icon': LucideIcons.sunrise,
+            'color': const Color(0xFF64B5F6),
+            'isNext': nextPrayer['time'] == ibadat.fajr,
+          },
+          if (settings.showSunrise)
+            {
+              'id': 'sunrise',
+              'title': 'ibadat.sunrise'.tr(),
+              'time': ibadat.sunrise,
+              'icon': LucideIcons.sun,
+              'color': Colors.orangeAccent,
+              'isNext': false,
+            },
+          {
+            'id': 'dhuhr',
+            'title': 'periods.dhuhr'.tr(),
+            'time': ibadat.dhuhr,
+            'icon': LucideIcons.sun_dim,
+            'color': const Color(0xFFFFCA28),
+            'isNext': nextPrayer['time'] == ibadat.dhuhr,
+          },
+          {
+            'id': 'asr',
+            'title': 'periods.asr'.tr(),
+            'time': ibadat.asr,
+            'icon': LucideIcons.cloud_sun,
+            'color': const Color(0xFFFF9800),
+            'isNext': nextPrayer['time'] == ibadat.asr,
+          },
+          {
+            'id': 'maghrib',
+            'title': 'periods.maghrib'.tr(),
+            'time': ibadat.maghrib,
+            'icon': LucideIcons.sunset,
+            'color': const Color(0xFFE53935),
+            'isNext': nextPrayer['time'] == ibadat.maghrib,
+          },
+          {
+            'id': 'isha',
+            'title': 'prayers.isha'.tr(),
+            'time': ibadat.isha,
+            'icon': LucideIcons.moon,
+            'color': const Color(0xFF1A237E),
+            'isNext': nextPrayer['time'] == ibadat.isha,
+          },
+        ];
+
+        final visibleNightParts = ibadat.nightParts
+            .where((p) => settings.visibleNightParts.contains(p.id))
+            .toList();
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final int totalCards =
+                prayerRowsData.length + visibleNightParts.length;
+            final bool isCompact =
+                constraints.maxHeight < 680 || totalCards >= 8;
+
+            final double cardGap = isCompact ? 4.5 : 6.5;
+            final double prayerTitleFontSize = isCompact ? 18.0 : 20.5;
+            final double prayerClockFontSize = isCompact ? 17.5 : 19.5;
+            final double qiyamTitleFontSize = isCompact ? 16.5 : 18.0;
+            final double qiyamClockFontSize = isCompact ? 15.5 : 17.0;
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(16, 2, 16, bottomSafe + 86),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: isCompact ? 10 : 14,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'ibadat.next_prayer'.tr(),
-                          style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black54,
-                            fontSize: 11.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          nextPrayer['name'] as String,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: isCompact ? 18 : 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isDark
+                            ? [const Color(0xFF1E2530), const Color(0xFF0B0F19)]
+                            : [Colors.white, const Color(0xFFE8ECEF)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white12 : Colors.black12,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDark
+                              ? Theme.of(context)
+                                  .primaryColor
+                                  .withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 12,
                         ),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          topLabel,
-                          style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black54,
-                            fontSize: 10.5,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'ibadat.next_prayer'.tr(),
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              nextPrayer['name'] as String,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontSize: isCompact ? 21.0 : 24.0,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 2),
-                        Directionality(
-                          textDirection: ui.TextDirection.ltr,
-                          child: settings.useAstroTimeForIbadat
-                              ? Text(
-                                  '- ${sCount.toString().padLeft(2, '0')}|${mCount.toString().padLeft(2, '0')}',
-                                  style: TextStyle(
-                                    color: const Color(0xFFF2C94C),
-                                    fontSize: isCompact ? 17 : 19,
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 1.0,
-                                  ),
-                                )
-                              : Text(
-                                  '- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}',
-                                  style: TextStyle(
-                                    color:
-                                        isDark ? Colors.white : Colors.black87,
-                                    fontSize: isCompact ? 17 : 19,
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              topLabel,
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Directionality(
+                              textDirection: ui.TextDirection.ltr,
+                              child: settings.useAstroTimeForIbadat
+                                  ? Text(
+                                      '- ${sCount.toString().padLeft(2, '0')}|${mCount.toString().padLeft(2, '0')}',
+                                      style: TextStyle(
+                                        color: const Color(0xFFF2C94C),
+                                        fontSize: isCompact ? 20.0 : 23.0,
+                                        fontWeight: FontWeight.w800,
+                                        fontFamily: 'Inter',
+                                        letterSpacing: 1.2,
+                                      ),
+                                    )
+                                  : Text(
+                                      '- ${sCount.toString().padLeft(2, '0')}:${mCount.toString().padLeft(2, '0')}',
+                                      style: TextStyle(
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontSize: isCompact ? 20.0 : 23.0,
+                                        fontWeight: FontWeight.w800,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: isCompact ? 6 : 10),
-              _buildSectionTitle('ibadat.prayers_tab'.tr(), context),
-              SizedBox(height: isCompact ? 4 : 6),
-
-              // 🌟 2. قائمة الصلوات (تتمدد بتوازن داخل المساحة المتاحة)
-              ...prayerRowsData.map(
-                (p) => Expanded(
-                  flex: 10,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: cardGap),
-                    child: _buildTimingCard(
-                      context: context,
-                      ref: ref,
-                      astroState: astroState,
-                      periodId: p['id'] as String,
-                      title: p['title'] as String,
-                      time: p['time'] as DateTime,
-                      icon: p['icon'] as IconData,
-                      rawColor: p['color'] as Color,
-                      isNext: p['isNext'] as bool,
-                      isDark: isDark,
-                      titleFontSize: prayerTitleFontSize,
-                      clockFontSize: prayerClockFontSize,
-                    ),
                   ),
-                ),
-              ),
-
-              // 🌟 3. قسم قيام الليل (يظهر في نفس الشاشة دون الحاجة للتمرير)
-              if (visibleNightParts.isNotEmpty) ...[
-                SizedBox(height: isCompact ? 2 : 6),
-                _buildSectionTitle('ibadat.qiyam_tab'.tr(), context),
-                SizedBox(height: isCompact ? 4 : 6),
-                ...visibleNightParts.map(
-                  (part) => Expanded(
-                    flex: 11,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: cardGap),
-                      child: _buildNightPartCard(
-                        context: context,
-                        ref: ref,
-                        part: part,
-                        astroState: astroState,
-                        settings: settings,
-                        isDark: isDark,
-                        titleFontSize: qiyamTitleFontSize,
-                        clockFontSize: qiyamClockFontSize,
+                  SizedBox(height: isCompact ? 5 : 8),
+                  _buildSectionTitle('ibadat.prayers_tab'.tr(), context),
+                  SizedBox(height: isCompact ? 3 : 5),
+                  ...prayerRowsData.map(
+                    (p) => Expanded(
+                      flex: 10,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: cardGap),
+                        child: _buildTimingCard(
+                          context: context,
+                          ref: ref,
+                          astroState: astroState,
+                          periodId: p['id'] as String,
+                          title: p['title'] as String,
+                          time: p['time'] as DateTime,
+                          icon: p['icon'] as IconData,
+                          rawColor: p['color'] as Color,
+                          isNext: p['isNext'] as bool,
+                          isDark: isDark,
+                          titleFontSize: prayerTitleFontSize,
+                          clockFontSize: prayerClockFontSize,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ],
-          ),
+                  if (visibleNightParts.isNotEmpty) ...[
+                    SizedBox(height: isCompact ? 2 : 5),
+                    _buildSectionTitle('ibadat.qiyam_tab'.tr(), context),
+                    SizedBox(height: isCompact ? 3 : 5),
+                    ...visibleNightParts.map(
+                      (part) => Expanded(
+                        flex: 10,
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: cardGap),
+                          child: _buildNightPartCard(
+                            context: context,
+                            ref: ref,
+                            part: part,
+                            astroState: astroState,
+                            settings: settings,
+                            isDark: isDark,
+                            titleFontSize: qiyamTitleFontSize,
+                            clockFontSize: qiyamClockFontSize,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  /// 🌟 بطاقة الصلوات بحجم خطوط متناسق ومريح للعين
   Widget _buildTimingCard({
     required BuildContext context,
     required WidgetRef ref,
@@ -654,7 +770,7 @@ class IbadatScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: isNext ? adaptedColor : rawColor, size: 20),
+          Icon(icon, color: isNext ? adaptedColor : rawColor, size: 23),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -666,7 +782,7 @@ class IbadatScreen extends ConsumerWidget {
                     ? adaptedColor
                     : (isDark ? Colors.white : Colors.black87),
                 fontSize: titleFontSize,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
@@ -689,7 +805,7 @@ class IbadatScreen extends ConsumerWidget {
             },
             child: Padding(
               padding: const EdgeInsets.all(6.0),
-              child: Icon(bellIcon, color: bellColor, size: 18),
+              child: Icon(bellIcon, color: bellColor, size: 20),
             ),
           ),
         ],
@@ -697,7 +813,7 @@ class IbadatScreen extends ConsumerWidget {
     );
   }
 
-  /// 🌟 بطاقة أوقات القيام مع مراعاة اتجاه اللغة (RTL: البداية يمين <- النهاية يسار | LTR: البداية يسار -> النهاية يمين)
+  /// 🌟 بطاقة أوقات القيام بخطوط وساعات مكبّرة مع مراعاة اتجاه اللغة (RTL / LTR)
   Widget _buildNightPartCard({
     required BuildContext context,
     required WidgetRef ref,
@@ -736,7 +852,7 @@ class IbadatScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(LucideIcons.sparkles, color: pColor, size: 18),
+          Icon(LucideIcons.sparkles, color: pColor, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -746,15 +862,11 @@ class IbadatScreen extends ConsumerWidget {
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black87,
                 fontSize: titleFontSize,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
           const SizedBox(width: 8),
-
-          // 🌟 نطاق الوقت يحترم اتجاه اللغة تلقائياً:
-          // في RTL (العربية): [وقت البداية (يمين)]  ←  [وقت النهاية (يسار)]
-          // في LTR (الإنجليزية): [Start Time (left)]  →  [End Time (right)]
           Flexible(
             flex: 0,
             child: FittedBox(
@@ -776,12 +888,12 @@ class IbadatScreen extends ConsumerWidget {
                       isEnd: false,
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Icon(
                         isRTL
                             ? LucideIcons.arrow_left
                             : LucideIcons.arrow_right,
-                        size: 13,
+                        size: 15,
                         color: isDark ? Colors.white54 : Colors.black54,
                       ),
                     ),
@@ -800,7 +912,6 @@ class IbadatScreen extends ConsumerWidget {
               ),
             ),
           ),
-
           const SizedBox(width: 8),
           InkWell(
             borderRadius: BorderRadius.circular(8),
@@ -810,7 +921,7 @@ class IbadatScreen extends ConsumerWidget {
             },
             child: Padding(
               padding: const EdgeInsets.all(6.0),
-              child: Icon(bellIcon, color: bellColor, size: 18),
+              child: Icon(bellIcon, color: bellColor, size: 20),
             ),
           ),
         ],
@@ -825,8 +936,8 @@ class IbadatScreen extends ConsumerWidget {
         title,
         style: TextStyle(
           color: Theme.of(context).primaryColor,
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
+          fontSize: 15.0,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
@@ -844,6 +955,7 @@ class IbadatScreen extends ConsumerWidget {
     final currentSound =
         settings.getPeriodSound(periodId, 'assets/audio/adhan.mp3');
     final currentVolume = settings.getPeriodVolume(periodId, 1.0);
+    final isAr = context.locale.languageCode == 'ar';
 
     showModalBottomSheet(
       context: context,
@@ -868,7 +980,7 @@ class IbadatScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(LucideIcons.bell_off, color: Colors.grey),
-                title: Text('ibadat.silent'.tr()),
+                title: Text(isAr ? 'بدون إشعار' : 'No Notification'),
                 trailing: currentLevel == 0
                     ? Icon(
                         LucideIcons.circle_check,
@@ -890,7 +1002,9 @@ class IbadatScreen extends ConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(LucideIcons.bell, color: Colors.blueAccent),
-                title: Text('ibadat.notification'.tr()),
+                title: Text(
+                  isAr ? 'إشعار على الستارة' : 'Curtain Notification',
+                ),
                 trailing: currentLevel == 1
                     ? Icon(
                         LucideIcons.circle_check,
@@ -901,6 +1015,9 @@ class IbadatScreen extends ConsumerWidget {
                   final isNotifGranted = await ref
                       .read(permissionsProvider.notifier)
                       .ensureNotificationPermission();
+                  await ref
+                      .read(permissionsProvider.notifier)
+                      .ensureExactAlarmPermission();
                   if (isNotifGranted) {
                     ref
                         .read(settingsProvider.notifier)

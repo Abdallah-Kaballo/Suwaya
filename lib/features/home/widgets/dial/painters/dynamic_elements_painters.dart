@@ -63,7 +63,8 @@ List<DialMarkerLayout> layoutDialMarkers({
         isPrayer: true),
     for (final marker in nightMarkers)
       UnifiedDialItem(
-        id: 'marker:${marker['n']}:${(marker['t'] as DateTime).microsecondsSinceEpoch}',
+        id: (marker['id'] as String?) ??
+            'marker:${marker['n']}:${(marker['t'] as DateTime).microsecondsSinceEpoch}',
         text: marker['n'] as String,
         time: marker['t'] as DateTime,
         color: goldBase,

@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:hijri/hijri_calendar.dart';
 
-// 🌟 العجلة السويعية الجديدة السلسة جداً (ساعات، دقائق، ليل/نهار)
+// 🌟 1. العجلة السويعية (سويعات 1-12، دقائق 0-59، وزر ليل/نهار)
 class AstroTimePicker extends StatefulWidget {
   final int initialHour; // 1-12
   final int initialMinute; // 0-59
@@ -42,8 +44,12 @@ class _AstroTimePickerState extends State<AstroTimePicker> {
     selectedMinute = widget.initialMinute.clamp(0, 59);
     isNight = widget.initialIsNight;
 
-    _hourController = FixedExtentScrollController(initialItem: 10000 * 12 + (selectedHour - 1));
-    _minuteController = FixedExtentScrollController(initialItem: 10000 * 60 + selectedMinute);
+    _hourController = FixedExtentScrollController(
+      initialItem: 10000 * 12 + (selectedHour - 1),
+    );
+    _minuteController = FixedExtentScrollController(
+      initialItem: 10000 * 60 + selectedMinute,
+    );
   }
 
   @override
@@ -60,118 +66,175 @@ class _AstroTimePickerState extends State<AstroTimePicker> {
   @override
   Widget build(BuildContext context) {
     final isRTL = Directionality.of(context) == TextDirection.rtl;
-    final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
-    
+    final headerStyle = TextStyle(
+      color: widget.textColor.withValues(alpha: 0.6),
+      fontSize: 13,
+      fontWeight: FontWeight.bold,
+    );
+
     final dayIcon = widget.iconMode == 'text' ? (isRTL ? 'ن' : 'D') : '☀️';
     final nightIcon = widget.iconMode == 'text' ? (isRTL ? 'ل' : 'N') : '🌑';
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(children: [
-          Expanded(child: Center(child: Text('common.suwaya'.tr(), style: headerStyle))),
-          const SizedBox(width: 14),
-          Expanded(child: Center(child: Text('add_screen.minute'.tr(), style: headerStyle))),
-          const SizedBox(width: 14),
-        ]),
-      ),
-      const SizedBox(height: 8),
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizedBox(
-          height: 140,
+    final nightDayLabel = 'add_screen.night_day'.tr() != 'add_screen.night_day'
+        ? 'add_screen.night_day'.tr()
+        : (isRTL ? 'ليل / نهار' : 'Night / Day');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Directionality(
+          textDirection: TextDirection.ltr,
           child: Row(
             children: [
               Expanded(
-                child: CupertinoPicker.builder(
-                  scrollController: _hourController,
-                  itemExtent: 40,
-                  onSelectedItemChanged: (i) {
-                    HapticFeedback.selectionClick();
-                    selectedHour = (i % 12) + 1;
-                    _notifyChange();
-                  },
-                  itemBuilder: (ctx, idx) => Center(
-                    child: Text(
-                      ((idx % 12) + 1).toString().padLeft(2, '0'),
-                      style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 26, fontWeight: FontWeight.w600, fontFamily: 'Inter'),
-                    ),
-                  ),
+                child: Center(
+                  child: Text('common.suwaya'.tr(), style: headerStyle),
                 ),
               ),
-              Container(
-                width: 1.5,
-                height: 12,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(color: widget.textColor.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(1)),
-              ),
+              const SizedBox(width: 17.5),
               Expanded(
-                child: CupertinoPicker.builder(
-                  scrollController: _minuteController,
-                  itemExtent: 40,
-                  onSelectedItemChanged: (i) {
-                    HapticFeedback.selectionClick();
-                    selectedMinute = i % 60;
-                    _notifyChange();
-                  },
-                  itemBuilder: (ctx, idx) => Center(
-                    child: Text(
-                      (idx % 60).toString().padLeft(2, '0'),
-                      style: const TextStyle(color: Color(0xFFF2C94C), fontSize: 26, fontWeight: FontWeight.w600, fontFamily: 'Inter'),
-                    ),
-                  ),
+                child: Center(
+                  child: Text('add_screen.minute'.tr(), style: headerStyle),
                 ),
               ),
               const SizedBox(width: 16),
-              // 🌟 زر التبديل البصري الجميل
               Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    setState(() => isNight = !isNight);
-                    _notifyChange();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: isNight ? const Color(0xFF1A237E).withValues(alpha: 0.3) : const Color(0xFFFFF176).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isNight ? const Color(0xFF3949AB) : const Color(0xFFFFCA28), width: 2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        isNight ? nightIcon : dayIcon,
-                        style: TextStyle(
-                          fontSize: 28,
-                          color: isNight ? const Color(0xFF64B5F6) : const Color(0xFFFFCA28),
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Tajawal'
-                        ),
-                      ),
-                    ),
-                  ),
+                child: Center(
+                  child: Text(nightDayLabel, style: headerStyle),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    ]);
+        const SizedBox(height: 8),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            height: 140,
+            child: Row(
+              children: [
+                Expanded(
+                  child: CupertinoPicker.builder(
+                    scrollController: _hourController,
+                    itemExtent: 40,
+                    onSelectedItemChanged: (i) {
+                      HapticFeedback.selectionClick();
+                      selectedHour = (i % 12) + 1;
+                      _notifyChange();
+                    },
+                    itemBuilder: (ctx, idx) => Center(
+                      child: Text(
+                        ((idx % 12) + 1).toString().padLeft(2, '0'),
+                        style: const TextStyle(
+                          color: Color(0xFFF2C94C),
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 1.5,
+                  height: 12,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: widget.textColor.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+                Expanded(
+                  child: CupertinoPicker.builder(
+                    scrollController: _minuteController,
+                    itemExtent: 40,
+                    onSelectedItemChanged: (i) {
+                      HapticFeedback.selectionClick();
+                      selectedMinute = i % 60;
+                      _notifyChange();
+                    },
+                    itemBuilder: (ctx, idx) => Center(
+                      child: Text(
+                        (idx % 60).toString().padLeft(2, '0'),
+                        style: const TextStyle(
+                          color: Color(0xFFF2C94C),
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      setState(() => isNight = !isNight);
+                      _notifyChange();
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: isNight
+                            ? const Color(0xFF1A237E).withValues(alpha: 0.3)
+                            : const Color(0xFFFFF176).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isNight
+                              ? const Color(0xFF3949AB)
+                              : const Color(0xFFFFCA28),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          isNight ? nightIcon : dayIcon,
+                          style: TextStyle(
+                            fontSize: 28,
+                            color: isNight
+                                ? const Color(0xFF64B5F6)
+                                : const Color(0xFFFFCA28),
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Tajawal',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
+// 🌟 2. عجلة الوقت المدني (تدعم نظام 24 ساعة 0..23، ونظام 12 ساعة 1..12 مع زر ص/م - AM/PM)
 class DoubleWheelPicker extends StatefulWidget {
   final String label1, label2;
   final int initialVal1, initialVal2, min1, max1, max2;
   final Function(int, int) onChanged;
   final Color textColor, surfaceColor;
-  
+  final bool is12HourMode;
+
   const DoubleWheelPicker({
-    super.key, required this.label1, required this.label2,
-    required this.initialVal1, required this.initialVal2,
-    required this.min1, required this.max1, required this.max2,
-    required this.onChanged, required this.textColor, required this.surfaceColor
+    super.key,
+    required this.label1,
+    required this.label2,
+    required this.initialVal1,
+    required this.initialVal2,
+    required this.min1,
+    required this.max1,
+    required this.max2,
+    required this.onChanged,
+    required this.textColor,
+    required this.surfaceColor,
+    this.is12HourMode = false,
   });
 
   @override
@@ -179,135 +242,561 @@ class DoubleWheelPicker extends StatefulWidget {
 }
 
 class _DoubleWheelPickerState extends State<DoubleWheelPicker> {
-  late int val1, val2;
+  late int val1;
+  late int val2;
+  late bool isPm;
   late FixedExtentScrollController _controller1, _controller2;
 
   @override
   void initState() {
     super.initState();
-    val1 = widget.initialVal1; val2 = widget.initialVal2;
-    int range1 = widget.max1 - widget.min1 + 1;
-    _controller1 = FixedExtentScrollController(initialItem: 10000 * range1 + (val1 - widget.min1));
-    _controller2 = FixedExtentScrollController(initialItem: 10000 * (widget.max2 + 1) + val2); 
+    val2 = widget.initialVal2.clamp(0, widget.max2);
+
+    if (widget.is12HourMode) {
+      final rawHour24 = widget.initialVal1.clamp(0, 23);
+      isPm = rawHour24 >= 12;
+      int h12 = rawHour24 % 12;
+      if (h12 == 0) h12 = 12;
+      val1 = h12;
+      _controller1 = FixedExtentScrollController(
+        initialItem: 10000 * 12 + (val1 - 1),
+      );
+    } else {
+      isPm = false;
+      val1 = widget.initialVal1.clamp(widget.min1, widget.max1);
+      final int range1 = widget.max1 - widget.min1 + 1;
+      _controller1 = FixedExtentScrollController(
+        initialItem: 10000 * range1 + (val1 - widget.min1),
+      );
+    }
+
+    _controller2 = FixedExtentScrollController(
+      initialItem: 10000 * (widget.max2 + 1) + val2,
+    );
   }
 
   @override
   void dispose() {
-    _controller1.dispose(); _controller2.dispose();
+    _controller1.dispose();
+    _controller2.dispose();
     super.dispose();
+  }
+
+  void _notifyChange() {
+    if (widget.is12HourMode) {
+      int hour24;
+      if (isPm) {
+        hour24 = val1 == 12 ? 12 : val1 + 12;
+      } else {
+        hour24 = val1 == 12 ? 0 : val1;
+      }
+      widget.onChanged(hour24, val2);
+    } else {
+      widget.onChanged(val1, val2);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    int range1 = widget.max1 - widget.min1 + 1;
-    final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
+    final headerStyle = TextStyle(
+      color: widget.textColor.withValues(alpha: 0.6),
+      fontSize: 13,
+      fontWeight: FontWeight.bold,
+    );
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(children: [
-          Expanded(child: Center(child: Text(widget.label1, style: headerStyle))),
-          const SizedBox(width: 24),
-          Expanded(child: Center(child: Text(widget.label2, style: headerStyle)))
-        ])),
-      const SizedBox(height: 8),
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizedBox(
-          height: 140,
-          child: Row(children: [
-            Expanded(
-              child: CupertinoPicker.builder(
-                scrollController: _controller1, itemExtent: 40,
-                onSelectedItemChanged: (i) {
-                  HapticFeedback.selectionClick();
-                  val1 = (i % range1) + widget.min1;
-                  widget.onChanged(val1, val2);
-                },
-                itemBuilder: (ctx, idx) => Center(child: Text(((idx % range1) + widget.min1).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 26, fontWeight: FontWeight.w600, fontFamily: 'Inter'))),
-              )
+    if (widget.is12HourMode) {
+      final isAr = context.locale.languageCode == 'ar';
+      final amLabel = isAr ? 'ص' : 'AM';
+      final pmLabel = isAr ? 'م' : 'PM';
+      final periodHeader = isAr ? 'ص / م' : 'AM / PM';
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Center(child: Text(widget.label1, style: headerStyle)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Center(child: Text(widget.label2, style: headerStyle)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Center(child: Text(periodHeader, style: headerStyle)),
+                ),
+              ],
             ),
-            Text(':', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-            Expanded(
-              child: CupertinoPicker.builder(
-                scrollController: _controller2, itemExtent: 40,
-                onSelectedItemChanged: (i) {
-                  HapticFeedback.selectionClick();
-                  val2 = (i % (widget.max2 + 1));
-                  widget.onChanged(val1, val2);
-                },
-                itemBuilder: (ctx, idx) => Center(child: Text((idx % (widget.max2 + 1)).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 26, fontWeight: FontWeight.w600, fontFamily: 'Inter'))),
-              )
+          ),
+          const SizedBox(height: 8),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              height: 140,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CupertinoPicker.builder(
+                      scrollController: _controller1,
+                      itemExtent: 40,
+                      onSelectedItemChanged: (i) {
+                        HapticFeedback.selectionClick();
+                        val1 = (i % 12) + 1;
+                        _notifyChange();
+                      },
+                      itemBuilder: (ctx, idx) => Center(
+                        child: Text(
+                          ((idx % 12) + 1).toString().padLeft(2, '0'),
+                          style: TextStyle(
+                            color: widget.textColor,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    ':',
+                    style: TextStyle(
+                      color: widget.textColor.withValues(alpha: 0.3),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Expanded(
+                    child: CupertinoPicker.builder(
+                      scrollController: _controller2,
+                      itemExtent: 40,
+                      onSelectedItemChanged: (i) {
+                        HapticFeedback.selectionClick();
+                        val2 = i % (widget.max2 + 1);
+                        _notifyChange();
+                      },
+                      itemBuilder: (ctx, idx) => Center(
+                        child: Text(
+                          (idx % (widget.max2 + 1)).toString().padLeft(2, '0'),
+                          style: TextStyle(
+                            color: widget.textColor,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        setState(() => isPm = !isPm);
+                        _notifyChange();
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: isPm
+                              ? const Color(0xFF1A237E).withValues(alpha: 0.3)
+                              : const Color(0xFFFFF176).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isPm
+                                ? const Color(0xFF3949AB)
+                                : const Color(0xFFFFCA28),
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            isPm ? pmLabel : amLabel,
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: isPm
+                                  ? const Color(0xFF64B5F6)
+                                  : const Color(0xFFFFCA28),
+                              fontWeight: FontWeight.w900,
+                              fontFamily: isAr ? 'Tajawal' : 'Inter',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ])
-        )
-      )
-    ]);
+          ),
+        ],
+      );
+    }
+
+    final int range1 = widget.max1 - widget.min1 + 1;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            children: [
+              Expanded(
+                child: Center(child: Text(widget.label1, style: headerStyle)),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Center(child: Text(widget.label2, style: headerStyle)),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            height: 140,
+            child: Row(
+              children: [
+                Expanded(
+                  child: CupertinoPicker.builder(
+                    scrollController: _controller1,
+                    itemExtent: 40,
+                    onSelectedItemChanged: (i) {
+                      HapticFeedback.selectionClick();
+                      val1 = (i % range1) + widget.min1;
+                      _notifyChange();
+                    },
+                    itemBuilder: (ctx, idx) => Center(
+                      child: Text(
+                        ((idx % range1) + widget.min1)
+                            .toString()
+                            .padLeft(2, '0'),
+                        style: TextStyle(
+                          color: widget.textColor,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Text(
+                  ':',
+                  style: TextStyle(
+                    color: widget.textColor.withValues(alpha: 0.3),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Expanded(
+                  child: CupertinoPicker.builder(
+                    scrollController: _controller2,
+                    itemExtent: 40,
+                    onSelectedItemChanged: (i) {
+                      HapticFeedback.selectionClick();
+                      val2 = i % (widget.max2 + 1);
+                      _notifyChange();
+                    },
+                    itemBuilder: (ctx, idx) => Center(
+                      child: Text(
+                        (idx % (widget.max2 + 1)).toString().padLeft(2, '0'),
+                        style: TextStyle(
+                          color: widget.textColor,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
-class HijriWheelPicker extends StatefulWidget {
+// 🌟 3. الرزنامة الهجرية الشبكية الاحترافية (مع تظليل وتعطيل الأيام السابقة تماماً مثل الرزنامة الميلادية)
+class HijriCalendarDatePicker extends StatefulWidget {
   final DateTime initialDate;
-  final ValueChanged<DateTime> onChanged;
-  final Color textColor, surfaceColor;
+  final DateTime firstDate;
+  final DateTime lastDate;
+  final ValueChanged<DateTime> onDateChanged;
+  final Color textColor;
+  final Color accentColor;
 
-  const HijriWheelPicker({super.key, required this.initialDate, required this.onChanged, required this.textColor, required this.surfaceColor});
+  const HijriCalendarDatePicker({
+    super.key,
+    required this.initialDate,
+    required this.firstDate,
+    required this.lastDate,
+    required this.onDateChanged,
+    required this.textColor,
+    required this.accentColor,
+  });
 
   @override
-  State<HijriWheelPicker> createState() => _HijriWheelPickerState();
+  State<HijriCalendarDatePicker> createState() =>
+      _HijriCalendarDatePickerState();
 }
 
-class _HijriWheelPickerState extends State<HijriWheelPicker> {
-  late int hDay, hMonth, hYear;
-  late FixedExtentScrollController _dayController, _monthController, _yearController;
-  final int minYearOffset = -1;
-  final int maxYearOffset = 5;
+class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
+  late DateTime _selectedDate;
+  late DateTime _minDate;
+  late DateTime _maxDate;
+  late int _displayedHijriYear;
+  late int _displayedHijriMonth;
 
   @override
   void initState() {
     super.initState();
-    final hDate = HijriCalendar.fromDate(widget.initialDate);
-    hYear = hDate.hYear; hMonth = hDate.hMonth; hDay = hDate.hDay;
-    _dayController = FixedExtentScrollController(initialItem: 10000 * 30 + (hDay - 1));
-    _monthController = FixedExtentScrollController(initialItem: 10000 * 12 + (hMonth - 1));
-    int yearIndex = hYear - (HijriCalendar.now().hYear + minYearOffset);
-    if (yearIndex < 0) yearIndex = 0;
-    _yearController = FixedExtentScrollController(initialItem: yearIndex);
+    _minDate = DateTime(
+      widget.firstDate.year,
+      widget.firstDate.month,
+      widget.firstDate.day,
+    );
+    _maxDate = DateTime(
+      widget.lastDate.year,
+      widget.lastDate.month,
+      widget.lastDate.day,
+    );
+
+    final cleanInit = DateTime(
+      widget.initialDate.year,
+      widget.initialDate.month,
+      widget.initialDate.day,
+    );
+    _selectedDate = cleanInit.isBefore(_minDate) ? _minDate : cleanInit;
+
+    final hInit = HijriCalendar.fromDate(_selectedDate);
+    _displayedHijriYear = hInit.hYear;
+    _displayedHijriMonth = hInit.hMonth;
   }
 
-  @override
-  void dispose() {
-    _dayController.dispose(); _monthController.dispose(); _yearController.dispose();
-    super.dispose();
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  bool get _canGoPrevMonth {
+    int prevM = _displayedHijriMonth - 1;
+    int prevY = _displayedHijriYear;
+    if (prevM < 1) {
+      prevM = 12;
+      prevY--;
+    }
+    final hCal = HijriCalendar();
+    final daysInPrev = hCal.getDaysInMonth(prevY, prevM);
+    final lastDayOfPrev = hCal.hijriToGregorian(prevY, prevM, daysInPrev);
+    final cleanLast = DateTime(
+      lastDayOfPrev.year,
+      lastDayOfPrev.month,
+      lastDayOfPrev.day,
+    );
+    return !cleanLast.isBefore(_minDate);
   }
 
-  void _updateDate() {
-    int maxDays = HijriCalendar().getDaysInMonth(hYear, hMonth);
-    if (hDay > maxDays) hDay = maxDays;
-    final updatedHijri = HijriCalendar()..hYear = hYear..hMonth = hMonth..hDay = hDay;
-    widget.onChanged(updatedHijri.hijriToGregorian(hYear, hMonth, hDay));
+  bool get _canGoNextMonth {
+    int nextM = _displayedHijriMonth + 1;
+    int nextY = _displayedHijriYear;
+    if (nextM > 12) {
+      nextM = 1;
+      nextY++;
+    }
+    final hCal = HijriCalendar();
+    final firstDayOfNext = hCal.hijriToGregorian(nextY, nextM, 1);
+    final cleanFirst = DateTime(
+      firstDayOfNext.year,
+      firstDayOfNext.month,
+      firstDayOfNext.day,
+    );
+    return !cleanFirst.isAfter(_maxDate);
+  }
+
+  void _changeMonth(int delta) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      int m = _displayedHijriMonth + delta;
+      int y = _displayedHijriYear;
+      if (m > 12) {
+        m = 1;
+        y++;
+      } else if (m < 1) {
+        m = 12;
+        y--;
+      }
+      _displayedHijriMonth = m;
+      _displayedHijriYear = y;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final headerStyle = TextStyle(color: widget.textColor.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.bold);
-    int currentHijriYear = HijriCalendar.now().hYear;
-    int yearRange = maxYearOffset - minYearOffset + 1;
+    final hCal = HijriCalendar();
+    final int daysInMonth = hCal.getDaysInMonth(
+      _displayedHijriYear,
+      _displayedHijriMonth,
+    );
+    final DateTime firstGreg = hCal.hijriToGregorian(
+      _displayedHijriYear,
+      _displayedHijriMonth,
+      1,
+    );
+    final int leadingEmpty = firstGreg.weekday % 7;
+    final int totalCells = leadingEmpty + daysInMonth;
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Directionality(textDirection: TextDirection.ltr, child: Row(children: [
-        Expanded(child: Center(child: Text('add_screen.year'.tr(), style: headerStyle))), const SizedBox(width: 8),
-        Expanded(flex: 2, child: Center(child: Text('add_screen.month'.tr(), style: headerStyle))), const SizedBox(width: 8),
-        Expanded(child: Center(child: Text('add_screen.day'.tr(), style: headerStyle)))
-      ])),
-      const SizedBox(height: 8),
-      Directionality(textDirection: TextDirection.ltr, child: SizedBox(height: 140, child: Row(children: [
-        Expanded(child: CupertinoPicker.builder(scrollController: _yearController, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); hYear = currentHijriYear + minYearOffset + i; _updateDate(); }, childCount: yearRange, itemBuilder: (ctx, idx) => Center(child: Text('${currentHijriYear + minYearOffset + idx}', style: TextStyle(color: widget.textColor, fontSize: 20, fontWeight: FontWeight.w600, fontFamily: 'Inter'))))),
-        Text('/', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-        Expanded(flex: 2, child: CupertinoPicker.builder(scrollController: _monthController, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); hMonth = (i % 12) + 1; _updateDate(); }, itemBuilder: (ctx, idx) => Center(child: Text('hijri.m${(idx % 12) + 1}'.tr(), style: TextStyle(color: widget.textColor, fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Tajawal'))))),
-        Text('/', style: TextStyle(color: widget.textColor.withValues(alpha: 0.3), fontSize: 24, fontWeight: FontWeight.bold)),
-        Expanded(child: CupertinoPicker.builder(scrollController: _dayController, itemExtent: 40, onSelectedItemChanged: (i) { HapticFeedback.selectionClick(); hDay = (i % 60) + 1; _updateDate(); }, itemBuilder: (ctx, idx) => Center(child: Text(((idx % 60) + 1).toString().padLeft(2, '0'), style: TextStyle(color: widget.textColor, fontSize: 22, fontWeight: FontWeight.w600, fontFamily: 'Inter'))))),
-      ])))
-    ]);
+    final langCode = context.locale.languageCode;
+    final safeLocale = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final baseSunday = DateTime(2026, 10, 18);
+
+    final monthTitle =
+        '${'hijri.m$_displayedHijriMonth'.tr()} $_displayedHijriYear ${'common.ah'.tr()}';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 1. شريط الشهر والسنة الهجرية وأزرار التنقل
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: _canGoPrevMonth ? () => _changeMonth(-1) : null,
+              icon: Icon(
+                isRTL ? LucideIcons.chevron_right : LucideIcons.chevron_left,
+                color: _canGoPrevMonth
+                    ? widget.textColor
+                    : widget.textColor.withValues(alpha: 0.2),
+                size: 20,
+              ),
+            ),
+            Text(
+              monthTitle,
+              style: TextStyle(
+                color: widget.textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: _canGoNextMonth ? () => _changeMonth(1) : null,
+              icon: Icon(
+                isRTL ? LucideIcons.chevron_left : LucideIcons.chevron_right,
+                color: _canGoNextMonth
+                    ? widget.textColor
+                    : widget.textColor.withValues(alpha: 0.2),
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // 2. صف أسماء أيام الأسبوع
+        Row(
+          children: List.generate(7, (index) {
+            final d = baseSunday.add(Duration(days: index));
+            final label = DateFormat('E', safeLocale).format(d);
+            return Expanded(
+              child: Center(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: widget.textColor.withValues(alpha: 0.5),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 8),
+
+        // 3. شبكة أيام الشهر الهجري (مع تظليل وتعطيل الأيام الماضية)
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: totalCells,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            mainAxisSpacing: 6,
+            crossAxisSpacing: 6,
+            childAspectRatio: 1.05,
+          ),
+          itemBuilder: (context, index) {
+            if (index < leadingEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            final int hDay = index - leadingEmpty + 1;
+            final DateTime gRaw = hCal.hijriToGregorian(
+              _displayedHijriYear,
+              _displayedHijriMonth,
+              hDay,
+            );
+            final DateTime cellDate = DateTime(gRaw.year, gRaw.month, gRaw.day);
+
+            final bool isDisabled =
+                cellDate.isBefore(_minDate) || cellDate.isAfter(_maxDate);
+            final bool isSelected = _isSameDay(cellDate, _selectedDate);
+            final bool isToday = _isSameDay(cellDate, _minDate);
+
+            return GestureDetector(
+              onTap: isDisabled
+                  ? null
+                  : () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedDate = cellDate);
+                      widget.onDateChanged(cellDate);
+                    },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? widget.accentColor
+                      : (isDisabled
+                          ? widget.textColor.withValues(alpha: 0.04)
+                          : Colors.transparent),
+                  border: isToday && !isSelected
+                      ? Border.all(color: widget.accentColor, width: 1.5)
+                      : null,
+                ),
+                child: Text(
+                  '$hDay',
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : (isDisabled
+                            ? widget.textColor.withValues(alpha: 0.24)
+                            : (isToday
+                                ? widget.accentColor
+                                : widget.textColor)),
+                    fontSize: 14,
+                    fontWeight: (isSelected || isToday)
+                        ? FontWeight.w900
+                        : FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 }

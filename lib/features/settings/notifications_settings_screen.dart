@@ -34,7 +34,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     final settings = ref.watch(settingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
     const accentColor = Color(0xFFD4AF37);
@@ -362,31 +362,155 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     );
   }
 
-  void _showDefaultsDialog(BuildContext context, dynamic settings, bool isHabit, bool isDark, Color surfaceColor, Color textColor, Color accentColor) {
-    int tempLevel = isHabit ? settings.defaultHabitAlertLevel : settings.defaultTaskAlertLevel;
-    String tempTone = isHabit ? settings.defaultHabitTone : settings.defaultTaskTone;
-    if (!_availableTones.containsKey(tempTone)) tempTone = 'assets/audio/default.mp3';
+  void _showDefaultsDialog(
+    BuildContext context,
+    dynamic settings,
+    bool isHabit,
+    bool isDark,
+    Color surfaceColor,
+    Color textColor,
+    Color accentColor,
+  ) {
+    int tempLevel = isHabit
+        ? settings.defaultHabitAlertLevel
+        : settings.defaultTaskAlertLevel;
+    String tempTone =
+        isHabit ? settings.defaultHabitTone : settings.defaultTaskTone;
+    double tempVolume =
+        isHabit ? settings.defaultHabitVolume : settings.defaultTaskVolume;
+    if (!_availableTones.containsKey(tempTone)) {
+      tempTone = 'assets/audio/default.mp3';
+    }
+    final isAr = context.locale.languageCode == 'ar';
 
     showModalBottomSheet(
-      context: context, backgroundColor: surfaceColor, isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      context: context,
+      backgroundColor: surfaceColor,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + 20, top: 20, left: 20, right: 20),
+        builder: (context, setSheetState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            top: 20,
+            left: 20,
+            right: 20,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('notifications.defaults_title'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+              Center(
+                child: Text(
+                  isHabit
+                      ? 'notifications.continuous_habits'.tr()
+                      : 'notifications.casual_tasks'.tr(),
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  _buildSegmentButton(
+                    context,
+                    isAr ? 'بدون إشعار' : 'No Notification',
+                    tempLevel == 0,
+                    textColor,
+                    accentColor,
+                    () => setSheetState(() => tempLevel = 0),
+                  ),
+                  const SizedBox(width: 6),
+                  _buildSegmentButton(
+                    context,
+                    isAr ? 'إشعار على الستارة' : 'Curtain Notif',
+                    tempLevel == 1,
+                    textColor,
+                    accentColor,
+                    () => setSheetState(() => tempLevel = 1),
+                  ),
+                  const SizedBox(width: 6),
+                  _buildSegmentButton(
+                    context,
+                    'alerts.alarm'.tr(),
+                    tempLevel == 2,
+                    textColor,
+                    accentColor,
+                    () => setSheetState(() => tempLevel = 2),
+                  ),
+                ],
+              ),
+              if (tempLevel == 2) ...[
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: textColor.withValues(alpha: 0.12)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: tempTone,
+                      dropdownColor: surfaceColor,
+                      isExpanded: true,
+                      items: _availableTones.entries
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e.key,
+                              child: Text(
+                                e.value,
+                                style: TextStyle(color: textColor),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) =>
+                          setSheetState(() => tempTone = val!),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Slider(
+                  value: tempVolume,
+                  min: 0.1,
+                  max: 1.0,
+                  activeColor: accentColor,
+                  onChanged: (v) => setSheetState(() => tempVolume = v),
+                ),
+              ],
               const SizedBox(height: 20),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: accentColor, minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentColor,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
                 onPressed: () {
-                  ref.read(settingsProvider.notifier).updateProductivityDefaults(isTask: !isHabit, alertLevel: tempLevel, tone: tempTone, volume: 1.0);
+                  ref
+                      .read(settingsProvider.notifier)
+                      .updateProductivityDefaults(
+                        isTask: !isHabit,
+                        alertLevel: tempLevel,
+                        tone: tempTone,
+                        volume: tempVolume,
+                      );
                   Navigator.pop(context);
                 },
-                child: Text('notifications.save'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              )
+                child: Text(
+                  'notifications.save'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

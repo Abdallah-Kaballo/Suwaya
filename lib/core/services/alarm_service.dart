@@ -45,16 +45,21 @@ class AlarmService {
       );
     }
 
-    final parts = rawPayload.split('|');
-    final payloadTitle = (parts.isNotEmpty && parts[0].isNotEmpty && parts[0] != 'تنبيه')
-        ? parts[0]
-        : fallbackTitle;
+    // 🌟 تنظيف البادئة (curtain| أو fullscreen|) بعد التحقق من وجود rawPayload
+    final cleanPayload = rawPayload.replaceFirst(
+      RegExp(r'^(curtain|fullscreen)\|'),
+      '',
+    );
+    final parts = cleanPayload.split('|');
+
+    final payloadTitle =
+        (parts.isNotEmpty && parts[0].isNotEmpty && parts[0] != 'تنبيه')
+            ? parts[0]
+            : fallbackTitle;
     final colorVal = parts.length > 1
         ? (int.tryParse(parts[1]) ?? 0xFFD4AF37)
         : 0xFFD4AF37;
-    final snoozes = parts.length > 2
-        ? (int.tryParse(parts[2]) ?? 0)
-        : 0;
+    final snoozes = parts.length > 2 ? (int.tryParse(parts[2]) ?? 0) : 0;
 
     return ParsedAlarmData(
       title: payloadTitle,
@@ -86,7 +91,7 @@ class AlarmService {
       loopAudio: true,
       vibrate: vibrate,
       androidFullScreenIntent: fullScreenIntent,
-      payload: '$title|$colorValue|0',
+      payload: 'fullscreen|$title|$colorValue|0',
       volumeSettings: VolumeSettings.fade(
         volume: volume,
         fadeDuration: const Duration(seconds: 5),
@@ -113,7 +118,7 @@ class AlarmService {
     if (parsed.snoozeCount >= maxSnoozes) return;
 
     final newPayload =
-        '${parsed.title}|${parsed.colorValue}|${parsed.snoozeCount + 1}';
+        'fullscreen|${parsed.title}|${parsed.colorValue}|${parsed.snoozeCount + 1}';
 
     final newSettings = currentSettings.copyWith(
       dateTime: DateTime.now().add(Duration(minutes: snoozeMinutes)),

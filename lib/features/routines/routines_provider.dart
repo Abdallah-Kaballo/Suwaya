@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/repositories/routine_repository.dart';
+import '../../core/utils/time_formatters.dart';
 
 // 🌟 مزود حالة لتتبع الروتين المتوهج حالياً
 final highlightedRoutineProvider = StateProvider<int?>((ref) => null);
@@ -110,6 +111,18 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
 
   for (final r in routines) {
     if (!r.isActive) continue;
+
+    // 🌟 فحص يوم الأسبوع حسب نظام الروتين (سويعي يبدأ من المغرب / مدني يبدأ من 00:00 منتصف الليل)
+    if (r.recurrenceDays != null && r.recurrenceDays!.isNotEmpty) {
+      final logicalDate = getLogicalDateForMode(
+        isAstroTime: r.isAstroTime,
+        astroState: astroState,
+        civilReference: virtualDateTimeNotifier.value,
+      );
+      if (!r.recurrenceDays!.contains(logicalDate.weekday)) {
+        continue;
+      }
+    }
 
     double startAngle = 0;
     double sweepAngle = 0;

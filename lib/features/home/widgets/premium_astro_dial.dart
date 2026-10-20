@@ -392,12 +392,25 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       final item = tappedMarker.item;
       final isTask = item.taskModel != null;
       HapticFeedback.lightImpact();
+
+      // 🌟 التعديل 10: إذا كان السهم لأحد أوقات الليل الخمسة، نرفق معه وقت النهاية لعرض تفاصيله الكاملة
+      DateTime? markerEndTime;
+      if (!isTask) {
+        for (final np in state.ibadatTimings.nightParts) {
+          if (np.id == item.id) {
+            markerEndTime = np.endTime;
+            break;
+          }
+        }
+      }
+
       _selectDialItem(
         DialSelection(
           id: isTask ? item.taskModel!.id.toString() : item.id,
           type: isTask ? DialSelectionType.task : DialSelectionType.prayer,
           title: isTask ? item.taskModel!.title : item.text,
           startTime: item.time,
+          endTime: markerEndTime,
           color: item.color,
         ),
       );
@@ -432,8 +445,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     final settings = ref.read(settingsProvider);
     final markers = <Map<String, dynamic>>[];
     for (final part in state.ibadatTimings.nightParts) {
-      if (settings.activeNightMarkers.contains(part.nameKey)) {
+      if (settings.visibleNightParts.contains(part.id)) {
         markers.add({
+          'id': part.id, // 🌟 تمرير المعرف الدقيق (half_2, third_3, sixth_4, sixth_5, sixth_6)
           'n': ('night_parts.${part.nameKey.replaceAll('np_', '')}').tr(),
           't': part.startTime,
         });
@@ -441,6 +455,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     }
     if (settings.showSunrise) {
       markers.add({
+        'id': 'sunrise',
         'n': 'ibadat.sunrise'.tr(),
         't': state.ibadatTimings.sunrise,
       });
@@ -453,9 +468,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       case 1:
         return 'periods.maghrib'.tr();
       case 2:
-        return 'prayers.isha'.tr();
+        return 'periods.isha'.tr();
       case 3:
-        return 'ibadat.qiyam_tab'.tr();
+        return 'periods.qiyam'.tr();
       case 4:
         return 'periods.fajr'.tr();
       case 5:
@@ -595,6 +610,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               langCode: context.locale.languageCode,
               design: selectedDesign,
               highlightedPeriodId: _highlightedPeriodId,
+              visibleNightParts: settings.visibleNightParts,
             ),
           ),
           _buildLayer(
@@ -717,10 +733,13 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: CustomPaint(painter: painter),
       );
 
-  /// 🌟 خلفية الدائرة المركزية: إيموجي الشمس (☀️) أو القمر (🌑) يملأ 100% من الدائرة المركزية بدون زيادة أو نقصان
+  /// 🌟 خلفية الدائرة المركزية: شمس واقعية نهاراً وقمر واقعي ليلاً يملأ 100% من الدائرة المركزية
+  /// 🌟 التعديل 1: خلفية الدائرة المركزية باستخدام صورتي PNG الدائريتين (ffff و moon.png) بنسبة 100%
   Widget _buildCenterGlow(bool isDark, DialDesign design, bool isDayPhase) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
-    final String bgEmoji = isDayPhase ? '☀️' : '🌑';
+    final String imagePath = isDayPhase
+        ? 'assets/icons/sun.png'
+        : 'assets/icons/moon.png';
 
     return Container(
       width: centerDiameter,
@@ -731,12 +750,12 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             ? []
             : [
                 BoxShadow(
-                  color: isDark ? Colors.black87 : Colors.white,
+                  color: isDark ? Colors.black87 : Colors.black26,
                   blurRadius: 20,
-                  spreadRadius: 4,
+                  spreadRadius: 3,
                 ),
                 BoxShadow(
-                  color: goldBase.withValues(alpha: 0.12),
+                  color: goldBase.withValues(alpha: 0.15),
                   blurRadius: 10,
                   spreadRadius: 1,
                 ),
@@ -747,36 +766,29 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           fit: StackFit.expand,
           alignment: Alignment.center,
           children: [
-            // قاعدة لونية خلف الإيموجي
-            ColoredBox(
-              color: isDark ? const Color(0xFF0D0D14) : const Color(0xFFF0F4F8),
-            ),
-
-            // 🌟 إيموجي الشمس أو القمر مكبّر بدقة ليملأ 100% من حافة الدائرة المركزية إلى حافتها
-            FittedBox(
+            // صورة الشمس أو القمر تملأ 100% من الدائرة المركزية
+            Image.asset(
+              imagePath,
+              width: centerDiameter,
+              height: centerDiameter,
               fit: BoxFit.cover,
-              child: Transform.scale(
-                scale: 1.28,
-                child: Text(
-                  bgEmoji,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 100,
-                    height: 1.0,
-                  ),
-                ),
-              ),
+              filterQuality: FilterQuality.high,
             ),
 
-            // طبقة تظليل شفافة ناعمة لإبراز الساعة الذهبية 00|00|00 في المركز
+            // طبقة تظليل خفيفة متدرجة لإبراز الساعة الذهبية بوضوح فوق الصورة
             DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black.withValues(alpha: isDayPhase ? 0.32 : 0.38),
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.black.withValues(alpha: 0.42),
+                    Colors.black.withValues(alpha: 0.22),
+                  ],
+                ),
                 border: Border.all(
                   color: design == DialDesign.minimal
                       ? (isDark ? Colors.white12 : Colors.black12)
-                      : goldBase.withValues(alpha: 0.75),
+                      : goldBase.withValues(alpha: 0.8),
                   width: 1.5,
                 ),
               ),
@@ -787,7 +799,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     );
   }
 
-  /// 🌟 محتوى المركز: وضع الساعة السويعية 00|00|00 في نقطة المنتصف الهندسي للدائرة تماماً
+  /// 🌟 التعديل 4: حذف نصي (سويعة كذا من كذا) واسم الفترة، وتكبير وتحسين خط الساعة الرقمية في المنتصف تماماً
   Widget _buildCentralTime(
     AstroState state,
     Color textColor,
@@ -816,25 +828,26 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
 
                 return FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Directionality(
-                    textDirection: ui.TextDirection.ltr,
-                    child: Text(
-                      civilTimeString,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: astroGold,
-                        fontFamily: 'Inter',
-                        letterSpacing: 1.0,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black87,
-                            blurRadius: 8,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
+                  child: Text(
+                    civilTimeString,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.w900,
+                      color: astroGold,
+                      fontFamily: 'Inter',
+                      letterSpacing: 1.2,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black,
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                        Shadow(
+                          color: Colors.black87,
+                          blurRadius: 18,
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -845,11 +858,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       );
     }
 
-    // 2. حالة الوقت السويعي (00|00|00 في وسط المركز تماماً)
-    final int displaySuwaya = state.currentSuwayaTime.periodLocalSlotNumber;
-    final String suwayaText =
-        '${'common.suwaya'.tr()} $displaySuwaya ${'common.of'.tr()} ${state.currentPeriod.suwayasCount}';
-
+    // 2. حالة الوقت السويعي (00|00|00 في وسط المركز تماماً وتحته مؤشر السرعة)
     return SizedBox(
       width: centerDiameter,
       height: centerDiameter,
@@ -858,68 +867,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 🌟 القسم العلوي (فوق المنتصف): رقم السويعة واسم الفترة
-            Align(
-              alignment: const Alignment(0.0, -0.62),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Text(
-                            suwayaText,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontFamily: 'Tajawal',
-                              fontWeight: FontWeight.bold,
-                              foreground: Paint()
-                                ..style = PaintingStyle.stroke
-                                ..strokeWidth = 1.0
-                                ..color = Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            suwayaText,
-                            style: const TextStyle(
-                              color: astroGold,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Tajawal',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        _periodTitle(state.currentPeriod),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(color: Colors.black, blurRadius: 6),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 🌟 نقطة المنتصف الهندسي تماماً: الساعة السويعية 00|00|00
+            // 🌟 الساعة الرقمية 00|00|00 في نقطة المنتصف الهندسي بخط أكبر وأفخم
             Align(
               alignment: Alignment.center,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: ValueListenableBuilder<String>(
                   valueListenable: virtualTimeNotifier,
                   builder: (context, virtualTime, child) {
@@ -929,20 +881,21 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                         virtualTime,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w900,
                           color: astroGold,
                           fontFamily: 'Inter',
-                          letterSpacing: 1.0,
+                          letterSpacing: 1.4,
+                          fontFeatures: [ui.FontFeature.tabularFigures()],
                           shadows: [
                             Shadow(
                               color: Colors.black,
-                              blurRadius: 8,
-                              offset: Offset(0, 1),
+                              blurRadius: 10,
+                              offset: Offset(0, 2),
                             ),
                             Shadow(
                               color: Colors.black87,
-                              blurRadius: 14,
+                              blurRadius: 18,
                             ),
                           ],
                         ),
@@ -953,9 +906,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               ),
             ),
 
-            // 🌟 القسم السفلي (تحت المنتصف): مؤشر سرعة التدفق
+            // 🌟 مؤشر سرعة التدفق أسفل الساعة
             const Align(
-              alignment: Alignment(0.0, 0.65),
+              alignment: Alignment(0.0, 0.58),
               child: TimeSpeedIndicator(),
             ),
           ],

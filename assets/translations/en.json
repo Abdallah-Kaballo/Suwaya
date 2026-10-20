@@ -37,7 +37,8 @@
     "delete": "Delete",
     "unknown": "Unknown",
     "startup_error": "Sorry, an error occurred during startup",
-    "save": "Save"
+    "save": "Save",
+    "suwaya_time": "Suwaya Time"
   },
   "night_parts": {
     "half_1": "First Half",
@@ -62,7 +63,9 @@
     "manage_periods": "Manage Tasks, Habits & Periods",
     "no_tasks": "No tasks currently, enjoy your time!",
     "period_info": "Period Info",
-    "suwayas_count": "Suwayas Count:"
+    "suwayas_count": "Suwayas Count:",
+    "edit_dial": "Customize Dial",
+    "dial_markers_settings": "Dial & Night Timings Settings"
   },
   "details": {
     "total_length": "Total Length:",
@@ -122,7 +125,8 @@
       "time_title": "Set Time",
       "time_desc": "Tap to set the task time. Choose between a fixed civil time or a flexible astro time.",
       "modes_title": "Time Modes",
-      "modes_desc": "1. Periods: Link to a specific prayer (e.g., 1st Suwaya of Asr).\n2. Cumulative: Pick a Suwaya index from 0 to 47.\n3. Civil: Standard clock time like a meeting."
+      "modes_desc": "1. Periods: Link to a specific prayer (e.g., 1st Suwaya of Asr).\n2. Cumulative: Pick a Suwaya index from 0 to 47.\n3. Civil: Standard clock time like a meeting.",
+      "night_day": "Night / Day"
     },
     "time_required": "A time must be set first!",
     "permissions_required": "Alarm permissions required!",
@@ -352,7 +356,7 @@
     "qiyam_short": "Divine descent time has started.",
     "period_start": "Period Start",
     "routine_body": "It's time to start the specified period.",
-    "segment_time": "Segment Time",
+    "segment_time": "Suwaya Time",
     "time_for_task": "It's time for your task",
     "alert": "Alert",
     "strong_alerts": "Strong Alerts",
@@ -465,7 +469,9 @@
     "period_4": "Fourth Period",
     "period_5": "Fifth Period",
     "period_6": "Sixth Period",
-    "period_7": "Seventh Period"
+    "period_7": "Seventh Period",
+    "isha": "Isha",
+    "qiyam": "2nd Half of Night"
   },
   "prayers": {
     "fajr": "Fajr",
@@ -579,7 +585,8 @@
     "max_12_hours": "Duration cannot exceed 12 Suwayas / hours",
     "recommended_closest": "Default (Closest to 1.00x speed)",
     "slower_option": "Lower speed (Calmer pace)",
-    "faster_option": "Higher speed (Intensive focus)"
+    "faster_option": "Higher speed (Intensive focus)",
+    "custom_time": "Custom Time"
   },
   "splash": {
     "app_title_ar": "سُـويـعَـة",
@@ -628,12 +635,19 @@
     "auto_renew_note": "All subscriptions are monthly, but \"Auto-Renew\" is turned off by default to ensure your comfort—no future charges will occur without your consent.",
     "restoring_msg": "Checking your previous support...",
     "restore_purchases": "Restore previous badge",
-    "active": "Active"
+    "active": "Active",
+    "format_12h": "12 Hours",
+    "format_24h": "24 Hours"
   },
   "nav": {
     "tasks": "Tasks",
     "ibadat": "Worships",
     "home": "Home",
-    "pomodoro": "Focus"
+    "pomodoro": "Focus",
+    "calendar": "Calendar"
+  },
+  "calendar": {
+    "today": "Today",
+    "no_items_in_phase": "No tasks scheduled in this phase"
   }
 }

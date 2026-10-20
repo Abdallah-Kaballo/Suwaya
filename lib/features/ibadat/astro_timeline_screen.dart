@@ -20,9 +20,7 @@ class AstroTimelineScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final bgColor = isDark
-        ? Theme.of(context).scaffoldBackgroundColor
-        : const Color(0xFFF5F7FA);
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final surfaceColor = isDark ? Theme.of(context).cardColor : Colors.white;
     final textColor = Theme.of(context).colorScheme.onSurface;
     final borderColor = isDark

@@ -3,12 +3,13 @@ import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/repositories/task_repository.dart';
+import '../../core/utils/time_formatters.dart';
 import '../../models/task_model.dart';
 import '../settings/settings_provider.dart';
 
 class TasksState {
-  final List<TaskModel> allTasks; 
-  final List<TaskModel> nowTasks;  
+  final List<TaskModel> allTasks;
+  final List<TaskModel> nowTasks;
   final List<TaskModel> todayTasks;
   final List<TaskModel> horizonTasks;
   final bool isLoading;
@@ -23,21 +24,50 @@ class TasksState {
 }
 
 class TasksNotifier extends Notifier<TasksState> {
+  int _lastObservedCivilDay = -1;
+
   @override
   TasksState build() {
+    // إعادة تحميل المهام عند تغير الفترة الفلكية أو بداية دورة مغرب جديدة
     ref.listen(astroProvider, (prev, next) {
-      if (prev?.currentPeriod.id != next.currentPeriod.id) loadTasks();
+      if (prev?.currentPeriod.id != next.currentPeriod.id ||
+          prev?.cycleAnchors.cycleEndMaghrib !=
+              next.cycleAnchors.cycleEndMaghrib) {
+        loadTasks();
+      }
     });
-    
+
+    // مراقبة عبور منتصف الليل المدني (00:00) لتحديث العادات والمهام المدنية فوراً
+    void onCivilTimeTick() {
+      final currentDay = virtualDateTimeNotifier.value.day;
+      if (_lastObservedCivilDay != -1 && _lastObservedCivilDay != currentDay) {
+        _lastObservedCivilDay = currentDay;
+        if (state.allTasks.isNotEmpty) {
+          _refreshFromMemory(state.allTasks);
+        }
+      } else {
+        _lastObservedCivilDay = currentDay;
+      }
+    }
+
+    virtualDateTimeNotifier.addListener(onCivilTimeTick);
+    ref.onDispose(() {
+      virtualDateTimeNotifier.removeListener(onCivilTimeTick);
+    });
+
     Future.microtask(() => loadTasks());
     return const TasksState();
   }
 
-  Map<String, int>? _getDynamicAstro(TaskModel task, AstroState astroState, DateTime now) {
+  Map<String, int>? _getDynamicAstro(
+    TaskModel task,
+    AstroState astroState,
+    DateTime now,
+  ) {
     if (task.isAstroTime && task.targetPeriodId != null) {
       return {
         'pId': task.targetPeriodId!,
-        'sNum': task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 0
+        'sNum': task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 0,
       };
     }
     if (!task.isAstroTime &&
@@ -89,13 +119,10 @@ class TasksNotifier extends Notifier<TasksState> {
 
   void _refreshFromMemory(List<TaskModel> allTasks) {
     final astroState = ref.read(astroProvider);
-    final currentPeriodId = astroState.periods.isNotEmpty ? astroState.currentPeriod.id : null;
-    
-    // 🌟 الإصلاح هنا: المسار الصحيح للوصول إلى رقم السويعة
+    final currentPeriodId =
+        astroState.periods.isNotEmpty ? astroState.currentPeriod.id : null;
     final currentSuwaya = astroState.currentSuwayaTime.periodLocalSlotNumber;
-    
-    final now = DateTime.now();
-    final weekday = now.weekday;
+    final cityNow = virtualDateTimeNotifier.value;
 
     final List<TaskModel> nowList = [];
     final List<TaskModel> todayList = [];
@@ -104,22 +131,40 @@ class TasksNotifier extends Notifier<TasksState> {
     final Map<int, Map<String, int>> astroCache = {};
 
     for (var task in allTasks) {
+      // 🌟 تحديد اليوم المنطقي للمهمة:
+      // - السويعية: تبدأ من مغرب اليوم السابق (تاريخ cycleEndMaghrib)
+      // - المدنية: تبدأ من 12:00 منتصف الليل (تاريخ cityNow)
+      final logicalToday = getLogicalDateForMode(
+        isAstroTime: task.isAstroTime,
+        astroState: astroState,
+        civilReference: cityNow,
+      );
+      final logicalWeekday = logicalToday.weekday;
+
       if (task.type == TaskType.casual && task.isCompleted) continue;
-      if (task.type == TaskType.permanent && task.isCompletedToday) continue;
+      if (task.type == TaskType.permanent &&
+          task.isCompletedOnDate(logicalToday)) {
+        continue;
+      }
 
       final effectiveDays = task.recurrenceDays;
-      final dynamicAstro = _getDynamicAstro(task, astroState, now);
-      
+      final dynamicAstro = _getDynamicAstro(task, astroState, cityNow);
+
       if (dynamicAstro != null) astroCache[task.id] = dynamicAstro;
 
       final pId = dynamicAstro?['pId'];
       final sNum = dynamicAstro?['sNum'];
-      
+
       if (task.type == TaskType.permanent) {
-        final bool isPermanentToday = effectiveDays == null || effectiveDays.isEmpty || effectiveDays.contains(weekday);
+        final bool isPermanentToday = effectiveDays == null ||
+            effectiveDays.isEmpty ||
+            effectiveDays.contains(logicalWeekday);
         if (isPermanentToday) {
           todayList.add(task);
-          if (pId == currentPeriodId && (sNum == 0 || sNum == currentSuwaya || task.targetSuwayas.contains(-1))) {
+          if (pId == currentPeriodId &&
+              (sNum == 0 ||
+                  sNum == currentSuwaya ||
+                  task.targetSuwayas.contains(-1))) {
             nowList.add(task);
           }
         } else {
@@ -128,12 +173,17 @@ class TasksNotifier extends Notifier<TasksState> {
       } else {
         if (task.targetDate == null) {
           horizonList.add(task);
-        } else if (task.targetDate!.year == now.year && task.targetDate!.month == now.month && task.targetDate!.day == now.day) {
+        } else if (task.targetDate!.year == logicalToday.year &&
+            task.targetDate!.month == logicalToday.month &&
+            task.targetDate!.day == logicalToday.day) {
           todayList.add(task);
-          if (pId == currentPeriodId && (sNum == 0 || sNum == currentSuwaya || task.targetSuwayas.contains(-1))) {
+          if (pId == currentPeriodId &&
+              (sNum == 0 ||
+                  sNum == currentSuwaya ||
+                  task.targetSuwayas.contains(-1))) {
             nowList.add(task);
           }
-        } else if (task.targetDate!.isAfter(now)) {
+        } else if (task.targetDate!.isAfter(logicalToday)) {
           horizonList.add(task);
         }
       }
@@ -157,7 +207,13 @@ class TasksNotifier extends Notifier<TasksState> {
       return aSuwaya.compareTo(bSuwaya);
     });
 
-    state = TasksState(allTasks: allTasks, nowTasks: nowList, todayTasks: todayList, horizonTasks: horizonList, isLoading: false);
+    state = TasksState(
+      allTasks: allTasks,
+      nowTasks: nowList,
+      todayTasks: todayList,
+      horizonTasks: horizonList,
+      isLoading: false,
+    );
   }
 
   Future<void> loadTasks() async {
@@ -172,9 +228,10 @@ class TasksNotifier extends Notifier<TasksState> {
       task.alarmMode = false;
       task.vibrateMode = false;
     } else {
-      task.notifyMode = true; 
+      task.notifyMode = true;
     }
-    final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
+    final updatedTasks =
+        state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
     await ref.read(taskRepositoryProvider).saveTask(task);
   }
@@ -184,9 +241,14 @@ class TasksNotifier extends Notifier<TasksState> {
     return state.allTasks.where((task) {
       if (task.type == TaskType.permanent) {
         final effectiveDays = task.recurrenceDays;
-        return effectiveDays == null || effectiveDays.isEmpty || effectiveDays.contains(weekday);
+        return effectiveDays == null ||
+            effectiveDays.isEmpty ||
+            effectiveDays.contains(weekday);
       } else {
-        return task.targetDate != null && task.targetDate!.year == date.year && task.targetDate!.month == date.month && task.targetDate!.day == date.day;
+        return task.targetDate != null &&
+            task.targetDate!.year == date.year &&
+            task.targetDate!.month == date.month &&
+            task.targetDate!.day == date.day;
       }
     }).toList();
   }
@@ -204,7 +266,8 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> deleteMultipleTasks(List<int> ids) async {
-    final updatedList = state.allTasks.where((t) => !ids.contains(t.id)).toList();
+    final updatedList =
+        state.allTasks.where((t) => !ids.contains(t.id)).toList();
     _refreshFromMemory(updatedList);
     for (var id in ids) {
       await ref.read(taskRepositoryProvider).deleteTask(id);
@@ -212,21 +275,32 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> toggleTaskStatus(TaskModel task) async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final astroState = ref.read(astroProvider);
+    final logicalToday = getLogicalDateForMode(
+      isAstroTime: task.isAstroTime,
+      astroState: astroState,
+      civilReference: virtualDateTimeNotifier.value,
+    );
     bool isAchievedNow = false;
 
     if (task.type == TaskType.permanent) {
-      final wasCompletedToday = task.isCompletedToday;
+      final wasCompletedToday = task.isCompletedOnDate(logicalToday);
       if (!wasCompletedToday) {
-        task.lastCompletedDate = today;
-        task.completionHistory = [...task.completionHistory, today];
-        task.currentStreak = task.completionHistory.length == 1 ? 1 : task.currentStreak + 1;
-        if (task.currentStreak > task.longestStreak) task.longestStreak = task.currentStreak;
+        task.lastCompletedDate = logicalToday;
+        task.completionHistory = [...task.completionHistory, logicalToday];
+        task.currentStreak =
+            task.completionHistory.length == 1 ? 1 : task.currentStreak + 1;
+        if (task.currentStreak > task.longestStreak) {
+          task.longestStreak = task.currentStreak;
+        }
         isAchievedNow = true;
       } else {
         task.lastCompletedDate = null;
-        task.completionHistory = task.completionHistory.where((d) => !(d.year == today.year && d.month == today.month && d.day == today.day)).toList();
+        task.completionHistory = task.completionHistory
+            .where((d) => !(d.year == logicalToday.year &&
+                d.month == logicalToday.month &&
+                d.day == logicalToday.day))
+            .toList();
         task.currentStreak = (task.currentStreak - 1).clamp(0, 9999);
         isAchievedNow = false;
       }
@@ -235,12 +309,13 @@ class TasksNotifier extends Notifier<TasksState> {
       task.completedAt = task.isCompleted ? DateTime.now() : null;
       isAchievedNow = task.isCompleted;
     }
-    
-    final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
+
+    final updatedTasks =
+        state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
 
     await ref.read(taskRepositoryProvider).saveTask(task);
-    
+
     try {
       if (isAchievedNow) {
         ref.read(settingsProvider.notifier).updateGlobalStreak();
@@ -248,19 +323,28 @@ class TasksNotifier extends Notifier<TasksState> {
     } catch (_) {}
   }
 
-  Future<void> rescheduleTask(TaskModel task, int periodId, int suwaya, int vMin) async {
+  Future<void> rescheduleTask(
+    TaskModel task,
+    int periodId,
+    int suwaya,
+    int vMin,
+  ) async {
     task.isAstroTime = true;
     task.targetPeriodId = periodId;
     task.targetSuwayas = [suwaya];
     task.targetVirtualMinute = vMin;
-    task.targetCivilTimeMinutes = null; 
+    task.targetCivilTimeMinutes = null;
 
-    final updatedTasks = state.allTasks.map((t) => t.id == task.id ? task : t).toList();
+    final updatedTasks =
+        state.allTasks.map((t) => t.id == task.id ? task : t).toList();
     _refreshFromMemory(updatedTasks);
-    
+
     await ref.read(taskRepositoryProvider).saveTask(task);
   }
 }
 
-final tasksProvider = NotifierProvider<TasksNotifier, TasksState>(TasksNotifier.new);
-final currentTasksProvider = FutureProvider<List<TaskModel>>((ref) async => ref.watch(tasksProvider).nowTasks);
+final tasksProvider =
+    NotifierProvider<TasksNotifier, TasksState>(TasksNotifier.new);
+final currentTasksProvider = FutureProvider<List<TaskModel>>(
+  (ref) async => ref.watch(tasksProvider).nowTasks,
+);

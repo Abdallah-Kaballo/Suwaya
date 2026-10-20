@@ -18,10 +18,10 @@ class GeoDatabaseService {
     if (_database != null) return;
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final path = join(dir.path, "Cities_V1.1.db");
+      final path = join(dir.path, "Cities_V2.db");
 
       if (!File(path).existsSync()) {
-        final data = await rootBundle.load("assets/db/Cities_V1.1.db");
+        final data = await rootBundle.load("assets/db/Cities_V2.db");
         final bytes = data.buffer.asUint8List();
         await File(path).writeAsBytes(bytes, flush: true);
       }

@@ -101,9 +101,8 @@ class _MiniDialPainter extends CustomPainter {
       String pName = '';
       switch (period.id) {
         case 1: pName = 'periods.maghrib'.tr(); break;
-        // 🌟 ضمان الأسماء المفقودة
-        case 2: pName = 'periods.isha'.tr(); if(pName == 'periods.isha') pName = 'العشاء'; break;
-        case 3: pName = 'نصف الليل الثاني'; break; 
+        case 2: pName = 'periods.isha'.tr(); break;
+        case 3: pName = 'periods.qiyam'.tr(); break;
         case 4: pName = 'periods.fajr'.tr(); break;
         case 5: pName = 'periods.duha'.tr(); break;
         case 6: pName = 'periods.dhuhr'.tr(); break;

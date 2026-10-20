@@ -200,44 +200,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   textColor,
                   primaryColor,
                 ),
-                // 🌟 قسم إعدادات القرص بعد حذف نافذة علامات الليل الذهبية ودمجها بزر أعلى القرص
-                _buildSettingsGroup(
-                  'settings.dial_settings'.tr(),
-                  [
-                    _buildSettingRow(
-                      context,
-                      icon: LucideIcons.refresh_ccw,
-                      title: 'settings.auto_rotate'.tr(),
-                      subtitle: 'settings.auto_rotate_desc'.tr(),
-                      isToggle: true,
-                      toggleValue: settingsState.isDialAutoRotating,
-                      onToggle: (v) => notifier.updateDialAutoRotation(v),
-                      isDark: isDark,
-                      primaryColor: primaryColor,
-                      textColor: textColor,
-                    ),
-                  ],
-                  isDark,
-                  surfaceColor,
-                  borderColor,
-                  textColor,
-                  primaryColor,
-                ),
+                
                 _buildSettingsGroup(
                   'settings.general'.tr(),
                   [
+                    
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.clock_3,
                       title: 'home.civil_time'.tr(),
-                      subtitle:
-                          _civilTimeFormatLabel(settingsState.civilTimeFormat),
+                      subtitle: _civilTimeFormatLabel(
+                        context,
+                        settingsState.civilTimeFormat,
+                      ),
                       onTap: () => _showSelectionSheet(
                         'home.civil_time'.tr(),
                         {
                           civilTimeFormatSystem: 'settings.theme_system'.tr(),
-                          civilTimeFormat12Hour: '12 h',
-                          civilTimeFormat24Hour: '24 h',
+                          civilTimeFormat12Hour: _civilTimeFormatLabel(
+                            context,
+                            civilTimeFormat12Hour,
+                          ),
+                          civilTimeFormat24Hour: _civilTimeFormatLabel(
+                            context,
+                            civilTimeFormat24Hour,
+                          ),
                         },
                         settingsState.civilTimeFormat,
                         notifier.updateCivilTimeFormat,
@@ -250,6 +237,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       primaryColor: primaryColor,
                       textColor: textColor,
                     ),
+
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.languages,
@@ -322,11 +310,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  String _civilTimeFormatLabel(String format) {
-    return switch (format) {
-      civilTimeFormat12Hour => '12 h',
-      civilTimeFormat24Hour => '24 h',
-      _ => 'settings.theme_system'.tr(),
+  /// 🌟 التعديل 8: عرض "12 ساعة" و "24 ساعة" وما يوازيها في اللغات الأخرى مع الإبقاء على خيار النظام كما هو
+  String _civilTimeFormatLabel(BuildContext context, String format) {
+    if (format == civilTimeFormat12Hour) {
+      final tr12 = 'settings.format_12h'.tr();
+      if (tr12 != 'settings.format_12h') return tr12;
+      return _localizedHourLabel(context.locale.languageCode, 12);
+    }
+    if (format == civilTimeFormat24Hour) {
+      final tr24 = 'settings.format_24h'.tr();
+      if (tr24 != 'settings.format_24h') return tr24;
+      return _localizedHourLabel(context.locale.languageCode, 24);
+    }
+    return 'settings.theme_system'.tr();
+  }
+
+  String _localizedHourLabel(String lang, int hours) {
+    return switch (lang) {
+      'ar' => '$hours ساعة',
+      'ur' => '$hours گھنٹے',
+      'ug' => '$hours سائەت',
+      'tr' || 'az' => '$hours Saat',
+      'id' || 'ms' => '$hours Jam',
+      'fr' => '$hours heures',
+      'de' => '$hours Stunden',
+      'es' || 'pt' => '$hours horas',
+      'it' => '$hours ore',
+      'nl' => '$hours uur',
+      'da' => '$hours timer',
+      'ru' => '$hours часов',
+      'hi' => '$hours घंटे',
+      'bn' => '$hours ঘণ্টা',
+      'th' => '$hours ชั่วโมง',
+      'ja' => '$hours時間制',
+      'zh' => '$hours 小时制',
+      'ff' => 'Waktuuji $hours',
+      _ => '$hours Hours',
     };
   }
 
@@ -337,9 +356,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color textColor,
   ) {
     final Color mainColor = textColor;
-    final Color iconBgColor = isDark
-        ? Colors.white.withValues(alpha: 0.05)
-        : Colors.black.withValues(alpha: 0.05);
+    final Color iconBgColor = Theme.of(context).scaffoldBackgroundColor;
+        
     bool isUpdating = false;
 
     return StatefulBuilder(
@@ -682,9 +700,7 @@ class _SettingRow extends StatelessWidget {
   Widget build(BuildContext _) {
     final Color mainColor = textColor;
     final Color baseIconColor = isDark ? Colors.white70 : Colors.black87;
-    final Color iconBgColor = isDark
-        ? Colors.white.withValues(alpha: 0.05)
-        : Colors.black.withValues(alpha: 0.05);
+    final Color iconBgColor = Theme.of(context).scaffoldBackgroundColor;
 
     return Material(
       color: Colors.transparent,

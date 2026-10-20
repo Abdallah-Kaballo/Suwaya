@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // 🌟 تم إضافة هذا الاستيراد لتعريف أزرار الصوت (HardwareKeyboard)
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:alarm/alarm.dart';
@@ -71,7 +72,9 @@ class _LoadingBootstrapScreenState extends State<LoadingBootstrapScreen> {
     } catch (e, stackTrace) {
       debugPrint('💥 Failure in initialization: $e\n$stackTrace');
       if (!mounted) return;
-      runApp(BootstrapFailureScreen(error: e.toString(), onRetry: _loadDatabase));
+      runApp(
+        BootstrapFailureScreen(error: e.toString(), onRetry: _loadDatabase),
+      );
     }
   }
 
@@ -117,26 +120,37 @@ class BootstrapFailureScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.warning_amber_rounded,
-                      color: Colors.amber, size: 64),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber,
+                    size: 64,
+                  ),
                   const SizedBox(height: 24),
-                  Text(errorTitle,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    errorTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                        color: Colors.black45,
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Text(error,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                            color: Colors.redAccent, fontSize: 12),
-                        maxLines: 5,
-                        overflow: TextOverflow.ellipsis),
+                      color: Colors.black45,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      error,
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                      ),
+                      maxLines: 5,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -144,24 +158,36 @@ class BootstrapFailureScreen extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16))),
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
                       onPressed: () {
-                        runApp(const MaterialApp(
+                        runApp(
+                          const MaterialApp(
                             debugShowCheckedModeBanner: false,
                             home: Scaffold(
-                                backgroundColor: Color(0xFF13131A),
-                                body: Center(
-                                    child: CircularProgressIndicator(
-                                        color: Colors.amber)))));
+                              backgroundColor: Color(0xFF13131A),
+                              body: Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.amber,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
                         onRetry();
                       },
                       icon: const Icon(Icons.refresh),
-                      label: Text(retryText,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      label: Text(
+                        retryText,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -184,19 +210,50 @@ class SuwayaApp extends ConsumerStatefulWidget {
 class _SuwayaAppState extends ConsumerState<SuwayaApp> {
   StreamSubscription<AlarmSet>? _alarmSubscription;
   int? _activeRingingAlarmId;
+  Set<int> _currentlyRingingIds = {};
 
   @override
   void initState() {
     super.initState();
-    // 🌟 استخدام التدفق الحديث Alarm.ringing بدلاً من ringStream المهمل
+    // 🌟 مستمع عام لأزرار الصوت لإيقاف الأذان أو المنبه عند الضغط على زر رفع/خفض الصوت
+    HardwareKeyboard.instance.addHandler(_handleGlobalVolumeKeys);
+
     _alarmSubscription = Alarm.ringing.listen((AlarmSet alarmSet) {
+      _currentlyRingingIds = alarmSet.alarms.map((a) => a.id).toSet();
       if (alarmSet.alarms.isNotEmpty) {
         _onAlarmRinging(alarmSet.alarms.first);
+      } else {
+        _activeRingingAlarmId = null;
       }
     });
   }
 
+  bool _handleGlobalVolumeKeys(KeyEvent event) {
+    if (event is KeyDownEvent && _currentlyRingingIds.isNotEmpty) {
+      if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
+          event.logicalKey == LogicalKeyboardKey.audioVolumeDown) {
+        // إذا كانت شاشة المنبه الكاملة مفتوحة، نترك لها معالجة الغفوة،
+        // أما إذا كان إشعار أذان/مهمة على الستارة، نوقفه فوراً بضغطة زر الصوت!
+        if (_activeRingingAlarmId == null) {
+          for (final id in List<int>.from(_currentlyRingingIds)) {
+            Alarm.stop(id);
+          }
+          _currentlyRingingIds.clear();
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   Future<void> _onAlarmRinging(AlarmSettings alarmSettings) async {
+    // 🌟 إذا كان التنبيه من نوع "إشعار على الستارة" (curtain|)، يبقى على الستارة فقط مع زر الإيقاف ولا يفتح شاشة كاملة
+    final isCurtainMode =
+        alarmSettings.payload?.startsWith('curtain|') ?? false;
+    if (isCurtainMode) {
+      return;
+    }
+
     if (_activeRingingAlarmId == alarmSettings.id) return;
     _activeRingingAlarmId = alarmSettings.id;
 
@@ -216,6 +273,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp> {
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleGlobalVolumeKeys);
     _alarmSubscription?.cancel();
     super.dispose();
   }
@@ -226,13 +284,15 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp> {
     final activeColorTheme = ref.watch(themeColorProvider);
     final goRouter = ref.watch(routerProvider);
 
-    final bool isDayTime = ref.watch(astroProvider.select((state) {
-      if (state.periods.isEmpty) {
-        final hour = DateTime.now().hour;
-        return hour >= 6 && hour < 18;
-      }
-      return state.currentSuwayaTime.phase.isDay;
-    }));
+    final bool isDayTime = ref.watch(
+      astroProvider.select((state) {
+        if (state.periods.isEmpty) {
+          final hour = DateTime.now().hour;
+          return hour >= 6 && hour < 18;
+        }
+        return state.currentSuwayaTime.phase.isDay;
+      }),
+    );
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
@@ -240,7 +300,10 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp> {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      themeMode: AppTheme.getThemeMode(settings.themeMode, isDayTime: isDayTime),
+      themeMode: AppTheme.getThemeMode(
+        settings.themeMode,
+        isDayTime: isDayTime,
+      ),
       theme: AppTheme.getLightTheme(activeColorTheme),
       darkTheme: AppTheme.getDarkTheme(activeColorTheme),
       routerConfig: goRouter,

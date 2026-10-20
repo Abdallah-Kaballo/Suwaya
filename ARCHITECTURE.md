@@ -4,7 +4,7 @@
 
 Suwaya is an open-source Astro-Productivity Flutter application built around a pure Dart astronomical time engine (`packages/suwaya_time`)[cite: 1, 3]. It unifies solar and prayer calculations, a 24-Suwaya Maghrib-to-Maghrib time model (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes), casual tasks, continuous habits, routines, dual-mode Pomodoro focus sessions, offline geolocation, notifications, full-screen lockscreen alarms, and 22-language localization[cite: 1, 2, 3].
 
-The implementation is strictly local-first and privacy-focused[cite: 3]. Isar Community (`isar_community`) serves as the primary read/write database for user data, while a bundled read-only SQLite database (`Cities_V1.1.db`) powers offline city search and reverse geocoding[cite: 1, 3]. The project contains no user accounts, cloud synchronization, or behavioral analytics[cite: 3].
+The implementation is strictly local-first and privacy-focused[cite: 3]. Isar Community (`isar_community`) serves as the primary read/write database for user data, while a bundled read-only SQLite database (`Cities_V2.db`) powers offline city search and reverse geocoding[cite: 1, 3]. The project contains no user accounts, cloud synchronization, or behavioral analytics[cite: 3].
 
 For the mathematical and astronomical specification of the V2 time model (`scheduleModelVersion = 2`), see [Suwaya-Time.md](Suwaya-Time.md)[cite: 1, 3].
 
@@ -14,7 +14,7 @@ For the mathematical and astronomical specification of the V2 time model (`sched
 
 ### 2.1 Local-First Persistence
 
-Tasks, habits, routines, settings, and saved locations are persisted locally on the device using Isar Community[cite: 1, 3]. Offline city lookup and Haversine reverse geocoding run locally against `assets/db/Cities_V1.1.db` via `sqflite`[cite: 1]. Dynamic documentation screens (FAQ and Privacy Policy) fetch JSON from the official GitHub repository with automatic local caching in `SharedPreferences` so they remain accessible offline[cite: 2].
+Tasks, habits, routines, settings, and saved locations are persisted locally on the device using Isar Community[cite: 1, 3]. Offline city lookup and Haversine reverse geocoding run locally against `assets/db/Cities_V2.db` via `sqflite`[cite: 1]. Dynamic documentation screens (FAQ and Privacy Policy) fetch JSON from the official GitHub repository with automatic local caching in `SharedPreferences` so they remain accessible offline[cite: 2].
 
 ### 2.2 Dependency Injection via Riverpod
 
@@ -194,7 +194,7 @@ Initialized in `DatabaseService.init()`:
 
 ### 6.2 Offline SQLite City Database (`GeoDatabaseService`)
 
-* Copies `assets/db/Cities_V1.1.db` to the application documents directory on first access and opens it in read-only mode via `sqflite`.
+* Copies `assets/db/Cities_V2.db` to the application documents directory on first access and opens it in read-only mode via `sqflite`.
 
 
 * Normalizes Arabic diacritics and administrative prefixes (`محافظة`, `مدينة`, `Governorate`, etc.) for clean city search.

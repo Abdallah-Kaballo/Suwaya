@@ -13,17 +13,29 @@ String formatCivilTime(
   required String locale,
   required BuildContext context,
 }) {
-  if (format == civilTimeFormatSystem) {
-    return TimeOfDay.fromDateTime(time).format(context);
+  final safeLocale = (locale == 'ff' || locale == 'ug') ? 'en' : locale;
+  final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+
+  // التحقق مما إذا كان المطلوب 24 ساعة (سواء باختيار صريح أو حسب إعدادات نظام الهاتف)
+  final bool use24Hour = format == civilTimeFormat24Hour ||
+      (format == civilTimeFormatSystem &&
+          (MediaQuery.maybeAlwaysUse24HourFormatOf(context) ?? false));
+
+  if (use24Hour) {
+    final time24 = DateFormat('HH:mm', safeLocale).format(time);
+    return '\u202A\u200E$time24\u200E\u202C';
   }
-  final safeLocale = locale == 'ff' || locale == 'ug' ? 'en' : locale;
-  
-  if (format == civilTimeFormat12Hour) {
-    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
-    final pattern = isRTL ? 'a h:mm' : 'h:mm a';
-    return DateFormat(pattern, safeLocale).format(time);
+
+  // 🌟 التعديل 5: نظام 12 ساعة
+  // في اللغات RTL (كالعربية): يظهر رمز (ص/م) يسار الساعة -> [م 5:30]
+  // في اللغات LTR (كالإنجليزية): يظهر رمز (AM/PM) يمين الساعة -> [5:30 PM]
+  final timeDigits = DateFormat('h:mm', safeLocale).format(time);
+  final periodMarker = DateFormat('a', safeLocale).format(time);
+
+  if (isRTL) {
+    return '\u202A\u200E$periodMarker\u200E \u200E$timeDigits\u200E\u202C';
   } else {
-    return DateFormat('HH:mm', safeLocale).format(time);
+    return '\u202A\u200E$timeDigits\u200E \u200E$periodMarker\u200E\u202C';
   }
 }
 
@@ -122,4 +134,16 @@ String formatSuwayaTime(int globalSuwayaIndex, int minute, {String separator = '
     return (globalIndex: (endTotalMinutes ~/ 60) % 24, minute: endTotalMinutes % 60);
   }
   return (globalIndex: startG % 24, minute: 0);
+}
+DateTime getLogicalDateForMode({
+  required bool isAstroTime,
+  required AstroState astroState,
+  DateTime? civilReference,
+}) {
+  final civil = civilReference ?? astroState.virtualTime;
+  if (isAstroTime && astroState.periods.isNotEmpty) {
+    final endMaghrib = astroState.cycleAnchors.cycleEndMaghrib;
+    return DateTime(endMaghrib.year, endMaghrib.month, endMaghrib.day);
+  }
+  return DateTime(civil.year, civil.month, civil.day);
 }
