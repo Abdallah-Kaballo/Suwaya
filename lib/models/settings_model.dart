@@ -26,7 +26,6 @@ class SettingsModel {
   DateTime? lastStreakDate;
 
   String timeDisplayMode = 'suwaya';
-  
   // 🌟 الخيار الجديد: 'emoji' (☀️/🌑) أو 'text' (ن/ل - D/N)
   String suwayaIconMode = 'emoji'; 
 
@@ -157,6 +156,31 @@ class SettingsModel {
 
   double getPeriodVolume(String pId, [double defaultVal = 1.0]) {
     return _getConfig(pId)?.volume ?? defaultVal;
+  }
+  
+  /// 🌟 قراءة وحفظ تصحيح التاريخ الهجري (-2 إلى +2 يوم) داخل Isar دون الحاجة لإعادة توليد settings_model.g.dart
+  int get hijriOffsetDays {
+    for (final c in periodConfigs) {
+      if (c.periodId == 'hijri_offset') {
+        return c.manualOffsetMinutes.clamp(-2, 2);
+      }
+    }
+    return 0;
+  }
+
+  set hijriOffsetDays(int days) {
+    final clamped = days.clamp(-2, 2);
+    final idx = periodConfigs.indexWhere((c) => c.periodId == 'hijri_offset');
+    if (idx >= 0) {
+      periodConfigs[idx].manualOffsetMinutes = clamped;
+    } else {
+      periodConfigs.add(
+        PeriodConfig()
+          ..periodId = 'hijri_offset'
+          ..isEnabled = false
+          ..manualOffsetMinutes = clamped,
+      );
+    }
   }
 
   int getManualOffset(String pId) {

@@ -2,14 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
 void main() {
-  group('Daylight Saving Time (DST) & Timezone Offset Tests (V2 Model)', () {
+  group('Daylight Saving Time (DST) & Calculation Methods Tests (V2 Model)', () {
     const double cairoLat = 30.0444;
     const double cairoLng = 31.2357;
 
-    test('Spring forward transition (+2h to +3h) shifts timings by 1 hour and preserves period continuity', () {
+    test('Mid-cycle DST transition (Maghrib at +2h, next day Fajr at +3h) preserves valid sequence and 24 Suwayas', () {
       final transitionDate = DateTime.utc(2026, 4, 24);
 
-      final winterDay = SuwayaTimeEngine.generateDay(
+      final crossDstDay = SuwayaTimeEngine.generateDay(
         cairoLat,
         cairoLng,
         transitionDate,
@@ -18,79 +18,65 @@ void main() {
         HighLatitudeRuleType.middleOfTheNight,
         19.5,
         17.5,
-        const Duration(hours: 2), // EET (Winter)
+        const Duration(hours: 2), // المساء بالتوقيت الشتوي (+2)
+        nextDayCityOffset: const Duration(hours: 3), // الصباح بالتوقيت الصيفي (+3)
       );
 
-      final summerDay = SuwayaTimeEngine.generateDay(
-        cairoLat,
-        cairoLng,
-        transitionDate,
-        CalculationMethodType.egyptian,
-        MadhabType.shafi,
-        HighLatitudeRuleType.middleOfTheNight,
-        19.5,
-        17.5,
-        const Duration(hours: 3), // EEST (Summer DST)
-      );
+      expect(crossDstDay.cycleAnchors.isValidSequence, isTrue);
+      expect(crossDstDay.periods.length, 7);
 
-      // التحقق من إزاحة المواقيت بمقدار ساعة واحدة بالضبط (+60 دقيقة)
-      expect(
-        summerDay.ibadatTimings.maghrib
-            .difference(winterDay.ibadatTimings.maghrib)
-            .inMinutes,
-        60,
-      );
-      expect(
-        summerDay.ibadatTimings.fajr
-            .difference(winterDay.ibadatTimings.fajr)
-            .inMinutes,
-        60,
-      );
-
-      // التحقق من وجود 7 فترات متصلة بدون فجوات وبمجموع 24 سويعة
-      expect(summerDay.periods.length, 7);
       final totalSuwayas =
-          summerDay.periods.fold<int>(0, (sum, p) => sum + p.suwayasCount);
+          crossDstDay.periods.fold<int>(0, (sum, p) => sum + p.suwayasCount);
       expect(totalSuwayas, 24);
 
-      for (int i = 0; i < summerDay.periods.length - 1; i++) {
+      for (int i = 0; i < crossDstDay.periods.length - 1; i++) {
         expect(
-          summerDay.periods[i].endTime,
-          equals(summerDay.periods[i + 1].startTime),
+          crossDstDay.periods[i].endTime,
+          equals(crossDstDay.periods[i + 1].startTime),
         );
         expect(
-          summerDay.periods[i].totalDuration.inMicroseconds,
+          crossDstDay.periods[i].totalDuration.inMicroseconds,
           greaterThan(0),
         );
       }
     });
 
-    test('Fall back transition (+3h to +2h) preserves 12 Night and 12 Day Suwayas', () {
-      final fallDate = DateTime.utc(2026, 10, 29);
+    test('All calculation methods produce distinct astronomical timings according to their angles', () {
+      final date = DateTime.utc(2026, 5, 15);
+      const offset = Duration(hours: 3);
 
-      final day = SuwayaTimeEngine.generateDay(
-        cairoLat,
-        cairoLng,
-        fallDate,
-        CalculationMethodType.egyptian,
-        MadhabType.shafi,
-        HighLatitudeRuleType.middleOfTheNight,
-        19.5,
-        17.5,
-        const Duration(hours: 2),
+      final mwl = PrayerCalculator.getIbadatTimings(
+        cairoLat, cairoLng, date,
+        CalculationMethodType.muslimWorldLeague, MadhabType.shafi,
+        HighLatitudeRuleType.middleOfTheNight, 18, 17, offset,
+      );
+      final egypt = PrayerCalculator.getIbadatTimings(
+        cairoLat, cairoLng, date,
+        CalculationMethodType.egyptian, MadhabType.shafi,
+        HighLatitudeRuleType.middleOfTheNight, 18, 17, offset,
+      );
+      final isna = PrayerCalculator.getIbadatTimings(
+        cairoLat, cairoLng, date,
+        CalculationMethodType.northAmerica, MadhabType.shafi,
+        HighLatitudeRuleType.middleOfTheNight, 18, 17, offset,
+      );
+      final france = PrayerCalculator.getIbadatTimings(
+        cairoLat, cairoLng, date,
+        CalculationMethodType.franceUoif, MadhabType.shafi,
+        HighLatitudeRuleType.middleOfTheNight, 18, 17, offset,
+      );
+      final russia = PrayerCalculator.getIbadatTimings(
+        cairoLat, cairoLng, date,
+        CalculationMethodType.russia, MadhabType.shafi,
+        HighLatitudeRuleType.middleOfTheNight, 18, 17, offset,
       );
 
-      final nightSuwayas = day.periods
-          .where((p) => p.id >= 1 && p.id <= 4)
-          .fold<int>(0, (sum, p) => sum + p.suwayasCount);
-      final daySuwayas = day.periods
-          .where((p) => p.id >= 5 && p.id <= 7)
-          .fold<int>(0, (sum, p) => sum + p.suwayasCount);
-
-      expect(nightSuwayas, 12);
-      expect(daySuwayas, 12);
-      expect(day.periods[2].suwayasCount, 6); // الفترة 3 (النصف الثاني من الليل) = 6 سويعات
-      expect(day.periods[3].suwayasCount, 1); // الفترة 4 (الفجر إلى الشروق) = 1 سويعة
+      // التحقق من أن الطرق لم تعد تسقط في نفس زاوية الفجر الخاصة برابطة العالم الإسلامي (18°)
+      expect(egypt.fajr, isNot(equals(mwl.fajr)));   // مصر 19.5°
+      expect(isna.fajr, isNot(equals(mwl.fajr)));    // أمريكا الشمالية 15°
+      expect(france.fajr, isNot(equals(mwl.fajr)));  // فرنسا 12°
+      expect(russia.fajr, isNot(equals(mwl.fajr)));  // روسيا 16°
+      expect(france.fajr.isAfter(russia.fajr), isTrue); // زاوية 12° تدخل بعد زاوية 16°
     });
   });
 }

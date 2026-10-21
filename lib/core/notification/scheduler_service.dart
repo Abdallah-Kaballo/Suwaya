@@ -186,8 +186,18 @@ class NotificationScheduler {
     }
 
     for (final t in allTasks) {
+      // 🌟 بصمة شاملة لجميع خصائص المهمة لضمان إعادة الجدولة فور تعديل أي حقل
       sb.write(
-          't=${t.id}:${t.isCompleted}:${t.targetPeriodId}:${t.targetVirtualMinute}:${t.notifyMode}:${t.alarmMode}:${t.scheduleModelVersion};');
+        't=${t.id}:${t.title}:${t.type.index}:${t.isCompleted}:'
+        '${t.lastCompletedDate?.millisecondsSinceEpoch}:'
+        '${t.targetDate?.millisecondsSinceEpoch}:'
+        '${t.isAstroTime}:${t.targetPeriodId}:'
+        '${t.targetSuwayas.join(",")}:${t.targetVirtualMinute}:'
+        '${t.targetCivilTimeMinutes}:'
+        '${t.recurrenceDays?.join(",")}:'
+        '${t.notifyMode}:${t.alarmMode}:${t.vibrateMode}:'
+        '${t.alarmTone}:${t.alarmVolume}:${t.scheduleModelVersion};',
+      );
     }
 
     sb.write(buildRoutineScheduleFingerprint(routines));
@@ -224,10 +234,9 @@ class NotificationScheduler {
       final double ishaAngle = settings.customIshaAngle;
       final DateTime isolatedCityNow = cityNow;
 
-      // 🌟 حساب فرق التوقيت الصيفي/الشتوي لكل يوم من الأيام الـ 7 القادمة على حدة قبل تمريرها للـ Isolate
-      // 🌟 توليد 8 دورات (-1 إلى 6) لضمان تغطية الدورة النشطة حالياً (قبل المغرب) + 7 أيام كاملة قادمة
+      // 🌟 حساب فرق التوقيت لـ 9 أيام (-1 إلى 7) لتوفير إزاحة اليوم الحالي واليوم التالي لكل دورة
       final List<Duration> weekCityOffsets = List.generate(
-        8,
+        9,
         (index) => _getUtcOffsetForDate(
           loc,
           isolatedCityNow.add(Duration(days: index - 1)),
@@ -241,6 +250,7 @@ class NotificationScheduler {
           final int dayOffset = index - 1;
           final targetDate = isolatedCityNow.add(Duration(days: dayOffset));
           final dayCityOffset = weekCityOffsets[index];
+          final nextDayOffset = weekCityOffsets[index + 1];
 
           final ibadat = PrayerCalculator.getIbadatTimings(
             lat,
@@ -252,6 +262,7 @@ class NotificationScheduler {
             fajrAngle,
             ishaAngle,
             dayCityOffset,
+            nextDayCityOffset: nextDayOffset,
             manualOffsets: isolatedManualOffsets,
           );
 
@@ -265,6 +276,7 @@ class NotificationScheduler {
             fajrAngle,
             ishaAngle,
             dayCityOffset,
+            nextDayCityOffset: nextDayOffset,
             manualOffsets: isolatedManualOffsets,
           ).periods;
 

@@ -205,6 +205,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   'settings.general'.tr(),
                   [
                     
+                    
+
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.clock_3,
@@ -228,6 +230,90 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                         settingsState.civilTimeFormat,
                         notifier.updateCivilTimeFormat,
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.calendar,
+                      title: context.locale.languageCode == 'ar'
+                          ? 'تصحيح التاريخ الهجري'
+                          : 'Hijri Date Adjustment',
+                      subtitle: _hijriOffsetLabel(
+                        context,
+                        settingsState.hijriOffsetDays,
+                      ),
+                      onTap: () => _showSelectionSheet(
+                        context.locale.languageCode == 'ar'
+                            ? 'تصحيح التاريخ الهجري'
+                            : 'Hijri Date Adjustment',
+                        {
+                          '-2': context.locale.languageCode == 'ar'
+                              ? '- يومان (-2)'
+                              : '-2 Days',
+                          '-1': context.locale.languageCode == 'ar'
+                              ? '- يوم واحد (-1)'
+                              : '-1 Day',
+                          '0': context.locale.languageCode == 'ar'
+                              ? 'تلقائي (0)'
+                              : 'Default (0)',
+                          '1': context.locale.languageCode == 'ar'
+                              ? '+ يوم واحد (+1)'
+                              : '+1 Day',
+                          '2': context.locale.languageCode == 'ar'
+                              ? '+ يومان (+2)'
+                              : '+2 Days',
+                        },
+                        settingsState.hijriOffsetDays.toString(),
+                        (String val) {
+                          notifier.updateHijriOffsetDays(
+                            int.tryParse(val) ?? 0,
+                          );
+                        },
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+
+                    // 🌟 داخل _buildSettingsGroup('settings.general'.tr(), [...]):
+                    _buildSettingRow(
+                      context,
+                      icon: isDark ? LucideIcons.moon : LucideIcons.sun,
+                      title: 'settings.theme'.tr() != 'settings.theme'
+                          ? 'settings.theme'.tr()
+                          : (context.locale.languageCode == 'ar'
+                              ? 'مظهر التطبيق'
+                              : 'App Theme'),
+                      subtitle: _themeModeLabel(
+                        context,
+                        settingsState.themeMode,
+                      ),
+                      onTap: () => _showSelectionSheet(
+                        'settings.theme'.tr() != 'settings.theme'
+                            ? 'settings.theme'.tr()
+                            : (context.locale.languageCode == 'ar'
+                                ? 'مظهر التطبيق'
+                                : 'App Theme'),
+                        {
+                          'dark': _themeModeLabel(context, 'dark'),
+                          'light': _themeModeLabel(context, 'light'),
+                          'mixed': _themeModeLabel(context, 'mixed'),
+                          'system': _themeModeLabel(context, 'system'),
+                        },
+                        settingsState.themeMode,
+                        notifier.updateThemeMode,
                         isDark,
                         surfaceColor,
                         textColor,
@@ -308,6 +394,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  String _hijriOffsetLabel(BuildContext context, int offset) {
+    final isAr = context.locale.languageCode == 'ar';
+    if (offset == 0) {
+      return isAr ? 'تلقائي (بدون تعديل)' : 'Auto (0 days)';
+    }
+    final sign = offset > 0 ? '+$offset' : '$offset';
+    return isAr ? '$sign يوم' : '$sign days';
   }
 
   /// 🌟 التعديل 8: عرض "12 ساعة" و "24 ساعة" وما يوازيها في اللغات الأخرى مع الإبقاء على خيار النظام كما هو
@@ -668,6 +763,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 }
+
+String _themeModeLabel(BuildContext context, String mode) {
+    final isAr = context.locale.languageCode == 'ar';
+    switch (mode) {
+      case 'light':
+        final tr = 'settings.theme_light'.tr();
+        return tr != 'settings.theme_light'
+            ? tr
+            : (isAr ? 'الوضع الفاتح' : 'Light Mode');
+      case 'dark':
+        final tr = 'settings.theme_dark'.tr();
+        return tr != 'settings.theme_dark'
+            ? tr
+            : (isAr ? 'الوضع الداكن' : 'Dark Mode');
+      case 'mixed':
+        final tr = 'settings.theme_mixed'.tr();
+        return tr != 'settings.theme_mixed'
+            ? tr
+            : (isAr
+                ? 'فلكي مختلط (فاتح نهاراً / داكن ليلاً)'
+                : 'Astro Mixed (Day Light / Night Dark)');
+      case 'system':
+      default:
+        return 'settings.theme_system'.tr();
+  }
+}
+
 
 class _SettingRow extends StatelessWidget {
   final BuildContext context;

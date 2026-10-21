@@ -103,16 +103,52 @@ class AstroState {
   });
 }
 
-enum CalculationMethodType { muslimWorldLeague, egyptian, karachi, ummAlQura, dubai, northAmerica, kuwait, qatar, singapore, tehran, turkey, custom }
+enum CalculationMethodType {
+  muslimWorldLeague,
+  egyptian,
+  karachi,
+  ummAlQura,
+  dubai,
+  northAmerica,
+  kuwait,
+  qatar,
+  singapore,
+  tehran,
+  turkey,
+  franceUoif, // 🌟 إضافة طريقة اتحاد المنظمات الإسلامية في فرنسا (UOIF)
+  russia,     // 🌟 إضافة طريقة الإدارة الدينية لمسلمي روسيا
+  custom,
+}
+
 enum MadhabType { hanafi, shafi }
-enum HighLatitudeRuleType { middleOfTheNight, seventhOfTheNight, twilightAngle }
+
+enum HighLatitudeRuleType {
+  middleOfTheNight,
+  seventhOfTheNight,
+  twilightAngle,
+}
+
 enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
 
 extension AstroStringParsers on String {
   String get _normalized => replaceAll('_', '').toLowerCase();
-  CalculationMethodType toCalculationMethod() => CalculationMethodType.values.firstWhere((e) => e.name.toLowerCase() == _normalized, orElse: () => CalculationMethodType.muslimWorldLeague);
-  MadhabType toMadhab() => MadhabType.values.firstWhere((e) => e.name.toLowerCase() == _normalized, orElse: () => MadhabType.shafi);
-  HighLatitudeRuleType toHighLatRule() => HighLatitudeRuleType.values.firstWhere((e) => e.name.toLowerCase() == _normalized, orElse: () => HighLatitudeRuleType.middleOfTheNight);
+
+  CalculationMethodType toCalculationMethod() =>
+      CalculationMethodType.values.firstWhere(
+        (e) => e.name.toLowerCase() == _normalized,
+        orElse: () => CalculationMethodType.muslimWorldLeague,
+      );
+
+  MadhabType toMadhab() => MadhabType.values.firstWhere(
+        (e) => e.name.toLowerCase() == _normalized,
+        orElse: () => MadhabType.shafi,
+      );
+
+  HighLatitudeRuleType toHighLatRule() =>
+      HighLatitudeRuleType.values.firstWhere(
+        (e) => e.name.toLowerCase() == _normalized,
+        orElse: () => HighLatitudeRuleType.middleOfTheNight,
+      );
 }
 
 extension AstroMapParsers on Map<String, int> {
@@ -120,12 +156,29 @@ extension AstroMapParsers on Map<String, int> {
     final map = <PrayerKey, int>{};
     forEach((key, value) {
       switch (key.toLowerCase()) {
-        case '1': case 'fajr': map[PrayerKey.fajr] = value; break;
-        case 'sunrise': map[PrayerKey.sunrise] = value; break;
-        case '3': case 'dhuhr': map[PrayerKey.dhuhr] = value; break;
-        case '4': case 'asr': map[PrayerKey.asr] = value; break;
-        case '5': case 'maghrib': map[PrayerKey.maghrib] = value; break;
-        case 'isha': map[PrayerKey.isha] = value; break;
+        case '1':
+        case 'fajr':
+          map[PrayerKey.fajr] = value;
+          break;
+        case 'sunrise':
+          map[PrayerKey.sunrise] = value;
+          break;
+        case '3':
+        case 'dhuhr':
+          map[PrayerKey.dhuhr] = value;
+          break;
+        case '4':
+        case 'asr':
+          map[PrayerKey.asr] = value;
+          break;
+        case '5':
+        case 'maghrib':
+          map[PrayerKey.maghrib] = value;
+          break;
+        case '9':
+        case 'isha':
+          map[PrayerKey.isha] = value;
+          break;
       }
     });
     return map;

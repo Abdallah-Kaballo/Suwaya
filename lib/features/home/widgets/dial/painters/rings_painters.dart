@@ -494,6 +494,12 @@ class OuterRingPainter extends CustomPainter {
     final pinEnd = pinStart + (R * 0.04);
     final textR = pinEnd + (R * 0.08);
 
+    final Color pinAndTextColor =
+        isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
+    final List<Shadow> textShadows = isDark
+        ? const [Shadow(color: Colors.black, blurRadius: 4)]
+        : const [Shadow(color: Colors.white, blurRadius: 3)];
+
     final textPainter = TextPainter(
       textDirection: ui.TextDirection.ltr,
       textAlign: TextAlign.center,
@@ -511,7 +517,7 @@ class OuterRingPainter extends CustomPainter {
             Offset(0, -pinStart),
             Offset(0, -pinEnd),
             Paint()
-              ..color = Colors.white
+              ..color = pinAndTextColor
               ..strokeWidth = 2.0
               ..strokeCap = StrokeCap.round,
           );
@@ -519,17 +525,17 @@ class OuterRingPainter extends CustomPainter {
         canvas.drawCircle(
           Offset(0, -pinEnd),
           design == DialDesign.minimal ? 1.0 : 1.5,
-          Paint()..color = Colors.white,
+          Paint()..color = pinAndTextColor,
         );
         if (design != DialDesign.minimal || index % 5 == 0) {
           textPainter.text = TextSpan(
             text: pin.hour.toString().padLeft(2, '0'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Playfair Display',
-              shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+            style: TextStyle(
+              color: pinAndTextColor,
+              fontSize: 14.5,
+              fontWeight: FontWeight.w800,
+              fontFamily: 'Inter',
+              shadows: textShadows,
             ),
           );
           textPainter.layout();
@@ -565,7 +571,7 @@ class OuterRingPainter extends CustomPainter {
             Offset(0, -pinStart),
             Offset(0, -pinEnd),
             Paint()
-              ..color = Colors.white
+              ..color = pinAndTextColor
               ..strokeWidth = 2.0
               ..strokeCap = StrokeCap.round,
           );
@@ -573,7 +579,7 @@ class OuterRingPainter extends CustomPainter {
         canvas.drawCircle(
           Offset(0, -pinEnd),
           design == DialDesign.minimal ? 1.0 : 1.5,
-          Paint()..color = Colors.white,
+          Paint()..color = pinAndTextColor,
         );
 
         int displayNum = (globalLineIndex % 12) + 1;
@@ -581,12 +587,12 @@ class OuterRingPainter extends CustomPainter {
 
         textPainter.text = TextSpan(
           text: '$displayNum $icon',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-            fontFamily: 'Playfair Display',
-            shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+          style: TextStyle(
+            color: pinAndTextColor,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w800,
+            fontFamily: 'Inter',
+            shadows: textShadows,
           ),
         );
         textPainter.layout();
@@ -626,6 +632,132 @@ class OuterRingPainter extends CustomPainter {
     }
     return false;
   }
+}
+
+/// 🌟 رسم التاج الإسطرلابي الذهبي الفخم فوق نقطة المغرب (بنفس حجم وموقع السهم السابق)
+void drawAstrolabeMaghribCrown(Canvas canvas, Offset center, double outerRadius) {
+  final double crownBaseY = center.dy - outerRadius - 2;
+  final double crownHeight = outerRadius * 0.13; // حجم متناسق مع السهم السابق
+  final double crownHalfWidth = crownHeight * 0.92;
+  final Offset apex = Offset(center.dx, crownBaseY - crownHeight);
+
+  // 1. تدرج ذهبي ملكي ثلاثي الأبعاد يطابق الصورة المرفقة
+  final Rect crownBounds = Rect.fromLTRB(
+    center.dx - crownHalfWidth,
+    apex.dy,
+    center.dx + crownHalfWidth,
+    crownBaseY + 4,
+  );
+
+  final Paint goldFillPaint = Paint()
+    ..shader = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFFFFF3B0), // لمعة القمة الذهبية
+        Color(0xFFE5C158), // ذهب ساطع
+        Color(0xFFB8860B), // ذهب عتيق عميق
+        Color(0xFF7A5600), // ظل القاعدة
+      ],
+      stops: [0.0, 0.35, 0.78, 1.0],
+    ).createShader(crownBounds)
+    ..style = PaintingStyle.fill;
+
+  final Paint goldRimPaint = Paint()
+    ..color = const Color(0xFFFFE58F)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.2
+    ..strokeJoin = StrokeJoin.round;
+
+  // 2. المسار الخارجي للتاج الإسطرلابي ذي الفصوص المزخرفة (Cusped Astrolabe Crown)
+  final Path outerCrown = Path()
+    ..moveTo(apex.dx, apex.dy) // القمة المدببة
+    // القوس العلوي الأيمن والفص الأول
+    ..quadraticBezierTo(
+      center.dx + crownHalfWidth * 0.22,
+      apex.dy + crownHeight * 0.28,
+      center.dx + crownHalfWidth * 0.45,
+      apex.dy + crownHeight * 0.34,
+    )
+    ..cubicTo(
+      center.dx + crownHalfWidth * 0.65,
+      apex.dy + crownHeight * 0.38,
+      center.dx + crownHalfWidth * 0.58,
+      apex.dy + crownHeight * 0.58,
+      center.dx + crownHalfWidth * 0.48,
+      apex.dy + crownHeight * 0.64,
+    )
+    // الفص السفلي الأيمن
+    ..quadraticBezierTo(
+      center.dx + crownHalfWidth * 0.88,
+      apex.dy + crownHeight * 0.68,
+      center.dx + crownHalfWidth,
+      crownBaseY,
+    )
+    // تقوس القاعدة الملاصق لحافة القرص
+    ..quadraticBezierTo(
+      center.dx,
+      crownBaseY - crownHeight * 0.12,
+      center.dx - crownHalfWidth,
+      crownBaseY,
+    )
+    // الفص السفلي الأيسر
+    ..quadraticBezierTo(
+      center.dx - crownHalfWidth * 0.88,
+      apex.dy + crownHeight * 0.68,
+      center.dx - crownHalfWidth * 0.48,
+      apex.dy + crownHeight * 0.64,
+    )
+    // الفص العلوي الأيسر والعودة للقمة
+    ..cubicTo(
+      center.dx - crownHalfWidth * 0.58,
+      apex.dy + crownHeight * 0.58,
+      center.dx - crownHalfWidth * 0.65,
+      apex.dy + crownHeight * 0.38,
+      center.dx - crownHalfWidth * 0.45,
+      apex.dy + crownHeight * 0.34,
+    )
+    ..quadraticBezierTo(
+      center.dx - crownHalfWidth * 0.22,
+      apex.dy + crownHeight * 0.28,
+      apex.dx,
+      apex.dy,
+    )
+    ..close();
+
+  // ظل خلفي ناعم لإبراز التاج فوق الحافة
+  canvas.drawShadow(outerCrown, Colors.black.withValues(alpha: 0.65), 4.0, false);
+  canvas.drawPath(outerCrown, goldFillPaint);
+  canvas.drawPath(outerCrown, goldRimPaint);
+
+  // 3. الزخرفة النباتية الإسطرلابية الداخلية (الدمعة العربية الوسطى)
+  final Path innerMedallion = Path()
+    ..moveTo(center.dx, apex.dy + crownHeight * 0.22)
+    ..quadraticBezierTo(
+      center.dx + crownHalfWidth * 0.34,
+      apex.dy + crownHeight * 0.55,
+      center.dx,
+      crownBaseY - crownHeight * 0.16,
+    )
+    ..quadraticBezierTo(
+      center.dx - crownHalfWidth * 0.34,
+      apex.dy + crownHeight * 0.55,
+      center.dx,
+      apex.dy + crownHeight * 0.22,
+    )
+    ..close();
+
+  final Paint filigreePaint = Paint()
+    ..color = const Color(0xFF4A3200).withValues(alpha: 0.65)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.0;
+
+  canvas.drawPath(innerMedallion, filigreePaint);
+  canvas.drawCircle(
+    Offset(center.dx, apex.dy + crownHeight * 0.54),
+    crownHeight * 0.08,
+    Paint()..color = const Color(0xFFFFF3B0),
+  );
 }
 
 class DividerRingPainter extends CustomPainter {

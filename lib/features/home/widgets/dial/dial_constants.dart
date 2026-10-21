@@ -20,17 +20,8 @@ const double kOuterR = 0.98;
 // 🌟 مزود حالة توهج المهام (تم عزله ليكون متاحاً لجميع أجزاء القرص)
 final highlightedTaskProvider = StateProvider<int?>((ref) => null);
 
-// 🌟 دالة مساعدة لتحديد لون المهام حسب التصنيف
-Color getNeonColorForCategory(TaskCategory category) {
-  final catStr = category.toString().toLowerCase();
-  if (catStr.contains('work')) return const Color(0xFF00E5FF);
-  if (catStr.contains('study')) return const Color(0xFF00E676);
-  if (catStr.contains('sport')) return const Color(0xFFFF3D00);
-  if (catStr.contains('worship')) return const Color(0xFFFFC400);
-  if (catStr.contains('entertainment')) return const Color(0xFFFF4081);
-  if (catStr.contains('personal')) return const Color(0xFFD500F9);
-  if (catStr.contains('social')) return const Color(0xFF76FF03);
-  return const Color(0xFF18FFFF);
+Color getNeonColorForCategory(TaskCategory category, {bool isDark = true}) {
+  return category.uiColor(isDark);
 }
 
 // 🌟 دالة مساعدة لتحويل الوقت إلى زاوية على القرص (تم إزالة _ لتصبح عامة)

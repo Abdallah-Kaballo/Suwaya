@@ -13,27 +13,32 @@ class TimeSpeedIndicator extends ConsumerWidget {
     if (astroState.periods.isEmpty) return const SizedBox.shrink();
 
     final speedMultiplier = astroState.timeSpeedMultiplier;
-    final pColor = astroState.currentPeriod.uiColor.adapt(context);
+    final pColor = astroState.currentPeriod.uiColor;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-          color: pColor.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: pColor.withValues(alpha: 0.5), width: 1.0)),
+        color: Colors.black.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: pColor.withValues(alpha: 0.65), width: 1.0),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(speedMultiplier >= 1.0 ? LucideIcons.zap : LucideIcons.hourglass, color: pColor, size: 10),
+          Icon(
+            speedMultiplier >= 1.0 ? LucideIcons.zap : LucideIcons.hourglass,
+            color: pColor,
+            size: 10,
+          ),
           const SizedBox(width: 4),
           Text(
-            // 🌟 التعديل: رقمين بعد الفاصلة
             '${speedMultiplier.toStringAsFixed(2)}x',
             style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.normal,
-                fontFamily: 'Playfair Display',
-                color: Colors.white),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Inter',
+              color: Colors.white,
+            ),
           ),
         ],
       ),

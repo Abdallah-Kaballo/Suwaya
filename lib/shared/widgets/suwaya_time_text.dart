@@ -33,10 +33,13 @@ class ClockTimeText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (civilTime != null) {
+      final defaultCivilColor =
+          isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
       return Directionality(
-        textDirection: ui.TextDirection.ltr, // 🌟 إجبار الأرقام المدنية على الاتجاه الصحيح
+        textDirection: ui.TextDirection.ltr,
         child: Text(
           formatCivilTime(
             civilTime!,
@@ -44,18 +47,19 @@ class ClockTimeText extends ConsumerWidget {
             locale: locale,
             context: context,
           ),
-          // 🌟 تثبيت اللون الأبيض دائماً للمدني
-          style: style.copyWith(color: Colors.white),
+          style: style.copyWith(color: style.color ?? defaultCivilColor),
         ),
       );
     }
 
     final settings = ref.watch(settingsProvider);
+    final suwayaGoldColor =
+        isDark ? const Color(0xFFF2C94C) : const Color(0xFF8A5A00);
+
     return SuwayaTimeText(
       globalSuwayaIndex: globalSuwayaIndex!,
       minute: virtualMinute!,
-      // 🌟 تثبيت اللون الذهبي دائماً للسويعي
-      style: style.copyWith(color: const Color(0xFFF2C94C)),
+      style: style.copyWith(color: suwayaGoldColor),
       iconMode: settings.suwayaIconMode,
       isRTL: isRTL,
     );
@@ -80,21 +84,30 @@ class SuwayaTimeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parts = getSuwayaTimeParts(globalSuwayaIndex, minute, isRTL, iconMode);
-    final fontSize = style.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
-    
-    // 🌟 الفاصل العمودي (خط رأسي أبيض قصير دائماً)
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final parts = getSuwayaTimeParts(
+      globalSuwayaIndex,
+      minute,
+      isRTL,
+      iconMode,
+    );
+    final fontSize =
+        style.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
+
+    final separatorColor = isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : const Color(0xFF111827).withValues(alpha: 0.65);
+
     final separator = Container(
       width: 1.5,
       height: fontSize * 0.58,
       margin: EdgeInsets.symmetric(horizontal: fontSize * 0.15),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: separatorColor,
         borderRadius: BorderRadius.circular(1.0),
       ),
     );
 
-    // 🌟 إجبار الأرقام لتكون (يسار: سويعة، يمين: دقيقة) بدون أن تنقلب
     final numbersWidget = Directionality(
       textDirection: ui.TextDirection.ltr,
       child: Row(
@@ -108,14 +121,16 @@ class SuwayaTimeText extends StatelessWidget {
       ),
     );
 
-    final iconWidget = Text(parts.icon, style: style.copyWith(fontFamily: 'Tajawal'));
+    final iconWidget = Text(
+      parts.icon,
+      style: style.copyWith(fontFamily: 'Tajawal'),
+    );
 
-    // 🌟 وضع الإيموجي في المكان الصحيح (يسار في العربي، يمين في الإنجليزي)
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: isRTL 
-          ? [iconWidget, const SizedBox(width: 4), numbersWidget] 
+      children: isRTL
+          ? [iconWidget, const SizedBox(width: 4), numbersWidget]
           : [numbersWidget, const SizedBox(width: 4), iconWidget],
     );
   }

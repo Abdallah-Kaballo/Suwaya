@@ -144,10 +144,14 @@ class AstroNotifier extends Notifier<AstroState> {
 
       final Duration cycleOffset =
           _getUtcOffsetForLocation(loc, dateToGenerate);
+      final Duration nextDayOffset = _getUtcOffsetForLocation(
+        loc,
+        dateToGenerate.add(const Duration(days: 1)),
+      );
 
       SuwayaDay getOrGenerateDay(DateTime date) {
         final String cacheKey =
-            '${date.year}-${date.month}-${date.day}_${cycleOffset.inMinutes}_${currentOffset.inMinutes}_$fingerprint';
+            '${date.year}-${date.month}-${date.day}_${cycleOffset.inMinutes}_${nextDayOffset.inMinutes}_$fingerprint';
         if (_dayCache.containsKey(cacheKey)) {
           return _dayCache[cacheKey]!;
         } else {
@@ -161,6 +165,7 @@ class AstroNotifier extends Notifier<AstroState> {
             settings.customFajrAngle,
             settings.customIshaAngle,
             cycleOffset,
+            nextDayCityOffset: nextDayOffset, // 🌟 معالجة عبور التوقيت الصيفي/الشتوي ليلاً
             manualOffsets: manualOffsetsMap,
           );
           if (_dayCache.length > 3) _dayCache.clear();
@@ -192,17 +197,24 @@ class AstroNotifier extends Notifier<AstroState> {
     }
   }
 
-  /// 🌟 نبض سريع (100ms) لتحديث الثواني السويعية بالسرعة الحالية دون إعادة رسم عقرب القرص إلا كل ثانية
+  /// 🌟 تحديث ذكي: لا يرسل إشعار بناء لواجهة الوقت السويعي إلا عند تغير الثانية السويعية فعلياً
   void _startUITicker(SuwayaDay day, SavedLocation? loc) {
     _uiTimer?.cancel();
     int lastCivilSecond = -1;
-    _uiTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+    String lastFormattedVirtual = virtualTimeNotifier.value;
+
+    _uiTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
       final tickNow = _getCityNow(loc);
       final newState = SuwayaTimeEngine.calculateCurrentState(day, tickNow);
+      final formatted = _formatVirtualTime(newState.currentSuwayaTime);
 
-      virtualTimeNotifier.value =
-          _formatVirtualTime(newState.currentSuwayaTime);
+      // لا نحدث ValueNotifier الخاص بالثواني السويعية إلا إذا تغيرت الثانية السويعية فعلاً
+      if (formatted != lastFormattedVirtual) {
+        lastFormattedVirtual = formatted;
+        virtualTimeNotifier.value = formatted;
+      }
 
+      // لا نحدث ValueNotifier الخاص بالوقت المدني وعقرب القرص إلا مرة كل ثانية فعلية
       if (tickNow.second != lastCivilSecond) {
         lastCivilSecond = tickNow.second;
         virtualDateTimeNotifier.value = tickNow;
@@ -259,6 +271,7 @@ class AstroNotifier extends Notifier<AstroState> {
 
       _scheduleSmartStateUpdate(day, loc, nowOffset);
     });
+
   }
 
   PrayerKey? _parsePrayerKey(String? periodIdStr) {

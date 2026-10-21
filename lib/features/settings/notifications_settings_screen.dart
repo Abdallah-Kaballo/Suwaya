@@ -35,9 +35,9 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
-    final surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
-    const accentColor = Color(0xFFD4AF37);
+    final surfaceColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final accentColor = Theme.of(context).primaryColor;
 
     final int prayersLevel = settings.getPeriodAlertLevel('1', 0);
     final String prayersTone = settings.getPeriodSound('1', 'assets/audio/adhan.mp3');

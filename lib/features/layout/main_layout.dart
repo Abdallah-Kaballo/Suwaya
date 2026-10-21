@@ -58,18 +58,15 @@ class MainLayout extends ConsumerWidget {
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 18),
         height: 72,
         decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF1E2530).withValues(alpha: 0.82)
-              : Colors.white.withValues(alpha: 0.88),
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: isDark ? 0.88 : 0.92),
           borderRadius: BorderRadius.circular(36),
-          border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.05),
-          ),
+          border: Border.all(color: Theme.of(context).dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.07),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),

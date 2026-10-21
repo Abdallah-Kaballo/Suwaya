@@ -6,28 +6,54 @@ import '../generators/suwaya_distributor.dart';
 class SuwayaTimeEngine {
   
   static SuwayaDay generateDay(
-    double lat, double lng, DateTime date, 
-    CalculationMethodType methodType, MadhabType madhabType, 
-    HighLatitudeRuleType highLatRuleType, double customFajr, double customIsha, 
-    Duration cityOffset, {Map<PrayerKey, int>? manualOffsets} 
-  ) {
-    // 🌟 توليد مواقيت العبادات العادية
+    double lat,
+    double lng,
+    DateTime date,
+    CalculationMethodType methodType,
+    MadhabType madhabType,
+    HighLatitudeRuleType highLatRuleType,
+    double customFajr,
+    double customIsha,
+    Duration cityOffset, {
+    Duration? nextDayCityOffset,
+    Map<PrayerKey, int>? manualOffsets,
+  }) {
     final ibadat = PrayerCalculator.getIbadatTimings(
-      lat, lng, date, methodType, madhabType, highLatRuleType, 
-      customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
-    );
-    
-    // 🌟 توليد المرساة الفلكية لدورة (المغرب إلى المغرب)
-    final anchors = PrayerCalculator.getCycleAnchors(
-      lat, lng, date, methodType, madhabType, highLatRuleType, 
-      customFajr, customIsha, cityOffset, manualOffsets: manualOffsets
+      lat,
+      lng,
+      date,
+      methodType,
+      madhabType,
+      highLatRuleType,
+      customFajr,
+      customIsha,
+      cityOffset,
+      nextDayCityOffset: nextDayCityOffset,
+      manualOffsets: manualOffsets,
     );
 
-    // 🌟 استدعاء التوزيع الجديد (24 سويعة) بناءً على المذهب
+    final anchors = PrayerCalculator.getCycleAnchors(
+      lat,
+      lng,
+      date,
+      methodType,
+      madhabType,
+      highLatRuleType,
+      customFajr,
+      customIsha,
+      cityOffset,
+      nextDayCityOffset: nextDayCityOffset,
+      manualOffsets: manualOffsets,
+    );
+
     final distribution = SuwayaDistributor.getDistributionForMadhab(madhabType);
     final periods = PeriodGenerator.generatePeriods(anchors, distribution);
-    
-    return SuwayaDay(ibadatTimings: ibadat, cycleAnchors: anchors, periods: periods);
+
+    return SuwayaDay(
+      ibadatTimings: ibadat,
+      cycleAnchors: anchors,
+      periods: periods,
+    );
   }
 
   static AstroState calculateCurrentState(SuwayaDay day, DateTime now) {

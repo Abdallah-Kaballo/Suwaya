@@ -175,6 +175,7 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   Future<void> _loadSettings() async {
     final settings = await _repository.getSettings();
     state = settings.clone();
+    
   }
 
   Future<void> updatePeriodNotificationSettings(
@@ -222,7 +223,7 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   Future<void> resetAllOffsets() async {
     final newState = state.clone();
     for (var config in newState.periodConfigs) {
-      config.manualOffsetMinutes = 0;
+      if (config.periodId != 'hijri_offset') config.manualOffsetMinutes = 0;
     }
     state = newState;
     await _repository.saveSettings(newState);
@@ -585,6 +586,13 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   // 🌟 دالة تحديث نمط الرموز
   Future<void> updateSuwayaIconMode(String mode) async {
     final newState = state.clone()..suwayaIconMode = mode;
+    state = newState;
+    await _repository.saveSettings(newState);
+  }
+  
+  // 🌟 دالة تحديث تصحيح التاريخ الهجري (-2 إلى +2 يوم)
+  Future<void> updateHijriOffsetDays(int days) async {
+    final newState = state.clone()..hijriOffsetDays = days.clamp(-2, 2);
     state = newState;
     await _repository.saveSettings(newState);
   }

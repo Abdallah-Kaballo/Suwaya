@@ -103,100 +103,105 @@ const SettingsModelSchema = CollectionSchema(
       name: r'highLatitudeRule',
       type: IsarType.string,
     ),
-    r'isDialAutoRotating': PropertySchema(
+    r'hijriOffsetDays': PropertySchema(
       id: 17,
+      name: r'hijriOffsetDays',
+      type: IsarType.long,
+    ),
+    r'isDialAutoRotating': PropertySchema(
+      id: 18,
       name: r'isDialAutoRotating',
       type: IsarType.bool,
     ),
     r'isFirstLaunch': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'isFirstLaunch',
       type: IsarType.bool,
     ),
     r'languageCode': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'languageCode',
       type: IsarType.string,
     ),
     r'lastStreakDate': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'lastStreakDate',
       type: IsarType.dateTime,
     ),
     r'longestStreak': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'longestStreak',
       type: IsarType.long,
     ),
     r'madhab': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'madhab',
       type: IsarType.string,
     ),
     r'maxSnoozeCount': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'maxSnoozeCount',
       type: IsarType.long,
     ),
     r'periodConfigs': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'periodConfigs',
       type: IsarType.objectList,
       target: r'PeriodConfig',
     ),
     r'qiyamAlarmEnabled': PropertySchema(
-      id: 25,
+      id: 26,
       name: r'qiyamAlarmEnabled',
       type: IsarType.bool,
     ),
     r'savedLocations': PropertySchema(
-      id: 26,
+      id: 27,
       name: r'savedLocations',
       type: IsarType.objectList,
       target: r'SavedLocation',
     ),
     r'showSunrise': PropertySchema(
-      id: 27,
+      id: 28,
       name: r'showSunrise',
       type: IsarType.bool,
     ),
     r'snoozeDurationMinutes': PropertySchema(
-      id: 28,
+      id: 29,
       name: r'snoozeDurationMinutes',
       type: IsarType.long,
     ),
     r'streakFreezesAvailable': PropertySchema(
-      id: 29,
+      id: 30,
       name: r'streakFreezesAvailable',
       type: IsarType.long,
     ),
     r'suwayaIconMode': PropertySchema(
-      id: 30,
+      id: 31,
       name: r'suwayaIconMode',
       type: IsarType.string,
     ),
     r'suwayaNumberStyle': PropertySchema(
-      id: 31,
+      id: 32,
       name: r'suwayaNumberStyle',
       type: IsarType.string,
     ),
     r'themeMode': PropertySchema(
-      id: 32,
+      id: 33,
       name: r'themeMode',
       type: IsarType.string,
     ),
     r'timeDisplayMode': PropertySchema(
-      id: 33,
+      id: 34,
       name: r'timeDisplayMode',
       type: IsarType.string,
     ),
     r'useAstroTimeForIbadat': PropertySchema(
-      id: 34,
+      id: 35,
       name: r'useAstroTimeForIbadat',
       type: IsarType.bool,
     ),
     r'visibleNightParts': PropertySchema(
-      id: 35,
+      id: 36,
       name: r'visibleNightParts',
       type: IsarType.stringList,
     )
@@ -308,35 +313,36 @@ void _settingsModelSerialize(
   writer.writeString(offsets[14], object.dialPinMode);
   writer.writeLongList(offsets[15], object.hiddenPeriods);
   writer.writeString(offsets[16], object.highLatitudeRule);
-  writer.writeBool(offsets[17], object.isDialAutoRotating);
-  writer.writeBool(offsets[18], object.isFirstLaunch);
-  writer.writeString(offsets[19], object.languageCode);
-  writer.writeDateTime(offsets[20], object.lastStreakDate);
-  writer.writeLong(offsets[21], object.longestStreak);
-  writer.writeString(offsets[22], object.madhab);
-  writer.writeLong(offsets[23], object.maxSnoozeCount);
+  writer.writeLong(offsets[17], object.hijriOffsetDays);
+  writer.writeBool(offsets[18], object.isDialAutoRotating);
+  writer.writeBool(offsets[19], object.isFirstLaunch);
+  writer.writeString(offsets[20], object.languageCode);
+  writer.writeDateTime(offsets[21], object.lastStreakDate);
+  writer.writeLong(offsets[22], object.longestStreak);
+  writer.writeString(offsets[23], object.madhab);
+  writer.writeLong(offsets[24], object.maxSnoozeCount);
   writer.writeObjectList<PeriodConfig>(
-    offsets[24],
+    offsets[25],
     allOffsets,
     PeriodConfigSchema.serialize,
     object.periodConfigs,
   );
-  writer.writeBool(offsets[25], object.qiyamAlarmEnabled);
+  writer.writeBool(offsets[26], object.qiyamAlarmEnabled);
   writer.writeObjectList<SavedLocation>(
-    offsets[26],
+    offsets[27],
     allOffsets,
     SavedLocationSchema.serialize,
     object.savedLocations,
   );
-  writer.writeBool(offsets[27], object.showSunrise);
-  writer.writeLong(offsets[28], object.snoozeDurationMinutes);
-  writer.writeLong(offsets[29], object.streakFreezesAvailable);
-  writer.writeString(offsets[30], object.suwayaIconMode);
-  writer.writeString(offsets[31], object.suwayaNumberStyle);
-  writer.writeString(offsets[32], object.themeMode);
-  writer.writeString(offsets[33], object.timeDisplayMode);
-  writer.writeBool(offsets[34], object.useAstroTimeForIbadat);
-  writer.writeStringList(offsets[35], object.visibleNightParts);
+  writer.writeBool(offsets[28], object.showSunrise);
+  writer.writeLong(offsets[29], object.snoozeDurationMinutes);
+  writer.writeLong(offsets[30], object.streakFreezesAvailable);
+  writer.writeString(offsets[31], object.suwayaIconMode);
+  writer.writeString(offsets[32], object.suwayaNumberStyle);
+  writer.writeString(offsets[33], object.themeMode);
+  writer.writeString(offsets[34], object.timeDisplayMode);
+  writer.writeBool(offsets[35], object.useAstroTimeForIbadat);
+  writer.writeStringList(offsets[36], object.visibleNightParts);
 }
 
 SettingsModel _settingsModelDeserialize(
@@ -367,38 +373,39 @@ SettingsModel _settingsModelDeserialize(
   object.dialPinMode = reader.readString(offsets[14]);
   object.hiddenPeriods = reader.readLongList(offsets[15]) ?? [];
   object.highLatitudeRule = reader.readString(offsets[16]);
+  object.hijriOffsetDays = reader.readLong(offsets[17]);
   object.id = id;
-  object.isDialAutoRotating = reader.readBool(offsets[17]);
-  object.isFirstLaunch = reader.readBool(offsets[18]);
-  object.languageCode = reader.readString(offsets[19]);
-  object.lastStreakDate = reader.readDateTimeOrNull(offsets[20]);
-  object.longestStreak = reader.readLong(offsets[21]);
-  object.madhab = reader.readString(offsets[22]);
-  object.maxSnoozeCount = reader.readLong(offsets[23]);
+  object.isDialAutoRotating = reader.readBool(offsets[18]);
+  object.isFirstLaunch = reader.readBool(offsets[19]);
+  object.languageCode = reader.readString(offsets[20]);
+  object.lastStreakDate = reader.readDateTimeOrNull(offsets[21]);
+  object.longestStreak = reader.readLong(offsets[22]);
+  object.madhab = reader.readString(offsets[23]);
+  object.maxSnoozeCount = reader.readLong(offsets[24]);
   object.periodConfigs = reader.readObjectList<PeriodConfig>(
-        offsets[24],
+        offsets[25],
         PeriodConfigSchema.deserialize,
         allOffsets,
         PeriodConfig(),
       ) ??
       [];
-  object.qiyamAlarmEnabled = reader.readBool(offsets[25]);
+  object.qiyamAlarmEnabled = reader.readBool(offsets[26]);
   object.savedLocations = reader.readObjectList<SavedLocation>(
-        offsets[26],
+        offsets[27],
         SavedLocationSchema.deserialize,
         allOffsets,
         SavedLocation(),
       ) ??
       [];
-  object.showSunrise = reader.readBool(offsets[27]);
-  object.snoozeDurationMinutes = reader.readLong(offsets[28]);
-  object.streakFreezesAvailable = reader.readLong(offsets[29]);
-  object.suwayaIconMode = reader.readString(offsets[30]);
-  object.suwayaNumberStyle = reader.readString(offsets[31]);
-  object.themeMode = reader.readString(offsets[32]);
-  object.timeDisplayMode = reader.readString(offsets[33]);
-  object.useAstroTimeForIbadat = reader.readBool(offsets[34]);
-  object.visibleNightParts = reader.readStringList(offsets[35]) ?? [];
+  object.showSunrise = reader.readBool(offsets[28]);
+  object.snoozeDurationMinutes = reader.readLong(offsets[29]);
+  object.streakFreezesAvailable = reader.readLong(offsets[30]);
+  object.suwayaIconMode = reader.readString(offsets[31]);
+  object.suwayaNumberStyle = reader.readString(offsets[32]);
+  object.themeMode = reader.readString(offsets[33]);
+  object.timeDisplayMode = reader.readString(offsets[34]);
+  object.useAstroTimeForIbadat = reader.readBool(offsets[35]);
+  object.visibleNightParts = reader.readStringList(offsets[36]) ?? [];
   return object;
 }
 
@@ -448,20 +455,22 @@ P _settingsModelDeserializeProp<P>(
     case 16:
       return (reader.readString(offset)) as P;
     case 17:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 18:
       return (reader.readBool(offset)) as P;
     case 19:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 20:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 21:
-      return (reader.readLong(offset)) as P;
-    case 22:
       return (reader.readString(offset)) as P;
-    case 23:
+    case 21:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 22:
       return (reader.readLong(offset)) as P;
+    case 23:
+      return (reader.readString(offset)) as P;
     case 24:
+      return (reader.readLong(offset)) as P;
+    case 25:
       return (reader.readObjectList<PeriodConfig>(
             offset,
             PeriodConfigSchema.deserialize,
@@ -469,9 +478,9 @@ P _settingsModelDeserializeProp<P>(
             PeriodConfig(),
           ) ??
           []) as P;
-    case 25:
-      return (reader.readBool(offset)) as P;
     case 26:
+      return (reader.readBool(offset)) as P;
+    case 27:
       return (reader.readObjectList<SavedLocation>(
             offset,
             SavedLocationSchema.deserialize,
@@ -479,14 +488,12 @@ P _settingsModelDeserializeProp<P>(
             SavedLocation(),
           ) ??
           []) as P;
-    case 27:
-      return (reader.readBool(offset)) as P;
     case 28:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 29:
       return (reader.readLong(offset)) as P;
     case 30:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 31:
       return (reader.readString(offset)) as P;
     case 32:
@@ -494,8 +501,10 @@ P _settingsModelDeserializeProp<P>(
     case 33:
       return (reader.readString(offset)) as P;
     case 34:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 35:
+      return (reader.readBool(offset)) as P;
+    case 36:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2372,6 +2381,62 @@ extension SettingsModelQueryFilter
     });
   }
 
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      hijriOffsetDaysEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hijriOffsetDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      hijriOffsetDaysGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hijriOffsetDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      hijriOffsetDaysLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hijriOffsetDays',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+      hijriOffsetDaysBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hijriOffsetDays',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -4220,6 +4285,20 @@ extension SettingsModelQuerySortBy
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByHijriOffsetDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hijriOffsetDays', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      sortByHijriOffsetDaysDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hijriOffsetDays', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
       sortByIsDialAutoRotating() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isDialAutoRotating', Sort.asc);
@@ -4636,6 +4715,20 @@ extension SettingsModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByHijriOffsetDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hijriOffsetDays', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+      thenByHijriOffsetDaysDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hijriOffsetDays', Sort.desc);
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -4989,6 +5082,13 @@ extension SettingsModelQueryWhereDistinct
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+      distinctByHijriOffsetDays() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hijriOffsetDays');
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
       distinctByIsDialAutoRotating() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isDialAutoRotating');
@@ -5232,6 +5332,12 @@ extension SettingsModelQueryProperty
       highLatitudeRuleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'highLatitudeRule');
+    });
+  }
+
+  QueryBuilder<SettingsModel, int, QQueryOperations> hijriOffsetDaysProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hijriOffsetDays');
     });
   }
 
