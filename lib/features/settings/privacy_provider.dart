@@ -13,8 +13,8 @@ class PrivacySection {
 
   factory PrivacySection.fromJson(Map<String, dynamic> json) {
     return PrivacySection(
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
+      title: (json['title'] as String?) ?? '',
+      content: (json['content'] as String?) ?? '',
     );
   }
 }

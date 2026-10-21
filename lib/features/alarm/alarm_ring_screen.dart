@@ -22,6 +22,7 @@ class AlarmRingScreen extends ConsumerStatefulWidget {
 
 class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     with SingleTickerProviderStateMixin {
+  late final ParsedAlarmData parsedData;
   late final String taskTitle;
   late final String taskBody;
   late final Color accentColor;
@@ -39,14 +40,13 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
   @override
   void initState() {
     super.initState();
-    _enableLockScreenVisibility();
+    _enableLockScreenAndAlarmStream();
 
-    // 🌟 قراءة موحدة وذكية لبيانات المنبه (سواء من payload أو NotificationSettings)
-    final parsed = AlarmService.parseAlarmSettings(widget.alarmSettings);
-    taskTitle = parsed.title;
-    taskBody = parsed.body;
-    accentColor = Color(parsed.colorValue);
-    snoozeCount = parsed.snoozeCount;
+    parsedData = AlarmService.parseAlarmSettings(widget.alarmSettings);
+    taskTitle = parsedData.title;
+    taskBody = parsedData.body;
+    accentColor = Color(parsedData.colorValue);
+    snoozeCount = parsedData.snoozeCount;
 
     _glowController = AnimationController(
       vsync: this,
@@ -56,43 +56,32 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     _glowAnimation = Tween<double>(begin: 0.18, end: 0.55).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
-
-    HardwareKeyboard.instance.addHandler(_handleHardwareKeys);
   }
 
-  Future<void> _enableLockScreenVisibility() async {
+  /// 🌟 تفعيل الظهور فوق شاشة القفل + ربط أزرار الصوت الفيزيائية بمسار صوت المنبه (STREAM_ALARM)
+  Future<void> _enableLockScreenAndAlarmStream() async {
     try {
       await platform.invokeMethod('showOnLockScreen');
+      await platform.invokeMethod('setAlarmVolumeControl', {'enabled': true});
     } catch (e) {
-      debugPrint('Failed to show on lock screen: $e');
+      debugPrint('Lockscreen/Volume channel note: $e');
     }
   }
 
-  Future<void> _disableLockScreenVisibility() async {
+  Future<void> _disableLockScreenAndRestoreStream() async {
     try {
+      await platform.invokeMethod('setAlarmVolumeControl', {'enabled': false});
       await platform.invokeMethod('hideFromLockScreen');
     } catch (e) {
-      debugPrint('Failed to hide from lock screen: $e');
+      debugPrint('Lockscreen/Volume restore note: $e');
     }
   }
 
   @override
   void dispose() {
-    _disableLockScreenVisibility();
+    _disableLockScreenAndRestoreStream();
     _glowController.dispose();
-    HardwareKeyboard.instance.removeHandler(_handleHardwareKeys);
     super.dispose();
-  }
-
-  bool _handleHardwareKeys(KeyEvent event) {
-    if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
-          event.logicalKey == LogicalKeyboardKey.audioVolumeDown) {
-        _triggerSnooze();
-        return true;
-      }
-    }
-    return false;
   }
 
   void _closeRingScreen() {
@@ -105,34 +94,107 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     }
   }
 
+  void _showErrorFeedback(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFD32F2F),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _triggerSnooze() async {
     if (_isProcessingAction) return;
+
     final settings = ref.read(settingsProvider);
     final maxSnoozes = settings.maxSnoozeCount > 0
         ? settings.maxSnoozeCount
-        : AlarmService.defaultMaxSnoozes;
+        : parsedData.maxSnoozes;
     final snoozeMins = settings.snoozeDurationMinutes > 0
         ? settings.snoozeDurationMinutes
-        : AlarmService.defaultSnoozeMinutes;
+        : parsedData.snoozeDurationMinutes;
 
-    if (snoozeCount >= maxSnoozes) return;
+    if (!parsedData.snoozeAllowed || snoozeCount >= maxSnoozes) return;
 
-    _isProcessingAction = true;
+    setState(() => _isProcessingAction = true);
     HapticFeedback.heavyImpact();
-    await AlarmService.snooze(
+
+    final result = await AlarmService.snooze(
       widget.alarmSettings,
-      snoozeMinutes: snoozeMins,
-      maxSnoozes: maxSnoozes,
+      snoozeMinutesOverride: snoozeMins,
+      maxSnoozesOverride: maxSnoozes,
     );
-    _closeRingScreen();
+
+    if (result.success) {
+      _closeRingScreen();
+    } else {
+      if (mounted) {
+        setState(() {
+          _isProcessingAction = false;
+          _dragPosition = 0.0;
+        });
+        final isAr = context.locale.languageCode == 'ar';
+        _showErrorFeedback(
+          isAr
+              ? 'تعذر تفعيل الغفوة، يرجى المحاولة مرة أخرى أو إيقاف التنبيه.'
+              : 'Could not activate snooze. Please try again or stop the alert.',
+        );
+      }
+    }
   }
 
   Future<void> _triggerStop() async {
     if (_isProcessingAction) return;
-    _isProcessingAction = true;
+    setState(() => _isProcessingAction = true);
     HapticFeedback.heavyImpact();
-    await Alarm.stop(widget.alarmSettings.id);
+
+    try {
+      final stopped = await Alarm.stop(widget.alarmSettings.id);
+      if (stopped) {
+        _closeRingScreen();
+        return;
+      }
+    } catch (_) {}
+
+    // محاولة ثانية احتياطية لضمان عدم بقاء المستخدم عالقاً
+    try {
+      await Alarm.stop(widget.alarmSettings.id);
+    } catch (_) {}
     _closeRingScreen();
+  }
+
+  String _kindBadgeLabel(BuildContext context) {
+    final isAr = context.locale.languageCode == 'ar';
+    switch (parsedData.kind) {
+      case AlarmEventKind.prayer:
+        return isAr ? 'ميقات الصلاة والأذان' : 'Prayer & Adhan Time';
+      case AlarmEventKind.qiyam:
+        return 'ibadat.qiyam_tab'.tr();
+      case AlarmEventKind.routine:
+        return 'tasks.tab_routines'.tr();
+      case AlarmEventKind.habit:
+        return 'tasks.tab_habits'.tr();
+      case AlarmEventKind.task:
+      case AlarmEventKind.unknown:
+        return 'tasks.tab_casual'.tr();
+    }
+  }
+
+  IconData _kindIcon() {
+    switch (parsedData.kind) {
+      case AlarmEventKind.prayer:
+        return LucideIcons.moon_star;
+      case AlarmEventKind.qiyam:
+        return LucideIcons.sparkles;
+      case AlarmEventKind.routine:
+        return LucideIcons.repeat;
+      case AlarmEventKind.habit:
+      case AlarmEventKind.task:
+      case AlarmEventKind.unknown:
+        return LucideIcons.alarm_clock;
+    }
   }
 
   @override
@@ -141,8 +203,14 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     final settings = ref.watch(settingsProvider);
     final maxSnoozes = settings.maxSnoozeCount > 0
         ? settings.maxSnoozeCount
-        : AlarmService.defaultMaxSnoozes;
-    final bool canSnooze = snoozeCount < maxSnoozes;
+        : parsedData.maxSnoozes;
+    final snoozeMins = settings.snoozeDurationMinutes > 0
+        ? settings.snoozeDurationMinutes
+        : parsedData.snoozeDurationMinutes;
+
+    final bool isPrayer = parsedData.kind == AlarmEventKind.prayer;
+    final bool canSnooze =
+        !isPrayer && parsedData.snoozeAllowed && snoozeCount < maxSnoozes;
 
     return PopScope(
       canPop: false,
@@ -174,29 +242,45 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // 🌟 القسم العلوي: الأيقونة، الوقت السويعي والمدني، العنوان والوصف
+                    // 🌟 القسم العلوي: شارة نوع الحدث، الأيقونة، الساعة المدنية والسويعية، العنوان
                     Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
                           ),
-                          child: Icon(
-                            LucideIcons.alarm_clock,
-                            color: accentColor,
-                            size: 44,
+                          decoration: BoxDecoration(
+                            color: accentColor.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: accentColor.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(_kindIcon(), color: accentColor, size: 15),
+                              const SizedBox(width: 6),
+                              Text(
+                                _kindBadgeLabel(context),
+                                style: TextStyle(
+                                  color: accentColor,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 18),
                         ClockTimeText.civil(
                           civilTime: now,
                           civilTimeFormat: settings.civilTimeFormat,
                           locale: context.locale.languageCode,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 64,
+                            fontSize: 62,
                             fontWeight: FontWeight.w900,
                             fontFamily: 'Inter',
                           ),
@@ -244,13 +328,15 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                         const SizedBox(height: 12),
                         if (canSnooze)
                           Text(
-                            '${'alarm.snooze'.tr()} (${snoozeCount + 1}/$maxSnoozes)',
+                            '${'alarm.snooze'.tr()} +$snoozeMins ${'details.minute'.tr()} (${snoozeCount + 1}/$maxSnoozes)',
                             style: const TextStyle(
                               color: Colors.white54,
                               fontSize: 13,
                             ),
                           )
-                        else
+                        else if (!isPrayer &&
+                            parsedData.snoozeAllowed &&
+                            snoozeCount >= maxSnoozes)
                           Text(
                             'alarm.max_snoozes_reached'.tr(),
                             style: const TextStyle(
@@ -262,7 +348,7 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                       ],
                     ),
 
-                    // 🌟 القسم السفلي: شريط السحب والأزرار السريعة
+                    // 🌟 القسم السفلي: شريط السحب والأزرار الصريحة
                     Column(
                       children: [
                         Directionality(
@@ -271,7 +357,9 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                             builder: (context, constraints) {
                               final trackWidth = constraints.maxWidth - 16;
                               return Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 8),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
                                 height: 80,
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.5),
@@ -289,8 +377,9 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 24.0),
+                                          padding: const EdgeInsets.only(
+                                            left: 24.0,
+                                          ),
                                           child: Text(
                                             'alarm.snooze'.tr(),
                                             style: TextStyle(
@@ -303,8 +392,9 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                           ),
                                         ),
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 24.0),
+                                          padding: const EdgeInsets.only(
+                                            right: 24.0,
+                                          ),
                                           child: Text(
                                             'alarm.stop'.tr(),
                                             style: const TextStyle(
@@ -317,9 +407,11 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                       ],
                                     ),
                                     Positioned(
-                                      left: (trackWidth / 2) - 35 + _dragPosition,
+                                      left:
+                                          (trackWidth / 2) - 35 + _dragPosition,
                                       child: GestureDetector(
                                         onHorizontalDragUpdate: (details) {
+                                          if (_isProcessingAction) return;
                                           setState(() {
                                             _dragPosition = (_dragPosition +
                                                     details.delta.dx)
@@ -332,6 +424,7 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                           });
                                         },
                                         onHorizontalDragEnd: (details) {
+                                          if (_isProcessingAction) return;
                                           if (_dragPosition >
                                               _maxDragThreshold) {
                                             _triggerStop();
@@ -360,7 +453,8 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                             boxShadow: [
                                               BoxShadow(
                                                 color: accentColor.withValues(
-                                                    alpha: 0.5),
+                                                  alpha: 0.5,
+                                                ),
                                                 blurRadius: 15,
                                                 spreadRadius: 2,
                                               ),
@@ -371,7 +465,7 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                                 ? LucideIcons.x
                                                 : (_dragPosition < -50
                                                     ? Icons.snooze
-                                                    : LucideIcons.bell_ring),
+                                                    : _kindIcon()),
                                             color: Colors.white,
                                             size: 30,
                                           ),
@@ -397,7 +491,8 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                     vertical: 14,
                                   ),
                                 ),
-                                onPressed: _triggerSnooze,
+                                onPressed:
+                                    _isProcessingAction ? null : _triggerSnooze,
                                 icon: const Icon(Icons.snooze),
                                 label: Text(
                                   'alarm.snooze'.tr(),
@@ -417,7 +512,8 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                   vertical: 14,
                                 ),
                               ),
-                              onPressed: _triggerStop,
+                              onPressed:
+                                  _isProcessingAction ? null : _triggerStop,
                               icon: const Icon(LucideIcons.power_off),
                               label: Text(
                                 'alarm.stop'.tr(),

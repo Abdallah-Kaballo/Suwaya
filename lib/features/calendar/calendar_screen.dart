@@ -7,21 +7,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:go_router/go_router.dart';
 import 'package:hijri/hijri_calendar.dart';
-import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/providers/ui_providers.dart';
 import '../../models/routine_model.dart';
-import '../../models/settings_model.dart';
 import '../../models/task_model.dart';
 import '../../shared/widgets/app_drawer.dart';
-import '../../shared/widgets/suwaya_time_text.dart';
 import '../routines/routines_provider.dart';
 import '../settings/settings_provider.dart';
-import '../tasks/routine_schedule_format.dart';
 import '../tasks/tasks_provider.dart';
+import 'widgets/calendar_day_agenda.dart';
 
-String _trCal(
+String trCal(
   BuildContext context,
   String key,
   String arFallback,
@@ -30,30 +27,6 @@ String _trCal(
   final translated = key.tr();
   if (translated != key) return translated;
   return context.locale.languageCode == 'ar' ? arFallback : enFallback;
-}
-
-Color _getCategoryNeonColor(TaskCategory category) {
-  final catStr = category.toString().toLowerCase();
-  if (catStr.contains('work')) return const Color(0xFF00E5FF);
-  if (catStr.contains('study')) return const Color(0xFF00E676);
-  if (catStr.contains('sport')) return const Color(0xFFFF3D00);
-  if (catStr.contains('worship')) return const Color(0xFFFFC400);
-  if (catStr.contains('entertainment')) return const Color(0xFFFF4081);
-  if (catStr.contains('personal')) return const Color(0xFFD500F9);
-  if (catStr.contains('social')) return const Color(0xFF76FF03);
-  return const Color(0xFF18FFFF);
-}
-
-int _resolveGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
-  int global = 0;
-  for (final p in periods) {
-    if (p.id == pId) {
-      final count = p.suwayasCount > 0 ? p.suwayasCount : 1;
-      return global + (sNum - 1).clamp(0, count - 1);
-    }
-    global += p.suwayasCount;
-  }
-  return 0;
 }
 
 /// 🌟 بيانات استحباب الصيام للأيام الهجرية الموسمية (الأيام البيض + عاشوراء + عرفة)
@@ -126,11 +99,11 @@ _FastingRecommendation? _getSeasonalFastingInfo(
   return null;
 }
 
-class _CalendarDayCellData {
+class CalendarDayCellData {
   final DateTime gregorianDate;
   final HijriCalendar hijriDate;
 
-  const _CalendarDayCellData({
+  const CalendarDayCellData({
     required this.gregorianDate,
     required this.hijriDate,
   });
@@ -163,10 +136,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     _syncFocusedMonthToDate(_selectedDate);
   }
 
+  // 🌟 دوال مساعدة لتحويل التاريخ مع مراعاة تصحيح التاريخ الهجري (hijriOffsetDays)
+  HijriCalendar _toHijri(DateTime gregorianDate) {
+    final offsetDays = ref.read(settingsProvider).hijriOffsetDays;
+    return HijriCalendar.fromDate(
+      gregorianDate.add(Duration(days: offsetDays)),
+    );
+  }
+
+  DateTime _fromHijri(int hYear, int hMonth, int hDay) {
+    final offsetDays = ref.read(settingsProvider).hijriOffsetDays;
+    final rawGreg = HijriCalendar().hijriToGregorian(hYear, hMonth, hDay);
+    return DateTime(
+      rawGreg.year,
+      rawGreg.month,
+      rawGreg.day,
+    ).subtract(Duration(days: offsetDays));
+  }
+
   void _syncFocusedMonthToDate(DateTime date) {
     _focusedGregorianYear = date.year;
     _focusedGregorianMonth = date.month;
-    final hDate = HijriCalendar.fromDate(date);
+    final hDate = _toHijri(date);
     _focusedHijriYear = hDate.hYear;
     _focusedHijriMonth = hDate.hMonth;
   }
@@ -199,18 +190,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         _focusedHijriYear = newYear;
         _focusedHijriMonth = newMonth;
 
-        final firstGreg = HijriCalendar().hijriToGregorian(
+        final firstGreg = _fromHijri(
           _focusedHijriYear,
           _focusedHijriMonth,
           1,
         );
         _focusedGregorianYear = firstGreg.year;
         _focusedGregorianMonth = firstGreg.month;
-        _selectedDate = DateTime(
-          firstGreg.year,
-          firstGreg.month,
-          firstGreg.day,
-        );
+        _selectedDate = firstGreg;
       } else {
         final nextGreg = DateTime(
           _focusedGregorianYear,
@@ -220,7 +207,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         _focusedGregorianYear = nextGreg.year;
         _focusedGregorianMonth = nextGreg.month;
 
-        final midHijri = HijriCalendar.fromDate(
+        final midHijri = _toHijri(
           DateTime(_focusedGregorianYear, _focusedGregorianMonth, 15),
         );
         _focusedHijriYear = midHijri.hYear;
@@ -230,8 +217,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     });
   }
 
-  List<_CalendarDayCellData> _generateMonthCells(bool isHijriPrimary) {
-    final List<_CalendarDayCellData> cells = [];
+  List<CalendarDayCellData> _generateMonthCells(bool isHijriPrimary) {
+    final List<CalendarDayCellData> cells = [];
 
     if (isHijriPrimary) {
       final hCal = HijriCalendar();
@@ -240,18 +227,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         _focusedHijriMonth,
       );
       for (int d = 1; d <= daysCount; d++) {
-        final gDate = hCal.hijriToGregorian(
+        final cleanGDate = _fromHijri(
           _focusedHijriYear,
           _focusedHijriMonth,
           d,
         );
-        final cleanGDate = DateTime(gDate.year, gDate.month, gDate.day);
         final hObj = HijriCalendar()
           ..hYear = _focusedHijriYear
           ..hMonth = _focusedHijriMonth
           ..hDay = d;
         cells.add(
-          _CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
+          CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
         );
       }
     } else {
@@ -266,52 +252,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           _focusedGregorianMonth,
           d,
         );
-        final hObj = HijriCalendar.fromDate(cleanGDate);
+        final hObj = _toHijri(cleanGDate);
         cells.add(
-          _CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
+          CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
         );
       }
     }
 
     return cells;
-  }
-
-  bool _isTaskInNightPhase(TaskModel task, AstroState astroState) {
-    if (task.isAstroTime && task.targetPeriodId != null) {
-      return task.targetPeriodId! >= 1 && task.targetPeriodId! <= 4;
-    }
-    if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
-      final mins = task.targetCivilTimeMinutes!;
-      final sunriseMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.sunrise.hour * 60 +
-              astroState.ibadatTimings.sunrise.minute)
-          : 360;
-      final maghribMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.maghrib.hour * 60 +
-              astroState.ibadatTimings.maghrib.minute)
-          : 1080;
-      return mins >= maghribMins || mins < sunriseMins;
-    }
-    return false;
-  }
-
-  bool _isRoutineInNightPhase(RoutineModel routine, AstroState astroState) {
-    if (routine.isAstroTime && routine.startPeriodId != null) {
-      return routine.startPeriodId! >= 1 && routine.startPeriodId! <= 4;
-    }
-    if (!routine.isAstroTime && routine.startTimeMinutes != null) {
-      final mins = routine.startTimeMinutes!;
-      final sunriseMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.sunrise.hour * 60 +
-              astroState.ibadatTimings.sunrise.minute)
-          : 360;
-      final maghribMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.maghrib.hour * 60 +
-              astroState.ibadatTimings.maghrib.minute)
-          : 1080;
-      return mins >= maghribMins || mins < sunriseMins;
-    }
-    return false;
   }
 
   List<TaskModel> _getTasksForDay(DateTime date, List<TaskModel> allTasks) {
@@ -388,7 +336,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
         ),
         title: Text(
-          _trCal(context, 'nav.calendar', 'التقويم', 'Calendar'),
+          trCal(context, 'nav.calendar', 'التقويم', 'Calendar'),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
@@ -410,7 +358,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               color: primaryColor,
             ),
             label: Text(
-              _trCal(context, 'calendar.today', 'اليوم', 'Today'),
+              trCal(context, 'calendar.today', 'اليوم', 'Today'),
               style: TextStyle(
                 color: primaryColor,
                 fontSize: 12,
@@ -422,7 +370,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _trCal(
+                trCal(
                   context,
                   'common.suwaya_time',
                   'الوقت السُويعي',
@@ -546,6 +494,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
 
           // 🌟 2. قسم المهام أسفل التقويم (يتوسع تلقائياً عند سحب القائمة لأعلى)
+          // 🌟 داخل body -> Column -> Expanded في CalendarScreen:
           Expanded(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
@@ -559,16 +508,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 }
                 return false;
               },
-              child: _buildSelectedDayAgenda(
-                context: context,
+              child: CalendarDayAgenda(
+                selectedDate: _selectedDate,
+                selectedHijriDate: _toHijri(_selectedDate),
                 astroState: astroState,
                 settings: settings,
-                allTasks: allTasks,
-                allRoutines: allRoutines,
-                primaryColor: primaryColor,
-                surfaceColor: surfaceColor,
-                textColor: textColor,
-                isDark: isDark,
+                dayTasks: _getTasksForDay(_selectedDate, allTasks),
+                dayRoutines: _getRoutinesForDay(_selectedDate, allRoutines),
               ),
             ),
           ),
@@ -605,7 +551,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   Widget _buildMonthHeader(
     BuildContext context,
-    List<_CalendarDayCellData> cells,
+    List<CalendarDayCellData> cells,
     bool isHijriPrimary,
     Color primaryColor,
     Color textColor,
@@ -767,7 +713,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   Widget _buildCalendarGrid(
     BuildContext context,
-    List<_CalendarDayCellData> cells,
+    List<CalendarDayCellData> cells,
     bool isHijriPrimary,
     List<TaskModel> allTasks,
     Color primaryColor,
@@ -777,8 +723,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     if (cells.isEmpty) return const SizedBox.shrink();
 
     final int leadingEmptyCount = cells.first.gregorianDate.weekday % 7;
-    final List<_CalendarDayCellData?> fullPaddedSlots = [
-      ...List<_CalendarDayCellData?>.filled(leadingEmptyCount, null),
+    final List<CalendarDayCellData?> fullPaddedSlots = [
+      ...List<CalendarDayCellData?>.filled(leadingEmptyCount, null),
       ...cells,
     ];
     while (fullPaddedSlots.length % 7 != 0) {
@@ -786,7 +732,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     }
 
     // 🌟 التعديل 6: عند طيّ التقويم، نعرض صف الأسبوع الذي يحتوي على اليوم المختار فقط
-    List<_CalendarDayCellData?> visibleSlots = fullPaddedSlots;
+    List<CalendarDayCellData?> visibleSlots = fullPaddedSlots;
     if (_isCalendarCollapsed) {
       int selectedSlotIdx = fullPaddedSlots.indexWhere(
         (c) => c != null && _isSameDay(c.gregorianDate, _selectedDate),
@@ -830,7 +776,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
         final dayTasks = _getTasksForDay(cell.gregorianDate, allTasks);
         final dotColors = dayTasks
-            .map((t) => _getCategoryNeonColor(t.category))
+            .map((t) => t.category.uiColor(isDark))
             .toSet()
             .take(3)
             .toList();
@@ -935,584 +881,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
         );
       },
-    );
-  }
-
-Widget _buildSelectedDayAgenda({
-    required BuildContext context,
-    required AstroState astroState,
-    required SettingsModel settings,
-    required List<TaskModel> allTasks,
-    required List<RoutineModel> allRoutines,
-    required Color primaryColor,
-    required Color surfaceColor,
-    required Color textColor,
-    required bool isDark,
-  }) {
-    final langCode = context.locale.languageCode;
-    final safeLocale = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
-
-    final dayName = DateFormat('EEEE', safeLocale).format(_selectedDate);
-    final hSelected = HijriCalendar.fromDate(_selectedDate);
-    final hDateStr =
-        '${hSelected.hDay} ${'hijri.m${hSelected.hMonth}'.tr()} ${hSelected.hYear} ${'common.ah'.tr()}';
-    final gDateStr = DateFormat('d MMMM yyyy', safeLocale).format(_selectedDate);
-
-    // 🌟 التعديل 11: استخراج سبب تظليل الصيام لليوم المختار إن وجد (الأيام البيض + عاشوراء + عرفة)
-    final fastingInfo = _getSeasonalFastingInfo(hSelected, langCode);
-
-    final dayTasks = _getTasksForDay(_selectedDate, allTasks);
-    final dayRoutines = _getRoutinesForDay(_selectedDate, allRoutines);
-
-    final nightTasks =
-        dayTasks.where((t) => _isTaskInNightPhase(t, astroState)).toList();
-    final dayPhaseTasks =
-        dayTasks.where((t) => !_isTaskInNightPhase(t, astroState)).toList();
-
-    final nightRoutines =
-        dayRoutines.where((r) => _isRoutineInNightPhase(r, astroState)).toList();
-    final dayPhaseRoutines = dayRoutines
-        .where((r) => !_isRoutineInNightPhase(r, astroState))
-        .toList();
-
-    final bool hasAnyItems = dayTasks.isNotEmpty || dayRoutines.isNotEmpty;
-
-    final String nightHeaderTitle = 'home.night_of'.tr(args: [dayName]) !=
-            'home.night_of'
-        ? 'home.night_of'.tr(args: [dayName])
-        : (langCode == 'ar' ? 'ليلة $dayName' : 'Night of $dayName');
-
-    final String dayHeaderTitle = 'home.day_of'.tr(args: [dayName]) !=
-            'home.day_of'
-        ? 'home.day_of'.tr(args: [dayName])
-        : (langCode == 'ar' ? 'نهار $dayName' : 'Day of $dayName');
-
-    return ListView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 130),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  '$dayName · $hDateStr',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                gDateStr,
-                style: TextStyle(
-                  color: textColor.withValues(alpha: 0.55),
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // 🌟 التعديل 11: بطاقة سبب تظليل الصيام (تظهر عند الضغط على يوم من الأيام البيض أو عاشوراء أو عرفة)
-        if (fastingInfo != null)
-          Container(
-            margin: const EdgeInsets.only(bottom: 12, top: 2),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: fastingInfo.highlightColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: fastingInfo.highlightColor.withValues(alpha: 0.45),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: fastingInfo.highlightColor.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    LucideIcons.moon_star,
-                    color: fastingInfo.highlightColor,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fastingInfo.title,
-                        style: TextStyle(
-                          color: fastingInfo.highlightColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        fastingInfo.reason,
-                        style: TextStyle(
-                          color: textColor.withValues(alpha: 0.8),
-                          fontSize: 12,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-        if (!hasAnyItems)
-          Container(
-            margin: const EdgeInsets.only(top: 24),
-            padding: const EdgeInsets.all(24),
-            alignment: Alignment.center,
-            child: Column(
-              children: [
-                Icon(
-                  LucideIcons.calendar_plus,
-                  size: 46,
-                  color: textColor.withValues(alpha: 0.2),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'tasks.empty_tasks'.tr(),
-                  style: TextStyle(
-                    color: textColor.withValues(alpha: 0.45),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          )
-        else ...[
-          _buildPhaseSectionCard(
-            context: context,
-            title: '$nightHeaderTitle 🌑',
-            icon: LucideIcons.moon,
-            phaseColor: const Color(0xFF7986CB),
-            tasks: nightTasks,
-            routines: nightRoutines,
-            periods: astroState.periods,
-            settings: settings,
-            surfaceColor: surfaceColor,
-            textColor: textColor,
-            isDark: isDark,
-          ),
-          const SizedBox(height: 12),
-          _buildPhaseSectionCard(
-            context: context,
-            title: '$dayHeaderTitle ☀️',
-            icon: LucideIcons.sun,
-            phaseColor: const Color(0xFFFFB300),
-            tasks: dayPhaseTasks,
-            routines: dayPhaseRoutines,
-            periods: astroState.periods,
-            settings: settings,
-            surfaceColor: surfaceColor,
-            textColor: textColor,
-            isDark: isDark,
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildPhaseSectionCard({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    required Color phaseColor,
-    required List<TaskModel> tasks,
-    required List<RoutineModel> routines,
-    required List<AstroPeriod> periods,
-    required SettingsModel settings,
-    required Color surfaceColor,
-    required Color textColor,
-    required bool isDark,
-  }) {
-    final isEmpty = tasks.isEmpty && routines.isEmpty;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: phaseColor.withValues(alpha: 0.28),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: phaseColor, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: phaseColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: phaseColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${tasks.length + routines.length}',
-                  style: TextStyle(
-                    color: phaseColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (isEmpty) ...[
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              child: Text(
-                _trCal(
-                  context,
-                  'calendar.no_items_in_phase',
-                  'لا توجد مهام مجدولة في هذه الفترة',
-                  'No tasks scheduled in this phase',
-                ),
-                style: TextStyle(
-                  color: textColor.withValues(alpha: 0.4),
-                  fontSize: 12.5,
-                ),
-              ),
-            ),
-          ] else ...[
-            const SizedBox(height: 10),
-            ...tasks.map(
-              (task) => _buildCalendarTaskTile(
-                context: context,
-                task: task,
-                periods: periods,
-                settings: settings,
-                textColor: textColor,
-                isDark: isDark,
-              ),
-            ),
-            ...routines.map(
-              (routine) => _buildCalendarRoutineTile(
-                context: context,
-                routine: routine,
-                periods: periods,
-                settings: settings,
-                textColor: textColor,
-                isDark: isDark,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarTaskTile({
-    required BuildContext context,
-    required TaskModel task,
-    required List<AstroPeriod> periods,
-    required SettingsModel settings,
-    required Color textColor,
-    required bool isDark,
-  }) {
-    final catColor = _getCategoryNeonColor(task.category);
-    final langCode = context.locale.languageCode;
-
-    final bool isCompletedOnSelectedDate = task.type == TaskType.casual
-        ? task.isCompleted
-        : task.completionHistory.any((d) => _isSameDay(d, _selectedDate));
-
-    final clockStyle = TextStyle(
-      color: task.isAstroTime ? const Color(0xFFF2C94C) : textColor,
-      fontSize: 14.5,
-      fontWeight: FontWeight.w700,
-      fontFamily: 'Inter',
-    );
-
-    Widget timeWidget = Text('--:--', style: clockStyle);
-    if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
-      final mins = task.targetCivilTimeMinutes!;
-      timeWidget = ClockTimeText.civil(
-        civilTime: DateTime(2000, 1, 1, mins ~/ 60, mins % 60),
-        civilTimeFormat: settings.civilTimeFormat,
-        locale: langCode,
-        style: clockStyle,
-      );
-    } else if (task.isAstroTime &&
-        task.targetPeriodId != null &&
-        periods.isNotEmpty) {
-      final globalSuwaya = _resolveGlobalSuwaya(
-        task.targetPeriodId!,
-        task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 1,
-        periods,
-      );
-      timeWidget = ClockTimeText.suwaya(
-        globalSuwayaIndex: globalSuwaya,
-        virtualMinute: task.targetVirtualMinute,
-        style: clockStyle,
-      );
-    }
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        final astro = ref.read(astroProvider);
-        context.push(
-          '/add-task',
-          extra: {
-            'currentPeriodId': astro.currentPeriod.id,
-            'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
-            'existingTask': task,
-            'initialTab': task.type == TaskType.permanent ? 1 : 0,
-          },
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.03)
-              : Colors.black.withValues(alpha: 0.02),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: catColor.withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.heavyImpact();
-                ref.read(tasksProvider.notifier).toggleTaskStatus(task);
-              },
-              child: Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: catColor, width: 2),
-                  color:
-                      isCompletedOnSelectedDate ? catColor : Colors.transparent,
-                ),
-                child: isCompletedOnSelectedDate
-                    ? const Icon(Icons.check, size: 14, color: Colors.white)
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    task.title,
-                    style: TextStyle(
-                      color:
-                          isCompletedOnSelectedDate ? Colors.grey : textColor,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      decoration: isCompletedOnSelectedDate
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1.5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: catColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          task.category.displayName,
-                          style: TextStyle(
-                            color: catColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      if (task.type == TaskType.permanent) ...[
-                        const SizedBox(width: 6),
-                        Icon(
-                          LucideIcons.repeat,
-                          size: 11,
-                          color: textColor.withValues(alpha: 0.45),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Directionality(
-              textDirection: ui.TextDirection.ltr,
-              child: timeWidget,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCalendarRoutineTile({
-    required BuildContext context,
-    required RoutineModel routine,
-    required List<AstroPeriod> periods,
-    required SettingsModel settings,
-    required Color textColor,
-    required bool isDark,
-  }) {
-    final rColor = Color(routine.colorValue);
-    final locale = context.locale.languageCode;
-    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
-
-    final clockStyle = TextStyle(
-      color: routine.isAstroTime ? const Color(0xFFF2C94C) : textColor,
-      fontSize: 13.5,
-      fontWeight: FontWeight.w700,
-      fontFamily: 'Inter',
-    );
-
-    Widget buildEndpoint({
-      required int? periodId,
-      required int? suwaya,
-      required int? virtualMin,
-      required int? civilMins,
-    }) {
-      if (routine.isAstroTime && periodId != null && periods.isNotEmpty) {
-        return ClockTimeText.suwaya(
-          globalSuwayaIndex:
-              _resolveGlobalSuwaya(periodId, suwaya ?? 1, periods),
-          virtualMinute: virtualMin ?? 0,
-          style: clockStyle,
-        );
-      }
-      if (!routine.isAstroTime && civilMins != null) {
-        return Text(formatCivilRoutineTime(civilMins, locale), style: clockStyle);
-      }
-      return Text('--:--', style: clockStyle);
-    }
-
-    final startWidget = buildEndpoint(
-      periodId: routine.startPeriodId,
-      suwaya: routine.startSuwaya,
-      virtualMin: routine.startVirtualMinute,
-      civilMins: routine.startTimeMinutes,
-    );
-
-    final endWidget = buildEndpoint(
-      periodId: routine.endPeriodId ?? routine.startPeriodId,
-      suwaya: routine.endSuwaya ?? routine.startSuwaya,
-      virtualMin: routine.endVirtualMinute,
-      civilMins: routine.endTimeMinutes,
-    );
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        final astro = ref.read(astroProvider);
-        context.push(
-          '/add-task',
-          extra: {
-            'currentPeriodId': astro.currentPeriod.id,
-            'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
-            'existingRoutine': routine,
-            'initialTab': 2,
-          },
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.03)
-              : Colors.black.withValues(alpha: 0.02),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: rColor.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: rColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                routine.title,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Directionality(
-              textDirection: isRTL ? ui.TextDirection.rtl : ui.TextDirection.ltr,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  startWidget,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Icon(
-                      isRTL ? LucideIcons.arrow_left : LucideIcons.arrow_right,
-                      size: 13,
-                      color: textColor.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  endWidget,
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

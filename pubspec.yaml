@@ -77,6 +77,7 @@ flutter:
     - assets/icons/app_icon.png
     - assets/icons/sun.png
     - assets/icons/moon.png
+    - assets/icons/Astrolabe Crown.png
     - assets/audio/
 
 flutter_launcher_icons:

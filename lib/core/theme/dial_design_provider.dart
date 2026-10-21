@@ -1,15 +1,21 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 🌟 تعريف التصاميم المتاحة للقرص
 enum DialDesign { classic, minimal, geometric }
 
 extension DialDesignExt on DialDesign {
   String get displayName {
     switch (this) {
-      case DialDesign.classic: return 'الكلاسيكي (الافتراضي)';
-      case DialDesign.minimal: return 'مبسط (Minimal)';
-      case DialDesign.geometric: return 'هندسي إسلامي';
+      case DialDesign.classic:
+        final tr = 'settings.dial_classic'.tr();
+        return tr != 'settings.dial_classic' ? tr : 'Classic Astrolabe';
+      case DialDesign.minimal:
+        final tr = 'settings.dial_minimal'.tr();
+        return tr != 'settings.dial_minimal' ? tr : 'Minimal';
+      case DialDesign.geometric:
+        final tr = 'settings.dial_geometric'.tr();
+        return tr != 'settings.dial_geometric' ? tr : 'Islamic Geometric';
     }
   }
 }

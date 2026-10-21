@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:suwaya/models/settings_model.dart';
 
 import 'settings_provider.dart';
 import '../../core/location/permissions_provider.dart';
@@ -25,7 +26,6 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
       'assets/audio/default.mp3': 'alerts.default_ring'.tr(),
       'assets/audio/adhan.mp3': 'alerts.makkah_adhan'.tr(),
       'assets/audio/soft.mp3': 'alerts.soft_bell'.tr(),
-      'assets/audio/birds.mp3': 'alerts.birds'.tr(),
     };
   }
 
@@ -335,27 +335,115 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     );
   }
 
-  Widget _buildDefaultsSection(dynamic settings, bool isDark, Color surfaceColor, Color textColor, Color accentColor) {
+  Widget _buildDefaultsSection(
+    SettingsModel settings, // 🌟 نوع صريح بدلاً من dynamic
+    bool isDark,
+    Color surfaceColor,
+    Color textColor,
+    Color accentColor,
+  ) {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final chevronIcon =
+        isRTL ? LucideIcons.chevron_left : LucideIcons.chevron_right;
+
     return Container(
-      decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(24)),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Column(
         children: [
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            leading: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: const Icon(LucideIcons.repeat, color: Colors.teal, size: 20)),
-            title: Text('notifications.continuous_habits'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-            subtitle: Text('notifications.habit_default'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11)),
-            trailing: Icon(LucideIcons.chevron_left, color: textColor.withValues(alpha: 0.3), size: 20),
-            onTap: () => _showDefaultsDialog(context, settings, true, isDark, surfaceColor, textColor, Colors.teal),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 8,
+            ),
+            leading: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.teal.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                LucideIcons.repeat,
+                color: Colors.teal,
+                size: 20,
+              ),
+            ),
+            title: Text(
+              'notifications.continuous_habits'.tr(),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              'notifications.habit_default'.tr(),
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.5),
+                fontSize: 11,
+              ),
+            ),
+            trailing: Icon(
+              chevronIcon,
+              color: textColor.withValues(alpha: 0.3),
+              size: 20,
+            ),
+            onTap: () => _showDefaultsDialog(
+              context,
+              settings,
+              true,
+              isDark,
+              surfaceColor,
+              textColor,
+              Colors.teal,
+            ),
           ),
-          Divider(color: textColor.withValues(alpha: 0.05), height: 1, indent: 20, endIndent: 20),
+          Divider(
+            color: textColor.withValues(alpha: 0.05),
+            height: 1,
+            indent: 20,
+            endIndent: 20,
+          ),
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            leading: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: const Icon(LucideIcons.circle_check, color: Colors.blue, size: 20)),
-            title: Text('notifications.casual_tasks'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-            subtitle: Text('notifications.task_default'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 11)),
-            trailing: Icon(LucideIcons.chevron_left, color: textColor.withValues(alpha: 0.3), size: 20),
-            onTap: () => _showDefaultsDialog(context, settings, false, isDark, surfaceColor, textColor, Colors.blue),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 8,
+            ),
+            leading: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                LucideIcons.circle_check,
+                color: Colors.blue,
+                size: 20,
+              ),
+            ),
+            title: Text(
+              'notifications.casual_tasks'.tr(),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              'notifications.task_default'.tr(),
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.5),
+                fontSize: 11,
+              ),
+            ),
+            trailing: Icon(
+              chevronIcon,
+              color: textColor.withValues(alpha: 0.3),
+              size: 20,
+            ),
+            onTap: () => _showDefaultsDialog(
+              context,
+              settings,
+              false,
+              isDark,
+              surfaceColor,
+              textColor,
+              Colors.blue,
+            ),
           ),
         ],
       ),
@@ -364,7 +452,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
 
   void _showDefaultsDialog(
     BuildContext context,
-    dynamic settings,
+    SettingsModel settings, // 🌟 نوع صريح بدلاً من dynamic
     bool isHabit,
     bool isDark,
     Color surfaceColor,

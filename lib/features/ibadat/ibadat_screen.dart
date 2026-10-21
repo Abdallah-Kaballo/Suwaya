@@ -225,6 +225,7 @@ class IbadatScreen extends ConsumerWidget {
     bool isEnd = false,
   }) {
     final useAstro = settings.useAstroTimeForIbadat;
+    final suwayaColor = suwayaTimeContrastColor(context);
     final style = TextStyle(
       fontSize: fontSize,
       fontWeight: FontWeight.w700,
@@ -252,7 +253,7 @@ class IbadatScreen extends ConsumerWidget {
     if (astroState.periods.isEmpty) {
       return Text(
         '00|00',
-        style: style.copyWith(color: const Color(0xFFF2C94C)),
+        style: style.copyWith(color: suwayaColor),
       );
     }
 
@@ -269,7 +270,7 @@ class IbadatScreen extends ConsumerWidget {
       textDirection: ui.TextDirection.ltr,
       child: Text(
         formattedTime,
-        style: style.copyWith(color: const Color(0xFFF2C94C)),
+        style: style.copyWith(color: civilColor ?? suwayaColor),
       ),
     );
   }

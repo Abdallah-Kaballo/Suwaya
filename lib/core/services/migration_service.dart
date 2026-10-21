@@ -9,6 +9,49 @@ final migrationServiceProvider = Provider<MigrationService>((ref) {
   return MigrationService(ref);
 });
 
+/// 🌟 تعريف فترات النظام القديم (V1 - يبدأ من الفجر) لمنع الأرقام السحرية
+enum V1LegacyPeriod {
+  fajr(1),
+  duha(2),
+  dhuhr(3),
+  asr(4),
+  maghrib(5),
+  isha(6),
+  qiyam(7);
+
+  final int id;
+  const V1LegacyPeriod(this.id);
+
+  static V1LegacyPeriod? fromId(int id) {
+    for (final p in V1LegacyPeriod.values) {
+      if (p.id == id) return p;
+    }
+    return null;
+  }
+}
+
+/// 🌟 تعريف فترات النظام الجديد (V2 - يبدأ من المغرب، 24 سويعة)
+enum V2AstroPeriod {
+  maghrib(1, 1),
+  isha(2, 4),
+  qiyam(3, 6),
+  fajr(4, 1),
+  duha(5, 6),
+  dhuhr(6, 3),
+  asr(7, 3);
+
+  final int id;
+  final int defaultMaxSuwayas;
+  const V2AstroPeriod(this.id, this.defaultMaxSuwayas);
+
+  static V2AstroPeriod fromId(int id) {
+    for (final p in V2AstroPeriod.values) {
+      if (p.id == id) return p;
+    }
+    return V2AstroPeriod.maghrib;
+  }
+}
+
 class MigrationService {
   final Ref _ref;
 
@@ -46,50 +89,19 @@ class MigrationService {
     }
   }
 
-  /// 🌟 تحويل رقم الفترة من نظام V1 (حيث 1=الفجر.. 5=المغرب) إلى نظام V2 (حيث 1=المغرب.. 4=الفجر.. 7=العصر)
-  int _mapV1PeriodIdToV2(int v1PeriodId) {
-    switch (v1PeriodId) {
-      case 1:
-        return 4; // الفجر
-      case 2:
-        return 5; // الضحى
-      case 3:
-        return 6; // الظهر
-      case 4:
-        return 7; // العصر
-      case 5:
-        return 1; // المغرب / أول الليل
-      case 6:
-        return 2; // العشاء / وسط الليل
-      case 7:
-        return 3; // النصف الثاني من الليل / الثلث الأخير
-      default:
-        return v1PeriodId.clamp(1, 7);
-    }
+  V2AstroPeriod _mapV1PeriodToV2(int v1PeriodId) {
+    return switch (V1LegacyPeriod.fromId(v1PeriodId)) {
+      V1LegacyPeriod.fajr => V2AstroPeriod.fajr,
+      V1LegacyPeriod.duha => V2AstroPeriod.duha,
+      V1LegacyPeriod.dhuhr => V2AstroPeriod.dhuhr,
+      V1LegacyPeriod.asr => V2AstroPeriod.asr,
+      V1LegacyPeriod.maghrib => V2AstroPeriod.maghrib,
+      V1LegacyPeriod.isha => V2AstroPeriod.isha,
+      V1LegacyPeriod.qiyam => V2AstroPeriod.qiyam,
+      null => V2AstroPeriod.fromId(v1PeriodId.clamp(1, 7)),
+    };
   }
 
-  int _maxSuwayasForV2Period(int v2PeriodId) {
-    switch (v2PeriodId) {
-      case 1:
-        return 1;
-      case 2:
-        return 4;
-      case 3:
-        return 6;
-      case 4:
-        return 1;
-      case 5:
-        return 6;
-      case 6:
-        return 3;
-      case 7:
-        return 3;
-      default:
-        return 1;
-    }
-  }
-
-  /// 🌟 ترحيل ذكي يحافظ على الجدولة الفلكية للمهمة عبر تحويل نسبي من 48 سويعة (30 د) إلى 24 سويعة (60 د)
   void _migrateTaskToV2(TaskModel task) {
     task.scheduleModelVersion = 2;
     task.migrationCount += 1;
@@ -97,10 +109,10 @@ class MigrationService {
     if (!task.isAstroTime) return;
 
     if (task.targetPeriodId != null && task.targetSuwayas.isNotEmpty) {
-      final v2PeriodId = _mapV1PeriodIdToV2(task.targetPeriodId!);
-      final maxSuwayas = _maxSuwayasForV2Period(v2PeriodId);
+      final targetV2 = _mapV1PeriodToV2(task.targetPeriodId!);
+      final maxSuwayas = targetV2.defaultMaxSuwayas;
 
-      task.targetPeriodId = v2PeriodId;
+      task.targetPeriodId = targetV2.id;
       task.targetSuwayas = task.targetSuwayas
           .map((s) {
             if (s == -1) return -1;
@@ -108,34 +120,31 @@ class MigrationService {
           })
           .toSet()
           .toList();
-      // تحويل الدقيقة الافتراضية من مقياس (0..29) إلى مقياس (0..59)
       task.targetVirtualMinute = (task.targetVirtualMinute * 2).clamp(0, 59);
     } else {
-      // في حال كانت الحقول الفلكية فارغة فقط نضع وقتاً مدنياً احتياطياً
       task.isAstroTime = false;
       task.targetCivilTimeMinutes ??= 10 * 60;
     }
   }
 
-  /// 🌟 ترحيل ذكي يحافظ على الجدولة الفلكية للروتين في نظام الـ 24 سويعة الجديد
   void _migrateRoutineToV2(RoutineModel routine) {
     routine.scheduleModelVersion = 2;
 
     if (!routine.isAstroTime) return;
 
     if (routine.startPeriodId != null && routine.endPeriodId != null) {
-      final newStartP = _mapV1PeriodIdToV2(routine.startPeriodId!);
-      final newEndP = _mapV1PeriodIdToV2(routine.endPeriodId!);
+      final newStartP = _mapV1PeriodToV2(routine.startPeriodId!);
+      final newEndP = _mapV1PeriodToV2(routine.endPeriodId!);
 
-      routine.startPeriodId = newStartP;
+      routine.startPeriodId = newStartP.id;
       routine.startSuwaya = (((routine.startSuwaya ?? 1) + 1) ~/ 2)
-          .clamp(1, _maxSuwayasForV2Period(newStartP));
+          .clamp(1, newStartP.defaultMaxSuwayas);
       routine.startVirtualMinute =
           ((routine.startVirtualMinute ?? 0) * 2).clamp(0, 59);
 
-      routine.endPeriodId = newEndP;
+      routine.endPeriodId = newEndP.id;
       routine.endSuwaya = (((routine.endSuwaya ?? 1) + 1) ~/ 2)
-          .clamp(1, _maxSuwayasForV2Period(newEndP));
+          .clamp(1, newEndP.defaultMaxSuwayas);
       routine.endVirtualMinute =
           ((routine.endVirtualMinute ?? 0) * 2).clamp(0, 59);
     } else {

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:go_router/go_router.dart';
+import 'package:suwaya/core/theme/astro_ui_extensions.dart';
 import 'dart:ui' as ui;
 
 import '../../core/utils/time_formatters.dart';
@@ -20,17 +21,6 @@ import '../../shared/widgets/suwaya_time_text.dart';
 import '../../core/providers/ui_providers.dart';
 import '../settings/settings_provider.dart';
 
-Color _getNeonColor(TaskCategory category) {
-  final catStr = category.toString().toLowerCase();
-  if (catStr.contains('work')) return const Color(0xFF00E5FF);
-  if (catStr.contains('study')) return const Color(0xFF00E676);
-  if (catStr.contains('sport')) return const Color(0xFFFF3D00);
-  if (catStr.contains('worship')) return const Color(0xFFFFC400);
-  if (catStr.contains('entertainment')) return const Color(0xFFFF4081);
-  if (catStr.contains('personal')) return const Color(0xFFD500F9);
-  if (catStr.contains('social')) return const Color(0xFF76FF03);
-  return const Color(0xFF18FFFF);
-}
 
 int _getGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
   int global = 0;
@@ -470,7 +460,8 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
   Widget build(BuildContext context) {
     final t = widget.task;
     final settings = ref.watch(settingsProvider);
-    final catColor = _getNeonColor(t.category);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final catColor = t.category.uiColor(isDark); // 🌟 استخدام الدالة الموحدة المتكيفة مع الثيم
     final surfaceColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).colorScheme.onSurface;
 
@@ -478,7 +469,7 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
 
     final clockStyle = TextStyle(
-      color: t.isAstroTime ? const Color(0xFFF2C94C) : textColor,
+      color: t.isAstroTime ? suwayaTimeContrastColor(context) : textColor,
       fontSize: 16,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
@@ -647,7 +638,7 @@ class _RoutineRowItem extends ConsumerWidget {
     final rColor = Color(routine.colorValue);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final clockColor = routine.isAstroTime
-        ? const Color(0xFFF2C94C)
+        ? suwayaTimeContrastColor(context)
         : (isDark ? Colors.white : Colors.black87);
     final clockStyle = TextStyle(
       color: clockColor,

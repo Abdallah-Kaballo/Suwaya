@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:suwaya/core/location/geo_database_service.dart';
+import 'package:suwaya/models/settings_model.dart';
 
 import '../../settings/settings_provider.dart';
 import '../../settings/settings_screen.dart';
@@ -56,7 +57,12 @@ class LocationHeader extends ConsumerWidget {
     );
   }
 
-  Widget _buildSmartHeaderContent(dynamic loc, bool isDark, Color textColor, Color accentColor) {
+  Widget _buildSmartHeaderContent(
+    SavedLocation loc, // 🌟 نوع صريح بدلاً من dynamic
+    bool isDark,
+    Color textColor,
+    Color accentColor,
+  ) {
     final String type = loc.locationType.isEmpty ? 'list' : loc.locationType;
     final String city = loc.nearestCity.isEmpty ? loc.name : loc.nearestCity;
 

@@ -4,6 +4,7 @@ import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.media.AudioManager
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.suwaya.app/lockscreen"
@@ -21,6 +22,15 @@ class MainActivity: FlutterActivity() {
                     result.success(null)
                 }
                 else -> result.notImplemented()
+                "setAlarmVolumeControl" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    volumeControlStream = if (enabled) {
+                        AudioManager.STREAM_ALARM
+                    } else {
+                        AudioManager.USE_DEFAULT_STREAM_TYPE
+                    }
+                    result.success(null)
+                }
             }
         }
     }

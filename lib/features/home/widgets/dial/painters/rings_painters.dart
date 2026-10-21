@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/theme/astro_ui_extensions.dart';
@@ -26,12 +25,25 @@ class RoutinesRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (routineArcs.isEmpty) return;
-
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
     final innerRadius = R * kPeriodR;
     final outerRadius = R * kRailwayR;
+    final width = outerRadius - innerRadius;
+
+    // 🌟 رسم أرضية مسار السكة أولاً تحت الروتين حتى لا تُطمس ألوان وأنماط الروتين
+    canvas.drawCircle(
+      center,
+      innerRadius + (width / 2),
+      Paint()
+        ..color = isDark
+            ? const Color(0xFF090B10).withValues(alpha: 0.82)
+            : const Color(0xFFE2E8F0).withValues(alpha: 0.65)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = width,
+    );
+
+    if (routineArcs.isEmpty) return;
 
     for (var arc in routineArcs) {
       final isHighlighted = arc.id == highlightedRoutineId;
@@ -60,7 +72,9 @@ class RoutinesRingPainter extends CustomPainter {
       }
 
       final fillPaint = Paint()
-        ..color = arc.color.withValues(alpha: isHighlighted ? 0.35 : 0.15)
+        ..color = arc.color.withValues(
+          alpha: isHighlighted ? 0.42 : (isDark ? 0.24 : 0.28),
+        )
         ..style = PaintingStyle.fill;
       canvas.drawPath(path, fillPaint);
 
@@ -68,8 +82,10 @@ class RoutinesRingPainter extends CustomPainter {
         canvas.save();
         canvas.clipPath(path);
         final patternPaint = Paint()
-          ..color = arc.color.withValues(alpha: isHighlighted ? 0.8 : 0.4)
-          ..strokeWidth = isHighlighted ? 1.5 : 1.0
+          ..color = arc.color.withValues(
+            alpha: isHighlighted ? 0.85 : (isDark ? 0.50 : 0.60),
+          )
+          ..strokeWidth = isHighlighted ? 1.6 : 1.1
           ..style = PaintingStyle.stroke;
 
         final bounds = path.getBounds();
@@ -80,10 +96,9 @@ class RoutinesRingPainter extends CustomPainter {
       canvas.drawPath(
         path,
         Paint()
-          ..color = arc.color.withValues(alpha: isHighlighted ? 1.0 : 0.8)
+          ..color = arc.color.withValues(alpha: isHighlighted ? 1.0 : 0.85)
           ..strokeWidth = isHighlighted ? 2.5 : 1.5
-          ..style = PaintingStyle.stroke
-          ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2.0),
+          ..style = PaintingStyle.stroke,
       );
     }
   }
@@ -180,7 +195,6 @@ class PeriodRingPainter extends CustomPainter {
   final String langCode;
   final DialDesign design;
   final int? highlightedPeriodId;
-  final List<String> visibleNightParts;
 
   PeriodRingPainter({
     required this.periods,
@@ -191,7 +205,6 @@ class PeriodRingPainter extends CustomPainter {
     required this.langCode,
     required this.design,
     this.highlightedPeriodId,
-    this.visibleNightParts = const [],
   });
 
   void _drawArcSegment(
@@ -209,8 +222,8 @@ class PeriodRingPainter extends CustomPainter {
       startAngle: startAngle,
       endAngle: startAngle + sweepAngle,
       colors: [
-        color.withValues(alpha: isHighlighted ? 0.95 : 0.4),
-        color.withValues(alpha: isHighlighted ? 0.75 : 0.2),
+        color.withValues(alpha: isHighlighted ? 0.95 : (isDark ? 0.62 : 0.78)),
+        color.withValues(alpha: isHighlighted ? 0.80 : (isDark ? 0.42 : 0.58)),
       ],
     );
 
@@ -241,9 +254,9 @@ class PeriodRingPainter extends CustomPainter {
     canvas.drawPath(
       path,
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.4)
+        ..color = Colors.white.withValues(alpha: isDark ? 0.45 : 0.70)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0,
+        ..strokeWidth = 1.1,
     );
 
     if (design == DialDesign.minimal || text.isEmpty) return;
@@ -260,7 +273,13 @@ class PeriodRingPainter extends CustomPainter {
       center.dx + drawRadius * cos(middleAngle),
       center.dy + drawRadius * sin(middleAngle),
     );
-    canvas.rotate(middleAngle + pi / 2);
+
+    // 🌟 تعديل اتجاه النص في النصف السفلي من القرص فلا يظهر مقلوباً رأساً على عقب
+    double textRotation = middleAngle + pi / 2;
+    if (sin(middleAngle) > 0) {
+      textRotation += pi;
+    }
+    canvas.rotate(textRotation);
 
     textPainter.text = TextSpan(
       text: text,
@@ -271,7 +290,7 @@ class PeriodRingPainter extends CustomPainter {
         fontFamily: 'Tajawal',
         shadows: [
           Shadow(color: Colors.black, blurRadius: 4, offset: Offset(0, 1)),
-          Shadow(color: Colors.black87, blurRadius: 10, offset: Offset(0, 0)),
+          Shadow(color: Colors.black87, blurRadius: 8, offset: Offset(0, 0)),
         ],
       ),
     );
@@ -309,79 +328,11 @@ class PeriodRingPainter extends CustomPainter {
       final isHighlighted =
           period.id == highlightedPeriodId || period.id == currentPeriod.id;
 
-      // 🌟 التعديل 9: رسم فترة النصف الثاني من الليل (الفترة 3 - 6 سويعات) بتقسيمها الهندسي الثابت
-      if (period.id == 3 && period.suwayasCount == 6) {
-        final suwayaAngle = sweepAngle / 6;
-        final splitRadius = innerRadius + (outerRadius - innerRadius) / 2;
-
-        // 1. أول سويعتين (بكامل عرض الحلقة): السدس الرابع
-        final s4Start = startAngle;
-        final s4Sweep = suwayaAngle * 2;
-        _drawArcSegment(
-          canvas,
-          center,
-          innerRadius,
-          outerRadius,
-          s4Start,
-          s4Sweep,
-          const Color(0xFF3F51B5),
-          'night_parts.sixth_4'.tr(),
-          isHighlighted,
-        );
-
-        // 2. القسم الداخلي (بطول 4 سويعات): الثلث الأخير
-        final lastThirdStart = startAngle + suwayaAngle * 2;
-        final lastThirdSweep = suwayaAngle * 4;
-        _drawArcSegment(
-          canvas,
-          center,
-          innerRadius,
-          splitRadius,
-          lastThirdStart,
-          lastThirdSweep,
-          const Color(0xFF1A237E),
-          'night_parts.third_3'.tr(),
-          isHighlighted,
-        );
-
-        // 3. القسم الخارجي (أول سويعتين من الـ 4): السدس الخامس
-        final s5Start = startAngle + suwayaAngle * 2;
-        final s5Sweep = suwayaAngle * 2;
-        _drawArcSegment(
-          canvas,
-          center,
-          splitRadius,
-          outerRadius,
-          s5Start,
-          s5Sweep,
-          const Color(0xFF3949AB),
-          'night_parts.sixth_5'.tr(),
-          isHighlighted,
-        );
-
-        // 4. القسم الخارجي (آخر سويعتين من الـ 4): السدس السادس
-        final s6Start = startAngle + suwayaAngle * 4;
-        final s6Sweep = suwayaAngle * 2;
-        _drawArcSegment(
-          canvas,
-          center,
-          splitRadius,
-          outerRadius,
-          s6Start,
-          s6Sweep,
-          const Color(0xFF303F9F),
-          'night_parts.sixth_6'.tr(),
-          isHighlighted,
-        );
-
-        continue;
-      }
-
-      Color pColor = period.uiColor;
+      final Color pColor = period.dialColor(isDark);
 
       if (isHighlighted) {
         final glowPaint = Paint()
-          ..color = pColor.withValues(alpha: isHighlighted ? 0.7 : 0.4)
+          ..color = pColor.withValues(alpha: isHighlighted ? 0.65 : 0.35)
           ..style = PaintingStyle.stroke
           ..strokeWidth = (outerRadius - innerRadius) + (isHighlighted ? 12 : 6)
           ..maskFilter = MaskFilter.blur(
@@ -396,6 +347,44 @@ class PeriodRingPainter extends CustomPainter {
           false,
           glowPaint,
         );
+      }
+
+      // 🌟 الفترة 3 (النصف الثاني من الليل - 6 سويعات):
+      // تقسيم نظيف بكامل عرض الحلقة بدون خط قسمة أفقي: (السدس الرابع = سويعتان) + (الثلث الأخير = 4 سويعات)
+      if (period.id == 3 && period.suwayasCount == 6) {
+        final suwayaAngle = sweepAngle / 6;
+
+        // 1. أول سويعتين (بكامل عرض الحلقة): السدس الرابع
+        final s4Color =
+            isDark ? const Color(0xFF3949AB) : const Color(0xFF303F9F);
+        _drawArcSegment(
+          canvas,
+          center,
+          innerRadius,
+          outerRadius,
+          startAngle,
+          suwayaAngle * 2,
+          s4Color,
+          'night_parts.sixth_4'.tr(),
+          isHighlighted,
+        );
+
+        // 2. آخر 4 سويعات (بكامل عرض الحلقة): الثلث الأخير
+        final lastThirdColor =
+            isDark ? const Color(0xFF7E57C2) : const Color(0xFF512DA8);
+        _drawArcSegment(
+          canvas,
+          center,
+          innerRadius,
+          outerRadius,
+          startAngle + suwayaAngle * 2,
+          suwayaAngle * 4,
+          lastThirdColor,
+          'night_parts.third_3'.tr(),
+          isHighlighted,
+        );
+
+        continue;
       }
 
       String pName = '';
@@ -448,8 +437,7 @@ class PeriodRingPainter extends CustomPainter {
         old.langCode != langCode ||
         old.design != design ||
         old.highlightedPeriodId != highlightedPeriodId ||
-        old.periods.length != periods.length ||
-        !listEquals(old.visibleNightParts, visibleNightParts)) {
+        old.periods.length != periods.length) {
       return true;
     }
     for (int i = 0; i < periods.length; i++) {

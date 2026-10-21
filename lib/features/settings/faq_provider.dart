@@ -13,8 +13,8 @@ class FaqItem {
 
   factory FaqItem.fromJson(Map<String, dynamic> json) {
     return FaqItem(
-      question: json['q'] ?? '',
-      answer: json['a'] ?? '',
+      question: (json['q'] as String?) ?? '',
+      answer: (json['a'] as String?) ?? '',
     );
   }
 }
@@ -35,8 +35,10 @@ final faqProvider = FutureProvider.family.autoDispose<List<FaqItem>, String>((re
       // حفظ النسخة الجديدة في التخزين المحلي
       await prefs.setString(cacheKey, response.body);
       
-      final List<dynamic> decodedData = jsonDecode(response.body);
-      return decodedData.map((e) => FaqItem.fromJson(e)).toList();
+      final List<dynamic> decodedData = jsonDecode(response.body) as List<dynamic>;
+      return decodedData
+          .map((e) => FaqItem.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
   } catch (e) {
     debugPrint('فشل جلب FAQ من الإنترنت، جاري محاولة فتح النسخة المخبأة: $e');
@@ -44,9 +46,14 @@ final faqProvider = FutureProvider.family.autoDispose<List<FaqItem>, String>((re
 
   // في حال انقطاع الإنترنت أو الفشل، نقرأ من الـ Cache
   final cachedData = prefs.getString(cacheKey);
+
   if (cachedData != null) {
-    final List<dynamic> decodedData = jsonDecode(cachedData);
-    return decodedData.map((e) => FaqItem.fromJson(e)).toList();
+  final List<dynamic> decodedData =
+      jsonDecode(cachedData) as List<dynamic>;
+
+  return decodedData
+      .map((e) => FaqItem.fromJson(e as Map<String, dynamic>))
+      .toList();
   }
 
   // إذا لم يكن هناك إنترنت ولم يسبق التخزين، نرجع قائمة فارغة

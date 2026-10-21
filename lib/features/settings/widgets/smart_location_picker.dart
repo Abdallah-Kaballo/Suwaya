@@ -134,50 +134,90 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     final lng = double.tryParse(_lngController.text.trim());
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('location_picker.location_name_required'.tr(), style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white)), backgroundColor: Colors.redAccent));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'location_picker.location_name_required'.tr(),
+            style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
 
     if (lat == null || lat < -90 || lat > 90) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('location_picker.lat_validation_error'.tr(), style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white)), backgroundColor: Colors.redAccent));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'location_picker.lat_validation_error'.tr(),
+            style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
 
     if (lng == null || lng < -180 || lng > 180) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('location_picker.lng_validation_error'.tr(), style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white)), backgroundColor: Colors.redAccent));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'location_picker.lng_validation_error'.tr(),
+            style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
 
     final notifier = ref.read(settingsProvider.notifier);
     final langCode = context.locale.languageCode;
 
-    final localData = await GeoDatabaseService.getNearestLocationData(lat, lng, langCode);
+    final localData = await GeoDatabaseService.getNearestLocationData(
+      lat,
+      lng,
+      langCode,
+    );
     String countryCode = 'CUSTOM';
     String countryName = 'common.unknown'.tr();
     String? timezone;
+    String nearestCity = name;
+
     if (localData != null) {
       countryCode = localData['countryCode'] ?? 'CUSTOM';
       timezone = localData['timezone'] as String?;
-      countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
+      nearestCity = (localData['cityName'] as String?) ?? name;
+      countryName = GeoDatabaseService.getLocalizedCountryName(
+        countryCode,
+        langCode,
+      );
     }
 
-    await notifier.addAndSelectLocation(name, lat, lng, countryCode, timezone: timezone);
-    
-    if (localData != null) {
-      countryCode = localData['countryCode'] ?? 'CUSTOM';
-      countryName = GeoDatabaseService.getLocalizedCountryName(countryCode, langCode);
-    }
-
-    await notifier.addAndSelectLocation(name, lat, lng, countryCode);
+    await notifier.addAndSelectLocation(
+      name,
+      lat,
+      lng,
+      countryCode,
+      timezone: timezone,
+      locationType: 'custom',
+      nearestCity: nearestCity,
+    );
     await _applySmartSettings(countryCode, countryName, ref);
 
     if (!mounted) return;
-    
+
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('location_picker.location_updated'.tr(), style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white)), 
-      backgroundColor: Colors.green.shade800
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'location_picker.location_updated'.tr(),
+          style: const TextStyle(fontFamily: 'Tajawal', color: Colors.white),
+        ),
+        backgroundColor: Colors.green.shade800,
+      ),
+    );
   }
 
   @override

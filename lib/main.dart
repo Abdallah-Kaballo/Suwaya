@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 🌟 تم إضافة هذا الاستيراد لتعريف أزرار الصوت (HardwareKeyboard)
+// 🌟 تم إضافة هذا الاستيراد لتعريف أزرار الصوت (HardwareKeyboard)
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:alarm/alarm.dart';
@@ -20,6 +20,11 @@ import 'core/router/app_router.dart';
 // 🌟 استيراد خدمة الترحيل وشاشة رنين المنبه الموحدة
 import 'core/services/migration_service.dart';
 import 'features/alarm/alarm_ring_screen.dart';
+import 'features/routines/routines_provider.dart';
+import 'features/tasks/tasks_provider.dart';
+import 'core/notification/scheduler_service.dart';
+import 'core/services/alarm_service.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -207,52 +212,49 @@ class SuwayaApp extends ConsumerStatefulWidget {
   ConsumerState<SuwayaApp> createState() => _SuwayaAppState();
 }
 
-class _SuwayaAppState extends ConsumerState<SuwayaApp> {
+class _SuwayaAppState extends ConsumerState<SuwayaApp>
+    with WidgetsBindingObserver {
   StreamSubscription<AlarmSet>? _alarmSubscription;
   int? _activeRingingAlarmId;
-  Set<int> _currentlyRingingIds = {};
 
   @override
   void initState() {
     super.initState();
-    // 🌟 مستمع عام لأزرار الصوت لإيقاف الأذان أو المنبه عند الضغط على زر رفع/خفض الصوت
-    HardwareKeyboard.instance.addHandler(_handleGlobalVolumeKeys);
+    WidgetsBinding.instance.addObserver(this);
 
     _alarmSubscription = Alarm.ringing.listen((AlarmSet alarmSet) {
-      _currentlyRingingIds = alarmSet.alarms.map((a) => a.id).toSet();
-      if (alarmSet.alarms.isNotEmpty) {
-        _onAlarmRinging(alarmSet.alarms.first);
-      } else {
+      if (alarmSet.alarms.isEmpty) {
         _activeRingingAlarmId = null;
+        return;
+      }
+
+      // اختيار أول منبه يتطلب شاشة كاملة (وتجاوز التنبيهات المحددة كـ إشعار ستارة فقط)
+      for (final alarm in alarmSet.alarms) {
+        final parsed = AlarmService.parseAlarmSettings(alarm);
+        if (!parsed.isCurtainOnly) {
+          _onAlarmRinging(alarm);
+          break;
+        }
       }
     });
   }
 
-  bool _handleGlobalVolumeKeys(KeyEvent event) {
-    if (event is KeyDownEvent && _currentlyRingingIds.isNotEmpty) {
-      if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
-          event.logicalKey == LogicalKeyboardKey.audioVolumeDown) {
-        // إذا كانت شاشة المنبه الكاملة مفتوحة، نترك لها معالجة الغفوة،
-        // أما إذا كان إشعار أذان/مهمة على الستارة، نوقفه فوراً بضغطة زر الصوت!
-        if (_activeRingingAlarmId == null) {
-          for (final id in List<int>.from(_currentlyRingingIds)) {
-            Alarm.stop(id);
-          }
-          _currentlyRingingIds.clear();
-          return true;
-        }
-      }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // 🌟 تحديث نافذة الجدولة المستقبلية فور عودة التطبيق للواجهة (مثلاً في يوم جديد أو بعد تعديل صلاحيات النظام)
+      final settings = ref.read(settingsProvider);
+      final tasks = ref.read(tasksProvider).allTasks;
+      final routines = ref.read(routinesProvider);
+      ref
+          .read(notificationSchedulerProvider)
+          .scheduleAhead(settings, tasks, routines);
     }
-    return false;
   }
 
   Future<void> _onAlarmRinging(AlarmSettings alarmSettings) async {
-    // 🌟 إذا كان التنبيه من نوع "إشعار على الستارة" (curtain|)، يبقى على الستارة فقط مع زر الإيقاف ولا يفتح شاشة كاملة
-    final isCurtainMode =
-        alarmSettings.payload?.startsWith('curtain|') ?? false;
-    if (isCurtainMode) {
-      return;
-    }
+    final parsed = AlarmService.parseAlarmSettings(alarmSettings);
+    if (parsed.isCurtainOnly) return;
 
     if (_activeRingingAlarmId == alarmSettings.id) return;
     _activeRingingAlarmId = alarmSettings.id;
@@ -273,7 +275,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp> {
 
   @override
   void dispose() {
-    HardwareKeyboard.instance.removeHandler(_handleGlobalVolumeKeys);
+    WidgetsBinding.instance.removeObserver(this);
     _alarmSubscription?.cancel();
     super.dispose();
   }

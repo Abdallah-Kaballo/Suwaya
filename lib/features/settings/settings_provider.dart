@@ -21,9 +21,10 @@ class AstroSmartDefaults {
   static AstroDefaults getDefaultsForCountry(String? countryCode) {
     if (countryCode == null || countryCode == 'CUSTOM') {
       return const AstroDefaults(
-          method: 'muslim_world_league',
-          madhab: 'shafi',
-          highLatitudeRule: 'middle_of_the_night');
+        method: 'muslim_world_league',
+        madhab: 'shafi',
+        highLatitudeRule: 'middle_of_the_night',
+      );
     }
 
     String method = 'muslim_world_league';
@@ -42,7 +43,7 @@ class AstroSmartDefaults {
         method = 'egyptian';
         break;
       case 'SA':
-        method = 'umm_al_qura';
+        method = 'ummAlQura'; // 🌟 توحيد التسمية مع باقي شاشات التطبيق
         break;
       case 'AE':
         method = 'dubai';
@@ -117,7 +118,10 @@ class AstroSmartDefaults {
         break;
     }
     return AstroDefaults(
-        method: method, madhab: madhab, highLatitudeRule: highLatRule);
+      method: method,
+      madhab: madhab,
+      highLatitudeRule: highLatRule,
+    );
   }
 }
 

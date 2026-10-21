@@ -13,8 +13,10 @@ import '../../models/task_model.dart';
 import '../../models/settings_model.dart';
 import '../../features/tasks/tasks_provider.dart';
 import '../../features/settings/settings_provider.dart';
-import '../utils/time_formatters.dart';
 import '../../features/routines/routines_provider.dart';
+import '../astro_engine/astro_provider.dart';
+import '../services/alarm_service.dart';
+import '../utils/time_formatters.dart';
 import 'notification_service.dart';
 
 final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
@@ -42,15 +44,30 @@ final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
     triggerSchedule();
   });
 
+  // 🌟 إعادة تحريك نافذة الجدولة تلقائياً عند دخول دورة مغرب جديدة أو تغير الفترة الفلكية
+  ref.listen(
+    astroProvider.select((a) => a.cycleAnchors.cycleEndMaghrib),
+    (prev, next) {
+      if (prev != next) triggerSchedule();
+    },
+  );
+
+  // 🌟 مراقبة شاملة لجميع حقول الإعدادات المؤثرة في الجدولة (شاملة visibleNightParts والغفوة)
   ref.listen(settingsProvider.select((s) {
     final sb = StringBuffer()
       ..write(
-          'loc=${s.activeLocation?.latitude},${s.activeLocation?.longitude},${s.activeLocation?.timezone};')
+        'loc=${s.activeLocation?.latitude},${s.activeLocation?.longitude},${s.activeLocation?.timezone};',
+      )
       ..write(
-          'astro=${s.calculationMethod},${s.madhab},${s.highLatitudeRule},${s.customFajrAngle},${s.customIshaAngle},${s.useAstroTimeForIbadat};');
+        'astro=${s.calculationMethod},${s.madhab},${s.highLatitudeRule},${s.customFajrAngle},${s.customIshaAngle},${s.useAstroTimeForIbadat};',
+      )
+      ..write(
+        'night=${s.visibleNightParts.join(",")};snooze=${s.snoozeDurationMinutes},${s.maxSnoozeCount};',
+      );
     for (var c in s.periodConfigs) {
       sb.write(
-          'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
+        'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};',
+      );
     }
     return sb.toString();
   }), (prev, nextFingerprint) {
@@ -66,10 +83,71 @@ class NotificationScheduler {
 
   String _lastScheduleHash = '';
   Set<int> _previouslyScheduledNormalIds = {};
+  int _retryCount = 0;
+  Timer? _retryTimer;
 
   NotificationScheduler(this._service);
 
-  /// 🌟 حساب الـ UTC Offset لأي يوم مستهدف مع مراعاة التوقيت الصيفي والشتوي (DST)
+  /// 🌟 معرف رقمي ثابت وحتمي لأجزاء الليل الخمسة (بدلاً من String.hashCode غير المستقر)
+  static int stableNightPartCode(String nightPartId) {
+    switch (nightPartId.trim().toLowerCase()) {
+      case 'half_1':
+        return 11;
+      case 'half_2':
+        return 12;
+      case 'third_1':
+        return 21;
+      case 'third_2':
+        return 22;
+      case 'third_3':
+        return 23;
+      case 'sixth_1':
+        return 31;
+      case 'sixth_2':
+        return 32;
+      case 'sixth_3':
+        return 33;
+      case 'sixth_4':
+        return 34;
+      case 'sixth_5':
+        return 35;
+      case 'sixth_6':
+        return 36;
+      default:
+        int acc = 50;
+        for (final unit in nightPartId.codeUnits) {
+          acc = ((acc * 31) + unit) % 40 + 50;
+        }
+        return acc;
+    }
+  }
+
+  /// 🌟 منع تصادم تنبيهين في نفس الثانية الفعلية:
+  /// تعطى الأولوية المطلقة للأذان في الثانية +0s، وتُزاح التنبيهات المتزامنة معه بمقدار +2s تتابعياً
+  static DateTime resolveCollisionSafeTime(
+    DateTime desiredTime,
+    Set<int> occupiedEpochSeconds,
+  ) {
+    final cleanTime = DateTime(
+      desiredTime.year,
+      desiredTime.month,
+      desiredTime.day,
+      desiredTime.hour,
+      desiredTime.minute,
+      desiredTime.second,
+    );
+    int candidateSec = cleanTime.millisecondsSinceEpoch ~/ 1000;
+    int offsetSeconds = 0;
+
+    while (occupiedEpochSeconds.contains(candidateSec) && offsetSeconds < 30) {
+      offsetSeconds += 2;
+      candidateSec += 2;
+    }
+
+    occupiedEpochSeconds.add(candidateSec);
+    return cleanTime.add(Duration(seconds: offsetSeconds));
+  }
+
   Duration _getUtcOffsetForDate(SavedLocation? loc, DateTime targetDate) {
     if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
       try {
@@ -92,7 +170,6 @@ class NotificationScheduler {
     ).timeZoneOffset;
   }
 
-  /// 🌟 إصلاح حرج: إرجاع وقت المدينة دائماً بصيغة DateTime.utc الموحدة (Wall-Clock UTC)
   DateTime _getCityNow(SavedLocation? loc) {
     if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
       try {
@@ -119,7 +196,6 @@ class NotificationScheduler {
     );
   }
 
-  /// 🌟 تحويل وقت الحدث (Wall-Clock UTC في المدينة) إلى وقت الجهاز الفعلي مع تعويض أي تغير في التوقيت الصيفي/الشتوي
   DateTime _resolveRealDeviceAlarmTime({
     required DateTime targetCityWallTime,
     required DateTime cityNowWallTime,
@@ -143,8 +219,7 @@ class NotificationScheduler {
       } catch (_) {}
     }
 
-    // في حال الاعتماد على توقيت الجهاز المحليに直接
-    final targetLocal = DateTime(
+    return DateTime(
       targetCityWallTime.year,
       targetCityWallTime.month,
       targetCityWallTime.day,
@@ -152,12 +227,14 @@ class NotificationScheduler {
       targetCityWallTime.minute,
       targetCityWallTime.second,
     );
-    return targetLocal;
   }
 
   String _getAssetAudioPath(String? soundId) {
     if (soundId == null || soundId.isEmpty || soundId == 'default') {
       return 'assets/audio/default.mp3';
+    }
+    if (soundId == 'assets/audio/birds.mp3' || soundId == 'birds') {
+      return 'assets/audio/soft.mp3';
     }
     if (soundId.contains('assets/')) return soundId;
     return 'assets/audio/$soundId.mp3';
@@ -166,27 +243,42 @@ class NotificationScheduler {
   Future<void> scheduleAhead(
     SettingsModel settings,
     List<TaskModel> allTasks,
-    List<RoutineModel> routines,
-  ) async {
+    List<RoutineModel> routines, {
+    bool forceRefresh = false,
+  }) async {
     if (_isScheduling) return;
 
     final loc = settings.activeLocation;
+    if (loc == null) {
+      // مقصود: لا نحدث _lastScheduleHash حتى تعاد المحاولة فور اختيار المستخدم لموقعه
+      return;
+    }
+
     final cityNow = _getCityNow(loc);
     final todayOffset = _getUtcOffsetForDate(loc, cityNow);
 
+    // 🌟 تضمين تاريخ اليوم الحالي في البصمة لضمان تحرك نافذة الـ 7 أيام تلقائياً كل يوم جديد
     final sb = StringBuffer()
       ..write(
-          'loc=${loc?.latitude},${loc?.longitude},${loc?.timezone},offset=${todayOffset.inMinutes};')
+        'date=${cityNow.year}-${cityNow.month}-${cityNow.day};',
+      )
       ..write(
-          'astro=${settings.calculationMethod},${settings.madhab},${settings.highLatitudeRule},${settings.customFajrAngle},${settings.customIshaAngle},${settings.useAstroTimeForIbadat};');
+        'loc=${loc.latitude},${loc.longitude},${loc.timezone},offset=${todayOffset.inMinutes};',
+      )
+      ..write(
+        'astro=${settings.calculationMethod},${settings.madhab},${settings.highLatitudeRule},${settings.customFajrAngle},${settings.customIshaAngle},${settings.useAstroTimeForIbadat};',
+      )
+      ..write(
+        'nightParts=${settings.visibleNightParts.join(",")};snooze=${settings.snoozeDurationMinutes}:${settings.maxSnoozeCount};',
+      );
 
     for (final c in settings.periodConfigs) {
       sb.write(
-          'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};');
+        'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};',
+      );
     }
 
     for (final t in allTasks) {
-      // 🌟 بصمة شاملة لجميع خصائص المهمة لضمان إعادة الجدولة فور تعديل أي حقل
       sb.write(
         't=${t.id}:${t.title}:${t.type.index}:${t.isCompleted}:'
         '${t.lastCompletedDate?.millisecondsSinceEpoch}:'
@@ -203,18 +295,19 @@ class NotificationScheduler {
     sb.write(buildRoutineScheduleFingerprint(routines));
     final currentHash = sb.toString();
 
-    if (currentHash == _lastScheduleHash) return;
+    if (!forceRefresh && currentHash == _lastScheduleHash) return;
+
+    bool hadSchedulingFailures = false;
 
     try {
       _isScheduling = true;
-
-      if (loc == null) return;
 
       final activeAlarms = await Alarm.getAlarms();
       final activeAlarmMap = {for (var a in activeAlarms) a.id: a};
 
       final Set<int> requiredAlarmIds = {};
       final Set<int> requiredNormalIds = {};
+      final Set<int> occupiedAlarmSeconds = {};
 
       final manualOffsetsMap = {
         for (var c in settings.periodConfigs)
@@ -234,7 +327,6 @@ class NotificationScheduler {
       final double ishaAngle = settings.customIshaAngle;
       final DateTime isolatedCityNow = cityNow;
 
-      // 🌟 حساب فرق التوقيت لـ 9 أيام (-1 إلى 7) لتوفير إزاحة اليوم الحالي واليوم التالي لكل دورة
       final List<Duration> weekCityOffsets = List.generate(
         9,
         (index) => _getUtcOffsetForDate(
@@ -292,7 +384,8 @@ class NotificationScheduler {
 
       final currentAstroEnd = weekAstroData
           .firstWhere(
-            (d) => (d['periods'] as List<AstroPeriod>).last.endTime.isAfter(cityNow),
+            (d) =>
+                (d['periods'] as List<AstroPeriod>).last.endTime.isAfter(cityNow),
             orElse: () => weekAstroData.first,
           )['periods'] as List<AstroPeriod>;
       final currentActiveAstroDate = DateTime.utc(
@@ -306,17 +399,23 @@ class NotificationScheduler {
         cityNow.day,
       );
 
+      final int userSnoozeMins = settings.snoozeDurationMinutes > 0
+          ? settings.snoozeDurationMinutes
+          : AlarmService.defaultSnoozeMinutes;
+      final int userMaxSnoozes = settings.maxSnoozeCount > 0
+          ? settings.maxSnoozeCount
+          : AlarmService.defaultMaxSnoozes;
+
       for (int index = 0; index < weekAstroData.length; index++) {
         final dayData = weekAstroData[index];
         final int dayOffset = dayData['dayOffset'] as int;
-        final int safeOffsetIndex = dayOffset + 1; // 0..7 لتوليد معرفات إشعارات موجبة وفريدة
+        final int safeOffsetIndex = dayOffset + 1;
         final targetDate = dayData['targetDate'] as DateTime;
         final ibadat = dayData['ibadat'] as IbadatTimings;
         final periods = dayData['periods'] as List<AstroPeriod>;
 
         if (periods.isEmpty) continue;
 
-        // 🌟 التاريخ المنطقي للدورة السويعية (من مغرب targetDate إلى مغرب اليوم التالي = تاريخ نهاية الدورة)
         final cycleEnd = periods.last.endTime;
         final astroCycleLogicalDate = DateTime.utc(
           cycleEnd.year,
@@ -325,7 +424,6 @@ class NotificationScheduler {
         );
         final int astroWeekday = astroCycleLogicalDate.weekday;
 
-        // 🌟 التاريخ المنطقي لليوم المدني (من 00:00 منتصف الليل إلى 23:59)
         final civilLogicalDate = DateTime.utc(
           targetDate.year,
           targetDate.month,
@@ -333,14 +431,41 @@ class NotificationScheduler {
         );
         final int civilWeekday = civilLogicalDate.weekday;
 
-        // 1. الصلوات المفروضة وأجزاء الليل (تُجدول من dayOffset >= 0)
+        // ====================================================
+        // 1. الصلوات المفروضة (الأولوية القصوى في الثانية +0s)
+        // ====================================================
         if (dayOffset >= 0) {
           final mandatoryPrayers = [
-            {'id': 'fajr', 'nameKey': 'periods.fajr', 'time': ibadat.fajr, 'numericId': 1},
-            {'id': 'dhuhr', 'nameKey': 'periods.dhuhr', 'time': ibadat.dhuhr, 'numericId': 3},
-            {'id': 'asr', 'nameKey': 'periods.asr', 'time': ibadat.asr, 'numericId': 4},
-            {'id': 'maghrib', 'nameKey': 'periods.maghrib', 'time': ibadat.maghrib, 'numericId': 5},
-            {'id': 'isha', 'nameKey': 'prayers.isha', 'time': ibadat.isha, 'numericId': 9},
+            {
+              'id': 'fajr',
+              'nameKey': 'periods.fajr',
+              'time': ibadat.fajr,
+              'numericId': 1,
+            },
+            {
+              'id': 'dhuhr',
+              'nameKey': 'periods.dhuhr',
+              'time': ibadat.dhuhr,
+              'numericId': 3,
+            },
+            {
+              'id': 'asr',
+              'nameKey': 'periods.asr',
+              'time': ibadat.asr,
+              'numericId': 4,
+            },
+            {
+              'id': 'maghrib',
+              'nameKey': 'periods.maghrib',
+              'time': ibadat.maghrib,
+              'numericId': 5,
+            },
+            {
+              'id': 'isha',
+              'nameKey': 'prayers.isha',
+              'time': ibadat.isha,
+              'numericId': 9,
+            },
           ];
 
           for (var prayer in mandatoryPrayers) {
@@ -350,7 +475,6 @@ class NotificationScheduler {
             final int numericId = prayer['numericId'] as int;
 
             if (pTime.isAfter(cityNow)) {
-              // 🌟 الوضع الافتراضي للصلوات الخمس هو 1 (إشعار على الستارة بصوت الأذان)
               final int alertLevel = settings.getPeriodAlertLevel(pId, 1);
 
               if (alertLevel > 0) {
@@ -360,24 +484,49 @@ class NotificationScheduler {
                 final int notificationId =
                     100000 + (safeOffsetIndex * 1000) + numericId;
 
-                final realAlarmTime = _resolveRealDeviceAlarmTime(
+                final rawDeviceTime = _resolveRealDeviceAlarmTime(
                   targetCityWallTime: pTime,
                   cityNowWallTime: cityNow,
                   loc: loc,
                 );
 
-                if (realAlarmTime
+                if (rawDeviceTime
                     .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
                   continue;
                 }
 
-                // المستوى 1 = إشعار على الستارة بصوت الأذان وزر إيقاف (بدون شاشة قفل كاملة)
-                // المستوى 2 = منبه شاشة كاملة يوقظ الشاشة
+                final realAlarmTime = resolveCollisionSafeTime(
+                  rawDeviceTime,
+                  occupiedAlarmSeconds,
+                );
+
                 final bool isFullScreenAlarm = alertLevel == 2;
-                final String modePrefix =
-                    isFullScreenAlarm ? 'fullscreen' : 'curtain';
+                final deliveryMode = isFullScreenAlarm
+                    ? AlarmDeliveryMode.fullscreenAlarm
+                    : AlarmDeliveryMode.curtainAudio;
                 final String prayerTitle =
                     '${'notifications.prayer_of'.tr()} ${nameKey.tr()}';
+                final String prayerBody = 'notifications.adhan_time_body'.tr();
+                final policy = AlarmPolicyTable.forEvent(
+                  kind: AlarmEventKind.prayer,
+                  sourceId: pId,
+                );
+
+                final payloadStr = ParsedAlarmData(
+                  eventId: notificationId,
+                  kind: AlarmEventKind.prayer,
+                  deliveryMode: deliveryMode,
+                  sourceId: pId,
+                  title: prayerTitle,
+                  body: prayerBody,
+                  colorValue: 0xFFD4AF37,
+                  snoozeAllowed: false, // الأذان لا يقبل الغفوة افتراضياً
+                  snoozeDurationMinutes: userSnoozeMins,
+                  snoozeCount: 0,
+                  maxSnoozes: 0,
+                  loopAudio: false, // الأذان يعمل مرة واحدة كاملاً دون تكرار مزعج
+                  volumePolicy: AlarmVolumePolicy.userAdjustable,
+                ).toPayloadString();
 
                 requiredAlarmIds.add(notificationId);
                 final existing = activeAlarmMap[notificationId];
@@ -387,41 +536,46 @@ class NotificationScheduler {
                       .difference(realAlarmTime)
                       .inSeconds
                       .abs();
-                  if (timeDiff < 60 &&
+                  if (timeDiff < 5 &&
                       existing.assetAudioPath == assetPath &&
-                      existing.androidFullScreenIntent == isFullScreenAlarm) {
+                      existing.androidFullScreenIntent == isFullScreenAlarm &&
+                      existing.loopAudio == false &&
+                      existing.payload == payloadStr) {
                     needsUpdate = false;
                   }
                 }
 
                 if (needsUpdate) {
-                  await Alarm.set(
+                  final ok = await Alarm.set(
                     alarmSettings: AlarmSettings(
                       id: notificationId,
                       dateTime: realAlarmTime,
                       assetAudioPath: assetPath,
-                      loopAudio: isFullScreenAlarm,
+                      loopAudio: false,
                       vibrate: true,
                       androidFullScreenIntent: isFullScreenAlarm,
-                      payload: '$modePrefix|$prayerTitle|0xFFD4AF37|0',
+                      payload: payloadStr,
                       volumeSettings: VolumeSettings.fade(
                         volume: settings.getPeriodVolume(pId, 1.0),
-                        fadeDuration: const Duration(seconds: 3),
-                        volumeEnforced: isFullScreenAlarm,
+                        fadeDuration: policy.fadeDuration,
+                        volumeEnforced: false,
                       ),
                       notificationSettings: NotificationSettings(
                         title: prayerTitle,
-                        body: 'notifications.adhan_time_body'.tr(),
+                        body: prayerBody,
                         stopButton: 'alarm.stop'.tr(),
                       ),
                     ),
                   );
+                  if (!ok) hadSchedulingFailures = true;
                 }
               }
             }
           }
 
-          // 2. قيام الليل
+          // ====================================================
+          // 2. أجزاء الليل (قيام الليل) بمعرفات ثابتة بدون hashCode
+          // ====================================================
           for (var nightPart in ibadat.nightParts) {
             if (settings.visibleNightParts.contains(nightPart.id) &&
                 nightPart.startTime.isAfter(cityNow)) {
@@ -433,25 +587,50 @@ class NotificationScheduler {
                   'assets/audio/soft.mp3',
                 );
                 final String assetPath = _getAssetAudioPath(soundId);
-                final int nightIdSafe = nightPart.id.hashCode.abs() % 100;
+                final int nightIdSafe = stableNightPartCode(nightPart.id);
                 final int notificationId =
                     200000 + (safeOffsetIndex * 1000) + nightIdSafe;
 
-                final realAlarmTime = _resolveRealDeviceAlarmTime(
+                final rawDeviceTime = _resolveRealDeviceAlarmTime(
                   targetCityWallTime: nightPart.startTime,
                   cityNowWallTime: cityNow,
                   loc: loc,
                 );
 
-                if (realAlarmTime
+                if (rawDeviceTime
                     .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
                   continue;
                 }
 
                 final String qiyamTitle =
                     '${'notifications.time_for'.tr()} ${('night_parts.${nightPart.nameKey.replaceAll("np_", "")}').tr()}';
+                final String qiyamBody = 'notifications.qiyam_body'.tr();
 
                 if (alertLevel == 2) {
+                  final realAlarmTime = resolveCollisionSafeTime(
+                    rawDeviceTime,
+                    occupiedAlarmSeconds,
+                  );
+                  final policy = AlarmPolicyTable.forEvent(
+                    kind: AlarmEventKind.qiyam,
+                    sourceId: nightPart.id,
+                  );
+                  final payloadStr = ParsedAlarmData(
+                    eventId: notificationId,
+                    kind: AlarmEventKind.qiyam,
+                    deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
+                    sourceId: nightPart.id,
+                    title: qiyamTitle,
+                    body: qiyamBody,
+                    colorValue: 0xFF8B5CF6,
+                    snoozeAllowed: policy.snoozeAllowedDefault,
+                    snoozeDurationMinutes: userSnoozeMins,
+                    snoozeCount: 0,
+                    maxSnoozes: userMaxSnoozes,
+                    loopAudio: policy.loopAudioDefault,
+                    volumePolicy: policy.volumePolicyDefault,
+                  ).toPayloadString();
+
                   requiredAlarmIds.add(notificationId);
                   final existing = activeAlarmMap[notificationId];
                   bool needsUpdate = true;
@@ -460,33 +639,36 @@ class NotificationScheduler {
                         .difference(realAlarmTime)
                         .inSeconds
                         .abs();
-                    if (timeDiff < 60 && existing.assetAudioPath == assetPath) {
+                    if (timeDiff < 5 &&
+                        existing.assetAudioPath == assetPath &&
+                        existing.payload == payloadStr) {
                       needsUpdate = false;
                     }
                   }
 
                   if (needsUpdate) {
-                    await Alarm.set(
+                    final ok = await Alarm.set(
                       alarmSettings: AlarmSettings(
                         id: notificationId,
                         dateTime: realAlarmTime,
                         assetAudioPath: assetPath,
-                        loopAudio: true,
+                        loopAudio: policy.loopAudioDefault,
                         vibrate: true,
                         androidFullScreenIntent: true,
-                        payload: 'fullscreen|$qiyamTitle|0xFF8B5CF6|0',
+                        payload: payloadStr,
                         volumeSettings: VolumeSettings.fade(
                           volume: settings.getPeriodVolume(nightPart.id, 0.5),
-                          fadeDuration: const Duration(seconds: 3),
-                          volumeEnforced: true,
+                          fadeDuration: policy.fadeDuration,
+                          volumeEnforced: false,
                         ),
                         notificationSettings: NotificationSettings(
                           title: qiyamTitle,
-                          body: 'notifications.qiyam_body'.tr(),
+                          body: qiyamBody,
                           stopButton: 'alarm.stop'.tr(),
                         ),
                       ),
                     );
+                    if (!ok) hadSchedulingFailures = true;
                   }
                 } else if (alertLevel == 1) {
                   requiredNormalIds.add(notificationId);
@@ -494,7 +676,7 @@ class NotificationScheduler {
                     id: notificationId,
                     title: qiyamTitle,
                     body: 'notifications.qiyam_short'.tr(),
-                    scheduledTime: realAlarmTime,
+                    scheduledTime: rawDeviceTime,
                     playSound: true,
                     enableVibration: true,
                   );
@@ -504,14 +686,15 @@ class NotificationScheduler {
           }
         }
 
-        // 🌟 3. قسم الروتين (فصل المنطق السويعي من المغرب عن المنطق المدني من منتصف الليل)
+        // ====================================================
+        // 3. قسم الروتين (سويعي ومدني) مع Payload V2 صريح
+        // ====================================================
         for (var routine in routines) {
           if (!routine.isActive || routine.alertLevel == 0) continue;
 
           DateTime? routineAlarmTime;
 
           if (routine.isAstroTime && routine.startPeriodId != null) {
-            // الروتين السُويعي: يتحقق من astroWeekday (حيث الأحد يبدأ من مغرب السبت)
             if (routine.recurrenceDays != null &&
                 routine.recurrenceDays!.isNotEmpty &&
                 !routine.recurrenceDays!.contains(astroWeekday)) {
@@ -529,7 +712,6 @@ class NotificationScheduler {
           } else if (!routine.isAstroTime &&
               routine.startTimeMinutes != null &&
               dayOffset >= 0) {
-            // الروتين المدني: يتحقق من civilWeekday (حيث الأحد يبدأ من 00:00 منتصف الليل)
             if (routine.recurrenceDays != null &&
                 routine.recurrenceDays!.isNotEmpty &&
                 !routine.recurrenceDays!.contains(civilWeekday)) {
@@ -546,21 +728,49 @@ class NotificationScheduler {
 
           if (routineAlarmTime != null && routineAlarmTime.isAfter(cityNow)) {
             final int routineNotifId =
-                300000 + (safeOffsetIndex * 10000) + routine.id;
-            final realAlarmTime = _resolveRealDeviceAlarmTime(
+                300000 + (safeOffsetIndex * 10000) + (routine.id % 10000);
+            final rawDeviceTime = _resolveRealDeviceAlarmTime(
               targetCityWallTime: routineAlarmTime,
               cityNowWallTime: cityNow,
               loc: loc,
             );
 
-            if (realAlarmTime
+            if (rawDeviceTime
                 .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
               continue;
             }
 
+            final String rTitle =
+                '${'notifications.period_start'.tr()}: ${routine.title}';
+            final String rBody = 'notifications.routine_body'.tr();
+
             if (routine.alertLevel == 2) {
-              requiredAlarmIds.add(routineNotifId);
+              final realAlarmTime = resolveCollisionSafeTime(
+                rawDeviceTime,
+                occupiedAlarmSeconds,
+              );
               final String rAsset = _getAssetAudioPath(routine.alarmTone);
+              final policy = AlarmPolicyTable.forEvent(
+                kind: AlarmEventKind.routine,
+                sourceId: routine.id.toString(),
+              );
+              final payloadStr = ParsedAlarmData(
+                eventId: routineNotifId,
+                kind: AlarmEventKind.routine,
+                deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
+                sourceId: routine.id.toString(),
+                title: routine.title,
+                body: rBody,
+                colorValue: routine.colorValue,
+                snoozeAllowed: policy.snoozeAllowedDefault,
+                snoozeDurationMinutes: userSnoozeMins,
+                snoozeCount: 0,
+                maxSnoozes: userMaxSnoozes,
+                loopAudio: true,
+                volumePolicy: AlarmVolumePolicy.userAdjustable,
+              ).toPayloadString();
+
+              requiredAlarmIds.add(routineNotifId);
               final existingTask = activeAlarmMap[routineNotifId];
               bool needsTaskUpdate = true;
               if (existingTask != null) {
@@ -568,14 +778,15 @@ class NotificationScheduler {
                             .difference(realAlarmTime)
                             .inSeconds
                             .abs() <
-                        60 &&
-                    existingTask.assetAudioPath == rAsset) {
+                        5 &&
+                    existingTask.assetAudioPath == rAsset &&
+                    existingTask.payload == payloadStr) {
                   needsTaskUpdate = false;
                 }
               }
 
               if (needsTaskUpdate) {
-                await Alarm.set(
+                final ok = await Alarm.set(
                   alarmSettings: AlarmSettings(
                     id: routineNotifId,
                     dateTime: realAlarmTime,
@@ -583,27 +794,28 @@ class NotificationScheduler {
                     loopAudio: true,
                     vibrate: true,
                     androidFullScreenIntent: true,
+                    payload: payloadStr,
                     volumeSettings: VolumeSettings.fade(
                       volume: routine.alarmVolume,
-                      fadeDuration: const Duration(seconds: 2),
-                      volumeEnforced: true,
+                      fadeDuration: policy.fadeDuration,
+                      volumeEnforced: false,
                     ),
                     notificationSettings: NotificationSettings(
-                      title:
-                          '${'notifications.period_start'.tr()}: ${routine.title}',
-                      body: 'notifications.routine_body'.tr(),
+                      title: rTitle,
+                      body: rBody,
                       stopButton: 'alarm.stop'.tr(),
                     ),
                   ),
                 );
+                if (!ok) hadSchedulingFailures = true;
               }
             } else if (routine.alertLevel == 1) {
               requiredNormalIds.add(routineNotifId);
               await _service.scheduleNormalNotification(
                 id: routineNotifId,
-                title: '${'notifications.period_start'.tr()}: ${routine.title}',
-                body: 'notifications.routine_body'.tr(),
-                scheduledTime: realAlarmTime,
+                title: rTitle,
+                body: rBody,
+                scheduledTime: rawDeviceTime,
                 playSound: true,
                 enableVibration: true,
               );
@@ -611,7 +823,9 @@ class NotificationScheduler {
           }
         }
 
-        // 🌟 4.أ. المهام والعادات السُويعية (تعتمد على astroCycleLogicalDate و astroWeekday)
+        // ====================================================
+        // 4.أ. المهام والعادات السُويعية مع Payload V2 صريح
+        // ====================================================
         for (var period in periods) {
           int globalSuwayaBase = 0;
           for (var p in periods) {
@@ -683,23 +897,53 @@ class NotificationScheduler {
                     task.targetVirtualMinute,
                     separator: '|',
                   );
-                  String timeText =
+                  final String timeText =
                       "${'notifications.segment_time'.tr()} : \u2066$clockText\u2069";
 
-                  final realTaskAlarmTime = _resolveRealDeviceAlarmTime(
+                  final rawDeviceTime = _resolveRealDeviceAlarmTime(
                     targetCityWallTime: taskCityTime,
                     cityNowWallTime: cityNow,
                     loc: loc,
                   );
 
-                  if (realTaskAlarmTime.isBefore(
+                  if (rawDeviceTime.isBefore(
                       DateTime.now().add(const Duration(seconds: 5)))) {
                     continue;
                   }
 
+                  final taskKind = task.type == TaskType.permanent
+                      ? AlarmEventKind.habit
+                      : AlarmEventKind.task;
+                  final String notifTitle =
+                      '${'notifications.time_for_task'.tr()}: ${task.title}';
+
                   if (task.alarmMode) {
-                    requiredAlarmIds.add(taskNotifId);
+                    final realTaskAlarmTime = resolveCollisionSafeTime(
+                      rawDeviceTime,
+                      occupiedAlarmSeconds,
+                    );
                     final String tAsset = _getAssetAudioPath(task.alarmTone);
+                    final policy = AlarmPolicyTable.forEvent(
+                      kind: taskKind,
+                      sourceId: task.id.toString(),
+                    );
+                    final payloadStr = ParsedAlarmData(
+                      eventId: taskNotifId,
+                      kind: taskKind,
+                      deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
+                      sourceId: task.id.toString(),
+                      title: task.title,
+                      body: timeText,
+                      colorValue: task.category.dialColor.toARGB32(),
+                      snoozeAllowed: true,
+                      snoozeDurationMinutes: userSnoozeMins,
+                      snoozeCount: 0,
+                      maxSnoozes: userMaxSnoozes,
+                      loopAudio: true,
+                      volumePolicy: AlarmVolumePolicy.userAdjustable,
+                    ).toPayloadString();
+
+                    requiredAlarmIds.add(taskNotifId);
                     final existingTask = activeAlarmMap[taskNotifId];
                     bool needsTaskUpdate = true;
                     if (existingTask != null) {
@@ -707,14 +951,15 @@ class NotificationScheduler {
                                   .difference(realTaskAlarmTime)
                                   .inSeconds
                                   .abs() <
-                              60 &&
-                          existingTask.assetAudioPath == tAsset) {
+                              5 &&
+                          existingTask.assetAudioPath == tAsset &&
+                          existingTask.payload == payloadStr) {
                         needsTaskUpdate = false;
                       }
                     }
 
                     if (needsTaskUpdate) {
-                      await Alarm.set(
+                      final ok = await Alarm.set(
                         alarmSettings: AlarmSettings(
                           id: taskNotifId,
                           dateTime: realTaskAlarmTime,
@@ -722,28 +967,28 @@ class NotificationScheduler {
                           loopAudio: true,
                           vibrate: true,
                           androidFullScreenIntent: true,
+                          payload: payloadStr,
                           volumeSettings: VolumeSettings.fade(
                             volume: task.alarmVolume,
-                            fadeDuration: const Duration(seconds: 2),
-                            volumeEnforced: true,
+                            fadeDuration: policy.fadeDuration,
+                            volumeEnforced: false,
                           ),
                           notificationSettings: NotificationSettings(
-                            title:
-                                '${'notifications.time_for_task'.tr()}: ${task.title}',
+                            title: notifTitle,
                             body: timeText,
                             stopButton: 'alarm.stop'.tr(),
                           ),
                         ),
                       );
+                      if (!ok) hadSchedulingFailures = true;
                     }
                   } else {
                     requiredNormalIds.add(taskNotifId);
                     await _service.scheduleNormalNotification(
                       id: taskNotifId,
-                      title:
-                          '${'notifications.time_for_task'.tr()}: ${task.title}',
+                      title: notifTitle,
                       body: timeText,
-                      scheduledTime: realTaskAlarmTime,
+                      scheduledTime: rawDeviceTime,
                       playSound: task.notifyMode,
                       enableVibration: task.vibrateMode,
                     );
@@ -754,7 +999,9 @@ class NotificationScheduler {
           }
         }
 
-        // 🌟 4.ب. المهام والعادات المدنية (تعتمد على civilLogicalDate و civilWeekday من 00:00 منتصف الليل)
+        // ====================================================
+        // 4.ب. المهام والعادات المدنية مع Payload V2 صريح
+        // ====================================================
         if (dayOffset >= 0) {
           for (var task in allTasks) {
             if (task.isAstroTime || task.targetCivilTimeMinutes == null) {
@@ -780,7 +1027,8 @@ class NotificationScheduler {
                     civilLogicalDate.year == currentCivilDate.year &&
                         civilLogicalDate.month == currentCivilDate.month &&
                         civilLogicalDate.day == currentCivilDate.day;
-                if (!(isTodayCivil && task.isCompletedOnDate(civilLogicalDate))) {
+                if (!(isTodayCivil &&
+                    task.isCompletedOnDate(civilLogicalDate))) {
                   isForThisCivilDay = true;
                 }
               }
@@ -796,26 +1044,55 @@ class NotificationScheduler {
               );
 
               if (taskCityTime.isAfter(cityNow)) {
-                final int taskNotifId = 500000 +
-                    (safeOffsetIndex * 10000) +
-                    (task.id % 10000);
+                final int taskNotifId =
+                    500000 + (safeOffsetIndex * 10000) + (task.id % 10000);
                 final civilStr =
                     '${(task.targetCivilTimeMinutes! ~/ 60).toString().padLeft(2, '0')}:${(task.targetCivilTimeMinutes! % 60).toString().padLeft(2, '0')}';
 
-                final realTaskAlarmTime = _resolveRealDeviceAlarmTime(
+                final rawDeviceTime = _resolveRealDeviceAlarmTime(
                   targetCityWallTime: taskCityTime,
                   cityNowWallTime: cityNow,
                   loc: loc,
                 );
 
-                if (realTaskAlarmTime.isBefore(
+                if (rawDeviceTime.isBefore(
                     DateTime.now().add(const Duration(seconds: 5)))) {
                   continue;
                 }
 
+                final taskKind = task.type == TaskType.permanent
+                    ? AlarmEventKind.habit
+                    : AlarmEventKind.task;
+                final String notifTitle =
+                    '${'notifications.time_for_task'.tr()}: ${task.title}';
+
                 if (task.alarmMode) {
-                  requiredAlarmIds.add(taskNotifId);
+                  final realTaskAlarmTime = resolveCollisionSafeTime(
+                    rawDeviceTime,
+                    occupiedAlarmSeconds,
+                  );
                   final String tAsset = _getAssetAudioPath(task.alarmTone);
+                  final policy = AlarmPolicyTable.forEvent(
+                    kind: taskKind,
+                    sourceId: task.id.toString(),
+                  );
+                  final payloadStr = ParsedAlarmData(
+                    eventId: taskNotifId,
+                    kind: taskKind,
+                    deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
+                    sourceId: task.id.toString(),
+                    title: task.title,
+                    body: civilStr,
+                    colorValue: task.category.dialColor.toARGB32(),
+                    snoozeAllowed: true,
+                    snoozeDurationMinutes: userSnoozeMins,
+                    snoozeCount: 0,
+                    maxSnoozes: userMaxSnoozes,
+                    loopAudio: true,
+                    volumePolicy: AlarmVolumePolicy.userAdjustable,
+                  ).toPayloadString();
+
+                  requiredAlarmIds.add(taskNotifId);
                   final existingTask = activeAlarmMap[taskNotifId];
                   bool needsTaskUpdate = true;
                   if (existingTask != null) {
@@ -823,14 +1100,15 @@ class NotificationScheduler {
                                 .difference(realTaskAlarmTime)
                                 .inSeconds
                                 .abs() <
-                            60 &&
-                        existingTask.assetAudioPath == tAsset) {
+                            5 &&
+                        existingTask.assetAudioPath == tAsset &&
+                        existingTask.payload == payloadStr) {
                       needsTaskUpdate = false;
                     }
                   }
 
                   if (needsTaskUpdate) {
-                    await Alarm.set(
+                    final ok = await Alarm.set(
                       alarmSettings: AlarmSettings(
                         id: taskNotifId,
                         dateTime: realTaskAlarmTime,
@@ -838,28 +1116,28 @@ class NotificationScheduler {
                         loopAudio: true,
                         vibrate: true,
                         androidFullScreenIntent: true,
+                        payload: payloadStr,
                         volumeSettings: VolumeSettings.fade(
                           volume: task.alarmVolume,
-                          fadeDuration: const Duration(seconds: 2),
-                          volumeEnforced: true,
+                          fadeDuration: policy.fadeDuration,
+                          volumeEnforced: false,
                         ),
                         notificationSettings: NotificationSettings(
-                          title:
-                              '${'notifications.time_for_task'.tr()}: ${task.title}',
+                          title: notifTitle,
                           body: civilStr,
                           stopButton: 'alarm.stop'.tr(),
                         ),
                       ),
                     );
+                    if (!ok) hadSchedulingFailures = true;
                   }
                 } else {
                   requiredNormalIds.add(taskNotifId);
                   await _service.scheduleNormalNotification(
                     id: taskNotifId,
-                    title:
-                        '${'notifications.time_for_task'.tr()}: ${task.title}',
+                    title: notifTitle,
                     body: civilStr,
-                    scheduledTime: realTaskAlarmTime,
+                    scheduledTime: rawDeviceTime,
                     playSound: task.notifyMode,
                     enableVibration: task.vibrateMode,
                   );
@@ -870,6 +1148,7 @@ class NotificationScheduler {
         }
       }
 
+      // تنظيف المنبهات القديمة مع عدم المساس بالمنبه الذي يرن حالياً إن وجد
       for (var alarm in activeAlarms) {
         if (!requiredAlarmIds.contains(alarm.id)) {
           await Alarm.stop(alarm.id);
@@ -885,10 +1164,21 @@ class NotificationScheduler {
       }
 
       _previouslyScheduledNormalIds = requiredNormalIds;
-      _lastScheduleHash = currentHash;
+
+      // 🌟 لا نثبّت البصمة إلا إذا نجحت جميع عمليات الجدولة؛ وعند الفشل الجزئي نعيد المحاولة بشكل مضبوط
+      if (!hadSchedulingFailures) {
+        _lastScheduleHash = currentHash;
+        _retryCount = 0;
+        _retryTimer?.cancel();
+      } else if (_retryCount < 3) {
+        _retryCount++;
+        _retryTimer?.cancel();
+        _retryTimer = Timer(Duration(seconds: 5 * _retryCount), () {
+          scheduleAhead(settings, allTasks, routines, forceRefresh: true);
+        });
+      }
     } catch (e) {
-      debugPrint(
-          '🚨 خطأ استثنائي أثناء الجدولة. تم إلغاء تحديث الهاش لإعادة المحاولة لاحقاً: $e');
+      debugPrint('🚨 NotificationScheduler exception: $e');
     } finally {
       _isScheduling = false;
     }

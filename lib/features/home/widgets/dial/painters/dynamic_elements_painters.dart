@@ -12,7 +12,7 @@ import '../dial_models.dart';
 
 List<DialMarkerLayout> layoutDialMarkers({
   required Size size,
-  required dynamic ibadat,
+  required IbadatTimings ibadat, // 🌟 نوع صريح بدلاً من dynamic
   required List<Map<String, dynamic>> nightMarkers,
   required List<DialTask> tasks,
   required DialDesign design,
@@ -32,35 +32,40 @@ List<DialMarkerLayout> layoutDialMarkers({
 
   final prayerItems = <UnifiedDialItem>[
     UnifiedDialItem(
-        id: 'prayer:fajr',
-        text: 'prayers.fajr'.tr(),
-        time: ibadat.fajr,
-        color: goldLight,
-        isPrayer: true),
+      id: 'prayer:fajr',
+      text: 'prayers.fajr'.tr(),
+      time: ibadat.fajr,
+      color: goldLight,
+      isPrayer: true,
+    ),
     UnifiedDialItem(
-        id: 'prayer:dhuhr',
-        text: 'prayers.dhuhr'.tr(),
-        time: ibadat.dhuhr,
-        color: goldLight,
-        isPrayer: true),
+      id: 'prayer:dhuhr',
+      text: 'prayers.dhuhr'.tr(),
+      time: ibadat.dhuhr,
+      color: goldLight,
+      isPrayer: true,
+    ),
     UnifiedDialItem(
-        id: 'prayer:asr',
-        text: 'prayers.asr'.tr(),
-        time: ibadat.asr,
-        color: goldLight,
-        isPrayer: true),
+      id: 'prayer:asr',
+      text: 'prayers.asr'.tr(),
+      time: ibadat.asr,
+      color: goldLight,
+      isPrayer: true,
+    ),
     UnifiedDialItem(
-        id: 'prayer:maghrib',
-        text: 'prayers.maghrib'.tr(),
-        time: ibadat.maghrib,
-        color: goldLight,
-        isPrayer: true),
+      id: 'prayer:maghrib',
+      text: 'prayers.maghrib'.tr(),
+      time: ibadat.maghrib,
+      color: goldLight,
+      isPrayer: true,
+    ),
     UnifiedDialItem(
-        id: 'prayer:isha',
-        text: 'prayers.isha'.tr(),
-        time: ibadat.isha,
-        color: goldLight,
-        isPrayer: true),
+      id: 'prayer:isha',
+      text: 'prayers.isha'.tr(),
+      time: ibadat.isha,
+      color: goldLight,
+      isPrayer: true,
+    ),
     for (final marker in nightMarkers)
       UnifiedDialItem(
         id: (marker['id'] as String?) ??
@@ -76,25 +81,34 @@ List<DialMarkerLayout> layoutDialMarkers({
   final layouts = <DialMarkerLayout>[];
   for (final item in prayerItems) {
     final angle = timeToAngle(item.time, dayStart, dayEnd);
-    layouts
-        .add(DialMarkerLayout(item: item, angle: angle, radius: trackRadii[0]));
+    layouts.add(
+      DialMarkerLayout(item: item, angle: angle, radius: trackRadii[0]),
+    );
     occupied[0].add({'angle': angle, 'margin': 0.04});
     final badgeRadius = trackRadii[0] - trackStep * 0.4;
     if (design != DialDesign.minimal) {
-      layouts.add(DialMarkerLayout(
-          item: item, angle: angle, radius: badgeRadius, isBadge: true));
+      layouts.add(
+        DialMarkerLayout(
+          item: item,
+          angle: angle,
+          radius: badgeRadius,
+          isBadge: true,
+        ),
+      );
     }
     occupied[1].add({'angle': angle, 'margin': 0.10});
   }
 
   final taskItems = tasks
-      .map((task) => UnifiedDialItem(
-            id: 'task:${task.taskModel.id}',
-            taskModel: task.taskModel,
-            text: task.shortName,
-            time: task.time,
-            color: task.color,
-          ))
+      .map(
+        (task) => UnifiedDialItem(
+          id: 'task:${task.taskModel.id}',
+          taskModel: task.taskModel,
+          text: task.shortName,
+          time: task.time,
+          color: task.color,
+        ),
+      )
       .toList()
     ..sort((a, b) => a.time.compareTo(b.time));
 
@@ -118,11 +132,13 @@ List<DialMarkerLayout> layoutDialMarkers({
       }
     }
     occupied[targetTrack].add({'angle': angle, 'margin': taskMargin});
-    layouts.add(DialMarkerLayout(
-      item: item,
-      angle: angle,
-      radius: trackRadii[targetTrack],
-    ));
+    layouts.add(
+      DialMarkerLayout(
+        item: item,
+        angle: angle,
+        radius: trackRadii[targetTrack],
+      ),
+    );
   }
   return layouts;
 }
@@ -153,7 +169,7 @@ DialMarkerLayout? hitTestDialMarker({
 }
 
 class RailwayRingPainter extends CustomPainter {
-  final dynamic ibadat;
+  final IbadatTimings ibadat; // 🌟 نوع صريح بدلاً من dynamic
   final List<Map<String, dynamic>> nightMarkers;
   final List<DialTask> tasks;
   final List<AstroPeriod> periods;
@@ -167,6 +183,7 @@ class RailwayRingPainter extends CustomPainter {
   final int? highlightedTaskId;
   final String? highlightedMarkerId;
   final String dialPinMode;
+  final List<DialMarkerLayout>? precomputedLayouts; // 🌟 تمرير التخطيط المحسوب مسبقاً
 
   RailwayRingPainter({
     required this.ibadat,
@@ -183,13 +200,20 @@ class RailwayRingPainter extends CustomPainter {
     this.highlightedTaskId,
     this.highlightedMarkerId,
     this.dialPinMode = 'suwaya48',
+    this.precomputedLayouts,
   });
 
-  void _drawEquilateralArrow(Canvas canvas, Offset center, double radius,
-      double baseWidth, double angle, Color color,
-      {bool isDragged = false,
-      bool isPrayer = false,
-      bool isHighlighted = false}) {
+  void _drawEquilateralArrow(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    double baseWidth,
+    double angle,
+    Color color, {
+    bool isDragged = false,
+    bool isPrayer = false,
+    bool isHighlighted = false,
+  }) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(angle + pi / 2);
@@ -214,20 +238,29 @@ class RailwayRingPainter extends CustomPainter {
 
     final double height = baseWidth * 0.866;
 
-    final path = Path();
-    path.moveTo(0, -height);
-    path.lineTo(-baseWidth / 2, 0);
-    path.lineTo(baseWidth / 2, 0);
-    path.close();
+    final path = Path()
+      ..moveTo(0, -height)
+      ..lineTo(-baseWidth / 2, 0)
+      ..lineTo(baseWidth / 2, 0)
+      ..close();
 
     if (isDragged || isHighlighted) {
       canvas.drawPath(
-          path,
-          Paint()
-            ..color = color
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8));
+        path,
+        Paint()
+          ..color = color
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      );
     }
 
+    // إطار داكن خفيف حول السهم ليبرز بوضوح في الوضعين الفاتح والداكن
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.45)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
     canvas.drawPath(path, Paint()..color = color);
 
     if (!isPrayer) {
@@ -237,73 +270,96 @@ class RailwayRingPainter extends CustomPainter {
         ..lineTo(baseWidth / 2 - 2, -1)
         ..close();
       canvas.drawPath(
-          inner, Paint()..color = Colors.white.withValues(alpha: 0.8));
+        inner,
+        Paint()..color = Colors.white.withValues(alpha: 0.85),
+      );
     }
     canvas.restore();
   }
 
-  void _drawTextBadge(Canvas canvas, Offset center, double radius, double angle,
-      String text, Color color,
-      {bool isHighlighted = false}) {
+  void _drawTextBadge(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    double angle,
+    String text,
+    Color color, {
+    bool isHighlighted = false,
+  }) {
     if (design == DialDesign.minimal) return;
 
     canvas.save();
     canvas.translate(center.dx, center.dy);
+
+    // 🌟 تعديل زاوية دوران اسم الصلاة في النصف السفلي ليبقى مقروءاً
+    final normAngle = angle % (2 * pi);
+    if (sin(normAngle) > 0) {
+    }
+
     canvas.rotate(angle + pi / 2);
     canvas.translate(0, -radius);
+    if (sin(normAngle) > 0) {
+      canvas.rotate(pi);
+    }
 
     if (isHighlighted) {
       canvas.drawCircle(
-          Offset.zero,
-          12,
-          Paint()
-            ..color = color.withValues(alpha: 0.8)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10));
+        Offset.zero,
+        12,
+        Paint()
+          ..color = color.withValues(alpha: 0.8)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+      );
     }
+
+    final Color fillColor =
+        isDark ? const Color(0xFFFFE58F) : const Color(0xFF5C3A00);
+    final Color strokeColor = isDark
+        ? Colors.black.withValues(alpha: 0.85)
+        : Colors.white.withValues(alpha: 0.90);
 
     final textPainterStroke = TextPainter(
       text: TextSpan(
-          text: text,
-          style: TextStyle(
-              fontSize: 13,
-              // 🌟 تم تعديل الخط ليكون عادياً (ليس عريضاً) لإطار النص
-              fontWeight: FontWeight.normal,
-              fontFamily: 'Tajawal',
-              foreground: Paint()
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = 0.6
-                ..color = Colors.white)),
+        text: text,
+        style: TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          fontFamily: 'Tajawal',
+          foreground: Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.2
+            ..color = strokeColor,
+        ),
+      ),
       textDirection: ui.TextDirection.ltr,
     )..layout();
-    textPainterStroke.paint(canvas,
-        Offset(-textPainterStroke.width / 2, -textPainterStroke.height / 2));
+    textPainterStroke.paint(
+      canvas,
+      Offset(-textPainterStroke.width / 2, -textPainterStroke.height / 2),
+    );
 
     final textPainterFill = TextPainter(
       text: TextSpan(
-          text: text,
-          style: TextStyle(
-              color: color,
-              fontSize: 13,
-              // 🌟 تم تعديل الخط ليكون عادياً (ليس عريضاً) لحشو النص
-              fontWeight: FontWeight.normal,
-              fontFamily: 'Tajawal',
-              shadows: [
-                Shadow(
-                    color: Colors.black.withValues(alpha: 0.8),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1))
-              ])),
+        text: text,
+        style: TextStyle(
+          color: fillColor,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+          fontFamily: 'Tajawal',
+        ),
+      ),
       textDirection: ui.TextDirection.ltr,
     )..layout();
-    textPainterFill.paint(canvas,
-        Offset(-textPainterFill.width / 2, -textPainterFill.height / 2));
+    textPainterFill.paint(
+      canvas,
+      Offset(-textPainterFill.width / 2, -textPainterFill.height / 2),
+    );
 
     canvas.restore();
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (ibadat == null || ibadat.maghrib == null) return;
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
 
@@ -311,22 +367,15 @@ class RailwayRingPainter extends CustomPainter {
     final outerRadius = R * kRailwayR;
     final width = outerRadius - innerRadius;
 
+    // 🌟 حافة السكة الخارجية فقط (تم نقل الطلاء الخلفي إلى ما تحت الروتين لعدم طمسه)
     canvas.drawCircle(
-        center,
-        innerRadius + (width / 2),
-        Paint()
-          ..color = isDark
-              ? Colors.black.withValues(alpha: 0.8)
-              : Colors.black.withValues(alpha: 0.3)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = width);
-    canvas.drawCircle(
-        center,
-        outerRadius,
-        Paint()
-          ..color = goldBase.withValues(alpha: 0.6)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0);
+      center,
+      outerRadius,
+      Paint()
+        ..color = goldBase.withValues(alpha: 0.65)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
 
     const int numTracks = 3;
     final double trackStep = width / numTracks;
@@ -339,17 +388,19 @@ class RailwayRingPainter extends CustomPainter {
     if (design != DialDesign.minimal) {
       for (var r in trackRadii) {
         canvas.drawCircle(
-            center,
-            r,
-            Paint()
-              ..color = Colors.white.withValues(alpha: 0.1)
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 0.5);
+          center,
+          r,
+          Paint()
+            ..color = (isDark ? Colors.white : Colors.black)
+                .withValues(alpha: 0.12)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 0.6,
+        );
       }
     }
 
     final stationPaint = Paint()
-      ..color = goldLight.withValues(alpha: 0.2)
+      ..color = (isDark ? goldLight : goldDark).withValues(alpha: 0.28)
       ..style = PaintingStyle.fill;
     for (var period in periods) {
       final startAngle = timeToAngle(period.startTime, dayStart, dayEnd);
@@ -363,9 +414,10 @@ class RailwayRingPainter extends CustomPainter {
         for (int t = 0; t < numTracks; t++) {
           final r = trackRadii[t] - (trackStep * 0.433);
           canvas.drawCircle(
-              Offset(center.dx + r * cos(angle), center.dy + r * sin(angle)),
-              design == DialDesign.minimal ? 0.5 : 1.2,
-              stationPaint);
+            Offset(center.dx + r * cos(angle), center.dy + r * sin(angle)),
+            design == DialDesign.minimal ? 0.5 : 1.2,
+            stationPaint,
+          );
         }
       }
     }
@@ -373,40 +425,58 @@ class RailwayRingPainter extends CustomPainter {
     if (dialPinMode == 'civil24') {
       final pinRadiusBand = buildSuwayaPinRadiusBand(R);
       final pinPaint = Paint()
-        ..color = goldLight.withValues(alpha: 0.9)
+        ..color = (isDark ? goldLight : goldDark).withValues(alpha: 0.9)
         ..strokeWidth = design == DialDesign.minimal ? 1.0 : 1.5
         ..strokeCap = StrokeCap.round;
       for (final angle in buildSuwayaPinAngles(periods, dayStart, dayEnd)) {
         canvas.drawLine(
-          Offset(center.dx + pinRadiusBand.innerRadius * cos(angle),
-              center.dy + pinRadiusBand.innerRadius * sin(angle)),
-          Offset(center.dx + pinRadiusBand.outerRadius * cos(angle),
-              center.dy + pinRadiusBand.outerRadius * sin(angle)),
+          Offset(
+            center.dx + pinRadiusBand.innerRadius * cos(angle),
+            center.dy + pinRadiusBand.innerRadius * sin(angle),
+          ),
+          Offset(
+            center.dx + pinRadiusBand.outerRadius * cos(angle),
+            center.dy + pinRadiusBand.outerRadius * sin(angle),
+          ),
           pinPaint,
         );
       }
     }
 
-    final markerLayouts = layoutDialMarkers(
-      size: size,
-      ibadat: ibadat,
-      nightMarkers: nightMarkers,
-      tasks: tasks,
-      design: design,
-      dayStart: dayStart,
-      dayEnd: dayEnd,
-    );
+    final markerLayouts = precomputedLayouts ??
+        layoutDialMarkers(
+          size: size,
+          ibadat: ibadat,
+          nightMarkers: nightMarkers,
+          tasks: tasks,
+          design: design,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+        );
     for (final layout
         in markerLayouts.where((layout) => layout.item.isPrayer)) {
       final isHighlighted = layout.item.id == highlightedMarkerId;
       if (layout.isBadge) {
-        _drawTextBadge(canvas, center, layout.radius, layout.angle,
-            layout.item.text, layout.item.color,
-            isHighlighted: isHighlighted);
+        _drawTextBadge(
+          canvas,
+          center,
+          layout.radius,
+          layout.angle,
+          layout.item.text,
+          layout.item.color,
+          isHighlighted: isHighlighted,
+        );
       } else {
-        _drawEquilateralArrow(canvas, center, layout.radius, 12.0, layout.angle,
-            layout.item.color,
-            isPrayer: true, isHighlighted: isHighlighted);
+        _drawEquilateralArrow(
+          canvas,
+          center,
+          layout.radius,
+          12.0,
+          layout.angle,
+          isDark ? layout.item.color : const Color(0xFFB8860B),
+          isPrayer: true,
+          isHighlighted: isHighlighted,
+        );
       }
     }
 
@@ -419,8 +489,16 @@ class RailwayRingPainter extends CustomPainter {
           item.id == highlightedMarkerId;
       final angle = isDragged && dragAngle != null ? dragAngle! : layout.angle;
       _drawEquilateralArrow(
-          canvas, center, layout.radius, 12.0, angle, item.color,
-          isDragged: isDragged, isPrayer: false, isHighlighted: isHighlighted);
+        canvas,
+        center,
+        layout.radius,
+        12.0,
+        angle,
+        item.color,
+        isDragged: isDragged,
+        isPrayer: false,
+        isHighlighted: isHighlighted,
+      );
     }
   }
 
@@ -480,46 +558,6 @@ class RailwayRingPainter extends CustomPainter {
   }
 }
 
-class CrownPainter extends CustomPainter {
-  final DateTime dayStart;
-  final DateTime dayEnd;
-
-  CrownPainter({required this.dayStart, required this.dayEnd});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final R = size.width / 2;
-    final maghribAngle = timeToAngle(dayStart, dayStart, dayEnd);
-
-    // 🌟 التاج يلتصق بالحافة الخارجية للقرص (خلف الدبابيس مباشرة)
-    final edgeR = R * kRailwayR; 
-
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(maghribAngle + pi / 2);
-    canvas.translate(0, -edgeR);
-
-    // 🌟 رسم مثلث الأسطرلاب الكلاسيكي المدبب نحو الخارج
-    final path = Path();
-    path.moveTo(-10, 0); // القاعدة اليسرى
-    path.lineTo(10, 0);  // القاعدة اليمنى
-    path.lineTo(0, -18); // الرأس المدبب نحو الخارج
-    path.close();
-
-    // تعبئة ذهبية وتحديد أبيض خفيف
-    canvas.drawPath(path, Paint()..color = const Color(0xFFF2C94C)..style = PaintingStyle.fill);
-    canvas.drawPath(path, Paint()..color = Colors.white70..style = PaintingStyle.stroke..strokeWidth = 1.5);
-
-    // مسمار دائري صغير في قاعدة التاج لمزيد من الأصالة
-    canvas.drawCircle(const Offset(0, 0), 3.0, Paint()..color = Colors.white);
-
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant CrownPainter old) => old.dayStart != dayStart || old.dayEnd != dayEnd;
-}
 
 class DynamicNeedlePainter extends CustomPainter {
   final DateTime currentTime;

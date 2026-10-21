@@ -49,43 +49,44 @@ class PermissionsNotifier extends Notifier<PermissionsState> {
     );
   }
 
-  // 🌟 معالجة ذكية لصلاحية الإشعارات
-  Future<bool> ensureNotificationPermission() async {
+  Future<bool> ensureNotificationPermission({
+    bool openSettingsIfDenied = true,
+  }) async {
     var status = await Permission.notification.status;
     if (status.isGranted) return true;
 
     status = await Permission.notification.request();
-    if (status.isPermanentlyDenied || status.isDenied) {
-      // إذا رفضها، نفتح له إعدادات التطبيق ليقوم بتفعيلها
-      await openAppSettings(); 
+    if (!status.isGranted && openSettingsIfDenied) {
+      await openAppSettings();
     }
     await checkAllPermissions();
     return await Permission.notification.isGranted;
   }
 
-  // 🌟 معالجة ذكية لصلاحية المنبه الدقيق (حرجة جداً لأندرويد 14+)
-  Future<bool> ensureExactAlarmPermission() async {
+  Future<bool> ensureExactAlarmPermission({
+    bool openSettingsIfDenied = true,
+  }) async {
     if (!Platform.isAndroid) return true;
-    
+
     var status = await Permission.scheduleExactAlarm.status;
     if (status.isGranted) return true;
 
     status = await Permission.scheduleExactAlarm.request();
-    // في أندرويد 14، قد ترفض فوراً وتتطلب الدخول اليدوي للإعدادات
-    if (!status.isGranted) {
+    if (!status.isGranted && openSettingsIfDenied) {
       await openAppSettings();
     }
     await checkAllPermissions();
     return await Permission.scheduleExactAlarm.isGranted;
   }
 
-  // 🌟 معالجة ذكية للموقع
-  Future<bool> ensureLocationPermission() async {
+  Future<bool> ensureLocationPermission({
+    bool openSettingsIfDenied = true,
+  }) async {
     var status = await Permission.location.status;
     if (status.isGranted) return true;
 
     status = await Permission.location.request();
-    if (status.isPermanentlyDenied) {
+    if (status.isPermanentlyDenied && openSettingsIfDenied) {
       await openAppSettings();
     }
     await checkAllPermissions();

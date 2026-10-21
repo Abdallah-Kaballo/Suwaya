@@ -568,7 +568,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             taskTime = dt;
           }
           if (taskTime != null) {
-            Color tColor = getNeonColorForCategory(task.category);
+            // 🌟 تمرير isDark لضمان تباين أسهم المهام في الوضعين
+            Color tColor = getNeonColorForCategory(task.category, isDark: isDark);
             String formattedName = task.dialShortName ?? task.title;
             _currentDialTasks.add(
               DialTask(
@@ -610,7 +611,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               langCode: context.locale.languageCode,
               design: selectedDesign,
               highlightedPeriodId: _highlightedPeriodId,
-              visibleNightParts: settings.visibleNightParts,
             ),
           ),
           _buildLayer(
@@ -625,8 +625,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                   : 'civil24',
             ),
           ),
-          if (selectedDesign == DialDesign.classic)
-            _buildLayer(CrownPainter(dayStart: dayStart, dayEnd: dayEnd)),
           _buildLayer(
             DividerRingPainter(
               periods: astroState.periods,
@@ -656,6 +654,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                   : 'civil24',
             ),
           ),
+          // 🌟 صورة التاج الإسطرلابي الجديدة بنفس موقع وحجم المثلث السابق
+          if (selectedDesign == DialDesign.classic)
+            _buildMaghribCrownImage(dayStart, dayEnd),
         ],
       ),
     );
@@ -733,8 +734,31 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: CustomPaint(painter: painter),
       );
 
-  /// 🌟 خلفية الدائرة المركزية: شمس واقعية نهاراً وقمر واقعي ليلاً يملأ 100% من الدائرة المركزية
-  /// 🌟 التعديل 1: خلفية الدائرة المركزية باستخدام صورتي PNG الدائريتين (ffff و moon.png) بنسبة 100%
+  /// 🌟 وضع صورة التاج الإسطرلابي الجديدة (Astrolabe Crown.png) بنفس حجم ومكان المثلث السابق (22x20)
+  Widget _buildMaghribCrownImage(DateTime dayStart, DateTime dayEnd) {
+    final double r = widget.size / 2;
+    final double edgeR = r * kRailwayR;
+    final double maghribAngle = timeToAngle(dayStart, dayStart, dayEnd);
+    const double crownWidth = 22.0;
+    const double crownHeight = 20.0;
+
+    return IgnorePointer(
+      child: Transform.rotate(
+        angle: maghribAngle + pi / 2,
+        child: Transform.translate(
+          offset: Offset(0, -(edgeR + (crownHeight / 2) - 1.5)),
+          child: Image.asset(
+            'assets/icons/Astrolabe Crown.png',
+            width: crownWidth,
+            height: crownHeight,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCenterGlow(bool isDark, DialDesign design, bool isDayPhase) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
     final String imagePath = isDayPhase
@@ -766,7 +790,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           fit: StackFit.expand,
           alignment: Alignment.center,
           children: [
-            // صورة الشمس أو القمر تملأ 100% من الدائرة المركزية
             Image.asset(
               imagePath,
               width: centerDiameter,
@@ -774,21 +797,20 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               fit: BoxFit.cover,
               filterQuality: FilterQuality.high,
             ),
-
-            // طبقة تظليل خفيفة متدرجة لإبراز الساعة الذهبية بوضوح فوق الصورة
+            // 🌟 تظليل مركزي أعمق قليلاً فوق صورة الشمس نهاراً لإبراز أرقام الساعة بتباين فائق
             DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Colors.black.withValues(alpha: 0.42),
-                    Colors.black.withValues(alpha: 0.22),
+                    Colors.black.withValues(alpha: isDayPhase ? 0.56 : 0.44),
+                    Colors.black.withValues(alpha: isDayPhase ? 0.30 : 0.22),
                   ],
                 ),
                 border: Border.all(
                   color: design == DialDesign.minimal
                       ? (isDark ? Colors.white12 : Colors.black12)
-                      : goldBase.withValues(alpha: 0.8),
+                      : goldBase.withValues(alpha: 0.85),
                   width: 1.5,
                 ),
               ),
@@ -799,7 +821,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     );
   }
 
-  /// 🌟 التعديل 4: حذف نصي (سويعة كذا من كذا) واسم الفترة، وتكبير وتحسين خط الساعة الرقمية في المنتصف تماماً
   Widget _buildCentralTime(
     AstroState state,
     Color textColor,
@@ -807,8 +828,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     SettingsModel settings,
   ) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
+    // 🌟 لون عاجي/ذهبي ساطع مع حدود ظل سوداء عميقة يحقق أعلى تباين فوق الشمس والقمر
+    const Color centerClockColor = Color(0xFFFFF3C4);
 
-    // 1. حالة الوقت المدني
     if (!settings.useAstroTimeForIbadat) {
       return SizedBox(
         width: centerDiameter,
@@ -834,7 +856,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                     style: const TextStyle(
                       fontSize: 38,
                       fontWeight: FontWeight.w900,
-                      color: astroGold,
+                      color: centerClockColor,
                       fontFamily: 'Inter',
                       letterSpacing: 1.2,
                       shadows: [
@@ -844,8 +866,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                           offset: Offset(0, 2),
                         ),
                         Shadow(
-                          color: Colors.black87,
-                          blurRadius: 18,
+                          color: Colors.black,
+                          blurRadius: 20,
                         ),
                       ],
                     ),
@@ -858,7 +880,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       );
     }
 
-    // 2. حالة الوقت السويعي (00|00|00 في وسط المركز تماماً وتحته مؤشر السرعة)
     return SizedBox(
       width: centerDiameter,
       height: centerDiameter,
@@ -867,7 +888,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 🌟 الساعة الرقمية 00|00|00 في نقطة المنتصف الهندسي بخط أكبر وأفخم
             Align(
               alignment: Alignment.center,
               child: Padding(
@@ -883,7 +903,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                         style: const TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w900,
-                          color: astroGold,
+                          color: centerClockColor,
                           fontFamily: 'Inter',
                           letterSpacing: 1.4,
                           fontFeatures: [ui.FontFeature.tabularFigures()],
@@ -894,8 +914,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                               offset: Offset(0, 2),
                             ),
                             Shadow(
-                              color: Colors.black87,
-                              blurRadius: 18,
+                              color: Colors.black,
+                              blurRadius: 20,
                             ),
                           ],
                         ),
@@ -905,8 +925,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                 ),
               ),
             ),
-
-            // 🌟 مؤشر سرعة التدفق أسفل الساعة
             const Align(
               alignment: Alignment(0.0, 0.58),
               child: TimeSpeedIndicator(),

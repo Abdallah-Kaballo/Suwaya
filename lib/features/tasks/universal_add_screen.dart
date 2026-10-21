@@ -19,19 +19,7 @@ import '../../core/utils/time_formatters.dart';
 
 
 import 'widgets/add_screen_pickers.dart';
-import 'widgets/pattern_preview_painter.dart';
-
-Color _getNeonColor(TaskCategory category) {
-  final catStr = category.toString().toLowerCase();
-  if (catStr.contains('work')) return const Color(0xFF00E5FF);
-  if (catStr.contains('study')) return const Color(0xFF00E676);
-  if (catStr.contains('sport')) return const Color(0xFFFF3D00);
-  if (catStr.contains('worship')) return const Color(0xFFFFC400);
-  if (catStr.contains('entertainment')) return const Color(0xFFFF4081);
-  if (catStr.contains('personal')) return const Color(0xFFD500F9);
-  if (catStr.contains('social')) return const Color(0xFF76FF03);
-  return const Color(0xFF18FFFF);
-}
+import 'widgets/add_screen_dialogs.dart';
 
 class UniversalAddScreen extends ConsumerStatefulWidget {
   final int currentPeriodId;
@@ -143,18 +131,44 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   late final Map<String, String> _availableTones;
   late final Map<String, String> _availablePatterns;
 
+  // 🌟 دالة لتحويل (رقم الفترة + رقم السويعة المحلي) إلى الفهرس العالمي (0..23)
+  int _mapLocalToGlobal(int? periodId, int? localSuwaya, List<AstroPeriod> periods) {
+    if (periodId == null || periods.isEmpty) return 0;
+    int global = 0;
+    for (final p in periods) {
+      if (p.id == periodId) {
+        final count = p.suwayasCount > 0 ? p.suwayasCount : 1;
+        final safeLocal = (localSuwaya == null || localSuwaya <= 0)
+            ? 1
+            : localSuwaya.clamp(1, count);
+        return (global + safeLocal - 1).clamp(0, 23);
+      }
+      global += p.suwayasCount;
+    }
+    return 0;
+  }
+
   @override
   void initState() {
     super.initState();
     int startTab = widget.existingRoutine != null ? 2 : widget.initialTab;
-    _tabController = TabController(length: 3, vsync: this, initialIndex: startTab);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: startTab,
+    );
     _selectedDate = widget.initialDate ?? DateTime.now();
 
-    // افتراضيات (نجلبها من القرص)
-    // بما أننا لا نعرف الفهرس العالمي من PeriodId مباشرة، سنفترض 0 مؤقتاً
-    _targetGlobalSuwaya = 0; 
-    _routineStartGlobalSuwaya = 0;
-    _routineEndGlobalSuwaya = 1;
+    final periods = ref.read(astroProvider).periods;
+    final defaultGlobal = _mapLocalToGlobal(
+      widget.currentPeriodId,
+      widget.currentSuwaya,
+      periods,
+    );
+
+    _targetGlobalSuwaya = defaultGlobal;
+    _routineStartGlobalSuwaya = defaultGlobal;
+    _routineEndGlobalSuwaya = (defaultGlobal + 1) % 24;
 
     if (widget.existingTask != null) {
       final t = widget.existingTask!;
@@ -170,12 +184,16 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       if (t.isAstroTime) {
         _hasTime = true;
         _timeMode = 0;
-        // لاستخراج Global Suwaya يجب أن نعلم الفترات
         _targetVirtualMinute = t.targetVirtualMinute;
-        // سيتم حسابه لاحقاً داخل Build أو بتمريره
+        final localS = t.targetSuwayas.isNotEmpty ? t.targetSuwayas.first : 1;
+        _targetGlobalSuwaya = _mapLocalToGlobal(
+          t.targetPeriodId,
+          localS,
+          periods,
+        );
       } else if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
         _hasTime = true;
-        _timeMode = 1; // 1 يعني مدني
+        _timeMode = 1;
         _targetCivilHour = t.targetCivilTimeMinutes! ~/ 60;
         _targetCivilMinute = t.targetCivilTimeMinutes! % 60;
       }
@@ -186,14 +204,26 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       _titleController.text = r.title;
       _routineColor = Color(r.colorValue);
       _routinePattern = r.pattern;
-      if (r.recurrenceDays != null) _routineRecurrenceDays.addAll(r.recurrenceDays!);
+      if (r.recurrenceDays != null) {
+        _routineRecurrenceDays.addAll(r.recurrenceDays!);
+      }
       _alertLevel = r.alertLevel;
       _alarmTone = r.alarmTone;
       _alarmVolume = r.alarmVolume;
 
       if (r.isAstroTime) {
         _routineTimeMode = 0;
+        _routineStartGlobalSuwaya = _mapLocalToGlobal(
+          r.startPeriodId,
+          r.startSuwaya,
+          periods,
+        );
         _routineStartVirtualMinute = r.startVirtualMinute ?? 0;
+        _routineEndGlobalSuwaya = _mapLocalToGlobal(
+          r.endPeriodId,
+          r.endSuwaya,
+          periods,
+        );
         _routineEndVirtualMinute = r.endVirtualMinute ?? 0;
       } else {
         _routineTimeMode = 1;
@@ -214,12 +244,15 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // 🌟 الاكتفاء بملفات الصوت الموجودة فعلياً في assets/audio/
     _availableTones = {
       'assets/audio/default.mp3': 'alerts.default_ring'.tr(),
       'assets/audio/adhan.mp3': 'alerts.makkah_adhan'.tr(),
       'assets/audio/soft.mp3': 'alerts.soft_bell'.tr(),
-      'assets/audio/birds.mp3': 'alerts.birds'.tr(),
     };
+    if (!_availableTones.containsKey(_alarmTone)) {
+      _alarmTone = 'assets/audio/default.mp3';
+    }
     _availablePatterns = {
       'linear': 'patterns.linear'.tr(),
       'hexagon': 'patterns.hexagon'.tr(),
@@ -650,102 +683,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
-  Future<void> _showRoutinePatternDialog(
-      Color pColor, Color surface, Color text) async {
-    HapticFeedback.selectionClick();
-    await showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-              builder: (context, setDialogState) => Dialog(
-                backgroundColor: surface,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('add_screen.pattern_and_color'.tr(),
-                          style: TextStyle(
-                              color: text,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            const Color(0xFF00E5FF),
-                            const Color(0xFF00E676),
-                            const Color(0xFFFF3D00),
-                            const Color(0xFFFFC400),
-                            const Color(0xFFFF4081),
-                            const Color(0xFFD500F9),
-                          ].map((color) {
-                            final isSelected = _routineColor == color;
-                            return GestureDetector(
-                              onTap: () {
-                                setDialogState(() => _routineColor = color);
-                                setState(() {});
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 12),
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                    color: color,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: Colors.white,
-                                        width: isSelected ? 3 : 0)),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ..._availablePatterns.entries.map((entry) {
-                        final isSelected = _routinePattern == entry.key;
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: CustomPaint(
-                              size: const Size(30, 30),
-                              painter: PatternPreviewPainter(
-                                  entry.key, _routineColor)),
-                          title: Text(entry.value,
-                              style: TextStyle(
-                                  color: isSelected ? pColor : text,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal)),
-                          trailing: isSelected
-                              ? Icon(LucideIcons.circle_check, color: pColor)
-                              : null,
-                          onTap: () {
-                            setDialogState(() => _routinePattern = entry.key);
-                            setState(() {});
-                          },
-                        );
-                      }),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: pColor),
-                              onPressed: () => Navigator.pop(ctx),
-                              child: Text('common.done'.tr(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)))),
-                    ],
-                  ),
-                ),
-              ),
-            ));
-  }
-
   Future<void> _showDateRecurrenceDialog(
     Color pColor,
     Color surface,
@@ -896,243 +833,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
-  Future<void> _showAlertsDialog(
-      Color pColor, Color surface, Color text) async {
-    HapticFeedback.selectionClick();
-    await showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-              builder: (context, setDialogState) => Dialog(
-                backgroundColor: surface,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('add_screen.alert_settings'.tr(),
-                          style: TextStyle(
-                              color: text,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          _alertIcon(
-                            0,
-                            LucideIcons.bell_off,
-                            context.locale.languageCode == 'ar'
-                                ? 'بدون إشعار'
-                                : 'No Notification',
-                            pColor,
-                            text,
-                            setDialogState,
-                          ),
-                          const SizedBox(width: 8),
-                          _alertIcon(
-                            1,
-                            LucideIcons.bell,
-                            context.locale.languageCode == 'ar'
-                                ? 'إشعار على الستارة'
-                                : 'Curtain Notification',
-                            pColor,
-                            text,
-                            setDialogState,
-                          ),
-                          const SizedBox(width: 8),
-                          _alertIcon(
-                            2,
-                            LucideIcons.alarm_clock,
-                            'alerts.alarm'.tr(),
-                            pColor,
-                            text,
-                            setDialogState,
-                          ),
-                        ],
-                      ),
-                      if (_alertLevel == 2) ...[
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 4),
-                          decoration: BoxDecoration(
-                              color: text.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(12)),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _alarmTone,
-                              dropdownColor: surface,
-                              isExpanded: true,
-                              items: _availableTones.entries
-                                  .map((e) => DropdownMenuItem(
-                                      value: e.key,
-                                      child: Text(e.value,
-                                          style: TextStyle(color: text))))
-                                  .toList(),
-                              onChanged: (val) {
-                                setDialogState(() => _alarmTone = val!);
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Slider(
-                            value: _alarmVolume,
-                            activeColor: pColor,
-                            onChanged: (v) {
-                              setDialogState(() => _alarmVolume = v);
-                              setState(() {});
-                            }),
-                      ],
-                      const SizedBox(height: 20),
-                      SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: pColor),
-                              onPressed: () => Navigator.pop(ctx),
-                              child: Text('common.done'.tr(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)))),
-                    ],
-                  ),
-                ),
-              ),
-            ));
-  }
-
-  Future<void> _showCategoryDialDialog(
-      Color pColor, Color surface, Color text) async {
-    HapticFeedback.selectionClick();
-    await showDialog(
-        context: context,
-        builder: (ctx) => StatefulBuilder(
-              builder: (context, setDialogState) => Dialog(
-                backgroundColor: surface,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('add_screen.category_and_dial'.tr(),
-                          style: TextStyle(
-                              color: text,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 16),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: TaskCategory.values.map((cat) {
-                            final isSelected = _selectedCategory == cat;
-                            final catColor = _getNeonColor(cat);
-                            return GestureDetector(
-                              onTap: () {
-                                setDialogState(() => _selectedCategory = cat);
-                                setState(() {});
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? catColor.withValues(alpha: 0.2)
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                        color: isSelected
-                                            ? catColor
-                                            : text.withValues(alpha: 0.1))),
-                                child: Row(children: [
-                                  Container(
-                                      width: 12,
-                                      height: 12,
-                                      decoration: BoxDecoration(
-                                          color: catColor,
-                                          shape: BoxShape.circle)),
-                                  const SizedBox(width: 6),
-                                  Text(cat.displayName,
-                                      style: TextStyle(color: text))
-                                ]),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text('add_screen.show_on_dial'.tr(),
-                            style: TextStyle(
-                                color: text,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold)),
-                        value: _showOnDial,
-                        activeThumbColor: pColor,
-                        onChanged: (val) {
-                          setDialogState(() => _showOnDial = val);
-                          setState(() {});
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: pColor),
-                              onPressed: () => Navigator.pop(ctx),
-                              child: Text('common.done'.tr(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold)))),
-                    ],
-                  ),
-                ),
-              ),
-            ));
-  }
-
-  Widget _alertIcon(int level, IconData icon, String title, Color accent,
-      Color text, Function setDialogState) {
-    final isActive = _alertLevel == level;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setDialogState(() => _alertLevel = level);
-          setState(() {});
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-              color: isActive
-                  ? accent.withValues(alpha: 0.15)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: isActive ? accent : text.withValues(alpha: 0.1))),
-          child: Column(children: [
-            Icon(icon,
-                color: isActive ? accent : text.withValues(alpha: 0.4),
-                size: 20),
-            const SizedBox(height: 4),
-            Text(title,
-                style: TextStyle(
-                    color: isActive ? accent : text.withValues(alpha: 0.6),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1234,7 +934,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           ),
         );
       } else {
-        // 🌟 استخدام ClockTimeText.suwaya لضمان ظهور السويعة يساراً والدقيقة يميناً (SS|MM) دائماً
         timePreview = ClockTimeText.suwaya(
           globalSuwayaIndex: _targetGlobalSuwaya,
           virtualMinute: _targetVirtualMinute,
@@ -1248,7 +947,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       }
     }
 
-    // 🌟 عرض التاريخ الهجري فقط عند اختيار الوقت السويعي (_timeMode == 0) والتاريخ الميلادي فقط عند اختيار المدني (_timeMode == 1)
     String dateStr;
     if (isHabit) {
       dateStr = _recurrenceDays.isEmpty
@@ -1257,7 +955,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     } else {
       final targetDate = _selectedDate ?? DateTime.now();
       if (_timeMode == 0) {
-        final hDate = HijriCalendar.fromDate(targetDate);
+        // 🌟 تطبيق تصحيح التاريخ الهجري
+        final adjustedDate = targetDate.add(
+          Duration(days: settings.hijriOffsetDays),
+        );
+        final hDate = HijriCalendar.fromDate(adjustedDate);
         dateStr =
             '${hDate.hDay} ${'hijri.m${hDate.hMonth}'.tr()} ${hDate.hYear}';
       } else {
@@ -1436,67 +1138,82 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
-  Widget _buildGridCard(
-      Color surfaceColor,
-      Color accentColor,
-      Color textColor,
-      String title,
-      String value,
-      IconData icon,
-      bool isHighlighted,
-      bool isError,
-      VoidCallback? onTap,
-      {Widget? valueWidget}) {
-    Color valColor = isError ? Colors.redAccent : textColor;
+  Future<void> _showRoutinePatternDialog(
+    Color pColor,
+    Color surface,
+    Color text,
+  ) =>
+      showRoutinePatternModal(
+        context: context,
+        pColor: pColor,
+        surface: surface,
+        text: text,
+        initialColor: _routineColor,
+        initialPattern: _routinePattern,
+        availablePatterns: _availablePatterns,
+        onChanged: (color, pattern) => setState(() {
+          _routineColor = color;
+          _routinePattern = pattern;
+        }),
+      );
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 100,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-              color: surfaceColor,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color: isError
-                      ? Colors.redAccent
-                      : (isHighlighted ? accentColor : Colors.transparent),
-                  width: 2)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon,
-                      color: isError
-                          ? Colors.redAccent
-                          : (isHighlighted
-                              ? accentColor
-                              : textColor.withValues(alpha: 0.5)),
-                      size: 16),
-                  const SizedBox(width: 6),
-                  Text(title,
-                      style: TextStyle(
-                          color: isError
-                              ? Colors.redAccent
-                              : textColor.withValues(alpha: 0.5),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
-              const Spacer(),
-              valueWidget ??
-                  Text(value,
-                      style: TextStyle(
-                          color: valColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Inter')),
-            ],
-          ),
-        ),
-      ),
+  Future<void> _showAlertsDialog(Color pColor, Color surface, Color text) =>
+      showAlertsModal(
+        context: context,
+        pColor: pColor,
+        surface: surface,
+        text: text,
+        initialAlertLevel: _alertLevel,
+        initialTone: _alarmTone,
+        initialVolume: _alarmVolume,
+        availableTones: _availableTones,
+        onChanged: (level, tone, vol) => setState(() {
+          _alertLevel = level;
+          _alarmTone = tone;
+          _alarmVolume = vol;
+        }),
+      );
+
+  Future<void> _showCategoryDialDialog(
+    Color pColor,
+    Color surface,
+    Color text,
+  ) =>
+      showCategoryDialModal(
+        context: context,
+        pColor: pColor,
+        surface: surface,
+        text: text,
+        initialCategory: _selectedCategory,
+        initialShowOnDial: _showOnDial,
+        onChanged: (cat, show) => setState(() {
+          _selectedCategory = cat;
+          _showOnDial = show;
+        }),
+      );
+  Widget _buildGridCard(
+    Color surfaceColor,
+    Color accentColor,
+    Color textColor,
+    String title,
+    String value,
+    IconData icon,
+    bool isHighlighted,
+    bool isError,
+    VoidCallback? onTap, {
+    Widget? valueWidget,
+  }) {
+    return AddGridCard(
+      surfaceColor: surfaceColor,
+      accentColor: accentColor,
+      textColor: textColor,
+      title: title,
+      value: value,
+      icon: icon,
+      isHighlighted: isHighlighted,
+      isError: isError,
+      onTap: onTap,
+      valueWidget: valueWidget,
     );
   }
 }

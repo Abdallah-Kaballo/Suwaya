@@ -35,96 +35,141 @@ class _MiniDialPainter extends CustomPainter {
   final bool isDark;
   final String langCode;
 
-  _MiniDialPainter(
-      {required this.periods, required this.isDark, required this.langCode});
+  _MiniDialPainter({
+    required this.periods,
+    required this.isDark,
+    required this.langCode,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width * 0.30;
     final textPainter = TextPainter(
-        textDirection: TextDirection.ltr, textAlign: TextAlign.center);
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
 
     double currentAngle = -pi / 2;
 
     for (var period in periods) {
       final sweepAngle = (period.suwayasCount / 24) * 2 * pi;
+      final pColor = period.dialColor(isDark);
 
       final paint = Paint()
-        ..color = period.uiColor.withValues(alpha: 0.2)
+        ..color = pColor.withValues(alpha: isDark ? 0.28 : 0.22)
         ..style = PaintingStyle.fill;
 
-      canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
-          currentAngle, sweepAngle, true, paint);
       canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius),
-          currentAngle,
-          sweepAngle,
-          true,
-          Paint()
-            ..color = period.uiColor
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5);
+        Rect.fromCircle(center: center, radius: radius),
+        currentAngle,
+        sweepAngle,
+        true,
+        paint,
+      );
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        currentAngle,
+        sweepAngle,
+        true,
+        Paint()
+          ..color = pColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
 
       final middleAngle = currentAngle + (sweepAngle / 2);
       final innerTextR = radius * 0.6;
-      final innerP = Offset(center.dx + innerTextR * cos(middleAngle),
-          center.dy + innerTextR * sin(middleAngle));
+      final innerP = Offset(
+        center.dx + innerTextR * cos(middleAngle),
+        center.dy + innerTextR * sin(middleAngle),
+      );
+
+      final countColor =
+          isDark ? const Color(0xFFFFE082) : const Color(0xFF111827);
+      final strokeBgColor = isDark ? Colors.black87 : Colors.white;
 
       textPainter.text = TextSpan(
-          text: period.suwayasCount.toString(),
-          style: TextStyle(
-              foreground: Paint()
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = 0.5
-                ..color = Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.normal,
-              fontFamily: 'Playfair Display',
-              letterSpacing: 0.5));
+        text: period.suwayasCount.toString(),
+        style: TextStyle(
+          foreground: Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.0
+            ..color = strokeBgColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          fontFamily: 'Inter',
+        ),
+      );
       textPainter.layout();
-      textPainter.paint(canvas,
-          innerP - Offset(textPainter.width / 2, textPainter.height / 2));
+      textPainter.paint(
+        canvas,
+        innerP - Offset(textPainter.width / 2, textPainter.height / 2),
+      );
 
       textPainter.text = TextSpan(
-          text: period.suwayasCount.toString(),
-          style: const TextStyle(
-              color: Color(0xFFF2C94C),
-              fontSize: 11,
-              fontWeight: FontWeight.normal,
-              fontFamily: 'Playfair Display',
-              letterSpacing: 0.5));
+        text: period.suwayasCount.toString(),
+        style: TextStyle(
+          color: countColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          fontFamily: 'Inter',
+        ),
+      );
       textPainter.layout();
-      textPainter.paint(canvas,
-          innerP - Offset(textPainter.width / 2, textPainter.height / 2));
+      textPainter.paint(
+        canvas,
+        innerP - Offset(textPainter.width / 2, textPainter.height / 2),
+      );
 
       String pName = '';
       switch (period.id) {
-        case 1: pName = 'periods.maghrib'.tr(); break;
-        case 2: pName = 'periods.isha'.tr(); break;
-        case 3: pName = 'periods.qiyam'.tr(); break;
-        case 4: pName = 'periods.fajr'.tr(); break;
-        case 5: pName = 'periods.duha'.tr(); break;
-        case 6: pName = 'periods.dhuhr'.tr(); break;
-        case 7: pName = 'periods.asr'.tr(); break;
+        case 1:
+          pName = 'periods.maghrib'.tr();
+          break;
+        case 2:
+          pName = 'periods.isha'.tr();
+          break;
+        case 3:
+          pName = 'periods.qiyam'.tr();
+          break;
+        case 4:
+          pName = 'periods.fajr'.tr();
+          break;
+        case 5:
+          pName = 'periods.duha'.tr();
+          break;
+        case 6:
+          pName = 'periods.dhuhr'.tr();
+          break;
+        case 7:
+          pName = 'periods.asr'.tr();
+          break;
       }
 
-      String outerText = pName.isNotEmpty ? '${period.id}\n($pName)' : period.id.toString();
+      final String outerText =
+          pName.isNotEmpty ? '${period.id}\n($pName)' : period.id.toString();
 
       final outerTextR = radius + 15;
-      final outerP = Offset(center.dx + outerTextR * cos(middleAngle),
-          center.dy + outerTextR * sin(middleAngle));
+      final outerP = Offset(
+        center.dx + outerTextR * cos(middleAngle),
+        center.dy + outerTextR * sin(middleAngle),
+      );
 
       textPainter.text = TextSpan(
-          text: outerText,
-          style: TextStyle(
-              color: period.uiColor,
-              fontSize: 9,
-              fontWeight: FontWeight.bold,
-              height: 1.2));
+        text: outerText,
+        style: TextStyle(
+          color: pColor,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
+          height: 1.15,
+        ),
+      );
       textPainter.layout();
-      textPainter.paint(canvas,
-          outerP - Offset(textPainter.width / 2, textPainter.height / 2));
+      textPainter.paint(
+        canvas,
+        outerP - Offset(textPainter.width / 2, textPainter.height / 2),
+      );
 
       currentAngle += sweepAngle;
     }

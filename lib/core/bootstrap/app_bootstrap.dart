@@ -7,8 +7,11 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../notification/notification_service.dart';
 
 class AppBootstrap {
-  static const String revenueCatGoogleApiKey =
-      'goog_JcnVefJVnUvvVCneWsmfNfOsMcL';
+  // 🌟 قراءة المفتاح عبر --dart-define=REVENUECAT_GOOGLE_API_KEY=... مع قيمة احتياطية
+  static const String revenueCatGoogleApiKey = String.fromEnvironment(
+    'REVENUECAT_GOOGLE_API_KEY',
+    defaultValue: 'goog_JcnVefJVnUvvVCneWsmfNfOsMcL',
+  );
 
   static Future<void> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +29,7 @@ class AppBootstrap {
     await NotificationService().init();
     await Alarm.init();
 
-    // 🌟 تهيئة RevenueCat لمتجر Google Play
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid && revenueCatGoogleApiKey.isNotEmpty) {
       try {
         await Purchases.configure(
           PurchasesConfiguration(revenueCatGoogleApiKey),

@@ -52,11 +52,11 @@ extension TaskCategoryExtension on TaskCategory {
       case TaskCategory.entertainment:
         return const Color(0xFFFF4081);
       case TaskCategory.personal:
-        return const Color(0xFFD500F9);
+        return const Color(0xFFE040FB);
       case TaskCategory.social:
         return const Color(0xFF76FF03);
       case TaskCategory.unspecified:
-        return const Color(0xFF18FFFF);
+        return const Color(0xFF94A3B8); // 🌟 رمادي فضي مميز عن فئة العمل
     }
   }
 
@@ -78,7 +78,7 @@ extension TaskCategoryExtension on TaskCategory {
       case TaskCategory.social:
         return const Color(0xFF33691E);
       case TaskCategory.unspecified:
-        return const Color(0xFF006064);
+        return const Color(0xFF475569); // 🌟 رمادي أردوازي داكن عالي التباين في الفاتح
     }
   }
 }

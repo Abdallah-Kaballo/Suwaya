@@ -35,7 +35,7 @@ class SettingsModel {
   String dialPinMode = 'suwaya48';
   String suwayaNumberStyle = 'english';
   List<String> activeNightMarkers = ['fifth_sixth'];
-
+  
   List<PeriodConfig> periodConfigs = [];
 
   bool useAstroTimeForIbadat = true;
@@ -202,10 +202,32 @@ class SettingsModel {
       ..calculationMethod = calculationMethod
       ..madhab = madhab
       ..highLatitudeRule = highLatitudeRule
+      ..customFajrAngle = customFajrAngle // 🌟 حفظ زاوية الفجر المخصصة
+      ..customIshaAngle = customIshaAngle // 🌟 حفظ زاوية العشاء المخصصة
       ..timeDisplayMode = timeDisplayMode
-      ..suwayaIconMode = suwayaIconMode // 🌟 استنساخ الحقل الجديد
-      ..activeLocation = activeLocation != null ? (SavedLocation()..name = activeLocation!.name..latitude = activeLocation!.latitude..longitude = activeLocation!.longitude..countryCode = activeLocation!.countryCode..isAutoLocation = activeLocation!.isAutoLocation..timezone = activeLocation!.timezone..locationType = activeLocation!.locationType..nearestCity = activeLocation!.nearestCity) : null
-      ..savedLocations = savedLocations.map((l) => SavedLocation()..name = l.name..latitude = l.latitude..longitude = l.longitude..countryCode = l.countryCode..isAutoLocation = l.isAutoLocation..timezone = l.timezone..locationType = l.locationType..nearestCity = l.nearestCity).toList()
+      ..suwayaIconMode = suwayaIconMode
+      ..activeLocation = activeLocation != null
+          ? (SavedLocation()
+            ..name = activeLocation!.name
+            ..latitude = activeLocation!.latitude
+            ..longitude = activeLocation!.longitude
+            ..countryCode = activeLocation!.countryCode
+            ..isAutoLocation = activeLocation!.isAutoLocation
+            ..timezone = activeLocation!.timezone
+            ..locationType = activeLocation!.locationType
+            ..nearestCity = activeLocation!.nearestCity)
+          : null
+      ..savedLocations = savedLocations
+          .map((l) => SavedLocation()
+            ..name = l.name
+            ..latitude = l.latitude
+            ..longitude = l.longitude
+            ..countryCode = l.countryCode
+            ..isAutoLocation = l.isAutoLocation
+            ..timezone = l.timezone
+            ..locationType = l.locationType
+            ..nearestCity = l.nearestCity)
+          .toList()
       ..currentStreak = currentStreak
       ..longestStreak = longestStreak
       ..lastStreakDate = lastStreakDate
@@ -223,7 +245,15 @@ class SettingsModel {
       ..defaultHabitVolume = defaultHabitVolume
       ..snoozeDurationMinutes = snoozeDurationMinutes
       ..maxSnoozeCount = maxSnoozeCount
-      ..periodConfigs = periodConfigs.map((c) => PeriodConfig()..periodId = c.periodId..isEnabled = c.isEnabled..alertLevel = c.alertLevel..soundPath = c.soundPath..volume = c.volume..manualOffsetMinutes = c.manualOffsetMinutes).toList();
+      ..periodConfigs = periodConfigs
+          .map((c) => PeriodConfig()
+            ..periodId = c.periodId
+            ..isEnabled = c.isEnabled
+            ..alertLevel = c.alertLevel
+            ..soundPath = c.soundPath
+            ..volume = c.volume
+            ..manualOffsetMinutes = c.manualOffsetMinutes)
+          .toList();
   }
 }
 

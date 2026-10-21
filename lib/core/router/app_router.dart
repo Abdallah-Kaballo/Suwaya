@@ -11,6 +11,8 @@ import '../../features/ibadat/ibadat_screen.dart';
 import '../../features/pomodoro/pomodoro_screen.dart';
 import '../../features/tasks/universal_add_screen.dart';
 import '../../features/calendar/calendar_screen.dart';
+import '../../models/task_model.dart';
+import '../../models/routine_model.dart';
 
 // مسارات Onboarding
 import '../../features/onboarding/onboarding_language_screen.dart';
@@ -89,12 +91,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>? ?? {};
           return UniversalAddScreen(
-            currentPeriodId: extra['currentPeriodId'] ?? 1,
-            currentSuwaya: extra['currentSuwaya'] ?? 1,
-            initialTab: extra['initialTab'] ?? 0,
-            existingTask: extra['existingTask'],
-            existingRoutine: extra['existingRoutine'],
-            initialDate: extra['initialDate'] as DateTime?, // 🌟 دعم التاريخ المحدد من التقويم
+            currentPeriodId: (extra['currentPeriodId'] as int?) ?? 1,
+            currentSuwaya: (extra['currentSuwaya'] as int?) ?? 1,
+            initialTab: (extra['initialTab'] as int?) ?? 0,
+            existingTask: extra['existingTask'] as TaskModel?,
+            existingRoutine: extra['existingRoutine'] as RoutineModel?,
+            initialDate: extra['initialDate'] as DateTime?,
           );
         },
       ),
