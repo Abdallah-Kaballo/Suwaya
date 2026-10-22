@@ -49,8 +49,16 @@ android {
 
     buildTypes {
         release {
-            // 🌟 استخدام مفتاح الإنتاج بدلاً من debug إذا كان الملف موجوداً
-            signingConfig = if (hasKeystore) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
+            val isCi = System.getenv("CI")?.toBoolean() == true
+            val allowDebugFallback = project.findProperty("allowDebugReleaseSign") == "true"
+
+            signingConfig = when {
+                hasKeystore -> signingConfigs.getByName("release")
+                !isCi && allowDebugFallback -> signingConfigs.getByName("debug")
+                else -> throw GradleException(
+                    "🚨 Missing key.properties for Release build! Provide release signing credentials or pass -PallowDebugReleaseSign=true for local testing only."
+                )
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hijri/hijri_calendar.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
 import 'package:suwaya_time/suwaya_time.dart';
@@ -42,7 +41,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   DateTime _getCityTime(SettingsModel settings) {
     final loc = settings.activeLocation;
-    if (loc != null && loc.isAutoLocation == false && loc.timezone != null) {
+    if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
       try {
         final location = tz.getLocation(loc.timezone!);
         final nowInTarget = tz.TZDateTime.now(location);
@@ -89,13 +88,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     DateTime cityNow,
     SettingsModel settings,
   ) {
-    DateTime? rawFajr, rawMaghrib;
-    for (var p in astroState.periods) {
-      if (p.periodKey == PeriodKey.nightMidnightFajr) rawFajr = p.endTime;
-      if (p.periodKey == PeriodKey.nightMaghribIsha) rawMaghrib = p.startTime;
-    }
-    rawFajr ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 4, 30);
-    rawMaghrib ??= DateTime(cityNow.year, cityNow.month, cityNow.day, 18, 0);
+    // 🌟 الاعتماد على الغروب الفلكي الصافي (calculatedSunset) لبداية الليلة الهجرية حتى لا يتأثر بالتعديل اليدوي للأذان
+    final DateTime rawFajr = astroState.ibadatTimings.fajr;
+    final DateTime rawSunset =
+        astroState.ibadatTimings.calculatedSunset ?? astroState.ibadatTimings.maghrib;
 
     final DateTime todayFajr = DateTime(
       cityNow.year,
@@ -104,12 +100,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       rawFajr.hour,
       rawFajr.minute,
     );
-    final DateTime todayMaghrib = DateTime(
+    final DateTime todaySunset = DateTime(
       cityNow.year,
       cityNow.month,
       cityNow.day,
-      rawMaghrib.hour,
-      rawMaghrib.minute,
+      rawSunset.hour,
+      rawSunset.minute,
     );
 
     final langCode = context.locale.languageCode;
@@ -118,13 +114,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     late final DateTime islamicDate;
     late final bool isNight;
 
+    // 🌟 قبل الفجر: نحن في ليلة اليوم الحالي (التاريخ الهجري تقدم بالفعل عند غروب الأمس ولا يتقدم مجدداً عند 00:00)
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
-    } else if (cityNow.isBefore(todayMaghrib)) {
+    } else if (cityNow.isBefore(todaySunset)) {
       islamicDate = cityNow;
       isNight = false;
     } else {
+      // 🌟 بعد الغروب الفلكي: دخلت ليلة اليوم الهجري الجديد
       islamicDate = cityNow.add(const Duration(days: 1));
       isNight = true;
     }
@@ -132,12 +130,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final String dayName = DateFormat('EEEE', safeIntl).format(islamicDate);
     final String dayNightStr = _formatDayNightTitle(context, isNight, dayName);
 
-    // 🌟 تطبيق تصحيح التاريخ الهجري المختار من الإعدادات
-    final hijriDate = HijriCalendar.fromDate(
-      islamicDate.add(Duration(days: settings.hijriOffsetDays)),
+    const hijriProvider = UmmAlQuraHijriProvider();
+    final hijriDate = hijriProvider.dateForGregorianDate(
+      date: CivilDate(islamicDate.year, islamicDate.month, islamicDate.day),
+      adjustmentDays: settings.hijriOffsetDays,
     );
-    final monthName = 'hijri.m${hijriDate.hMonth}'.tr();
-    final hijriStr = '${hijriDate.hDay} $monthName ${hijriDate.hYear}';
+    final monthName = 'hijri.m${hijriDate.month}'.tr();
+    final hijriStr = '${hijriDate.day} $monthName ${hijriDate.year}';
 
     final textColor = isDark ? Colors.white : Colors.black87;
 

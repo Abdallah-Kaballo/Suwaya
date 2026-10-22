@@ -31,9 +31,16 @@ class LocationService {
       throw LocationException('location_picker.error_permission_denied_forever');
     }
 
+    Position? lastKnown;
     try {
-      Position? lastKnown = await Geolocator.getLastKnownPosition();
-      if (lastKnown != null) return lastKnown;
+      lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        final age = DateTime.now().difference(lastKnown.timestamp).abs();
+        // 🌟 قبول الموقع المخزن مسبقاً فقط إذا كان حديثاً (أقل من 10 دقائق) ودقيقاً (<= 150 متر)
+        if (age <= const Duration(minutes: 10) && lastKnown.accuracy <= 150) {
+          return lastKnown;
+        }
+      }
     } catch (_) {}
 
     try {
@@ -44,6 +51,8 @@ class LocationService {
         ),
       );
     } catch (e) {
+      // 🌟 استخدام آخر موقع معروف كخطة بديلة فقط عند انتهاء مهلة الـ GPS
+      if (lastKnown != null) return lastKnown;
       throw LocationException('location_picker.error_gps_timeout');
     }
   }

@@ -1355,44 +1355,47 @@ class SuwayaActiveTimerView extends ConsumerWidget {
     final notifier = ref.read(pomodoroProvider.notifier);
     final config = state.suwayaConfig;
 
-    if (config == null) return const SizedBox.shrink();
-
-    if (state.isFinished) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: Text(
-              'pomodoro.time_up_prayer'.tr(),
-              textAlign: TextAlign.center,
-            ),
-            content: Text(
-              'pomodoro.time_up_desc'.tr(),
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    notifier.acknowledgeFinish();
-                  },
-                  child: Text(
-                    'common.done'.tr(),
-                    style: const TextStyle(color: Colors.white),
+    // 🌟 الاستماع لتغير حالة الانتهاء مرة واحدة فقط لمنع تكدس نوافذ الحوار أثناء إعادة البناء
+    ref.listen<bool>(
+      pomodoroProvider.select((s) => s.isFinished),
+      (previous, isFinished) {
+        if (isFinished && previous != true && context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: Text(
+                'pomodoro.time_up_prayer'.tr(),
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                'pomodoro.time_up_desc'.tr(),
+                textAlign: TextAlign.center,
+              ),
+              actions: [
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      notifier.acknowledgeFinish();
+                    },
+                    child: Text(
+                      'common.done'.tr(),
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      });
-    }
+              ],
+            ),
+          );
+        }
+      },
+    );
+
+    if (config == null) return const SizedBox.shrink();
 
     final isDark =
         state.isFullScreen || Theme.of(context).brightness == Brightness.dark;

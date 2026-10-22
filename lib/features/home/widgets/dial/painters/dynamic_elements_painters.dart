@@ -199,7 +199,7 @@ class RailwayRingPainter extends CustomPainter {
     required this.design,
     this.highlightedTaskId,
     this.highlightedMarkerId,
-    this.dialPinMode = 'suwaya48',
+    this.dialPinMode = 'suwaya24',
     this.precomputedLayouts,
   });
 

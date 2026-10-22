@@ -302,7 +302,7 @@ Defined in `lib/core/router/app_router.dart` using `rootNavigatorKey`:
 
 The astronomical dial in `lib/features/home/widgets/` is decomposed into layered `CustomPainter` classes wrapped in `RepaintBoundary` for 60/120fps performance:
 
-* Static/Semi-Static Layers (`heavyDialStack`): `BackgroundPainter`, `IslamicRetePainter` / `GeometricRetePainter`, `RoutinesRingPainter`, `PeriodRingPainter`, `OuterRingPainter` (supports `suwaya48`/`24` pins and `civil24` pins), `CrownPainter` (Maghrib crown marker), `DividerRingPainter`, and `RailwayRingPainter` (3-track collision-avoiding layout for prayer markers and task arrows).
+* Static/Semi-Static Layers (`heavyDialStack`): `BackgroundPainter`, `IslamicRetePainter` / `GeometricRetePainter`, `RoutinesRingPainter`, `PeriodRingPainter`, `OuterRingPainter` (supports `suwaya24` pins and `civil24` pins), `CrownPainter` (Maghrib crown marker), `DividerRingPainter`, and `RailwayRingPainter` (3-track collision-avoiding layout for prayer markers and task arrows).
 
 
 * Dynamic Layer: `DynamicNeedlePainter` driven by `virtualDateTimeNotifier` and wrapped in `Transform.rotate` for auto-rotation or manual touch rotation with elastic snap-back.

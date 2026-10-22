@@ -328,14 +328,24 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final scaffold = ScaffoldMessenger.of(context);
 
     if (_tabController.index == 2) {
-      if (_alertLevel >= 1) {
-        bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
-        if (!mounted) return;
-        if (!hasPermissions) {
-          scaffold.showSnackBar(SnackBar(content: Text('add_screen.permissions_required'.tr()), backgroundColor: Colors.redAccent));
-          return;
-        }
+      // 🌟 فحص موحد لصلاحيات الإشعارات والمنبهات قبل حفظ الروتين أو المهمة
+    if (_alertLevel >= 1) {
+      final permsNotifier = ref.read(permissionsProvider.notifier);
+      final hasNotif = await permsNotifier.ensureNotificationPermission();
+      final hasExactAlarm = _alertLevel == 2
+          ? await permsNotifier.ensureExactAlarmPermission()
+          : true;
+      if (!mounted) return;
+      if (!hasNotif || !hasExactAlarm) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Text('add_screen.permissions_required'.tr()),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
       }
+    }
 
       final routine = widget.existingRoutine ?? RoutineModel();
       routine.title = title;
@@ -373,11 +383,21 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       return;
     }
 
+    // 🌟 فحص موحد لصلاحيات الإشعارات والمنبهات قبل حفظ الروتين أو المهمة
     if (_alertLevel >= 1) {
-      bool hasPermissions = await ref.read(permissionsProvider.notifier).ensureExactAlarmPermission();
+      final permsNotifier = ref.read(permissionsProvider.notifier);
+      final hasNotif = await permsNotifier.ensureNotificationPermission();
+      final hasExactAlarm = _alertLevel == 2
+          ? await permsNotifier.ensureExactAlarmPermission()
+          : true;
       if (!mounted) return;
-      if (!hasPermissions) {
-        scaffold.showSnackBar(SnackBar(content: Text('add_screen.permissions_required'.tr()), backgroundColor: Colors.redAccent));
+      if (!hasNotif || !hasExactAlarm) {
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Text('add_screen.permissions_required'.tr()),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
         return;
       }
     }

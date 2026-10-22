@@ -32,7 +32,7 @@ class SettingsModel {
   bool qiyamAlarmEnabled = false;
   List<int> hiddenPeriods = [];
   bool isDialAutoRotating = true;
-  String dialPinMode = 'suwaya48';
+  String dialPinMode = 'suwaya24';
   String suwayaNumberStyle = 'english';
   List<String> activeNightMarkers = ['fifth_sixth'];
   

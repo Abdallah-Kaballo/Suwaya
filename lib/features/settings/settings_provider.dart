@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:suwaya/core/location/location_service.dart';
 import 'package:suwaya/core/location/permissions_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -367,6 +366,7 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       ..countryCode = countryCode
       ..timezone = timezone
       ..locationType = locationType
+      ..isAutoLocation = (locationType == 'gps') // 🌟 ربط التحديث التلقائي بنوع GPS
       ..nearestCity = nearestCity;
 
     final newState = state.clone()..activeLocation = loc;
@@ -400,34 +400,28 @@ class SettingsNotifier extends Notifier<SettingsModel> {
           .read(permissionsProvider.notifier)
           .ensureLocationPermission();
       if (!isLocGranted) throw Exception('permissions.location_required'.tr());
-      final position = await LocationService.determinePosition();
-      String detectedCountryCode = 'SA';
-      try {
-        final geocoding = Geocoding();
 
-        final List<Placemark> placemarks =
-            await geocoding.placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-        if (placemarks.isNotEmpty && placemarks.first.isoCountryCode != null) {
-          detectedCountryCode = placemarks.first.isoCountryCode!;
-        }
-      } catch (_) {}
+      // 🌟 استخدام المسار المحلي الموحد لضمان جلب وحفظ المنطقة الزمنية (timezone) وأقرب مدينة
+      final locData = await LocationService.fetchOfflineLocation(state.languageCode);
+      final String detectedCountryCode = (locData['countryCode'] as String?) ?? 'SA';
 
-      final loc = SavedLocation()
-        ..latitude = position.latitude
-        ..longitude = position.longitude
-        ..countryCode = detectedCountryCode
-        ..name = 'location_picker.current_location'.tr()
-        ..isAutoLocation = true;
-      await _repository.updateActiveLocation(loc);
+      await addAndSelectLocation(
+        (locData['formattedName'] as String?) ?? 'location_picker.current_location'.tr(),
+        (locData['lat'] as num).toDouble(),
+        (locData['lng'] as num).toDouble(),
+        detectedCountryCode,
+        timezone: locData['timezone'] as String?,
+        locationType: 'gps',
+        nearestCity: (locData['city'] as String?) ?? '',
+      );
+
       final defaults =
           AstroSmartDefaults.getDefaultsForCountry(detectedCountryCode);
       await updateAstroSettings(
-          method: defaults.method,
-          madhab: defaults.madhab,
-          highLatRule: defaults.highLatitudeRule);
+        method: defaults.method,
+        madhab: defaults.madhab,
+        highLatRule: defaults.highLatitudeRule,
+      );
     } catch (e) {
       rethrow;
     }

@@ -17,6 +17,7 @@ class SuwayaTimeEngine {
     Duration cityOffset, {
     Duration? nextDayCityOffset,
     Map<PrayerKey, int>? manualOffsets,
+    Duration Function(DateTime utcInstant)? offsetResolver,
   }) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat,
@@ -30,6 +31,7 @@ class SuwayaTimeEngine {
       cityOffset,
       nextDayCityOffset: nextDayCityOffset,
       manualOffsets: manualOffsets,
+      offsetResolver: offsetResolver,
     );
 
     final anchors = PrayerCalculator.getCycleAnchors(
@@ -44,6 +46,7 @@ class SuwayaTimeEngine {
       cityOffset,
       nextDayCityOffset: nextDayCityOffset,
       manualOffsets: manualOffsets,
+      offsetResolver: offsetResolver,
     );
 
     final distribution = SuwayaDistributor.getDistributionForMadhab(madhabType);
@@ -56,79 +59,112 @@ class SuwayaTimeEngine {
     );
   }
 
-  static AstroState calculateCurrentState(SuwayaDay day, DateTime now) {
+  static AstroState calculateCurrentState(
+    SuwayaDay day,
+    DateTime now, {
+    DateTime? nowUtc,
+  }) {
     if (day.periods.isEmpty) return getFallbackState(now);
-    
+
     AstroPeriod currentPeriod;
+    final bool useUtcLookup =
+        nowUtc != null && day.periods.every((p) => p.startUtc != null && p.endUtc != null);
+
     try {
-      // 🌟 الفترات تُعامل كنطاق [start, end)
-      currentPeriod = day.periods.firstWhere((p) => 
-          (now.isAfter(p.startTime) || now.isAtSameMomentAs(p.startTime)) && now.isBefore(p.endTime));
+      if (useUtcLookup) {
+        currentPeriod = day.periods.firstWhere(
+          (p) =>
+              (nowUtc.isAfter(p.startUtc!) || nowUtc.isAtSameMomentAs(p.startUtc!)) &&
+              nowUtc.isBefore(p.endUtc!),
+        );
+      } else {
+        currentPeriod = day.periods.firstWhere(
+          (p) =>
+              (now.isAfter(p.startTime) || now.isAtSameMomentAs(p.startTime)) &&
+              now.isBefore(p.endTime),
+        );
+      }
     } catch (_) {
-      currentPeriod = now.isBefore(day.periods.first.startTime) ? day.periods.first : day.periods.last;
+      if (useUtcLookup) {
+        currentPeriod = nowUtc.isBefore(day.periods.first.startUtc!)
+            ? day.periods.first
+            : day.periods.last;
+      } else {
+        currentPeriod = now.isBefore(day.periods.first.startTime)
+            ? day.periods.first
+            : day.periods.last;
+      }
     }
 
     final totalMicroseconds = currentPeriod.totalDuration.inMicroseconds;
     if (totalMicroseconds <= 0) return getFallbackState(now);
-    
+
     int sCount = currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
     final suwayaDurationMicroseconds = totalMicroseconds / sCount;
-    
-    int elapsedMicroseconds = now.difference(currentPeriod.startTime).inMicroseconds;
-    if (elapsedMicroseconds < 0) elapsedMicroseconds = 0; 
-    
-    // 🌟 حساب رقم السويعة المحلي داخل الفترة الحالية
-    int currentLocalSuwaya = (elapsedMicroseconds / suwayaDurationMicroseconds).floor() + 1;
-    currentLocalSuwaya = currentLocalSuwaya.clamp(1, sCount); 
-    
-    // 🌟 حساب نسبة التقدم بدقة عالية جداً (0.0 إلى 0.9999) لتحريك المؤشر بسلاسة
-    double progress = (elapsedMicroseconds % suwayaDurationMicroseconds) / suwayaDurationMicroseconds;
+
+    int elapsedMicroseconds;
+    if (nowUtc != null && currentPeriod.startUtc != null) {
+      elapsedMicroseconds = nowUtc.difference(currentPeriod.startUtc!).inMicroseconds;
+    } else {
+      elapsedMicroseconds = now.difference(currentPeriod.startTime).inMicroseconds;
+    }
+    if (elapsedMicroseconds < 0) elapsedMicroseconds = 0;
+
+    int currentLocalSuwaya =
+        (elapsedMicroseconds / suwayaDurationMicroseconds).floor() + 1;
+    currentLocalSuwaya = currentLocalSuwaya.clamp(1, sCount);
+
+    double progress =
+        (elapsedMicroseconds % suwayaDurationMicroseconds) / suwayaDurationMicroseconds;
     progress = progress.clamp(0.0, 0.999999);
-    
-    // 🌟 حساب سرعة السويعة مقابل الزمن المدني
+
     final speedMultiplier = 3600 / (suwayaDurationMicroseconds / 1000000);
 
-    // 🌟 تحديد هل نحن في نطاق الليل أم النهار وحساب رقم السويعة (1 إلى 12)
     SuwayaPhase phase;
     int phaseSlotNumber = 0;
-    
-    final nightKeys = [PeriodKey.nightMaghribIsha, PeriodKey.nightIshaMidnight, PeriodKey.nightMidnightFajr, PeriodKey.nightFajrSunrise];
-    
+
+    final nightKeys = [
+      PeriodKey.nightMaghribIsha,
+      PeriodKey.nightIshaMidnight,
+      PeriodKey.nightMidnightFajr,
+      PeriodKey.nightFajrSunrise,
+    ];
+
     if (nightKeys.contains(currentPeriod.periodKey)) {
-       phase = SuwayaPhase.night;
-       for (var p in day.periods) {
-           if (p.periodKey == currentPeriod.periodKey) break;
-           phaseSlotNumber += p.suwayasCount;
-       }
+      phase = SuwayaPhase.night;
+      for (var p in day.periods) {
+        if (p.periodKey == currentPeriod.periodKey) break;
+        phaseSlotNumber += p.suwayasCount;
+      }
     } else {
-       phase = SuwayaPhase.day;
-       for (var p in day.periods) {
-           if (!nightKeys.contains(p.periodKey)) {
-               if (p.periodKey == currentPeriod.periodKey) break;
-               phaseSlotNumber += p.suwayasCount;
-           }
-       }
+      phase = SuwayaPhase.day;
+      for (var p in day.periods) {
+        if (!nightKeys.contains(p.periodKey)) {
+          if (p.periodKey == currentPeriod.periodKey) break;
+          phaseSlotNumber += p.suwayasCount;
+        }
+      }
     }
     phaseSlotNumber += currentLocalSuwaya;
 
-    // 🌟 توليد كائن التوقيت الدقيق الجديد
     final clockTime = SuwayaClockTime(
-       phase: phase,
-       phaseSlotNumber: phaseSlotNumber,
-       periodKey: currentPeriod.periodKey,
-       periodLocalSlotNumber: currentLocalSuwaya,
-       slotProgress: progress,
-       cycleStartDate: day.cycleAnchors.cycleStartMaghrib,
-       instant: now,
+      phase: phase,
+      phaseSlotNumber: phaseSlotNumber,
+      periodKey: currentPeriod.periodKey,
+      periodLocalSlotNumber: currentLocalSuwaya,
+      slotProgress: progress,
+      cycleStartDate: day.cycleAnchors.cycleStartMaghrib,
+      instant: nowUtc ?? now,
     );
 
     return AstroState(
-      virtualTime: now, 
-      periods: day.periods, 
-      currentPeriod: currentPeriod, 
-      currentSuwayaTime: clockTime, 
-      timeSpeedMultiplier: speedMultiplier, 
-      ibadatTimings: day.ibadatTimings, 
+      virtualTime: now,
+      instantUtc: nowUtc,
+      periods: day.periods,
+      currentPeriod: currentPeriod,
+      currentSuwayaTime: clockTime,
+      timeSpeedMultiplier: speedMultiplier,
+      ibadatTimings: day.ibadatTimings,
       cycleAnchors: day.cycleAnchors,
     );
   }

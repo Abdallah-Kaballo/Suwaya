@@ -11,19 +11,76 @@ enum PeriodKey {
 }
 
 class SuwayaCycleAnchors {
-  final DateTime cycleStartMaghrib, cycleIsha, sharIMidnight, cycleFajr, cycleSunrise, cycleDhuhr, cycleAsr, cycleEndMaghrib;
+  final DateTime cycleStartMaghrib,
+      cycleIsha,
+      sharIMidnight,
+      cycleFajr,
+      cycleSunrise,
+      cycleDhuhr,
+      cycleAsr,
+      cycleEndMaghrib;
+
+  // 🌟 اللحظات العالمية الحقيقية (UTC Instants) لضمان دقة المدد عبر التوقيت الصيفي
+  final DateTime? cycleStartMaghribUtc,
+      cycleIshaUtc,
+      sharIMidnightUtc,
+      cycleFajrUtc,
+      cycleSunriseUtc,
+      cycleDhuhrUtc,
+      cycleAsrUtc,
+      cycleEndMaghribUtc;
+
+  // 🌟 الغروب الفلكي الصافي (غير متأثر بالتعديل اليدوي لدقائق الأذان) لتحديد بداية التاريخ الهجري
+  final DateTime? calculatedStartSunset, calculatedEndSunset;
+  final DateTime? calculatedStartSunsetUtc, calculatedEndSunsetUtc;
 
   const SuwayaCycleAnchors({
-    required this.cycleStartMaghrib, required this.cycleIsha, required this.sharIMidnight,
-    required this.cycleFajr, required this.cycleSunrise, required this.cycleDhuhr,
-    required this.cycleAsr, required this.cycleEndMaghrib,
+    required this.cycleStartMaghrib,
+    required this.cycleIsha,
+    required this.sharIMidnight,
+    required this.cycleFajr,
+    required this.cycleSunrise,
+    required this.cycleDhuhr,
+    required this.cycleAsr,
+    required this.cycleEndMaghrib,
+    this.cycleStartMaghribUtc,
+    this.cycleIshaUtc,
+    this.sharIMidnightUtc,
+    this.cycleFajrUtc,
+    this.cycleSunriseUtc,
+    this.cycleDhuhrUtc,
+    this.cycleAsrUtc,
+    this.cycleEndMaghribUtc,
+    this.calculatedStartSunset,
+    this.calculatedEndSunset,
+    this.calculatedStartSunsetUtc,
+    this.calculatedEndSunsetUtc,
   });
 
   bool get isValidSequence {
-    return cycleStartMaghrib.isBefore(cycleIsha) && cycleIsha.isBefore(sharIMidnight) &&
-           sharIMidnight.isBefore(cycleFajr) && cycleFajr.isBefore(cycleSunrise) &&
-           cycleSunrise.isBefore(cycleDhuhr) && cycleDhuhr.isBefore(cycleAsr) &&
-           cycleAsr.isBefore(cycleEndMaghrib);
+    if (cycleStartMaghribUtc != null &&
+        cycleIshaUtc != null &&
+        sharIMidnightUtc != null &&
+        cycleFajrUtc != null &&
+        cycleSunriseUtc != null &&
+        cycleDhuhrUtc != null &&
+        cycleAsrUtc != null &&
+        cycleEndMaghribUtc != null) {
+      return cycleStartMaghribUtc!.isBefore(cycleIshaUtc!) &&
+          cycleIshaUtc!.isBefore(sharIMidnightUtc!) &&
+          sharIMidnightUtc!.isBefore(cycleFajrUtc!) &&
+          cycleFajrUtc!.isBefore(cycleSunriseUtc!) &&
+          cycleSunriseUtc!.isBefore(cycleDhuhrUtc!) &&
+          cycleDhuhrUtc!.isBefore(cycleAsrUtc!) &&
+          cycleAsrUtc!.isBefore(cycleEndMaghribUtc!);
+    }
+    return cycleStartMaghrib.isBefore(cycleIsha) &&
+        cycleIsha.isBefore(sharIMidnight) &&
+        sharIMidnight.isBefore(cycleFajr) &&
+        cycleFajr.isBefore(cycleSunrise) &&
+        cycleSunrise.isBefore(cycleDhuhr) &&
+        cycleDhuhr.isBefore(cycleAsr) &&
+        cycleAsr.isBefore(cycleEndMaghrib);
   }
 }
 
@@ -47,35 +104,69 @@ class SuwayaClockTime {
 }
 
 class AstroPeriod {
-  final int id; 
-  final PeriodKey periodKey; 
+  final int id;
+  final PeriodKey periodKey;
   final String nameKey;
   final DateTime startTime, endTime;
+  final DateTime? startUtc, endUtc; // 🌟 اللحظات الفعلية لحساب المدة الحقيقية
   final int suwayasCount, colorValue;
 
   const AstroPeriod({
-    required this.id, required this.periodKey, required this.nameKey,
-    required this.startTime, required this.endTime,
-    required this.suwayasCount, required this.colorValue,
+    required this.id,
+    required this.periodKey,
+    required this.nameKey,
+    required this.startTime,
+    required this.endTime,
+    this.startUtc,
+    this.endUtc,
+    required this.suwayasCount,
+    required this.colorValue,
   });
 
-  Duration get totalDuration => endTime.difference(startTime);
+  /// 🌟 المدة الحقيقية المنقضية بالثواني العالمية (لا تتشوه بتقديم أو تأخير التوقيت الصيفي)
+  Duration get totalDuration {
+    if (startUtc != null && endUtc != null) {
+      return endUtc!.difference(startUtc!);
+    }
+    return endTime.difference(startTime);
+  }
 }
 
 class NightPart {
   final String id, nameKey;
   final DateTime startTime, endTime;
+  final DateTime? startUtc, endUtc;
 
-  const NightPart({required this.id, required this.nameKey, required this.startTime, required this.endTime});
+  const NightPart({
+    required this.id,
+    required this.nameKey,
+    required this.startTime,
+    required this.endTime,
+    this.startUtc,
+    this.endUtc,
+  });
+
+  Duration get realDuration =>
+      (startUtc != null && endUtc != null)
+          ? endUtc!.difference(startUtc!)
+          : endTime.difference(startTime);
 }
 
 class IbadatTimings {
   final DateTime fajr, sunrise, dhuhr, asr, maghrib, isha, nextFajr;
+  final DateTime? calculatedSunset; // 🌟 الغروب الفلكي الصافي لبداية الليلة الهجرية
   final List<NightPart> nightParts;
 
   const IbadatTimings({
-    required this.fajr, required this.sunrise, required this.dhuhr, required this.asr,
-    required this.maghrib, required this.isha, required this.nextFajr, required this.nightParts,
+    required this.fajr,
+    required this.sunrise,
+    required this.dhuhr,
+    required this.asr,
+    required this.maghrib,
+    required this.isha,
+    required this.nextFajr,
+    this.calculatedSunset,
+    required this.nightParts,
   });
 }
 
@@ -89,17 +180,23 @@ class SuwayaDay {
 
 class AstroState {
   final DateTime virtualTime;
+  final DateTime? instantUtc; // 🌟 اللحظة العالمية الحقيقية
   final List<AstroPeriod> periods;
   final AstroPeriod currentPeriod;
-  final SuwayaClockTime currentSuwayaTime; 
+  final SuwayaClockTime currentSuwayaTime;
   final double timeSpeedMultiplier;
   final IbadatTimings ibadatTimings;
   final SuwayaCycleAnchors cycleAnchors;
 
   const AstroState({
-    required this.virtualTime, required this.periods, required this.currentPeriod,
-    required this.currentSuwayaTime, required this.timeSpeedMultiplier,
-    required this.ibadatTimings, required this.cycleAnchors,
+    required this.virtualTime,
+    this.instantUtc,
+    required this.periods,
+    required this.currentPeriod,
+    required this.currentSuwayaTime,
+    required this.timeSpeedMultiplier,
+    required this.ibadatTimings,
+    required this.cycleAnchors,
   });
 }
 

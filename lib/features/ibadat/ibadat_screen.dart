@@ -407,6 +407,7 @@ class IbadatScreen extends ConsumerWidget {
     return ValueListenableBuilder<DateTime>(
       valueListenable: virtualDateTimeNotifier,
       builder: (context, liveNow, _) {
+        final anchors = astroState.cycleAnchors;
         final mandatoryPrayers = [
           {
             'id': 'fajr',
@@ -435,18 +436,48 @@ class IbadatScreen extends ConsumerWidget {
           },
         ];
 
-        Map<String, dynamic> nextPrayer = mandatoryPrayers.first;
-        int minDiffSecs = 86400;
-        final int nowTotalSecs =
-            liveNow.hour * 3600 + liveNow.minute * 60 + liveNow.second;
+        // 🌟 حساب الصلاة القادمة بدقة عبر مقارنة كائنات DateTime الفعلية شاملة فجر الغد (nextFajr)
+        final candidatePrayers = [
+          ...mandatoryPrayers,
+          {
+            'id': 'fajr',
+            'name': 'periods.fajr'.tr(),
+            'time': ibadat.nextFajr,
+          },
+          {
+            'id': 'isha',
+            'name': 'prayers.isha'.tr(),
+            'time': anchors.cycleIsha,
+          },
+          {
+            'id': 'fajr',
+            'name': 'periods.fajr'.tr(),
+            'time': anchors.cycleFajr,
+          },
+          {
+            'id': 'dhuhr',
+            'name': 'periods.dhuhr'.tr(),
+            'time': anchors.cycleDhuhr,
+          },
+          {
+            'id': 'asr',
+            'name': 'periods.asr'.tr(),
+            'time': anchors.cycleAsr,
+          },
+          {
+            'id': 'maghrib',
+            'name': 'periods.maghrib'.tr(),
+            'time': anchors.cycleEndMaghrib,
+          },
+        ];
 
-        for (var p in mandatoryPrayers) {
+        Map<String, dynamic> nextPrayer = mandatoryPrayers.first;
+        int minDiffSecs = 86400 * 2;
+
+        for (var p in candidatePrayers) {
           final DateTime pTime = p['time'] as DateTime;
-          final int pTotalSecs =
-              pTime.hour * 3600 + pTime.minute * 60 + pTime.second;
-          int diffSecs = pTotalSecs - nowTotalSecs;
-          if (diffSecs <= 0) diffSecs += 86400;
-          if (diffSecs < minDiffSecs) {
+          final int diffSecs = pTime.difference(liveNow).inSeconds;
+          if (diffSecs > 0 && diffSecs < minDiffSecs) {
             minDiffSecs = diffSecs;
             nextPrayer = p;
           }
@@ -506,7 +537,7 @@ class IbadatScreen extends ConsumerWidget {
             'time': ibadat.fajr,
             'icon': LucideIcons.sunrise,
             'color': const Color(0xFF64B5F6),
-            'isNext': nextPrayer['time'] == ibadat.fajr,
+            'isNext': nextPrayer['id'] == 'fajr',
           },
           if (settings.showSunrise)
             {
@@ -523,7 +554,7 @@ class IbadatScreen extends ConsumerWidget {
             'time': ibadat.dhuhr,
             'icon': LucideIcons.sun_dim,
             'color': const Color(0xFFFFCA28),
-            'isNext': nextPrayer['time'] == ibadat.dhuhr,
+            'isNext': nextPrayer['id'] == 'dhuhr',
           },
           {
             'id': 'asr',
@@ -531,7 +562,7 @@ class IbadatScreen extends ConsumerWidget {
             'time': ibadat.asr,
             'icon': LucideIcons.cloud_sun,
             'color': const Color(0xFFFF9800),
-            'isNext': nextPrayer['time'] == ibadat.asr,
+            'isNext': nextPrayer['id'] == 'asr',
           },
           {
             'id': 'maghrib',
@@ -539,7 +570,7 @@ class IbadatScreen extends ConsumerWidget {
             'time': ibadat.maghrib,
             'icon': LucideIcons.sunset,
             'color': const Color(0xFFE53935),
-            'isNext': nextPrayer['time'] == ibadat.maghrib,
+            'isNext': nextPrayer['id'] == 'maghrib',
           },
           {
             'id': 'isha',
@@ -547,7 +578,7 @@ class IbadatScreen extends ConsumerWidget {
             'time': ibadat.isha,
             'icon': LucideIcons.moon,
             'color': const Color(0xFF1A237E),
-            'isNext': nextPrayer['time'] == ibadat.isha,
+            'isNext': nextPrayer['id'] == 'isha',
           },
         ];
 

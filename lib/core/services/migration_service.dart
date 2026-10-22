@@ -4,6 +4,7 @@ import '../repositories/task_repository.dart';
 import '../repositories/routine_repository.dart';
 import '../../models/task_model.dart';
 import '../../models/routine_model.dart';
+import '../repositories/settings_repository.dart';
 
 final migrationServiceProvider = Provider<MigrationService>((ref) {
   return MigrationService(ref);
@@ -30,7 +31,6 @@ enum V1LegacyPeriod {
   }
 }
 
-/// 🌟 تعريف فترات النظام الجديد (V2 - يبدأ من المغرب، 24 سويعة)
 enum V2AstroPeriod {
   maghrib(1, 1),
   isha(2, 4),
@@ -43,6 +43,13 @@ enum V2AstroPeriod {
   final int id;
   final int defaultMaxSuwayas;
   const V2AstroPeriod(this.id, this.defaultMaxSuwayas);
+
+  // 🌟 حساب الحد الأقصى للسويعات بناءً على المذهب الفقهي المختار
+  int maxSuwayasForMadhab({required bool isHanafi}) {
+    if (this == V2AstroPeriod.dhuhr) return isHanafi ? 4 : 3;
+    if (this == V2AstroPeriod.asr) return isHanafi ? 2 : 3;
+    return defaultMaxSuwayas;
+  }
 
   static V2AstroPeriod fromId(int id) {
     for (final p in V2AstroPeriod.values) {
@@ -60,8 +67,13 @@ class MigrationService {
   Future<void> runMigrationsIfNeeded() async {
     final taskRepo = _ref.read(taskRepositoryProvider);
     final routineRepo = _ref.read(routineRepositoryProvider);
+    final settingsRepo = _ref.read(settingsRepositoryProvider);
 
-    final allTasks = await taskRepo.getActiveTasks();
+    final settings = await settingsRepo.getSettings();
+    final bool isHanafi = settings.madhab.toLowerCase() == 'hanafi';
+
+    // 🌟 جلب جميع المهام لضمان عدم بقاء مهام قديمة على نموذج V1
+    final allTasks = await taskRepo.getAllTasks();
     final allRoutines = await routineRepo.getAllRoutines();
 
     bool needsRestart = false;
@@ -69,7 +81,7 @@ class MigrationService {
     for (var task in allTasks) {
       if (task.scheduleModelVersion < 2) {
         debugPrint('Migration: Upgrading Task ID ${task.id} to V2');
-        _migrateTaskToV2(task);
+        _migrateTaskToV2(task, isHanafi: isHanafi);
         await taskRepo.saveTask(task);
         needsRestart = true;
       }
@@ -78,7 +90,7 @@ class MigrationService {
     for (var routine in allRoutines) {
       if (routine.scheduleModelVersion < 2) {
         debugPrint('Migration: Upgrading Routine ID ${routine.id} to V2');
-        _migrateRoutineToV2(routine);
+        _migrateRoutineToV2(routine, isHanafi: isHanafi);
         await routineRepo.saveRoutine(routine);
         needsRestart = true;
       }
@@ -102,7 +114,7 @@ class MigrationService {
     };
   }
 
-  void _migrateTaskToV2(TaskModel task) {
+  void _migrateTaskToV2(TaskModel task, {required bool isHanafi}) {
     task.scheduleModelVersion = 2;
     task.migrationCount += 1;
 
@@ -110,7 +122,7 @@ class MigrationService {
 
     if (task.targetPeriodId != null && task.targetSuwayas.isNotEmpty) {
       final targetV2 = _mapV1PeriodToV2(task.targetPeriodId!);
-      final maxSuwayas = targetV2.defaultMaxSuwayas;
+      final maxSuwayas = targetV2.maxSuwayasForMadhab(isHanafi: isHanafi);
 
       task.targetPeriodId = targetV2.id;
       task.targetSuwayas = task.targetSuwayas
@@ -127,7 +139,7 @@ class MigrationService {
     }
   }
 
-  void _migrateRoutineToV2(RoutineModel routine) {
+  void _migrateRoutineToV2(RoutineModel routine, {required bool isHanafi}) {
     routine.scheduleModelVersion = 2;
 
     if (!routine.isAstroTime) return;
@@ -136,15 +148,18 @@ class MigrationService {
       final newStartP = _mapV1PeriodToV2(routine.startPeriodId!);
       final newEndP = _mapV1PeriodToV2(routine.endPeriodId!);
 
+      final maxStart = newStartP.maxSuwayasForMadhab(isHanafi: isHanafi);
+      final maxEnd = newEndP.maxSuwayasForMadhab(isHanafi: isHanafi);
+
       routine.startPeriodId = newStartP.id;
-      routine.startSuwaya = (((routine.startSuwaya ?? 1) + 1) ~/ 2)
-          .clamp(1, newStartP.defaultMaxSuwayas);
+      routine.startSuwaya =
+          (((routine.startSuwaya ?? 1) + 1) ~/ 2).clamp(1, maxStart);
       routine.startVirtualMinute =
           ((routine.startVirtualMinute ?? 0) * 2).clamp(0, 59);
 
       routine.endPeriodId = newEndP.id;
-      routine.endSuwaya = (((routine.endSuwaya ?? 1) + 1) ~/ 2)
-          .clamp(1, newEndP.defaultMaxSuwayas);
+      routine.endSuwaya =
+          (((routine.endSuwaya ?? 1) + 1) ~/ 2).clamp(1, maxEnd);
       routine.endVirtualMinute =
           ((routine.endVirtualMinute ?? 0) * 2).clamp(0, 59);
     } else {

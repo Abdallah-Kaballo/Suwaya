@@ -29,7 +29,7 @@ void main() {
     });
 
     test('يستخدم ترقيم السويعات كخيار افتراضي', () {
-      expect(SettingsModel().dialPinMode, equals('suwaya48'));
+      expect(SettingsModel().dialPinMode, equals('suwaya24'));
     });
   });
 }

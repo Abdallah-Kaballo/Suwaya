@@ -37,7 +37,7 @@ class RoutinesRingPainter extends CustomPainter {
       innerRadius + (width / 2),
       Paint()
         ..color = isDark
-            ? const Color(0xFF090B10).withValues(alpha: 0.82)
+            ? const Color(0xFF121316).withValues(alpha: 0.82)
             : const Color(0xFFE2E8F0).withValues(alpha: 0.65)
         ..style = PaintingStyle.stroke
         ..strokeWidth = width,
@@ -470,7 +470,7 @@ class OuterRingPainter extends CustomPainter {
     required this.dayEnd,
     required this.isDark,
     required this.design,
-    this.pinMode = 'suwaya48',
+    this.pinMode = 'suwaya24',
   });
 
   @override

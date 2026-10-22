@@ -18,7 +18,7 @@ class AstroNotifier extends Notifier<AstroState> {
   int _lastPeriodId = -1;
   int _lastSuwaya = -1;
 
-  /// 🌟 حساب فرق التوقيت (UTC Offset) لموقع وتاريخ محددين مع مراعاة التوقيت الصيفي والشتوي (DST)
+  /// 🌟 حساب فرق التوقيت (UTC Offset) للحظة الزمنية الدقيقة بدلاً من تثبيتها عند 12 ظهراً
   Duration _getUtcOffsetForLocation(
     SavedLocation? loc, [
     DateTime? referenceDate,
@@ -32,7 +32,9 @@ class AstroNotifier extends Notifier<AstroState> {
             referenceDate.year,
             referenceDate.month,
             referenceDate.day,
-            12,
+            referenceDate.hour,
+            referenceDate.minute,
+            referenceDate.second,
           );
           return targetTzTime.timeZoneOffset;
         }
@@ -45,7 +47,9 @@ class AstroNotifier extends Notifier<AstroState> {
         referenceDate.year,
         referenceDate.month,
         referenceDate.day,
-        12,
+        referenceDate.hour,
+        referenceDate.minute,
+        referenceDate.second,
       ).timeZoneOffset;
     }
     return DateTime.now().timeZoneOffset;
@@ -165,8 +169,13 @@ class AstroNotifier extends Notifier<AstroState> {
             settings.customFajrAngle,
             settings.customIshaAngle,
             cycleOffset,
-            nextDayCityOffset: nextDayOffset, // 🌟 معالجة عبور التوقيت الصيفي/الشتوي ليلاً
+            nextDayCityOffset: nextDayOffset,
             manualOffsets: manualOffsetsMap,
+            offsetResolver: (utcInstant) => TimezoneResolver.resolveForInstant(
+              utcInstant,
+              timezoneId: loc?.timezone,
+              fallbackOffset: cycleOffset,
+            ).utcOffset,
           );
           if (_dayCache.length > 3) _dayCache.clear();
           _dayCache[cacheKey] = newDay;
@@ -175,8 +184,11 @@ class AstroNotifier extends Notifier<AstroState> {
       }
 
       final generatedDay = getOrGenerateDay(dateToGenerate);
-      final initialState =
-          SuwayaTimeEngine.calculateCurrentState(generatedDay, cityNow);
+      final initialState = SuwayaTimeEngine.calculateCurrentState(
+        generatedDay,
+        cityNow,
+        nowUtc: DateTime.now().toUtc(),
+      );
 
       _lastPeriodId = initialState.currentPeriod.id;
       _lastSuwaya = initialState.currentSuwayaTime.periodLocalSlotNumber;

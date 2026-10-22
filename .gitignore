@@ -46,11 +46,11 @@ app.*.map.json
 
 
 
-# --- Security & Signing Keys ---
-*.jks
-*.keystore
-android/key.properties
-android/local.properties
+# Signing credentials & local config
+key.properties
+local.properties
+**/*.jks
+**/*.keystore
 
 # --- JVM Crash Logs & Kotlin Sessions ---
 android/hs_err_pid*.log

@@ -81,6 +81,13 @@ class NotificationScheduler {
   final NotificationService _service;
   bool _isScheduling = false;
 
+  // 🌟 حفظ أحدث طلب جدولة يصل أثناء انشغال المجدول لمنع إسقاط التعديلات
+  bool _hasPendingSchedule = false;
+  SettingsModel? _pendingSettings;
+  List<TaskModel>? _pendingTasks;
+  List<RoutineModel>? _pendingRoutines;
+  bool _pendingForceRefresh = false;
+
   String _lastScheduleHash = '';
   Set<int> _previouslyScheduledNormalIds = {};
   int _retryCount = 0;
@@ -148,7 +155,11 @@ class NotificationScheduler {
     return cleanTime.add(Duration(seconds: offsetSeconds));
   }
 
-  Duration _getUtcOffsetForDate(SavedLocation? loc, DateTime targetDate) {
+  Duration _getUtcOffsetForDate(
+    SavedLocation? loc,
+    DateTime targetDate, {
+    int hour = 12,
+  }) {
     if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
       try {
         final location = tz.getLocation(loc.timezone!);
@@ -157,7 +168,7 @@ class NotificationScheduler {
           targetDate.year,
           targetDate.month,
           targetDate.day,
-          12,
+          hour,
         );
         return targetInTz.timeZoneOffset;
       } catch (_) {}
@@ -166,7 +177,7 @@ class NotificationScheduler {
       targetDate.year,
       targetDate.month,
       targetDate.day,
-      12,
+      hour,
     ).timeZoneOffset;
   }
 
@@ -246,7 +257,14 @@ class NotificationScheduler {
     List<RoutineModel> routines, {
     bool forceRefresh = false,
   }) async {
-    if (_isScheduling) return;
+    if (_isScheduling) {
+      _hasPendingSchedule = true;
+      _pendingSettings = settings.clone();
+      _pendingTasks = List<TaskModel>.from(allTasks);
+      _pendingRoutines = List<RoutineModel>.from(routines);
+      _pendingForceRefresh = _pendingForceRefresh || forceRefresh;
+      return;
+    }
 
     final loc = settings.activeLocation;
     if (loc == null) {
@@ -1148,15 +1166,20 @@ class NotificationScheduler {
         }
       }
 
-      // تنظيف المنبهات القديمة مع عدم المساس بالمنبه الذي يرن حالياً إن وجد
+      // تنظيف المنبهات القديمة
       for (var alarm in activeAlarms) {
         if (!requiredAlarmIds.contains(alarm.id)) {
           await Alarm.stop(alarm.id);
         }
       }
 
-      final toCancelNormal =
-          _previouslyScheduledNormalIds.difference(requiredNormalIds);
+      // 🌟 دمج الإشعارات المعلقة فعلياً في النظام مع الذاكرة لضمان حذف الإشعارات القديمة حتى بعد إعادة تشغيل التطبيق
+      final osPendingNormalIds = await _service.getPendingNormalNotificationIds();
+      final knownNormalIds = {
+        ..._previouslyScheduledNormalIds,
+        ...osPendingNormalIds,
+      };
+      final toCancelNormal = knownNormalIds.difference(requiredNormalIds);
       for (var id in toCancelNormal) {
         try {
           await _service.cancel(id);
@@ -1165,7 +1188,6 @@ class NotificationScheduler {
 
       _previouslyScheduledNormalIds = requiredNormalIds;
 
-      // 🌟 لا نثبّت البصمة إلا إذا نجحت جميع عمليات الجدولة؛ وعند الفشل الجزئي نعيد المحاولة بشكل مضبوط
       if (!hadSchedulingFailures) {
         _lastScheduleHash = currentHash;
         _retryCount = 0;
@@ -1177,10 +1199,41 @@ class NotificationScheduler {
           scheduleAhead(settings, allTasks, routines, forceRefresh: true);
         });
       }
-    } catch (e) {
-      debugPrint('🚨 NotificationScheduler exception: $e');
+    } catch (e, stackTrace) {
+      debugPrint('🚨 NotificationScheduler exception: $e\n$stackTrace');
+      // 🌟 إعادة المحاولة تلقائياً عند فشل الحساب أو استدعاء خدمات النظام
+      if (_retryCount < 3) {
+        _retryCount++;
+        _retryTimer?.cancel();
+        _retryTimer = Timer(Duration(seconds: 5 * _retryCount), () {
+          scheduleAhead(settings, allTasks, routines, forceRefresh: true);
+        });
+      }
     } finally {
       _isScheduling = false;
+      // 🌟 تنفيذ أحدث طلب جدولة معلق فور انتهاء العملية الجارية
+      if (_hasPendingSchedule &&
+          _pendingSettings != null &&
+          _pendingTasks != null &&
+          _pendingRoutines != null) {
+        final nextSettings = _pendingSettings!;
+        final nextTasks = _pendingTasks!;
+        final nextRoutines = _pendingRoutines!;
+        final nextForce = _pendingForceRefresh;
+
+        _hasPendingSchedule = false;
+        _pendingSettings = null;
+        _pendingTasks = null;
+        _pendingRoutines = null;
+        _pendingForceRefresh = false;
+
+        Future.microtask(() => scheduleAhead(
+              nextSettings,
+              nextTasks,
+              nextRoutines,
+              forceRefresh: nextForce,
+            ));
+      }
     }
   }
 }

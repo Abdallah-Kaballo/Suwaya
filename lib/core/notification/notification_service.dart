@@ -157,6 +157,21 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.cancel(id);
   }
 
+  Future<Set<int>> getPendingNormalNotificationIds() async {
+    try {
+      final pending =
+          await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      return pending
+          .map((req) => req.id)
+          .where((id) =>
+              id != _pomodoroLiveNotificationId &&
+              id != _pomodoroChimeNotificationId)
+          .toSet();
+    } catch (_) {
+      return {};
+    }
+  }
+
   Future<void> _safeZonedSchedule(
     int id,
     String title,

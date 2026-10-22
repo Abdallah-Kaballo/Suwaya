@@ -36,6 +36,10 @@ class TaskRepository {
         .findAll();
   }
 
+  Future<List<TaskModel>> getAllTasks() async {
+    return await _isar.taskModels.where().findAll();
+  }
+
   Future<void> saveTask(TaskModel task) async {
     await _isar.writeTxn(() async {
       await _isar.taskModels.put(task);

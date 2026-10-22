@@ -103,6 +103,7 @@ class PrayerCalculator {
     Duration cityOffset, {
     Duration? nextDayCityOffset,
     Map<PrayerKey, int>? manualOffsets,
+    Duration Function(DateTime utcInstant)? offsetResolver,
   }) {
     final coordinates = Coordinates(lat, lng);
     final params = _getParams(
@@ -128,50 +129,52 @@ class PrayerCalculator {
       }
     }
 
-    // 🌟 استخدام إزاحة اليوم التالي لـ nextFajr لمعالجة عبور التوقيت الصيفي/الشتوي في منتصف الليل
     final effectiveNextOffset = nextDayCityOffset ?? cityOffset;
 
-    final fajr = _applyOffset(
-      today.fajr.toUtc().add(cityOffset),
-      PrayerKey.fajr,
-      allowedManualOffsets,
-    );
-    final sunrise = today.sunrise.toUtc().add(cityOffset);
-    final dhuhr = _applyOffset(
-      today.dhuhr.toUtc().add(cityOffset),
-      PrayerKey.dhuhr,
-      allowedManualOffsets,
-    );
-    final asr = _applyOffset(
-      today.asr.toUtc().add(cityOffset),
-      PrayerKey.asr,
-      allowedManualOffsets,
-    );
-    final maghrib = _applyOffset(
-      today.maghrib.toUtc().add(cityOffset),
-      PrayerKey.maghrib,
-      allowedManualOffsets,
-    );
-    final isha = _applyOffset(
-      today.isha.toUtc().add(cityOffset),
-      PrayerKey.isha,
-      allowedManualOffsets,
-    );
-    final nextFajr = _applyOffset(
-      tomorrow.fajr.toUtc().add(effectiveNextOffset),
-      PrayerKey.fajr,
-      allowedManualOffsets,
-    );
+    // 🌟 حساب اللحظات العالمية الفعلية (UTC Instants) أولاً
+    final rawSunsetUtc = today.maghrib.toUtc();
+    final fajrUtc = _applyOffset(today.fajr.toUtc(), PrayerKey.fajr, allowedManualOffsets);
+    final sunriseUtc = today.sunrise.toUtc();
+    final dhuhrUtc = _applyOffset(today.dhuhr.toUtc(), PrayerKey.dhuhr, allowedManualOffsets);
+    final asrUtc = _applyOffset(today.asr.toUtc(), PrayerKey.asr, allowedManualOffsets);
+    final maghribUtc = _applyOffset(rawSunsetUtc, PrayerKey.maghrib, allowedManualOffsets);
+    final ishaUtc = _applyOffset(today.isha.toUtc(), PrayerKey.isha, allowedManualOffsets);
+    final nextFajrUtc = _applyOffset(tomorrow.fajr.toUtc(), PrayerKey.fajr, allowedManualOffsets);
+
+    DateTime toEveningWall(DateTime utc) =>
+        utc.add(offsetResolver != null ? offsetResolver(utc) : cityOffset);
+    DateTime toNextDayWall(DateTime utc) =>
+        utc.add(offsetResolver != null ? offsetResolver(utc) : effectiveNextOffset);
+
+    // 🌟 دالة تحويل ذكية لأجزاء الليل تراعي لحظة عبور التوقيت الصيفي
+    DateTime toNightWall(DateTime utc) {
+      if (offsetResolver != null) return utc.add(offsetResolver(utc));
+      // عند عدم تمرير محلل منطقة زمنية، نستخدم إزاحة المساء قبل منتصف الليل وإزاحة الصباح بعده
+      final halfNightUtc = maghribUtc.add(nextFajrUtc.difference(maghribUtc) ~/ 2);
+      return utc.isBefore(halfNightUtc)
+          ? utc.add(cityOffset)
+          : utc.add(effectiveNextOffset);
+    }
+
+    final maghribWall = toEveningWall(maghribUtc);
+    final nextFajrWall = toNextDayWall(nextFajrUtc);
 
     return IbadatTimings(
-      fajr: fajr,
-      sunrise: sunrise,
-      dhuhr: dhuhr,
-      asr: asr,
-      maghrib: maghrib,
-      isha: isha,
-      nextFajr: nextFajr,
-      nightParts: NightDivision.calculateNightParts(maghrib, nextFajr),
+      fajr: toEveningWall(fajrUtc),
+      sunrise: toEveningWall(sunriseUtc),
+      dhuhr: toEveningWall(dhuhrUtc),
+      asr: toEveningWall(asrUtc),
+      maghrib: maghribWall,
+      isha: toEveningWall(ishaUtc),
+      nextFajr: nextFajrWall,
+      calculatedSunset: toEveningWall(rawSunsetUtc),
+      nightParts: NightDivision.calculateNightParts(
+        maghribWall,
+        nextFajrWall,
+        maghribUtc: maghribUtc,
+        nextFajrUtc: nextFajrUtc,
+        toWallClock: toNightWall,
+      ),
     );
   }
 
@@ -187,6 +190,7 @@ class PrayerCalculator {
     Duration cityOffset, {
     Duration? nextDayCityOffset,
     Map<PrayerKey, int>? manualOffsets,
+    Duration Function(DateTime utcInstant)? offsetResolver,
   }) {
     final coordinates = Coordinates(lat, lng);
     final params = _getParams(
@@ -217,57 +221,78 @@ class PrayerCalculator {
       }
     }
 
-    // 🌟 تطبيق cityOffset على أحداث المساء (dayD) وتطبيق effectiveNextOffset على أحداث اليوم التالي (dayDPlus1)
     final effectiveNextOffset = nextDayCityOffset ?? cityOffset;
 
-    final cycleStartMaghrib = _applyOffset(
-      dayD.maghrib.toUtc().add(cityOffset),
+    // 🌟 1. حساب جميع المراسي بالتوقيت العالمي الفعلي (UTC)
+    final rawStartSunsetUtc = dayD.maghrib.toUtc();
+    final rawEndSunsetUtc = dayDPlus1.maghrib.toUtc();
+
+    final cycleStartMaghribUtc = _applyOffset(
+      rawStartSunsetUtc,
       PrayerKey.maghrib,
       allowedManualOffsets,
     );
-    final cycleIsha = _applyOffset(
-      dayD.isha.toUtc().add(cityOffset),
+    final cycleIshaUtc = _applyOffset(
+      dayD.isha.toUtc(),
       PrayerKey.isha,
       allowedManualOffsets,
     );
-
-    final cycleFajr = _applyOffset(
-      dayDPlus1.fajr.toUtc().add(effectiveNextOffset),
+    final cycleFajrUtc = _applyOffset(
+      dayDPlus1.fajr.toUtc(),
       PrayerKey.fajr,
       allowedManualOffsets,
     );
-    final cycleSunrise = dayDPlus1.sunrise.toUtc().add(effectiveNextOffset);
-    final cycleDhuhr = _applyOffset(
-      dayDPlus1.dhuhr.toUtc().add(effectiveNextOffset),
+    final cycleSunriseUtc = dayDPlus1.sunrise.toUtc();
+    final cycleDhuhrUtc = _applyOffset(
+      dayDPlus1.dhuhr.toUtc(),
       PrayerKey.dhuhr,
       allowedManualOffsets,
     );
-    final cycleAsr = _applyOffset(
-      dayDPlus1.asr.toUtc().add(effectiveNextOffset),
+    final cycleAsrUtc = _applyOffset(
+      dayDPlus1.asr.toUtc(),
       PrayerKey.asr,
       allowedManualOffsets,
     );
-    final cycleEndMaghrib = _applyOffset(
-      dayDPlus1.maghrib.toUtc().add(effectiveNextOffset),
+    final cycleEndMaghribUtc = _applyOffset(
+      rawEndSunsetUtc,
       PrayerKey.maghrib,
       allowedManualOffsets,
     );
 
-    final nightMicroseconds =
-        cycleFajr.difference(cycleStartMaghrib).inMicroseconds;
-    final sharIMidnight = cycleStartMaghrib.add(
-      Duration(microseconds: nightMicroseconds ~/ 2),
+    // 🌟 2. حساب منتصف الليل الشرعي بالزمن العالمي الفعلي (وليس بطرح ساعات الحائط)
+    final realNightMicroseconds =
+        cycleFajrUtc.difference(cycleStartMaghribUtc).inMicroseconds;
+    final sharIMidnightUtc = cycleStartMaghribUtc.add(
+      Duration(microseconds: realNightMicroseconds ~/ 2),
     );
 
+    // 🌟 3. إسقاط اللحظات العالمية على التوقيت المحلي للمدينة
+    DateTime toEveningWall(DateTime utc) =>
+        utc.add(offsetResolver != null ? offsetResolver(utc) : cityOffset);
+    DateTime toNextDayWall(DateTime utc) =>
+        utc.add(offsetResolver != null ? offsetResolver(utc) : effectiveNextOffset);
+
     return SuwayaCycleAnchors(
-      cycleStartMaghrib: cycleStartMaghrib,
-      cycleIsha: cycleIsha,
-      sharIMidnight: sharIMidnight,
-      cycleFajr: cycleFajr,
-      cycleSunrise: cycleSunrise,
-      cycleDhuhr: cycleDhuhr,
-      cycleAsr: cycleAsr,
-      cycleEndMaghrib: cycleEndMaghrib,
+      cycleStartMaghrib: toEveningWall(cycleStartMaghribUtc),
+      cycleIsha: toEveningWall(cycleIshaUtc),
+      sharIMidnight: toEveningWall(sharIMidnightUtc),
+      cycleFajr: toNextDayWall(cycleFajrUtc),
+      cycleSunrise: toNextDayWall(cycleSunriseUtc),
+      cycleDhuhr: toNextDayWall(cycleDhuhrUtc),
+      cycleAsr: toNextDayWall(cycleAsrUtc),
+      cycleEndMaghrib: toNextDayWall(cycleEndMaghribUtc),
+      cycleStartMaghribUtc: cycleStartMaghribUtc,
+      cycleIshaUtc: cycleIshaUtc,
+      sharIMidnightUtc: sharIMidnightUtc,
+      cycleFajrUtc: cycleFajrUtc,
+      cycleSunriseUtc: cycleSunriseUtc,
+      cycleDhuhrUtc: cycleDhuhrUtc,
+      cycleAsrUtc: cycleAsrUtc,
+      cycleEndMaghribUtc: cycleEndMaghribUtc,
+      calculatedStartSunset: toEveningWall(rawStartSunsetUtc),
+      calculatedEndSunset: toNextDayWall(rawEndSunsetUtc),
+      calculatedStartSunsetUtc: rawStartSunsetUtc,
+      calculatedEndSunsetUtc: rawEndSunsetUtc,
     );
   }
 }

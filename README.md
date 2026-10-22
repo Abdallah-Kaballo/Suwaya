@@ -84,7 +84,7 @@ The app caches generated astronomical cycles. Its smart state timer wakes at the
 
 ## Suwaya Time Reference
 
-For the complete calculation model, period boundaries, 24-Suwaya distribution, virtual-time mapping, timezone behavior, edge cases, and test invariants, see [Suwaya-Time.md](https://www.google.com/search?q=Suwaya-Time.md).
+For the complete calculation model, period boundaries, 24-Suwaya distribution, virtual-time mapping, timezone behavior, edge cases, and test invariants, see [Suwaya-Time.md](Suwaya-Time.md).
 
 ## Current Features
 
@@ -224,7 +224,7 @@ Requirements:
 
 
 ```bash
-git clone [https://github.com/Abdallah-Kaballo/Suwaya.git](https://github.com/Abdallah-Kaballo/Suwaya.git)
+git clone https://github.com/Abdallah-Kaballo/Suwaya.git
 cd Suwaya
 flutter pub get
 flutter run
@@ -265,22 +265,15 @@ Supported locales are registered in `lib/core/localization/app_locales.dart`. Tr
 
 ## Data, Privacy, and Permissions
 
-Tasks, routines, settings, and saved locations are stored locally in Isar. Location is used to calculate prayer and astronomical times. Read [docs/privacy.md](https://www.google.com/search?q=docs/privacy.md) for the privacy policy.
+Tasks, routines, settings, and saved locations are stored locally in Isar. Optional supporter tiers use Google Play Billing and RevenueCat (anonymous customer ID and entitlement status). Read [docs/privacy.md](docs/privacy.md) for the full privacy policy.
 
 | Permission | Purpose |
 | --- | --- |
-| Location | Location-aware calculations and saved places
-
- |
-| Notifications | Prayer, task, and routine reminders
-
- |
-| Alarms | Full-screen alarm scheduling and ringing
-
- |
-| Internet | Dynamic FAQ/Privacy updates from GitHub; no cloud sync is configured
-
- |
+| Location | On-device astronomical calculations and saved places |
+| Notifications | Prayer, task, and routine reminders |
+| Alarms | Full-screen alarm scheduling and ringing |
+| Billing | Optional supporter badges via Google Play & RevenueCat |
+| Internet | Dynamic FAQ/Privacy updates from GitHub and store purchase verification |
 
 ## Known Limitations
 
@@ -316,4 +309,4 @@ Do not commit signing credentials, private API keys, passwords, or personal acce
 
 ## License
 
-Suwaya is licensed under the GNU General Public License v3.0. See [LICENSE](https://www.google.com/search?q=LICENSE).
+Suwaya is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE).
