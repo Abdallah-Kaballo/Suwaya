@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:suwaya/models/settings_model.dart';
 import '../repositories/task_repository.dart';
 import '../repositories/routine_repository.dart';
 import '../../models/task_model.dart';
@@ -72,7 +73,11 @@ class MigrationService {
     final settings = await settingsRepo.getSettings();
     final bool isHanafi = settings.madhab.toLowerCase() == 'hanafi';
 
-    // 🌟 جلب جميع المهام لضمان عدم بقاء مهام قديمة على نموذج V1
+    // 🌟 توحيد معرفات الصلوات في periodConfigs إلى المعرفات النصية الصريحة ومنع التكرار
+    if (_normalizeSettingsPeriodConfigs(settings)) {
+      await settingsRepo.saveSettings(settings);
+    }
+
     final allTasks = await taskRepo.getAllTasks();
     final allRoutines = await routineRepo.getAllRoutines();
 
@@ -99,6 +104,30 @@ class MigrationService {
     if (needsRestart) {
       debugPrint('Migration Completed Successfully.');
     }
+  }
+
+  bool _normalizeSettingsPeriodConfigs(SettingsModel settings) {
+    bool changed = false;
+    final Map<String, PeriodConfig> deduplicated = {};
+
+    for (final config in settings.periodConfigs) {
+      final rawId = config.periodId;
+      if (rawId == null || rawId.isEmpty) continue;
+      final normalizedId = SettingsModel.normalizePeriodId(rawId);
+      if (normalizedId != rawId) {
+        config.periodId = normalizedId;
+        changed = true;
+      }
+      if (deduplicated.containsKey(normalizedId)) {
+        changed = true;
+      }
+      deduplicated[normalizedId] = config;
+    }
+
+    if (changed) {
+      settings.periodConfigs = deduplicated.values.toList();
+    }
+    return changed;
   }
 
   V2AstroPeriod _mapV1PeriodToV2(int v1PeriodId) {

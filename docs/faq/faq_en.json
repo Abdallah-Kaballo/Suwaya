@@ -58,14 +58,5 @@
   {
     "q": "Where is my data stored and what is Suwaya's privacy policy?",
     "a": "All your tasks, habits, routines, settings, and saved locations are stored locally on your device inside a fast local database (Isar). Suwaya has no cloud servers and does not collect, track, or share any personal or advertising data."
-  },
-  {
-    "title": "3. In-App Purchases (Store Billing & RevenueCat)",
-    "content": "If you choose to purchase or restore a supporter badge, Suwaya uses platform store billing and the RevenueCat SDK to verify your supporter entitlement using an anonymous app user ID and purchase receipt status. Sensitive payment information is processed exclusively by the platform store and is never accessed or stored by Suwaya."
-  },
-  {
-    "title": "6. Third-Party Libraries and Network Access",
-    "content": "Suwaya uses open-source Flutter libraries for local persistence, astronomical calculations, and geolocation. Network requests are strictly limited to fetching documentation updates (FAQ and Privacy Policy) from the official GitHub repository, checking for app updates, and verifying supporter purchases via RevenueCat."
   }
-
 ]

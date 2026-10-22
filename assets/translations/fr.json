@@ -204,7 +204,7 @@
     "auto_rotate": "Rotation Automatique",
     "auto_rotate_desc": "Fixer l'aiguille en haut et faire tourner le cadran avec le temps.",
     "dial_pin_mode": "Mode des broches du cadran",
-    "dial_pin_48": "Suwayas · 48 broches",
+    "dial_pin_12": "Suwayas · 24 broches",
     "dial_pin_24": "Heure civile · 24 broches",
     "general": "Général",
     "app_language": "Langue de l'Application",

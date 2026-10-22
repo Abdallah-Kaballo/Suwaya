@@ -568,7 +568,7 @@ class NotificationScheduler {
                   }
                 } else if (alertLevel == 1) {
                   requiredNormalIds.add(notificationId);
-                  await _service.scheduleNormalNotification(
+                  final ok = await _service.scheduleNormalNotification(
                     id: notificationId,
                     title: qiyamTitle,
                     body: 'notifications.qiyam_short'.tr(),
@@ -576,6 +576,7 @@ class NotificationScheduler {
                     playSound: true,
                     enableVibration: true,
                   );
+                  if (!ok) hadSchedulingFailures = true;
                 }
               }
             }
@@ -603,6 +604,11 @@ class NotificationScheduler {
                 period: p,
                 localSuwaya: routine.startSuwaya ?? 1,
                 virtualMinute: routine.startVirtualMinute ?? 0,
+                toWallClock: (utc) => TimezoneResolver.toWallClock(
+                  utc,
+                  timezoneId: loc.timezone,
+                  fallbackOffset: weekCityOffsets[index],
+                ),
               );
             } catch (_) {}
           } else if (!routine.isAstroTime &&
@@ -707,7 +713,7 @@ class NotificationScheduler {
               }
             } else if (routine.alertLevel == 1) {
               requiredNormalIds.add(routineNotifId);
-              await _service.scheduleNormalNotification(
+              final ok = await _service.scheduleNormalNotification(
                 id: routineNotifId,
                 title: rTitle,
                 body: rBody,
@@ -715,6 +721,7 @@ class NotificationScheduler {
                 playSound: true,
                 enableVibration: true,
               );
+              if (!ok) hadSchedulingFailures = true;
             }
           }
         }
@@ -776,7 +783,7 @@ class NotificationScheduler {
                   toWallClock: (utc) => TimezoneResolver.toWallClock(
                     utc,
                     timezoneId: loc.timezone,
-                    fallbackOffset: todayOffset,
+                    fallbackOffset: weekCityOffsets[index],
                   ),
                 );
 
@@ -877,14 +884,15 @@ class NotificationScheduler {
                     }
                   } else {
                     requiredNormalIds.add(taskNotifId);
-                    await _service.scheduleNormalNotification(
+                    final ok = await _service.scheduleNormalNotification(
                       id: taskNotifId,
                       title: notifTitle,
-                      body: timeText,
+                      body: timeText, // (أو civilStr في القسم 4.ب)
                       scheduledTime: rawDeviceTime,
                       playSound: task.notifyMode,
                       enableVibration: task.vibrateMode,
                     );
+                    if (!ok) hadSchedulingFailures = true;
                   }
                 }
               }

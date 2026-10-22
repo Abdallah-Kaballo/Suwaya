@@ -195,6 +195,7 @@ class PeriodRingPainter extends CustomPainter {
   final String langCode;
   final DialDesign design;
   final int? highlightedPeriodId;
+  final double totalRotation;
 
   PeriodRingPainter({
     required this.periods,
@@ -205,7 +206,34 @@ class PeriodRingPainter extends CustomPainter {
     required this.langCode,
     required this.design,
     this.highlightedPeriodId,
+    this.totalRotation = 0.0,
   });
+
+  int _computeFlipMask() {
+    int mask = 0;
+    int bit = 0;
+    for (final period in periods) {
+      final startAngle = timeToAngle(period.startTime, dayStart, dayEnd);
+      final endAngle = timeToAngle(period.endTime, dayStart, dayEnd);
+      double sweepAngle = endAngle - startAngle;
+      if (sweepAngle <= 0) sweepAngle += 2 * pi;
+
+      if (period.id == 3 && period.suwayasCount == 6) {
+        final suwayaAngle = sweepAngle / 6;
+        final mid1 = startAngle + suwayaAngle;
+        final mid2 = startAngle + suwayaAngle * 4;
+        if (sin(mid1 + totalRotation) > 0) mask |= (1 << bit);
+        bit++;
+        if (sin(mid2 + totalRotation) > 0) mask |= (1 << bit);
+        bit++;
+      } else {
+        final mid = startAngle + (sweepAngle / 2);
+        if (sin(mid + totalRotation) > 0) mask |= (1 << bit);
+        bit++;
+      }
+    }
+    return mask;
+  }
 
   void _drawArcSegment(
     Canvas canvas,
@@ -274,9 +302,9 @@ class PeriodRingPainter extends CustomPainter {
       center.dy + drawRadius * sin(middleAngle),
     );
 
-    // 🌟 تعديل اتجاه النص في النصف السفلي من القرص فلا يظهر مقلوباً رأساً على عقب
+    // 🌟 قلب النص تلقائياً بناءً على زاويته الفعلية على الشاشة أثناء التدوير
     double textRotation = middleAngle + pi / 2;
-    if (sin(middleAngle) > 0) {
+    if (sin(middleAngle + totalRotation) > 0) {
       textRotation += pi;
     }
     canvas.rotate(textRotation);
@@ -349,12 +377,9 @@ class PeriodRingPainter extends CustomPainter {
         );
       }
 
-      // 🌟 الفترة 3 (النصف الثاني من الليل - 6 سويعات):
-      // تقسيم نظيف بكامل عرض الحلقة بدون خط قسمة أفقي: (السدس الرابع = سويعتان) + (الثلث الأخير = 4 سويعات)
       if (period.id == 3 && period.suwayasCount == 6) {
         final suwayaAngle = sweepAngle / 6;
 
-        // 1. أول سويعتين (بكامل عرض الحلقة): السدس الرابع
         final s4Color =
             isDark ? const Color(0xFF3949AB) : const Color(0xFF303F9F);
         _drawArcSegment(
@@ -369,7 +394,6 @@ class PeriodRingPainter extends CustomPainter {
           isHighlighted,
         );
 
-        // 2. آخر 4 سويعات (بكامل عرض الحلقة): الثلث الأخير
         final lastThirdColor =
             isDark ? const Color(0xFF7E57C2) : const Color(0xFF512DA8);
         _drawArcSegment(
@@ -437,7 +461,8 @@ class PeriodRingPainter extends CustomPainter {
         old.langCode != langCode ||
         old.design != design ||
         old.highlightedPeriodId != highlightedPeriodId ||
-        old.periods.length != periods.length) {
+        old.periods.length != periods.length ||
+        old._computeFlipMask() != _computeFlipMask()) {
       return true;
     }
     for (int i = 0; i < periods.length; i++) {
@@ -463,6 +488,7 @@ class OuterRingPainter extends CustomPainter {
   final bool isDark;
   final DialDesign design;
   final String pinMode;
+  final double totalRotation;
 
   OuterRingPainter({
     required this.periods,
@@ -471,7 +497,36 @@ class OuterRingPainter extends CustomPainter {
     required this.isDark,
     required this.design,
     this.pinMode = 'suwaya24',
+    this.totalRotation = 0.0,
   });
+
+  int _computePinsFlipMask() {
+    int mask = 0;
+    int bit = 0;
+    if (pinMode == 'civil24') {
+      final pins = buildCivilDialPins(dayStart, dayEnd);
+      for (final pin in pins) {
+        if (sin(pin.angle + totalRotation) > 0) mask |= (1 << bit);
+        bit++;
+      }
+      return mask;
+    }
+
+    for (final period in periods) {
+      final startAngle = timeToAngle(period.startTime, dayStart, dayEnd);
+      final endAngle = timeToAngle(period.endTime, dayStart, dayEnd);
+      double sweepAngle = endAngle - startAngle;
+      if (sweepAngle <= 0) sweepAngle += 2 * pi;
+      final suwayaAngle = sweepAngle / period.suwayasCount;
+
+      for (int i = 0; i < period.suwayasCount; i++) {
+        final lineAngle = startAngle + (i * suwayaAngle);
+        if (sin(lineAngle + totalRotation) > 0) mask |= (1 << bit);
+        bit++;
+      }
+    }
+    return mask;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -528,6 +583,9 @@ class OuterRingPainter extends CustomPainter {
           );
           textPainter.layout();
           canvas.translate(0, -textR);
+          if (sin(pin.angle + totalRotation) > 0) {
+            canvas.rotate(pi);
+          }
           textPainter.paint(
             canvas,
             Offset(-textPainter.width / 2, -textPainter.height / 2),
@@ -586,6 +644,9 @@ class OuterRingPainter extends CustomPainter {
         textPainter.layout();
 
         canvas.translate(0, -textR);
+        if (sin(lineAngle + totalRotation) > 0) {
+          canvas.rotate(pi);
+        }
         textPainter.paint(
           canvas,
           Offset(-textPainter.width / 2, -textPainter.height / 2),
@@ -605,6 +666,7 @@ class OuterRingPainter extends CustomPainter {
       old.design != design ||
       old.pinMode != pinMode ||
       old.periods.length != periods.length ||
+      old._computePinsFlipMask() != _computePinsFlipMask() ||
       _periodsChanged(old.periods, periods);
 
   bool _periodsChanged(

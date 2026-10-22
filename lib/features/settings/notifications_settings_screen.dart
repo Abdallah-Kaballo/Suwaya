@@ -39,12 +39,14 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     final textColor = Theme.of(context).colorScheme.onSurface;
     final accentColor = Theme.of(context).primaryColor;
 
-    final int prayersLevel = settings.getPeriodAlertLevel('1', 0);
-    final String prayersTone = settings.getPeriodSound('1', 'assets/audio/adhan.mp3');
-    final double prayersVolume = settings.getPeriodVolume('1', 1.0);
+    final int prayersLevel = settings.getPeriodAlertLevel('fajr', 1);
+    final String prayersTone =
+        settings.getPeriodSound('fajr', 'assets/audio/adhan.mp3');
+    final double prayersVolume = settings.getPeriodVolume('fajr', 1.0);
 
     final int qiyamLevel = settings.getPeriodAlertLevel('third_3', 0);
-    final String qiyamTone = settings.getPeriodSound('third_3', 'assets/audio/soft.mp3');
+    final String qiyamTone =
+        settings.getPeriodSound('third_3', 'assets/audio/soft.mp3');
     final double qiyamVolume = settings.getPeriodVolume('third_3', 0.5);
 
     return Scaffold(
@@ -54,21 +56,33 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(LucideIcons.arrow_right, color: textColor),
+          icon: Icon(
+            context.locale.languageCode == 'ar'
+                ? LucideIcons.arrow_right
+                : LucideIcons.arrow_left,
+            color: textColor,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'notifications.title'.tr(),
-          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         children: [
-          // 🌟 قسم الصلوات المفروضة
           _buildPremiumCard(
-            context: context, isDark: isDark, surfaceColor: surfaceColor, textColor: textColor, accentColor: accentColor,
+            context: context,
+            isDark: isDark,
+            surfaceColor: surfaceColor,
+            textColor: textColor,
+            accentColor: accentColor,
             icon: LucideIcons.moon_star,
             title: 'notifications.prayers'.tr(),
             subtitle: 'notifications.prayers_desc'.tr(),
@@ -77,18 +91,27 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             currentVolume: prayersVolume,
             onSave: (level, tone, vol) async {
               if (level > 0) await _requestPermissions(ref);
-              final ids = ['1', '3', '4', '5', 'isha'];
-              for (var id in ids) {
-                ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: id, isEnabled: true, alertLevel: level, soundPath: tone, volume: vol);
+              const ids = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+              for (final id in ids) {
+                await ref
+                    .read(settingsProvider.notifier)
+                    .updatePeriodNotificationSettings(
+                      periodId: id,
+                      isEnabled: level > 0,
+                      alertLevel: level,
+                      soundPath: tone,
+                      volume: vol,
+                    );
               }
             },
           ),
-          
           const SizedBox(height: 20),
-
-          // 🌟 قسم قيام الليل (الأجزاء الخمسة للنصف الثاني من الليل فقط)
           _buildPremiumCard(
-            context: context, isDark: isDark, surfaceColor: surfaceColor, textColor: textColor, accentColor: const Color(0xFF8B5CF6),
+            context: context,
+            isDark: isDark,
+            surfaceColor: surfaceColor,
+            textColor: textColor,
+            accentColor: const Color(0xFF8B5CF6),
             icon: LucideIcons.sparkles,
             title: 'notifications.qiyam'.tr(),
             subtitle: 'notifications.qiyam_desc'.tr(),
@@ -98,22 +121,46 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             isFadeInForced: true,
             onSave: (level, tone, vol) async {
               if (level > 0) await _requestPermissions(ref);
-              const nightIds = ['half_2', 'third_3', 'sixth_4', 'sixth_5', 'sixth_6'];
-              for (var id in nightIds) {
-                ref.read(settingsProvider.notifier).updatePeriodNotificationSettings(periodId: id, isEnabled: true, alertLevel: level, soundPath: tone, volume: vol);
+              const nightIds = [
+                'half_2',
+                'third_3',
+                'sixth_4',
+                'sixth_5',
+                'sixth_6',
+              ];
+              for (final id in nightIds) {
+                await ref
+                    .read(settingsProvider.notifier)
+                    .updatePeriodNotificationSettings(
+                      periodId: id,
+                      isEnabled: level > 0,
+                      alertLevel: level,
+                      soundPath: tone,
+                      volume: vol,
+                    );
               }
             },
           ),
-
           const SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Text('notifications.productivity'.tr(), style: TextStyle(color: textColor.withValues(alpha: 0.5), fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
+            child: Text(
+              'notifications.productivity'.tr(),
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.5),
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 1.2,
+              ),
+            ),
           ),
-
-          // 🌟 قسم الإنتاجية (المهام والعادات)
-          _buildDefaultsSection(settings, isDark, surfaceColor, textColor, accentColor),
-          
+          _buildDefaultsSection(
+            settings,
+            isDark,
+            surfaceColor,
+            textColor,
+            accentColor,
+          ),
           const SizedBox(height: 40),
         ],
       ),
@@ -127,18 +174,37 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
   }
 
   Widget _buildPremiumCard({
-    required BuildContext context, required bool isDark, required Color surfaceColor, required Color textColor, required Color accentColor,
-    required IconData icon, required String title, required String subtitle, required int currentLevel, required String currentTone, required double currentVolume,
-    bool isFadeInForced = false, required Function(int, String, double) onSave,
+    required BuildContext context,
+    required bool isDark,
+    required Color surfaceColor,
+    required Color textColor,
+    required Color accentColor,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required int currentLevel,
+    required String currentTone,
+    required double currentVolume,
+    bool isFadeInForced = false,
+    required Function(int, String, double) onSave,
   }) {
-    bool isEnabled = currentLevel > 0;
-    int mode = currentLevel == 0 ? 1 : currentLevel;
+    final bool isEnabled = currentLevel > 0;
+    final int mode = currentLevel == 0 ? 1 : currentLevel;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
 
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -149,7 +215,10 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: accentColor.withValues(alpha: 0.1), shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
                   child: Icon(icon, color: accentColor, size: 24),
                 ),
                 const SizedBox(width: 16),
@@ -157,9 +226,23 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 17)),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text(subtitle, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12, height: 1.3)),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: textColor.withValues(alpha: 0.5),
+                          fontSize: 12,
+                          height: 1.3,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -181,98 +264,222 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            child: isEnabled ? Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: textColor.withValues(alpha: 0.05))),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Container(
+            child: isEnabled
+                ? Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.black : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
+                      border: Border(
+                        top: BorderSide(
+                          color: textColor.withValues(alpha: 0.05),
+                        ),
+                      ),
                     ),
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      children: [
-                        _buildSegmentButton(context, 'notifications.quiet'.tr(), mode == 1, textColor, accentColor, () {
-                          HapticFeedback.selectionClick();
-                          onSave(1, currentTone, currentVolume);
-                        }),
-                        _buildSegmentButton(context, 'notifications.wake_screen'.tr(), mode == 2, textColor, accentColor, () {
-                          HapticFeedback.selectionClick();
-                          onSave(2, currentTone, currentVolume);
-                        }),
-                      ],
-                    ),
-                  ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    child: mode == 2 ? Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 24),
-                        GestureDetector(
-                          onTap: () => _showTonePicker(context, currentTone, surfaceColor, textColor, accentColor, (selectedTone) {
-                            onSave(2, selectedTone, currentVolume);
-                          }),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: textColor.withValues(alpha: 0.1)),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(LucideIcons.music, color: textColor.withValues(alpha: 0.5), size: 18),
-                                const SizedBox(width: 12),
-                                Expanded(child: Text('notifications.alarm_tone'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.w500))),
-                                Text(_availableTones[currentTone] ?? 'افتراضي', style: TextStyle(color: accentColor, fontWeight: FontWeight.bold, fontSize: 13)),
-                                const SizedBox(width: 8),
-                                Icon(LucideIcons.chevron_left, color: textColor.withValues(alpha: 0.3), size: 18),
-                              ],
-                            ),
+                        const SizedBox(height: 20),
+                        Container(
+                          decoration: BoxDecoration(
+                            color:
+                                isDark ? Colors.black : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: Row(
+                            children: [
+                              _buildSegmentButton(
+                                context,
+                                'notifications.quiet'.tr(),
+                                mode == 1,
+                                textColor,
+                                accentColor,
+                                () {
+                                  HapticFeedback.selectionClick();
+                                  onSave(1, currentTone, currentVolume);
+                                },
+                              ),
+                              _buildSegmentButton(
+                                context,
+                                'notifications.wake_screen'.tr(),
+                                mode == 2,
+                                textColor,
+                                accentColor,
+                                () {
+                                  HapticFeedback.selectionClick();
+                                  onSave(2, currentTone, currentVolume);
+                                },
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Icon(LucideIcons.volume_1, color: textColor.withValues(alpha: 0.4), size: 18),
-                            Expanded(
-                              child: SliderTheme(
-                                data: SliderThemeData(
-                                  activeTrackColor: accentColor,
-                                  thumbColor: accentColor,
-                                  inactiveTrackColor: textColor.withValues(alpha: 0.1),
-                                  trackHeight: 4,
-                                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                                ),
-                                child: Slider(
-                                  value: currentVolume, min: 0.1, max: 1.0,
-                                  onChangeEnd: (val) => onSave(2, currentTone, val),
-                                  onChanged: (val) {},
-                                ),
-                              ),
-                            ),
-                            Icon(LucideIcons.volume_2, color: textColor.withValues(alpha: 0.4), size: 18),
-                          ],
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          child: mode == 2
+                              ? StatefulBuilder(
+                                  builder: (context, setSliderState) {
+                                    double localVolume =
+                                        currentVolume.clamp(0.1, 1.0);
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: 24),
+                                        GestureDetector(
+                                          onTap: () => _showTonePicker(
+                                            context,
+                                            currentTone,
+                                            surfaceColor,
+                                            textColor,
+                                            accentColor,
+                                            (selectedTone) {
+                                              onSave(
+                                                2,
+                                                selectedTone,
+                                                localVolume,
+                                              );
+                                            },
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 14,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: textColor.withValues(
+                                                  alpha: 0.1,
+                                                ),
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  LucideIcons.music,
+                                                  color: textColor.withValues(
+                                                    alpha: 0.5,
+                                                  ),
+                                                  size: 18,
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    'notifications.alarm_tone'
+                                                        .tr(),
+                                                    style: TextStyle(
+                                                      color: textColor,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _availableTones[
+                                                          currentTone] ??
+                                                      'alerts.default_ring'
+                                                          .tr(),
+                                                  style: TextStyle(
+                                                    color: accentColor,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  isRTL
+                                                      ? LucideIcons.chevron_left
+                                                      : LucideIcons
+                                                          .chevron_right,
+                                                  color: textColor.withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                  size: 18,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              LucideIcons.volume_1,
+                                              color: textColor.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                              size: 18,
+                                            ),
+                                            Expanded(
+                                              child: SliderTheme(
+                                                data: SliderThemeData(
+                                                  activeTrackColor: accentColor,
+                                                  thumbColor: accentColor,
+                                                  inactiveTrackColor: textColor
+                                                      .withValues(alpha: 0.1),
+                                                  trackHeight: 4,
+                                                  overlayShape:
+                                                      const RoundSliderOverlayShape(
+                                                    overlayRadius: 14,
+                                                  ),
+                                                  thumbShape:
+                                                      const RoundSliderThumbShape(
+                                                    enabledThumbRadius: 6,
+                                                  ),
+                                                ),
+                                                child: Slider(
+                                                  value: localVolume,
+                                                  min: 0.1,
+                                                  max: 1.0,
+                                                  onChanged: (val) {
+                                                    setSliderState(() {
+                                                      currentVolume = val;
+                                                      localVolume = val;
+                                                    });
+                                                  },
+                                                  onChangeEnd: (val) => onSave(
+                                                    2,
+                                                    currentTone,
+                                                    val,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Icon(
+                                              LucideIcons.volume_2,
+                                              color: textColor.withValues(
+                                                alpha: 0.4,
+                                              ),
+                                              size: 18,
+                                            ),
+                                          ],
+                                        ),
+                                        if (isFadeInForced)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 8.0,
+                                              right: 4,
+                                            ),
+                                            child: Text(
+                                              '✨ ${'notifications.fade_in'.tr()}',
+                                              style: TextStyle(
+                                                color: accentColor,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
+                                )
+                              : const SizedBox.shrink(),
                         ),
-                        if (isFadeInForced)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0, right: 4),
-                            child: Text('✨ ${'notifications.fade_in'.tr()}', style: TextStyle(color: accentColor, fontSize: 11, fontWeight: FontWeight.w600)),
-                          )
                       ],
-                    ) : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
-            ) : const SizedBox.shrink(),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
@@ -592,7 +799,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                   Navigator.pop(context);
                 },
                 child: Text(
-                  'notifications.save'.tr(),
+                  'common.save'.tr(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

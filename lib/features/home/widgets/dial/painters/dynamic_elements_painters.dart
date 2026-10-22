@@ -169,7 +169,7 @@ DialMarkerLayout? hitTestDialMarker({
 }
 
 class RailwayRingPainter extends CustomPainter {
-  final IbadatTimings ibadat; // 🌟 نوع صريح بدلاً من dynamic
+  final IbadatTimings ibadat;
   final List<Map<String, dynamic>> nightMarkers;
   final List<DialTask> tasks;
   final List<AstroPeriod> periods;
@@ -183,7 +183,8 @@ class RailwayRingPainter extends CustomPainter {
   final int? highlightedTaskId;
   final String? highlightedMarkerId;
   final String dialPinMode;
-  final List<DialMarkerLayout>? precomputedLayouts; // 🌟 تمرير التخطيط المحسوب مسبقاً
+  final List<DialMarkerLayout>? precomputedLayouts;
+  final double totalRotation;
 
   RailwayRingPainter({
     required this.ibadat,
@@ -201,7 +202,27 @@ class RailwayRingPainter extends CustomPainter {
     this.highlightedMarkerId,
     this.dialPinMode = 'suwaya24',
     this.precomputedLayouts,
+    this.totalRotation = 0.0,
   });
+
+  int _computeBadgesFlipMask() {
+    int mask = 0;
+    int bit = 0;
+    final prayerTimes = <DateTime>[
+      ibadat.fajr,
+      ibadat.dhuhr,
+      ibadat.asr,
+      ibadat.maghrib,
+      ibadat.isha,
+      for (final m in nightMarkers) m['t'] as DateTime,
+    ];
+    for (final t in prayerTimes) {
+      final angle = timeToAngle(t, dayStart, dayEnd);
+      if (sin(angle + totalRotation) > 0) mask |= (1 << bit);
+      bit++;
+    }
+    return mask;
+  }
 
   void _drawEquilateralArrow(
     Canvas canvas,
@@ -290,15 +311,11 @@ class RailwayRingPainter extends CustomPainter {
 
     canvas.save();
     canvas.translate(center.dx, center.dy);
-
-    // 🌟 تعديل زاوية دوران اسم الصلاة في النصف السفلي ليبقى مقروءاً
-    final normAngle = angle % (2 * pi);
-    if (sin(normAngle) > 0) {
-    }
-
     canvas.rotate(angle + pi / 2);
     canvas.translate(0, -radius);
-    if (sin(normAngle) > 0) {
+
+    // 🌟 قلب شارة اسم الصلاة أو جزء الليل تلقائياً عند وجودها في النصف السفلي من الشاشة أثناء التدوير
+    if (sin(angle + totalRotation) > 0) {
       canvas.rotate(pi);
     }
 
@@ -522,7 +539,8 @@ class RailwayRingPainter extends CustomPainter {
         old.ibadat.isha != ibadat.isha ||
         old.ibadat.nextFajr != ibadat.nextFajr ||
         old.nightMarkers.length != nightMarkers.length ||
-        old.tasks.length != tasks.length) {
+        old.tasks.length != tasks.length ||
+        old._computeBadgesFlipMask() != _computeBadgesFlipMask()) {
       return true;
     }
 

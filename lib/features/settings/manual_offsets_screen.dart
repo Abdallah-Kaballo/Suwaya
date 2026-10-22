@@ -18,10 +18,10 @@ class ManualOffsetsScreen extends ConsumerWidget {
   const ManualOffsetsScreen({super.key});
 
   static const List<_PrayerOffsetPreset> _allowedPrayers = [
-    _PrayerOffsetPreset(id: '1', labelKey: 'periods.fajr', uiColor: Color(0xFF64B5F6)),
-    _PrayerOffsetPreset(id: '3', labelKey: 'periods.dhuhr', uiColor: Color(0xFFFFCA28)),
-    _PrayerOffsetPreset(id: '4', labelKey: 'periods.asr', uiColor: Color(0xFFFF9800)),
-    _PrayerOffsetPreset(id: '5', labelKey: 'periods.maghrib', uiColor: Color(0xFFE53935)),
+    _PrayerOffsetPreset(id: 'fajr', labelKey: 'periods.fajr', uiColor: Color(0xFF64B5F6)),
+    _PrayerOffsetPreset(id: 'dhuhr', labelKey: 'periods.dhuhr', uiColor: Color(0xFFFFCA28)),
+    _PrayerOffsetPreset(id: 'asr', labelKey: 'periods.asr', uiColor: Color(0xFFFF9800)),
+    _PrayerOffsetPreset(id: 'maghrib', labelKey: 'periods.maghrib', uiColor: Color(0xFFE53935)),
     _PrayerOffsetPreset(id: 'isha', labelKey: 'prayers.isha', uiColor: Color(0xFF1A237E)),
   ];
 

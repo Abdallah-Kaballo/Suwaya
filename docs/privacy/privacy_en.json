@@ -8,8 +8,8 @@
     "content": "Location information: When you choose automatic location, Suwaya requests location permission and uses latitude and longitude locally to calculate prayer times, select timezone contexts, find the nearest city, and suggest calculation defaults. This data is not sent to a server.\n\nApplication data: Suwaya stores calculation preferences, language, theme, tasks, and routines locally.\n\nNotifications and alarms: Suwaya schedules local notifications and alarms through the operating system."
   },
   {
-    "title": "3. Information We Do Not Currently Collect",
-    "content": "The application does not intentionally collect or transmit account details, advertising identifiers, behavioral analytics, crash reports, location history, backend data through Supabase, or payment information."
+    "title": "3. In-App Purchases (Store Billing & RevenueCat)",
+    "content": "The application does not collect personal account details, advertising identifiers, or behavioral analytics. If you choose to purchase or restore a supporter badge, Suwaya uses platform store billing and the RevenueCat SDK to verify your supporter entitlement using an anonymous app user ID and purchase receipt status. Sensitive payment information is processed exclusively by the platform store and is never accessed or stored by Suwaya."
   },
   {
     "title": "4. Data Storage, Retention, and Deletion",
@@ -20,8 +20,8 @@
     "content": "Suwaya may request permissions for: Location (for prayer calculations), Notifications (for reminders), Exact alarms (for time-sensitive scheduling), Vibration, and Internet (for platform operations). You can revoke permissions via OS settings."
   },
   {
-    "title": "6. Third-Party Libraries and Platform Services",
-    "content": "Suwaya uses open-source libraries for Flutter, persistence, prayer calculations, and UI. Platform providers (Android, iOS) may process data independently under their own privacy policies."
+    "title": "6. Third-Party Libraries and Network Access",
+    "content": "Suwaya uses open-source Flutter libraries for local persistence, astronomical calculations, and geolocation. Network requests are strictly limited to fetching documentation updates (FAQ and Privacy Policy) from the official GitHub repository, checking for app updates, and verifying supporter purchases via RevenueCat."
   },
   {
     "title": "7. Security",

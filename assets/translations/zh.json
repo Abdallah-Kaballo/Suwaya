@@ -204,7 +204,7 @@
     "auto_rotate": "自动旋转表盘",
     "auto_rotate_desc": "固定时间指针在顶部，表盘随时间旋转。",
     "dial_pin_mode": "表盘刻度模式",
-    "dial_pin_48": "Suwayas · 48 刻度",
+    "dial_pin_12": "Suwayas · 24 刻度",
     "dial_pin_24": "民用时间 · 24 刻度",
     "general": "常规",
     "app_language": "应用语言",

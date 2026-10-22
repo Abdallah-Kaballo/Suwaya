@@ -104,7 +104,7 @@ class NotificationService {
     return scheduledTime;
   }
 
-  Future<void> scheduleNormalNotification({
+  Future<bool> scheduleNormalNotification({
     required int id,
     required String title,
     required String body,
@@ -113,7 +113,7 @@ class NotificationService {
     bool enableVibration = true,
   }) async {
     final safeTime = _getSafeScheduledTime(scheduledTime, isDailyRoutine: false);
-    if (safeTime.isBefore(DateTime.now())) return;
+    if (safeTime.isBefore(DateTime.now())) return true;
 
     final stopText =
         'alarm.stop'.tr() != 'alarm.stop' ? 'alarm.stop'.tr() : 'إيقاف';
@@ -130,7 +130,6 @@ class NotificationService {
               'content://settings/system/notification_sound',
             )
           : null,
-      // 🌟 التعديل 4: إظهار زر الإيقاف فقط في إشعارات التنبيه الصوتية وحذفه من الإشعار الصامت
       actions: playSound
           ? <AndroidNotificationAction>[
               AndroidNotificationAction(
@@ -143,7 +142,7 @@ class NotificationService {
           : null,
     );
 
-    await _safeZonedSchedule(
+    return await _safeZonedSchedule(
       id,
       title,
       body,
@@ -172,7 +171,7 @@ class NotificationService {
     }
   }
 
-  Future<void> _safeZonedSchedule(
+  Future<bool> _safeZonedSchedule(
     int id,
     String title,
     String body,
@@ -198,6 +197,7 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
+      return true;
     } catch (e) {
       debugPrint('⚠️ السقوط الآمن لجدولة الإشعار على الستارة: $e');
       try {
@@ -211,8 +211,10 @@ class NotificationService {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );
+        return true;
       } catch (innerError) {
         debugPrint('🚨 فشل جدولة الإشعار نهائياً: $innerError');
+        return false;
       }
     }
   }

@@ -40,18 +40,16 @@ This data is used only to provide the corresponding application features and is 
 
 If you enable them, Suwaya schedules notifications and alarms through the operating system. Notification titles, bodies, timing, sound, vibration, and alarm settings are used locally to deliver reminders. Suwaya does not receive a copy of these scheduled notifications from a remote notification server.
 
-## 3. Information We Do Not Currently Collect
+## 3. Information We Do Not Collect & Optional Supporter Purchases
 
-The current application does not intentionally collect or transmit:
+The application does not collect or transmit:
 
-- Account details or authentication identifiers.
+- Account details or personal authentication identifiers.
 - Advertising identifiers or behavioral analytics.
-- Crash reports through Firebase Crashlytics.
 - Location history or background movement data.
-- Task, routine, or settings data through Supabase or another Suwaya cloud backend.
-- Payment information.
+- Task, routine, or settings data to any cloud backend.
 
-The operating system, app store, and platform services may process technical information under their own privacy policies. This policy covers the Suwaya application code and its configured services.
+If you optionally choose to purchase or restore a Supporter Badge, Suwaya uses Google Play Billing and the RevenueCat SDK (`purchases_flutter`) to verify your supporter entitlement via an anonymous app user ID and purchase receipt status. Financial and payment details are processed exclusively by Google Play and are never accessed or stored by Suwaya.
 
 ## 4. Data Storage, Retention, and Deletion
 
@@ -73,11 +71,13 @@ Suwaya may request the following permissions depending on the features you use:
 
 Permissions are requested when the related feature needs them. You can deny or revoke permissions through the operating system settings, although related features may stop working.
 
-## 6. Third-Party Libraries and Platform Services
+## 6. Third-Party Libraries and Network Services
 
-Suwaya uses open-source libraries for Flutter, local persistence, prayer calculations, geolocation, geocoding, localization, notifications, alarms, and related UI functionality. These libraries may interact with operating-system APIs as required for their documented functions.
+Suwaya uses open-source libraries for Flutter, local persistence (`isar_community`, `sqflite`), prayer calculations (`adhan`), geolocation, localization, notifications, and alarms. Network access is strictly limited to:
 
-The current Suwaya project does not configure an advertising SDK, Firebase Crashlytics, Supabase authentication, or Supabase synchronization. Platform providers such as Android, iOS, desktop operating systems, and app stores may process data independently under their own terms.
+- Fetching FAQ and Privacy Policy JSON updates from the official GitHub repository.
+- Checking for in-app updates via the official Play Store API (`in_app_update`).
+- Verifying optional supporter badge entitlements via Google Play Billing and RevenueCat.
 
 ## 7. Security
 

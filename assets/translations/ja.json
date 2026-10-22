@@ -204,7 +204,7 @@
     "auto_rotate": "ダイヤルの自動回転",
     "auto_rotate_desc": "時間針を上に固定し、時間と共にダイヤルを回転させます。",
     "dial_pin_mode": "ダイヤルピンモード",
-    "dial_pin_48": "スワヤ · 48 ピン",
+    "dial_pin_12": "スワヤ · 24 ピン",
     "dial_pin_24": "標準時間 · 24 ピン",
     "general": "一般",
     "app_language": "アプリの言語",

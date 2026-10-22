@@ -218,7 +218,7 @@
     "auto_rotate": "Auto-Rotate Dial",
     "auto_rotate_desc": "Pin the time needle at the top and rotate the dial with time.",
     "dial_pin_mode": "Dial pin mode",
-    "dial_pin_48": "Suwayas · 48 pins",
+    "dial_pin_12": "Suwayas · 24 pins",
     "dial_pin_24": "Civil time · 24 pins",
     "general": "General",
     "app_language": "App Language",
