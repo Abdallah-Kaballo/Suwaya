@@ -526,7 +526,6 @@ class _DoubleWheelPickerState extends State<DoubleWheelPicker> {
   }
 }
 
-// 🌟 3. الرزنامة الهجرية الشبكية الاحترافية (مع تظليل وتعطيل الأيام السابقة تماماً مثل الرزنامة الميلادية)
 class HijriCalendarDatePicker extends StatefulWidget {
   final DateTime initialDate;
   final DateTime firstDate;
@@ -534,6 +533,7 @@ class HijriCalendarDatePicker extends StatefulWidget {
   final ValueChanged<DateTime> onDateChanged;
   final Color textColor;
   final Color accentColor;
+  final int hijriOffsetDays;
 
   const HijriCalendarDatePicker({
     super.key,
@@ -543,6 +543,7 @@ class HijriCalendarDatePicker extends StatefulWidget {
     required this.onDateChanged,
     required this.textColor,
     required this.accentColor,
+    this.hijriOffsetDays = 0,
   });
 
   @override
@@ -556,6 +557,18 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
   late DateTime _maxDate;
   late int _displayedHijriYear;
   late int _displayedHijriMonth;
+
+  HijriCalendar _toAdjustedHijri(DateTime gregorianDate) {
+    final offset = widget.hijriOffsetDays.clamp(-2, 2);
+    return HijriCalendar.fromDate(gregorianDate.add(Duration(days: offset)));
+  }
+
+  DateTime _fromAdjustedHijri(int hYear, int hMonth, int hDay) {
+    final offset = widget.hijriOffsetDays.clamp(-2, 2);
+    final rawGreg = HijriCalendar().hijriToGregorian(hYear, hMonth, hDay);
+    return DateTime(rawGreg.year, rawGreg.month, rawGreg.day)
+        .subtract(Duration(days: offset));
+  }
 
   @override
   void initState() {
@@ -578,7 +591,7 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
     );
     _selectedDate = cleanInit.isBefore(_minDate) ? _minDate : cleanInit;
 
-    final hInit = HijriCalendar.fromDate(_selectedDate);
+    final hInit = _toAdjustedHijri(_selectedDate);
     _displayedHijriYear = hInit.hYear;
     _displayedHijriMonth = hInit.hMonth;
   }
@@ -595,12 +608,7 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
     }
     final hCal = HijriCalendar();
     final daysInPrev = hCal.getDaysInMonth(prevY, prevM);
-    final lastDayOfPrev = hCal.hijriToGregorian(prevY, prevM, daysInPrev);
-    final cleanLast = DateTime(
-      lastDayOfPrev.year,
-      lastDayOfPrev.month,
-      lastDayOfPrev.day,
-    );
+    final cleanLast = _fromAdjustedHijri(prevY, prevM, daysInPrev);
     return !cleanLast.isBefore(_minDate);
   }
 
@@ -611,13 +619,7 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
       nextM = 1;
       nextY++;
     }
-    final hCal = HijriCalendar();
-    final firstDayOfNext = hCal.hijriToGregorian(nextY, nextM, 1);
-    final cleanFirst = DateTime(
-      firstDayOfNext.year,
-      firstDayOfNext.month,
-      firstDayOfNext.day,
-    );
+    final cleanFirst = _fromAdjustedHijri(nextY, nextM, 1);
     return !cleanFirst.isAfter(_maxDate);
   }
 
@@ -645,7 +647,7 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
       _displayedHijriYear,
       _displayedHijriMonth,
     );
-    final DateTime firstGreg = hCal.hijriToGregorian(
+    final DateTime firstGreg = _fromAdjustedHijri(
       _displayedHijriYear,
       _displayedHijriMonth,
       1,
@@ -664,7 +666,6 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 1. شريط الشهر والسنة الهجرية وأزرار التنقل
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -701,8 +702,6 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
           ],
         ),
         const SizedBox(height: 8),
-
-        // 2. صف أسماء أيام الأسبوع
         Row(
           children: List.generate(7, (index) {
             final d = baseSunday.add(Duration(days: index));
@@ -723,8 +722,6 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
           }),
         ),
         const SizedBox(height: 8),
-
-        // 3. شبكة أيام الشهر الهجري (مع تظليل وتعطيل الأيام الماضية)
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -741,12 +738,11 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
             }
 
             final int hDay = index - leadingEmpty + 1;
-            final DateTime gRaw = hCal.hijriToGregorian(
+            final DateTime cellDate = _fromAdjustedHijri(
               _displayedHijriYear,
               _displayedHijriMonth,
               hDay,
             );
-            final DateTime cellDate = DateTime(gRaw.year, gRaw.month, gRaw.day);
 
             final bool isDisabled =
                 cellDate.isBefore(_minDate) || cellDate.isAfter(_maxDate);

@@ -59,25 +59,41 @@ class SuwayaFlowOption {
   });
 }
 
-// 🌟 3. إعدادات جلسة البومودورو السُويعي النشطة
 class SuwayaSessionConfig {
-  final DateTime anchoredStartTime; // دقيقة دخول المستخدم لصفحة الإعداد
-  final DateTime endTime; // وقت النهاية (الصلاة القادمة أو الوقت المخصص)
-  final String endLabel; // اسم وقت النهاية
-  final int totalPomodoros; // إجمالي عدد البومودورات (N)
-  final double flowSpeed; // سرعة التدفق المختارة
-  final int workVirtualMinutes; // 25 دقيقة افتراضية
-  final int breakVirtualMinutes; // 5 دقائق افتراضية
+  final DateTime anchoredStartTime;
+  final DateTime endTime;
+  final DateTime anchoredStartUtc;
+  final DateTime endUtc;
+  final String endLabel;
+  final int totalPomodoros;
+  final double flowSpeed;
+  final int workVirtualMinutes;
+  final int breakVirtualMinutes;
 
-  const SuwayaSessionConfig({
+  SuwayaSessionConfig({
     required this.anchoredStartTime,
     required this.endTime,
+    DateTime? anchoredStartUtc,
+    DateTime? endUtc,
     required this.endLabel,
     required this.totalPomodoros,
     required this.flowSpeed,
     this.workVirtualMinutes = 25,
     this.breakVirtualMinutes = 5,
-  });
+  })  : anchoredStartUtc = anchoredStartUtc ??
+            DateTime.now().toUtc().subtract(
+                  Duration(
+                    seconds: DateTime.now()
+                        .toUtc()
+                        .second, // محاذاة لبداية الدقيقة الحالية بـ UTC
+                  ),
+                ),
+        endUtc = endUtc ??
+            (anchoredStartUtc ??
+                    DateTime.now().toUtc().subtract(
+                          Duration(seconds: DateTime.now().toUtc().second),
+                        ))
+                .add(endTime.difference(anchoredStartTime));
 }
 
 // 🌟 4. الحالة الشاملة للبومودورو الاحترافي
@@ -805,16 +821,17 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       return;
     }
 
-    final now = _currentCityTime();
+    final nowUtc = DateTime.now().toUtc();
+    final nowWall = _currentCityTime();
 
-    // الإنهاء الإجباري عند بلوغ وقت النهاية / الصلاة
-    if (!now.isBefore(config.endTime)) {
+    // الإنهاء الإجباري عند بلوغ لحظة النهاية العالمية أو المحلية
+    if (!nowUtc.isBefore(config.endUtc) || !nowWall.isBefore(config.endTime)) {
       _endSuwayaForcefully();
       return;
     }
 
-    // 🌟 فحص تنبيه ما قبل الصلاة بدقيقتين فعليتين (120 ثانية)
-    final realSecondsToEnd = config.endTime.difference(now).inSeconds;
+    // فحص تنبيه ما قبل الصلاة بدقيقتين فعليتين (120 ثانية عالمية)
+    final realSecondsToEnd = config.endUtc.difference(nowUtc).inSeconds;
     final bool isNearPrayer = realSecondsToEnd <= 120 && realSecondsToEnd > 0;
     if (isNearPrayer && !_prePrayerWarningTriggered) {
       _prePrayerWarningTriggered = true;
@@ -826,7 +843,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
 
     final int actualElapsedSecs = max(
       0,
-      now.difference(config.anchoredStartTime).inSeconds,
+      nowUtc.difference(config.anchoredStartUtc).inSeconds,
     );
     final double totalVirtualElapsed = actualElapsedSecs * config.flowSpeed;
 
@@ -848,8 +865,8 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     final double elapsedInCurrentPomo =
         totalVirtualElapsed % cycleTotalVirtualSecs;
 
-    final double focusVirtualSecs = config.workVirtualMinutes * 60.0; // 1500s
-    final double breakVirtualSecs = config.breakVirtualMinutes * 60.0; // 300s
+    final double focusVirtualSecs = config.workVirtualMinutes * 60.0;
+    final double breakVirtualSecs = config.breakVirtualMinutes * 60.0;
 
     final bool inBreak = elapsedInCurrentPomo >= focusVirtualSecs;
 

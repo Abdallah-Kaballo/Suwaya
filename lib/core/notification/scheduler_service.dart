@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -18,6 +17,8 @@ import '../astro_engine/astro_provider.dart';
 import '../services/alarm_service.dart';
 import '../utils/time_formatters.dart';
 import 'notification_service.dart';
+import 'schedule_fingerprint.dart';
+import 'schedule_plan_builder.dart';
 
 final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
   final notifService = ref.read(notificationServiceProvider);
@@ -95,65 +96,17 @@ class NotificationScheduler {
 
   NotificationScheduler(this._service);
 
-  /// 🌟 معرف رقمي ثابت وحتمي لأجزاء الليل الخمسة (بدلاً من String.hashCode غير المستقر)
-  static int stableNightPartCode(String nightPartId) {
-    switch (nightPartId.trim().toLowerCase()) {
-      case 'half_1':
-        return 11;
-      case 'half_2':
-        return 12;
-      case 'third_1':
-        return 21;
-      case 'third_2':
-        return 22;
-      case 'third_3':
-        return 23;
-      case 'sixth_1':
-        return 31;
-      case 'sixth_2':
-        return 32;
-      case 'sixth_3':
-        return 33;
-      case 'sixth_4':
-        return 34;
-      case 'sixth_5':
-        return 35;
-      case 'sixth_6':
-        return 36;
-      default:
-        int acc = 50;
-        for (final unit in nightPartId.codeUnits) {
-          acc = ((acc * 31) + unit) % 40 + 50;
-        }
-        return acc;
-    }
-  }
+  static int stableNightPartCode(String nightPartId) =>
+      ScheduleFingerprint.stableNightPartCode(nightPartId);
 
-  /// 🌟 منع تصادم تنبيهين في نفس الثانية الفعلية:
-  /// تعطى الأولوية المطلقة للأذان في الثانية +0s، وتُزاح التنبيهات المتزامنة معه بمقدار +2s تتابعياً
   static DateTime resolveCollisionSafeTime(
     DateTime desiredTime,
     Set<int> occupiedEpochSeconds,
-  ) {
-    final cleanTime = DateTime(
-      desiredTime.year,
-      desiredTime.month,
-      desiredTime.day,
-      desiredTime.hour,
-      desiredTime.minute,
-      desiredTime.second,
-    );
-    int candidateSec = cleanTime.millisecondsSinceEpoch ~/ 1000;
-    int offsetSeconds = 0;
-
-    while (occupiedEpochSeconds.contains(candidateSec) && offsetSeconds < 30) {
-      offsetSeconds += 2;
-      candidateSec += 2;
-    }
-
-    occupiedEpochSeconds.add(candidateSec);
-    return cleanTime.add(Duration(seconds: offsetSeconds));
-  }
+  ) =>
+      ScheduleFingerprint.resolveCollisionSafeTime(
+        desiredTime,
+        occupiedEpochSeconds,
+      );
 
   Duration _getUtcOffsetForDate(
     SavedLocation? loc,
@@ -275,43 +228,13 @@ class NotificationScheduler {
     final cityNow = _getCityNow(loc);
     final todayOffset = _getUtcOffsetForDate(loc, cityNow);
 
-    // 🌟 تضمين تاريخ اليوم الحالي في البصمة لضمان تحرك نافذة الـ 7 أيام تلقائياً كل يوم جديد
-    final sb = StringBuffer()
-      ..write(
-        'date=${cityNow.year}-${cityNow.month}-${cityNow.day};',
-      )
-      ..write(
-        'loc=${loc.latitude},${loc.longitude},${loc.timezone},offset=${todayOffset.inMinutes};',
-      )
-      ..write(
-        'astro=${settings.calculationMethod},${settings.madhab},${settings.highLatitudeRule},${settings.customFajrAngle},${settings.customIshaAngle},${settings.useAstroTimeForIbadat};',
-      )
-      ..write(
-        'nightParts=${settings.visibleNightParts.join(",")};snooze=${settings.snoozeDurationMinutes}:${settings.maxSnoozeCount};',
-      );
-
-    for (final c in settings.periodConfigs) {
-      sb.write(
-        'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};',
-      );
-    }
-
-    for (final t in allTasks) {
-      sb.write(
-        't=${t.id}:${t.title}:${t.type.index}:${t.isCompleted}:'
-        '${t.lastCompletedDate?.millisecondsSinceEpoch}:'
-        '${t.targetDate?.millisecondsSinceEpoch}:'
-        '${t.isAstroTime}:${t.targetPeriodId}:'
-        '${t.targetSuwayas.join(",")}:${t.targetVirtualMinute}:'
-        '${t.targetCivilTimeMinutes}:'
-        '${t.recurrenceDays?.join(",")}:'
-        '${t.notifyMode}:${t.alarmMode}:${t.vibrateMode}:'
-        '${t.alarmTone}:${t.alarmVolume}:${t.scheduleModelVersion};',
-      );
-    }
-
-    sb.write(buildRoutineScheduleFingerprint(routines));
-    final currentHash = sb.toString();
+    final currentHash = ScheduleFingerprint.compute(
+      cityNow: cityNow,
+      todayOffset: todayOffset,
+      settings: settings,
+      allTasks: allTasks,
+      routines: routines,
+    );
 
     if (!forceRefresh && currentHash == _lastScheduleHash) return;
 
@@ -332,80 +255,35 @@ class NotificationScheduler {
           if (c.periodId != null) c.periodId!: c.manualOffsetMinutes
       };
 
-      final double lat = loc.latitude;
-      final double lng = loc.longitude;
-      final CalculationMethodType calcMethod =
-          settings.calculationMethod.toCalculationMethod();
-      final MadhabType madhab = settings.madhab.toMadhab();
-      final HighLatitudeRuleType hlRule =
-          settings.highLatitudeRule.toHighLatRule();
-      final Map<PrayerKey, int> isolatedManualOffsets =
-          manualOffsetsMap.toPrayerKeyMap();
-      final double fajrAngle = settings.customFajrAngle;
-      final double ishaAngle = settings.customIshaAngle;
-      final DateTime isolatedCityNow = cityNow;
-
       final List<Duration> weekCityOffsets = List.generate(
         9,
         (index) => _getUtcOffsetForDate(
           loc,
-          isolatedCityNow.add(Duration(days: index - 1)),
+          cityNow.add(Duration(days: index - 1)),
         ),
       );
 
-      final List<Map<String, dynamic>> weekAstroData = await Isolate.run(() {
-        final List<Map<String, dynamic>> daysData = [];
+      final List<ScheduledDayAstroWindow> weekAstroWindows =
+          await SchedulePlanBuilder.computeWeekAstroWindows(
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        timezoneId: loc.timezone,
+        isolatedCityNow: cityNow,
+        fallbackDayOffsets: weekCityOffsets,
+        calcMethod: settings.calculationMethod.toCalculationMethod(),
+        madhab: settings.madhab.toMadhab(),
+        hlRule: settings.highLatitudeRule.toHighLatRule(),
+        fajrAngle: settings.customFajrAngle,
+        ishaAngle: settings.customIshaAngle,
+        manualOffsets: manualOffsetsMap.toPrayerKeyMap(),
+      );
 
-        for (int index = 0; index < 8; index++) {
-          final int dayOffset = index - 1;
-          final targetDate = isolatedCityNow.add(Duration(days: dayOffset));
-          final dayCityOffset = weekCityOffsets[index];
-          final nextDayOffset = weekCityOffsets[index + 1];
-
-          final ibadat = PrayerCalculator.getIbadatTimings(
-            lat,
-            lng,
-            targetDate,
-            calcMethod,
-            madhab,
-            hlRule,
-            fajrAngle,
-            ishaAngle,
-            dayCityOffset,
-            nextDayCityOffset: nextDayOffset,
-            manualOffsets: isolatedManualOffsets,
-          );
-
-          final periods = SuwayaTimeEngine.generateDay(
-            lat,
-            lng,
-            targetDate,
-            calcMethod,
-            madhab,
-            hlRule,
-            fajrAngle,
-            ishaAngle,
-            dayCityOffset,
-            nextDayCityOffset: nextDayOffset,
-            manualOffsets: isolatedManualOffsets,
-          ).periods;
-
-          daysData.add({
-            'dayOffset': dayOffset,
-            'targetDate': targetDate,
-            'ibadat': ibadat,
-            'periods': periods,
-          });
-        }
-        return daysData;
-      });
-
-      final currentAstroEnd = weekAstroData
+      final currentAstroEnd = weekAstroWindows
           .firstWhere(
-            (d) =>
-                (d['periods'] as List<AstroPeriod>).last.endTime.isAfter(cityNow),
-            orElse: () => weekAstroData.first,
-          )['periods'] as List<AstroPeriod>;
+            (d) => d.periods.last.endTime.isAfter(cityNow),
+            orElse: () => weekAstroWindows.first,
+          )
+          .periods;
       final currentActiveAstroDate = DateTime.utc(
         currentAstroEnd.last.endTime.year,
         currentAstroEnd.last.endTime.month,
@@ -424,13 +302,13 @@ class NotificationScheduler {
           ? settings.maxSnoozeCount
           : AlarmService.defaultMaxSnoozes;
 
-      for (int index = 0; index < weekAstroData.length; index++) {
-        final dayData = weekAstroData[index];
-        final int dayOffset = dayData['dayOffset'] as int;
+      for (int index = 0; index < weekAstroWindows.length; index++) {
+        final dayWindow = weekAstroWindows[index];
+        final int dayOffset = dayWindow.dayOffset;
         final int safeOffsetIndex = dayOffset + 1;
-        final targetDate = dayData['targetDate'] as DateTime;
-        final ibadat = dayData['ibadat'] as IbadatTimings;
-        final periods = dayData['periods'] as List<AstroPeriod>;
+        final targetDate = dayWindow.targetDate;
+        final ibadat = dayWindow.ibadat;
+        final periods = dayWindow.periods;
 
         if (periods.isEmpty) continue;
 
@@ -888,20 +766,17 @@ class NotificationScheduler {
             if (isForThisCycle) {
               final suwayaCount =
                   period.suwayasCount > 0 ? period.suwayasCount : 1;
-              final microPerSuwaya = period.endTime
-                      .difference(period.startTime)
-                      .inMicroseconds ~/
-                  suwayaCount;
-              final microPerVirtualMin = microPerSuwaya ~/ 60;
 
               for (var suwayaNum in task.targetSuwayas) {
-                int effectiveSuwayaNum =
+                final int effectiveSuwayaNum =
                     suwayaNum == -1 ? (suwayaCount ~/ 2) + 1 : suwayaNum;
-                final taskCityTime = period.startTime.add(
-                  Duration(
-                    microseconds:
-                        (microPerSuwaya * (effectiveSuwayaNum - 1)) +
-                            (microPerVirtualMin * task.targetVirtualMinute),
+                final DateTime taskCityTime = period.resolveSlotWallTime(
+                  effectiveSuwayaNum,
+                  task.targetVirtualMinute,
+                  toWallClock: (utc) => TimezoneResolver.toWallClock(
+                    utc,
+                    timezoneId: loc.timezone,
+                    fallbackOffset: todayOffset,
                   ),
                 );
 

@@ -158,16 +158,7 @@ final routineArcsProvider = Provider<List<RoutineArcData>>((ref) {
           (candidate) => candidate.id == periodId,
           orElse: () => astroState.periods.first,
         );
-        final count = period.suwayasCount > 0 ? period.suwayasCount : 1;
-        final localIndex = (localSuwaya - 1).clamp(0, count - 1);
-        final safeMinute = minute.clamp(0, 59);
-        final microsPerSuwaya =
-            period.endTime.difference(period.startTime).inMicroseconds ~/ count;
-        // 🌟 الإصلاح 3: القسمة على 60.0 بدلاً من 30 لحساب الوقت الفعلي بدقة
-        return period.startTime.add(Duration(
-          microseconds: microsPerSuwaya * localIndex +
-              (microsPerSuwaya * safeMinute / 60.0).round(),
-        ));
+        return period.resolveSlotWallTime(localSuwaya, minute);
       }
 
       startTime = getAstroTime(sPId, sLocal, sm);

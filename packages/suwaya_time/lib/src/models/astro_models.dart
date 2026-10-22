@@ -108,7 +108,7 @@ class AstroPeriod {
   final PeriodKey periodKey;
   final String nameKey;
   final DateTime startTime, endTime;
-  final DateTime? startUtc, endUtc; // 🌟 اللحظات الفعلية لحساب المدة الحقيقية
+  final DateTime? startUtc, endUtc;
   final int suwayasCount, colorValue;
 
   const AstroPeriod({
@@ -123,12 +123,68 @@ class AstroPeriod {
     required this.colorValue,
   });
 
-  /// 🌟 المدة الحقيقية المنقضية بالثواني العالمية (لا تتشوه بتقديم أو تأخير التوقيت الصيفي)
+  /// المدة الحقيقية المنقضية بالثواني العالمية (محصنة ضد قفزات التوقيت الصيفي)
   Duration get totalDuration {
     if (startUtc != null && endUtc != null) {
       return endUtc!.difference(startUtc!);
     }
     return endTime.difference(startTime);
+  }
+
+  /// حساب اللحظة العالمية (UTC) لأي سويعة ودقيقة افتراضية داخل الفترة
+  DateTime resolveSlotUtc(int localSuwaya, int virtualMinute) {
+    final count = suwayasCount > 0 ? suwayasCount : 1;
+    final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
+    final minute = virtualMinute.clamp(0, 59);
+    final baseStart = startUtc ?? startTime;
+    final periodMicro = totalDuration.inMicroseconds;
+    final denominator = count * 60;
+    final requestedUnits = suwayaIndex * 60 + minute;
+    final offsetMicroseconds =
+        (periodMicro * requestedUnits + denominator - 1) ~/ denominator;
+    return baseStart.add(Duration(microseconds: offsetMicroseconds));
+  }
+
+  /// حساب وقت الحائط المحلي للمدينة لأي سويعة ودقيقة افتراضية
+  DateTime resolveSlotWallTime(
+    int localSuwaya,
+    int virtualMinute, {
+    DateTime Function(DateTime utcInstant)? toWallClock,
+  }) {
+    if (startUtc != null && toWallClock != null) {
+      return toWallClock(resolveSlotUtc(localSuwaya, virtualMinute));
+    }
+    final count = suwayasCount > 0 ? suwayasCount : 1;
+    final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
+    final minute = virtualMinute.clamp(0, 59);
+    final wallSpanMicro = endTime.difference(startTime).inMicroseconds;
+    final denominator = count * 60;
+    final requestedUnits = suwayaIndex * 60 + minute;
+    final offsetMicroseconds =
+        (wallSpanMicro * requestedUnits + denominator - 1) ~/ denominator;
+    return startTime.add(Duration(microseconds: offsetMicroseconds));
+  }
+
+  /// حساب المدة الفيزيائية الحقيقية المتبقية حتى بداية السويعة التالية
+  Duration durationUntilNextSuwaya({
+    required int currentLocalSlotNumber,
+    required DateTime now,
+    DateTime? nowUtc,
+  }) {
+    final count = suwayasCount > 0 ? suwayasCount : 1;
+    final suwayaMicro = totalDuration.inMicroseconds ~/ count;
+    if (nowUtc != null && startUtc != null) {
+      final nextTransitionUtc = startUtc!.add(
+        Duration(microseconds: suwayaMicro * currentLocalSlotNumber),
+      );
+      return nextTransitionUtc.difference(nowUtc);
+    }
+    final wallSuwayaMicro =
+        endTime.difference(startTime).inMicroseconds ~/ count;
+    final nextTransitionWall = startTime.add(
+      Duration(microseconds: wallSuwayaMicro * currentLocalSlotNumber),
+    );
+    return nextTransitionWall.difference(now);
   }
 }
 
@@ -171,21 +227,40 @@ class IbadatTimings {
 }
 
 class SuwayaDay {
+  /// مواقيت الدورة الفلكية النشطة (تبدأ من المغرب وتشمل أجزاء الليل النشطة)
   final IbadatTimings ibadatTimings;
-  final SuwayaCycleAnchors cycleAnchors; 
+
+  /// مواقيت اليوم المدني الحالي (لعرض صلوات التاريخ الميلادي الجاري بدقة قبل المغرب وبعده)
+  final IbadatTimings civilDayIbadat;
+  final SuwayaCycleAnchors cycleAnchors;
   final List<AstroPeriod> periods;
 
-  const SuwayaDay({required this.ibadatTimings, required this.cycleAnchors, required this.periods});
+  const SuwayaDay({
+    required this.ibadatTimings,
+    IbadatTimings? civilDayIbadat,
+    required this.cycleAnchors,
+    required this.periods,
+  }) : civilDayIbadat = civilDayIbadat ?? ibadatTimings;
+
+  SuwayaDay withCivilDayIbadat(IbadatTimings todayCivilIbadat) {
+    return SuwayaDay(
+      ibadatTimings: ibadatTimings,
+      civilDayIbadat: todayCivilIbadat,
+      cycleAnchors: cycleAnchors,
+      periods: periods,
+    );
+  }
 }
 
 class AstroState {
   final DateTime virtualTime;
-  final DateTime? instantUtc; // 🌟 اللحظة العالمية الحقيقية
+  final DateTime? instantUtc;
   final List<AstroPeriod> periods;
   final AstroPeriod currentPeriod;
   final SuwayaClockTime currentSuwayaTime;
   final double timeSpeedMultiplier;
   final IbadatTimings ibadatTimings;
+  final IbadatTimings civilDayIbadat;
   final SuwayaCycleAnchors cycleAnchors;
 
   const AstroState({
@@ -196,8 +271,15 @@ class AstroState {
     required this.currentSuwayaTime,
     required this.timeSpeedMultiplier,
     required this.ibadatTimings,
+    IbadatTimings? civilDayIbadat,
     required this.cycleAnchors,
-  });
+  }) : civilDayIbadat = civilDayIbadat ?? ibadatTimings;
+
+  /// أجزاء الليل المناسبة للعرض: أثناء الليل تعرض الليلة الجارية، وأثناء النهار تعرض الليلة القادمة
+  List<NightPart> get activeOrUpcomingNightParts =>
+      currentSuwayaTime.phase.isNight
+          ? ibadatTimings.nightParts
+          : civilDayIbadat.nightParts;
 }
 
 enum CalculationMethodType {

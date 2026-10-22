@@ -25,9 +25,10 @@ void showDialAndIbadatMarkersSheet(
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
   const allowedOrder = ['half_2', 'third_3', 'sixth_4', 'sixth_5', 'sixth_6'];
+  final sourceNightParts = astroState.activeOrUpcomingNightParts;
   final availableNightParts = <NightPart>[];
   for (final id in allowedOrder) {
-    final match = astroState.ibadatTimings.nightParts.where((p) => p.id == id);
+    final match = sourceNightParts.where((p) => p.id == id);
     if (match.isNotEmpty) {
       availableNightParts.add(match.first);
     }
@@ -400,7 +401,8 @@ class IbadatScreen extends ConsumerWidget {
     AstroState astroState,
     bool isDark,
   ) {
-    final ibadat = astroState.ibadatTimings;
+    // مواقيت اليوم المدني الحالي لعرض الصلوات الخمس والشروق لتاريخ اليوم الصحيح
+    final ibadat = astroState.civilDayIbadat;
     final settings = ref.watch(settingsProvider);
     final bottomSafe = MediaQuery.of(context).padding.bottom;
 
@@ -436,7 +438,6 @@ class IbadatScreen extends ConsumerWidget {
           },
         ];
 
-        // 🌟 حساب الصلاة القادمة بدقة عبر مقارنة كائنات DateTime الفعلية شاملة فجر الغد (nextFajr)
         final candidatePrayers = [
           ...mandatoryPrayers,
           {
@@ -474,7 +475,7 @@ class IbadatScreen extends ConsumerWidget {
         Map<String, dynamic> nextPrayer = mandatoryPrayers.first;
         int minDiffSecs = 86400 * 2;
 
-        for (var p in candidatePrayers) {
+        for (final p in candidatePrayers) {
           final DateTime pTime = p['time'] as DateTime;
           final int diffSecs = pTime.difference(liveNow).inSeconds;
           if (diffSecs > 0 && diffSecs < minDiffSecs) {
@@ -489,14 +490,15 @@ class IbadatScreen extends ConsumerWidget {
         if (settings.useAstroTimeForIbadat) {
           topLabel = 'ibadat.virtual_remaining'.tr();
 
-          // 🌟 حساب اللحظة السويعية الحالية بدقة من المحرك الفلكي
           final liveAstroState = SuwayaTimeEngine.calculateCurrentState(
             SuwayaDay(
               ibadatTimings: astroState.ibadatTimings,
+              civilDayIbadat: astroState.civilDayIbadat,
               cycleAnchors: astroState.cycleAnchors,
               periods: astroState.periods,
             ),
             liveNow,
+            nowUtc: DateTime.now().toUtc(),
           );
           final ct = liveAstroState.currentSuwayaTime;
           final int currentGlobalIndex = ct.phase.isNight
@@ -505,7 +507,6 @@ class IbadatScreen extends ConsumerWidget {
           final int currentVirtualTotalMins =
               (currentGlobalIndex * 60) + ct.virtualMinute;
 
-          // 🌟 جلب الموقع السويعي الثابت للصلاة القادمة (مثلاً الظهر = الفهرس 18 أي السويعة 07|00 ☀️)
           final targetAstro = getFixedAstroTime(
             nextPrayer['id'] as String,
             astroState,
@@ -514,7 +515,6 @@ class IbadatScreen extends ConsumerWidget {
           final int targetVirtualTotalMins =
               (targetAstro.globalIndex * 60) + targetAstro.minute;
 
-          // 🌟 طرح الموقعين السويعيين مباشرةً (1440 دقيقة افتراضية = 24 سويعة)
           int virtualRemainingMins =
               targetVirtualTotalMins - currentVirtualTotalMins;
           if (virtualRemainingMins <= 0) {
@@ -582,7 +582,7 @@ class IbadatScreen extends ConsumerWidget {
           },
         ];
 
-        final visibleNightParts = ibadat.nightParts
+        final visibleNightParts = astroState.activeOrUpcomingNightParts
             .where((p) => settings.visibleNightParts.contains(p.id))
             .toList();
 

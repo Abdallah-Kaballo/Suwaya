@@ -9,37 +9,17 @@ import '../settings_provider.dart';
 
 enum LocationStep { method, manualChoice, dropdowns, coordinates, savedLocations }
 
-Future<void> _applySmartSettings(String countryCode, String countryName, WidgetRef ref) async {
-  final c = countryName.toLowerCase();
-  
-  String method = 'muslim_world_league';
-  if (countryCode == 'EG' || c.contains('مصر') || c.contains('سودان')) {
-    method = 'egyptian';
-  } else if (countryCode == 'SA' || c.contains('سعودية')) {
-    method = 'ummAlQura';
-  } else if (countryCode == 'PK' || countryCode == 'IN' || c.contains('باكستان') || c.contains('هند')) {
-    method = 'karachi';
-  } else if (countryCode == 'TR' || c.contains('تركيا')) {
-    method = 'turkey';
-  } else if (countryCode == 'KW' || c.contains('كويت')) {
-    method = 'kuwait';
-  } else if (countryCode == 'QA' || c.contains('قطر')) {
-    method = 'qatar';
-  } else if (countryCode == 'AE' || c.contains('إمارات')) {
-    method = 'dubai';
-  } else if (countryCode == 'US' || countryCode == 'CA' || c.contains('أمريكا') || c.contains('كندا')) {
-    method = 'north_america';
-  } else if (countryCode == 'IR' || c.contains('إيران')) {
-    method = 'tehran';
-  }
-
-  String madhab = 'shafi';
-  if (['PK', 'IN', 'TR', 'BD', 'AF'].contains(countryCode.toUpperCase())) {
-    madhab = 'hanafi';
-  }
-
-  await ref.read(settingsProvider.notifier).updateCalculationMethod(method);
-  await ref.read(settingsProvider.notifier).updateMadhab(madhab);
+Future<void> _applySmartSettings(
+  String countryCode,
+  String countryName,
+  WidgetRef ref,
+) async {
+  final defaults = AstroSmartDefaults.getDefaultsForCountry(countryCode);
+  await ref.read(settingsProvider.notifier).updateAstroSettings(
+        method: defaults.method,
+        madhab: defaults.madhab,
+        highLatRule: defaults.highLatitudeRule,
+      );
 }
 
 class SmartLocationPicker extends ConsumerStatefulWidget {

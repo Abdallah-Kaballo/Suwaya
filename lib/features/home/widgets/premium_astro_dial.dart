@@ -531,21 +531,15 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             final p = astroState.periods
                 .firstWhere((per) => per.id == task.targetPeriodId);
             final suwayaCount = p.suwayasCount > 0 ? p.suwayasCount : 1;
-            final microPerSuwaya =
-                p.endTime.difference(p.startTime).inMicroseconds ~/ suwayaCount;
-            int sIndex = task.targetSuwayas.isNotEmpty
+            final int localSuwaya = task.targetSuwayas.isNotEmpty
                 ? (task.targetSuwayas.first == -1
-                    ? suwayaCount ~/ 2
-                    : task.targetSuwayas.first - 1)
-                : suwayaCount ~/ 2;
-            sIndex = sIndex.clamp(0, suwayaCount - 1);
+                    ? (suwayaCount ~/ 2) + 1
+                    : task.targetSuwayas.first)
+                : (suwayaCount ~/ 2) + 1;
 
-            final microPerVirtualMinute = microPerSuwaya / 60.0;
-            taskTime = p.startTime.add(
-              Duration(
-                microseconds: (microPerSuwaya * sIndex) +
-                    (microPerVirtualMinute * task.targetVirtualMinute).toInt(),
-              ),
+            taskTime = p.resolveSlotWallTime(
+              localSuwaya,
+              task.targetVirtualMinute,
             );
           } else if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
             DateTime pStartNoSecs = DateTime.utc(

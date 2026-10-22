@@ -753,6 +753,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                           ),
                           textColor: text,
                           accentColor: pColor,
+                          hijriOffsetDays:
+                              ref.read(settingsProvider).hijriOffsetDays,
                           onDateChanged: (d) {
                             setDialogState(() => tempDate = d);
                           },

@@ -66,3 +66,6 @@ jobs:
 
       - name: Build Android debug APK
         run: flutter build apk --debug
+
+      - name: Verify Android release APK build (R8 & ProGuard check)
+        run: flutter build apk --release -PallowDebugReleaseSign=true

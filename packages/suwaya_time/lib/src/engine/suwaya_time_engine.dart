@@ -3,8 +3,9 @@ import '../calculators/prayer_calculator.dart';
 import '../generators/period_generator.dart';
 import '../generators/suwaya_distributor.dart';
 
+// استبدل الكلاس SuwayaTimeEngine بالمقطع التالي:
+
 class SuwayaTimeEngine {
-  
   static SuwayaDay generateDay(
     double lat,
     double lng,
@@ -18,6 +19,7 @@ class SuwayaTimeEngine {
     Duration? nextDayCityOffset,
     Map<PrayerKey, int>? manualOffsets,
     Duration Function(DateTime utcInstant)? offsetResolver,
+    IbadatTimings? civilDayIbadatOverride,
   }) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat,
@@ -54,6 +56,7 @@ class SuwayaTimeEngine {
 
     return SuwayaDay(
       ibadatTimings: ibadat,
+      civilDayIbadat: civilDayIbadatOverride ?? ibadat,
       cycleAnchors: anchors,
       periods: periods,
     );
@@ -67,14 +70,15 @@ class SuwayaTimeEngine {
     if (day.periods.isEmpty) return getFallbackState(now);
 
     AstroPeriod currentPeriod;
-    final bool useUtcLookup =
-        nowUtc != null && day.periods.every((p) => p.startUtc != null && p.endUtc != null);
+    final bool useUtcLookup = nowUtc != null &&
+        day.periods.every((p) => p.startUtc != null && p.endUtc != null);
 
     try {
       if (useUtcLookup) {
         currentPeriod = day.periods.firstWhere(
           (p) =>
-              (nowUtc.isAfter(p.startUtc!) || nowUtc.isAtSameMomentAs(p.startUtc!)) &&
+              (nowUtc.isAfter(p.startUtc!) ||
+                  nowUtc.isAtSameMomentAs(p.startUtc!)) &&
               nowUtc.isBefore(p.endUtc!),
         );
       } else {
@@ -96,17 +100,23 @@ class SuwayaTimeEngine {
       }
     }
 
-    final totalMicroseconds = currentPeriod.totalDuration.inMicroseconds;
+    final totalMicroseconds = useUtcLookup
+        ? currentPeriod.totalDuration.inMicroseconds
+        : currentPeriod.endTime.difference(currentPeriod.startTime).inMicroseconds;
+
     if (totalMicroseconds <= 0) return getFallbackState(now);
 
-    int sCount = currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
-    final suwayaDurationMicroseconds = totalMicroseconds / sCount;
+    final int sCount =
+        currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
+    final double suwayaDurationMicroseconds = totalMicroseconds / sCount;
 
     int elapsedMicroseconds;
-    if (nowUtc != null && currentPeriod.startUtc != null) {
-      elapsedMicroseconds = nowUtc.difference(currentPeriod.startUtc!).inMicroseconds;
+    if (useUtcLookup && currentPeriod.startUtc != null) {
+      elapsedMicroseconds =
+          nowUtc.difference(currentPeriod.startUtc!).inMicroseconds;
     } else {
-      elapsedMicroseconds = now.difference(currentPeriod.startTime).inMicroseconds;
+      elapsedMicroseconds =
+          now.difference(currentPeriod.startTime).inMicroseconds;
     }
     if (elapsedMicroseconds < 0) elapsedMicroseconds = 0;
 
@@ -114,16 +124,19 @@ class SuwayaTimeEngine {
         (elapsedMicroseconds / suwayaDurationMicroseconds).floor() + 1;
     currentLocalSuwaya = currentLocalSuwaya.clamp(1, sCount);
 
-    double progress =
-        (elapsedMicroseconds % suwayaDurationMicroseconds) / suwayaDurationMicroseconds;
+    double progress = (elapsedMicroseconds % suwayaDurationMicroseconds) /
+        suwayaDurationMicroseconds;
     progress = progress.clamp(0.0, 0.999999);
 
-    final speedMultiplier = 3600 / (suwayaDurationMicroseconds / 1000000);
+    final double actualPeriodSuwayaMicro =
+        currentPeriod.totalDuration.inMicroseconds / sCount;
+    final double speedMultiplier =
+        actualPeriodSuwayaMicro > 0 ? 3600 / (actualPeriodSuwayaMicro / 1000000) : 1.0;
 
     SuwayaPhase phase;
     int phaseSlotNumber = 0;
 
-    final nightKeys = [
+    const nightKeys = [
       PeriodKey.nightMaghribIsha,
       PeriodKey.nightIshaMidnight,
       PeriodKey.nightMidnightFajr,
@@ -132,13 +145,13 @@ class SuwayaTimeEngine {
 
     if (nightKeys.contains(currentPeriod.periodKey)) {
       phase = SuwayaPhase.night;
-      for (var p in day.periods) {
+      for (final p in day.periods) {
         if (p.periodKey == currentPeriod.periodKey) break;
         phaseSlotNumber += p.suwayasCount;
       }
     } else {
       phase = SuwayaPhase.day;
-      for (var p in day.periods) {
+      for (final p in day.periods) {
         if (!nightKeys.contains(p.periodKey)) {
           if (p.periodKey == currentPeriod.periodKey) break;
           phaseSlotNumber += p.suwayasCount;
@@ -165,20 +178,60 @@ class SuwayaTimeEngine {
       currentSuwayaTime: clockTime,
       timeSpeedMultiplier: speedMultiplier,
       ibadatTimings: day.ibadatTimings,
+      civilDayIbadat: day.civilDayIbadat,
       cycleAnchors: day.cycleAnchors,
     );
   }
 
   static AstroState getFallbackState(DateTime now) {
-    final fallbackIbadat = IbadatTimings(fajr: now, sunrise: now, dhuhr: now, asr: now, maghrib: now, isha: now, nextFajr: now.add(const Duration(days: 1)), nightParts: const []);
-    final fallbackAnchors = SuwayaCycleAnchors(cycleStartMaghrib: now, cycleIsha: now, sharIMidnight: now, cycleFajr: now, cycleSunrise: now, cycleDhuhr: now, cycleAsr: now, cycleEndMaghrib: now.add(const Duration(days: 1)));
-    final fallbackPeriod = AstroPeriod(id: 1, periodKey: PeriodKey.nightMaghribIsha, nameKey: 'period_maghrib', colorValue: 0xFFD4AF37, startTime: now, endTime: now.add(const Duration(hours: 1)), suwayasCount: 1);
-    final fallbackTime = SuwayaClockTime(phase: SuwayaPhase.night, phaseSlotNumber: 1, periodKey: PeriodKey.nightMaghribIsha, periodLocalSlotNumber: 1, slotProgress: 0.0, cycleStartDate: now, instant: now);
-    
+    final fallbackIbadat = IbadatTimings(
+      fajr: now,
+      sunrise: now,
+      dhuhr: now,
+      asr: now,
+      maghrib: now,
+      isha: now,
+      nextFajr: now.add(const Duration(days: 1)),
+      nightParts: const [],
+    );
+    final fallbackAnchors = SuwayaCycleAnchors(
+      cycleStartMaghrib: now,
+      cycleIsha: now,
+      sharIMidnight: now,
+      cycleFajr: now,
+      cycleSunrise: now,
+      cycleDhuhr: now,
+      cycleAsr: now,
+      cycleEndMaghrib: now.add(const Duration(days: 1)),
+    );
+    final fallbackPeriod = AstroPeriod(
+      id: 1,
+      periodKey: PeriodKey.nightMaghribIsha,
+      nameKey: 'period_maghrib',
+      colorValue: 0xFFD4AF37,
+      startTime: now,
+      endTime: now.add(const Duration(hours: 1)),
+      suwayasCount: 1,
+    );
+    final fallbackTime = SuwayaClockTime(
+      phase: SuwayaPhase.night,
+      phaseSlotNumber: 1,
+      periodKey: PeriodKey.nightMaghribIsha,
+      periodLocalSlotNumber: 1,
+      slotProgress: 0.0,
+      cycleStartDate: now,
+      instant: now,
+    );
+
     return AstroState(
-      virtualTime: now, periods: [fallbackPeriod], currentPeriod: fallbackPeriod, 
-      currentSuwayaTime: fallbackTime, timeSpeedMultiplier: 1.0, 
-      ibadatTimings: fallbackIbadat, cycleAnchors: fallbackAnchors
+      virtualTime: now,
+      periods: [fallbackPeriod],
+      currentPeriod: fallbackPeriod,
+      currentSuwayaTime: fallbackTime,
+      timeSpeedMultiplier: 1.0,
+      ibadatTimings: fallbackIbadat,
+      civilDayIbadat: fallbackIbadat,
+      cycleAnchors: fallbackAnchors,
     );
   }
 }

@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'package:flutter/services.dart' show rootBundle;
 
 // نموذج يمثل قسم واحد من سياسة الخصوصية
 class PrivacySection {
@@ -19,41 +21,60 @@ class PrivacySection {
   }
 }
 
+List<PrivacySection> _parsePrivacyJson(String rawJson) {
+  final List<dynamic> decoded = jsonDecode(rawJson) as List<dynamic>;
+  return decoded
+      .map((e) => PrivacySection.fromJson(e as Map<String, dynamic>))
+      .where((s) => s.title.isNotEmpty && s.content.isNotEmpty)
+      .toList();
+}
+
 final privacyProvider = FutureProvider.family
     .autoDispose<List<PrivacySection>, String>((ref, langCode) async {
   final targetLang = (langCode == 'ar') ? 'ar' : 'en';
-
   final prefs = await SharedPreferences.getInstance();
   final cacheKey = 'suwaya_privacy_cache_$targetLang';
   final url =
       'https://raw.githubusercontent.com/Abdallah-Kaballo/Suwaya/main/docs/privacy/privacy_$targetLang.json';
 
-  try {
-    final response =
-        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      await prefs.setString(cacheKey, response.body);
-      final List<dynamic> decodedData = jsonDecode(response.body);
-      final sections =
-          decodedData.map((e) => PrivacySection.fromJson(e)).toList();
-      if (sections.isNotEmpty) return sections;
-    }
-  } catch (e) {
-    debugPrint('فشل جلب Privacy Policy، جاري فتح النسخة المحلية: $e');
-  }
+  List<PrivacySection> localSections = const [];
 
   final cachedData = prefs.getString(cacheKey);
-  if (cachedData != null) {
+  if (cachedData != null && cachedData.isNotEmpty) {
     try {
-      final List<dynamic> decodedData = jsonDecode(cachedData);
-      final sections =
-          decodedData.map((e) => PrivacySection.fromJson(e)).toList();
-      if (sections.isNotEmpty) return sections;
+      localSections = _parsePrivacyJson(cachedData);
     } catch (_) {}
   }
 
-  // 🌟 نسخة محلية مدمجة تعمل دون إنترنت وتتضمن الإفصاح الكامل عن RevenueCat و Google Play
-  return _defaultPrivacySections(targetLang);
+  if (localSections.isEmpty) {
+    try {
+      final bundled =
+          await rootBundle.loadString('docs/privacy/privacy_$targetLang.json');
+      localSections = _parsePrivacyJson(bundled);
+    } catch (_) {}
+  }
+
+  if (localSections.isEmpty) {
+    localSections = _defaultPrivacySections(targetLang);
+  }
+
+  // تحديث صامت في الخلفية دون تعطيل عرض الصفحة للمستخدم
+  unawaited(() async {
+    try {
+      final response =
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200 && response.body != cachedData) {
+        final parsed = _parsePrivacyJson(response.body);
+        if (parsed.isNotEmpty) {
+          await prefs.setString(cacheKey, response.body);
+        }
+      }
+    } catch (e) {
+      debugPrint('Privacy background refresh skipped: $e');
+    }
+  }());
+
+  return localSections;
 });
 
 List<PrivacySection> _defaultPrivacySections(String lang) {

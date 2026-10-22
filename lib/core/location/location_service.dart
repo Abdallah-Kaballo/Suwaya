@@ -1,6 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'geo_database_service.dart';
+import '../../features/settings/settings_provider.dart';
 
 class LocationException implements Exception {
   final String messageKey;
@@ -10,16 +11,25 @@ class LocationException implements Exception {
 }
 
 class LocationService {
-  static Future<Position> determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  static const Duration _freshMaxAge = Duration(minutes: 10);
+  static const double _freshMaxAccuracyMeters = 150.0;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  // الحدود القصوى المسموح بها عند السقوط الاحتياطي لآخر موقع معروف
+  static const Duration _fallbackMaxAge = Duration(hours: 12);
+  static const double _fallbackMaxAccuracyMeters = 2500.0;
+
+  static bool _isAcceptableFallback(Position pos) {
+    final age = DateTime.now().difference(pos.timestamp).abs();
+    return age <= _fallbackMaxAge && pos.accuracy <= _fallbackMaxAccuracyMeters;
+  }
+
+  static Future<Position> determinePosition() async {
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw LocationException('location_picker.error_gps_disabled');
     }
 
-    permission = await Geolocator.checkPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
@@ -36,8 +46,8 @@ class LocationService {
       lastKnown = await Geolocator.getLastKnownPosition();
       if (lastKnown != null) {
         final age = DateTime.now().difference(lastKnown.timestamp).abs();
-        // 🌟 قبول الموقع المخزن مسبقاً فقط إذا كان حديثاً (أقل من 10 دقائق) ودقيقاً (<= 150 متر)
-        if (age <= const Duration(minutes: 10) && lastKnown.accuracy <= 150) {
+        if (age <= _freshMaxAge &&
+            lastKnown.accuracy <= _freshMaxAccuracyMeters) {
           return lastKnown;
         }
       }
@@ -50,16 +60,19 @@ class LocationService {
           timeLimit: Duration(seconds: 8),
         ),
       );
-    } catch (e) {
-      // 🌟 استخدام آخر موقع معروف كخطة بديلة فقط عند انتهاء مهلة الـ GPS
-      if (lastKnown != null) return lastKnown;
+    } catch (_) {
+      // لا نقبل الموقع القديم عند فشل الـ GPS إلا إذا كان ضمن هامش صلاحية ودقة موثوق
+      if (lastKnown != null && _isAcceptableFallback(lastKnown)) {
+        return lastKnown;
+      }
       throw LocationException('location_picker.error_gps_timeout');
     }
   }
 
   static Future<Map<String, dynamic>> fetchOfflineLocation(
-      String langCode) async {
-    Position position = await determinePosition();
+    String langCode,
+  ) async {
+    final Position position = await determinePosition();
 
     final localData = await GeoDatabaseService.getNearestLocationData(
       position.latitude,
@@ -82,49 +95,20 @@ class LocationService {
       );
     }
 
+    // الاعتماد على الجدول المرجعي الموحد للدول (شاملاً طريقة الحساب، المذهب، وقاعدة العروض العليا)
+    final smartDefaults = AstroSmartDefaults.getDefaultsForCountry(countryCode);
+
     return {
       'lat': position.latitude,
       'lng': position.longitude,
       'city': city,
       'country': country,
       'countryCode': countryCode,
-      'timezone': timezone, // 🌟 تمرير المنطقة الزمنية لضبط التوقيت الصيفي والشتوي
-      'method': _determineMethod(countryCode, country),
-      'madhab': _determineMadhab(countryCode, country),
+      'timezone': timezone,
+      'method': smartDefaults.method,
+      'madhab': smartDefaults.madhab,
+      'highLatRule': smartDefaults.highLatitudeRule,
       'formattedName': '$city / $country',
     };
-  }
-
-  static String _determineMethod(String code, String countryName) {
-    final c = countryName.toLowerCase();
-    if (code == 'EG' || c.contains('مصر') || c.contains('سودان')) {
-      return 'egyptian';
-    }
-    if (code == 'SA' || c.contains('سعودية')) return 'ummAlQura';
-    if (code == 'PK' ||
-        code == 'IN' ||
-        c.contains('باكستان') ||
-        c.contains('هند')) {
-      return 'karachi';
-    }
-    if (code == 'TR' || c.contains('تركيا')) return 'turkey';
-    if (code == 'KW' || c.contains('كويت')) return 'kuwait';
-    if (code == 'QA' || c.contains('قطر')) return 'qatar';
-    if (code == 'AE' || c.contains('إمارات')) return 'dubai';
-    if (code == 'US' ||
-        code == 'CA' ||
-        c.contains('أمريكا') ||
-        c.contains('كندا')) {
-      return 'north_america';
-    }
-    if (code == 'IR' || c.contains('إيران')) return 'tehran';
-    return 'muslim_world_league';
-  }
-
-  static String _determineMadhab(String code, String countryName) {
-    if (['PK', 'IN', 'TR', 'BD', 'AF'].contains(code.toUpperCase())) {
-      return 'hanafi';
-    }
-    return 'shafi';
   }
 }

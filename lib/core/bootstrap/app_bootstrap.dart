@@ -7,11 +7,16 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import '../notification/notification_service.dart';
 
 class AppBootstrap {
-  // 🌟 قراءة المفتاح عبر --dart-define=REVENUECAT_GOOGLE_API_KEY=... مع قيمة احتياطية
   static const String revenueCatGoogleApiKey = String.fromEnvironment(
     'REVENUECAT_GOOGLE_API_KEY',
-    defaultValue: 'goog_JcnVefJVnUvvVCneWsmfNfOsMcL',
+    defaultValue: '',
   );
+  static const String revenueCatAppleApiKey = String.fromEnvironment(
+    'REVENUECAT_APPLE_API_KEY',
+    defaultValue: '',
+  );
+
+  static bool isRevenueCatConfigured = false;
 
   static Future<void> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -29,13 +34,17 @@ class AppBootstrap {
     await NotificationService().init();
     await Alarm.init();
 
-    if (Platform.isAndroid && revenueCatGoogleApiKey.isNotEmpty) {
+    final String activeApiKey = Platform.isAndroid
+        ? revenueCatGoogleApiKey
+        : (Platform.isIOS ? revenueCatAppleApiKey : '');
+
+    if (activeApiKey.isNotEmpty) {
       try {
-        await Purchases.configure(
-          PurchasesConfiguration(revenueCatGoogleApiKey),
-        );
+        await Purchases.configure(PurchasesConfiguration(activeApiKey));
+        isRevenueCatConfigured = true;
       } catch (e) {
         debugPrint('⚠️ RevenueCat init warning: $e');
+        isRevenueCatConfigured = false;
       }
     }
   }

@@ -5,33 +5,56 @@ import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/geo_models.dart';
 
 class GeoDatabaseService {
   static Database? _database;
+  static const int _currentBundledDbVersion = 2;
+  static const String _dbVersionPrefKey = 'suwaya_bundled_cities_db_version';
 
   // ==========================================
-  // 1. SQLite: إدارة قاعدة بيانات المدن
+  // 1. SQLite: إدارة قاعدة بيانات المدن مع تحديث آمن عبر الإصدارات
   // ==========================================
   static Future<void> loadDatabase() async {
     if (_database != null) return;
     try {
       final dir = await getApplicationDocumentsDirectory();
-      final path = join(dir.path, "Cities_V2.db");
+      final dbPath = join(dir.path, 'Cities_V2.db');
+      final dbFile = File(dbPath);
 
-      if (!File(path).existsSync()) {
-        final data = await rootBundle.load("assets/db/Cities_V2.db");
-        final bytes = data.buffer.asUint8List();
-        await File(path).writeAsBytes(bytes, flush: true);
+      final prefs = await SharedPreferences.getInstance();
+      final installedVersion = prefs.getInt(_dbVersionPrefKey) ?? 0;
+      final needsCopyOrUpgrade = !dbFile.existsSync() ||
+          installedVersion < _currentBundledDbVersion ||
+          dbFile.lengthSync() == 0;
+
+      if (needsCopyOrUpgrade) {
+        final data = await rootBundle.load('assets/db/Cities_V2.db');
+        final bytes = data.buffer.asUint8List(
+          data.offsetInBytes,
+          data.lengthInBytes,
+        );
+
+        // كتابة ذرية في ملف مؤقت أولاً لمنع بقاء نسخة تالفة إذا توقف التطبيق أثناء النسخ
+        final tempPath = '$dbPath.tmp';
+        final tempFile = File(tempPath);
+        await tempFile.writeAsBytes(bytes, flush: true);
+
+        if (dbFile.existsSync()) {
+          await dbFile.delete();
+        }
+        await tempFile.rename(dbPath);
+        await prefs.setInt(_dbVersionPrefKey, _currentBundledDbVersion);
       }
 
-      _database = await openDatabase(path, readOnly: true);
+      _database = await openDatabase(dbPath, readOnly: true);
     } catch (e) {
-      throw Exception("فشل في تحميل قاعدة بيانات المدن: $e");
+      throw Exception('فشل في تحميل قاعدة بيانات المدن: $e');
     }
   }
-
+  
   static Future<List<Map<String, dynamic>>> searchCitiesInCountry(String query, String countryCode) async {
     await loadDatabase();
     if (query.trim().isEmpty || countryCode.isEmpty) return [];

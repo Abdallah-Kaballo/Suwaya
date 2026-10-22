@@ -214,6 +214,8 @@ class SuwayaTemporalContext {
   });
 }
 
+// استبدل الكلاس TemporalContextEngine بالمقطع التالي:
+
 class TemporalContextEngine {
   static const HijriCalendarProvider _defaultHijriProvider =
       UmmAlQuraHijriProvider();
@@ -227,7 +229,8 @@ class TemporalContextEngine {
     Duration? fallbackOffset,
     CalculationMethodType methodType = CalculationMethodType.muslimWorldLeague,
     MadhabType madhabType = MadhabType.shafi,
-    HighLatitudeRuleType highLatRuleType = HighLatitudeRuleType.middleOfTheNight,
+    HighLatitudeRuleType highLatRuleType =
+        HighLatitudeRuleType.middleOfTheNight,
     double customFajrAngle = 18.0,
     double customIshaAngle = 18.0,
     Map<PrayerKey, int>? manualOffsets,
@@ -251,7 +254,17 @@ class TemporalContextEngine {
     final civilDate =
         CivilDate(cityNowWall.year, cityNowWall.month, cityNowWall.day);
 
-    // فحص مواقيت اليوم المدني الحالي لمعرفة موقع اللحظة الحالية بالنسبة للمغرب والغروب الفلكي
+    final nextCivilDayWall = cityNowWall.add(const Duration(days: 1));
+    final nextCivilOffset = offsetAt(
+      DateTime.utc(
+        nextCivilDayWall.year,
+        nextCivilDayWall.month,
+        nextCivilDayWall.day,
+        12,
+      ),
+    );
+
+    // مواقيت اليوم المدني الحالي (ثابتة لتاريخ اليوم الميلادي الجاري)
     final todayIbadat = PrayerCalculator.getIbadatTimings(
       latitude,
       longitude,
@@ -262,6 +275,7 @@ class TemporalContextEngine {
       customFajrAngle,
       customIshaAngle,
       currentTz.utcOffset,
+      nextDayCityOffset: nextCivilOffset,
       manualOffsets: manualOffsets,
       offsetResolver: offsetAt,
     );
@@ -289,7 +303,7 @@ class TemporalContextEngine {
       ),
     );
 
-    final suwayaDay = cachedDay ??
+    final baseDay = cachedDay ??
         SuwayaTimeEngine.generateDay(
           latitude,
           longitude,
@@ -303,7 +317,10 @@ class TemporalContextEngine {
           nextDayCityOffset: cycleNextDayOffset,
           manualOffsets: manualOffsets,
           offsetResolver: offsetAt,
+          civilDayIbadatOverride: todayIbadat,
         );
+
+    final suwayaDay = baseDay.withCivilDayIbadat(todayIbadat);
 
     final astroState = SuwayaTimeEngine.calculateCurrentState(
       suwayaDay,
@@ -311,8 +328,6 @@ class TemporalContextEngine {
       nowUtc: utcNow,
     );
 
-    // 🌟 قاعدة اليوم الهجري الشرعي والليلة:
-    // يتقدم التاريخ الهجري عند الغروب الفلكي الصافي (calculatedSunset) ولا يتقدم مرة ثانية عند 00:00 منتصف الليل!
     final astronomicalSunsetWall =
         todayIbadat.calculatedSunset ?? todayIbadat.maghrib;
     final bool isAfterTodaySunset =
@@ -321,7 +336,6 @@ class TemporalContextEngine {
     final CivilDate islamicLogicalDate =
         isAfterTodaySunset ? civilDate.addDays(1) : civilDate;
 
-    // الليلة الشرعية تمتد من الغروب حتى الفجر
     final bool isIslamicNight =
         isAfterTodaySunset || cityNowWall.isBefore(todayIbadat.fajr);
 

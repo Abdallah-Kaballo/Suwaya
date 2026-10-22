@@ -78,7 +78,10 @@ flutter:
     - assets/icons/sun.png
     - assets/icons/moon.png
     - assets/icons/Astrolabe Crown.png
+    - assets/icons/Hours Hand.png
     - assets/audio/
+    - docs/faq/
+    - docs/privacy/
 
 flutter_launcher_icons:
   android: true

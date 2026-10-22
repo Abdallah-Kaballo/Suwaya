@@ -5,20 +5,13 @@ DateTime resolveAstroRoutineTime({
   required AstroPeriod period,
   required int localSuwaya,
   required int virtualMinute,
+  DateTime Function(DateTime utcInstant)? toWallClock,
 }) {
-  final count = period.suwayasCount > 0 ? period.suwayasCount : 1;
-  final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
-  
-  // 🌟 التعديل: السويعة الآن 60 دقيقة افتراضية
-  final minute = virtualMinute.clamp(0, 59); 
-  final periodDuration = period.totalDuration.inMicroseconds;
-  final denominator = count * 60; 
-  final requestedUnits = suwayaIndex * 60 + minute; 
-  
-  final numerator = periodDuration * requestedUnits;
-  final offsetMicroseconds = (numerator + denominator - 1) ~/ denominator;
-
-  return period.startTime.add(Duration(microseconds: offsetMicroseconds));
+  return period.resolveSlotWallTime(
+    localSuwaya,
+    virtualMinute,
+    toWallClock: toWallClock,
+  );
 }
 
 String buildRoutineScheduleFingerprint(Iterable<RoutineModel> routines) {
