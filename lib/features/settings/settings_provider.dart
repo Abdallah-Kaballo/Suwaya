@@ -389,9 +389,15 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       ..calculationMethod = defaults.method
       ..madhab = defaults.madhab
       ..highLatitudeRule = defaults.highLatitudeRule;
+
+    if (!newState.savedLocations.any(
+      (l) => l.latitude == loc.latitude && l.longitude == loc.longitude,
+    )) {
+      newState.savedLocations = List.from(newState.savedLocations)..add(loc);
+    }
+
     state = newState;
-    _repository.updateActiveLocation(loc);
-    _repository.saveSettings(newState);
+    await _repository.saveSettings(newState);
   }
 
   Future<void> autoDetectLocation() async {
@@ -516,6 +522,38 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     }
 
     newState.activeNightMarkers = current;
+    state = newState;
+    await _repository.saveSettings(newState);
+  }
+
+  Future<void> updateBatchPeriodNotificationSettings({
+    required List<String> periodIds,
+    required bool isEnabled,
+    required int alertLevel,
+    required String soundPath,
+    required double volume,
+  }) async {
+    final newState = state.clone();
+    for (final periodId in periodIds) {
+      final index =
+          newState.periodConfigs.indexWhere((c) => c.periodId == periodId);
+      if (index >= 0) {
+        newState.periodConfigs[index]
+          ..isEnabled = isEnabled
+          ..alertLevel = alertLevel
+          ..soundPath = soundPath
+          ..volume = volume;
+      } else {
+        newState.periodConfigs.add(
+          PeriodConfig()
+            ..periodId = periodId
+            ..isEnabled = isEnabled
+            ..alertLevel = alertLevel
+            ..soundPath = soundPath
+            ..volume = volume,
+        );
+      }
+    }
     state = newState;
     await _repository.saveSettings(newState);
   }

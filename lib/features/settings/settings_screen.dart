@@ -6,6 +6,9 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/location/location_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:suwaya/core/theme/app_theme.dart';
+import 'package:suwaya/core/theme/dial_design_provider.dart';
+import 'package:suwaya/core/theme/theme_color_provider.dart';
 
 import 'settings_provider.dart';
 import 'widgets/smart_location_picker.dart';
@@ -326,6 +329,99 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                     _buildSettingRow(
                       context,
+                      icon: LucideIcons.palette,
+                      title: 'settings.app_color'.tr(),
+                      subtitle: switch (ref.watch(themeColorProvider)) {
+                        AppColorTheme.gold => 'settings.color_gold'.tr(),
+                        AppColorTheme.ocean => 'settings.color_ocean'.tr(),
+                        AppColorTheme.forest => 'settings.color_forest'.tr(),
+                        AppColorTheme.desert => 'settings.color_desert'.tr(),
+                      },
+                      onTap: () => _showSelectionSheet(
+                        'settings.choose_app_color'.tr(),
+                        {
+                          'gold': 'settings.color_gold'.tr(),
+                          'ocean': 'settings.color_ocean'.tr(),
+                          'forest': 'settings.color_forest'.tr(),
+                          'desert': 'settings.color_desert'.tr(),
+                        },
+                        ref.read(themeColorProvider).name,
+                        (val) {
+                          final selected = AppColorTheme.values.firstWhere(
+                            (e) => e.name == val,
+                            orElse: () => AppColorTheme.gold,
+                          );
+                          ref.read(themeColorProvider.notifier).changeTheme(selected);
+                        },
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.compass,
+                      title: 'settings.dial_design'.tr(),
+                      subtitle: switch (ref.watch(dialDesignProvider)) {
+                        DialDesign.classic => 'settings.design_classic'.tr(),
+                        DialDesign.minimal => 'settings.design_minimal'.tr(),
+                        DialDesign.geometric => 'settings.design_geometric'.tr(),
+                      },
+                      onTap: () => _showSelectionSheet(
+                        'settings.choose_dial_design'.tr(),
+                        {
+                          'classic': 'settings.design_classic'.tr(),
+                          'minimal': 'settings.design_minimal'.tr(),
+                          'geometric': 'settings.design_geometric'.tr(),
+                        },
+                        ref.read(dialDesignProvider).name,
+                        (val) {
+                          final selected = DialDesign.values.firstWhere(
+                            (e) => e.name == val,
+                            orElse: () => DialDesign.classic,
+                          );
+                          ref.read(dialDesignProvider.notifier).changeDesign(selected);
+                        },
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.hash,
+                      title: 'settings.dial_pin_mode'.tr(),
+                      subtitle: settingsState.dialPinMode == 'civil24'
+                          ? 'settings.dial_pin_24'.tr()
+                          : 'settings.dial_pin_12'.tr(),
+                      onTap: () => _showSelectionSheet(
+                        'settings.dial_pin_mode'.tr(),
+                        {
+                          'suwaya24': 'settings.dial_pin_12'.tr(),
+                          'civil24': 'settings.dial_pin_24'.tr(),
+                        },
+                        settingsState.dialPinMode,
+                        notifier.updateDialPinMode,
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+
+                    _buildSettingRow(
+                      context,
                       icon: LucideIcons.languages,
                       title: 'settings.app_language'.tr(),
                       subtitle: currentLangName,
@@ -605,8 +701,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color textColor,
     Color primaryColor,
   ) {
-    if (_searchQuery.isNotEmpty &&
-        !label.toLowerCase().contains(_searchQuery)) {
+    final filteredRows = _searchQuery.isEmpty
+        ? rows
+        : rows.where((w) {
+            if (label.toLowerCase().contains(_searchQuery)) return true;
+            if (w is _SettingRow) {
+              return w.title.toLowerCase().contains(_searchQuery) ||
+                  (w.subtitle?.toLowerCase().contains(_searchQuery) ?? false);
+            }
+            return true;
+          }).toList();
+
+    if (filteredRows.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -634,10 +740,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               border: Border.all(color: borderColor),
             ),
             child: Column(
-              children: rows.asMap().entries.map((entry) {
+              children: filteredRows.asMap().entries.map((entry) {
                 final int idx = entry.key;
                 final Widget row = entry.value;
-                if (idx == rows.length - 1) return row;
+                if (idx == filteredRows.length - 1) return row;
                 return Column(
                   children: [
                     row,

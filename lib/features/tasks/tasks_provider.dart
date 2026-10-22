@@ -269,9 +269,7 @@ class TasksNotifier extends Notifier<TasksState> {
     final updatedList =
         state.allTasks.where((t) => !ids.contains(t.id)).toList();
     _refreshFromMemory(updatedList);
-    for (var id in ids) {
-      await ref.read(taskRepositoryProvider).deleteTask(id);
-    }
+    await ref.read(taskRepositoryProvider).deleteTasks(ids);
   }
 
   Future<void> toggleTaskStatus(TaskModel task) async {

@@ -88,10 +88,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     DateTime cityNow,
     SettingsModel settings,
   ) {
-    // 🌟 الاعتماد على الغروب الفلكي الصافي (calculatedSunset) لبداية الليلة الهجرية حتى لا يتأثر بالتعديل اليدوي للأذان
-    final DateTime rawFajr = astroState.ibadatTimings.fajr;
-    final DateTime rawSunset =
-        astroState.ibadatTimings.calculatedSunset ?? astroState.ibadatTimings.maghrib;
+    // 🌟 قراءة الفجر والغروب الفلكي الصافي من مواقيت اليوم المدني الحالي (civilDayIbadat)
+    final DateTime rawFajr = astroState.civilDayIbadat.fajr;
+    final DateTime rawSunset = astroState.civilDayIbadat.calculatedSunset ??
+        astroState.civilDayIbadat.maghrib;
 
     final DateTime todayFajr = DateTime(
       cityNow.year,
@@ -219,10 +219,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF13131A) : Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isHighlighted ? color : color.withValues(alpha: 0.3),
+            color: isHighlighted ? color : color.withValues(alpha: 0.40),
             width: isHighlighted ? 2.0 : 1.5,
           ),
           boxShadow: isHighlighted
@@ -310,11 +310,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     final pColor = astroState.currentPeriod.uiColor.adapt(context);
     final cityNow = _getCityTime(settings);
+    final isDialTouching = ref.watch(isDialTouchActiveProvider);
 
     return Scaffold(
       backgroundColor: scaffoldBgColor,
-      drawerEnableOpenDragGesture: true,
-      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+      drawerEnableOpenDragGesture: !isDialTouching,
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width,
       drawer: const AppDrawer(),
       onDrawerChanged: (isOpen) =>
           ref.read(isDrawerOpenProvider.notifier).state = isOpen,
@@ -385,9 +386,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               .refreshDynamicLocationIfNeeded();
         },
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
+          physics: isDialTouching
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
           slivers: [
             SliverToBoxAdapter(
               child: _buildTopHeader(
@@ -587,8 +590,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               );
                             }),
                             ...tasksForLegend.map((task) {
-                              Color tColor =
-                                  getNeonColorForCategory(task.category);
+                              final Color tColor = getNeonColorForCategory(
+                                task.category,
+                                isDark: isDark,
+                              );
                               final isHighlighted =
                                   ref.watch(highlightedTaskProvider) == task.id;
 

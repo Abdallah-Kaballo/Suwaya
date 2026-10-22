@@ -1,5 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
     <!-- صلاحية الدفع عبر جوجل بلاي -->
     <uses-permission android:name="com.android.vending.BILLING" />
 
@@ -12,24 +11,19 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     
-    <!-- 🌟 تم إضافة صلاحيات تشغيل الخدمة في الخلفية لتشغيل المنبهات بأمان -->
+    <!-- صلاحيات تشغيل الخدمة في الخلفية لتشغيل المنبهات بأمان -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     
     <!-- صلاحيات المنبه الدقيق وإيقاظ الشاشة -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    
-    <!-- 🌟 تم الإبقاء على SCHEDULE_EXACT_ALARM فقط كما نصحت التوجيهات -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
-    
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     
     <!-- الشبكة -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-
+    
     <application
         android:label="Suwaya"
         android:name="${applicationName}"

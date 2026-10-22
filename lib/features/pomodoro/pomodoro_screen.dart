@@ -44,7 +44,7 @@ class PomodoroScreen extends ConsumerWidget {
         backgroundColor: scaffoldBgColor,
         drawerEnableOpenDragGesture:
             !isSubView && !pomodoroState.isFullScreen,
-        drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+        drawerEdgeDragWidth: MediaQuery.of(context).size.width,
         drawer: const AppDrawer(),
         onDrawerChanged: (isOpen) =>
             ref.read(isDrawerOpenProvider.notifier).state = isOpen,

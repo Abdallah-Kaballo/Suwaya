@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:suwaya/core/providers/ui_providers.dart';
 import 'package:suwaya/core/theme/astro_ui_extensions.dart';
 import 'package:suwaya/core/utils/time_formatters.dart';
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
@@ -541,24 +542,29 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               task.targetVirtualMinute,
             );
           } else if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
-            DateTime pStartNoSecs = DateTime.utc(
+            final int h = task.targetCivilTimeMinutes! ~/ 60;
+            final int m = task.targetCivilTimeMinutes! % 60;
+            final DateTime candidateDay1 = DateTime.utc(
               dayStart.year,
               dayStart.month,
               dayStart.day,
-              dayStart.hour,
-              dayStart.minute,
+              h,
+              m,
             );
-            DateTime dt = DateTime.utc(
-              dayStart.year,
-              dayStart.month,
-              dayStart.day,
-              task.targetCivilTimeMinutes! ~/ 60,
-              task.targetCivilTimeMinutes! % 60,
+            final DateTime candidateDay2 = DateTime.utc(
+              dayEnd.year,
+              dayEnd.month,
+              dayEnd.day,
+              h,
+              m,
             );
-            if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
-            if (dt.isAfter(dayEnd)) dt = dt.subtract(const Duration(days: 1));
-            if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
-            taskTime = dt;
+            if (!candidateDay1.isBefore(dayStart) &&
+                !candidateDay1.isAfter(dayEnd)) {
+              taskTime = candidateDay1;
+            } else if (!candidateDay2.isBefore(dayStart) &&
+                !candidateDay2.isAfter(dayEnd)) {
+              taskTime = candidateDay2;
+            }
           }
           if (taskTime != null) {
             Color tColor =
@@ -625,24 +631,50 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           ValueListenableBuilder<DateTime>(
             valueListenable: virtualDateTimeNotifier,
             builder: (context, liveTime, _) {
-              final needleAngle = timeToAngle(liveTime, dayStart, dayEnd);
+              // 🌟 تكميم الوقت المستخدم لدوران القرص والعقرب إلى خطوات كل 15 ثانية
+              // (15 ثانية تعادل 0.06 درجة فقط، أي أقل من 0.2 بكسل غير مرئية للعين)
+              // مما يمنع إعادة رسم الحلقات والـ CustomPainters في كل ثانية!
+              final quantizedSeconds = (liveTime.second ~/ 15) * 15;
+              final dialTime = DateTime.utc(
+                liveTime.year,
+                liveTime.month,
+                liveTime.day,
+                liveTime.hour,
+                liveTime.minute,
+                quantizedSeconds,
+              );
+
+              final needleAngle = timeToAngle(dialTime, dayStart, dayEnd);
               final autoRotationOffset =
                   settings.isDialAutoRotating ? -(needleAngle + pi / 2) : 0.0;
 
-              return GestureDetector(
-                onPanDown: _onPanDown,
-                onPanUpdate: _onPanUpdate,
-                onPanEnd: _onPanEnd,
-                onPanCancel: _onPanCancel,
-                onTapUp: (details) => _handleTap(
-                  details,
-                  astroState,
-                  dayStart,
-                  dayEnd,
-                  autoRotationOffset + _manualRotation.value,
-                  selectedDesign,
-                ),
-                child: AnimatedBuilder(
+              return Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) {
+                  ref.read(isDialTouchActiveProvider.notifier).state = true;
+                },
+                onPointerUp: (_) {
+                  ref.read(isDialTouchActiveProvider.notifier).state = false;
+                },
+                onPointerCancel: (_) {
+                  ref.read(isDialTouchActiveProvider.notifier).state = false;
+                },
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: _onPanDown,
+                  onPanStart: (_) {},
+                  onPanUpdate: _onPanUpdate,
+                  onPanEnd: _onPanEnd,
+                  onPanCancel: _onPanCancel,
+                  onTapUp: (details) => _handleTap(
+                    details,
+                    astroState,
+                    dayStart,
+                    dayEnd,
+                    autoRotationOffset + _manualRotation.value,
+                    selectedDesign,
+                  ),
+                  child: AnimatedBuilder(
                   animation: _manualRotation,
                   builder: (context, _) {
                     final totalRotation =
@@ -709,11 +741,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                           ),
                           if (selectedDesign == DialDesign.classic)
                             _buildMaghribCrownImage(dayStart, dayEnd),
-                          // 🌟 استخدام صورة العقرب المرفقة Hours Hand.png (أو الرسم المبسط في الوضع Minimal)
                           if (selectedDesign == DialDesign.minimal)
                             _buildLayer(
                               DynamicNeedlePainter(
-                                currentTime: liveTime,
+                                currentTime: dialTime,
                                 dayStart: dayStart,
                                 dayEnd: dayEnd,
                                 isDark: isDark,
@@ -721,17 +752,35 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                               ),
                             )
                           else
-                            _buildHoursHandImage(needleAngle),
+                            _buildHoursHandImage(needleAngle, isDark),
                         ],
                       ),
                     );
                   },
                 ),
+               )
               );
             },
           ),
-          _buildCenterGlow(isDark, selectedDesign, isDayPhase),
-          _buildCentralTime(astroState, textColor, isDark, settings),
+          // 🌟 عزل الهالة الوسطى والساعة الرقمية في RepaintBoundary مستقلين
+          // لضمان أن تحديث الثواني يعيد رسم نص الساعة فقط دون لمس القرص الفلكي!
+          RepaintBoundary(
+            child: _buildCenterGlow(isDark, selectedDesign, isDayPhase),
+          ),
+          RepaintBoundary(
+            child: Semantics(
+              container: true,
+              liveRegion: true,
+              label:
+                  '${_periodTitle(astroState.currentPeriod)}، ${settings.useAstroTimeForIbadat ? virtualTimeNotifier.value : formatCivilTime(astroState.virtualTime, format: settings.civilTimeFormat, locale: currentLangCode, context: context)}',
+              child: _buildCentralTime(
+                astroState,
+                textColor,
+                isDark,
+                settings,
+              ),
+            ),
+          ), 
         ],
       ),
     );
@@ -743,52 +792,101 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: CustomPaint(painter: painter),
       );
 
-  /// 🌟 رسم عقرب الساعة باستخدام الصورة المرفقة (assets/icons/Hours Hand.png)
-  /// يمتد العقرب من تحت القرص المركزي (الشمس/القمر) حتى حافة مسار السكة (kRailwayR)
-  Widget _buildHoursHandImage(double needleAngle) {
+  Widget _buildHoursHandImage(double needleAngle, bool isDark) {
     final double r = widget.size / 2;
-    final double startRadius = r * 0.20; // يبدأ من تحت القرص المركزي (0.34 * r)
-    final double tipRadius = r * kRailwayR - 4.0; // ينتهي عند حافة مسار السكة
+    final double startRadius = r * 0.20;
+    final double tipRadius = r * kRailwayR - 4.0;
     final double handLength = tipRadius - startRadius;
     final double handWidth = handLength * 0.36;
     final double centerOffsetY = -(startRadius + (handLength / 2));
+
+    const List<double> silverWhiteMatrix = <double>[
+      0.55, 0.55, 0.55, 0.0, 145.0,
+      0.57, 0.57, 0.57, 0.0, 150.0,
+      0.62, 0.62, 0.62, 0.0, 162.0,
+      0.0,  0.0,  0.0,  1.0, 0.0,
+    ];
+
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final Widget baseHandImage = Image.asset(
+      'assets/icons/Hours Hand.png',
+      width: handWidth,
+      height: handLength,
+      cacheHeight: (handLength * dpr).round(),
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.medium,
+    );
 
     return IgnorePointer(
       child: Transform.rotate(
         angle: needleAngle + pi / 2,
         child: Transform.translate(
           offset: Offset(0, centerOffsetY),
-          child: Image.asset(
-            'assets/icons/Hours Hand.png',
-            width: handWidth,
-            height: handLength,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
+          child: RepaintBoundary(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Transform.translate(
+                  offset: const Offset(0, 2.0),
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withValues(alpha: isDark ? 0.80 : 0.45),
+                        BlendMode.srcIn,
+                      ),
+                      child: baseHandImage,
+                    ),
+                  ),
+                ),
+                if (isDark)
+                  ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 6.5, sigmaY: 6.5),
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        const Color(0xFFE0F2FE).withValues(alpha: 0.75),
+                        BlendMode.srcIn,
+                      ),
+                      child: baseHandImage,
+                    ),
+                  ),
+                if (isDark)
+                  ColorFiltered(
+                    colorFilter: const ColorFilter.matrix(silverWhiteMatrix),
+                    child: baseHandImage,
+                  )
+                else
+                  baseHandImage,
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// 🌟 وضع صورة التاج الإسطرلابي (Astrolabe Crown.png)
+  /// 🌟 تكبير صورة التاج الإسطرلابي (Astrolabe Crown.png) بمقدار 1.5x (33x30 بدلاً من 22x20)
+  // 2. استبدل دالة _buildMaghribCrownImage بـ:
   Widget _buildMaghribCrownImage(DateTime dayStart, DateTime dayEnd) {
     final double r = widget.size / 2;
     final double edgeR = r * kRailwayR;
     final double maghribAngle = timeToAngle(dayStart, dayStart, dayEnd);
-    const double crownWidth = 22.0;
-    const double crownHeight = 20.0;
+    const double crownWidth = 33.0;
+    const double crownHeight = 30.0;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
 
     return IgnorePointer(
       child: Transform.rotate(
         angle: maghribAngle + pi / 2,
         child: Transform.translate(
-          offset: Offset(0, -(edgeR + (crownHeight / 2) - 1.5)),
+          offset: Offset(0, -(edgeR + (crownHeight / 2) - 2.5)),
           child: Image.asset(
             'assets/icons/Astrolabe Crown.png',
             width: crownWidth,
             height: crownHeight,
+            cacheWidth: (crownWidth * dpr).round(),
             fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
+            filterQuality: FilterQuality.medium,
           ),
         ),
       ),
@@ -831,8 +929,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                 imagePath,
                 width: centerDiameter,
                 height: centerDiameter,
+                cacheWidth:
+                    (centerDiameter * MediaQuery.devicePixelRatioOf(context))
+                        .round(),
                 fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
+                filterQuality: FilterQuality.medium,
               ),
               DecoratedBox(
                 decoration: BoxDecoration(

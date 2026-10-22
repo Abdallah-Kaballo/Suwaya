@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
@@ -67,5 +67,9 @@ jobs:
       - name: Build Android debug APK
         run: flutter build apk --debug
 
-      - name: Verify Android release APK build (R8 & ProGuard check)
-        run: flutter build apk --release -PallowDebugReleaseSign=true
+      - name: Verify Android release APK & AAB build (R8 & ProGuard check)
+        env:
+          ORG_GRADLE_PROJECT_allowDebugReleaseSign: "true"
+        run: |
+          flutter build apk --release
+          flutter build appbundle --release

@@ -135,17 +135,35 @@ class TimezoneContext {
   });
 }
 
-/// محلل المنطقة الزمنية باستخدام قاعدة بيانات IANA (timezone)
 class TimezoneResolver {
+  static String? _cachedTzId;
+  static tz.Location? _cachedLocation;
+
+  static tz.Location? _getLocationCached(String timezoneId) {
+    final trimmed = timezoneId.trim();
+    if (trimmed.isEmpty) return null;
+    if (_cachedTzId == trimmed && _cachedLocation != null) {
+      return _cachedLocation;
+    }
+    try {
+      final loc = tz.getLocation(trimmed);
+      _cachedTzId = trimmed;
+      _cachedLocation = loc;
+      return loc;
+    } catch (_) {
+      return null;
+    }
+  }
+
   static TimezoneContext resolveForInstant(
     DateTime instantUtc, {
     String? timezoneId,
     Duration? fallbackOffset,
   }) {
     final utc = instantUtc.toUtc();
-    if (timezoneId != null && timezoneId.trim().isNotEmpty) {
-      try {
-        final location = tz.getLocation(timezoneId.trim());
+    if (timezoneId != null && timezoneId.isNotEmpty) {
+      final location = _getLocationCached(timezoneId);
+      if (location != null) {
         final tzInstant = tz.TZDateTime.from(utc, location);
         return TimezoneContext(
           timezoneId: location.name,
@@ -153,7 +171,7 @@ class TimezoneResolver {
           isDaylightSavingTime: tzInstant.timeZone.isDst,
           confidence: TemporalConfidence.exact,
         );
-      } catch (_) {}
+      }
     }
 
     final offset = fallbackOffset ?? DateTime.now().timeZoneOffset;
@@ -165,7 +183,6 @@ class TimezoneResolver {
     );
   }
 
-  /// تحويل لحظة عالمية (UTC) إلى ساعة حائط محلية للمدينة
   static DateTime toWallClock(
     DateTime instantUtc, {
     String? timezoneId,

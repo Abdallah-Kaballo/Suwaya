@@ -55,6 +55,7 @@ class GeoDatabaseService {
     }
   }
   
+
   static Future<List<Map<String, dynamic>>> searchCitiesInCountry(String query, String countryCode) async {
     await loadDatabase();
     if (query.trim().isEmpty || countryCode.isEmpty) return [];
@@ -96,7 +97,22 @@ class GeoDatabaseService {
     return list;
   }
   
-  static Future<List<Map<String, dynamic>>> getCitiesByCountry(String countryCode) async {
+  static final RegExp _arDiacriticsRegex = RegExp(r'[\u064B-\u065F\u0670]');
+  static final RegExp _arMultiAlefLamRegex = RegExp(r'^ا{2,}ل');
+  static final RegExp _arAdminPrefixRegex =
+      RegExp(r'^(محافظة|مدينة|ولاية|مقاطعة|بلدية)\s+');
+  static final RegExp _arHyphenRegex =
+      RegExp(r'(?<=[\u0600-\u06FF])-(?=[\u0600-\u06FF])');
+  static final RegExp _parenthesesRegex = RegExp(r'\s*\(.*?\)\s*');
+  static final RegExp _multiSpaceRegex = RegExp(r'\s+');
+  static final RegExp _enAdminSuffixRegex = RegExp(
+    r'\s+(Governorate|City|Municipality|Province)$',
+    caseSensitive: false,
+  );
+
+  static Future<List<Map<String, dynamic>>> getCitiesByCountry(
+    String countryCode,
+  ) async {
     await loadDatabase();
     final results = await _database!.rawQuery('''
       SELECT name_ar as name, name_en as nameEn, country_code as countryCode, lat, lng, timezone
@@ -107,20 +123,26 @@ class GeoDatabaseService {
       final mutableRow = Map<String, dynamic>.from(row);
       String? arName = mutableRow['name'] as String?;
       String? enName = mutableRow['nameEn'] as String?;
-      
+
       if (arName != null) {
-        arName = arName.replaceAll(RegExp(r'[\u064B-\u065F\u0670]'), ''); 
-        arName = arName.replaceAll(RegExp(r'^ا{2,}ل'), 'ال'); 
-        arName = arName.replaceAll(RegExp(r'^(محافظة|مدينة|ولاية|مقاطعة|بلدية)\s+'), ''); 
-        arName = arName.replaceAll(RegExp(r'(?<=[\u0600-\u06FF])-(?=[\u0600-\u06FF])'), ' '); 
-        arName = arName.replaceAll(RegExp(r'\s*\(.*?\)\s*'), ''); 
-        mutableRow['name'] = arName.trim().replaceAll(RegExp(r'\s+'), ' '); 
+        arName = arName
+            .replaceAll(_arDiacriticsRegex, '')
+            .replaceAll(_arMultiAlefLamRegex, 'ال')
+            .replaceAll(_arAdminPrefixRegex, '')
+            .replaceAll(_arHyphenRegex, ' ')
+            .replaceAll(_parenthesesRegex, '')
+            .trim()
+            .replaceAll(_multiSpaceRegex, ' ');
+        mutableRow['name'] = arName;
       }
 
       if (enName != null) {
-        enName = enName.replaceAll(RegExp(r'\s+(Governorate|City|Municipality|Province)$', caseSensitive: false), '');
-        enName = enName.replaceAll(RegExp(r'\s*\(.*?\)\s*'), '');
-        mutableRow['nameEn'] = enName.trim().replaceAll(RegExp(r'\s+'), ' ');
+        enName = enName
+            .replaceAll(_enAdminSuffixRegex, '')
+            .replaceAll(_parenthesesRegex, '')
+            .trim()
+            .replaceAll(_multiSpaceRegex, ' ');
+        mutableRow['nameEn'] = enName;
       }
       return mutableRow;
     }).toList();

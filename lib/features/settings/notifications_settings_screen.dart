@@ -91,18 +91,15 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             currentVolume: prayersVolume,
             onSave: (level, tone, vol) async {
               if (level > 0) await _requestPermissions(ref);
-              const ids = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-              for (final id in ids) {
-                await ref
-                    .read(settingsProvider.notifier)
-                    .updatePeriodNotificationSettings(
-                      periodId: id,
-                      isEnabled: level > 0,
-                      alertLevel: level,
-                      soundPath: tone,
-                      volume: vol,
-                    );
-              }
+              await ref
+                  .read(settingsProvider.notifier)
+                  .updateBatchPeriodNotificationSettings(
+                    periodIds: const ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'],
+                    isEnabled: level > 0,
+                    alertLevel: level,
+                    soundPath: tone,
+                    volume: vol,
+                  );
             },
           ),
           const SizedBox(height: 20),
@@ -121,24 +118,21 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             isFadeInForced: true,
             onSave: (level, tone, vol) async {
               if (level > 0) await _requestPermissions(ref);
-              const nightIds = [
-                'half_2',
-                'third_3',
-                'sixth_4',
-                'sixth_5',
-                'sixth_6',
-              ];
-              for (final id in nightIds) {
-                await ref
-                    .read(settingsProvider.notifier)
-                    .updatePeriodNotificationSettings(
-                      periodId: id,
-                      isEnabled: level > 0,
-                      alertLevel: level,
-                      soundPath: tone,
-                      volume: vol,
-                    );
-              }
+              await ref
+                  .read(settingsProvider.notifier)
+                  .updateBatchPeriodNotificationSettings(
+                    periodIds: const [
+                      'half_2',
+                      'third_3',
+                      'sixth_4',
+                      'sixth_5',
+                      'sixth_6',
+                    ],
+                    isEnabled: level > 0,
+                    alertLevel: level,
+                    soundPath: tone,
+                    volume: vol,
+                  );
             },
           ),
           const SizedBox(height: 32),
@@ -161,11 +155,129 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
             textColor,
             accentColor,
           ),
+          const SizedBox(height: 20),
+          _buildSnoozeSection(
+            settings,
+            surfaceColor,
+            textColor,
+            accentColor,
+          ),
           const SizedBox(height: 40),
         ],
       ),
     );
   }
+
+  Widget _buildSnoozeSection(
+    SettingsModel settings,
+    Color surfaceColor,
+    Color textColor,
+    Color accentColor,
+  ) {
+    final durationOptions = {
+      5: 'notifications.mins_5'.tr(),
+      10: 'notifications.mins_10'.tr(),
+      15: 'notifications.mins_15'.tr(),
+      30: 'notifications.mins_30'.tr(),
+    };
+    final maxCountOptions = {
+      1: 'notifications.once'.tr(),
+      3: 'notifications.times_3'.tr(),
+      5: 'notifications.times_5'.tr(),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.snooze_rounded, color: accentColor, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'notifications.snooze_system'.tr(),
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'notifications.snooze_duration'.tr(),
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.7),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: durationOptions.entries.map((entry) {
+              final isSelected = settings.snoozeDurationMinutes == entry.key;
+              return ChoiceChip(
+                label: Text(entry.value),
+                selected: isSelected,
+                selectedColor: accentColor.withValues(alpha: 0.2),
+                labelStyle: TextStyle(
+                  color: isSelected ? accentColor : textColor,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                onSelected: (_) {
+                  HapticFeedback.selectionClick();
+                  ref.read(settingsProvider.notifier).updateSnoozeSettings(
+                        durationMinutes: entry.key,
+                        maxCount: settings.maxSnoozeCount,
+                      );
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'notifications.snooze_max'.tr(),
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.7),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: maxCountOptions.entries.map((entry) {
+              final isSelected = settings.maxSnoozeCount == entry.key;
+              return ChoiceChip(
+                label: Text(entry.value),
+                selected: isSelected,
+                selectedColor: accentColor.withValues(alpha: 0.2),
+                labelStyle: TextStyle(
+                  color: isSelected ? accentColor : textColor,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                onSelected: (_) {
+                  HapticFeedback.selectionClick();
+                  ref.read(settingsProvider.notifier).updateSnoozeSettings(
+                        durationMinutes: settings.snoozeDurationMinutes,
+                        maxCount: entry.key,
+                      );
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> _requestPermissions(WidgetRef ref) async {
     final perms = ref.read(permissionsProvider.notifier);
@@ -315,7 +427,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                         ),
                         AnimatedSize(
                           duration: const Duration(milliseconds: 300),
-                          child: mode == 2
+                          child: isEnabled
                               ? StatefulBuilder(
                                   builder: (context, setSliderState) {
                                     double localVolume =
@@ -334,7 +446,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                                             accentColor,
                                             (selectedTone) {
                                               onSave(
-                                                2,
+                                                mode,
                                                 selectedTone,
                                                 localVolume,
                                               );
@@ -439,7 +551,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                                                     });
                                                   },
                                                   onChangeEnd: (val) => onSave(
-                                                    2,
+                                                    mode,
                                                     currentTone,
                                                     val,
                                                   ),

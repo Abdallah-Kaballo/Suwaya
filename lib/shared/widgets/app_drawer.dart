@@ -105,26 +105,41 @@ class AppDrawer extends ConsumerWidget {
               children: [
                 const Icon(LucideIcons.circle_check, color: Colors.green),
                 const SizedBox(width: 8),
-                Text('drawer.up_to_date'.tr(),
+                Expanded(
+                  child: Text(
+                    'settings.about'.tr(),
                     style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18)),
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
               ],
             ),
-            content: Text('drawer.latest_version_msg'.tr(),
-                style: TextStyle(
-                    color: textColor.withValues(alpha: 0.7), height: 1.5)),
+            content: Text(
+              'drawer.up_to_date'.tr(),
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.8),
+                height: 1.5,
+              ),
+            ),
             actions: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8))),
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () => Navigator.pop(ctx),
-                child: Text('common.done'.tr(),
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'common.done'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),

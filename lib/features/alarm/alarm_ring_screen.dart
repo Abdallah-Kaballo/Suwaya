@@ -199,7 +199,6 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
     final settings = ref.watch(settingsProvider);
     final maxSnoozes = settings.maxSnoozeCount > 0
         ? settings.maxSnoozeCount
@@ -219,24 +218,27 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
         body: Stack(
           alignment: Alignment.center,
           children: [
-            AnimatedBuilder(
-              animation: _glowAnimation,
-              builder: (context, child) {
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      center: Alignment.center,
-                      radius: 1.4,
-                      colors: [
-                        accentColor.withValues(alpha: _glowAnimation.value),
-                        const Color(0xFF0B0F19),
-                      ],
+            RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _glowAnimation,
+                builder: (context, child) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment.center,
+                        radius: 1.4,
+                        colors: [
+                          accentColor.withValues(alpha: _glowAnimation.value),
+                          const Color(0xFF0B0F19),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-            SafeArea(
+            RepaintBoundary(
+              child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
@@ -274,37 +276,24 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                           ),
                         ),
                         const SizedBox(height: 18),
-                        ClockTimeText.civil(
-                          civilTime: now,
-                          civilTimeFormat: settings.civilTimeFormat,
-                          locale: context.locale.languageCode,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 62,
-                            fontWeight: FontWeight.w900,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        ValueListenableBuilder<String>(
-                          valueListenable: virtualTimeNotifier,
-                          builder: (context, virtualTime, _) {
-                            return Directionality(
-                              textDirection: ui.TextDirection.ltr,
-                              child: Text(
-                                virtualTime,
-                                style: const TextStyle(
-                                  color: Color(0xFFF2C94C),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: 'Inter',
-                                  letterSpacing: 1.2,
-                                ),
+                      
+                        ValueListenableBuilder<DateTime>(
+                          valueListenable: virtualDateTimeNotifier,
+                          builder: (context, liveCivilNow, _) {
+                            return ClockTimeText.civil(
+                              civilTime: liveCivilNow,
+                              civilTimeFormat: settings.civilTimeFormat,
+                              locale: context.locale.languageCode,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 62,
+                                fontWeight: FontWeight.w900,
+                                fontFamily: 'Inter',
                               ),
                             );
                           },
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 6),
                         Text(
                           taskTitle,
                           style: TextStyle(
@@ -347,13 +336,27 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                           ),
                       ],
                     ),
+                    
+                    
 
                     // 🌟 القسم السفلي: شريط السحب والأزرار الصريحة
                     Column(
                       children: [
-                        Directionality(
-                          textDirection: ui.TextDirection.ltr,
-                          child: LayoutBuilder(
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            'alarm.swipe_to_stop'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        ExcludeSemantics(
+                          child: Directionality(
+                            textDirection: ui.TextDirection.ltr,
+                            child: LayoutBuilder(
                             builder: (context, constraints) {
                               final trackWidth = constraints.maxWidth - 16;
                               return Container(
@@ -476,8 +479,11 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                 ),
                               );
                             },
+                            ),
                           ),
+                          
                         ),
+                    
                         const SizedBox(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -531,9 +537,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

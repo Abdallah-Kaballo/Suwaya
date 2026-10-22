@@ -42,21 +42,21 @@ extension TaskCategoryExtension on TaskCategory {
   Color get dialColor {
     switch (this) {
       case TaskCategory.work:
-        return const Color(0xFF00E5FF);
+        return const Color(0xFF22D3EE); // سماوي سيان صافي
       case TaskCategory.study:
-        return const Color(0xFF00E676);
+        return const Color(0xFF34D399); // زمردي مريح للعين
       case TaskCategory.sport:
-        return const Color(0xFFFF3D00);
+        return const Color(0xFFFF6E40); // مرجاني برتقالي نشط وغير مجهد للعين
       case TaskCategory.worship:
-        return const Color(0xFFFFC400);
+        return const Color(0xFFFBBF24); // ذهبي كهرماني دافئ
       case TaskCategory.entertainment:
-        return const Color(0xFFFF4081);
+        return const Color(0xFFF472B6); // وردي ناعم واضح
       case TaskCategory.personal:
-        return const Color(0xFFE040FB);
+        return const Color(0xFFC084FC); // أرجواني لافندر متوازن
       case TaskCategory.social:
-        return const Color(0xFF76FF03);
+        return const Color(0xFF4ADE80); // أخضر نعناعي متناغم بدلاً من الليموني الفاقع
       case TaskCategory.unspecified:
-        return const Color(0xFF94A3B8); // 🌟 رمادي فضي مميز عن فئة العمل
+        return const Color(0xFF94A3B8); // فضي أردوازي
     }
   }
 
@@ -64,21 +64,21 @@ extension TaskCategoryExtension on TaskCategory {
     if (isDark) return dialColor;
     switch (this) {
       case TaskCategory.work:
-        return const Color(0xFF006978);
+        return const Color(0xFF0E7490);
       case TaskCategory.study:
-        return const Color(0xFF1B5E20);
+        return const Color(0xFF15803D);
       case TaskCategory.sport:
-        return const Color(0xFFBF360C);
+        return const Color(0xFFC2410C);
       case TaskCategory.worship:
         return const Color(0xFF8A5A00);
       case TaskCategory.entertainment:
-        return const Color(0xFFAD1457);
+        return const Color(0xFF9D174D);
       case TaskCategory.personal:
-        return const Color(0xFF6A1B9A);
+        return const Color(0xFF6B21A8);
       case TaskCategory.social:
-        return const Color(0xFF33691E);
+        return const Color(0xFF166534);
       case TaskCategory.unspecified:
-        return const Color(0xFF475569); // 🌟 رمادي أردوازي داكن عالي التباين في الفاتح
+        return const Color(0xFF475569);
     }
   }
 }

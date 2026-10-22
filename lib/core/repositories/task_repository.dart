@@ -36,6 +36,13 @@ class TaskRepository {
         .findAll();
   }
 
+  Future<void> deleteTasks(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await _isar.writeTxn(() async {
+      await _isar.taskModels.deleteAll(ids);
+    });
+  }
+
   Future<List<TaskModel>> getAllTasks() async {
     return await _isar.taskModels.where().findAll();
   }

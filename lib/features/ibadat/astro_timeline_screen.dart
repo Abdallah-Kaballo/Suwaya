@@ -214,7 +214,15 @@ class AstroTimelineScreen extends ConsumerWidget {
             ),
             Directionality(
               textDirection: ui.TextDirection.ltr,
-              child: Text(suwayaStr, style: const TextStyle(color: Color(0xFFF2C94C), fontWeight: FontWeight.w600, fontFamily: 'Inter', fontSize: 15)),
+              child: Text(
+                suwayaStr,
+                style: TextStyle(
+                  color: suwayaTimeContrastColor(context),
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Inter',
+                  fontSize: 15,
+                ),
+              ),
             ),
           ]
         )

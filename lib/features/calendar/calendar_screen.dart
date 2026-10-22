@@ -131,7 +131,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
+    final now = virtualDateTimeNotifier.value;
     _selectedDate = DateTime(now.year, now.month, now.day);
     _syncFocusedMonthToDate(_selectedDate);
   }
@@ -167,7 +167,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   void _jumpToToday() {
     HapticFeedback.lightImpact();
-    final now = DateTime.now();
+    final now = virtualDateTimeNotifier.value;
     setState(() {
       _selectedDate = DateTime(now.year, now.month, now.day);
       _syncFocusedMonthToDate(_selectedDate);
@@ -320,7 +320,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       backgroundColor: scaffoldBgColor,
       drawerEnableOpenDragGesture: true,
-      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width,
       drawer: const AppDrawer(),
       onDrawerChanged: (isOpen) =>
           ref.read(isDrawerOpenProvider.notifier).state = isOpen,
@@ -742,7 +742,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       visibleSlots = fullPaddedSlots.sublist(weekRowStart, weekRowStart + 7);
     }
 
-    final today = DateTime.now();
+    final today = virtualDateTimeNotifier.value;
     final langCode = context.locale.languageCode;
 
     return GridView.builder(

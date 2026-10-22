@@ -216,6 +216,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
     with WidgetsBindingObserver {
   StreamSubscription<AlarmSet>? _alarmSubscription;
   int? _activeRingingAlarmId;
+  AlarmSettings? _activeCurtainAlarm;
 
   @override
   void initState() {
@@ -225,16 +226,25 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
     _alarmSubscription = Alarm.ringing.listen((AlarmSet alarmSet) {
       if (alarmSet.alarms.isEmpty) {
         _activeRingingAlarmId = null;
+        if (_activeCurtainAlarm != null && mounted) {
+          setState(() => _activeCurtainAlarm = null);
+        }
         return;
       }
 
-      // اختيار أول منبه يتطلب شاشة كاملة (وتجاوز التنبيهات المحددة كـ إشعار ستارة فقط)
+      AlarmSettings? curtainCandidate;
       for (final alarm in alarmSet.alarms) {
         final parsed = AlarmService.parseAlarmSettings(alarm);
         if (!parsed.isCurtainOnly) {
           _onAlarmRinging(alarm);
           break;
+        } else {
+          curtainCandidate = alarm;
         }
+      }
+
+      if (mounted && _activeCurtainAlarm?.id != curtainCandidate?.id) {
+        setState(() => _activeCurtainAlarm = curtainCandidate);
       }
     });
   }
@@ -309,6 +319,82 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
       theme: AppTheme.getLightTheme(activeColorTheme),
       darkTheme: AppTheme.getDarkTheme(activeColorTheme),
       routerConfig: goRouter,
+      builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        final safeMediaQuery = mediaQuery.copyWith(
+          textScaler: mediaQuery.textScaler.clamp(
+            minScaleFactor: 0.85,
+            maxScaleFactor: 1.25,
+          ),
+        );
+        final curtainAlarm = _activeCurtainAlarm;
+        final appContent = MediaQuery(
+          data: safeMediaQuery,
+          child: child ?? const SizedBox.shrink(),
+        );
+        if (curtainAlarm == null) return appContent;
+        final parsed = AlarmService.parseAlarmSettings(curtainAlarm);
+        return Stack(
+          children: [
+            if (child != null) child,
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Material(
+                    elevation: 8,
+                    borderRadius: BorderRadius.circular(20),
+                    color: const Color(0xFF1C1E24),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFE5C158), width: 1.5),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.volume_up_rounded, color: Color(0xFFE5C158)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              parsed.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          TextButton.icon(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
+                              foregroundColor: Colors.redAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () async {
+                              await Alarm.stop(curtainAlarm.id);
+                              if (mounted) {
+                                setState(() => _activeCurtainAlarm = null);
+                              }
+                            },
+                            icon: const Icon(Icons.stop_circle_outlined, size: 18),
+                            label: Text('alarm.stop'.tr()),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

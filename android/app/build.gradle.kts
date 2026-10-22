@@ -49,14 +49,16 @@ android {
 
     buildTypes {
         release {
-            val isCi = System.getenv("CI")?.toBoolean() == true
             val allowDebugFallback = project.findProperty("allowDebugReleaseSign") == "true"
+
+            isMinifyEnabled = true
+            isShrinkResources = true
 
             signingConfig = when {
                 hasKeystore -> signingConfigs.getByName("release")
-                !isCi && allowDebugFallback -> signingConfigs.getByName("debug")
+                allowDebugFallback -> signingConfigs.getByName("debug")
                 else -> throw GradleException(
-                    "🚨 Missing key.properties for Release build! Provide release signing credentials or pass -PallowDebugReleaseSign=true for local testing only."
+                    "🚨 Missing key.properties for Release build! Provide release signing credentials or pass -PallowDebugReleaseSign=true for testing only."
                 )
             }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

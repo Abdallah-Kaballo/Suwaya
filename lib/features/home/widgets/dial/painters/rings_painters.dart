@@ -31,14 +31,14 @@ class RoutinesRingPainter extends CustomPainter {
     final outerRadius = R * kRailwayR;
     final width = outerRadius - innerRadius;
 
-    // 🌟 رسم أرضية مسار السكة أولاً تحت الروتين حتى لا تُطمس ألوان وأنماط الروتين
+    // 🌟 تفتيح درجة الرمادي في إطار المهام والروتينات لبروز المسار بوضوح وأناقة
     canvas.drawCircle(
       center,
       innerRadius + (width / 2),
       Paint()
         ..color = isDark
-            ? const Color(0xFF121316).withValues(alpha: 0.82)
-            : const Color(0xFFE2E8F0).withValues(alpha: 0.65)
+            ? const Color(0xFF282D3A).withValues(alpha: 0.92)
+            : const Color(0xFFEDF2F7).withValues(alpha: 0.90)
         ..style = PaintingStyle.stroke
         ..strokeWidth = width,
     );
@@ -73,7 +73,7 @@ class RoutinesRingPainter extends CustomPainter {
 
       final fillPaint = Paint()
         ..color = arc.color.withValues(
-          alpha: isHighlighted ? 0.42 : (isDark ? 0.24 : 0.28),
+          alpha: isHighlighted ? 0.45 : (isDark ? 0.28 : 0.30),
         )
         ..style = PaintingStyle.fill;
       canvas.drawPath(path, fillPaint);
@@ -83,9 +83,9 @@ class RoutinesRingPainter extends CustomPainter {
         canvas.clipPath(path);
         final patternPaint = Paint()
           ..color = arc.color.withValues(
-            alpha: isHighlighted ? 0.85 : (isDark ? 0.50 : 0.60),
+            alpha: isHighlighted ? 0.90 : (isDark ? 0.58 : 0.65),
           )
-          ..strokeWidth = isHighlighted ? 1.6 : 1.1
+          ..strokeWidth = isHighlighted ? 1.6 : 1.15
           ..style = PaintingStyle.stroke;
 
         final bounds = path.getBounds();
@@ -96,8 +96,8 @@ class RoutinesRingPainter extends CustomPainter {
       canvas.drawPath(
         path,
         Paint()
-          ..color = arc.color.withValues(alpha: isHighlighted ? 1.0 : 0.85)
-          ..strokeWidth = isHighlighted ? 2.5 : 1.5
+          ..color = arc.color.withValues(alpha: isHighlighted ? 1.0 : 0.90)
+          ..strokeWidth = isHighlighted ? 2.5 : 1.6
           ..style = PaintingStyle.stroke,
       );
     }

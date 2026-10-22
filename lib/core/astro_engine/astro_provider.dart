@@ -15,19 +15,29 @@ final Map<String, SuwayaDay> _dayCache = {};
 class AstroNotifier extends Notifier<AstroState> {
   Timer? _stateTimer;
   Timer? _uiTimer;
+  AppLifecycleListener? _lifecycleListener;
 
   int _lastPeriodId = -1;
   int _lastSuwaya = -1;
   int _lastCivilDay = -1;
 
+  int _cachedOffsetMinuteEpoch = -1;
+  Duration _cachedUtcOffset = Duration.zero;
+
   Duration _getUtcOffsetForInstant(
     SavedLocation? loc,
     DateTime instantUtc,
   ) {
-    return TimezoneResolver.resolveForInstant(
+    final currentMinuteEpoch = instantUtc.millisecondsSinceEpoch ~/ 60000;
+    if (_cachedOffsetMinuteEpoch == currentMinuteEpoch) {
+      return _cachedUtcOffset;
+    }
+    _cachedUtcOffset = TimezoneResolver.resolveForInstant(
       instantUtc,
       timezoneId: loc?.timezone,
     ).utcOffset;
+    _cachedOffsetMinuteEpoch = currentMinuteEpoch;
+    return _cachedUtcOffset;
   }
 
   DateTime _getCityNowFromUtc(SavedLocation? loc, DateTime nowUtc) {
@@ -54,6 +64,7 @@ class AstroNotifier extends Notifier<AstroState> {
       return f;
     }));
 
+    _cachedOffsetMinuteEpoch = -1;
     final settings = ref.read(settingsProvider);
     final SavedLocation? loc = settings.activeLocation;
     final DateTime nowUtc = DateTime.now().toUtc();
@@ -61,7 +72,11 @@ class AstroNotifier extends Notifier<AstroState> {
     try {
       ref.onDispose(() {
         _stateTimer?.cancel();
+        _stateTimer = null;
         _uiTimer?.cancel();
+        _uiTimer = null;
+        _lifecycleListener?.dispose();
+        _lifecycleListener = null; // 🌟 تصفير المرجع لمنع استدعاء dispose مرتين عند إعادة بناء المزود
       });
 
       final Map<PrayerKey, int> manualOffsetsMap = {};
@@ -76,7 +91,6 @@ class AstroNotifier extends Notifier<AstroState> {
       final madhabEnum = settings.madhab.toMadhab();
       final highLatEnum = settings.highLatitudeRule.toHighLatRule();
 
-      // تقييم السياق الزمني الموحد عبر TemporalContextEngine
       final temporalContext = TemporalContextEngine.evaluate(
         instantUtc: nowUtc,
         latitude: loc?.latitude ?? 21.4225,
@@ -116,6 +130,56 @@ class AstroNotifier extends Notifier<AstroState> {
         temporalContext.timezone.utcOffset,
       );
       _startUITicker(generatedDay, loc);
+
+      // 🌟 إيقاف المؤقتات تماماً في الخلفية لحماية البطارية واستئنافها فور فتح الشاشة
+      _lifecycleListener?.dispose();
+      _lifecycleListener = AppLifecycleListener(
+        onPause: () {
+          _uiTimer?.cancel();
+          _stateTimer?.cancel();
+        },
+        onHide: () {
+          _uiTimer?.cancel();
+          _stateTimer?.cancel();
+        },
+        onResume: () {
+          final resumeUtc = DateTime.now().toUtc();
+          final resumeWall = _getCityNowFromUtc(loc, resumeUtc);
+          final cycleEndUtc = generatedDay.cycleAnchors.cycleEndMaghribUtc;
+          final hasCycleEnded = cycleEndUtc != null
+              ? !resumeUtc.isBefore(cycleEndUtc)
+              : !resumeWall.isBefore(generatedDay.cycleAnchors.cycleEndMaghrib);
+
+          if (resumeWall.day != _lastCivilDay || hasCycleEnded) {
+            ref.invalidateSelf();
+            return;
+          }
+
+          final resumedState = SuwayaTimeEngine.calculateCurrentState(
+            generatedDay,
+            resumeWall,
+            nowUtc: resumeUtc,
+          );
+          virtualDateTimeNotifier.value = resumeWall;
+          virtualTimeNotifier.value =
+              _formatVirtualTime(resumedState.currentSuwayaTime);
+
+          if (_lastPeriodId != resumedState.currentPeriod.id ||
+              _lastSuwaya !=
+                  resumedState.currentSuwayaTime.periodLocalSlotNumber) {
+            _lastPeriodId = resumedState.currentPeriod.id;
+            _lastSuwaya = resumedState.currentSuwayaTime.periodLocalSlotNumber;
+            state = resumedState;
+          }
+
+          _scheduleSmartStateUpdate(
+            generatedDay,
+            loc,
+            _getUtcOffsetForInstant(loc, resumeUtc),
+          );
+          _startUITicker(generatedDay, loc);
+        },
+      );
 
       return initialState;
     } catch (e) {

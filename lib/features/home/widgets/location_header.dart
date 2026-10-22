@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:suwaya/core/location/geo_database_service.dart';
+import 'package:suwaya/features/settings/widgets/smart_location_picker.dart';
 import 'package:suwaya/models/settings_model.dart';
 
 import '../../settings/settings_provider.dart';
-import '../../settings/settings_screen.dart';
 
 
 final nearestCityProvider = FutureProvider.family.autoDispose<String?, String>((ref, langCode) async {
@@ -33,9 +33,18 @@ class LocationHeader extends ConsumerWidget {
     final accentColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white70 : Colors.black87;
 
+    void openPicker() {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const SmartLocationPicker(),
+      );
+    }
+
     if (loc == null) {
       return InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+        onTap: openPicker,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -49,7 +58,7 @@ class LocationHeader extends ConsumerWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+      onTap: openPicker,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         child: _buildSmartHeaderContent(loc, isDark, textColor, accentColor),

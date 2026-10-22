@@ -34,7 +34,7 @@ class SettingsModel {
   bool isDialAutoRotating = true;
   String dialPinMode = 'suwaya24';
   String suwayaNumberStyle = 'english';
-  List<String> activeNightMarkers = ['fifth_sixth'];
+  List<String> activeNightMarkers = ['sixth_5'];
   
   List<PeriodConfig> periodConfigs = [];
 

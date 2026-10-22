@@ -532,27 +532,39 @@ class CalendarDayAgenda extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.heavyImpact();
-                ref.read(tasksProvider.notifier).toggleTaskStatus(task);
-              },
-              child: Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: catColor, width: 2),
-                  color: isCompletedOnSelectedDate
-                      ? catColor
-                      : Colors.transparent,
+            Semantics(
+              button: true,
+              checked: isCompletedOnSelectedDate,
+              label: task.title,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  HapticFeedback.heavyImpact();
+                  ref.read(tasksProvider.notifier).toggleTaskStatus(task);
+                },
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: catColor, width: 2),
+                        color: isCompletedOnSelectedDate
+                            ? catColor
+                            : Colors.transparent,
+                      ),
+                      child: isCompletedOnSelectedDate
+                          ? const Icon(Icons.check, size: 14, color: Colors.white)
+                          : null,
+                    ),
+                  ),
                 ),
-                child: isCompletedOnSelectedDate
-                    ? const Icon(Icons.check, size: 14, color: Colors.white)
-                    : null,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 4),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

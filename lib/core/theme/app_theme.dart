@@ -36,9 +36,10 @@ class AppTheme {
     const bgScaffold = Color(0xFF121316);
     const surfaceCard = Color(0xFF1C1E24);
     const surfaceElevated = Color(0xFF24272F);
-    const borderGray = Color(0xFF2C303A);
+    const borderGray = Color(0xFF2E3340);
     const textPrimary = Color(0xFFF3F4F6);
-    const textSecondary = Color(0xFF9CA3AF);
+    const textSecondary = Color(0xFFA1A8B8);
+    const onPrimaryDark = Color(0xFF0F172A); // تباين فائق (> 10:1) فوق الذهبي والألوان الفاتحة
 
     return ThemeData(
       useMaterial3: true,
@@ -48,12 +49,24 @@ class AppTheme {
       fontFamily: fontFamily,
       colorScheme: ColorScheme.dark(
         primary: primary,
+        onPrimary: onPrimaryDark,
         secondary: primary,
+        onSecondary: onPrimaryDark,
         surface: surfaceCard,
         surfaceContainerHighest: surfaceElevated,
         onSurface: textPrimary,
         onSurfaceVariant: textSecondary,
         outline: borderGray,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: onPrimaryDark,
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -98,10 +111,10 @@ class AppTheme {
     final primary = _getPrimaryLight(theme);
     const bgScaffold = Color(0xFFF4F6F9);
     const surfaceCard = Color(0xFFFFFFFF);
-    const surfaceElevated = Color(0xFFF8F9FA);
-    const borderGray = Color(0xFFE5E7EB);
-    const textPrimary = Color(0xFF111827);
-    const textSecondary = Color(0xFF6B7280);
+    const surfaceElevated = Color(0xFFF8FAFC);
+    const borderGray = Color(0xFFE2E8F0);
+    const textPrimary = Color(0xFF0F172A);
+    const textSecondary = Color(0xFF475569);
 
     return ThemeData(
       useMaterial3: true,
@@ -111,12 +124,24 @@ class AppTheme {
       fontFamily: fontFamily,
       colorScheme: ColorScheme.light(
         primary: primary,
+        onPrimary: Colors.white,
         secondary: primary,
+        onSecondary: Colors.white,
         surface: surfaceCard,
         surfaceContainerHighest: surfaceElevated,
         onSurface: textPrimary,
         onSurfaceVariant: textSecondary,
         outline: borderGray,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,

@@ -30,6 +30,10 @@ class _InMemoryTaskRepository implements TaskRepository {
       tasks.removeWhere((t) => t.id == id);
 
   @override
+  Future<void> deleteTasks(List<int> ids) async =>
+      tasks.removeWhere((t) => ids.contains(t.id));
+
+  @override
   Future<List<TaskModel>> getActiveTasks() async => tasks;
 
   @override

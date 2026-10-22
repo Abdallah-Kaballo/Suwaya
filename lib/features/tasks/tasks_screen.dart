@@ -138,6 +138,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
 
     return Scaffold(
       backgroundColor: bgColor,
+      drawerEnableOpenDragGesture: !_isSelectionMode,
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width,
       drawer: const AppDrawer(),
       onDrawerChanged: (isOpen) =>
           ref.read(isDrawerOpenProvider.notifier).state = isOpen,
@@ -205,6 +207,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
       ),
       body: TabBarView(
         controller: _tabController,
+        physics: const NeverScrollableScrollPhysics(),
         children: [
           _buildTasksList(casualTasks, periods, false),
           _buildTasksList(habits, periods, false),
@@ -362,12 +365,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
     );
   }
 
-  Widget _buildSwipeableRow(
-      {required int id,
-      required bool isRoutine,
-      required Widget child,
-      required VoidCallback onDelete,
-      required VoidCallback onEdit}) {
+  Widget _buildSwipeableRow({
+    required int id,
+    required bool isRoutine,
+    required Widget child,
+    required VoidCallback onDelete,
+    required VoidCallback onEdit,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
@@ -378,15 +382,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
             ? DismissDirection.none
             : DismissDirection.horizontal,
         background: Container(
-            color: Colors.redAccent,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: const Icon(LucideIcons.trash, color: Colors.white)),
+          color: Colors.redAccent,
+          alignment: AlignmentDirectional.centerStart,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: const Icon(LucideIcons.trash, color: Colors.white),
+        ),
         secondaryBackground: Container(
-            color: Colors.blueAccent,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: const Icon(LucideIcons.pencil, color: Colors.white)),
+          color: Colors.blueAccent,
+          alignment: AlignmentDirectional.centerEnd,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: const Icon(LucideIcons.pencil, color: Colors.white),
+        ),
         confirmDismiss: (dir) async {
           if (dir == DismissDirection.startToEnd) return true;
           onEdit();
@@ -534,26 +540,38 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                           ? Theme.of(context).primaryColor
                           : Colors.grey))
             else
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.heavyImpact();
-                  setState(() => _isLocalCompleted = true);
-                  Future.delayed(
+              Semantics(
+                button: true,
+                checked: _isLocalCompleted,
+                label: t.title,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    HapticFeedback.heavyImpact();
+                    setState(() => _isLocalCompleted = true);
+                    Future.delayed(
                       const Duration(milliseconds: 400),
-                      () =>
-                          ref.read(tasksProvider.notifier).toggleTaskStatus(t));
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(left: 8, right: 8),
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: catColor, width: 2),
-                      color: _isLocalCompleted ? catColor : Colors.transparent),
-                  child: _isLocalCompleted
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
+                      () => ref.read(tasksProvider.notifier).toggleTaskStatus(t),
+                    );
+                  },
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: catColor, width: 2),
+                          color: _isLocalCompleted ? catColor : Colors.transparent,
+                        ),
+                        child: _isLocalCompleted
+                            ? const Icon(Icons.check, size: 16, color: Colors.white)
+                            : null,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             Expanded(

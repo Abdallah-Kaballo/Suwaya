@@ -606,16 +606,34 @@ class DynamicNeedlePainter extends CustomPainter {
     final needleLength = R * kRailwayR - 8.0;
     final needleStart = R * 0.25;
 
+    final Color minimalHandColor =
+        isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1E293B);
+
     if (design == DialDesign.minimal) {
-      canvas.drawLine(
+      if (isDark) {
+        canvas.drawLine(
           Offset(0, -needleStart),
           Offset(0, -needleLength),
           Paint()
-            ..color = const Color(0xFF007BFF)
-            ..strokeWidth = 2.0
-            ..strokeCap = StrokeCap.round);
-      canvas.drawCircle(Offset(0, -needleLength), 4.0,
-          Paint()..color = const Color(0xFF007BFF));
+            ..color = const Color(0xFFE0F2FE).withValues(alpha: 0.65)
+            ..strokeWidth = 6.0
+            ..strokeCap = StrokeCap.round
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        );
+      }
+      canvas.drawLine(
+        Offset(0, -needleStart),
+        Offset(0, -needleLength),
+        Paint()
+          ..color = minimalHandColor
+          ..strokeWidth = 2.4
+          ..strokeCap = StrokeCap.round,
+      );
+      canvas.drawCircle(
+        Offset(0, -needleLength),
+        4.5,
+        Paint()..color = minimalHandColor,
+      );
       canvas.restore();
       return;
     }

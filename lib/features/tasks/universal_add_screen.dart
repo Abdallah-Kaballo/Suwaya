@@ -63,26 +63,22 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
   /// 🌟 التحقق مما إذا كان الوقت المختار للمهمة العابرة في اليوم الحالي قد مضى بالفعل
   bool _isCandidateTaskTimeInPast({
-    required int mode, // 0: سويعي، 1: مدني
+    required int mode,
     required int candidateGlobalSuwaya,
     required int candidateVirtualMin,
     required int candidateCivilHour,
     required int candidateCivilMin,
   }) {
-    // ينطبق القيد على المهام العابرة (Casual Tasks) فقط عندما يكون التاريخ المختار هو اليوم الحالي
     if (_tabController.index != 0) return false;
-    final targetDate = _selectedDate ?? DateTime.now();
-    final now = DateTime.now();
-    if (!_isSameDay(targetDate, now)) return false;
+    final cityNow = virtualDateTimeNotifier.value;
+    final targetDate = _selectedDate ?? cityNow;
+    if (!_isSameDay(targetDate, cityNow)) return false;
 
     if (mode == 1) {
-      // فحص الوقت المدني مقابل وقت المدينة الحالي
-      final cityNow = virtualDateTimeNotifier.value;
       final nowMins = cityNow.hour * 60 + cityNow.minute;
       final selectedMins = candidateCivilHour * 60 + candidateCivilMin;
       return selectedMins <= nowMins;
     } else {
-      // فحص الوقت السويعي مقابل السويعة والدقيقة الافتراضية الحالية
       final astroState = ref.read(astroProvider);
       if (astroState.periods.isEmpty) return false;
       final ct = astroState.currentSuwayaTime;
@@ -148,6 +144,20 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     return 0;
   }
 
+  void _applyDefaultsForTab(int tabIndex) {
+    if (widget.existingTask != null || widget.existingRoutine != null) return;
+    final settings = ref.read(settingsProvider);
+    if (tabIndex == 1) {
+      _alertLevel = settings.defaultHabitAlertLevel;
+      _alarmTone = settings.defaultHabitTone;
+      _alarmVolume = settings.defaultHabitVolume;
+    } else if (tabIndex == 0) {
+      _alertLevel = settings.defaultTaskAlertLevel;
+      _alarmTone = settings.defaultTaskTone;
+      _alarmVolume = settings.defaultTaskVolume;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -157,7 +167,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       vsync: this,
       initialIndex: startTab,
     );
-    _selectedDate = widget.initialDate ?? DateTime.now();
+    final cityNow = virtualDateTimeNotifier.value;
+    _selectedDate = widget.initialDate ??
+        DateTime(cityNow.year, cityNow.month, cityNow.day);
 
     final periods = ref.read(astroProvider).periods;
     final defaultGlobal = _mapLocalToGlobal(
@@ -170,11 +182,14 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     _routineStartGlobalSuwaya = defaultGlobal;
     _routineEndGlobalSuwaya = (defaultGlobal + 1) % 24;
 
+    // 🌟 تحميل الإعدادات الافتراضية للمهمة أو العادة الجديدة
+    _applyDefaultsForTab(startTab);
+
     if (widget.existingTask != null) {
       final t = widget.existingTask!;
       _titleController.text = t.title;
       _selectedCategory = t.category;
-      _selectedDate = t.targetDate ?? DateTime.now();
+      _selectedDate = t.targetDate ?? _selectedDate;
       _recurrenceDays = List.from(t.recurrenceDays ?? []);
       _showOnDial = t.showOnDial;
       _alertLevel = t.alarmMode ? 2 : (t.notifyMode ? 1 : 0);
@@ -238,7 +253,12 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       }
     }
 
-    _tabController.addListener(() => setState(() {}));
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _applyDefaultsForTab(_tabController.index);
+      }
+      setState(() {});
+    });
   }
 
   @override
@@ -295,12 +315,19 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
   Future<void> _saveItem() async {
     final title = _titleController.text.trim();
-    if (title.isEmpty) return;
-
-    if (_tabController.index != 2 && !_hasTime) {
+    if (title.isEmpty) {
       HapticFeedback.heavyImpact();
-      setState(() => _timeError = true);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('add_screen.time_required'.tr()), backgroundColor: Colors.redAccent));
+      final isAr = context.locale.languageCode == 'ar';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isAr
+                ? 'يرجى كتابة عنوان أولاً قبل الحفظ!'
+                : 'Please enter a title before saving!',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
       return;
     }
 
