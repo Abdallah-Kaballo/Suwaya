@@ -1,12 +1,12 @@
 # Suwaya Time
 
-A comprehensive reference for Suwaya's astronomical time system (Schedule Model V2) and the pure Dart `packages/suwaya_time` package[cite: 3]. This package transforms continuously changing solar events and prayer timings into a highly structured 24-Suwaya virtual day, perfectly divided into 12 Night Suwayas and 12 Day Suwayas[cite: 1, 3].
+A comprehensive reference for Suwaya's astronomical time system (Schedule Model V2) and the pure Dart `packages/suwaya_time` package. This package transforms continuously changing solar events and prayer timings into a highly structured 24-Suwaya virtual day, perfectly divided into 12 Night Suwayas and 12 Day Suwayas.
 
-> **Note:** This document describes the V2 behavior implemented in the current codebase (`scheduleModelVersion = 2`)[cite: 1, 3].
+> **Note:** This document describes the V2 behavior implemented in the current codebase (`scheduleModelVersion = 2`).
 
 ## 1. Core Concept
 
-Civil time measures the day with fixed 60-minute clock hours starting at midnight[cite: 3]. Suwaya shifts the paradigm by starting from the astronomical and Islamic cycle—where the night precedes the day (**Maghrib to the following Maghrib**)—and dividing this cycle into meaningful periods anchored by prayer times and solar events[cite: 1, 3]:
+Civil time measures the day with fixed 60-minute clock hours starting at midnight. Suwaya shifts the paradigm by starting from the astronomical and Islamic cycle—where the night precedes the day (**Maghrib to the following Maghrib**)—and dividing this cycle into meaningful periods anchored by prayer times and solar events:
 
 ```text
 Location + Date + Calculation Settings
@@ -192,102 +192,3 @@ Located at `lib/core/astro_engine/astro_provider.dart`, `AstroNotifier` securely
 
 
 * **1-Second UI Ticker (`_uiTimer`):** A lightweight 250ms periodic ticker that drives the `virtualDateTimeNotifier` and `virtualTimeNotifier`. This allows the `PremiumAstroDial` needles and digital clocks to animate smoothly at 60fps without causing heavy widget tree rebuilds.
-
-
-
-
-
-```
-
----
-
-### 2. ملف `docs/privacy.md`
-
-```markdown
-# Privacy Policy for Suwaya (سُويعَة)
-
-**Last updated: October 2026**
-
-Abdallah Kaballo ("we", "our", or "us") develops and maintains Suwaya, an open-source Flutter application for astronomical prayer times, virtual Suwaya time, tasks, routines, and focus sessions. This policy explains what information the current version of the application accesses, how it is used, and where it is stored[cite: 6].
-
-## 1. Scope and Current Data Model
-
-The current application operates on a **local-first** basis[cite: 6]. It does not provide user accounts, authentication, cloud synchronization, or a configured remote database[cite: 6]. 
-
-Most application data is stored exclusively on your device within an Isar Community database[cite: 6]. The current database contains your customized settings, tasks, habits, routines, and saved geographic information[cite: 6]. The application also bundles a read-only SQLite database for local offline city search and location matching[cite: 6].
-
-## 2. Information the Application Uses
-
-### Location Information
-When you opt to use automatic location detection, Suwaya requests location permissions and uses your device's coordinates locally to[cite: 6]:
-- Calculate precise prayer and astronomical times[cite: 6].
-- Select the correct timezone context[cite: 6].
-- Find your approximate nearest city and country via the bundled offline city database[cite: 6].
-- Suggest accurate calculation methods and Madhab defaults[cite: 6].
-
-**These coordinates are never sent to a Suwaya server.** Suwaya does not track your movement in the background, build a location history, or sell location data[cite: 6]. You may alternatively choose a location manually and deny location permissions entirely[cite: 6].
-
-### Application Data
-Depending on the features you use, Suwaya stores locally[cite: 6]:
-- Calculation preferences, UI language, visual themes, and notification settings[cite: 6].
-- Tasks, task schedules, completion history, streaks, and Suwaya contexts[cite: 6].
-- Focus routines and their associated parameters[cite: 6].
-
-### Notifications and Alarms
-If enabled, Suwaya schedules local notifications and full-screen exact alarms through the operating system[cite: 6]. Suwaya uses these to deliver time-sensitive reminders but does not transmit notification histories to any remote server[cite: 6].
-
-## 3. Information We Do Not Collect & Supporter Purchases
-
-The application does not collect or transmit[cite: 6]:
-- Personal authentication identifiers or account details[cite: 6].
-- Advertising identifiers or behavioral analytics tracking[cite: 6].
-- Task or routine data to any cloud backend[cite: 6].
-
-If you optionally choose to purchase a Supporter Badge, Suwaya utilizes Google Play Billing (or Apple App Store) alongside the RevenueCat SDK to verify your entitlement via an anonymous app user ID[cite: 6]. Financial and payment details are processed exclusively by the platform store and are never accessed, captured, or stored by Suwaya[cite: 6].
-
-## 4. Data Storage, Retention, and Deletion
-
-Local data remains on your device until you delete it through the app's interface, clear the application’s storage via your OS settings, or uninstall the application[cite: 6]. Suwaya does not retain a server-side copy of your local tasks, routines, or settings[cite: 6].
-
-## 5. Permissions
-
-Suwaya may request the following system permissions to function correctly[cite: 6]:
-
-| Permission | Purpose |
-|---|---|
-| **Location** | For automatic location detection and location-aware prayer calculations[cite: 6]. |
-| **Notifications** | To deliver local task, routine, and prayer reminders[cite: 6]. |
-| **Exact Alarms** | To schedule time-sensitive, full-screen lockscreen alarms[cite: 6]. |
-| **Vibration** | To provide haptic feedback during local notifications and alarms[cite: 6]. |
-| **Internet** | To fetch Markdown documentation updates (FAQ/Privacy), check for app updates, and process optional Supporter badge purchases[cite: 6]. |
-
-You can deny or revoke these permissions at any time through your operating system settings[cite: 6].
-
-## 6. Third-Party Libraries and Network Services
-
-Suwaya uses open-source libraries for Flutter, local persistence (`isar_community`, `sqflite`), astronomical calculations (`adhan`), geolocation, localization, and notifications[cite: 6]. Network access is strictly limited to[cite: 6]:
-- Fetching FAQ and Privacy Policy JSON updates directly from the official GitHub repository[cite: 6].
-- Checking for in-app updates via official store APIs (`in_app_update`)[cite: 6].
-- Verifying optional supporter badge entitlements via Google Play Billing and RevenueCat[cite: 6].
-
-## 7. Security
-
-Local data protection depends on the security of your device and operating system[cite: 6]. We strongly recommend keeping your device protected with standard security controls (PIN/Biometrics) and advise against using rooted or compromised devices if you store sensitive personal schedules[cite: 6].
-
-## 8. Children
-
-Suwaya is not designed to knowingly collect personal information from children[cite: 6]. Because the application operates offline-first and provides no cloud account system, it does not intentionally create child user profiles or collect data remotely[cite: 6].
-
-## 9. Changes to This Policy
-
-This policy may be updated if the application's data practices evolve. The "Last updated" date at the top of this page indicates the latest revision[cite: 6]. Material changes will be reflected in the project documentation and release notes[cite: 6].
-
-## 10. Contact
-
-For questions, corrections, or privacy concerns, please contact the project maintainer by opening an issue on the official Suwaya GitHub repository[cite: 6]:
-
-<https://github.com/Abdallah-Kaballo/Suwaya>
-
-Suwaya is open-source and licensed under the GNU General Public License v3.0[cite: 6]. Its source code is publicly available for review in the repository[cite: 6].
-
-```
