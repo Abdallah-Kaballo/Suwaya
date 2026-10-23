@@ -1,62 +1,62 @@
 [
   {
-    "q": "Apa itu aplikasi «Suwaya» dan apa konsep utamanya?",
-    "a": "Suwaya adalah aplikasi Produktivitas Astronomi (Astro-Productivity) sumber terbuka yang dirancang untuk menyelaraskan kembali ritme harian, tugas, dan sesi fokus Anda dengan pergerakan matahari serta waktu salat di lokasi geografis Anda, alih-alih hanya bergantung pada jam sipil yang kaku."
+    "q": "Apa itu Suwaya dan apa konsep utamanya?",
+    "a": "Suwaya adalah aplikasi Astro-Produktivitas sumber terbuka (open-source) yang dirancang untuk menyambungkan kembali ritme harian, tugas, dan sesi fokus Anda dengan pergerakan matahari dan waktu salat di lokasi geografis Anda, daripada hanya mengandalkan jam sipil yang kaku."
   },
   {
-    "q": "Apa itu «Suwaya» dan bagaimana cara kerja sistem 24 Suwaya?",
-    "a": "Alih-alih membagi hari menjadi 24 jam sipil yang sama mulai tengah malam, Suwaya membagi hari astronomis (dari Magrib ke Magrib berikutnya) menjadi 24 Suwaya dalam dua fase:\n• Fase Malam (🌑): Membentang dari azan Magrib hingga Matahari Terbit, terdiri dari 12 Suwaya Malam (01 hingga 12).\n• Fase Siang (☀️): Membentang dari Matahari Terbit hingga azan Magrib berikutnya, terdiri dari 12 Suwaya Siang (01 hingga 12).\nSetiap Suwaya terdiri dari 60 menit virtual (ditulis dalam format 00|00), sedangkan durasi nyatanya memanjang atau memendek sesuai panjang malam dan siang pada musim serta lokasi Anda."
+    "q": "Apa itu 'Suwaya' dan bagaimana sistem 24-Suwaya bekerja?",
+    "a": "Daripada membagi hari menjadi 24 jam sipil yang sama dimulai pada tengah malam, Suwaya membagi hari astronomis (dari Magrib ke Magrib berikutnya) menjadi 24 Suwaya di dua fase:\n• Fase Malam (🌑): Membentang dari Magrib hingga Matahari Terbit dan terdiri dari 12 Suwaya Malam (bernomor 01 hingga 12).\n• Fase Siang (☀️): Membentang dari Matahari Terbit hingga Magrib berikutnya dan terdiri dari 12 Suwaya Siang (bernomor 01 hingga 12).\nSetiap Suwaya terdiri dari 60 menit virtual (ditulis sebagai 00|00), sementara durasi aslinya memuai atau menyusut sesuai dengan panjang malam dan siang di musim dan lokasi Anda."
   },
   {
-    "q": "Mengapa hari di Suwaya dimulai saat Magrib, bukan tengah malam atau Subuh?",
-    "a": "Aplikasi ini mengikuti siklus kalender astronomis dan Islam autentik di mana malam mendahului siang; hari baru dimulai saat matahari terbenam (Magrib). Oleh karena itu, Anda akan melihat keterangan seperti «Malam Jumat» setelah Magrib, lalu berubah menjadi «Siang Jumat» setelah Subuh."
+    "q": "Mengapa hari di Suwaya dimulai pada Magrib, bukan tengah malam atau Subuh?",
+    "a": "Aplikasi ini mengikuti siklus kalender astronomis dan Islam yang autentik di mana malam mendahului siang; hari baru dimulai saat matahari terbenam (Magrib). Oleh karena itu, Anda akan melihat tajuk seperti 'Malam Jumat' setelah Magrib, yang kemudian berubah menjadi 'Siang Jumat' setelah Subuh."
   },
   {
     "q": "Apa saja tujuh periode astronomis dalam sehari?",
-    "a": "Dial membagi siklus dari Magrib ke Magrib berikutnya menjadi 7 periode berkesinambungan tanpa jeda:\n1. Periode Magrib (Magrib hingga Isya).\n2. Periode Isya (Isya hingga tengah malam syar'i) — berbagi total 5 Suwaya Malam dengan periode Magrib.\n3. Periode Paruh Kedua Malam / Qiyam (Tengah malam hingga Subuh) — durasi tetap: 6 Suwaya Malam (06|00 🌑 hingga 11|59 🌑).\n4. Periode Subuh (Azan Subuh hingga Terbit) — durasi tetap: 1 Suwaya Malam (Suwaya 12 🌑).\n5. Periode Duha (Terbit hingga Zuhur).\n6. Periode Zuhur (Zuhur hingga Asar).\n7. Periode Asar (Asar hingga Magrib berikutnya) — 12 Suwaya Siang (01 ☀️ hingga 12 ☀️) didistribusikan secara dinamis ke dalam periode Duha, Zuhur, dan Asar."
+    "a": "Dial membagi siklus dari Magrib ke Magrib berikutnya menjadi 7 periode yang berkesinambungan tanpa celah:\n1. Periode Magrib (Magrib ke Isya).\n2. Periode Isya (Isya ke tengah malam astronomis) — berbagi 5 Suwaya Malam dengan periode Magrib.\n3. Paruh Kedua Malam / Periode Qiyam (Tengah malam astronomis ke Subuh) — ditetapkan pada 6 Suwaya Malam (06|00 🌑 hingga 11|59 🌑).\n4. Periode Subuh (Subuh ke Matahari Terbit) — ditetapkan pada 1 Suwaya Malam (Suwaya 12 🌑).\n5. Periode Duha (Matahari Terbit ke Zuhur).\n6. Periode Zuhur (Zuhur ke Asar).\n7. Periode Asar (Asar ke Magrib berikutnya) — 12 Suwaya Siang (01 ☀️ hingga 12 ☀️) didistribusikan secara dinamis melintasi periode Duha, Zuhur, dan Asar."
   },
   {
-    "q": "Apa arti indikator Kecepatan Aliran Waktu (seperti 1.25x atau 0.85x)?",
-    "a": "Karena setiap Suwaya mewakili 60 menit virtual (3.600 detik virtual) sedangkan durasi nyatanya bervariasi menurut periode dan musim, indikator kecepatan menunjukkan seberapa cepat menit Suwaya mengalir dibandingkan menit sipil:\n• 1.00x: 1 Suwaya nyata sama persis dengan 60 menit sipil.\n• Lebih dari 1.00x (dengan ikon petir ⚡): Periode berlangsung singkat, sehingga menit Suwaya mengalir lebih cepat daripada menit sipil.\n• Kurang dari 1.00x (dengan ikon jam pasir ⏳): Periode berlangsung panjang, sehingga menit Suwaya mengalir lebih tenang dan lambat daripada menit sipil."
+    "q": "Apa arti indikator Kecepatan Aliran Waktu (misalnya, 1.25x atau 0.85x)?",
+    "a": "Karena setiap Suwaya mewakili 60 menit virtual (3.600 detik virtual) sementara durasi aslinya bervariasi berdasarkan periode dan musim, indikator kecepatan menunjukkan seberapa cepat menit Suwaya mengalir dibandingkan dengan menit sipil:\n• 1.00x: 1 Suwaya persis sama dengan 60 menit sipil.\n• Lebih dari 1.00x (dengan ikon petir ⚡): Periode ini pendek, sehingga menit Suwaya mengalir lebih cepat daripada menit sipil.\n• Kurang dari 1.00x (dengan ikon jam pasir ⏳): Periode ini panjang dan membentang, sehingga menit Suwaya mengalir lebih tenang dan lebih lambat daripada menit sipil."
   },
   {
-    "q": "Bagaimana cara membaca waktu Suwaya dan apa perbedaan visualnya dengan waktu sipil?",
-    "a": "Waktu Suwaya dirancang agar mudah dikenali sekilas:\n• Waktu Suwaya selalu ditampilkan dengan warna Emas Astronomis dan menggunakan garis vertikal (|) di antara Suwaya dan menit beserta ikon fase, seperti (04|30 🌑) untuk Suwaya Malam ke-4 lewat 30 menit virtual, atau (08|15 ☀️) untuk Suwaya Siang ke-8 lewat 15 menit virtual.\n• Waktu sipil ditampilkan dengan warna putih/netral dan tanda titik dua (:).\nAnda dapat beralih antara waktu Suwaya dan waktu sipil kapan saja dengan mengetuk ikon jam/bulan sabit di bilah atas."
+    "q": "Bagaimana cara membaca waktu Suwaya dan apa bedanya secara visual dengan waktu sipil?",
+    "a": "Waktu Suwaya dirancang agar mudah dikenali sekilas:\n• Waktu Suwaya selalu ditampilkan dalam warna Emas Astro dan menggunakan bilah vertikal (|) di antara Suwaya dan menit virtual bersama dengan ikon fase, seperti (04|30 🌑) untuk Suwaya Malam ke-4 dan 30 menit virtual, atau (08|15 ☀️) untuk Suwaya Siang ke-8 dan 15 menit virtual.\n• Waktu sipil ditampilkan dalam teks putih/netral dengan titik dua standar (:).\nAnda dapat beralih antara waktu Suwaya dan waktu sipil secara global kapan saja dengan mengetuk ikon jam/bulan sabit di bilah atas."
   },
   {
-    "q": "Apa saja lima bagian Qiyamul Lail yang tersedia di aplikasi?",
-    "a": "Untuk ibadah malam, aplikasi berfokus pada Periode 3 (Paruh Kedua Malam: dari tengah malam hingga Subuh, sepanjang 6 Suwaya) dan menyediakan 5 pembagian presisi:\n• Paruh Kedua Malam: 6 Suwaya penuh (06|00 🌑 hingga 11|59 🌑).\n• Sepertiga Akhir Malam: 4 Suwaya (08|00 🌑 hingga 11|59 🌑).\n• Seperenam Keempat Malam: 2 Suwaya (06|00 🌑 hingga 07|59 🌑).\n• Seperenam Kelima Malam: 2 Suwaya (08|00 🌑 hingga 09|59 🌑).\n• Seperenam Keenam Malam: 2 Suwaya (10|00 🌑 hingga 11|59 🌑).\nAplikasi secara otomatis mencegah bagian yang saling bertabrakan aktif bersamaan agar tampilan dial tetap rapi."
+    "q": "Apa saja lima bagian Qiyam (Salat Malam) yang tersedia di aplikasi?",
+    "a": "Untuk Qiyam, aplikasi berfokus pada Periode 3 (Paruh Kedua Malam: dari tengah malam astronomis ke Subuh, mencakup 6 Suwaya) dan menyediakan 5 subdivisi yang tepat:\n• Paruh Kedua Malam: 6 Suwaya (06|00 🌑 hingga 11|59 🌑).\n• Sepertiga Terakhir Malam: 4 Suwaya (08|00 🌑 hingga 11|59 🌑).\n• Seperenam Keempat Malam: 2 Suwaya (06|00 🌑 hingga 07|59 🌑).\n• Seperenam Kelima Malam: 2 Suwaya (08|00 🌑 hingga 09|59 🌑).\n• Seperenam Keenam Malam: 2 Suwaya (10|00 🌑 hingga 11|59 🌑).\nAplikasi ini secara otomatis mencegah pilihan yang tumpang tindih pada dial untuk menjaga tata letak visual tetap bersih."
   },
   {
-    "q": "Bagaimana cara menggunakan Dial Astrolab Astronomis di layar Beranda?",
-    "a": "Dial astronomis sepenuhnya interaktif:\n• Ketuk (Tap): Ketuk cincin periode, penanda salat, panah tugas, atau busur rutinitas untuk melihat detail waktu mulai/selesai (sipil & Suwaya), jumlah Suwaya, dan kecepatan aliran.\n• Putar Manual: Putar dial dengan jari Anda untuk menjelajahi periode; dial akan kembali secara elastis saat dilepaskan.\n• Seret & Lepas (Drag & Drop): Tekan lama panah tugas pada dial, lalu seret dan lepaskan ke periode atau Suwaya lain untuk menjadwalkan ulang tugas secara instan!\n• Edit Cepat: Ketuk tombol (Edit Dial ✏️) di atas dial untuk mengatur tampilan waktu Terbit dan bagian Qiyamul Lail."
+    "q": "Bagaimana cara menggunakan Dial Astrolabe Astronomis interaktif di layar Beranda?",
+    "a": "Dial astronomis sepenuhnya interaktif:\n• Ketuk (Tap): Ketuk cincin periode, penanda waktu salat, panah tugas, atau lengkungan rutinitas apa pun untuk melihat dialog terperinci dengan waktu mulai/akhir (baik dalam format sipil maupun Suwaya), jumlah Suwaya, dan kecepatan aliran.\n• Rotasi Manual: Seret dial dengan jari Anda untuk menjelajahi periode; dial akan secara elastis kembali ke posisinya saat dilepaskan.\n• Seret & Lepas (Drag & Drop): Tekan lama panah tugas apa pun di dial, lalu seret dan lepas ke periode atau Suwaya lain untuk segera menjadwal ulang tugas.\n• Edit Cepat: Ketuk tombol (Sesuaikan Dial ✏️) di atas dial untuk mengaktifkan atau menonaktifkan Matahari Terbit dan bagian malam Qiyam."
   },
   {
-    "q": "Apa perbedaan antara Tugas Kasual, Kebiasaan Berkelanjutan, dan Periode Rutinitas?",
-    "a": "• Tugas Kasual (Casual Tasks): Tugas satu kali yang terkait dengan tanggal dan waktu tertentu (Suwaya atau sipil).\n• Kebiasaan Berkelanjutan (Continuous Habits): Aktivitas berulang harian atau mingguan yang mendukung pelacakan beruntun (Streaks) dengan 3 Pembeku Streak (Streak Freezes) untuk melindungi capaian Anda jika terlewat satu hari.\n• Periode Rutinitas (Routines): Blok waktu dengan jam mulai dan selesai (seperti waktu tidur, kerja, atau belajar) yang digambar sebagai busur berwarna dengan 4 pola geometris pada dial astronomis."
+    "q": "Apa perbedaan antara Tugas Santai (Casual Tasks), Kebiasaan Berkelanjutan (Continuous Habits), dan Rutinitas (Routines)?",
+    "a": "• Tugas Santai: Tugas satu kali yang ditautkan ke tanggal dan waktu tertentu (Suwaya atau sipil).\n• Kebiasaan Berkelanjutan: Tindakan berulang harian atau mingguan yang melacak rentetan penyelesaian (Streaks) Anda dan menyertakan 3 Pembekuan Rentetan (Streak Freezes) untuk melindungi kemajuan Anda jika Anda melewatkan satu hari.\n• Rutinitas: Blok waktu dengan waktu mulai dan berakhir (seperti tidur, bekerja, atau belajar) yang direpresentasikan sebagai lengkungan berwarna dengan pola (4 pola geometris) pada dial astronomis."
   },
   {
-    "q": "Bagaimana cara kerja Timer Fokus (Pomodoro Suwaya vs. Pomodoro Tradisional)?",
-    "a": "Aplikasi menyediakan dua mode fokus:\n1. Pomodoro Tradisional: Bekerja dengan menit sipil standar (default 25 menit kerja / 5 menit istirahat pendek, dan 30 menit istirahat panjang setiap 4 siklus), dilengkapi tombol Mulai, Jeda/Lanjutkan, Lewati (Skip), Reset, serta tombol pengaturan di bagian atas untuk menyesuaikan semua durasi.\n2. Pomodoro Suwaya: Mengunci waktu mulai saat Anda membuka halaman pengaturan dan secara default menetapkan waktu selesai pada salat wajib berikutnya (atau waktu khusus antara 15 menit hingga 12 jam/Suwaya). Aplikasi membagi durasi tersebut menjadi sejumlah bulat sesi Pomodoro virtual (25/5) dengan kecepatan antara 0.5x hingga 2.0x (memilih kecepatan terdekat ke 1.00x secara default), memotong waktu pengaturan dari sesi pertama, dan berhenti otomatis saat waktu salat tiba."
+    "q": "Bagaimana Pengatur Waktu Fokus (Suwaya Pomodoro vs. Pomodoro Tradisional) bekerja?",
+    "a": "Aplikasi ini menawarkan dua mode fokus:\n1. Pomodoro Tradicional: Menggunakan menit sipil standar (default 25 menit kerja / 5 menit istirahat pendek, dan istirahat panjang 30 menit setiap 4 siklus) dengan kontrol Mulai, Jeda/Lanjutkan, Lewati, dan Atur Ulang, plus tombol pengaturan untuk menyesuaikan semuanya.\n2. Suwaya Pomodoro: Menetapkan waktu mulai saat Anda memasuki layar pengaturan dan menetapkan waktu akhir ke waktu salat wajib berikutnya sebagai default (atau waktu kustom apa pun antara 15 menit hingga 12 jam/Suwaya). Mode ini membagi interval menjadi bilangan bulat Pomodoro virtual 25/5 dengan kecepatan aliran antara 0.5x hingga 2.0x, mengurangi waktu persiapan dari Pomodoro pertama, dan berhenti otomatis saat waktu salat tiba."
   },
   {
     "q": "Apakah aplikasi memerlukan koneksi internet untuk menghitung waktu atau mencari kota?",
-    "a": "Tidak. Suwaya bekerja secara Offline-First; aplikasi ini dilengkapi basis data lokal berisi ribuan kota di seluruh dunia. Bahkan saat menggunakan GPS, aplikasi menemukan kota terdekat serta mengatur metode perhitungan dan mazhab secara otomatis tanpa internet."
+    "a": "Tidak. Suwaya bersifat offline-first; aplikasi ini menyertakan database lokal yang memuat ribuan kota di seluruh dunia. Bahkan saat menggunakan GPS, ia akan menemukan kota terdekat Anda dan mengonfigurasi metode perhitungan dan Mazhab secara otomatis tanpa memerlukan akses internet."
   },
   {
-    "q": "Ada selisih beberapa menit antara aplikasi dan masjid lokal saya, bagaimana cara menyesuaikannya?",
-    "a": "Buka menu samping, masuk ke (Pengaturan) -> (Perhitungan Astronomis) untuk memilih metode perhitungan dan mazhab, atau masuk ke (Koreksi Waktu Manual) untuk menambah atau mengurangi waktu salat secara manual dari -30 hingga +30 menit."
+    "q": "Ada perbedaan beberapa menit antara aplikasi dan masjid lokal saya. Bagaimana cara menyesuaikannya?",
+    "a": "Buka menu laci samping, buka (Pengaturan) -> (Pengaturan Astro Lanjutan), di mana Anda dapat mengubah metode perhitungan, Mazhab, atau sudut kustom, atau ketuk (Penyesuaian Waktu Manual) untuk menyesuaikan setiap salat wajib secara individual dari -30 hingga +30 menit."
   },
   {
     "q": "Apa saja tingkat peringatan yang tersedia untuk salat, Qiyam, tugas, dan rutinitas?",
-    "a": "Anda dapat mengatur setiap item dengan salah satu dari 3 tingkat peringatan:\n1. Hening: Tanpa notifikasi.\n2. Notifikasi Standar: Peringatan tenang di bilah notifikasi sistem.\n3. Alarm Kuat (Bangunkan Layar): Alarm layar penuh yang muncul di atas layar kunci dengan volume bertahap (Fade-in), mendukung geser layar atau tombol volume fisik ponsel untuk menghentikan atau menunda (Snooze)."
+    "a": "Anda dapat mengonfigurasi setiap item dengan salah satu dari 3 tingkat peringatan:\n1. Senyap: Tidak ada pemberitahuan.\n2. Pemberitahuan Standar: Pemberitahuan senyap di baki sistem.\n3. Alarm Keras (Membangunkan Layar): Alarm layar penuh yang muncul di atas layar kunci dengan suara yang meningkat bertahap (Fade-in), mendukung usap-untuk-berhenti/tunda serta tombol volume perangkat keras untuk menunda."
   },
   {
-    "q": "Apa yang terjadi pada tugas lama saya setelah memperbarui ke sistem baru?",
-    "a": "Aplikasi menyertakan Layanan Migrasi (Migration Service) otomatis saat dijalankan; layanan ini memperbarui tugas dan rutinitas dari versi lama secara aman ke waktu sipil default (pukul 10:00 pagi) agar tidak ada data yang hilang, sehingga Anda dapat menjadwalkannya kembali ke Suwaya yang diinginkan."
+    "q": "Apa yang terjadi pada tugas lama saya setelah memperbarui ke sistem waktu V2 baru?",
+    "a": "Aplikasi ini menyertakan Layanan Migrasi otomatis yang berjalan saat pengaktifan; layanan ini dengan aman memutakhirkan tugas dan rutinitas yang dibuat berdasarkan model lama ke waktu sipil default (10:00 pagi) sehingga tidak ada tugas Anda yang hilang, memungkinkan Anda menjadwal ulangnya ke Suwaya pilihan Anda."
   },
   {
-    "q": "Di mana data saya disimpan dan bagaimana kebijakan privasi Suwaya?",
-    "a": "Semua tugas, kebiasaan, rutinitas, pengaturan, dan lokasi Anda disimpan secara lokal hanya di perangkat Anda dalam basis data cepat (Isar). Suwaya tidak memiliki server cloud dan tidak mengumpulkan atau membagikan data pribadi maupun iklan apa pun."
+    "q": "Di mana data saya disimpan dan apa kebijakan privasi Suwaya?",
+    "a": "Semua tugas, kebiasaan, rutinitas, pengaturan, dan lokasi tersimpan Anda disimpan secara lokal di perangkat Anda di dalam database lokal yang cepat (Isar). Suwaya tidak memiliki server cloud dan tidak mengumpulkan, melacak, atau membagikan data pribadi atau iklan apa pun."
   }
 ]

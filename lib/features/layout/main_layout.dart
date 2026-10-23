@@ -157,7 +157,10 @@ class MainLayout extends ConsumerWidget {
           onTap: () {
             if (index == currentIndex) return;
             HapticFeedback.selectionClick();
-            shell.goBranch(index, initialLocation: index == currentIndex);
+            // 🌟 تأخير بسيط جداً للسماح للأنيميشن بالعمل قبل تجميد الشاشة في بناء الواجهة الثقيلة
+            Future.delayed(const Duration(milliseconds: 50), () {
+              shell.goBranch(index, initialLocation: index == currentIndex);
+            });
           },
           behavior: HitTestBehavior.opaque,
           child: AnimatedContainer(

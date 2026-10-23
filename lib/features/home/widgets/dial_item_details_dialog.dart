@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:suwaya/core/theme/astro_ui_extensions.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../../core/utils/time_formatters.dart';
@@ -92,6 +93,8 @@ Future<void> showDialItemDetailsDialog({
     }
   }
 
+  final Color adaptedColor = selection.color.adapt(context); // 🌟 تطبيق التكيف اللوني
+
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -110,7 +113,7 @@ Future<void> showDialItemDetailsDialog({
             astroState,
             settings,
             civilColor,
-            selection.color,
+            adaptedColor, // استخدام اللون المتكيف
             selection,
             false,
           ),
@@ -123,7 +126,7 @@ Future<void> showDialItemDetailsDialog({
               astroState,
               settings,
               civilColor,
-              selection.color,
+              adaptedColor, // استخدام اللون المتكيف
               selection,
               true,
             ),
@@ -134,21 +137,21 @@ Future<void> showDialItemDetailsDialog({
               'home.suwayas_count'.tr(),
               '${periodMetrics.suwayaCount} ${'details.suwayas'.tr()}',
               civilColor,
-              selection.color,
+              adaptedColor, // استخدام اللون المتكيف
             ),
             const SizedBox(height: 10),
             _buildPeriodMetricRow(
               'details.suwaya_length'.tr(),
               _formatSuwayaDuration(periodMetrics.actualSuwayaDuration),
               civilColor,
-              selection.color,
+              adaptedColor, // استخدام اللون المتكيف
             ),
             const SizedBox(height: 10),
             _buildPeriodMetricRow(
               'details.flow_speed'.tr(),
               '${periodMetrics.flowSpeed.toStringAsFixed(2)}x',
               civilColor,
-              selection.color,
+              adaptedColor, // استخدام اللون المتكيف
             ),
           ],
         ],

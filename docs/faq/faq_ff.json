@@ -1,62 +1,62 @@
 [
   {
-    "q": "Ko woni jaaɓnirgal «Suwaya» kadi ko woni miijo mum mawngo?",
-    "a": "Suwaya ko jaaɓnirgal udditiingal (open-source) ngam ɓeydude golle e nder waktuuji koode e naange (Astro-Productivity). Ngal feewnaa ko ngam jokkondirde nguurndam maa ñalnde kala, golle maa e waktuuji darnde maa e yahdu naange e waktuuji juulde e nokku ɗo ngon-ɗaa ɗoo, tawa wonaa fawaade tan e waktuuji montoruuji siwil."
+    "q": "Ko holi Suwaya, e hol ko woni e nder mum?",
+    "a": "Suwaya ko application (kaɓirgal) Astro-Productivity udditirgal (open-source) ngal feewnaa ngam artirde njillu ma ñalnde kala, golle e tefooje e dille naange e waktuuji juulde e nokku ma, tawa tuugnaaki tan e waktuuji weeyo baɗɗi tekkere."
   },
   {
-    "q": "Ko woni «Suwaya» kadi no yuɓɓo 24 Suwaya gollortoo?",
-    "a": "Fuɗɗoraade feccude ñalawma e waktuuji 24 siwil potɗi gila hakkunde jamma, Suwaya feccat ñalawma koode (gila Futuroo haa Futuroo janngo mum) e Suwayaaji 24 nder pecce ɗiɗi:\n• Feccere Jamma (🌑): Gila e noddaango Futuroo haa Fuɗngo Naange, ena waɗi Suwayaaji Jamma 12 (limgol 01 haa 12).\n• Feccere Ñalawma (☀️): Gila Fuɗngo Naange haa Futuroo garoowo, ena waɗi Suwayaaji Ñalawma 12 (limgol 01 haa 12).\nSuwaya kala ena waɗi hojomaaji (minitaaji) 60 miijaaɗi (mbinndiraaɗi 00|00), kono njuuteendi mum goonga ndii ena juuta walla ena raɓɓiɗa fawaade e njuuteendi jamma e ñalawma e nder dumunna e nokku maa."
+    "q": "Ko holi 'Suwaya' e hol no njuɓɓudi 24-Suwaya gollirta?",
+    "a": "So wonaa feccude ñalawma oo e waktuuji 24 potɗi puɗɗotooɗi e cakkital jemma, Suwaya ina fecca ñalawma weeyo oo (gila e Magrib haa e Magrib garoowo) e 24 Suwayaaji e taweeli ɗiɗi:\n• Dawal Jemma (🌑): Fuɗɗotoo ko e Magrib haa naange fuɗa (Fajiri), waɗi Suwayaaji jemma 12 (limgal gila 01 haa 12).\n• Dawal Ñalawma (☀️): Fuɗɗotoo ko naange fuɗa haa Magrib garoowo, waɗi Suwayaaji ñalawma 12 (limgal gila 01 haa 12).\nKala Suwaya ina waɗi hojomaaji mbiyteedi 60 (winndaa ko 00|00), tawa njolo e ngoñol mum e ndenndaandi jemma e ñalawma ina tuugnii e jamaanu e nokkuure nde ngon-ɗaa."
   },
   {
-    "q": "Ko waɗi ñalawma e nder Suwaya fuɗɗotoo ko e Futuroo (Maghrib) wonaa hakkunde jamma walla Fajiri?",
-    "a": "Jaaɓnirgal ngal rewata ko e limlebbi Lislaam e koode goongawol ɗo jamma ardii ñalawma; ñalawma keso fuɗɗotoo ko nde naange muti (Futuroo). Ko ɗuum waɗi aɗa yiya dow hello jaɓɓorgo ngoo «Jamma Aljumaa» caggal Futuroo, caggal ɗuum wona «Ñalawma Aljumaa» caggal Fajiri."
+    "q": "Ko waɗi ñalawma e Suwaya fuɗɗotoo ko e Magrib ɓaawo cakkital jemma walla Fajiri?",
+    "a": "Application oo ina jokki e taariiha laaɓtuɗo mo kalite weeyo e lislaam ɗo jemma ardi ñalawma; ñalawma keso ina fuɗɗoo nde naange muti (Magrib). Ko ɗum waɗi maa yi'o kelle ko wayi no 'Jemma Aljuma' caggal Magrib, ɗum wayloto ko e 'Ñalawma Aljuma' caggal Fajiri."
   },
   {
-    "q": "Hol toɓɓe (Periods) jeeɗiɗi koode ɗee e nder ñalawma?",
-    "a": "Taarde waktu ndee feccat taariindi gila Futuroo haa Futuroo garoowo e toɓɓe 7 jokkondirɗe tawa alaa ɗo taƴi:\n1. Waktu Futuroo (Futuroo haa Geeƴe/Isha).\n2. Waktu Geeƴe (Geeƴe haa hakkunde jamma) — ena renndi Suwayaaji Jamma 5 e waktu Futuroo.\n3. Feccere Ɗiɗaɓere Jamma / Waktu Qiyam (Hakkunde jamma haa Fajiri) — ko Suwayaaji Jamma 6 tabitɗi (06|00 🌑 haa 11|59 🌑).\n4. Waktu Fajiri (Fajiri haa Fuɗngo Naange) — ko Suwaya Jamma 1 tabitɗo (Suwaya 12 🌑).\n5. Waktu Duhaa (Fuɗngo Naange haa Sallifana/Dhuhr).\n6. Waktu Sallifana (Sallifana haa Alasara/Asr).\n7. Waktu Alasara (Alasara haa Futuroo garoowo) — Suwayaaji Ñalawma 12 ɗii (01 ☀️ haa 12 ☀️) peccetee ko e nder waktuuji Duhaa, Sallifana e Alasara."
+    "q": "Ko holi sahaaji jeeɗiɗi weeyo ñalawma ɗii?",
+    "a": "Dial oo (taylo) ina fecca gila e Magrib gooto haa e Magrib garoowo e pecce 7 jokkondirɗe tawa alaa hen wuddere:\n1. Sahaa Magrib (gila Magrib haa Iisa).\n2. Sahaa Iisa (gila Iisa haa cakkital jemma weeyo) — renndi 5 Suwayaaji jemma e sahaa Magrib.\n3. Feccere ɗiɗmere Jemma / Sahaa Qiyam (gila cakkital jemma weeyo haa Fajiri) — taƴaa ko e 6 Suwayaaji jemma (gila 06|00 🌑 haa 11|59 🌑).\n4. Sahaa Fajiri (gila Fajiri haa naange fuɗa) — taƴaa ko e 1 Suwaya jemma (Suwaya 12 🌑).\n5. Sahaa Duha (gila naange fuɗa haa Salaati).\n6. Sahaa Salaati / Dhuhr (gila Salaati haa Laansara).\n7. Sahaa Laansara / Asr (gila Laansara haa Magrib garoowo) — Suwayaaji 12 ñalawma (01 ☀️ haa 12 ☀️) peccaama e njuɓɓudi ndii e nder sahaaji Duha, Salaati e Laansara."
   },
   {
-    "q": "Ko hollirgal Yaawgol Dogdu Waktu (hono 1.25x walla 0.85x) firtata?",
-    "a": "Nde tawnoo Suwaya kala ko hojomaaji 60 miijaaɗi (majaango 3 600), kono njuuteendi mum goonga ena wayloo, hollirgal yaawgol ngal ena hollita no hojomaaji Suwaya ndogirta so yerondiraama e hojomaaji siwil:\n• 1.00x: Suwaya 1 goonga ena foti e hojomaaji 60 siwil.\n• Ɓuri 1.00x (maande majjere ⚡): Waktu oo ko daɓɓo, ɗuum noon hojomaaji Suwaya ɓuri yaawde e hojomaaji siwil.\n• Jaasi 1.00x (maande montor ceenal ⏳): Waktu oo ko juutɗo, ɗuum noon hojomaaji Suwaya ena njaha seeɗa-seeɗa e deeƴre."
+    "q": "Ko holi firti maande njaaweeki dille sahaa (yeru 1.25x walla 0.85x)?",
+    "a": "Sibbu kala Suwaya ko 60 hojomaaji (3,600 leƴƴanɗe), tawa lajal goonga ngal ina wayloo e sahaa e jamaanu, maande njaaweeki ndii ina hollita no hojomaaji Suwaya ɗii ɓawrata njaaweeki e hojomaaji goonga:\n• 1.00x: Suwaya 1 fotndaa ko hojomaaji 60.\n• Ɓuri 1.00x (ina waɗi nata maande mahe ⚡): Sahaa oo ko juutɗo, ko ɗum waɗi hojomaaji Suwaya ɗii ina njaawa yahde e ɓurɗo hojomaaji goonga.\n• Ɓuri famɗude e 1.00x (ina waɗi nata lewru ndiyam ⏳): Sahaa oo ina mawnii e yaajnii, ko ɗum waɗi hojomaaji Suwaya ɗii ina njippoo seeɗa-seeɗa e ɓurɗo hojomaaji goonga."
   },
   {
-    "q": "No njanngir-mi waktu Suwaya kadi hol ko seerndi ɗum e yiyngo e waktu siwil?",
-    "a": "Waktu Suwaya feewniraa ko no anndirtee law:\n• Waktu Suwaya hollirtee sahaa kala ko e noone Kaŋŋe (Astro Gold) e diidol dariingol (|) hakkunde Suwaya e hojomaaji wondude e maande jamma/ñalawma, yeru (04|30 🌑) wonande Suwaya 4ɓo jamma e hojomaaji 30, walla (08|15 ☀️) wonande Suwaya 8ɓo ñalawma e hojomaaji 15.\n• Waktu siwil hollirtee ko e noone daneejo e toɓɓe ɗiɗi (:).\nAɗa waawi waylude hakkunde waktu Suwaya e waktu siwil sahaa kala so a ɓoɗɗii maande montor/lewru dow hello ngoo."
+    "q": "Hol no njanngir-mi waktu Suwaya e hol no ceerndiri e waktu weeyo e yiyngo?",
+    "a": "Waktu Suwaya ina waɗaa ngam yiyteede e ƴeewndo:\n• Waktu Suwaya ina holliro e Astro Gold e huutortoo taariindi (|) hakkunde Suwaya e hojomaaji makko e nata dawal, hono (04|30 🌑) ngam Suwaya jemma 4 e hojomaaji 30, walla (08|15 ☀️) ngam Suwaya ñalawma 8 e hojomaaji 15.\n• Waktu goonga ina holliro e binndol danewol/heewngol tawa e taariindi ɗiɗi (:).\nAa waawi waylude hakkunde waktu Suwaya e waktu goonga sahaa kala nde piyi-ɗaa e nata waktu/lewru e nder bar ɓurɗo toowde."
   },
   {
-    "q": "Hol pecce joy Qiyam (juulde jamma) goodɗe e nder jaaɓnirgal ngal?",
-    "a": "Wonande Qiyam, jaaɓnirgal ngal fawii ko e Waktu 3ɓo (Feccere Ɗiɗaɓere Jamma: gila hakkunde jamma haa Fajiri, woni Suwayaaji 6) kadi ngal hokkata ko pecce 5 laaɓtuɗe:\n• Feccere Ɗiɗaɓere Jamma: Suwayaaji 6 timmuɗi (06|00 🌑 haa 11|59 🌑).\n• Tataɓal Sakkitiingal Jamma: Suwayaaji 4 (08|00 🌑 haa 11|59 🌑).\n• Jeegomɓal Nayaɓal Jamma: Suwayaaji 2 (06|00 🌑 haa 07|59 🌑).\n• Jeegomɓal Joyaɓal Jamma: Suwayaaji 2 (08|00 🌑 haa 09|59 🌑).\n• Jeegomɓal Jeegomaɓal Jamma: Suwayaaji 2 (10|00 🌑 haa 11|59 🌑).\nJaaɓnirgal ngal ena haɗa e hoore mum suɓaade pecce ɗiɗi jillondirɗe ngam taarde ndee laaɓa."
+    "q": "Ko holi pecce joy Qiyam (Juulde Jemma) gollorteeɗe e application oo?",
+    "a": "Ngam Qiyam, application oo ina dartini e Sahaa 3 (Feccere ɗiɗmere Jemma: gila cakkital jemma weeyo haa Fajiri, yaaji haa 6 Suwayaaji) e ina rokka pecce 5 laaɓtuɗe:\n• Feccere ɗiɗmere Jemma: 6 Suwayaaji (gila 06|00 🌑 haa 11|59 🌑).\n• Tatabal cakkitiingal Jemma: 4 Suwayaaji (gila 08|00 🌑 haa 11|59 🌑).\n• Jeegomal nayaɓal Jemma: 2 Suwayaaji (gila 06|00 🌑 haa 07|59 🌑).\n• Jeegomal joyaɓal Jemma: 2 Suwayaaji (gila 08|00 🌑 haa 09|59 🌑).\n• Jeegomal jeegomal Jemma: 2 Suwayaaji (gila 10|00 🌑 haa 11|59 🌑).\nApplication oo ina haɗa weeyo cuɓe kawrugol e dial ngam tabitinde njuɓɓudi mbaydi ndi ina laaɓti."
   },
   {
-    "q": "No kuutororto-mi Taarde Astrolab dow hello Jaɓɓorgo ngoo?",
-    "a": "Taarde koode ndee ena gollora e nder junngo maa:\n• Memgol (Tap): Mem waktu, maande juulde, kurol golle walla taarde woowre ngam yiyde waktuuji puɗɗagol e timmoode (siwil e Suwaya), limoore Suwayaaji e yaawgol waktu.\n• Yiiltugol junngo: Yiiltu taarde ndee e fedeendu maa; so a yoofii nde, nde ruttotoo e nokku mayre.\n• Dasu & Woppu (Drag & Drop): Ɓoɗɗu juutgol e kurol golle dow taarde ndee, dasaa ngol feewde e waktu walla Suwaya goɗɗo ngam waylude waktu golle ɗee e nder majaango!\n• Waylugol yaawngol: Ɓoɗɗu (Waylu Taarde ✏️) dow taarde ndee ngam hollude walla suuɗde Fuɗngo Naange e pecce Qiyam."
+    "q": "Hol no kuutortoo-mi Astrolabe weeyo e laylaytol asoowal (Home screen)?",
+    "a": "Dial weeyo ko kuutorgol ngol ɓuuɓngol:\n• Piyo (Tap): Piyu e kala ɓoggi sahaa, maande juulde, biir golle walla rutiin ngam yiyde yewtere heewnde wiɗto e sahaaji fuɗɗoode/timmoode (e kala mbaydiiji goonga e Suwaya), limgal Suwaya e njaaweeki dille.\n• Taylo Jungo (Manual Rotation): Doosu dial oo e fedaandu ma ngam ƴeewndaade sahaaji; nde ndoosi-ɗaa o, o rokkata artude e nokku makko.\n• Jotto e Bulo (Drag & Drop): Danno piɗol e biir golle e dial oo, caggal ɗum njaadoo e mum faddaa ɗum e sahaa walla Suwaya goɗɗo ngam moƴƴinde golle ɗee e sahaaji goɗɗi.\n• Feewnit (Quick Edit): Piyu e faandaare (Moƴƴin Dial ✏️) dow dial oo ngam udditde walla uddu naange fuɗa e pecce jemma Qiyam."
   },
   {
-    "q": "Hol ko seerndi Golle Sahaa Gooto, Aadaaji Jokkondirɗi e Woowre (Routines)?",
-    "a": "• Golle Sahaa Gooto (Casual Tasks): Golle laawol gootol jokkondirɗe e ñalngu e waktu keeriiɗo (Suwaya walla siwil).\n• Aadaaji Jokkondirɗi (Continuous Habits): Golle ruttoTooɗe ñalnde kala walla e ñalɗi cuɓaaɗi, ɗe limata jokkondiral maa (Streaks) kadi ɗe ndokka Hisnugol 3 (Streak Freezes) ngam reende jokkondiral maa so a ronkii ñalawma gooto.\n• Woowre (Routines): Waktuuji jogiiɗi puɗɗagol e timmoode (hono ɗanngal, liggey walla jaŋde) ɗi natal mum en woni taaruuji nooneeji 4 dow taarde koode ndee."
+    "q": "Ko holi ceergal hakkunde golle, woowere, e rutiin?",
+    "a": "• Golle keewɗe (Casual Tasks): Golle gootel ɗe jokkondiri e ñalngu e sahaa tabituɗo (Suwaya walla goonga).\n• Woowere (Continuous Habits): Golle gartooje ñalnde kala walla e yontere ɗe njokkata geɗe ma timmuɗe (Streaks) e ɗe naatata e 3 darti (Streak Freezes) ngam hisnude yahdu ma so tawii a ŋakkii ñalawma.\n• Rutiin (Routines): Pecce sahaa gila fuɗɗoode haa timmoode (hono ɗoyngol, golle walla janngirde) mbaɗiraa ko e lewlewndo, mbaydiiji boɗeeji (4 mbaydiiji jeyngol) e dial weeyo."
   },
   {
-    "q": "No Limto Darnde (Pomodoro Suwaya e Pomodoro Aada) gollortoo?",
-    "a": "Jaaɓnirgal ngal ena jogii fannuuji ɗiɗi darnde:\n1. Pomodoro Aada: Gollortoo ko hojomaaji siwil (25 hojomaaji golle / 5 fooftere raɓɓiɗnde, e 30 fooftere juutnde caggal taariindi 4 kala) wondude e ɓoɗɗorɗe Fuɗɗo, Dartin/Jokku, Diw (Skip) e Teelte dow ngam waylude waktuuji ɗii.\n2. Pomodoro Suwaya: Tabitinat waktu puɗɗagol nde naat-ɗaa e hello ngoo, waɗa timmoode ndee e juulde farilla aroore ndee (walla waktu cuɓaaɗo hakkunde hojomaaji 15 e waktuuji/Suwayaaji 12). Ngal fecca dumunna oo e limoore Pomodoro (25/5) e yaawgol hakkunde 0.5x e 2.0x (ngal suɓoo yaawgol ɓurngol ɓadaade 1.00x), ngal ittira waktu teeltugol oo e Pomodoro gadano oo, kadi ngal darta nde waktu juulde naati."
+    "q": "Hol no waktuuji hakkille gollirta (Suwaya Pomodoro vs. Pomodoro Gila Mbaadi)?",
+    "a": "Application oo ina rokka diikuuji ɗiɗi ngam hakkille:\n1. Pomodoro Gila Mbaadi: Ina huutoroo hojomaaji goonga (default 25m golle / 5m foftere rammu, e foftere 30m e kala 4 cyles) e doosgal Fuɗɗo, Darne/Yahru, Ñemmbita, e Fuɗɗita, tee e piɗol eɓɓooji ngam moƴƴinde fof.\n2. Suwaya Pomodoro: Ina haɓɓa sahaa fuɗɗoode nde naat-ɗaa e eɓɓooji e ina moƴƴina sahaa timmoode e waktu juulde farilla garoowo (walla kala sahaa keertiiɗo hakkunde hojomaaji 15 e waktuuji 12/Suwayaaji). O fecca weeyo e limgal timmungal ngal 25/5 Pomodorooji mbiyteedi tawa e njaaweeki dille hakkunde 0.5x e 2.0x, ɗum ɗo o usta sahaa eɓɓooji gila e Pomodoro arande, o darna ko yaawi e sahaa juulde."
   },
   {
-    "q": "Mbele jaaɓnirgal ngal ena sokli enternet ngam hiisaade waktuuji walla yiylaade gure?",
-    "a": "Alaa. Suwaya gollortoo ko tawa enternet alaa (Offline-First); ngal jogii ko resndo gure ujunnaaje winndere ndee nder telefon maa. Hay so a huutoriima GPS, ngal yiytat wuro ɓurngo ɓadaade ma, ngal teelta laawol hiisa e Mazhab tawa aartaaki e enternet."
+    "q": "Ete kuutorɗe ɗee ina njeti internet ngam limtude sahaaji walla wiɗtude gure?",
+    "a": "Alaa. Suwaya ko Offline-First (tuugniiɗo e alaa-internet); ina naatata e data base e nokku oo ɗo ujunnaaje gure winndere ndee tawee. Haa sahaa nde huutortoo-ɗaa GPS, o tawata wuro ma ɓurngo ɓadaade e o moƴƴina limto ngoo e Madhab oo ko yaawi tawa e jaɓɓitaaki internet."
   },
   {
-    "q": "Ena woodi ceertugol hojomaaji seeɗa hakkunde jaaɓnirgal ngal e juulirde amen, no mbaɗat-mi?",
-    "a": "Uddit doggol bannge ngol, yah to (Teelte) -> (Hiisaaji Koode) ngam suɓaade laawol hiisa leydi maa e Mazhab, walla naat to (Feewnugol Waktuuji Junngo) ngam ɓeydude walla ustude juulde kala gila -30 haa +30 hojom."
+    "q": "Ina woodi seerndi hojomaaji seeɗa hakkunde kuutorɗe ɗee e jumaa am. Hol no mbaaw-mi feewnude ɗum?",
+    "a": "Udditu menu dow oo, yaho to (Eɓɓooji) -> (Eɓɓooji Astro Ɓamtaaɗi), ɗo mbaaw-ɗaa waylude fartaŋŋe limto, Madhab walla bangeeji heertiiɗi, walla piyo e (Taylonteeɗi Waktu) ngam feewnude kala juulde farilla -30 haa +30 hojomaaji."
   },
   {
-    "q": "Hol toɓɓe tintingol goodɗe wonande juulɗe, Qiyam, golle e woowre?",
-    "a": "Aɗa waawi suɓaade toɓɓere 1 nder 3 wonande huunde kala:\n1. Muuɓal (Silent): Alaa tintingol.\n2. Tintingol Woowngol: Tintinol deeƴngol dow telefon oo.\n3. Noddaango Doole (Findin Yaynirde): Noddaango heewngo yaynirde dow coktirgal telefon tawa daande ndee ena ɓeydoo seeɗa-seeɗa (Fade-in), aɗa waawi dartinde walla dirtinde (Snooze) e ɓoɗɗude butoŋaaji daande telefon oo."
+    "q": "Ko holi tolnooji tintingol woodi ngam juulde, Qiyam, golle e rutiin?",
+    "a": "A waawi feewnude kala huunde e nder 3 tolnooji tintingol:\n1. Deƴƴuɗo: Alaa njannginaango.\n2. Njannginaango Kiiɗɗo: Njannginaango leemleem e nder lowre sistem.\n3. Tintingol Toowngol (Fina Laylaytol): Tintingol yeeso fof ngol yaltata dow laylaytol uddugol ngol e mawnugo sonko (Fade-in), ngol wallita dañde ɗemngal ngam darta/dartina (snooze), kadi huutoroo piɗe sonko kaɓirɗe ngam dartina."
   },
   {
-    "q": "Ko wonata e golle am ɓooyɗe caggal nde kesɗitin-mi feewde e yuɓɓo V2 keso ngoo?",
-    "a": "Jaaɓnirgal ngal ena jogii Sarwiis Eggugol (Migration Service) gollotooɗo nde uddit-ɗaa ngal; o waylat golle e woowre ɓooyɗe ɗee e kisal feewde e waktu siwil (10:00 subaka) ngam hay huunde woto majju, mbele aɗa waawa waɗtude ɗe e Suwaya keso mo njiɗ-ɗaa."
+    "q": "Ko holi kewata e golle am kiiɗɗe caggal nde ɓeydaaki e sistem V2 keso oo?",
+    "a": "Application oo ina naatata e Kuugal Njuɓɓudi automatik gollirngal e fuɗɗoode; ina ɓeyda ko hisni golle e rutiin mbaɗiraa e les mbaadi kiiɗndi e sahaa goonga default (10:00 Subaka) ngam waasde yuumtude e golle ma fof, addana ma rewde golle e Suwaya ɓur-ɗaa yiɗde."
   },
   {
-    "q": "Hol to keɓe am ndesndetee kadi ko woni dawrugol suturo Suwaya?",
-    "a": "Golle maa, aadaaji maa, woowre maa, teelte maa e nokkuuji maa fof ndesndetee ko nder telefon maa tan e nder resndo (Isar). Suwaya alaa sarwisaaji duule (cloud) kadi roondotaako walla renndina hay keɓe maa keeriiɗe."
+    "q": "Hol to keɓe am mooɓotoo e holi policy sirlu Suwaya?",
+    "a": "Kala golle ma, woowere, rutiin, eɓɓooji, e nokkuuji keɓaaɗi ɗii ina keɓee e nokku ma nder laylaytol ma nder data base njaawɗo (Isar). Suwaya alaa eɓɓooji weeyo (cloud) e alaa ko mboofta, waɗa diisnondiral walla renndina kala keɓe ma e paandaale."
   }
 ]

@@ -1,62 +1,62 @@
 [
   {
-    "q": "«Suwaya» uygulaması nedir ve temel fikri neye dayanır?",
-    "a": "Suwaya, günlük ritminizi, görevlerinizi ve odaklanma seanslarınızı yalnızca sabit sivil saatlere bağlı kalmak yerine bulunduğunuz coğrafi konumdaki güneş hareketleri ve namaz vakitleriyle yeniden uyumlu hale getirmek için tasarlanmış açık kaynaklı bir Astronomik Üretkenlik (Astro-Productivity) uygulamasıdır."
+    "q": "Suwaya nedir ve temel konsepti nedir?",
+    "a": "Suwaya, günlük ritminizi, görevlerinizi ve odaklanma oturumlarınızı katı sivil saatlere bağımlı kalmak yerine, bulunduğunuz coğrafi konumdaki güneş hareketleri ve namaz vakitleriyle yeniden bağlantı kurmak için tasarlanmış açık kaynaklı bir Astro-Üretkenlik uygulamasıdır."
   },
   {
-    "q": "«Suwaya» nedir ve 24 Suwaya sistemi nasıl çalışır?",
-    "a": "Günü gece yarısı başlayan 24 eşit sivil saate bölmek yerine, Suwaya astronomik günü (Akşam ezanından ertesi günün Akşam ezanına kadar) iki evrede 24 Suwaya'ya böler:\n• Gece Evresi (🌑): Akşam'dan Güneşin doğuşuna kadar sürer ve 12 Gece Suwaya'sından (01 ile 12 arası) oluşur.\n• Gündüz Evresi (☀️): Güneşin doğuşundan ertesi Akşam'a kadar sürer ve 12 Gündüz Suwaya'sından (01 ile 12 arası) oluşur.\nHer Suwaya 60 sanal dakikadan (00|00 biçiminde yazılır) oluşur; ancak gerçek süresi bulunduğunuz mevsim ve konumdaki gece-gündüz uzunluğuna göre uzar veya kısalır."
+    "q": "'Suwaya' nedir ve 24 Suwaya sistemi nasıl çalışır?",
+    "a": "Günü gece yarısından itibaren 24 eşit sivil saate bölmek yerine, Suwaya astronomik günü (Akşam namazından ertesi Akşam namazına kadar) iki evrede 24 Suwaya'ya böler:\n• Gece Evresi (🌑): Akşam'dan Güneş'in doğuşuna kadar sürer ve 12 Gece Suwayası'ndan oluşur (01'den 12'ye kadar numaralandırılır).\n• Gündüz Evresi (☀️): Güneş'in doğuşundan ertesi Akşam'a kadar sürer ve 12 Gündüz Suwayası'ndan oluşur (01'den 12'ye kadar numaralandırılır).\nHer Suwaya 60 sanal dakikadan oluşur (00|00 şeklinde yazılır), ancak gerçek süresi, bulunduğunuz mevsime ve konuma göre gece ve gündüzün uzunluğuna bağlı olarak uzar veya kısalır."
   },
   {
-    "q": "Suwaya'da gün neden gece yarısı veya İmsak yerine Akşam vaktinde başlar?",
-    "a": "Uygulama, gecenin gündüzden önce geldiği özgün astronomik ve İslami takvim döngüsünü takip eder; yeni gün güneşin batışıyla (Akşam vaktiyle) başlar. Bu nedenle ana ekranın üst kısmında Akşam'dan sonra «Cuma Gecesi», İmsak'tan sonra ise «Cuma Gündüzü» ifadesini görürsünüz."
+    "q": "Suwaya'da gün neden gece yarısı veya Sabah namazı (Fajr) yerine Akşam namazı (Maghrib) ile başlıyor?",
+    "a": "Uygulama, gecenin gündüzden önce geldiği otantik astronomik ve İslami takvim döngüsünü takip eder; yeni bir gün gün batımıyla (Akşam namazı) başlar. Bu nedenle, Akşam namazından sonra 'Cuma Gecesi' gibi başlıklar görürsünüz ve bu, Sabah namazından sonra 'Cuma Gündüzü'ne dönüşür."
   },
   {
-    "q": "Günün bölündüğü yedi astronomik dönem hangileridir?",
-    "a": "Kadran, Akşam'dan ertesi Akşam'a kadar olan döngüyü boşluksuz 7 kesintisiz döneme ayırır:\n1. Akşam Dönemi (Akşam'dan Yatsı'ya).\n2. Yatsı Dönemi (Yatsı'dan şer'i gece yarısına) — Akşam dönemiyle birlikte toplam 5 Gece Suwaya'sını paylaşır.\n3. Gecenin İkinci Yarısı / Kıyam Dönemi (Gece yarısından İmsak'a) — sabit 6 Gece Suwaya'sıdır (06|00 🌑 - 11|59 🌑).\n4. İmsak/Sabah Dönemi (İmsak'tan Güneş doğuşuna) — sabit 1 Gece Suwaya'sıdır (12. Suwaya 🌑).\n5. Kuşluk (Duha) Dönemi (Güneş doğuşundan Öğle'ye).\n6. Öğle Dönemi (Öğle'den İkindi'ye).\n7. İkindi Dönemi (İkindi'den ertesi Akşam'a) — 12 Gündüz Suwaya'sı (01 ☀️ - 12 ☀️) Kuşluk, Öğle ve İkindi dönemlerine dinamik olarak dağıtılır."
+    "q": "Günün yedi astronomik periyodu nelerdir?",
+    "a": "Kadran, bir Akşam namazından diğerine kadar olan döngüyü boşluksuz 7 bitişik periyoda ayırır:\n1. Akşam Periyodu (Akşam'dan Yatsı'ya).\n2. Yatsı Periyodu (Yatsı'dan astronomik gece yarısına) — 5 Gece Suwayasını Akşam periyoduyla paylaşır.\n3. Gecenin İkinci Yarısı / Kıyam Periyodu (Astronomik gece yarısından Sabah'a) — 6 Gece Suwayası (06|00 🌑 ile 11|59 🌑 arası) olarak sabitlenmiştir.\n4. Sabah Periyodu (Sabah'tan Güneş'in doğuşuna) — 1 Gece Suwayası (Suwaya 12 🌑) olarak sabitlenmiştir.\n5. Duha Periyodu (Güneş'in doğuşundan Öğle'ye).\n6. Öğle Periyodu (Öğle'den İkindi'ye).\n7. İkindi Periyodu (İkindi'den ertesi Akşam'a) — 12 Gündüz Suwayası (01 ☀️ ile 12 ☀️ arası) Duha, Öğle ve İkindi periyotları arasına dinamik olarak dağıtılır."
   },
   {
-    "q": "Zaman Akış Hızı göstergesi (ör. 1.25x veya 0.85x) ne anlama gelir?",
-    "a": "Her Suwaya 60 sanal dakikayı (3.600 sanal saniye) temsil ederken gerçek süresi döneme ve mevsime göre değiştiğinden, hız göstergesi sanal Suwaya dakikalarının sivil dakikalara kıyasla ne kadar hızlı aktığını gösterir:\n• 1.00x: 1 Suwaya tam olarak 60 sivil dakikaya eşittir.\n• 1.00x'ten büyük (şimşek simgesi ⚡): Dönem kısadır, bu yüzden Suwaya dakikaları sivil dakikalardan daha hızlı akar.\n• 1.00x'ten küçük (kum saati simgesi ⏳): Dönem uzundur, bu yüzden Suwaya dakikaları sivil dakikalardan daha sakin ve yavaş akar."
+    "q": "Zaman Akış Hızı göstergesi (ör. 1.25x veya 0.85x) ne anlama geliyor?",
+    "a": "Her Suwaya 60 sanal dakikayı (3.600 sanal saniye) temsil ederken, gerçek süresi periyoda ve mevsime göre değiştiği için, hız göstergesi Suwaya dakikalarının sivil dakikalara kıyasla ne kadar hızlı aktığını gösterir:\n• 1.00x: 1 Suwaya tam olarak 60 sivil dakikaya eşittir.\n• 1.00x'ten büyük (şimşek simgesiyle ⚡): Periyot kısadır, bu nedenle Suwaya dakikaları sivil dakikalardan daha hızlı akar.\n• 1.00x'ten küçük (kum saati simgesiyle ⏳): Periyot uzundur, bu nedenle Suwaya dakikaları sivil dakikalardan daha yavaş ve sakin akar."
   },
   {
-    "q": "Suwaya saatini nasıl okurum ve sivil saatten görsel farkı nedir?",
-    "a": "Suwaya saati ilk bakışta ayırt edilebilecek şekilde tasarlanmıştır:\n• Suwaya saati her zaman Astronomik Altın renginde yazılır ve Suwaya ile dakikalar arasında dikey çizgi (|) ve evre simgesi kullanılır; örneğin (04|30 🌑) 4. Gece Suwaya'sı ve 30 sanal dakikayı, (08|15 ☀️) ise 8. Gündüz Suwaya'sı ve 15 sanal dakikayı ifade eder.\n• Sivil saat beyaz/nötr renkte ve iki nokta üst üste (:) ile gösterilir.\nÜst çubuktaki saat/hilal düğmesine dokunarak istediğiniz an uygulama genelinde Suwaya saati ile sivil saat arasında geçiş yapabilirsiniz."
+    "q": "Suwaya zamanını nasıl okurum ve sivil zamandan görsel olarak farkı nedir?",
+    "a": "Suwaya zamanı bir bakışta tanınabilir olacak şekilde tasarlanmıştır:\n• Suwaya zamanı her zaman Astro Altın renginde görüntülenir ve Suwayalar ile sanal dakikalar arasında dikey bir çubuk (|) ve bir evre simgesi kullanır, örneğin 4. Gece Suwayası ve 30 sanal dakika için (04|30 🌑) veya 8. Gündüz Suwayası ve 15 sanal dakika için (08|15 ☀️).\n• Sivil zaman, standart iki nokta üst üste (:) ile beyaz/nötr metin olarak görüntülenir.\nÜst çubuktaki saat/hilal simgesine dokunarak istediğiniz zaman Suwaya zamanı ile sivil zaman arasında geçiş yapabilirsiniz."
   },
   {
-    "q": "Uygulamada mevcut olan beş Gece Namazı (Kıyam) bölümü hangileridir?",
-    "a": "Uygulama, Kıyam bölümünde 3. Döneme (Gecenin İkinci Yarısı: gece yarısından İmsak'a kadar, 6 Suwaya) odaklanır ve 5 hassas astronomik bölüm sunar:\n• Gecenin İkinci Yarısı: 6 Suwaya (06|00 🌑 - 11|59 🌑).\n• Gecenin Son Üçte Biri: 4 Suwaya (08|00 🌑 - 11|59 🌑).\n• Gecenin Dördüncü Altıda Biri: 2 Suwaya (06|00 🌑 - 07|59 🌑).\n• Gecenin Beşinci Altıda Biri: 2 Suwaya (08|00 🌑 - 09|59 🌑).\n• Gecenin Altıncı Altıda Biri: 2 Suwaya (10|00 🌑 - 11|59 🌑).\nUygulama, kadranda görsel karmaşayı önlemek için çakışan bölümlerin aynı anda seçilmesini otomatik olarak engeller."
+    "q": "Uygulamada bulunan beş Gece İbadeti (Kıyam) bölümü nelerdir?",
+    "a": "Kıyam için uygulama Periyot 3'e odaklanır (Gecenin İkinci Yarısı: astronomik gece yarısından Sabah namazına kadar, 6 Suwaya'yı kapsar) ve 5 hassas alt bölüm sunar:\n• Gecenin İkinci Yarısı: 6 Suwaya (06|00 🌑 ile 11|59 🌑 arası).\n• Gecenin Son Üçte Biri: 4 Suwaya (08|00 🌑 ile 11|59 🌑 arası).\n• Gecenin Dördüncü Altıda Biri: 2 Suwaya (06|00 🌑 ile 07|59 🌑 arası).\n• Gecenin Beşinci Altıda Biri: 2 Suwaya (08|00 🌑 ile 09|59 🌑 arası).\n• Gecenin Son Altıda Biri: 2 Suwaya (10|00 🌑 ile 11|59 🌑 arası).\nUygulama, görsel düzeni temiz tutmak için kadranda çakışan seçimleri otomatik olarak engeller."
   },
   {
     "q": "Ana ekrandaki etkileşimli Astronomik Usturlap Kadranını nasıl kullanırım?",
-    "a": "Astronomik kadran tamamen etkileşimlidir:\n• Dokunma (Tap): Başlangıç/bitiş saatlerini (sivil ve Suwaya), Suwaya sayısını ve akış hızını içeren ayrıntılı pencereyi görmek için herhangi bir döneme, namaz işaretine, görev okuna veya rutin yayına dokunun.\n• Manuel Döndürme: Dönemleri incelemek için kadranı parmağınızla çevirebilirsiniz; bıraktığınızda esnek bir şekilde元の konumuna döner.\n• Sürükle ve Bırak (Drag & Drop): Kadrandaki herhangi bir görev okuna uzun basın, ardından görevi anında yeniden planlamak için başka bir döneme veya Suwaya'ya sürükleyip bırakın!\n• Hızlı Düzenleme: Güneş doğuşunu ve Kıyam bölümlerini açıp kapatmak için kadranın üstündeki (Kadranı Düzenle ✏️) düğmesine dokunun."
+    "a": "Astronomik kadran tamamen etkileşimlidir:\n• Dokunma (Tap): Başlangıç/bitiş saatleri (hem sivil hem de Suwaya formatlarında), Suwaya sayısı ve akış hızı hakkında ayrıntılı bir iletişim kutusu görmek için herhangi bir periyot halkasına, namaz işaretine, görev okuna veya rutin yayına dokunun.\n• Manuel Döndürme: Periyotları keşfetmek için kadranı parmağınızla sürükleyin; serbest bırakıldığında esnek bir şekilde geri dönecektir.\n• Sürükle ve Bırak (Drag & Drop): Kadrandaki herhangi bir görev okuna uzun basın, ardından görevi hemen yeniden planlamak için başka bir periyoda veya Suwaya'ya sürükleyip bırakın.\n• Hızlı Düzenleme: Güneş'in doğuşunu ve Kıyam gece bölümlerini açıp kapatmak için kadranın üzerindeki (Kadranı Özelleştir ✏️) düğmesine dokunun."
   },
   {
-    "q": "Geçici Görevler, Sürekli Alışkanlıklar ve Rutin Dönemler arasındaki fark nedir?",
-    "a": "• Geçici Görevler (Casual Tasks): Belirli bir tarih ve saate (Suwaya veya sivil) bağlı tek seferlik görevlerdir.\n• Sürekli Alışkanlıklar (Continuous Habits): Günlük veya haftanın belirli günlerinde tekrarlanan, seri (Streak) takibini destekleyen ve bir günü kaçırdığınızda serinizi koruyan 3 Seri Dondurma (Streak Freeze) hakkı içeren alışkanlıklardır.\n• Rutin Dönemler (Routines): Başlangıç ve bitiş saati olan (uyku, çalışma veya okuma saatleri gibi) ve astronomik kadranda 4 geometrik desenle renkli yaylar olarak çizilen zaman dilimleridir."
+    "q": "Sıradan Görevler (Casual Tasks), Sürekli Alışkanlıklar (Continuous Habits) ve Rutinler arasındaki fark nedir?",
+    "a": "• Sıradan Görevler: Belirli bir tarih ve saate (Suwaya veya sivil) bağlı tek seferlik görevler.\n• Sürekli Alışkanlıklar: Tamamlama serilerinizi (Streaks) izleyen ve bir günü kaçırırsanız ilerlemenizi korumak için 3 Seri Dondurma (Streak Freezes) içeren yinelenen günlük veya haftalık eylemler.\n• Rutinler: Astronomik kadran üzerinde renkli ve desenli yaylar (4 geometrik desen) olarak oluşturulan başlangıç ve bitiş zamanı olan zaman blokları (uyku, çalışma veya ders çalışma gibi)."
   },
   {
-    "q": "Odaklanma Zamanlayıcısı (Suwaya Pomodoro ve Geleneksel Pomodoro) nasıl çalışır?",
-    "a": "Uygulama iki odaklanma modu sunar:\n1. Geleneksel Pomodoro: Standart sivil dakikalarla çalışır (varsayılan 25 dk çalışma / 5 dk kısa mola ve her 4 döngüde bir 30 dk uzun mola). Başlat, Duraklat/Devam Et, Atla ve Sıfırla düğmelerinin yanı sıra üstteki ayarlar simgesinden tüm süreleri özelleştirme imkanı sunar.\n2. Suwaya Pomodoro: Sayfaya girdiğiniz anı başlangıç zamanı olarak sabitler ve bitişi varsayılan olarak sıradaki farz namaza (veya 15 dakika ile 12 saat/Suwaya arasında seçtiğiniz bir zamana) ayarlar. Süreyi 0.5x ile 2.0x arasında bir akış hızıyla tam sayılı 25/5 sanal Pomodoro seanslarına böler (1.00x'e en yakın hızı varsayılan seçer), kurulum süresini ilk Pomodoro'dan düşer ve namaz vakti girdiğinde otomatik olarak durur."
+    "q": "Odak Zamanlayıcı (Suwaya Pomodoro ve Geleneksel Pomodoro) nasıl çalışır?",
+    "a": "Uygulama iki odak modu sunar:\n1. Geleneksel Pomodoro: Başlat, Duraklat/Devam Et, Atla ve Sıfırla kontrolleri ve ayrıca her şeyi özelleştirmek için bir ayarlar düğmesi ile standart sivil dakikaları kullanır (varsayılan olarak 25dk çalışma / 5dk kısa mola ve her 4 döngüde bir 30dk uzun mola).\n2. Suwaya Pomodoro: Kurulum ekranına girdiğinizde başlangıç zamanını sabitler ve bitiş zamanını varsayılan olarak bir sonraki farz namaza (veya 15 dakika ile 12 saat/Suwaya arasındaki herhangi bir özel zamana) ayarlar. Aralığı, 0.5x ile 2.0x arasında (varsayılan olarak 1.00x'e en yakın hızı seçerek) bir akış hızıyla tam sayı 25/5 sanal Pomodorolara böler, kurulum süresini ilk Pomodoro'dan düşer ve namaz vaktinde otomatik olarak durur."
   },
   {
-    "q": "Vakitleri hesaplamak veya şehir aramak için internet bağlantısı gerekir mi?",
-    "a": "Hayır, Suwaya çevrimdışı öncelikli (Offline-First) çalışır; dünya çapında binlerce şehri içeren yerleşik bir yerel veritabanına sahiptir. GPS kullanırken bile internete ihtiyaç duymadan en yakın şehri bulur ve hesaplama yöntemi ile mezhebi otomatik olarak ayarlar."
+    "q": "Uygulamanın zamanlamaları hesaplamak veya şehirleri aramak için internet bağlantısına ihtiyacı var mı?",
+    "a": "Hayır. Suwaya çevrimdışı önceliklidir (Offline-First); dünya çapında binlerce şehrin paketlenmiş yerel bir veritabanını içerir. GPS kullanırken bile, internet erişimine ihtiyaç duymadan en yakın şehrinizi bulur ve hesaplama yöntemini ile Mezhebi otomatik olarak yapılandırır."
   },
   {
-    "q": "Uygulama ile yerel camim arasında birkaç dakikalık fark var, nasıl ayarlayabilirim?",
-    "a": "Yan menüden (Ayarlar) -> (Astronomik Hesaplamalar) bölümüne gidin; buradan ülkenizin hesaplama yöntemini ve mezhebi seçebilir veya (Manuel Vakit Ayarları) ekranından her namazı ayrı ayrı -30 ile +30 dakika arasında ileri/geri alabilirsiniz."
+    "q": "Uygulama ile yerel camim arasında birkaç dakikalık fark var. Bunu nasıl ayarlayabilirim?",
+    "a": "Yan menüyü açın, (Ayarlar) -> (Gelişmiş Astro Ayarları)'na gidin; burada hesaplama yöntemini, Mezhebi veya özel açıları değiştirebilir veya zorunlu herhangi bir namazı -30 ile +30 dakika arasında tek tek ayarlamak için (Manuel Zaman Kaydırmaları)'na dokunabilirsiniz."
   },
   {
     "q": "Namazlar, Kıyam, görevler ve rutinler için hangi uyarı seviyeleri mevcuttur?",
-    "a": "Her öğeyi 3 uyarı seviyesinden biriyle özelleştirebilirsiniz:\n1. Sessiz: Bildirim yok.\n2. Standart Bildirim: Sistem bildirim çubuğunda sakin bir uyarı.\n3. Güçlü Alarm (Ekranı Uyandır): Kilit ekranının üzerinde açılan, kademeli ses yükseltmeli (Fade-in) tam ekran alarm; ekranda kaydırarak veya telefonun ses tuşlarına basarak erteleme/durdurma desteği sunar."
+    "a": "Her öğeyi 3 uyarı seviyesinden biriyle yapılandırabilirsiniz:\n1. Sessiz: Bildirim yok.\n2. Standart Bildirim: Sistem tepsisinde sessiz bir bildirim.\n3. Güçlü Alarm (Ekranı Uyandırır): Kaydırma veya erteleme için durdurma işlevini destekleyen ve ayrıca ertelemek için donanım ses düzeyi düğmelerini kullanabileceğiniz, sesin yavaş yavaş arttığı (Fade-in) kilit ekranının üzerinde beliren tam ekran bir alarm."
   },
   {
-    "q": "Yeni sisteme güncelledikten sonra eski görevlerime ne olur?",
-    "a": "Uygulama, açılışta otomatik çalışan güvenli bir Veri Taşıma Hizmeti (Migration Service) içerir; önceki sürümlerde planlanmış görev ve rutinleri hiçbir veri kaybı olmaması için güvenli bir şekilde varsayılan sivil saate (10:00) dönüştürür, böylece bunları dilediğiniz yeni Suwaya'ya taşıyabilirsiniz."
+    "q": "Yeni V2 zaman sistemine güncelledikten sonra eski görevlerime ne olacak?",
+    "a": "Uygulama, başlangıçta çalışan otomatik bir Geçiş Hizmeti (Migration Service) içerir; eski model altında oluşturulan görevleri ve rutinleri, hiçbir görevinizin kaybolmaması için varsayılan bir sivil zamana (sabah 10:00) güvenli bir şekilde yükseltir ve bunları tercih ettiğiniz Suwaya'ya yeniden planlamanıza olanak tanır."
   },
   {
     "q": "Verilerim nerede saklanıyor ve Suwaya'nın gizlilik politikası nedir?",
-    "a": "Tüm görevleriniz, alışkanlıklarınız, rutinleriniz ve konum bilgileriniz yalnızca cihazınızda hızlı bir yerel veritabanında (Isar) saklanır. Suwaya'nın bulut sunucuları yoktur ve hiçbir kişisel veya reklam verisi toplamaz ya da paylaşmaz."
+    "a": "Tüm görevleriniz, alışkanlıklarınız, rutinleriniz, ayarlarınız ve kayıtlı konumlarınız yerel olarak, cihazınızdaki hızlı bir yerel veritabanında (Isar) saklanır. Suwaya'nın herhangi bir bulut sunucusu yoktur ve hiçbir kişisel veya reklam verisini toplamaz, izlemez veya paylaşmaz."
   }
 ]

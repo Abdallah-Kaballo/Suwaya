@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:suwaya/features/ibadat/astro_timeline_screen.dart';
 import 'package:suwaya/features/settings/manual_offsets_screen.dart';
 
 import '../../features/layout/main_layout.dart';
@@ -105,11 +104,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SupportScreen(),
       ),
-      GoRoute(
-        path: '/ibadat/timeline',
-        parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const AstroTimelineScreen(),
-      ),
+
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);

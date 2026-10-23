@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math' show cos, asin, sqrt;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';
@@ -233,6 +234,13 @@ class GeoDatabaseService {
   }
 
   static String getLocalizedCountryName(String code, String lang) {
+    final trKey = 'countries.$code';
+    final translated = trKey.tr();
+    
+    if (translated != trKey) {
+      return translated;
+    }
+
     if (lang == 'ar') return _countriesAr[code] ?? code;
     return _countriesEn[code] ?? code;
   }

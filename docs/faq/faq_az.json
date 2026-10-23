@@ -1,62 +1,62 @@
 [
   {
-    "q": "«Suwaya» tətbiqi nədir və onun əsas ideyası nədən ibarətdir?",
-    "a": "Suwaya, gündəlik ritminizi, tapşırıqlarınızı və fokuslanma seanslarınızı yalnız sabit mülki saatlara bağlamaq əvəzinə, coğrafi məkanınızdakı günəşin hərəkəti və namaz vaxtları ilə uyğunlaşdırmaq üçün hazırlanmış açıq mənbəli Astronomik Məhsuldarlıq (Astro-Productivity) tətbiqidir."
+    "q": "Suwaya nədir və onun əsas konsepsiyası nədir?",
+    "a": "Suwaya, gündəlik ritminizi, tapşırıqlarınızı və fokus sessiyalarınızı sadəcə sərt vətəndaş saatlarına (mülki saata) etibar etmək əvəzinə, olduğunuz coğrafi məkanda günəşin hərəkəti və namaz vaxtları ilə yenidən əlaqələndirmək üçün hazırlanmış açıq mənbəli Astro-Məhsuldarlıq (Astro-Productivity) tətbiqidir."
   },
   {
-    "q": "«Suwaya» nədir və 24 Suwaya sistemi necə işləyir?",
-    "a": "Günü gecə yarısından başlayan 24 bərabər mülki saata bölmək əvəzinə, Suwaya astronomik günü (Şam namazından növbəti Şam namazına qədər) iki fazada 24 Suwaya-ya bölür:\n• Gecə Fazası (🌑): Şam azanından Günəş çıxana qədər davam edir və 12 Gecə Suwaya-sından (01-dən 12-yə qədər) ibarətdir.\n• Gündüz Fazası (☀️): Günəş çıxandan növbəti Şam azanına qədər davam edir və 12 Gündüz Suwaya-sından (01-dən 12-yə qədər) ibarətdir.\nHər bir Suwaya 60 virtual dəqiqədən (00|00 formatında yazılır) ibarətdir, lakin onun həqiqi müddəti fəsildən və məkanınızdan asılı olaraq gecə və gündüzün uzunluğuna görə uzanır və ya qısalır."
+    "q": "'Suwaya' nədir və 24-Suwaya sistemi necə işləyir?",
+    "a": "Günü gecə yarısından başlayan 24 bərabər mülki saata bölmək əvəzinə, Suwaya astronomik günü (Məğribdən növbəti Məğribə qədər) iki faza daxilində 24 Suwaya-ya bölür:\n• Gecə Fazası (🌑): Məğribdən Günəşin çıxmasına qədər davam edir və 12 Gecə Suwayasından ibarətdir (01-dən 12-yə qədər nömrələnib).\n• Gündüz Fazası (☀️): Günəşin çıxmasından növbəti Məğribə qədər davam edir və 12 Gündüz Suwayasından ibarətdir (01-dən 12-yə qədər nömrələnib).\nHər bir Suwaya 60 virtual dəqiqədən ibarətdir (00|00 kimi yazılır), onun real müddəti isə fəslinizə və məkanınıza görə gecə və gündüzün uzunluğuna uyğun olaraq genişlənir və ya daralır."
   },
   {
-    "q": "Suwaya-da gün niyə gecə yarısı və ya Sübh əvəzinə Şam vaxtında başlayır?",
-    "a": "Tətbiq gecənin gündüzdən əvvəl gəldiyi əsl astronomik və İslami təqvim dövrünü izləyir; yeni gün günəşin batması (Şam vaxtı) ilə başlayır. Buna görə də əsas ekranın yuxarısında Şamdan sonra «Cümə Gecəsi», Sübhdən sonra isə «Cümə Gündüzü» ifadəsini görürsünüz."
+    "q": "Niyə Suwaya-da gün gecə yarısı və ya Sübhdən deyil, Məğribdən başlayır?",
+    "a": "Tətbiq, gecənin gündüzü qabaqladığı orijinal astronomik və İslami təqvim dövrünü izləyir; yeni gün gün batımında (Məğrib) başlayır. Buna görə də, Məğribdən sonra 'Cümə Gecəsi' kimi başlıqlar görəcəksiniz, hansı ki, Sübhdən sonra 'Cümə Günü'nə çevrilir."
   },
   {
-    "q": "Günün bölündüyü yeddi astronomik dövr hansılardır?",
-    "a": "Siferblat Şamdan növbəti Şama qədər olan dövrü boşluqsuz 7 fasiləsiz dövrə bölür:\n1. Şam Dövrü (Şamdan İşa/Xüftənə qədər).\n2. İşa Dövrü (İşadan şəri gecə yarısına qədər) — Şam dövrü ilə birlikdə ümumi 5 Gecə Suwaya-sını paylaşır.\n3. Gecənin İkinci Yarısı / Qiyam Dövrü (Gecə yarısından Sübhə qədər) — sabit 6 Gecə Suwaya-sıdır (06|00 🌑 – 11|59 🌑).\n4. Sübh Dövrü (Sübhdən Günəş çıxana qədər) — sabit 1 Gecə Suwaya-sıdır (12-ci Suwaya 🌑).\n5. Duha Dövrü (Günəş çıxandan Zöhrə qədər).\n6. Zöhr Dövrü (Zöhrdən Əsrə qədər).\n7. Əsr Dövrü (Əsrdən növbəti Şama qədər) — 12 Gündüz Suwaya-sı (01 ☀️ – 12 ☀️) Duha, Zöhr və Əsr dövrləri arasında dinamik şəkildə paylanır."
+    "q": "Günün yeddi astronomik dövrü hansılardır?",
+    "a": "Siferblat bir Məğribdən digərinə olan dövrü heç bir boşluq olmadan 7 ardıcıl dövrə bölür:\n1. Məğrib Dövrü (Məğribdən İşa-ya (Yatsı)).\n2. İşa Dövrü (İşa-dan astronomik gecə yarısına qədər) — Məğrib dövrü ilə 5 Gecə Suwayasını bölüşür.\n3. Gecənin İkinci Yarısı / Qiyam Dövrü (Astronomik gecə yarısından Sübhə qədər) — 6 Gecə Suwayasına sabitlenib (06|00 🌑-dan 11|59 🌑-a qədər).\n4. Sübh Dövrü (Sübhdən Günəşin çıxmasına qədər) — 1 Gecə Suwayasına sabitlenib (Suwaya 12 🌑).\n5. Duha Dövrü (Günəşin çıxmasından Zöhrə qədər).\n6. Zöhr Dövrü (Zöhrdən Əsrə qədər).\n7. Əsr Dövrü (Əsrdən növbəti Məğribə qədər) — 12 Gündüz Suwayası (01 ☀️-dən 12 ☀️-ə qədər) Duha, Zöhr və Əsr dövrləri arasında dinamik olaraq paylanır."
   },
   {
-    "q": "Zaman Axını Sürəti göstəricisi (məs. 1.25x və ya 0.85x) nə deməkdir?",
-    "a": "Hər Suwaya 60 virtual dəqiqəni (3600 virtual saniyə) təmsil etdiyi halda həqiqi müddəti dövrə və fəslə görə dəyişdiyindən, sürət göstəricisi virtual Suwaya dəqiqələrinin mülki dəqiqələrlə müqayisədə nə qədər sürətlə axdığını göstərir:\n• 1.00x: 1 həqiqi Suwaya tam olaraq 60 mülki dəqiqəyə bərabərdir.\n• 1.00x-dən böyük (ildırım ikonu ⚡): Dövr qısadır, ona görə də Suwaya dəqiqələri mülki dəqiqələrdən daha sürətlə axır.\n• 1.00x-dən kiçik (qum saatı ikonu ⏳): Dövr uzundur, ona görə də Suwaya dəqiqələri mülki dəqiqələrdən daha sakit və yavaş axır."
+    "q": "Zaman Axını Sürəti göstəricisi (məsələn, 1.25x və ya 0.85x) nə deməkdir?",
+    "a": "Hər Suwaya 60 virtual dəqiqəni (3,600 virtual saniyə) təmsil etdiyi, lakin onun real müddəti dövrə və fəslə görə dəyişdiyi üçün sürət göstəricisi Suwaya dəqiqələrinin mülki dəqiqələrlə müqayisədə nə qədər sürətli axdığını göstərir:\n• 1.00x: 1 Suwaya tam olaraq 60 mülki dəqiqəyə bərabərdir.\n• 1.00x-dən böyük (ildırım işarəsi ⚡ ilə): Dövr qısadır, buna görə də Suwaya dəqiqələri mülki dəqiqələrdən daha sürətli axır.\n• 1.00x-dən kiçik (qum saatı işarəsi ⏳ ilə): Dövr uzun və genişdir, buna görə də Suwaya dəqiqələri mülki dəqiqələrdən daha sakit və yavaş axır."
   },
   {
-    "q": "Suwaya vaxtını necə oxuya bilərəm və mülki saatdan vizual fərqi nədir?",
-    "a": "Suwaya vaxtı ilk baxışdan seçiləcək şəkildə hazırlanmışdır:\n• Suwaya vaxtı həmişə Astronomik Qızılı rəngdə göstərilir və Suwaya ilə dəqiqələr arasında şaquli xətt (|) və faza ikonundan istifadə edir; məsələn, 4-cü Gecə Suwaya-sı və 30 virtual dəqiqə üçün (04|30 🌑), və ya 8-ci Gündüz Suwaya-sı və 15 virtual dəqiqə üçün (08|15 ☀️).\n• Mülki vaxt ağ/neytral rəngdə və qoşa nöqtə (:) ilə göstərilir.\nYuxarı paneldəki saat/aypara düyməsinə toxunaraq istənilən vaxt Suwaya vaxtı ilə mülki vaxt arasında keçid edə bilərsiniz."
+    "q": "Suwaya vaxtını necə oxuyuram və vizual olaraq mülki vaxtdan nə ilə fərqlənir?",
+    "a": "Suwaya vaxtı bir baxışda tanına biləcək şəkildə hazırlanmışdır:\n• Suwaya vaxtı həmişə Astro Gold rəngində göstərilir və faza işarəsi ilə birlikdə Suwayalar və virtual dəqiqələr arasında şaquli xəttdən (|) istifadə edir. Məsələn, 4-cü Gecə Suwayası və 30 virtual dəqiqə üçün (04|30 🌑), və ya 8-ci Gündüz Suwayası və 15 virtual dəqiqə üçün (08|15 ☀️).\n• Mülki vaxt (normal saat) isə standart iki nöqtə (:) ilə ağ/neytral mətndə göstərilir.\nSiz yuxarı paneldəki saat/aypara işarəsinə toxunaraq istənilən vaxt Suwaya vaxtı ilə mülki vaxt arasında keçid edə bilərsiniz."
   },
   {
-    "q": "Tətbiqdə mövcud olan beş Gecə Namazı (Qiyam) hissəsi hansılardır?",
-    "a": "Tətbiq Qiyam bölməsində 3-cü Dövrə (Gecənin İkinci Yarısı: gecə yarısından Sübhə qədər, 6 Suwaya) fokuslanır və 5 dəqiq astronomik bölgü təqdim edir:\n• Gecənin İkinci Yarısı: tam 6 Suwaya (06|00 🌑 – 11|59 🌑).\n• Gecənin Son Üçdə Biri: 4 Suwaya (08|00 🌑 – 11|59 🌑).\n• Gecənin Dördüncü Altıda Biri: 2 Suwaya (06|00 🌑 – 07|59 🌑).\n• Gecənin Beşinci Altıda Biri: 2 Suwaya (08|00 🌑 – 09|59 🌑).\n• Gecənin Altıncı Altıda Biri: 2 Suwaya (10|00 🌑 – 11|59 🌑).\nTətbiq siferblatda vizual qarışıqlığın qarşısını almaq üçün üst-üstə düşən hissələrin eyni vaxtda seçilməsini avtomatik olaraq əngəlləyir."
+    "q": "Tətbiqdə mövcud olan beş Qiyam (Gecə Namazı) hissəsi hansılardır?",
+    "a": "Qiyam üçün tətbiq 3-cü Dövrə (Gecənin İkinci Yarısı: astronomik gecə yarısından Sübhə qədər, 6 Suwayanı əhatə edir) fokuslanır və 5 dəqiq alt bölmə təqdim edir:\n• Gecənin İkinci Yarısı: 6 Suwaya (06|00 🌑-dan 11|59 🌑-a qədər).\n• Gecənin Son Üçdə Biri: 4 Suwaya (08|00 🌑-dan 11|59 🌑-a qədər).\n• Gecənin Dördüncü Altıda Biri: 2 Suwaya (06|00 🌑-dan 07|59 🌑-a qədər).\n• Gecənin Beşinci Altıda Biri: 2 Suwaya (08|00 🌑-dan 09|59 🌑-a qədər).\n• Gecənin Altıncı Altıda Biri: 2 Suwaya (10|00 🌑-dan 11|59 🌑-a qədər).\nTətbiq təmiz vizual tərtibatı qorumaq üçün siferblatda üst-üstə düşən seçimlərin qarşısını avtomatik alır."
   },
   {
-    "q": "Əsas ekrandakı interaktiv Astronomik Üstürlab Siferblatından necə istifadə edim?",
-    "a": "Astronomik siferblat tamamilə interaktivdir:\n• Toxunma (Tap): Başlanğıc/bitmə vaxtlarını (mülki və Suwaya), Suwaya sayını və axın sürətini görmək üçün istənilən dövr halqasına, namaz işarəsinə, tapşırıq oxuna və ya rutin qövsünə toxunun.\n• Əllə Fırlatma: Dövrləri araşdırmaq üçün siferblatı barmağınızla fırladın; buraxdıqda elastik şəkildə əvvəlki vəziyyətinə qayıdacaq.\n• Sürüşdür və Burax (Drag & Drop): Siferblatdakı istənilən tapşırıq oxunu basıb saxlayın, sonra tapşırığı dərhal yenidən planlaşdırmaq üçün başqa dövrə və ya Suwaya-ya sürüşdürüb buraxın!\n• Sürətli Redaktə: Günəşin çıxmasını və Qiyam hissələrini açıb-bağlamaq üçün siferblatın üstündəki (Siferblatı Redaktə Et ✏️) düyməsinə toxunun."
+    "q": "Əsas ekranda interaktiv Astronomik Astrolyabiya Siferblatını necə istifadə edim?",
+    "a": "Astronomik siferblat tamamilə interaktivdir:\n• Toxunma (Tap): Başlanğıc/bitmə vaxtları, Suwaya sayı və axın sürəti olan ətraflı pəncərəni görmək üçün istənilən dövr halqasına, namaz markerinə, tapşırıq oxuna və ya rutin qövsünə toxunun.\n• Əllə Fırlanma (Manual Rotation): Dövrləri araşdırmaq üçün siferblatı barmağınızla sürükləyin; buraxıldıqda elastik olaraq yerinə qayıdacaq.\n• Sürüklə və Burax (Drag & Drop): Siferblatdakı hər hansı bir tapşırıq oxuna uzun basın, sonra tapşırığı dərhal yenidən planlaşdırmaq üçün onu başqa dövrə və ya Suwaya-ya sürükləyib buraxın.\n• Tez Redaktə (Quick Edit): Günəşin çıxmasını və Qiyam gecəsi hissələrini yandırmaq/söndürmək üçün siferblatın üzərindəki (Siferblatı Fərdiləşdir ✏️) düyməsinə toxunun."
   },
   {
-    "q": "Birdəfəlik Tapşırıqlar, Davamlı Vərdişlər və Rutin Dövrlər arasındakı fərq nədir?",
-    "a": "• Birdəfəlik Tapşırıqlar (Casual Tasks): Müəyyən bir tarix və vaxtla (Suwaya və ya mülki) əlaqəli tək səfərlik tapşırıqlardır.\n• Davamlı Vərdişlər (Continuous Habits): Hər gün və ya həftənin müəyyən günlərində təkrarlanan, ardıcıllığı (Streak) izləyən və bir günü buraxdıqda irəliləyişinizi qorumaq üçün 3 Ardıcıllıq Dondurma (Streak Freeze) haqqı verən vərdişlərdir.\n• Rutin Dövrlər (Routines): Başlanğıc və bitmə vaxtı olan (yuxu, iş və ya oxuma saatları kimi) və astronomik siferblatda 4 həndəsi naxışla rəngli qövslər kimi çəkilən zaman bloklarıdır."
+    "q": "Gündəlik Tapşırıqlar, Davamlı Vərdişlər və Rutinlər arasındakı fərq nədir?",
+    "a": "• Gündəlik Tapşırıqlar (Casual Tasks): Müəyyən bir tarixə və vaxta (Suwaya və ya mülki) bağlı olan birdəfəlik tapşırıqlar.\n• Davamlı Vərdişlər (Continuous Habits): Tamamlama seriyalarınızı (Streaks) izləyən və bir günü qaçırsanız belə tərəqqinizi qorumaq üçün 3 Seriya Dondurulması (Streak Freezes) ehtiva edən təkrarlanan gündəlik və ya həftəlik hərəkətlər.\n• Rutinlər (Routines): Astronomik siferblatda rəngli, naxışlı qövslər (4 həndəsi naxış) kimi göstərilən başlanğıc və bitmə vaxtı olan vaxt blokları (yuxu, iş və ya oxumaq kimi)."
   },
   {
-    "q": "Fokus Taymeri (Suwaya Pomodoro və Ənənəvi Pomodoro) necə işləyir?",
-    "a": "Tətbiq iki fokuslanma rejimi təklif edir:\n1. Ənənəvi Pomodoro: Standart mülki dəqiqələrlə işləyir (standart 25 dəq iş / 5 dəq qısa fasilə və hər 4 dövrdən bir 30 dəq uzun fasilə). Başlat, Fasilə/Davam et, Keç (Skip), Sıfırla düymələri və yuxarıdakı ayarlar ikonu ilə bütün müddətləri fərdiləşdirmək imkanı verir.\n2. Suwaya Pomodoro: Səhifəyə daxil olduğunuz anı başlanğıc vaxtı kimi sabitləyir və bitmə vaxtını standart olaraq növbəti fərz namazına (və ya 15 dəqiqə ilə 12 saat/Suwaya arasında seçdiyiniz vaxta) təyin edir. Müddəti 0.5x ilə 2.0x arasında axın sürəti ilə tam saylı 25/5 virtual Pomodoro seanslarına bölür (standart olaraq 1.00x-ə ən yaxın sürəti seçir), quraşdırma vaxtını ilk Pomodorodan çıxır və namaz vaxtı çatdıqda avtomatik dayanır."
+    "q": "Fokus Taymeri (Suwaya Pomodoro vs. Ənənəvi Pomodoro) necə işləyir?",
+    "a": "Tətbiq iki fokus rejimi təklif edir:\n1. Ənənəvi Pomodoro: Hər şeyi fərdiləşdirmək üçün ayarlar düyməsi ilə yanaşı, Başla, fasilə ver/davam et, keç və sıfırla idarəetmələri ilə standart mülki dəqiqələrdən istifadə edir (standart olaraq 25 dəq. iş / 5 dəq. qısa fasilə və hər 4 dövrdən bir 30 dəq. uzun fasilə).\n2. Suwaya Pomodoro: Quraşdırma ekranına daxil olduğunuz zaman başlama vaxtını lövbərləyir və bitmə vaxtını standart olaraq növbəti məcburi namaza (və ya 15 dəqiqə ilə 12 saat/Suwaya arasında istənilən xüsusi vaxta) təyin edir. O, intervalı 0.5x ilə 2.0x arasında bir axın sürəti ilə tam ədədli 25/5 virtual Pomodorolara bölür, ilk Pomodoro-dan quraşdırma vaxtını çıxır və namaz vaxtı avtomatik olaraq dayanır."
   },
   {
-    "q": "Vaxtları hesablamaq və ya şəhər axtarmaq üçün internet bağlantısı lazımdırmı?",
-    "a": "Xeyr, Suwaya Offline-First prinsipi ilə işləyir; tərkibində dünya üzrə minlərlə şəhəri əhatə edən daxili yerli verilənlər bazası var. Hətta GPS istifadə edərkən belə internetə ehtiyac olmadan ən yaxın şəhəri tapır, hesablama metodunu və məzhəbi avtomatik tənzimləyir."
+    "q": "Tətbiqə vaxtları hesablamaq və ya şəhərləri axtarmaq üçün internet bağlantısı lazımdırmı?",
+    "a": "Xeyr. Suwaya ilk olaraq oflayndır (Offline-First); o, dünya üzrə minlərlə şəhərin yerli məlumat bazasını ehtiva edir. Hətta GPS istifadə edərkən belə, ən yaxın şəhərinizi tapır və internetə çıxış ehtiyacı olmadan hesablama metodunu və Məzhəbi avtomatik olaraq konfiqurasiya edir."
   },
   {
-    "q": "Tətbiq ilə yerli məscidim arasında bir neçə dəqiqə fərq var, bunu necə tənzimləyə bilərəm?",
-    "a": "Yan menyudan (Ayarlar) -> (Astronomik Hesablamalar) bölməsinə keçərək ölkənizin hesablama metodunu və məzhəbi seçə, yaxud (Əllə Vaxt Düzəlişləri) ekranından hər bir namazı ayrı-ayrılıqda -30 ilə +30 dəqiqə arasında irəli/geri çəkə bilərsiniz."
+    "q": "Tətbiq ilə məhəllə məscidi arasında bir neçə dəqiqəlik fərq var. Bunu necə tənzimləyə bilərəm?",
+    "a": "Yan menyunu açın, (Ayarlar) -> (Təkmil Astro Ayarları)-na keçin, burada hesablama metodunu, Məzhəbi və ya fərdi bucaqları dəyişdirə bilərsiniz. Yaxud hər məcburi namazı -30-dan +30 dəqiqəyə qədər fərdi olaraq tənzimləmək üçün (Vaxtın Əllə Tənzimlənməsi) düyməsinə toxunun."
   },
   {
-    "q": "Namazlar, Qiyam, tapşırıqlar və rutinlər üçün hansı bildiriş səviyyələri mövcuddur?",
-    "a": "Hər bir elementi 3 bildiriş səviyyəsindən biri ilə tənzimləyə bilərsiniz:\n1. Səssiz: Bildiriş yoxdur.\n2. Standart Bildiriş: Sistem panelində sakit xəbərdarlıq.\n3. Güclü Zəngli Saat (Ekranı Oyat): Kilid ekranının üzərində açılan, səsi tədricən artan (Fade-in) tam ekran zəngli saat; ekranda sürüşdürərək və ya telefonun səs düymələrinə basaraq dayandırmaq və ya təxirə salmaq (Snooze) mümkündür."
+    "q": "Namazlar, Qiyam, tapşırıqlar və rutinlər üçün hansı xəbərdarlıq səviyyələri mövcuddur?",
+    "a": "Siz hər bir elementi 3 xəbərdarlıq səviyyəsindən biri ilə konfiqurasiya edə bilərsiniz:\n1. Səssiz: Bildiriş yoxdur.\n2. Standart Bildiriş: Sistem tepsisində sakit bir bildiriş.\n3. Uca Səsli Siqnal (Ekranı Oyandırır): Kilid ekranının üstündə tədricən artan səs (Fade-in) ilə görünən tam ekranlı siqnal. Dayandırmaq/təxirə salmaq üçün sürüşdürməni, həmçinin təxirə salmaq üçün (Snooze) aparatın səs düymələrini dəstəkləyir."
   },
   {
-    "q": "Yeni V2 sisteminə yenilədikdən sonra köhnə tapşırıqlarıma nə olur?",
-    "a": "Tətbiqdə açılış zamanı avtomatik işləyən təhlükəsiz Məlumat Köçürmə Xidməti (Migration Service) mövcuddur; əvvəlki versiyalarda planlaşdırılmış tapşırıq və rutinləri heç bir məlumat itkisi olmaması üçün təhlükəsiz şəkildə standart mülki saata (10:00) çevirir, beləliklə onları istədiyiniz yeni Suwaya-ya təyin edə bilərsiniz."
+    "q": "Yeni V2 zaman sisteminə yeniləndikdən sonra köhnə tapşırıqlarıma nə olacaq?",
+    "a": "Tətbiqə işə salınma zamanı işləyən avtomatik Miqrasiya Xidməti daxildir; o, köhnə model altında yaradılmış tapşırıqları və rutinləri etibarlı şəkildə standart mülki vaxta (səhər 10:00) yeniləyir ki, heç bir tapşırığınız itirilməsin. Beləliklə, siz onları istədiyiniz Suwaya-ya yenidən planlaşdıra bilərsiniz."
   },
   {
     "q": "Məlumatlarım harada saxlanılır və Suwaya-nın məxfilik siyasəti nədir?",
-    "a": "Bütün tapşırıqlarınız, vərdişləriniz, rutinləriniz, ayarlarınız və məkan məlumatlarınız yalnız cihazınızda sürətli yerli verilənlər bazasında (Isar) saxlanılır. Suwaya-nın bulud serverləri yoxdur və heç bir şəxsi və ya reklam məlumatını toplamır və paylaşmır."
+    "a": "Bütün tapşırıqlarınız, vərdişləriniz, rutinləriniz, ayarlarınız və yadda saxlanılan məkanlarınız yalnız cihazınızdakı sürətli yerli məlumat bazasında (Isar) lokal olaraq saxlanılır. Suwaya-nın heç bir bulud serveri yoxdur və o, hər hansı şəxsi və ya reklam məlumatını toplamır, izləmir və ya paylaşmır."
   }
 ]

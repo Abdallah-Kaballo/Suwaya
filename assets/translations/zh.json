@@ -37,7 +37,8 @@
     "delete": "删除",
     "unknown": "未知",
     "startup_error": "抱歉，启动时发生错误",
-    "save": "保存"
+    "save": "保存",
+    "suwaya_time": "Suwaya 时间"
   },
   "night_parts": {
     "half_1": "前半夜",
@@ -62,7 +63,9 @@
     "manage_periods": "管理任务和时段",
     "no_tasks": "目前没有任务，享受您的时间吧！",
     "period_info": "时段信息",
-    "suwayas_count": "Suwaya 数量："
+    "suwayas_count": "Suwaya 数量：",
+    "edit_dial": "自定义表盘",
+    "dial_markers_settings": "表盘与夜晚时间设置"
   },
   "details": {
     "total_length": "总时长：",
@@ -112,7 +115,8 @@
       "time_title": "设定时间",
       "time_desc": "点击以设定任务时间。在固定的民用时间或灵活的天文时间中选择。",
       "modes_title": "时间模式",
-      "modes_desc": "1. 礼拜时段：链接到特定的礼拜（例如晡礼的第一个Suwaya）。\n2. 累计：选择从0到47的Suwaya索引。\n3. 民用时间：标准的时钟时间。"
+      "modes_desc": "1. 礼拜时段：链接到特定的礼拜（例如晡礼的第一个Suwaya）。\n2. 累计：选择从0到47的Suwaya索引。\n3. 民用时间：标准的时钟时间。",
+      "night_day": "夜晚 / 白天"
     },
     "time_required": "必须先设定时间！",
     "permissions_required": "闹钟需要权限才能工作！",
@@ -121,7 +125,7 @@
     "pin_exact_time": "固定准确时间",
     "by_periods": "按礼拜时段",
     "cumulative": "累计",
-    "civil": "民用时间",
+    "civil": "民用时间 (时钟)",
     "cumulative_suwaya": "累计 Suwaya",
     "minute": "分钟",
     "civil_hour": "民用小时",
@@ -441,156 +445,63 @@
     "error_gps_timeout": "位置请求超时，请重试。",
     "current_location": "我的当前位置"
   },
-  "periods": {
-    "fajr": "晨礼 (Fajr)",
-    "duha": "杜哈 (Duha)",
-    "dhuhr": "晌礼 (Dhuhr)",
-    "asr": "晡礼 (Asr)",
-    "maghrib": "昏礼 (Maghrib)",
-    "middle_third": "中三分之一",
-    "last_third": "后三分之一",
-    "period_1": "第一时段",
-    "period_2": "第二时段",
-    "period_3": "第三时段",
-    "period_4": "第四时段",
-    "period_5": "第五时段",
-    "period_6": "第六时段",
-    "period_7": "第七时段"
-  },
-  "prayers": {
-    "fajr": "晨礼",
-    "dhuhr": "晌礼",
-    "asr": "晡礼",
-    "maghrib": "昏礼",
-    "isha": "宵礼"
-  },
-  "languages": {
-    "tr": "土耳其语", "ru": "俄语", "ur": "乌尔都语", "ar": "阿拉伯语",
-    "hi": "印地语", "bn": "孟加拉语", "th": "泰语", "ja": "日语",
-    "zh": "中文", "ug": "维吾尔语", "pt": "葡萄牙语", "ff": "富拉语",
-    "az": "阿塞拜疆语", "id": "印尼语", "ms": "马来语", "da": "丹麦语",
-    "de": "德语", "en": "英语", "es": "西班牙语", "fr": "法语",
-    "it": "意大利语", "nl": "荷兰语"
-  },
-  "drawer": {
-    "faq": "常见问题 (FAQ)",
-    "contact": "联系与支持",
-    "about_app": "关于应用",
-    "check_updates": "检查更新",
-    "develop_with_us": "与我们一起开发",
-    "checking_updates": "正在检查更新...",
-    "up_to_date": "您使用的是最新版本的 Suwaya 🌟",
-    "update_check_failed": "检查更新失败，请检查您的网络连接。",
-    "update_available": "有新的更新可用！",
-    "new_version_desc": "Suwaya 的新版本现已推出。",
-    "do_you_want_to_download": "您要下载并安装更新吗？",
-    "download": "立即下载",
-    "guest_user": "访客用户",
-    "secure_data": "保护您的数据 ☁️",
-    "tap_to_login": "点击登录并同步",
-    "manage_account": "管理账户与同步",
-    "github_connection_failed": "连接到 GitHub 失败",
-    "time_engineered": "时间的工程",
-    "support_app": "支持本应用",
-    "ios_update_msg": "更新可通过您系统的 App Store 获取。",
-    "update_error_msg": "无法连接到 Google Play 商店。请稍后再试。"
-  },
-  "alarm": {
-    "suwaya_alert": "Suwaya 提醒",
-    "time_for_task": "到了完成任务的时间了！",
-    "snooze_10m": "贪睡 10 分钟",
-    "swipe_to_stop": "滑动以停止或贪睡",
-    "stop": "停止",
-    "default_title": "Suwaya 提醒",
-    "max_snoozes_reached": "已达到最大贪睡次数",
-    "snooze": "贪睡"
-  },
-  "analytics": {
-    "title": "分析与统计",
-    "coming_soon": "分析仪表板即将在此处建立...",
-    "daily_progress": "每日进度",
-    "perfect_day": "完美的一天！🌟",
-    "keep_going": "继续闪耀，每一个 Suwaya 都会带来改变。",
-    "current_streak": "当前连续记录",
-    "days": "天",
-    "focus_time": "专注时间",
-    "hours": "小时",
-    "weekly_overview": "每周概览"
-  },
-  "pomodoro": {
-    "suwaya_info": "Suwaya 信息",
-    "current_time": "当前时间：",
-    "time_speed": "时间流速：",
-    "actual_length": "实际 Suwaya 时长：",
-    "customize_suwaya": "自定义 Suwaya 时间",
-    "absolute_focus": "绝对专注",
-    "absolute_focus_desc": "一整个 Suwaya 的深度工作。",
-    "balanced_default": "平衡 (默认)",
-    "balanced_desc": "25 分钟专注，然后放松眼睛和身体。",
-    "relaxed": "轻松",
-    "relaxed_desc": "20 分钟专注，休息时间更长。",
-    "focus_rest": "自定义专注与休息",
-    "in_flow": "处于心流状态...",
-    "break_remaining": "剩余休息时间",
-    "focus_remaining": "剩余专注时间",
-    "deep_relaxation": "深度放松...",
-    "balanced": "平衡\n25/5",
-    "no_tasks": "此 Suwaya 未分配任务",
-    "focus_now_on": "现在专注于："
-  },
-  "splash": {
-    "app_title_ar": "سُـويـعَـة",
-    "app_title_en": "Suwaya"
-  },
-  "stats": {
-    "discovery_title": "探索中 🔭",
-    "discovery_desc": "完成更多任务以发现您的天文模式。",
-    "fajr_title": "晨风 🕊️",
-    "fajr_desc": "开始的能量和祝福体现在您的早晨成就中。",
-    "duha_title": "晨光先锋 🌤️",
-    "duha_desc": "早晨的阳光照亮了您的生产力，您在白天处于专注力的顶峰。",
-    "day_title": "白日骑士 🐎",
-    "day_desc": "在一天中您不知懈怠，您的成就持续而强劲。",
-    "night_title": "守夜人 🌙",
-    "night_desc": "当人们沉睡时，您的工作和成就正悄然上升。",
-    "balanced_title": "平衡者 ⚖️",
-    "balanced_desc": "您出色地将精力分配到一整天中。",
-    "insight_harmony_high": "您的天文和谐度非常高！过去一周表现出色。",
-    "insight_harmony_low": "看来您度过了忙碌的一周。尝试分散任务以减轻压力。",
-    "insight_fajr_focus": "您在晨礼时段的专注为您带来难以置信的优势和清晰的头脑。",
-    "insight_night_focus": "您的夜间活动非常棒，但请确保获得足够的身体休息。",
-    "insight_stable": "您的表现很稳定，并且在不同时段中很好地分配了能量。"
-  },
-  "faq": {
-    "offline_error": "看来您处于离线状态，且常见问题解答之前未加载。"
-  },
-  "privacy": {
-    "offline_error": "目前无法加载隐私政策。请检查您的互联网连接。"
-  },
-  "support": {
-    "title": "支持本应用",
-    "success_msg": "非常感谢您支持 Suwaya！您的徽章已成功激活。",
-    "philosophy_msg": "Suwaya 不仅仅是一个应用程序；它是一种重新连接日常自然节奏并在时间中寻找祝福 (Barakah) 的哲学。该应用程序将保持完全免费，无广告，并尊重您的隐私。\n\n您在这里的订阅不会解锁任何隐藏功能——它只是作为您名字旁边的一枚“荣誉徽章”。这是对这个想法的纯粹支持和信仰，帮助我们支付服务器和开发成本。",
-    "badges_title": "支持者徽章",
-    "bronze_title": "青铜徽章",
-    "silver_title": "白银徽章",
-    "gold_title": "黄金徽章",
-    "diamond_title": "钻石徽章",
-    "price_monthly": "{price} / 每月",
-    "feature_bronze": "在应用名称旁显示青铜徽章",
-    "feature_silver": "在应用名称旁显示白银徽章",
-    "feature_gold": "在应用名称旁显示黄金徽章",
-    "feature_diamond": "在应用名称旁显示钻石徽章",
-    "feature_support": "支持哲学理念和项目的持续发展",
-    "auto_renew_note": "所有订阅均为包月，但“自动续费”默认处于关闭状态，以确保您安心——未经您的同意，不会产生未来的费用。",
-    "restoring_msg": "正在检查您以前的支持记录...",
-    "restore_purchases": "恢复以前的徽章",
-    "active": "已激活"
-  },
   "nav": {
     "tasks": "任务",
     "ibadat": "礼拜",
     "home": "主页",
-    "pomodoro": "专注"
+    "pomodoro": "专注",
+    "calendar": "日历"
+  },
+  "calendar": {
+    "today": "今天",
+    "no_items_in_phase": "此阶段没有安排任务"
+  },
+  "alarm_screen": {
+    "default_title": "Suwaya 提醒",
+    "default_body": "到了完成任务的时间了！",
+    "snooze": "贪睡 10 分钟",
+    "stop": "停止"
+  },
+  "pomodoro": {
+    "choose_mode": "选择专注模式",
+    "traditional": "传统番茄钟",
+    "traditional_desc": "使用标准时钟分钟的工作和休息循环",
+    "suwaya_mode": "Suwaya 番茄钟",
+    "suwaya_mode_desc": "与礼拜时间和天文时间流同步的专注环节",
+    "suwaya_setup": "Suwaya 番茄钟设置",
+    "starts_now": "现在开始",
+    "ends_at": "结束于 {}",
+    "actual_minutes_avail": "实际可用分钟数",
+    "time_too_short": "可用时间太短（少于 15 分钟）",
+    "flow_speed": "环节划分和流速",
+    "recommended": "推荐",
+    "alternative": "备选",
+    "focus_rest_split": "专注 / 休息划分",
+    "start_session": "开始环节",
+    "time_up_prayer": "礼拜时间到了",
+    "time_up_desc": "您的 Suwaya 番茄钟环节已在预定时间结束。",
+    "deep_relaxation": "深度放松（休息）",
+    "in_flow": "心流状态（专注）",
+    "end_session": "结束环节",
+    "long_break": "长休息",
+    "start": "开始",
+    "reset": "停止并重置",
+    "pause": "暂停",
+    "resume": "继续",
+    "skip": "跳过",
+    "traditional_settings": "传统番茄钟设置",
+    "work_duration": "番茄钟时长（工作）",
+    "short_break_duration": "短休息时长",
+    "long_break_duration": "长休息时长",
+    "cycles_before_long_break": "长休息前的循环次数",
+    "end_must_be_after_start": "结束时间必须在开始时间之后",
+    "max_12_hours": "时长不能超过 12 小时/Suwaya",
+    "recommended_closest": "默认（最接近 1.00x 速度）",
+    "slower_option": "较慢速度（平静的节奏）",
+    "faster_option": "较快速度（密集专注）",
+    "custom_time": "自定义时间"
+  },
+  "countries": {
+    "AF": "阿富汗", "AX": "奥兰群岛", "AL": "阿尔巴尼亚", "DZ": "阿尔及利亚", "AS": "美属萨摩亚", "AD": "安道尔", "AO": "安哥拉", "AI": "安圭拉", "AQ": "南极洲", "AG": "安提瓜和巴布达", "AR": "阿根廷", "AM": "亚美尼亚", "AW": "阿鲁巴", "AU": "澳大利亚", "AT": "奥地利", "AZ": "阿塞拜疆", "BS": "巴哈马", "BH": "巴林", "BD": "孟加拉国", "BB": "巴巴多斯", "BY": "白俄罗斯", "BE": "比利时", "BZ": "伯利兹", "BJ": "贝宁", "BM": "百慕大", "BT": "不丹", "BO": "玻利维亚", "BA": "波斯尼亚和黑塞哥维那", "BW": "博茨瓦纳", "BV": "布韦岛", "BR": "巴西", "IO": "英属印度洋领地", "BN": "文莱", "BG": "保加利亚", "BF": "布基纳法索", "BI": "布隆迪", "KH": "柬埔寨", "CM": "喀麦隆", "CA": "加拿大", "CV": "佛得角", "KY": "开曼群岛", "CF": "中非共和国", "TD": "乍得", "CL": "智利", "CN": "中国", "CX": "圣诞岛", "CC": "科科斯群岛", "CO": "哥伦比亚", "KM": "科摩罗", "CG": "刚果（布）", "CD": "刚果（金）", "CK": "库克群岛", "CR": "哥斯达黎加", "CI": "科特迪瓦", "HR": "克罗地亚", "CU": "古巴", "CY": "塞浦路斯", "CZ": "捷克", "DK": "丹麦", "DJ": "吉布提", "DM": "多米尼克", "DO": "多米尼加共和国", "EC": "厄瓜多尔", "EG": "埃及", "SV": "萨尔瓦多", "GQ": "赤道几内亚", "ER": "厄立特里亚", "EE": "爱沙尼亚", "ET": "埃塞俄比亚", "FK": "福克兰群岛", "FO": "法罗群岛", "FJ": "斐济", "FI": "芬兰", "FR": "法国", "GF": "法属圭亚那", "PF": "法属波利尼西亚", "TF": "法属南部领地", "GA": "加蓬", "GM": "冈比亚", "GE": "格鲁吉亚", "DE": "德国", "GH": "加纳", "GI": "直布罗陀", "GR": "希腊", "GL": "格陵兰", "GD": "格林纳达", "GP": "瓜德罗普", "GU": "关岛", "GT": "危地马拉", "GG": "根西岛", "GN": "几内亚", "GW": "几内亚比绍", "GY": "圭亚那", "HT": "海地", "HM": "赫德岛和麦克唐纳群岛", "VA": "梵蒂冈", "HN": "洪都拉斯", "HK": "香港", "HU": "匈牙利", "IS": "冰岛", "IN": "印度", "ID": "印度尼西亚", "IR": "伊朗", "IQ": "伊拉克", "IE": "爱尔兰", "IM": "马恩岛", "IL": "以色列", "IT": "意大利", "JM": "牙买加", "JP": "日本", "JE": "泽西岛", "JO": "约旦", "KZ": "哈萨克斯坦", "KE": "肯尼亚", "KI": "基里巴斯", "KP": "朝鲜", "KR": "韩国", "KW": "科威特", "KG": "吉尔吉斯斯坦", "LA": "老挝", "LV": "拉脱维亚", "LB": "黎巴嫩", "LS": "莱索托", "LR": "利比里亚", "LY": "利比亚", "LI": "列支敦士登", "LT": "立陶宛", "LU": "卢森堡", "MO": "澳门", "MK": "北马其顿", "MG": "马达加斯加", "MW": "马拉维", "MY": "马来西亚", "MV": "马尔代夫", "ML": "马里", "MT": "马耳他", "MH": "马绍尔群岛", "MQ": "马提尼克", "MR": "毛里塔尼亚", "MU": "毛里求斯", "YT": "马约特", "MX": "墨西哥", "FM": "密克罗尼西亚", "MD": "摩尔多瓦", "MC": "摩纳哥", "MN": "蒙古", "ME": "黑山", "MS": "蒙特塞拉特", "MA": "摩洛哥", "MZ": "莫桑比克", "MM": "缅甸", "NA": "纳米比亚", "NR": "瑙鲁", "NP": "尼泊尔", "NL": "荷兰", "NC": "新喀里多尼亚", "NZ": "新西兰", "NI": "尼加拉瓜", "NE": "尼日尔", "NG": "尼日利亚", "NU": "纽埃", "NF": "诺福克岛", "MP": "北马里亚纳群岛", "NO": "挪威", "OM": "阿曼", "PK": "巴基斯坦", "PW": "帕劳", "PS": "巴勒斯坦", "PA": "巴拿马", "PG": "巴布亚新几内亚", "PY": "巴拉圭", "PE": "秘鲁", "PH": "菲律宾", "PN": "皮特凯恩群岛", "PL": "波兰", "PT": "葡萄牙", "PR": "波多黎各", "QA": "卡塔尔", "RE": "留尼汪", "RO": "罗马尼亚", "RU": "俄罗斯", "RW": "卢旺达", "BL": "圣巴泰勒米", "SH": "圣赫勒拿", "KN": "圣基茨和尼维斯", "LC": "圣卢西亚", "MF": "法属圣马丁", "PM": "圣皮埃尔和密克隆", "VC": "圣文森特和格林纳丁斯", "WS": "萨摩亚", "SM": "圣马力诺", "ST": "圣多美和普林西比", "SA": "沙特阿拉伯", "SN": "塞内加尔", "RS": "塞尔维亚", "SC": "塞舌尔", "SL": "塞拉利昂", "SG": "新加坡", "SK": "斯洛伐克", "SI": "斯洛文尼亚", "SB": "所罗门群岛", "SO": "索马里", "ZA": "南非", "GS": "南乔治亚和南桑威奇群岛", "ES": "西班牙", "LK": "斯里兰卡", "SD": "苏丹", "SR": "苏里南", "SJ": "斯瓦尔巴和扬马延", "SZ": "斯威士兰", "SE": "瑞典", "CH": "瑞士", "SY": "叙利亚", "TW": "台湾", "TJ": "塔吉克斯坦", "TZ": "坦桑尼亚", "TH": "泰国", "TL": "东帝汶", "TG": "多哥", "TK": "托克劳", "TO": "汤加", "TT": "特立尼达和多巴哥", "TN": "突尼斯", "TR": "土耳其", "TM": "土库曼斯坦", "TC": "特克斯和凯科斯群岛", "TV": "图瓦卢", "UG": "乌干达", "UA": "乌克兰", "AE": "阿联酋", "GB": "英国", "US": "美国", "UM": "美国本土外小岛屿", "UY": "乌拉圭", "UZ": "乌兹别克斯坦", "VU": "瓦努阿图", "VE": "委内瑞拉", "VN": "越南", "BQ": "博奈尔", "CW": "库拉索", "SS": "南苏丹", "SX": "荷属圣马丁", "XK": "科索沃", "VG": "英属维尔京群岛", "VI": "美属维尔京群岛", "WF": "瓦利斯和富图纳", "EH": "西撒哈拉", "YE": "也门", "ZM": "赞比亚", "ZW": "津巴布韦"
   }
 }

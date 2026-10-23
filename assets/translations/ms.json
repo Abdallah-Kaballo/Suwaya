@@ -37,7 +37,8 @@
     "delete": "Padam",
     "unknown": "Tidak Diketahui",
     "startup_error": "Maaf, ralat berlaku semasa bermula",
-    "save": "Simpan"
+    "save": "Simpan",
+    "suwaya_time": "Masa Suwaya"
   },
   "night_parts": {
     "half_1": "Separuh Pertama Malam",
@@ -62,7 +63,9 @@
     "manage_periods": "Urus Tugas & Tempoh",
     "no_tasks": "Tiada tugas pada masa ini, nikmati masa anda!",
     "period_info": "Info Tempoh",
-    "suwayas_count": "Jumlah Suwaya:"
+    "suwayas_count": "Jumlah Suwaya:",
+    "edit_dial": "Sesuaikan Dail",
+    "dial_markers_settings": "Tetapan Dail & Waktu Malam"
   },
   "details": {
     "total_length": "Panjang Keseluruhan:",
@@ -112,7 +115,8 @@
       "time_title": "Tetapkan Masa",
       "time_desc": "Ketik untuk menetapkan masa tugas. Pilih antara masa awam tetap atau masa astro yang fleksibel.",
       "modes_title": "Mod Masa",
-      "modes_desc": "1. Tempoh: Pautkan kepada waktu solat tertentu.\n2. Kumulatif: Pilih indeks Suwaya dari 0 hingga 47.\n3. Awam: Wasa jam standard seperti mesyuarat."
+      "modes_desc": "1. Tempoh: Pautkan kepada waktu solat tertentu.\n2. Kumulatif: Pilih indeks Suwaya dari 0 hingga 47.\n3. Awam: Masa jam standard seperti mesyuarat.",
+      "night_day": "Malam / Siang"
     },
     "time_required": "Masa mesti ditetapkan dahulu!",
     "permissions_required": "Keizinan penggera diperlukan!",
@@ -200,7 +204,7 @@
     "theme_midnight": "Biru Tengah Malam 👑",
     "dial_settings": "Tetapan Dail Interaktif",
     "golden_night_markers": "Penanda Malam Emas",
-    "markers_desc": "Pilih maks 2 penanda",
+    "markers_desc": "Pilih maks 2 penanda (menghalang pertindihan)",
     "auto_rotate": "Putar Automatik Dail",
     "auto_rotate_desc": "Sematkan jarum masa di atas dan putar dail dengan masa.",
     "dial_pin_mode": "Mod pin dail",
@@ -441,6 +445,62 @@
     "error_gps_timeout": "Permintaan lokasi tamat masa. Sila cuba lagi.",
     "current_location": "Lokasi Semasa Saya"
   },
+  "nav": {
+    "tasks": "Tugas",
+    "ibadat": "Ibadah",
+    "home": "Utama",
+    "pomodoro": "Fokus",
+    "calendar": "Kalendar"
+  },
+  "calendar": {
+    "today": "Hari Ini",
+    "no_items_in_phase": "Tiada tugas yang dijadualkan dalam fasa ini"
+  },
+  "alarm_screen": {
+    "default_title": "Makluman Suwaya",
+    "default_body": "Sudah tiba masanya untuk tugas anda!",
+    "snooze": "Tunda 10m",
+    "stop": "Berhenti"
+  },
+  "pomodoro": {
+    "choose_mode": "Pilih Mod Fokus",
+    "traditional": "Pomodoro Tradisional",
+    "traditional_desc": "Kitaran kerja dan rehat menggunakan minit jam standard",
+    "suwaya_mode": "Suwaya Pomodoro",
+    "suwaya_mode_desc": "Sesi fokus diselaraskan dengan waktu solat dan aliran astronomi",
+    "suwaya_setup": "Persediaan Suwaya Pomodoro",
+    "starts_now": "Bermula Sekarang",
+    "ends_at": "Berakhir pada {}",
+    "actual_minutes_avail": "minit sebenar tersedia",
+    "time_too_short": "Masa yang ada terlalu singkat (kurang daripada 15 minit)",
+    "flow_speed": "Pembahagian Sesi & Kelajuan Aliran",
+    "recommended": "Disyorkan",
+    "alternative": "Alternatif",
+    "focus_rest_split": "Pembahagian Fokus / Rehat",
+    "start_session": "Mula Sesi",
+    "time_up_prayer": "Tiba Waktu Solat",
+    "time_up_desc": "Sesi Suwaya Pomodoro anda telah tamat pada masa yang dijadualkan.",
+    "deep_relaxation": "Kelonggaran Mendalam (Rehat)",
+    "in_flow": "Dalam Aliran (Fokus)",
+    "end_session": "Tamat Sesi",
+    "long_break": "Rehat Panjang",
+    "start": "Mula",
+    "reset": "Berhenti & Tetap Semula",
+    "pause": "Jeda",
+    "resume": "Sambung Semula",
+    "skip": "Langkau",
+    "traditional_settings": "Tetapan Pomodoro Tradisional",
+    "work_duration": "Tempoh Pomodoro (Kerja)",
+    "short_break_duration": "Tempoh Rehat Pendek",
+    "long_break_duration": "Tempoh Rehat Panjang",
+    "cycles_before_long_break": "Rehat Panjang Selepas",
+    "end_must_be_after_start": "Masa tamat mestilah selepas masa mula",
+    "max_12_hours": "Tempoh tidak boleh melebihi 12 Suwaya/jam",
+    "recommended_closest": "Lalai (Paling hampir dengan kelajuan 1.00x)",
+    "slower_option": "Kelajuan perlahan (Langkah tenang)",
+    "faster_option": "Kelajuan lebih cepat (Fokus intensif)",
+    "custom_time": "Masa Tersuai"
+  },
   "periods": {
     "fajr": "Subuh",
     "duha": "Dhuha",
@@ -495,16 +555,6 @@
     "ios_update_msg": "Kemas kini tersedia melalui App Store sistem anda.",
     "update_error_msg": "Gagal menyambung ke Google Play Store. Sila cuba lagi nanti."
   },
-  "alarm": {
-    "suwaya_alert": "Makluman Suwaya",
-    "time_for_task": "Sudah tiba masanya untuk tugas anda!",
-    "snooze_10m": "Tunda 10m",
-    "swipe_to_stop": "Tarik untuk berhenti atau tunda",
-    "stop": "Berhenti",
-    "default_title": "Makluman Suwaya",
-    "max_snoozes_reached": "Had tunda maksimum dicapai",
-    "snooze": "Tunda"
-  },
   "analytics": {
     "title": "Analisis & Statistik",
     "coming_soon": "Papan pemuka analisis akan dibina di sini tidak lama lagi...",
@@ -516,27 +566,6 @@
     "focus_time": "Masa Fokus",
     "hours": "Jam",
     "weekly_overview": "Tinjauan Mingguan"
-  },
-  "pomodoro": {
-    "suwaya_info": "Maklumat Suwaya",
-    "current_time": "Masa Semasa:",
-    "time_speed": "Kelajuan Aliran Masa:",
-    "actual_length": "Panjang Suwaya Sebenar:",
-    "customize_suwaya": "Sesuaikan Masa Suwaya",
-    "absolute_focus": "Fokus Mutlak",
-    "absolute_focus_desc": "Satu Suwaya penuh untuk kerja mendalam.",
-    "balanced_default": "Seimbang (Lalai)",
-    "balanced_desc": "25 minit fokus, kemudian rehatkan mata dan badan anda.",
-    "relaxed": "Santai",
-    "relaxed_desc": "20 minit fokus, dengan rehat yang lebih panjang.",
-    "focus_rest": "Sesuaikan Fokus / Rehat",
-    "in_flow": "Dalam keadaan fokus (Flow)...",
-    "break_remaining": "Baki Rehat",
-    "focus_remaining": "Baki Fokus",
-    "deep_relaxation": "Kelapangan mendalam...",
-    "balanced": "Seimbang\n25/5",
-    "no_tasks": "Tiada tugas diberikan untuk Suwaya ini",
-    "focus_now_on": "Fokus sekarang pada:"
   },
   "splash": {
     "app_title_ar": "سُـويـعَـة",
@@ -587,10 +616,7 @@
     "restore_purchases": "Pulihkan lencana sebelumnya",
     "active": "Aktif"
   },
-  "nav": {
-    "tasks": "Tugas",
-    "ibadat": "Ibadah",
-    "home": "Utama",
-    "pomodoro": "Fokus"
+  "countries": {
+    "AF": "Afghanistan", "AX": "Kepulauan Aland", "AL": "Albania", "DZ": "Algeria", "AS": "Samoa Amerika", "AD": "Andorra", "AO": "Angola", "AI": "Anguilla", "AQ": "Antartika", "AG": "Antigua dan Barbuda", "AR": "Argentina", "AM": "Armenia", "AW": "Aruba", "AU": "Australia", "AT": "Austria", "AZ": "Azerbaijan", "BS": "Bahamas", "BH": "Bahrain", "BD": "Bangladesh", "BB": "Barbados", "BY": "Belarus", "BE": "Belgium", "BZ": "Belize", "BJ": "Benin", "BM": "Bermuda", "BT": "Bhutan", "BO": "Bolivia", "BA": "Bosnia dan Herzegovina", "BW": "Botswana", "BV": "Pulau Bouvet", "BR": "Brazil", "IO": "Wilayah Lautan Hindi British", "BN": "Brunei", "BG": "Bulgaria", "BF": "Burkina Faso", "BI": "Burundi", "KH": "Kemboja", "CM": "Cameroon", "CA": "Kanada", "CV": "Tanjung Verde", "KY": "Kepulauan Cayman", "CF": "Republik Afrika Tengah", "TD": "Chad", "CL": "Chile", "CN": "China", "CX": "Pulau Christmas", "CC": "Kepulauan Cocos (Keeling)", "CO": "Colombia", "KM": "Comoros", "CG": "Congo", "CD": "Republik Demokratik Congo", "CK": "Kepulauan Cook", "CR": "Costa Rica", "CI": "Cote d'Ivoire", "HR": "Croatia", "CU": "Cuba", "CY": "Cyprus", "CZ": "Czechia", "DK": "Denmark", "DJ": "Djibouti", "DM": "Dominica", "DO": "Republik Dominika", "EC": "Ecuador", "EG": "Mesir", "SV": "El Salvador", "GQ": "Guinea Khatulistiwa", "ER": "Eritrea", "EE": "Estonia", "ET": "Habsyah", "FK": "Kepulauan Falkland", "FO": "Kepulauan Faroe", "FJ": "Fiji", "FI": "Finland", "FR": "Perancis", "GF": "Guiana Perancis", "PF": "Polinesia Perancis", "TF": "Wilayah Selatan Perancis", "GA": "Gabon", "GM": "Gambia", "GE": "Georgia", "DE": "Jerman", "GH": "Ghana", "GI": "Gibraltar", "GR": "Greece", "GL": "Greenland", "GD": "Grenada", "GP": "Guadeloupe", "GU": "Guam", "GT": "Guatemala", "GG": "Guernsey", "GN": "Guinea", "GW": "Guinea-Bissau", "GY": "Guyana", "HT": "Haiti", "HM": "Pulau Heard dan Kepulauan McDonald", "VA": "Kota Vatican", "HN": "Honduras", "HK": "Hong Kong", "HU": "Hungary", "IS": "Iceland", "IN": "India", "ID": "Indonesia", "IR": "Iran", "IQ": "Iraq", "IE": "Ireland", "IM": "Isle of Man", "IL": "Israel", "IT": "Itali", "JM": "Jamaica", "JP": "Jepun", "JE": "Jersey", "JO": "Jordan", "KZ": "Kazakhstan", "KE": "Kenya", "KI": "Kiribati", "KP": "Korea Utara", "KR": "Korea Selatan", "KW": "Kuwait", "KG": "Kyrgyzstan", "LA": "Laos", "LV": "Latvia", "LB": "Lubnan", "LS": "Lesotho", "LR": "Liberia", "LY": "Libya", "LI": "Liechtenstein", "LT": "Lithuania", "LU": "Luxembourg", "MO": "Macau", "MK": "Macedonia Utara", "MG": "Madagascar", "MW": "Malawi", "MY": "Malaysia", "MV": "Maldives", "ML": "Mali", "MT": "Malta", "MH": "Kepulauan Marshall", "MQ": "Martinique", "MR": "Mauritania", "MU": "Mauritius", "YT": "Mayotte", "MX": "Mexico", "FM": "Micronesia", "MD": "Moldova", "MC": "Monaco", "MN": "Mongolia", "ME": "Montenegro", "MS": "Montserrat", "MA": "Maghribi", "MZ": "Mozambique", "MM": "Myanmar", "NA": "Namibia", "NR": "Nauru", "NP": "Nepal", "NL": "Belanda", "NC": "New Caledonia", "NZ": "New Zealand", "NI": "Nicaragua", "NE": "Niger", "NG": "Nigeria", "NU": "Niue", "NF": "Pulau Norfolk", "MP": "Kepulauan Mariana Utara", "NO": "Norway", "OM": "Oman", "PK": "Pakistan", "PW": "Palau", "PS": "Palestin", "PA": "Panama", "PG": "Papua New Guinea", "PY": "Paraguay", "PE": "Peru", "PH": "Filipina", "PN": "Kepulauan Pitcairn", "PL": "Poland", "PT": "Portugal", "PR": "Puerto Rico", "QA": "Qatar", "RE": "Reunion", "RO": "Romania", "RU": "Rusia", "RW": "Rwanda", "BL": "Saint Barthelemy", "SH": "Saint Helena", "KN": "Saint Kitts dan Nevis", "LC": "Saint Lucia", "MF": "Saint Martin", "PM": "Saint Pierre dan Miquelon", "VC": "Saint Vincent dan Grenadines", "WS": "Samoa", "SM": "San Marino", "ST": "Sao Tome dan Principe", "SA": "Arab Saudi", "SN": "Senegal", "RS": "Serbia", "SC": "Seychelles", "SL": "Sierra Leone", "SG": "Singapura", "SK": "Slovakia", "SI": "Slovenia", "SB": "Kepulauan Solomon", "SO": "Somalia", "ZA": "Afrika Selatan", "GS": "Georgia Selatan dan Kepulauan Sandwich Selatan", "ES": "Sepanyol", "LK": "Sri Lanka", "SD": "Sudan", "SR": "Suriname", "SJ": "Svalbard dan Jan Mayen", "SZ": "Eswatini", "SE": "Sweden", "CH": "Switzerland", "SY": "Syria", "TW": "Taiwan", "TJ": "Tajikistan", "TZ": "Tanzania", "TH": "Thailand", "TL": "Timor-Leste", "TG": "Togo", "TK": "Tokelau", "TO": "Tonga", "TT": "Trinidad dan Tobago", "TN": "Tunisia", "TR": "Turki", "TM": "Turkmenistan", "TC": "Kepulauan Turks dan Caicos", "TV": "Tuvalu", "UG": "Uganda", "UA": "Ukraine", "AE": "Emiriah Arab Bersatu", "GB": "United Kingdom", "US": "Amerika Syarikat", "UM": "Kepulauan Terpencil A.S.", "UY": "Uruguay", "UZ": "Uzbekistan", "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "BQ": "Bonaire", "CW": "Curacao", "SS": "Sudan Selatan", "SX": "Sint Maarten", "XK": "Kosovo", "VG": "Kepulauan Virgin British", "VI": "Kepulauan Virgin A.S.", "WF": "Wallis dan Futuna", "EH": "Sahara Barat", "YE": "Yaman", "ZM": "Zambia", "ZW": "Zimbabwe"
   }
 }

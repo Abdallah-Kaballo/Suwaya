@@ -6,7 +6,6 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/location/permissions_provider.dart';
 import 'package:suwaya/core/utils/time_formatters.dart';
-import 'package:suwaya/features/ibadat/astro_timeline_screen.dart';
 import 'package:suwaya/models/settings_model.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
@@ -317,7 +316,7 @@ class IbadatScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: scaffoldBgColor,
       drawerEnableOpenDragGesture: true,
-      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width,
       drawer: const AppDrawer(),
       onDrawerChanged: (isOpen) =>
           ref.read(isDrawerOpenProvider.notifier).state = isOpen,
@@ -380,25 +379,7 @@ class IbadatScreen extends ConsumerWidget {
               );
             },
           ),
-          // 🌟 زر فتح النافذة الموحدة لإعدادات القرص وأوقات الليل
-          // 🌟 زر فتح الجدول الزمني الفلكي الكامل (AstroTimelineScreen)
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            tooltip: 'full_astro_timeline'.tr(),
-            icon: Icon(
-              LucideIcons.calendar_clock,
-              color: Theme.of(context).primaryColor,
-              size: 20,
-            ),
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const AstroTimelineScreen(),
-                ),
-              );
-            },
-          ),
+          
           // 🌟 زر فتح النافذة الموحدة لإعدادات القرص وأوقات الليل
           IconButton(
             visualDensity: VisualDensity.compact,
@@ -855,7 +836,6 @@ class IbadatScreen extends ConsumerWidget {
     );
   }
 
-  /// 🌟 بطاقة أوقات القيام بخطوط وساعات مكبّرة مع مراعاة اتجاه اللغة (RTL / LTR)
   Widget _buildNightPartCard({
     required BuildContext context,
     required WidgetRef ref,
@@ -880,11 +860,12 @@ class IbadatScreen extends ConsumerWidget {
       bellColor = pColor;
     }
 
-    final partTitle =
-        ('night_parts.${part.nameKey.replaceAll("np_", "")}').tr();
+    final String originalTitle = ('night_parts.${part.nameKey.replaceAll("np_", "")}').tr();
+    // 🌟 التعديل: استبدال المسافة الأولى بسطر جديد لضمان ظهور الكلمتين فوق بعضهما
+    final String partTitle = originalTitle.replaceFirst(' ', '\n');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1A1D24) : Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -899,16 +880,17 @@ class IbadatScreen extends ConsumerWidget {
           Expanded(
             child: Text(
               partTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              overflow: TextOverflow.visible,
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black87,
-                fontSize: titleFontSize,
+                fontSize: titleFontSize - 1.5, // تصغير طفيف ليناسب السطرين
                 fontWeight: FontWeight.w800,
+                height: 1.2, // تقريب الأسطر
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Flexible(
             flex: 0,
             child: FittedBox(
@@ -920,53 +902,38 @@ class IbadatScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildClockTime(
-                      context,
-                      part.startTime,
-                      astroState,
-                      settings,
-                      isDark,
-                      part.id,
-                      fontSize: clockFontSize,
-                      isEnd: false,
+                      context, part.startTime, astroState, settings, isDark, part.id,
+                      fontSize: clockFontSize, isEnd: false,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Icon(
-                        isRTL
-                            ? LucideIcons.arrow_left
-                            : LucideIcons.arrow_right,
-                        size: 15,
-                        color: isDark ? Colors.white54 : Colors.black54,
+                        isRTL ? LucideIcons.arrow_left : LucideIcons.arrow_right,
+                        size: 15, color: isDark ? Colors.white54 : Colors.black54,
                       ),
                     ),
                     _buildClockTime(
-                      context,
-                      part.endTime,
-                      astroState,
-                      settings,
-                      isDark,
-                      part.id,
-                      fontSize: clockFontSize,
-                      isEnd: true,
+                      context, part.endTime, astroState, settings, isDark, part.id,
+                      fontSize: clockFontSize, isEnd: true,
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Semantics(
             button: true,
-            label: '${'ibadat.alert_for'.tr()} $partTitle',
+            label: '${'ibadat.alert_for'.tr()} $originalTitle',
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () {
                 HapticFeedback.mediumImpact();
-                _showAlarmChoiceSheet(context, ref, part.id, partTitle, isDark);
+                _showAlarmChoiceSheet(context, ref, part.id, originalTitle, isDark);
               },
               child: SizedBox(
-                width: 48,
-                height: 48,
+                width: 44,
+                height: 44,
                 child: Center(
                   child: Icon(bellIcon, color: bellColor, size: 20),
                 ),

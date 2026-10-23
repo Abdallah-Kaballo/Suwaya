@@ -37,7 +37,8 @@
     "delete": "Elimina",
     "unknown": "Sconosciuto",
     "startup_error": "Siamo spiacenti, si è verificato un errore all'avvio",
-    "save": "Salva"
+    "save": "Salva",
+    "suwaya_time": "Ora Suwaya"
   },
   "night_parts": {
     "half_1": "Prima Metà",
@@ -62,7 +63,9 @@
     "manage_periods": "Gestisci Attività e Periodi",
     "no_tasks": "Nessuna attività al momento, goditi il tuo tempo!",
     "period_info": "Info sul Periodo",
-    "suwayas_count": "Numero di Suwaya:"
+    "suwayas_count": "Numero di Suwaya:",
+    "edit_dial": "Personalizza Quadrante",
+    "dial_markers_settings": "Impostazioni Quadrante e Notte"
   },
   "details": {
     "total_length": "Durata Totale:",
@@ -94,7 +97,7 @@
     "soft_bell": "Campana Dolce",
     "birds": "Cinguettio di Uccelli",
     "silent": "Silenzioso",
-    "notification": "Notifica Silenziosa",
+    "notification": "Notifica Silenciosa",
     "alarm": "Allarme Forte",
     "alarm_tone": "Tono Allarme",
     "notification_enabled": "Avviso Attivo"
@@ -112,7 +115,8 @@
       "time_title": "Imposta l'Ora",
       "time_desc": "Tocca per impostare l'ora. Scegli tra ora civile o astro.",
       "modes_title": "Modalità di Orario",
-      "modes_desc": "1. Periodi: Collega a una preghiera.\n2. Cumulativo: Scegli un indice Suwaya da 0 a 47.\n3. Civile: Orario standard."
+      "modes_desc": "1. Periodi: Collega a una preghiera.\n2. Cumulativo: Scegli un indice Suwaya da 0 a 47.\n3. Civile: Orario standard.",
+      "night_day": "Notte / Giorno"
     },
     "time_required": "Devi prima impostare un orario!",
     "permissions_required": "Sono richiesti i permessi di allarme!",
@@ -199,7 +203,7 @@
     "theme_mixed": "Misto (Automatico dal Sole)",
     "theme_midnight": "Blu Mezzanotte 👑",
     "dial_settings": "Impostazioni Quadrante Interattivo",
-    "golden_night_markers": "Segnaposto Notturni Dorati",
+    "golden_night_markers": "Segnaposto Notturni Dorados",
     "markers_desc": "Scegli max 2 segnaposti",
     "auto_rotate": "Rotazione Automatica",
     "auto_rotate_desc": "Fissa l'ago in alto e ruota il quadrante con il tempo.",
@@ -405,9 +409,9 @@
     "starts_at": "Inizia alle:",
     "ends_at": "Termina alle:",
     "alert_for": "Avviso per:",
-    "silent": "Silenzioso",
-    "notification": "Notifica",
-    "alarm": "Allarme / Adhan",
+    "silent": "Silenzioso (Nessun allarme)",
+    "notification": "Notifica (Messaggio silenzioso)",
+    "alarm": "Allarme / Adhan (Risveglia lo schermo)",
     "customize_qiyam": "Personalizza Orari Qiyam",
     "sunrise": "Alba",
     "next_fajr": "Prossimo Fajr"
@@ -518,25 +522,43 @@
     "weekly_overview": "Panoramica Settimanale"
   },
   "pomodoro": {
-    "suwaya_info": "Info Suwaya",
-    "current_time": "Ora Attuale:",
-    "time_speed": "Velocità di Flusso:",
-    "actual_length": "Durata Reale Suwaya:",
-    "customize_suwaya": "Personalizza Tempo Suwaya",
-    "absolute_focus": "Focus Assoluto",
-    "absolute_focus_desc": "Una Suwaya intera di lavoro profondo.",
-    "balanced_default": "Bilanciato (Predefinito)",
-    "balanced_desc": "25 min di focus, poi relax per corpo e occhi.",
-    "relaxed": "Rilassato",
-    "relaxed_desc": "20 min di focus, con pause più lunghe.",
-    "focus_rest": "Personalizza Focus/Riposo",
-    "in_flow": "In stato di flow...",
-    "break_remaining": "Pausa Rimanente",
-    "focus_remaining": "Focus Rimanente",
-    "deep_relaxation": "Rilassamento profondo...",
-    "balanced": "Bilanciato\n25/5",
-    "no_tasks": "Nessuna attività per questa Suwaya",
-    "focus_now_on": "Concentrati ora su:"
+    "choose_mode": "Scegli Modalità di Concentrazione",
+    "traditional": "Pomodoro Tradizionale",
+    "traditional_desc": "Cicli di lavoro e pausa con minuti di orologio standard",
+    "suwaya_mode": "Suwaya Pomodoro",
+    "suwaya_mode_desc": "Sessioni di concentrazione sincronizzate con gli orari di preghiera e il flusso astronomico",
+    "suwaya_setup": "Configurazione Suwaya Pomodoro",
+    "starts_now": "Inizia Ora",
+    "ends_at": "Termina alle {}",
+    "actual_minutes_avail": "minuti reali disponibili",
+    "time_too_short": "Il tempo disponibile è troppo breve (meno di 15 minuti)",
+    "flow_speed": "Divisione Sessione & Velocità di Flusso",
+    "recommended": "Raccomandato",
+    "alternative": "Alternativa",
+    "focus_rest_split": "Divisione Concentrazione / Pausa",
+    "start_session": "Avvia Sessione",
+    "time_up_prayer": "Ora della Preghiera",
+    "time_up_desc": "La tua sessione Suwaya Pomodoro è terminata all'orario programmato.",
+    "deep_relaxation": "Rilassamento Profondo (Pausa)",
+    "in_flow": "In Stato di Flusso (Concentrazione)",
+    "end_session": "Termina Sessione",
+    "long_break": "Pausa Lunga",
+    "start": "Avvia",
+    "reset": "Ferma e Ripristina",
+    "pause": "Pausa",
+    "resume": "Riprendi",
+    "skip": "Salta",
+    "traditional_settings": "Impostazioni Pomodoro Tradizionale",
+    "work_duration": "Durata Pomodoro (Lavoro)",
+    "short_break_duration": "Durata Pausa Breve",
+    "long_break_duration": "Durata Pausa Lunga",
+    "cycles_before_long_break": "Pausa Lunga Ogni",
+    "end_must_be_after_start": "L'ora di fine deve essere successiva all'ora di inizio",
+    "max_12_hours": "La durata non può superare 12 Suwayas/ore",
+    "recommended_closest": "Predefinito (Più vicino alla velocità 1.00x)",
+    "slower_option": "Velocità inferiore (Ritmo più calmo)",
+    "faster_option": "Velocità superiore (Concentrazione intensiva)",
+    "custom_time": "Tempo Personalizzato"
   },
   "splash": {
     "app_title_ar": "سُـويـعَـة",
@@ -591,6 +613,10 @@
     "tasks": "Attività",
     "ibadat": "Culto",
     "home": "Home",
-    "pomodoro": "Focus"
+    "pomodoro": "Focus",
+    "calendar": "Calendario"
+  },
+  "countries": {
+    "AF": "Afghanistan", "AX": "Isole Åland", "AL": "Albania", "DZ": "Algeria", "AS": "Samoa Americane", "AD": "Andorra", "AO": "Angola", "AI": "Anguilla", "AQ": "Antartide", "AG": "Antigua e Barbuda", "AR": "Argentina", "AM": "Armenia", "AW": "Aruba", "AU": "Australia", "AT": "Austria", "AZ": "Azerbaigian", "BS": "Bahamas", "BH": "Bahrein", "BD": "Bangladesh", "BB": "Barbados", "BY": "Bielorussia", "BE": "Belgio", "BZ": "Belize", "BJ": "Benin", "BM": "Bermuda", "BT": "Bhutan", "BO": "Bolivia", "BA": "Bosnia ed Erzegovina", "BW": "Botswana", "BV": "Isola Bouvet", "BR": "Brasile", "IO": "Territorio Britannico dell'Oceano Indiano", "BN": "Brunei", "BG": "Bulgaria", "BF": "Burkina Faso", "BI": "Burundi", "KH": "Cambogia", "CM": "Camerun", "CA": "Canada", "CV": "Capo Verde", "KY": "Isole Cayman", "CF": "Repubblica Centrafricana", "TD": "Ciad", "CL": "Cile", "CN": "Cina", "CX": "Isola di Natale", "CC": "Isole Cocos (Keeling)", "CO": "Colombia", "KM": "Comore", "CG": "Congo-Brazzaville", "CD": "Congo-Kinshasa", "CK": "Isole Cook", "CR": "Costa Rica", "CI": "Costa d'Avorio", "HR": "Croazia", "CU": "Cuba", "CY": "Cipro", "CZ": "Cechia", "DK": "Danimarca", "DJ": "Gibuti", "DM": "Dominica", "DO": "Repubblica Dominicana", "EC": "Ecuador", "EG": "Egitto", "SV": "El Salvador", "GQ": "Guinea Equatoriale", "ER": "Eritrea", "EE": "Estonia", "ET": "Etiopia", "FK": "Isole Falkland", "FO": "Isole Fær Øer", "FJ": "Figi", "FI": "Finlandia", "FR": "Francia", "GF": "Guyana Francese", "PF": "Polinesia Francese", "TF": "Terre Australi e Antartiche Francesi", "GA": "Gabon", "GM": "Gambia", "GE": "Georgia", "DE": "Germania", "GH": "Ghana", "GI": "Gibilterra", "GR": "Grecia", "GL": "Groenlandia", "GD": "Grenada", "GP": "Guadalupa", "GU": "Guam", "GT": "Guatemala", "GG": "Guernsey", "GN": "Guinea", "GW": "Guinea-Bissau", "GY": "Guyana", "HT": "Haiti", "HM": "Isole Heard e McDonald", "VA": "Città del Vaticano", "HN": "Honduras", "HK": "Hong Kong", "HU": "Ungheria", "IS": "Islanda", "IN": "India", "ID": "Indonesia", "IR": "Iran", "IQ": "Iraq", "IE": "Irlanda", "IM": "Isola di Man", "IL": "Israele", "IT": "Italia", "JM": "Giamaica", "JP": "Giappone", "JE": "Jersey", "JO": "Giordania", "KZ": "Kazakistan", "KE": "Kenya", "KI": "Kiribati", "KP": "Corea del Nord", "KR": "Corea del Sud", "KW": "Kuwait", "KG": "Kirghizistan", "LA": "Laos", "LV": "Lettonia", "LB": "Libano", "LS": "Lesotho", "LR": "Liberia", "LY": "Libia", "LI": "Liechtenstein", "LT": "Lituania", "LU": "Lussemburgo", "MO": "Macao", "MK": "Macedonia del Nord", "MG": "Madagascar", "MW": "Malawi", "MY": "Malesia", "MV": "Maldive", "ML": "Mali", "MT": "Malta", "MH": "Isole Marshall", "MQ": "Martinica", "MR": "Mauritania", "MU": "Mauritius", "YT": "Mayotte", "MX": "Messico", "FM": "Micronesia", "MD": "Moldavia", "MC": "Monaco", "MN": "Mongolia", "ME": "Montenegro", "MS": "Montserrat", "MA": "Marocco", "MZ": "Mozambico", "MM": "Myanmar", "NA": "Namibia", "NR": "Nauru", "NP": "Nepal", "NL": "Paesi Bassi", "NC": "Nuova Caledonia", "NZ": "Nuova Zelanda", "NI": "Nicaragua", "NE": "Niger", "NG": "Nigeria", "NU": "Niue", "NF": "Isola Norfolk", "MP": "Isole Marianne Settentrionali", "NO": "Norvegia", "OM": "Oman", "PK": "Pakistan", "PW": "Palau", "PS": "Palestina", "PA": "Panama", "PG": "Papua Nuova Guinea", "PY": "Paraguay", "PE": "Perù", "PH": "Filippine", "PN": "Isole Pitcairn", "PL": "Polonia", "PT": "Portogallo", "PR": "Porto Rico", "QA": "Qatar", "RE": "Riunione", "RO": "Romania", "RU": "Russia", "RW": "Ruanda", "BL": "Saint-Barthélemy", "SH": "Sant'Elena", "KN": "Saint Kitts e Nevis", "LC": "Santa Lucia", "MF": "Saint-Martin", "PM": "Saint-Pierre e Miquelon", "VC": "Saint Vincent e Grenadine", "WS": "Samoa", "SM": "San Marino", "ST": "São Tomé e Príncipe", "SA": "Arabia Saudita", "SN": "Senegal", "RS": "Serbia", "SC": "Seychelles", "SL": "Sierra Leone", "SG": "Singapore", "SK": "Slovacchia", "SI": "Slovenia", "SB": "Isole Salomone", "SO": "Somalia", "ZA": "Sudafrica", "GS": "Georgia del Sud e Sandwich Australi", "ES": "Spagna", "LK": "Sri Lanka", "SD": "Sudan", "SR": "Suriname", "SJ": "Svalbard e Jan Mayen", "SZ": "Eswatini", "SE": "Svezia", "CH": "Svizzera", "SY": "Siria", "TW": "Taiwan", "TJ": "Tagikistan", "TZ": "Tanzania", "TH": "Tailandia", "TL": "Timor Est", "TG": "Togo", "TK": "Tokelau", "TO": "Tonga", "TT": "Trinidad e Tobago", "TN": "Tunisia", "TR": "Turchia", "TM": "Turkmenistan", "TC": "Isole Turks e Caicos", "TV": "Tuvalu", "UG": "Uganda", "UA": "Ucraina", "AE": "Emirati Arabi Uniti", "GB": "Regno Unito", "US": "Stati Uniti", "UM": "Isole Minori Esterne degli Stati Uniti", "UY": "Uruguay", "UZ": "Uzbekistan", "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "BQ": "Bonaire", "CW": "Curaçao", "SS": "Sud Sudan", "SX": "Sint Maarten", "XK": "Kosovo", "VG": "Isole Vergini Britanniche", "VI": "Isole Vergini Americane", "WF": "Wallis e Futuna", "EH": "Sahara Occidentale", "YE": "Yemen", "ZM": "Zambia", "ZW": "Zimbabwe"
   }
 }

@@ -1,62 +1,62 @@
 [
   {
-    "q": "Wat is de «Suwaya»-app en wat is het kernconcept?",
-    "a": "Suwaya is een open-source Astro-Productiviteit (Astro-Productivity) applicatie die is ontworpen om je dagelijkse ritme, taken en focussessies opnieuw te verbinden met de zonnebeweging en gebedstijden op jouw geografische locatie, in plaats van uitsluitend te vertrouwen op starre burgerlijke klokuren."
+    "q": "Wat is Suwaya en wat is het kernconcept?",
+    "a": "Suwaya is een open-source Astro-Productivity applicatie die is ontworpen om uw dagelijkse ritme, taken en focussessies opnieuw te verbinden met de zonnebeweging en gebedstijden op uw geografische locatie, in plaats van uitsluitend te vertrouwen op stugge burgerlijke kloktijden."
   },
   {
-    "q": "Wat is een «Suwaya» en hoe werkt het 24-Suwaya-systeem?",
-    "a": "In plaats van de dag vanaf middernacht op te delen in 24 gelijke burgerlijke uren, verdeelt Suwaya de astronomische dag (van Maghrib tot de volgende Maghrib) in 24 Suwaya's over twee fasen:\n• Nachtfase (🌑): Loopt van Maghrib tot zonsopgang en bestaat uit 12 Nacht-Suwaya's (genummerd van 01 tot 12).\n• Dagfase (☀️): Loopt van zonsopgang tot de volgende Maghrib en bestaat uit 12 Dag-Suwaya's (genummerd van 01 tot 12).\nElke Suwaya bestaat uit 60 virtuele minuten (geschreven als 00|00), terwijl de werkelijke duur langer of korter wordt afhankelijk van de lengte van nacht en dag in jouw seizoen en locatie."
+    "q": "Wat is een 'Suwaya' en hoe werkt het 24-Suwaya systeem?",
+    "a": "In plaats van de dag te verdelen in 24 gelijke burgerlijke uren vanaf middernacht, verdeelt Suwaya de astronomische dag (van Maghrib tot de volgende Maghrib) in 24 Suwaya's over twee fasen:\n• Nachtfase (🌑): Loopt van Maghrib tot Zonsopgang en bestaat uit 12 Nacht-Suwaya's (genummerd van 01 tot 12).\n• Dagfase (☀️): Loopt van Zonsopgang tot de volgende Maghrib en bestaat uit 12 Dag-Suwaya's (genummerd van 01 tot 12).\nElke Suwaya bestaat uit 60 virtuele minuten (geschreven als 00|00), terwijl de werkelijke duur ervan zich uitbreidt of krimpt afhankelijk van de lengte van dag en nacht in uw seizoen en locatie."
   },
   {
-    "q": "Waarom begint de dag in Suwaya bij Maghrib in plaats van om middernacht of bij Fajr?",
-    "a": "De app volgt de authentieke astronomische en islamitische kalendercyclus waarin de nacht voorafgaat aan de dag; een nieuwe dag begint bij zonsondergang (Maghrib). Daarom zie je bovenaan het startscherm na Maghrib bijvoorbeeld «Nacht van Vrijdag», wat na Fajr verandert in «Dag van Vrijdag»."
+    "q": "Waarom begint de dag in Suwaya bij Maghrib in plaats van middernacht of Fajr?",
+    "a": "De app volgt de authentieke astronomische en islamitische kalendercyclus waarbij de nacht voorafgaat aan de dag; een nieuwe dag begint bij zonsondergang (Maghrib). Daarom ziet u na Maghrib koppen als 'Nacht van Vrijdag', die na Fajr overgaan in 'Dag van Vrijdag'."
   },
   {
     "q": "Wat zijn de zeven astronomische perioden van de dag?",
-    "a": "De wijzerplaat verdeelt de cyclus van Maghrib tot de volgende Maghrib naadloos in 7 aaneengesloten perioden:\n1. Maghrib-periode (Maghrib tot Isha).\n2. Isha-periode (Isha tot astronomisch middernacht) — deelt 5 Nacht-Suwaya's met de Maghrib-periode.\n3. Tweede helft van de nacht / Qiyam-periode (middernacht tot Fajr) — vaste duur van 6 Nacht-Suwaya's (06|00 🌑 tot 11|59 🌑).\n4. Fajr-periode (Fajr tot zonsopgang) — vaste duur van 1 Nacht-Suwaya (Suwaya 12 🌑).\n5. Duha-periode (zonsopgang tot Dhuhr).\n6. Dhuhr-periode (Dhuhr tot Asr).\n7. Asr-periode (Asr tot de volgende Maghrib) — de 12 Dag-Suwaya's (01 ☀️ tot 12 ☀️) worden dynamisch verdeeld over de perioden Duha, Dhuhr en Asr."
+    "a": "De wijzerplaat verdeelt de cyclus van de ene Maghrib naar de volgende in 7 aaneengesloten perioden zonder gaten:\n1. Maghrib-periode (van Maghrib tot Isha).\n2. Isha-periode (van Isha tot astronomische middernacht) — deelt 5 Nacht-Suwaya's met de Maghrib-periode.\n3. Tweede Helft van de Nacht / Qiyam-periode (van astronomische middernacht tot Fajr) — vastgesteld op 6 Nacht-Suwaya's (van 06|00 🌑 tot 11|59 🌑).\n4. Fajr-periode (van Fajr tot Zonsopgang) — vastgesteld op 1 Nacht-Suwaya (Suwaya 12 🌑).\n5. Duha-periode (van Zonsopgang tot Dhuhr).\n6. Dhuhr-periode (van Dhuhr tot Asr).\n7. Asr-periode (van Asr tot de volgende Maghrib) — de 12 Dag-Suwaya's (01 ☀️ tot 12 ☀️) worden dynamisch verdeeld over de Duha-, Dhuhr- en Asr-perioden."
   },
   {
-    "q": "Wat betekent de indicator voor Tijdstroomsnelheid (bijv. 1.25x of 0.85x)?",
-    "a": "Omdat elke Suwaya 60 virtuele minuten (3.600 virtuele seconden) vertegenwoordigt terwijl de werkelijke duur varieert per periode en seizoen, laat de snelheidsindicator zien hoe snel virtuele Suwaya-minuten verstrijken in vergelijking met burgerlijke minuten:\n• 1.00x: 1 werkelijke Suwaya is precies gelijk aan 60 burgerlijke minuten.\n• Groter dan 1.00x (bliksem-icoon ⚡): De periode is kort, dus Suwaya-minuten gaan sneller dan burgerlijke minuten.\n• Kleiner dan 1.00x (zandloper-icoon ⏳): De periode is lang, dus Suwaya-minuten stromen rustiger en langzamer dan burgerlijke minuten."
+    "q": "Wat betekent de Tijdstroom Snelheidsindicator (bijv. 1.25x of 0.85x)?",
+    "a": "Omdat elke Suwaya 60 virtuele minuten (3.600 virtuele seconden) vertegenwoordigt, terwijl de werkelijke duur varieert per periode en seizoen, toont de snelheidsindicator hoe snel Suwaya-minuten stromen in vergelijking met burgerlijke minuten:\n• 1.00x: 1 Suwaya is precies gelijk aan 60 burgerlijke minuten.\n• Groter dan 1.00x (met bliksempictogram ⚡): De periode is kort, dus Suwaya-minuten stromen sneller dan burgerlijke minuten.\n• Kleiner dan 1.00x (met zandloperpictogram ⏳): De periode is lang en uitgestrekt, dus Suwaya-minuten stromen kalmer en langzamer dan burgerlijke minuten."
   },
   {
-    "q": "Hoe lees ik de Suwaya-tijd en wat is het visuele verschil met de burgerlijke tijd?",
-    "a": "De Suwaya-tijd is ontworpen om in één oogopslag herkenbaar te zijn:\n• Suwaya-tijd wordt altijd weergegeven in Astro-Goud en gebruikt een verticale streep (|) tussen de Suwaya en de minuten samen met het fase-icoon, zoals (04|30 🌑) voor de 4e Nacht-Suwaya en 30 virtuele minuten, of (08|15 ☀️) voor de 8e Dag-Suwaya en 15 virtuele minuten.\n• Burgerlijke tijd wordt weergegeven in wit/neutraal met een standaard dubbele punt (:).\nJe kunt op elk moment globaal schakelen tussen Suwaya-tijd en burgerlijke tijd door op het klok-/maan-icoon in de bovenbalk te tikken."
+    "q": "Hoe lees ik de Suwaya-tijd af en hoe verschilt dit visueel van de burgerlijke tijd?",
+    "a": "Suwaya-tijd is ontworpen om in één oogopslag herkenbaar te zijn:\n• Suwaya-tijd wordt altijd weergegeven in Astro Gold en gebruikt een verticale balk (|) tussen de Suwaya's en virtuele minuten, samen met een fasepictogram, zoals (04|30 🌑) voor de 4e Nacht-Suwaya en 30 virtuele minuten, of (08|15 ☀️) voor de 8e Dag-Suwaya en 15 virtuele minuten.\n• Burgerlijke tijd wordt weergegeven in witte/neutrale tekst met een standaard dubbele punt (:).\nU kunt op elk moment schakelen tussen Suwaya-tijd en burgerlijke tijd door op het klok-/maanpictogram in de bovenste balk te tikken."
   },
   {
-    "q": "Welke vijf Qiyam-delen (nachtgebed) zijn beschikbaar in de app?",
-    "a": "Voor Qiyam richt de app zich op Periode 3 (Tweede helft van de nacht: van astronomisch middernacht tot Fajr, 6 Suwaya's lang) en biedt 5 nauwkeurige onderverdelingen:\n• Tweede helft van de nacht: volledige 6 Suwaya's (06|00 🌑 tot 11|59 🌑).\n• Laatste derde deel van de nacht: 4 Suwaya's (08|00 🌑 tot 11|59 🌑).\n• Vierde zesde deel van de nacht: 2 Suwaya's (06|00 🌑 tot 07|59 🌑).\n• Vijfde zesde deel van de nacht: 2 Suwaya's (08|00 🌑 tot 09|59 🌑).\n• Zesde zesde deel van de nacht: 2 Suwaya's (10|00 🌑 tot 11|59 🌑).\nDe app voorkomt automatisch overlappende selecties op de wijzerplaat om het overzicht helder te houden."
+    "q": "Wat zijn de vijf Qiyam (Nachtgebed) delen die beschikbaar zijn in de app?",
+    "a": "Voor Qiyam richt de app zich op Periode 3 (Tweede Helft van de Nacht: van astronomische middernacht tot Fajr, verdeeld over 6 Suwaya's) en biedt 5 nauwkeurige onderverdelingen:\n• Tweede Helft van de Nacht: 6 Suwaya's (van 06|00 🌑 tot 11|59 🌑).\n• Laatste Derde van de Nacht: 4 Suwaya's (van 08|00 🌑 tot 11|59 🌑).\n• Vierde Zesde van de Nacht: 2 Suwaya's (van 06|00 🌑 tot 07|59 🌑).\n• Vijfde Zesde van de Nacht: 2 Suwaya's (van 08|00 🌑 tot 09|59 🌑).\n• Zesde Zesde van de Nacht: 2 Suwaya's (van 10|00 🌑 tot 11|59 🌑).\nDe app voorkomt automatisch overlappende selecties op de wijzerplaat om een schone visuele lay-out te behouden."
   },
   {
-    "q": "Hoe gebruik ik de interactieve Astronomische Astrolabium-wijzerplaat op het Startscherm?",
-    "a": "De astronomische wijzerplaat is volledig interactief:\n• Tikken (Tap): Tik op een periodering, gebedsmarkering, taakpijl of routineboog om een venster te openen met begin-/eindtijden (burgerlijk en Suwaya), het aantal Suwaya's en de stroomsnelheid.\n• Handmatig draaien: Draai de wijzerplaat met je vinger om perioden te verkennen; bij het loslaten veert hij soepel terug.\n• Slepen en neerzetten (Drag & Drop): Houd een taakpijl op de wijzerplaat ingedrukt en sleep deze naar een andere periode of Suwaya om de taak direct opnieuw in te plannen!\n• Snel bewerken: Tik op de knop (Wijzerplaat bewerken ✏️) boven de wijzerplaat om zonsopgang en Qiyam-delen in of uit te schakelen."
+    "q": "Hoe gebruik ik de interactieve Astronomische Astrolabium Wijzerplaat op het startscherm?",
+    "a": "De astronomische wijzerplaat is volledig interactief:\n• Tikken (Tap): Tik op een willekeurige periodering, gebedsmarkering, taakpijl of routineboog om een gedetailleerd dialoogvenster te zien met start-/eindtijden, Suwaya-telling en stroomsnelheid.\n• Handmatige Rotatie: Sleep de wijzerplaat met uw vinger om perioden te verkennen; deze veert elastisch terug bij het loslaten.\n• Slepen & Neerzetten (Drag & Drop): Druk lang op een taakpijl op de wijzerplaat en sleep deze vervolgens naar een andere periode of Suwaya om de taak onmiddellijk opnieuw te plannen.\n• Snel Bewerken: Tik op de knop (Wijzerplaat Aanpassen ✏️) boven de wijzerplaat om de delen van zonsopgang en Qiyam-nacht in of uit te schakelen."
   },
   {
-    "q": "Wat is het verschil tussen Losse Taken, Doorlopende Gewoonten en Routines?",
-    "a": "• Losse Taken (Casual Tasks): Eenmalige taken gekoppeld aan een specifieke datum en tijd (Suwaya of burgerlijk).\n• Doorlopende Gewoonten (Continuous Habits): Dagelijks of wekelijks terugkerende acties die je reeksen (Streaks) bijhouden en 3 Reeks-bevriezingen (Streak Freezes) bevatten om je voortgang te beschermen als je een dag mist.\n• Routines (Routines): Tijdsblokken met een begin- en eindtijd (zoals slaap, werk of studie) die als gekleurde bogen met 4 geometrische patronen op de wijzerplaat worden getekend."
+    "q": "Wat is het verschil tussen Informele Taken, Continue Gewoontes en Routines?",
+    "a": "• Informele Taken (Casual Tasks): Eenmalige taken gekoppeld aan een specifieke datum en tijd (Suwaya of burgerlijk).\n• Continue Gewoontes (Continuous Habits): Terugkerende dagelijkse of wekelijkse acties die uw voltooiingsreeksen (Streaks) bijhouden en 3 Reeksbevriezingen (Streak Freezes) bevatten om uw voortgang te beschermen als u een dag mist.\n• Routines: Tijdblokken met een start- en eindtijd (zoals slaap, werk of studie) die worden weergegeven als gekleurde, gepatroneerde bogen (4 geometrische patronen) op de astronomische wijzerplaat."
   },
   {
     "q": "Hoe werkt de Focustimer (Suwaya Pomodoro vs. Traditionele Pomodoro)?",
-    "a": "De app biedt twee focusmodi:\n1. Traditionele Pomodoro: Werkt met standaard burgerlijke minuten (standaard 25 min werk / 5 min korte pauze, en 30 min lange pauze na elke 4 cycli) met knoppen voor Start, Pauze/Hervatten, Overslaan (Skip) en Reset, plus een instellingenknop bovenaan om alle tijden aan te passen.\n2. Suwaya Pomodoro: Zet de starttijd vast zodra je het instellingenscherm opent en stelt het einde standaard in op het volgende verplichte gebed (of een gekozen tijd tussen 15 minuten en 12 uur/Suwaya's). Het verdeelt de tijd in een geheel aantal virtuele 25/5-Pomodoro's met een stroomsnelheid tussen 0.5x en 2.0x (kiest standaard de snelheid die het dichtst bij 1.00x ligt), trekt de insteltijd af van de eerste Pomodoro en stopt automatisch zodra het gebedstijd is."
+    "a": "De app biedt twee focusmodi:\n1. Traditionele Pomodoro: Gebruikt standaard burgerlijke minuten (standaard 25m werk / 5m korte pauze, en elke 4 cycli een lange pauze van 30m) met Start, Pauze/Hervatten, Overslaan en Reset bedieningselementen, plus een instellingenknop om alles aan te passen.\n2. Suwaya Pomodoro: Verankert de starttijd wanneer u het instelscherm opent en stelt de eindtijd standaard in op het volgende verplichte gebed (of een aangepaste tijd tussen 15 minuten en 12 uur/Suwaya's). Het verdeelt het interval in een geheel aantal 25/5 virtuele Pomodoro's met een stroomsnelheid tussen 0.5x en 2.0x, trekt de insteltijd af van de eerste Pomodoro en stopt automatisch op de gebedstijd."
   },
   {
-    "q": "Heeft de app een internetverbinding nodig om tijden te berekenen of steden te zoeken?",
-    "a": "Nee. Suwaya werkt Offline-First en bevat een ingebouwde lokale database met duizenden steden wereldwijd. Zelfs bij gebruik van GPS vindt de app zonder internet de dichtstbijzijnde stad en stelt automatisch de berekeningsmethode en rechtsschool (Madhab) in."
+    "q": "Heeft de app een internetverbinding nodig om tijden te berekenen of naar steden te zoeken?",
+    "a": "Nee. Suwaya is Offline-First; het bevat een gebundelde lokale database van duizenden steden wereldwijd. Zelfs bij het gebruik van GPS, vindt het uw dichtstbijzijnde stad en configureert het automatisch de berekeningsmethode en Madhab zonder internettoegang nodig te hebben."
   },
   {
-    "q": "Er zit een paar minuten verschil tussen de app en mijn lokale moskee. Hoe pas ik dit aan?",
-    "a": "Open het zijmenu en ga naar (Instellingen) -> (Astronomische Berekeningen) om de berekeningsmethode en Madhab te kiezen, of open (Handmatige Tijdcorrecties) om elk gebed afzonderlijk met -30 tot +30 minuten aan te passen."
+    "q": "Er is een verschil van een paar minuten tussen de app en mijn lokale moskee. Hoe kan ik dit aanpassen?",
+    "a": "Open het zijmenu, ga naar (Instellingen) -> (Geavanceerde Astro-instellingen), waar u de berekeningsmethode, Madhab of aangepaste hoeken kunt wijzigen, of tik op (Handmatige Tijdverschuivingen) om elk verplicht gebed afzonderlijk aan te passen van -30 tot +30 minuten."
   },
   {
-    "q": "Welke meldingsniveaus zijn er voor gebeden, Qiyam, taken en routines?",
-    "a": "Je kunt elk item instellen op een van de 3 meldingsniveaus:\n1. Stil: Geen meldingen.\n2. Standaardmelding: Een rustige melding in de systeembalk.\n3. Sterk alarm (Scherm wekken): Een schermvullend alarm boven het vergrendelscherm met geleidelijk toenemend geluid (Fade-in), dat kan worden gestopt of gesluimerd (Snooze) door over het scherm te vegen of op de volumeknoppen van de telefoon te drukken."
+    "q": "Welke waarschuwingsniveaus zijn beschikbaar voor gebeden, Qiyam, taken en routines?",
+    "a": "U kunt elk item configureren met een van de 3 waarschuwingsniveaus:\n1. Stil: Geen meldingen.\n2. Standaard Melding: Een stille melding in het systeemvak.\n3. Luid Alarm (Scherm wekken): Een alarm op volledig scherm dat boven het vergrendelscherm verschijnt met een geleidelijke audio fade-in, die vegen om te stoppen/snoozen ondersteunt, evenals hardware volumeknoppen voor snoozen."
   },
   {
-    "q": "Wat gebeurt er met mijn oude taken na de update naar het nieuwe V2-systeem?",
-    "a": "De app bevat een automatische Migratieservice (Migration Service) bij het opstarten die taken en routines uit het oude model veilig omzet naar een standaard burgerlijke tijd (10:00 uur), zodat er geen gegevens verloren gaan en je ze eenvoudig aan een nieuwe Suwaya kunt toewijzen."
+    "q": "Wat gebeurt er met mijn oude taken na het updaten naar het nieuwe V2 tijdsysteem?",
+    "a": "De app bevat een automatische Migratieservice die wordt uitgevoerd bij het opstarten; het werkt taken en routines die onder het oudere model zijn gemaakt veilig bij naar een standaard burgerlijke tijd (10:00 uur) zodat geen van uw taken verloren gaat, zodat u ze opnieuw kunt plannen naar de Suwaya van uw voorkeur."
   },
   {
     "q": "Waar worden mijn gegevens opgeslagen en wat is het privacybeleid van Suwaya?",
-    "a": "Al je taken, gewoonten, routines, instellingen en locaties worden uitsluitend lokaal op je apparaat opgeslagen in een snelle lokale database (Isar). Suwaya heeft geen cloudservers en verzamelt of deelt geen persoonlijke of advertentiegegevens."
+    "a": "Al uw taken, gewoontes, routines, instellingen en opgeslagen locaties worden lokaal op uw apparaat opgeslagen in een snelle lokale database (Isar). Suwaya heeft geen cloudservers en verzamelt, traceert of deelt geen persoonlijke of reclamegegevens."
   }
 ]

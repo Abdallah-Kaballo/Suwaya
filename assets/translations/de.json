@@ -9,7 +9,7 @@
   "categories": {
     "unspecified": "Nicht angegeben",
     "work": "Arbeit",
-    "study": "Studium",
+    "study": "Studie",
     "sport": "Sport",
     "entertainment": "Unterhaltung",
     "worship": "Gottesdienst",
@@ -37,7 +37,8 @@
     "delete": "Löschen",
     "unknown": "Unbekannt",
     "startup_error": "Es ist leider ein Fehler aufgetreten",
-    "save": "Speichern"
+    "save": "Speichern",
+    "suwaya_time": "Suwaya-Zeit"
   },
   "night_parts": {
     "half_1": "Erste Hälfte",
@@ -62,7 +63,9 @@
     "manage_periods": "Aufgaben und Perioden verwalten",
     "no_tasks": "Zurzeit keine Aufgaben, genieße deine Zeit!",
     "period_info": "Info zur Periode",
-    "suwayas_count": "Anzahl der Suwayas:"
+    "suwayas_count": "Anzahl der Suwayas:",
+    "edit_dial": "Zifferblatt anpassen",
+    "dial_markers_settings": "Einstellungen für Zifferblatt & Nacht"
   },
   "details": {
     "total_length": "Gesamtlänge:",
@@ -112,7 +115,8 @@
       "time_title": "Zeit festlegen",
       "time_desc": "Tippen, um die Aufgabenzeit festzulegen. Wähle zwischen fester ziviler Zeit oder flexibler Astrozeit.",
       "modes_title": "Zeitmodi",
-      "modes_desc": "1. Perioden: An ein bestimmtes Gebet binden.\n2. Kumulativ: Wähle einen Suwaya-Index von 0 bis 47.\n3. Zivil: Standard-Uhrzeit wie bei einem Meeting."
+      "modes_desc": "1. Perioden: An ein bestimmtes Gebet binden.\n2. Kumulativ: Wähle einen Suwaya-Index von 0 bis 47.\n3. Zivil: Standard-Uhrzeit wie bei einem Meeting.",
+      "night_day": "Nacht / Tag"
     },
     "time_required": "Zuerst muss eine Zeit festgelegt werden!",
     "permissions_required": "Alarmberechtigungen sind erforderlich!",
@@ -170,7 +174,7 @@
     "empty_routines": "Keine Routinen gespeichert"
   },
   "routines": {
-    "manage_special_periods": "Aufgaben, Gewohnheiten & Perioden",
+    "manage_special_periods": "Aufgaben, Gewohnheiten & Perioden verwalten",
     "periods_count": "Perioden",
     "no_routines": "Noch keine besonderen Perioden hinzugefügt."
   },
@@ -259,7 +263,7 @@
     "qatar": "Katar",
     "qatar_desc": "Katar und umliegende Regionen",
     "kuwait": "Kuwait",
-    "kuwait_desc": "Kuwait und umliegende Regionen",
+    "kuwait_desc": "Kuwait",
     "karachi": "Universität der Islamischen Wissenschaften, Karachi",
     "karachi_desc": "Pakistan, Afghanistan, Bangladesch",
     "isna": "Islamische Gesellschaft Nordamerikas (ISNA)",
@@ -441,156 +445,63 @@
     "error_gps_timeout": "Zeitüberschreitung der Standortanfrage. Bitte erneut versuchen.",
     "current_location": "Mein aktueller Standort"
   },
-  "periods": {
-    "fajr": "Fajr",
-    "duha": "Duha",
-    "dhuhr": "Dhuhr",
-    "asr": "Asr",
-    "maghrib": "Maghrib",
-    "middle_third": "Mittleres Drittel",
-    "last_third": "Letztes Drittel",
-    "period_1": "Erste Periode",
-    "period_2": "Zweite Periode",
-    "period_3": "Dritte Periode",
-    "period_4": "Vierte Periode",
-    "period_5": "Fünfte Periode",
-    "period_6": "Sechste Periode",
-    "period_7": "Siebte Periode"
-  },
-  "prayers": {
-    "fajr": "Fajr",
-    "dhuhr": "Dhuhr",
-    "asr": "Asr",
-    "maghrib": "Maghrib",
-    "isha": "Isha"
-  },
-  "languages": {
-    "tr": "Türkisch", "ru": "Russisch", "ur": "Urdu", "ar": "Arabisch",
-    "hi": "Hindi", "bn": "Bengalisch", "th": "Thai", "ja": "Japanisch",
-    "zh": "Chinesisch", "ug": "Uigurisch", "pt": "Portugiesisch", "ff": "Fulfulde",
-    "az": "Aserbaidschanisch", "id": "Indonesisch", "ms": "Malaiisch", "da": "Dänisch",
-    "de": "Deutsch", "en": "Englisch", "es": "Spanisch", "fr": "Französisch",
-    "it": "Italienisch", "nl": "Niederländisch"
-  },
-  "drawer": {
-    "faq": "FAQ",
-    "contact": "Kontakt & Support",
-    "about_app": "Über die App",
-    "check_updates": "Auf Updates prüfen",
-    "develop_with_us": "Entwickeln Sie mit uns",
-    "checking_updates": "Suche nach Updates...",
-    "up_to_date": "Du nutzt die neueste Version von Suwaya 🌟",
-    "update_check_failed": "Suche nach Updates fehlgeschlagen. Überprüfe das Internet.",
-    "update_available": "Neues Update verfügbar!",
-    "new_version_desc": "Eine neue und verbesserte Version von Suwaya ist verfügbar.",
-    "do_you_want_to_download": "Möchtest du das Update jetzt herunterladen und installieren?",
-    "download": "Jetzt herunterladen",
-    "guest_user": "Gastnutzer",
-    "secure_data": "Daten sichern ☁️",
-    "tap_to_login": "Tippen zum Anmelden & Synchronisieren",
-    "manage_account": "Konto & Synchronisierung verwalten",
-    "github_connection_failed": "Verbindung zu GitHub fehlgeschlagen",
-    "time_engineered": "Zeit Konstruiert",
-    "support_app": "App Unterstützen",
-    "ios_update_msg": "Updates sind über den App Store deines Systems verfügbar.",
-    "update_error_msg": "Verbindung zum Google Play Store fehlgeschlagen. Bitte später erneut versuchen."
-  },
-  "alarm": {
-    "suwaya_alert": "Suwaya-Alarm",
-    "time_for_task": "Es ist Zeit für deine Aufgabe!",
-    "snooze_10m": "10 Min schlummern",
-    "swipe_to_stop": "Zum Stoppen wischen",
-    "stop": "Stopp",
-    "default_title": "Suwaya-Alarm",
-    "max_snoozes_reached": "Maximale Schlummeranzahl erreicht",
-    "snooze": "Schlummern"
-  },
-  "analytics": {
-    "title": "Analysen & Statistiken",
-    "coming_soon": "Das Analyse-Dashboard wird bald hier verfügbar sein...",
-    "daily_progress": "Täglicher Fortschritt",
-    "perfect_day": "Perfekter Tag! 🌟",
-    "keep_going": "Weiter so, jede Suwaya macht einen Unterschied.",
-    "current_streak": "Aktuelle Serie",
-    "days": "Tage",
-    "focus_time": "Fokuszeit",
-    "hours": "Stunden",
-    "weekly_overview": "Wochenübersicht"
-  },
-  "pomodoro": {
-    "suwaya_info": "Suwaya-Informationen",
-    "current_time": "Aktuelle Zeit:",
-    "time_speed": "Fließgeschwindigkeit der Zeit:",
-    "actual_length": "Tatsächliche Suwaya-Länge:",
-    "customize_suwaya": "Suwaya-Zeit anpassen",
-    "absolute_focus": "Absoluter Fokus",
-    "absolute_focus_desc": "Eine komplette Suwaya tiefer Arbeit.",
-    "balanced_default": "Ausgeglichen (Standard)",
-    "balanced_desc": "25 Min. Fokus, danach entspannen.",
-    "relaxed": "Entspannt",
-    "relaxed_desc": "20 Min. Fokus, mit längeren Pausen.",
-    "focus_rest": "Fokus & Pause anpassen",
-    "in_flow": "Im Flow-Zustand...",
-    "break_remaining": "Verbleibende Pause",
-    "focus_remaining": "Verbleibender Fokus",
-    "deep_relaxation": "Tiefe Entspannung...",
-    "balanced": "Ausgeglichen\n25/5",
-    "no_tasks": "Keine Aufgaben für diese Suwaya",
-    "focus_now_on": "Fokussiere dich jetzt auf:"
-  },
-  "splash": {
-    "app_title_ar": "سُـويـعَـة",
-    "app_title_en": "Suwaya"
-  },
-  "stats": {
-    "discovery_title": "Entdecke 🔭",
-    "discovery_desc": "Schließe mehr Aufgaben ab, um dein astronomisches Muster zu entdecken.",
-    "fajr_title": "Fajr Brise 🕊️",
-    "fajr_desc": "Die Energie von Neuanfängen zeigt sich in deinen morgendlichen Leistungen.",
-    "duha_title": "Duha Pionier 🌤️",
-    "duha_desc": "Die Morgensonne erhellt deine Produktivität, du bist am Tag im Spitzenfokus.",
-    "day_title": "Ritter des Tages 🐎",
-    "day_desc": "Du kennst keine Faulheit am Tag, deine Leistungen sind kontinuierlich.",
-    "night_title": "Nachtwächter 🌙",
-    "night_desc": "Während andere schlafen, steigen deine Leistungen still auf.",
-    "balanced_title": "Ausgeglichen ⚖️",
-    "balanced_desc": "Du verteilst deine Energie perfekt über den Tag.",
-    "insight_harmony_high": "Deine astronomische Harmonie ist sehr hoch! Tolle Konstanz in der letzten Woche.",
-    "insight_harmony_low": "Es scheint, du hattest eine stressige Woche. Verteile deine Aufgaben besser.",
-    "insight_fajr_focus": "Dein Fokus bei Fajr gibt dir einen unglaublichen mentalen Vorsprung für den Rest des Tages.",
-    "insight_night_focus": "Deine nächtliche Aktivität ist exzellent, aber achte auf genug körperliche Ruhe.",
-    "insight_stable": "Deine Leistung ist stabil und du verteilst deine Energie gut auf verschiedene Zeiten."
-  },
-  "faq": {
-    "offline_error": "Es scheint, dass du offline bist und die FAQ nicht zuvor geladen wurden."
-  },
-  "privacy": {
-    "offline_error": "Datenschutzerklärung kann derzeit nicht geladen werden. Bitte Internetverbindung prüfen."
-  },
-  "support": {
-    "title": "Die App unterstützen",
-    "success_msg": "Vielen Dank, dass du Suwaya unterstützt! Dein Abzeichen wurde erfolgreich aktiviert.",
-    "philosophy_msg": "Suwaya ist nicht nur eine App, es ist eine Philosophie, sich mit dem natürlichen Rhythmus des Tages zu verbinden und den Segen (Barakah) in der Zeit zu finden. Die App bleibt komplett kostenlos, werbefrei und respektiert deine Privatsphäre.\n\nDein Abonnement schaltet keine versteckten Funktionen frei – es dient als „Ehrenabzeichen“ neben deinem Namen. Es ist reine Unterstützung für die Idee und hilft uns, die Entwicklungs- und Serverkosten zu decken.",
-    "badges_title": "Unterstützerabzeichen",
-    "bronze_title": "Bronze Abzeichen",
-    "silver_title": "Silber Abzeichen",
-    "gold_title": "Gold Abzeichen",
-    "diamond_title": "Diamant Abzeichen",
-    "price_monthly": "{price} / monatlich",
-    "feature_bronze": "Zeigt das Bronze-Abzeichen neben dem App-Namen an",
-    "feature_silver": "Zeigt das Silber-Abzeichen neben dem App-Namen an",
-    "feature_gold": "Zeigt das Gold-Abzeichen neben dem App-Namen an",
-    "feature_diamond": "Zeigt das Diamant-Abzeichen neben dem App-Namen an",
-    "feature_support": "Unterstütze die Philosophie und die Kontinuität des Projekts",
-    "auto_renew_note": "Alle Abonnements sind monatlich, aber die „Automatische Verlängerung“ ist standardmäßig deaktiviert, um dir Sicherheit zu geben – es erfolgen keine weiteren Abbuchungen ohne deine Zustimmung.",
-    "restoring_msg": "Deine bisherige Unterstützung wird überprüft...",
-    "restore_purchases": "Bisheriges Abzeichen wiederherstellen",
-    "active": "Aktiv"
-  },
   "nav": {
     "tasks": "Aufgaben",
     "ibadat": "Gebete",
     "home": "Home",
-    "pomodoro": "Fokus"
+    "pomodoro": "Fokus",
+    "calendar": "Kalender"
+  },
+  "calendar": {
+    "today": "Heute",
+    "no_items_in_phase": "Keine Aufgaben in dieser Phase geplant"
+  },
+  "alarm_screen": {
+    "default_title": "Suwaya-Alarm",
+    "default_body": "Es ist Zeit für deine Aufgabe!",
+    "snooze": "10 Min schlummern",
+    "stop": "Stopp"
+  },
+  "pomodoro": {
+    "choose_mode": "Fokus-Modus wählen",
+    "traditional": "Traditioneller Pomodoro",
+    "traditional_desc": "Arbeits- und Pausenzyklen mit zivilen Minuten",
+    "suwaya_mode": "Suwaya Pomodoro",
+    "suwaya_mode_desc": "Fokus-Sitzungen synchronisiert mit Gebetszeiten und astronomischem Fluss",
+    "suwaya_setup": "Suwaya Pomodoro Einrichtung",
+    "starts_now": "Beginnt jetzt",
+    "ends_at": "Endet um {}",
+    "actual_minutes_avail": "Tatsächliche Minuten verfügbar",
+    "time_too_short": "Verfügbare Zeit ist zu kurz (weniger als 15 Minuten)",
+    "flow_speed": "Sitzungsaufteilung & Fließgeschwindigkeit",
+    "recommended": "Empfohlen",
+    "alternative": "Alternative",
+    "focus_rest_split": "Fokus / Pause Aufteilung",
+    "start_session": "Sitzung starten",
+    "time_up_prayer": "Zeit für das Gebet",
+    "time_up_desc": "Deine Suwaya Pomodoro-Sitzung ist zur geplanten Zeit beendet.",
+    "deep_relaxation": "Tiefe Entspannung (Pause)",
+    "in_flow": "Im Flow-Zustand (Fokus)",
+    "end_session": "Sitzung beenden",
+    "long_break": "Lange Pause",
+    "start": "Start",
+    "reset": "Stopp & Zurücksetzen",
+    "pause": "Pause",
+    "resume": "Fortsetzen",
+    "skip": "Überspringen",
+    "traditional_settings": "Traditionelle Pomodoro-Einstellungen",
+    "work_duration": "Pomodoro-Dauer (Arbeit)",
+    "short_break_duration": "Dauer der kurzen Pause",
+    "long_break_duration": "Dauer der langen Pause",
+    "cycles_before_long_break": "Lange Pause nach jedem",
+    "end_must_be_after_start": "Endzeit muss nach Startzeit liegen",
+    "max_12_hours": "Dauer darf 12 Suwayas/Stunden nicht überschreiten",
+    "recommended_closest": "Standard (Am nächsten zu 1.00x Geschwindigkeit)",
+    "slower_option": "Langsamere Geschwindigkeit (Ruhigeres Tempo)",
+    "faster_option": "Schnellere Geschwindigkeit (Intensiver Fokus)",
+    "custom_time": "Eigene Zeit"
+  },
+  "countries": {
+    "AF": "Afghanistan", "AX": "Ålandinseln", "AL": "Albanien", "DZ": "Algerien", "AS": "Amerikanisch-Samoa", "AD": "Andorra", "AO": "Angola", "AI": "Anguilla", "AQ": "Antarktis", "AG": "Antigua und Barbuda", "AR": "Argentinien", "AM": "Armenien", "AW": "Aruba", "AU": "Australien", "AT": "Österreich", "AZ": "Aserbaidschan", "BS": "Bahamas", "BH": "Bahrain", "BD": "Bangladesch", "BB": "Barbados", "BY": "Belarus", "BE": "Belgien", "BZ": "Belize", "BJ": "Benin", "BM": "Bermuda", "BT": "Bhutan", "BO": "Bolivien", "BA": "Bosnien und Herzegowina", "BW": "Botswana", "BV": "Bouvetinsel", "BR": "Brasilien", "IO": "Britisches Territorium im Indischen Ozean", "BN": "Brunei", "BG": "Bulgarien", "BF": "Burkina Faso", "BI": "Burundi", "KH": "Kambodscha", "CM": "Kamerun", "CA": "Kanada", "CV": "Kap Verde", "KY": "Kaimaninseln", "CF": "Zentralafrikanische Republik", "TD": "Tschad", "CL": "Chile", "CN": "China", "CX": "Weihnachtsinsel", "CC": "Kokosinseln", "CO": "Kolumbien", "KM": "Komoren", "CG": "Kongo-Brazzaville", "CD": "Kongo-Kinshasa", "CK": "Cookinseln", "CR": "Costa Rica", "CI": "Elfenbeinküste", "HR": "Kroatien", "CU": "Kuba", "CY": "Zypern", "CZ": "Tschechien", "DK": "Dänemark", "DJ": "Dschibuti", "DM": "Dominica", "DO": "Dominikanische Republik", "EC": "Ecuador", "EG": "Ägypten", "SV": "El Salvador", "GQ": "Äquatorialguinea", "ER": "Eritrea", "EE": "Estland", "ET": "Äthiopien", "FK": "Falklandinseln", "FO": "Färöer", "FJ": "Fidschi", "FI": "Finnland", "FR": "Frankreich", "GF": "Französisch-Guayana", "PF": "Französisch-Polynesien", "TF": "Französische Süd- und Antarktisgebiete", "GA": "Gabun", "GM": "Gambia", "GE": "Georgien", "DE": "Deutschland", "GH": "Ghana", "GI": "Gibraltar", "GR": "Griechenland", "GL": "Grönland", "GD": "Grenada", "GP": "Guadeloupe", "GU": "Guam", "GT": "Guatemala", "GG": "Guernsey", "GN": "Guinea", "GW": "Guinea-Bissau", "GY": "Guyana", "HT": "Haiti", "HM": "Heard und McDonaldinseln", "VA": "Vatikanstadt", "HN": "Honduras", "HK": "Hongkong", "HU": "Ungarn", "IS": "Island", "IN": "Indien", "ID": "Indonesien", "IR": "Iran", "IQ": "Irak", "IE": "Irland", "IM": "Isle of Man", "IL": "Israel", "IT": "Italien", "JM": "Jamaika", "JP": "Japan", "JE": "Jersey", "JO": "Jordanien", "KZ": "Kasachstan", "KE": "Kenia", "KI": "Kiribati", "KP": "Nordkorea", "KR": "Südkorea", "KW": "Kuwait", "KG": "Kirgisistan", "LA": "Laos", "LV": "Lettland", "LB": "Libanon", "LS": "Lesotho", "LR": "Liberia", "LY": "Libyen", "LI": "Liechtenstein", "LT": "Litauen", "LU": "Luxemburg", "MO": "Macau", "MK": "Nordmazedonien", "MG": "Madagaskar", "MW": "Malawi", "MY": "Malaysia", "MV": "Malediven", "ML": "Mali", "MT": "Malta", "MH": "Marshallinseln", "MQ": "Martinique", "MR": "Mauretanien", "MU": "Mauritius", "YT": "Mayotte", "MX": "Mexiko", "FM": "Mikronesien", "MD": "Moldau", "MC": "Monaco", "MN": "Mongolei", "ME": "Montenegro", "MS": "Montserrat", "MA": "Marokko", "MZ": "Mosambik", "MM": "Myanmar", "NA": "Namibia", "NR": "Nauru", "NP": "Nepal", "NL": "Niederlande", "NC": "Neukaledonien", "NZ": "Neuseeland", "NI": "Nicaragua", "NE": "Niger", "NG": "Nigeria", "NU": "Niue", "NF": "Norfolkinsel", "MP": "Nördliche Marianen", "NO": "Norwegen", "OM": "Oman", "PK": "Pakistan", "PW": "Palau", "PS": "Palästina", "PA": "Panama", "PG": "Papua-Neuguinea", "PY": "Paraguay", "PE": "Peru", "PH": "Philippinen", "PN": "Pitcairninseln", "PL": "Polen", "PT": "Portugal", "PR": "Puerto Rico", "QA": "Katar", "RE": "Réunion", "RO": "Rumänien", "RU": "Russland", "RW": "Ruanda", "BL": "St. Barthélemy", "SH": "St. Helena", "KN": "St. Kitts und Nevis", "LC": "St. Lucia", "MF": "St. Martin", "PM": "St. Pierre und Miquelon", "VC": "St. Vincent und die Grenadinen", "WS": "Samoa", "SM": "San Marino", "ST": "São Tomé und Príncipe", "SA": "Saudi-Arabien", "SN": "Senegal", "RS": "Serbien", "SC": "Seychellen", "SL": "Sierra Leone", "SG": "Singapur", "SK": "Slowakei", "SI": "Slowenien", "SB": "Salomonen", "SO": "Somalia", "ZA": "Südafrika", "GS": "Südgeorgien und die Südlichen Sandwichinseln", "ES": "Spanien", "LK": "Sri Lanka", "SD": "Sudan", "SR": "Suriname", "SJ": "Svalbard und Jan Mayen", "SZ": "Eswatini", "SE": "Schweden", "CH": "Schweiz", "SY": "Syrien", "TW": "Taiwan", "TJ": "Tadschikistan", "TZ": "Tansania", "TH": "Thailand", "TL": "Osttimor", "TG": "Togo", "TK": "Tokelau", "TO": "Tonga", "TT": "Trinidad und Tobago", "TN": "Tunesien", "TR": "Türkei", "TM": "Turkmenistan", "TC": "Turks- und Caicosinseln", "TV": "Tuvalu", "UG": "Uganda", "UA": "Ukraine", "AE": "Vereinigte Arabische Emirate", "GB": "Vereinigtes Königreich", "US": "Vereinigte Staaten", "UM": "Kleinere Amerikanische Überseeinseln", "UY": "Uruguay", "UZ": "Usbekistan", "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "BQ": "Bonaire", "CW": "Curaçao", "SS": "Südsudan", "SX": "Sint Maarten", "XK": "Kosovo", "VG": "Britische Jungferninseln", "VI": "Amerikanische Jungferninseln", "WF": "Wallis und Futuna", "EH": "Westsahara", "YE": "Jemen", "ZM": "Sambia", "ZW": "Simbabwe"
   }
 }

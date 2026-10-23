@@ -1,62 +1,62 @@
 [
   {
-    "q": "O que é o aplicativo «Suwaya» e qual é o seu conceito principal?",
-    "a": "O Suwaya é um aplicativo de código aberto de Astro-Produtividade (Astro-Productivity) projetado para reconectar seu ritmo diário, suas tarefas e suas sessões de foco com o movimento solar e os horários de oração na sua localização geográfica, em vez de depender apenas das rígidas horas do relógio civil."
+    "q": "O que é o Suwaya e qual é o seu conceito principal?",
+    "a": "O Suwaya é um aplicativo de Astro-Produtividade de código aberto projetado para reconectar seu ritmo diário, tarefas e sessões de foco com o movimento solar e os horários de oração em sua localização geográfica, em vez de depender apenas das horas civis rígidas."
   },
   {
-    "q": "O que é uma «Suwaya» e como funciona o sistema de 24 Suwayas?",
-    "a": "Em vez de dividir o dia em 24 horas civis iguais a partir da meia-noite, o Suwaya divide o dia astronômico (do Maghrib até o próximo Maghrib) em 24 Suwayas distribuídas em duas fases:\n• Fase Noturna (🌑): Vai do Maghrib até o nascer do sol e consiste em 12 Suwayas noturnas (numeradas de 01 a 12).\n• Fase Diurna (☀️): Vai do nascer do sol até o próximo Maghrib e consiste em 12 Suwayas diurnas (numeradas de 01 a 12).\nCada Suwaya tem 60 minutos virtuais (escritos como 00|00), enquanto sua duração real se expande ou se contrai de acordo com a duração da noite e do dia na sua estação e localização."
+    "q": "O que é uma 'Suwaya' e como funciona o sistema de 24 Suwayas?",
+    "a": "Em vez de dividir o dia em 24 horas civis iguais começando à meia-noite, o Suwaya divide o dia astronômico (do Maghrib ao Maghrib seguinte) em 24 Suwayas em duas fases:\n• Fase Noturna (🌑): Estende-se do Maghrib ao Nascer do Sol e consiste em 12 Suwayas Noturnas (numeradas de 01 a 12).\n• Fase Diurna (☀️): Estende-se do Nascer do Sol ao Maghrib seguinte e consiste em 12 Suwayas Diurnas (numeradas de 01 a 12).\nCada Suwaya consiste em 60 minutos virtuais (escritos como 00|00), enquanto sua duração real se expande ou se contrai de acordo com a duração da noite e do dia em sua estação e localização."
   },
   {
-    "q": "Por que o dia no Suwaya começa no Maghrib em vez da meia-noite ou do Fajr?",
-    "a": "O aplicativo segue o ciclo autêntico do calendário astronômico e islâmico, onde a noite precede o dia; um novo dia começa ao pôr do sol (Maghrib). Por isso, no topo da tela inicial você verá cabeçalhos como «Noite de Sexta-feira» após o Maghrib, mudando para «Dia de Sexta-feira» após o Fajr."
+    "q": "Por que o dia no Suwaya começa no Maghrib em vez de à meia-noite ou no Fajr?",
+    "a": "O aplicativo segue o autêntico ciclo do calendário astronômico e islâmico onde a noite precede o dia; um novo dia começa no pôr do sol (Maghrib). Portanto, você verá cabeçalhos como 'Noite de Sexta' após o Maghrib, que então se transforma em 'Dia de Sexta' após o Fajr."
   },
   {
     "q": "Quais são os sete períodos astronômicos do dia?",
-    "a": "O mostrador divide o ciclo do Maghrib até o próximo Maghrib em 7 períodos contíguos sem lacunas:\n1. Período do Maghrib (do Maghrib ao Isha).\n2. Período do Isha (do Isha à meia-noite astronômica) — compartilha 5 Suwayas noturnas com o período do Maghrib.\n3. Segunda metade da noite / Período de Qiyam (da meia-noite ao Fajr) — duração fixa de 6 Suwayas noturnas (06|00 🌑 a 11|59 🌑).\n4. Período do Fajr (do Fajr ao nascer do sol) — duração fixa de 1 Suwaya noturna (Suwaya 12 🌑).\n5. Período de Duha (do nascer do sol ao Dhuhr).\n6. Período do Dhuhr (do Dhuhr ao Asr).\n7. Período do Asr (do Asr ao próximo Maghrib) — as 12 Suwayas diurnas (01 ☀️ a 12 ☀️) são distribuídas dinamicamente entre os períodos de Duha, Dhuhr e Asr."
+    "a": "O mostrador divide o ciclo de um Maghrib para o seguinte em 7 períodos contíguos sem espaços:\n1. Período do Maghrib (do Maghrib ao Isha).\n2. Período do Isha (do Isha à meia-noite astronômica) — compartilha 5 Suwayas Noturnas com o período do Maghrib.\n3. Segunda Metade da Noite / Período do Qiyam (da meia-noite astronômica ao Fajr) — fixado em 6 Suwayas Noturnas (de 06|00 🌑 a 11|59 🌑).\n4. Período do Fajr (do Fajr ao Nascer do Sol) — fixado em 1 Suwaya Noturna (Suwaya 12 🌑).\n5. Período do Duha (do Nascer do Sol ao Dhuhr).\n6. Período do Dhuhr (do Dhuhr ao Asr).\n7. Período do Asr (do Asr ao Maghrib seguinte) — as 12 Suwayas Diurnas (01 ☀️ a 12 ☀️) são distribuídas dinamicamente pelos períodos do Duha, Dhuhr e Asr."
   },
   {
-    "q": "O que significa o indicador de Velocidade do Fluxo do Tempo (ex.: 1.25x ou 0.85x)?",
-    "a": "Como cada Suwaya representa 60 minutos virtuais (3.600 segundos virtuais), mas sua duração real varia conforme o período e a estação, o indicador mostra a velocidade com que os minutos Suwaya fluem em comparação aos minutos civis:\n• 1.00x: 1 Suwaya real equivale exatamente a 60 minutos civis.\n• Maior que 1.00x (ícone de raio ⚡): O período é curto, portanto os minutos Suwaya passam mais rápido que os minutos civis.\n• Menor que 1.00x (ícone de ampulheta ⏳): O período é longo, portanto os minutos Suwaya fluem de forma mais calma e lenta que os minutos civis."
+    "q": "O que significa o indicador de Velocidade do Fluxo de Tempo (por exemplo, 1.25x ou 0.85x)?",
+    "a": "Como cada Suwaya representa 60 minutos virtuais (3.600 segundos virtuais), enquanto sua duração real varia de acordo com o período e a estação, o indicador de velocidade mostra a rapidez com que os minutos Suwaya fluem em comparação com os minutos civis:\n• 1.00x: 1 Suwaya equivale a exatamente 60 minutos civis.\n• Maior que 1.00x (com ícone de relâmpago ⚡): O período é curto, então os minutos Suwaya fluem mais rápido que os minutos civis.\n• Menor que 1.00x (com ícone de ampulheta ⏳): O período é longo e prolongado, então os minutos Suwaya fluem mais calma e lentamente do que os minutos civis."
   },
   {
-    "q": "Como leio a hora Suwaya e qual é a diferença visual em relação à hora civil?",
-    "a": "A hora Suwaya foi projetada para ser reconhecida rapidamente:\n• A hora Suwaya é sempre exibida em Dourado Astronômico e usa uma barra vertical (|) entre a Suwaya e os minutos junto com o ícone da fase, como (04|30 🌑) para a 4.ª Suwaya noturna e 30 minutos virtuais, ou (08|15 ☀️) para a 8.ª Suwaya diurna e 15 minutos virtuais.\n• A hora civil é exibida em branco/neutro com dois-pontos tradicionais (:).\nVocê pode alternar globalmente entre a hora Suwaya e a hora civil a qualquer momento tocando no ícone de relógio/crescente na barra superior."
+    "q": "Como leio a hora Suwaya e como ela difere visualmente da hora civil?",
+    "a": "O horário Suwaya foi projetado para ser reconhecido num relance:\n• A hora Suwaya é sempre exibida em Ouro Astro e usa uma barra vertical (|) entre as Suwayas e os minutos virtuais junto com um ícone de fase, como (04|30 🌑) para a 4ª Suwaya Noturna e 30 minutos virtuais, ou (08|15 ☀️) para a 8ª Suwaya Diurna e 15 minutos virtuais.\n• A hora civil é exibida em texto branco/neutro com os dois pontos padrão (:).\nVocê pode alternar entre a hora Suwaya e a hora civil a qualquer momento tocando no ícone de relógio/lua crescente na barra superior."
   },
   {
-    "q": "Quais são as cinco partes do Qiyam (oração noturna) disponíveis no aplicativo?",
-    "a": "Para o Qiyam, o aplicativo foca no Período 3 (Segunda metade da noite: da meia-noite astronômica ao Fajr, com 6 Suwayas) e fornece 5 subdivisões precisas:\n• Segunda metade da noite: 6 Suwayas completas (06|00 🌑 a 11|59 🌑).\n• Último terço da noite: 4 Suwayas (08|00 🌑 a 11|59 🌑).\n• Quarto sexto da noite: 2 Suwayas (06|00 🌑 a 07|59 🌑).\n• Quinto sexto da noite: 2 Suwayas (08|00 🌑 a 09|59 🌑).\n• Sexto sexto da noite: 2 Suwayas (10|00 🌑 a 11|59 🌑).\nO aplicativo impede automaticamente seleções sobrepostas no mostrador para manter o visual limpo."
+    "q": "Quais são as cinco partes do Qiyam (Oração Noturna) disponíveis no aplicativo?",
+    "a": "Para o Qiyam, o aplicativo concentra-se no Período 3 (Segunda Metade da Noite: da meia-noite astronômica ao Fajr, abrangendo 6 Suwayas) e fornece 5 subdivisões precisas:\n• Segunda Metade da Noite: 6 Suwayas (de 06|00 🌑 a 11|59 🌑).\n• Último Terço da Noite: 4 Suwayas (de 08|00 🌑 a 11|59 🌑).\n• Quarto Sexto da Noite: 2 Suwayas (de 06|00 🌑 a 07|59 🌑).\n• Quinto Sexto da Noite: 2 Suwayas (de 08|00 🌑 a 09|59 🌑).\n• Sexto Sexto da Noite: 2 Suwayas (de 10|00 🌑 a 11|59 🌑).\nO aplicativo evita automaticamente seleções sobrepostas no mostrador para manter um layout visual limpo."
   },
   {
-    "q": "Como uso o Mostrador Astrolábio Astronômico interativo na tela Inicial?",
-    "a": "O mostrador astronômico é totalmente interativo:\n• Toque (Tap): Toque em qualquer anel de período, marcador de oração, seta de tarefa ou arco de rotina para ver uma janela detalhada com horários de início/fim (civil e Suwaya), quantidade de Suwayas e velocidade de fluxo.\n• Rotação manual: Gire o mostrador com o dedo para explorar os períodos; ao soltar, ele retorna elasticamente à posição original.\n• Arrastar e soltar (Drag & Drop): Pressione e segure a seta de qualquer tarefa no mostrador e arraste-a para outro período ou Suwaya para reagendá-la instantaneamente!\n• Edição rápida: Toque no botão (Editar mostrador ✏️) acima do mostrador para ativar ou ocultar o nascer do sol e as partes do Qiyam."
+    "q": "Como uso o Mostrador Astrolábio Astronômico interativo na tela inicial?",
+    "a": "O mostrador astronômico é totalmente interativo:\n• Tocar (Tap): Toque em qualquer anel de período, marcador de oração, seta de tarefa ou arco de rotina para ver uma caixa de diálogo detalhada com horários de início/término, contagem de Suwayas e velocidade de fluxo.\n• Rotação Manual: Arraste o mostrador com o dedo para explorar os períodos; ele voltará elasticamente ao lugar quando solto.\n• Arrastar e Soltar (Drag & Drop): Pressione e segure a seta de qualquer tarefa no mostrador e, em seguida, arraste-a e solte-a em outro período ou Suwaya para reagendar a tarefa imediatamente.\n• Edição Rápida: Toque no botão (Personalizar Mostrador ✏️) acima do mostrador para ativar ou desativar o Nascer do Sol e as partes da noite do Qiyam."
   },
   {
     "q": "Qual é a diferença entre Tarefas Casuais, Hábitos Contínuos e Rotinas?",
-    "a": "• Tarefas Casuais (Casual Tasks): Tarefas únicas vinculadas a uma data e hora específicas (Suwaya ou civil).\n• Hábitos Contínuos (Continuous Habits): Ações recorrentes diárias ou semanais que acompanham suas ofensivas (Streaks) e incluem 3 Congelamentos de Ofensiva (Streak Freezes) para proteger seu progresso se você perder um dia.\n• Rotinas (Routines): Blocos de tempo com início e fim (como sono, trabalho ou estudo) desenhados como arcos coloridos com 4 padrões geométricos no mostrador astronômico."
+    "a": "• Tarefas Casuais: Tarefas de uso único vinculadas a uma data e hora específicas (Suwaya ou civil).\n• Hábitos Contínuos: Ações recorrentes diárias ou semanais que rastreiam suas sequências de conclusão (Streaks) e incluem 3 Congelamentos de Sequência (Streak Freezes) para proteger seu progresso se você perder um dia.\n• Rotinas: Blocos de tempo com um horário de início e término (como sono, trabalho ou estudo) renderizados como arcos coloridos e padronizados (4 padrões geométricos) no mostrador astronômico."
   },
   {
-    "q": "Como funciona o Temporizador de Foco (Pomodoro Suwaya vs. Pomodoro Tradicional)?",
-    "a": "O aplicativo oferece dois modos de foco:\n1. Pomodoro Tradicional: Funciona com minutos civis padrão (padrão de 25 min de foco / 5 min de pausa curta, e 30 min de pausa longa a cada 4 ciclos) com botões de Iniciar, Pausar/Retomar, Pular (Skip) e Redefinir, além de um botão de configurações no topo para personalizar todas as durações.\n2. Pomodoro Suwaya: Fixa o horário de início quando você entra na tela de configuração e define por padrão o término na próxima oração obrigatória (ou qualquer horário personalizado entre 15 minutos e 12 horas/Suwayas). Divide o intervalo em um número inteiro de Pomodoros virtuais (25/5) com velocidade entre 0.5x e 2.0x (selecionando por padrão a velocidade mais próxima de 1.00x), desconta o tempo de configuração do primeiro Pomodoro e para automaticamente no horário da oração."
+    "q": "Como funciona o Temporizador de Foco (Suwaya Pomodoro vs. Pomodoro Tradicional)?",
+    "a": "O aplicativo oferece dois modos de foco:\n1. Pomodoro Tradicional: Usa minutos civis padrão (padrão 25m de trabalho / 5m de pausa curta e uma pausa longa de 30m a cada 4 ciclos) com controles Iniciar, Pausar/Retomar, Pular e Redefinir, além de um botão de configurações para personalizar tudo.\n2. Suwaya Pomodoro: Fixa a hora de início quando você entra na tela de configuração e define a hora de término padrão para a próxima oração obrigatória (ou qualquer hora personalizada entre 15 minutos e 12 horas/Suwayas). Ele divide o intervalo em um número inteiro de Pomodoros virtuais de 25/5 com uma velocidade de fluxo entre 0.5x e 2.0x, deduz o tempo de configuração do primeiro Pomodoro e para automaticamente na hora da oração."
   },
   {
-    "q": "O aplicativo precisa de conexão com a Internet para calcular horários ou buscar cidades?",
-    "a": "Não. O Suwaya funciona no modo Offline-First; ele inclui um banco de dados local integrado com milhares de cidades em todo o mundo. Mesmo ao usar o GPS, encontra a cidade mais próxima e configura automaticamente o método de cálculo e a escola jurídica (Madhab) sem precisar de Internet."
+    "q": "O aplicativo requer conexão com a internet para calcular horários ou procurar cidades?",
+    "a": "Não. O Suwaya prioriza o uso offline (Offline-First); ele inclui um banco de dados local agrupado de milhares de cidades em todo o mundo. Mesmo ao usar o GPS, ele encontra a cidade mais próxima e configura o método de cálculo e o Madhab automaticamente sem precisar de acesso à Internet."
   },
   {
-    "q": "Há uma diferença de alguns minutos entre o aplicativo e minha mesquita local. Como ajustar?",
-    "a": "Abra o menu lateral e vá em (Configurações) -> (Cálculos Astronômicos) para alterar o método de cálculo e o Madhab, ou acesse (Ajustes Manuais de Horário) para adiantar ou atrasar qualquer oração individualmente de -30 a +30 minutos."
+    "q": "Há uma diferença de alguns minutos entre o aplicativo e a minha mesquita local. Como posso ajustar isso?",
+    "a": "Abra o menu lateral, vá para (Configurações) -> (Configurações Astro Avançadas), onde você pode alterar o método de cálculo, Madhab ou ângulos personalizados, ou toque em (Ajustes Manuais de Tempo) para ajustar cada oração obrigatória individualmente de -30 a +30 minutos."
   },
   {
     "q": "Quais níveis de alerta estão disponíveis para orações, Qiyam, tarefas e rotinas?",
-    "a": "Você pode configurar cada item com um de 3 níveis de alerta:\n1. Silencioso: Sem notificações.\n2. Notificação padrão: Um aviso discreto na barra do sistema.\n3. Alarme forte (Acordar tela): Um alarme em tela cheia sobre a tela de bloqueio com aumento gradual de volume (Fade-in), permitindo parar ou adiar (Snooze) deslizando na tela ou usando os botões físicos de volume."
+    "a": "Você pode configurar cada item com um dos 3 níveis de alerta:\n1. Silencioso: Sem notificações.\n2. Notificação Padrão: Uma notificação silenciosa na bandeja do sistema.\n3. Alarme Alto (Despertar a Tela): Um alarme em tela cheia que aparece sobre a tela de bloqueio com um aumento gradual do áudio (Fade-in), permitindo deslizar para parar/soneca e usar os botões físicos de volume para a função de soneca (Snooze)."
   },
   {
-    "q": "O que acontece com minhas tarefas antigas após atualizar para o novo sistema V2?",
-    "a": "O aplicativo inclui um Serviço de Migração automático na inicialização que converte com segurança as tarefas e rotinas do modelo anterior para um horário civil padrão (10:00 AM), garantindo que nenhum dado seja perdido e permitindo reagendá-las na Suwaya desejada."
+    "q": "O que acontecerá com minhas tarefas antigas após a atualização para o novo sistema de tempo V2?",
+    "a": "O aplicativo inclui um Serviço de Migração automático que é executado na inicialização; ele atualiza com segurança as tarefas e rotinas criadas no modelo antigo para um horário civil padrão (10:00 da manhã) para que nenhuma de suas tarefas seja perdida, permitindo que você as reagende em sua Suwaya preferida."
   },
   {
     "q": "Onde meus dados são armazenados e qual é a política de privacidade do Suwaya?",
-    "a": "Todas as suas tarefas, hábitos, rotinas, configurações e localizações são armazenados exclusivamente no seu dispositivo dentro de um banco de dados local rápido (Isar). O Suwaya não possui servidores em nuvem e não coleta nem compartilha dados pessoais ou publicitários."
+    "a": "Todas as suas tarefas, hábitos, rotinas, configurações e locais salvos são armazenados localmente em seu dispositivo em um banco de dados local rápido (Isar). O Suwaya não tem servidores em nuvem e não coleta, rastreia ou compartilha nenhum dado pessoal ou publicitário."
   }
 ]

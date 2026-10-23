@@ -5,308 +5,189 @@
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Languages](https://img.shields.io/badge/languages-22-green)](assets/translations/)
 
-Suwaya is an open-source Astro-Productivity Flutter application that organizes the day around astronomical events and prayer times[cite: 3]. It combines a 24-Suwaya Maghrib-to-Maghrib virtual time model (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes) with casual tasks, continuous habits, routines, dual-mode Pomodoro focus sessions, offline geolocation, notifications, full-screen lockscreen alarms, and multi-language support[cite: 1, 2, 3].
+Suwaya is an open-source Astro-Productivity Flutter application that organizes your day around astronomical events and prayer times[cite: 3]. It replaces rigid civil clock hours with a dynamic **24-Suwaya Maghrib-to-Maghrib virtual time model** (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes)[cite: 1, 3]. 
 
-The project is strictly local-first and privacy-focused: settings, tasks, routines, and saved locations are stored locally using Isar Community, while offline city search relies on a bundled SQLite database (`Cities_V2.db`)[cite: 1, 3]. The application does not require a cloud backend or user authentication[cite: 3].
+The app unifies casual tasks, continuous habits, routines, a dual-mode Pomodoro focus timer, an interactive Hijri calendar with seasonal fasting recommendations, offline geolocation, and full-screen lockscreen alarms[cite: 1, 2, 3]. It operates strictly **local-first** with absolute privacy, utilizing on-device databases (Isar Community & SQLite) without requiring user authentication or a cloud backend[cite: 1, 3].
 
 ## Contents
 
 - [Overview](#overview)
-- [How Suwaya Time Works](#how-suwaya-time-works)
-- [Suwaya Time Reference](#suwaya-time-reference)
+- [How Suwaya Time Works (V2 Model)](#how-suwaya-time-works-v2-model)
 - [Current Features](#current-features)
-- [Architecture](#architecture)
+- [Architecture & Tech Stack](#architecture--tech-stack)
 - [Repository Structure](#repository-structure)
-- [Technology Stack](#technology-stack)
 - [Requirements and Installation](#requirements-and-installation)
-- [Configuration](#configuration)
-- [Testing](#testing)
-- [Calculation Methodology](#calculation-methodology)
 - [Localization](#localization)
 - [Data, Privacy, and Permissions](#data-privacy-and-permissions)
-- [Known Limitations](#known-limitations)
 - [Contributing](#contributing)
-- [Security](#security)
 - [License](#license)
 
 ## Overview
 
-Civil time treats every clock hour as equal[cite: 3]. Suwaya adds an astronomical layer based on the actual day at the selected location[cite: 3]:
+Civil time treats every clock hour as equal[cite: 3]. Suwaya adds an astronomical layer based on the actual sun movement at your selected location[cite: 3]:
 
 ```text
-Location + date
-      |
-      v
-Prayer and solar event calculations
-      |
-      v
-Maghrib-to-Maghrib astronomical cycle
-      |
-      v
-24 Suwayas distributed across 7 contiguous periods
-      |
-      v
-Current period, virtual time, tasks, routines, and focus sessions
+Location + Date + Calculation Settings
+                 |
+                 v
+   Prayer and Solar Event Timings (Adhan)
+                 |
+                 v
+   Maghrib-to-Maghrib Astronomical Cycle
+                 |
+                 v
+   7 Contiguous Periods = 24 Virtual Suwayas (12 Night / 12 Day)
+                 |
+                 v
+   Tasks, Routines, Habits, and Focus Sessions Synced to Astro Time
 
 ```
 
-The main day boundaries follow the Islamic astronomical cycle (Maghrib to the following Maghrib) and are divided into 7 contiguous periods: Maghrib, Isha, Second Half of the Night (Qiyam), Fajr, Duha, Dhuhr, and Asr. Period lengths vary with calculated astronomical timings, while the complete cycle always contains 24 Suwayas.
+The day boundaries follow the Islamic astronomical cycle (Maghrib to the following Maghrib) and are divided into 7 contiguous periods: Maghrib, Isha, Qiyam (Second Half of the Night), Fajr, Duha, Dhuhr, and Asr. Period lengths vary physically throughout the year, but the virtual cycle always scales to exactly 24 Suwayas (1,440 virtual minutes).
 
-## How Suwaya Time Works
+## How Suwaya Time Works (V2 Model)
 
-The pure Dart `packages/suwaya_time` package calculates prayer timings, night parts, daily periods, and the Suwaya distribution. The Flutter application supplies the active location, date, timezone offset, calculation method, Madhab, high-latitude rule, and manual prayer offsets.
+The pure Dart `packages/suwaya_time` engine calculates prayer timings, night parts, daily periods, and Suwaya distributions.
 
-The runtime engine maintains these invariants:
-
-* Prayer timings are chronologically ordered.
+* **24-Suwaya Distribution:** The cycle consists of exactly 24 Suwayas. 12 Suwayas form the Night phase (Maghrib to Sunrise), and 12 Suwayas form the Day phase (Sunrise to Maghrib).
 
 
-* Generated periods are contiguous.
+* **60 Virtual Minutes:** Each Suwaya is broken down into exactly 60 virtual minutes. The real-time flow speed of these virtual minutes dynamically accelerates (`>1.0x`) or decelerates (`<1.0x`) depending on the physical length of the current period.
 
 
-* Periods cover the interval from Maghrib to the next Maghrib.
+* **Night Parts (Qiyam):** The second half of the night is automatically subdivided into 5 canonical parts (e.g., Last Third, Fourth Sixth) for precise night prayer scheduling.
 
 
-* The daily cycle contains exactly 24 Suwayas (12 Night, 12 Day).
-
-
-* The night interval extends from Maghrib to the following Fajr.
-
-
-* Qiyam parts are precisely defined within the second half of the night.
-
-
-* A manual offset changes only its selected prayer.
+* **Independent Engine:** The engine remains completely independent of Flutter, relying solely on mathematical models and the `adhan` package.
 
 
 
-The app caches generated astronomical cycles. Its smart state timer wakes at the next Suwaya boundary, while a lightweight five-second ticker updates the displayed virtual clock without rebuilding the full application state.
-
-## Suwaya Time Reference
-
-For the complete calculation model, period boundaries, 24-Suwaya distribution, virtual-time mapping, timezone behavior, edge cases, and test invariants, see [Suwaya-Time.md](Suwaya-Time.md).
+For a deep dive into the mathematical and astronomical specifications of the V2 time model, see [Suwaya-Time.md](https://www.google.com/search?q=Suwaya-Time.md).
 
 ## Current Features
 
-### Main Experience
+### 🧭 Main Experience
 
-* Home screen with a Hijri night/day header, mini astronomical dial, and an interactive, touch-rotatable `PremiumAstroDial` with drag-and-drop task rescheduling.
-
-
-* Ibadat screen with next-prayer countdowns, prayer timings, sunrise toggle, and 5 canonical Qiyam night parts (`half_2`, `third_3`, `sixth_4`, `sixth_5`, `sixth_6`).
-
-
-* Tasks screen with three tabs (Casual Tasks, Continuous Habits, and Routines), streak tracking, and freeze protection[cite: 1, 2].
-* Dual-mode Pomodoro focus screen (Traditional Pomodoro with customizable cycles and Suwaya Pomodoro linked to prayer times and flow speeds).
-
-
-* Onboarding flow for language selection (22 languages) and smart location configuration.
+* **Interactive Premium Astro Dial:** A touch-rotatable astronomical dial on the Home screen featuring drag-and-drop task rescheduling, dynamic needles, and beautiful geometric/classic designs.
+* **Worships (Ibadat):** Detailed next-prayer countdowns, timeline overviews, sunrise toggles, and exclusive Qiyam night part tracking (`half_2`, `third_3`, `sixth_4`, `sixth_5`, `sixth_6`).
+* **Hijri Calendar & Fasting:** A built-in dual calendar (Civil & Hijri) highlighting seasonal fasting recommendations like Arafah, Ashura, and the White Days.
+* **Smart Task Management:** Three distinct modes:
+* *Casual Tasks:* One-time events.
+* *Continuous Habits:* Recurring actions with streak tracking and streak-freeze protection[cite: 1, 2].
+* *Routines:* Time blocks (e.g., work, reading) rendered as patterned colored arcs directly on the Astro Dial.
 
 
 
-### Calculations and Device Services
+### 🍅 Dual-Mode Pomodoro Focus Timer
 
-* Adhan-based prayer calculations with configurable calculation methods and Madhabs (Shafi/Hanafi).
+* **Traditional Mode:** Customizable work/break cycles based on standard civil minutes.
+* **Suwaya Mode:** Focus sessions dynamically synchronized with the astronomical flow. It calculates optimal flow speeds, deducts setup time, and automatically halts upon the arrival of the next mandatory prayer time.
 
+### ⚙️ Engine & Device Services
 
-* High-latitude rules, custom Fajr/Isha angles, and manual offsets.
-
-
-* Offline city search and Haversine reverse geocoding via a bundled SQLite database (`Cities_V2.db`).
-
-
-* Background 7-day notification and alarm scheduling via `Isolate.run`.
+* **Offline City Database:** Instant location search and Haversine reverse geocoding via a bundled SQLite database (`Cities_V2.db`), requiring zero internet access.
 
 
-* Full-screen lockscreen alarms with hardware volume button snoozing and interactive swipe-to-stop/snooze.
+* **Advanced Astro Calculations:** Supports multiple calculation methods (including MWL, Umm Al-Qura, ISNA, UOIF, Russia), high-latitude rules, custom angles, and manual minute offsets.
 
 
-* Light, dark (OLED), system, and mixed themes, with RTL/LTR layout support.
+* **Isolate-Based Background Scheduler:** Computes 7-day notification windows flawlessly in the background off the main UI thread.
 
 
+* **Full-Screen Lockscreen Alarms:** High-priority alerts that wake up the device, supporting interactive swipe-to-stop/snooze and hardware volume button snooze capabilities.
 
-## Architecture
 
-Suwaya uses a feature-oriented Flutter architecture:
+* **Customization:** 4 App Color Themes (Gold, Ocean, Forest, Desert), 4 UI Modes (Light, Dark, System, Mixed), and multiple dial rendering modes.
 
-```text
-Flutter screens and shared widgets
-              |
-      Riverpod providers/notifiers
-              |
- Repositories and platform services
-              |
-  Isar local DB & SQLite city DB
-              |
-     Pure Dart suwaya_time package
+## Architecture & Tech Stack
 
-```
+Suwaya employs a strictly feature-first architecture built on modern Flutter tools:
 
-Widgets render state and collect user actions. Providers and notifiers coordinate state. Repositories own Isar persistence, while services wrap notifications, alarms, location, geocoding, and database migrations. The astronomical calculations live in `packages/suwaya_time` and do not depend on Flutter or Riverpod.
+| Area | Technology |
+| --- | --- |
+| **Framework** | Flutter & Dart (SDK 3.2+) |
+| **State Management** | Riverpod |
+| **Local Database** | Isar Community (Primary DB) & `sqflite` (Read-only Geo DB) |
+| **Astro Domain** | Pure Dart `suwaya_time` local package (wrapping `adhan`) |
+| **Routing** | `go_router` |
+| **Location & Geocoding** | `geolocator` |
+| **Notifications & Alarms** | `flutter_local_notifications` & `alarm` |
+| **Localization** | `easy_localization` (22 supported languages) |
+| **In-App Purchases** | `purchases_flutter` (RevenueCat for optional Supporter Badges) |
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the implementation rules and startup sequence.
+For a detailed breakdown of the application structure, startup sequence, and dependency injection patterns, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Repository Structure
 
 ```text
 lib/
 ├── main.dart
-├── core/
-│   ├── astro_engine/       # Flutter adapter and current astronomical state[cite: 3]
-│   ├── bootstrap/          # Lightweight application initialization[cite: 3]
-│   ├── database/           # Isar initialization and provider[cite: 3]
-│   ├── localization/       # Supported locales and translation path[cite: 3]
-│   ├── location/           # SQLite Geo database, location service, and permissions[cite: 1, 3]
-│   ├── notification/       # Notification services, Isolate scheduler, and time resolver[cite: 1, 3]
-│   ├── repositories/       # Task, routine, and settings persistence[cite: 3]
-│   ├── router/             # go_router configuration and startup gate[cite: 1, 3]
-│   ├── services/           # Alarm service and data migration service[cite: 1, 3]
-│   ├── theme/              # Themes, color themes, dial designs, and UI color adapters[cite: 1, 3]
-│   └── providers/          # Shared UI providers[cite: 3]
-├── features/               # Home, ibadat, tasks, routines, pomodoro, settings, alarm, etc.[cite: 1, 3]
-├── models/                 # Persistent Isar models and generated adapters[cite: 3]
-└── shared/widgets/         # Reusable application widgets[cite: 3]
-packages/suwaya_time/       # Pure Dart astronomical domain package[cite: 3]
-Suwaya-Time.md              # Detailed Suwaya time and calculation reference[cite: 3]
-test/                       # Domain, provider, model, and widget tests[cite: 3]
-assets/translations/        # 22 localization files[cite: 3]
-docs/privacy.md             # Privacy policy[cite: 3]
+├── core/               # App bootstrap, Database, Theme, Notifications, Router, Repositories[cite: 1, 3]
+├── features/           # Home, Ibadat, Tasks, Calendar, Pomodoro, Settings, Alarm[cite: 1, 3]
+├── models/             # Isar persistent models & generated adapters[cite: 3]
+└── shared/widgets/     # Reusable UI components (AppDrawer, SuwayaTimeText, etc.)[cite: 3]
+packages/suwaya_time/   # Pure Dart astronomical engine package[cite: 3]
+assets/
+├── db/                 # Bundled SQLite databases (Cities_V2.db)
+├── icons/              # App icons and dial graphical assets
+└── translations/       # 22 language JSON files[cite: 3]
 
 ```
-
-## Technology Stack
-
-| Area | Technology |
-| --- | --- |
-| Application | Flutter and Dart
-
- |
-| State management | Riverpod
-
- |
-| Routing | go_router
-
- |
-| Local persistence | Isar Community & SQLite (`sqflite`)
-
- |
-| Prayer calculations | adhan
-
- |
-| Astronomical domain engine | Local `suwaya_time` Dart package
-
- |
-| Location & Geocoding | Geolocator and Geocoding
-
- |
-| Localization | Easy Localization and intl
-
- |
-| Notifications | Flutter Local Notifications
-
- |
-| Alarms | alarm
-
- |
-| In-app updates & support | in_app_update & purchases_flutter
-
- |
 
 ## Requirements and Installation
 
-Requirements:
+**Requirements:**
 
-* Flutter with Dart SDK `>=3.2.3 <4.0.0`.
+* Flutter SDK (3.24.0 or higher)
+* Dart SDK (`>=3.2.3 <4.0.0`)
+* Android / iOS build tools
 
-
-* Android, iOS, desktop, or web tooling for the target platform.
-
-
+**Installation:**
 
 ```bash
-git clone https://github.com/Abdallah-Kaballo/Suwaya.git
+git clone [https://github.com/Abdallah-Kaballo/Suwaya.git](https://github.com/Abdallah-Kaballo/Suwaya.git)
 cd Suwaya
 flutter pub get
-flutter run
 
 ```
 
-Generate Isar adapters after changing persistent models:
+*Note: If you modify persistent Isar models (`lib/models/`), you must regenerate the adapters:*
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 
 ```
 
-## Configuration
-
-The application has no required cloud credentials. Platform configuration may still be needed for location, notifications, exact alarms, and wake-lock capabilities. Review platform project files and request permissions only when the related feature is used.
-
-Translation assets, the city database (`Cities_V2.db`), app icons, and notification audio are declared in `pubspec.yaml`.
-
-## Testing
-
-```bash
-flutter analyze
-flutter test
-dart format .
-
-```
-
-The test suite covers prayer and period calculations, daylight-saving and leap-year behavior, polar/high-latitude cases, manual offsets, the 24-Suwaya distribution, virtual-time mapping, task logic, settings cloning, task providers, and widgets.
-
-## Calculation Methodology
-
-Results depend on coordinates, date, timezone offset, calculation method, Madhab, high-latitude rule, custom angles, and manual offsets. Different applications can therefore produce different results. Suwaya exposes these inputs in settings and tests the domain invariants rather than claiming universal agreement with every reference implementation.
-
 ## Localization
 
-Supported locales are registered in `lib/core/localization/app_locales.dart`. Translation files are stored in `assets/translations/`, with Arabic as the fallback locale. User-visible text should be localized, and both RTL and LTR layouts must be checked when adding or changing UI.
+Suwaya globally supports **22 languages**, seamlessly handling Right-To-Left (RTL) and Left-To-Right (LTR) UI paradigms, complete with localized numerals and calendar data. The default fallback language is Arabic (`ar`). Translations are managed via JSON files in `assets/translations/`.
 
 ## Data, Privacy, and Permissions
 
-Tasks, routines, settings, and saved locations are stored locally in Isar. Optional supporter tiers use Google Play Billing and RevenueCat (anonymous customer ID and entitlement status). Read [docs/privacy.md](docs/privacy.md) for the full privacy policy.
+**100% Privacy Focused:** Suwaya is designed as a local-first tool. Tasks, habits, routines, settings, and location data never leave your device. The app utilizes on-device SQLite databases to resolve cities to coordinates.
 
-| Permission | Purpose |
-| --- | --- |
-| Location | On-device astronomical calculations and saved places |
-| Notifications | Prayer, task, and routine reminders |
-| Alarms | Full-screen alarm scheduling and ringing |
-| Billing | Optional supporter badges via Google Play & RevenueCat |
-| Internet | Dynamic FAQ/Privacy updates from GitHub and store purchase verification |
+**Permissions Used:**
 
-## Known Limitations
+* **Location:** Strictly calculated on-device to determine accurate sun positions.
+* **Notifications & Exact Alarms:** Used exclusively to trigger your localized scheduled reminders, prayers, and task notifications.
+* **Internet:** Used minimally to fetch dynamic Markdown documentation (FAQ/Privacy), check for app updates, or verify optional supporter tier purchases (via RevenueCat/Google Play Billing)[cite: 2].
 
-* Calculation results vary between calculation methods and high-latitude rules.
-
-
-* Some alarm and notification behaviors require platform-specific native permissions.
-
-
-* Location and timezone data can change when the user travels or changes the active location.
-
-
-* Cloud synchronization, user authentication, and remote analytics are not part of the current implementation.
-
-
+Read [docs/privacy.md](https://www.google.com/search?q=docs/privacy.md) for the comprehensive privacy policy.
 
 ## Contributing
 
-Keep domain calculations in `packages/suwaya_time`, persistence behind repositories, and platform APIs behind services. Add translation keys for user-visible text and tests for calculation, state, or persistence changes.
+Contributions are welcome! Please follow these guidelines:
 
-Before opening a pull request:
+1. Keep the `packages/suwaya_time` engine pure (No Flutter/Riverpod imports).
 
-```bash
-dart format .
-flutter analyze
-flutter test
 
-```
+2. Maintain data persistence exclusively through Repository wrappers.
+3. Ensure UI changes are tested in both RTL and LTR locales.
+4. Run `dart format .`, `flutter analyze`, and `flutter test` before submitting a pull request.
 
-## Security
 
-Do not commit signing credentials, private API keys, passwords, or personal access tokens. Report security issues privately to the repository owner or through available GitHub security channels.
 
 ## License
 
-Suwaya is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE).
+Suwaya is open-source software licensed under the **GNU General Public License v3.0**. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for more details.
+

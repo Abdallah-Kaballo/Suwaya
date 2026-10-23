@@ -1,62 +1,62 @@
 [
   {
-    "q": "Hvad er «Suwaya»-appen, og hvad er dens grundidé?",
-    "a": "Suwaya er en open-source Astro-Produktivitetsapp (Astro-Productivity), der er designet til at genforbinde din daglige rytme, dine opgaver og dine fokussessioner med solens bevægelse og bedetiderne på din geografiske placering i stedet for kun at stole på faste borgerlige klokketimer."
+    "q": "Hvad er Suwaya, og hvad er kernekonceptet?",
+    "a": "Suwaya er en open source Astro-Productivity applikation designet til at forbinde din daglige rytme, opgaver og fokussessioner med solens bevægelse og bønnetider på din geografiske placering, frem for udelukkende at stole på stive borgerlige klokketimer."
   },
   {
-    "q": "Hvad er en «Suwaya», og hvordan fungerer 24-Suwaya-systemet?",
-    "a": "I stedet for at opdele døgnet i 24 lige store borgerlige timer fra midnat, opdeler Suwaya det astronomiske døgn (fra Maghrib til næste Maghrib) i 24 Suwayaer fordelt på to faser:\n• Natfase (🌑): Strækker sig fra Maghrib til solopgang og består af 12 Nat-Suwayaer (nummereret 01 til 12).\n• Dagfase (☀️): Strækker sig fra solopgang til næste Maghrib og består af 12 Dag-Suwayaer (nummereret 01 til 12).\nHver Suwaya består af 60 virtuelle minutter (skrevet som 00|00), mens dens faktiske varighed udvider eller trækker sig sammen alt efter nattens og dagens længde på din årstid og placering."
+    "q": "Hvad er en 'Suwaya', og hvordan fungerer 24-Suwaya-systemet?",
+    "a": "I stedet for at dele dagen ind i 24 lige store borgerlige timer med start ved midnat, deler Suwaya den astronomiske dag (fra Maghrib til den næste Maghrib) ind i 24 Suwayaer fordelt på to faser:\n• Natfase (🌑): Strækker sig fra Maghrib til solopgang og består af 12 nat-Suwayaer (nummereret 01 til 12).\n• Dagfase (☀️): Strækker sig fra solopgang til den næste Maghrib og består af 12 dag-Suwayaer (nummereret 01 til 12).\nHver Suwaya består af 60 virtuelle minutter (skrevet som 00|00), mens dens reelle varighed udvides eller trækkes sammen i overensstemmelse med længden af nat og dag i din årstid og placering."
   },
   {
-    "q": "Hvorfor starter døgnet i Suwaya ved Maghrib i stedet for ved midnat eller Fajr?",
-    "a": "Appen følger den autentiske astronomiske og islamiske kalendercyklus, hvor natten går forud for dagen; et nyt døgn begynder ved solnedgang (Maghrib). Derfor vil du øverst på startskærmen se overskrifter som «Fredag Nat» efter Maghrib, som derefter skifter til «Fredag Dag» efter Fajr."
+    "q": "Hvorfor starter dagen i Suwaya ved Maghrib i stedet for midnat eller Fajr?",
+    "a": "Appen følger den autentiske astronomiske og islamiske kalendercyklus, hvor natten går forud for dagen; en ny dag begynder ved solnedgang (Maghrib). Derfor vil du se overskrifter som 'Fredagsnat' efter Maghrib, som derefter skifter til 'Fredag Dag' efter Fajr."
   },
   {
-    "q": "Hvad er døgnets syv astronomiske perioder?",
-    "a": "Urskiven opdeler cyklussen fra Maghrib til næste Maghrib i 7 sammenhængende perioder uden huller:\n1. Maghrib-perioden (Maghrib til Isha).\n2. Isha-perioden (Isha til astronomisk midnat) — deler 5 Nat-Suwayaer med Maghrib-perioden.\n3. Anden halvdel af natten / Qiyam-perioden (Midnat til Fajr) — fast varighed på 6 Nat-Suwayaer (06|00 🌑 til 11|59 🌑).\n4. Fajr-perioden (Fajr til solopgang) — fast varighed på 1 Nat-Suwaya (Suwaya 12 🌑).\n5. Duha-perioden (Solopgang til Dhuhr).\n6. Dhuhr-perioden (Dhuhr til Asr).\n7. Asr-perioden (Asr til næste Maghrib) — de 12 Dag-Suwayaer (01 ☀️ til 12 ☀️) fordeles dynamisk mellem perioderne Duha, Dhuhr og Asr."
+    "q": "Hvad er dagens syv astronomiske perioder?",
+    "a": "Urskiven deler cyklussen fra den ene Maghrib til den næste i 7 sammenhængende perioder uden huller:\n1. Maghrib-periode (fra Maghrib til Isha).\n2. Isha-periode (fra Isha til astronomisk midnat) — deler 5 nat-Suwayaer med Maghrib-perioden.\n3. Anden halvdel af natten / Qiyam-periode (fra astronomisk midnat til Fajr) — fastsat til 6 nat-Suwayaer (fra 06|00 🌑 til 11|59 🌑).\n4. Fajr-periode (fra Fajr til solopgang) — fastsat til 1 nat-Suwaya (Suwaya 12 🌑).\n5. Duha-periode (fra solopgang til Dhuhr).\n6. Dhuhr-periode (fra Dhuhr til Asr).\n7. Asr-periode (fra Asr til næste Maghrib) — de 12 dag-Suwayaer (01 ☀️ til 12 ☀️) fordeles dynamisk over Duha, Dhuhr og Asr-perioderne."
   },
   {
-    "q": "Hvad betyder indikatoren for Tidsstrømshastighed (f.eks. 1.25x eller 0.85x)?",
-    "a": "Da hver Suwaya repræsenterer 60 virtuelle minutter (3.600 virtuelle sekunder), mens dens reelle varighed varierer efter periode og årstid, viser hastighedsindikatoren, hvor hurtigt virtuelle Suwaya-minutter går sammenlignet med borgerlige minutter:\n• 1.00x: 1 reel Suwaya svarer præcis til 60 borgerlige minutter.\n• Større end 1.00x (lyn-ikon ⚡): Perioden er kort, så Suwaya-minutter går hurtigere end borgerlige minutter.\n• Mindre end 1.00x (timeglas-ikon ⏳): Perioden er lang, så Suwaya-minutter flyder roligere og langsommere end borgerlige minutter."
+    "q": "Hvad betyder indikatoren for tidsflowhastighed (f.eks. 1.25x eller 0.85x)?",
+    "a": "Da hver Suwaya repræsenterer 60 virtuelle minutter (3.600 virtuelle sekunder), mens dens reelle varighed varierer efter periode og årstid, viser hastighedsindikatoren, hvor hurtigt Suwaya-minutter strømmer sammenlignet med borgerlige minutter:\n• 1.00x: 1 Suwaya er præcis lig med 60 borgerlige minutter.\n• Større end 1.00x (med lyn-ikon ⚡): Perioden er kort, så Suwaya-minutter strømmer hurtigere end borgerlige minutter.\n• Mindre end 1.00x (med timeglas-ikon ⏳): Perioden er lang og udstrakt, så Suwaya-minutter strømmer mere roligt og langsommere end borgerlige minutter."
   },
   {
-    "q": "Hvordan aflæser jeg Suwaya-tid, og hvordan adskiller den sig visuelt fra borgerlig tid?",
-    "a": "Suwaya-tid er designet til at kunne genkendes med et enkelt blik:\n• Suwaya-tid vises altid i Astro-Guld og bruger en lodret streg (|) mellem Suwaya og minutter sammen med et fase-ikon, f.eks. (04|30 🌑) for 4. Nat-Suwaya og 30 virtuelle minutter, eller (08|15 ☀️) for 8. Dag-Suwaya og 15 virtuelle minutter.\n• Borgerlig tid vises i hvid/neutral farve med et almindeligt kolon (:).\nDu kan når som helst skifte globalt mellem Suwaya-tid og borgerlig tid ved at trykke på ur-/halvmåne-ikonet i topbjælken."
+    "q": "Hvordan læser jeg Suwaya-tiden, og hvordan adskiller den sig visuelt fra den borgerlige tid?",
+    "a": "Suwaya-tiden er designet til at være genkendelig ved et øjekast:\n• Suwaya-tid vises altid i Astro Gold og bruger en lodret streg (|) mellem Suwayaerne og de virtuelle minutter sammen med et faseikon, f.eks. (04|30 🌑) for den 4. nat-Suwaya og 30 virtuelle minutter, eller (08|15 ☀️) for den 8. dag-Suwaya og 15 virtuelle minutter.\n• Borgerlig tid vises i hvid/neutral tekst med et standardkolon (:).\nDu kan til enhver tid skifte globalt mellem Suwaya-tid og borgerlig tid ved at trykke på ur-/halvmåne-ikonet i den øverste bjælke."
   },
   {
-    "q": "Hvilke fem Qiyam-dele (nattebøn) er tilgængelige i appen?",
-    "a": "Til Qiyam fokuserer appen på Periode 3 (Anden halvdel af natten: fra astronomisk midnat til Fajr, som varer 6 Suwayaer) og giver 5 præcise inddelinger:\n• Anden halvdel af natten: Alle 6 Suwayaer (06|00 🌑 til 11|59 🌑).\n• Sidste tredjedel af natten: 4 Suwayaer (08|00 🌑 til 11|59 🌑).\n• Fjerde sjettedel af natten: 2 Suwayaer (06|00 🌑 til 07|59 🌑).\n• Femte sjettedel af natten: 2 Suwayaer (08|00 🌑 til 09|59 🌑).\n• Sjette sjettedel af natten: 2 Suwayaer (10|00 🌑 til 11|59 🌑).\nAppen forhindrer automatisk overlappende valg på urskiven for at holde visningen overskuelig."
+    "q": "Hvad er de fem Qiyam (nattebøn) dele tilgængelige i appen?",
+    "a": "For Qiyam fokuserer appen på Periode 3 (Anden halvdel af natten: fra astronomisk midnat til Fajr, der spænder over 6 Suwayaer) og giver 5 præcise underinddelinger:\n• Anden halvdel af natten: 6 Suwayaer (fra 06|00 🌑 til 11|59 🌑).\n• Sidste tredjedel af natten: 4 Suwayaer (fra 08|00 🌑 til 11|59 🌑).\n• Fjerde sjettedel af natten: 2 Suwayaer (fra 06|00 🌑 til 07|59 🌑).\n• Femte sjettedel af natten: 2 Suwayaer (fra 08|00 🌑 til 09|59 🌑).\n• Sjette sjettedel af natten: 2 Suwayaer (fra 10|00 🌑 til 11|59 🌑).\nAppen forhindrer automatisk overlappende valg på urskiven for at holde det visuelle layout rent."
   },
   {
-    "q": "Hvordan bruger jeg den interaktive Astronomiske Astrolab-urskive på startskærmen?",
-    "a": "Den astronomiske urskive er fuldt interaktiv:\n• Tryk (Tap): Tryk på en periodering, bedemarkør, opgavepil eller rutinebue for at se et detaljeret vindue med start-/sluttider (borgerlig og Suwaya), antal Suwayaer og strømhastighed.\n• Manuel rotation: Drej urskiven med fingeren for at udforske perioder; når du slipper, svinger den elastisk tilbage.\n• Træk og slip (Drag & Drop): Hold fingeren nede på en opgavepil på urskiven, og træk den over på en anden periode eller Suwaya for straks at flytte opgaven!\n• Hurtig redigering: Tryk på knappen (Rediger urskive ✏️) over urskiven for at vise eller skjule solopgang og Qiyam-dele."
+    "q": "Hvordan bruger jeg den interaktive astronomiske astrolabium-urskive på startskærmen?",
+    "a": "Den astronomiske urskive er fuldt interaktiv:\n• Tryk (Tap): Tryk på en vilkårlig periodering, bønnemarkør, opgavepil eller rutinebue for at se en detaljeret dialogboks med start-/sluttider (i både borgerligt og Suwaya-format), Suwaya-antal og flowhastighed.\n• Manuel rotation: Træk i urskiven med din finger for at udforske perioderne; den vil elastisk springe tilbage på plads, når den slippes.\n• Træk og slip (Drag & Drop): Tryk længe på en vilkårlig opgavepil på urskiven, træk den derefter og slip den på en anden periode eller Suwaya for at omplanlægge opgaven med det samme.\n• Hurtig redigering: Tryk på knappen (Tilpas urskive ✏️) over urskiven for at slå solopgang og Qiyam-nattedele til eller fra."
   },
   {
-    "q": "Hvad er forskellen mellem Engangsopgaver, Faste Vaner og Rutiner?",
-    "a": "• Engangsopgaver (Casual Tasks): Enkeltstående opgaver knyttet til en bestemt dato og tid (Suwaya eller borgerlig).\n• Faste Vaner (Continuous Habits): Daglige eller ugentlige gentagne handlinger, der sporer dine stimer (Streaks) og inkluderer 3 Stime-frysninger (Streak Freezes) for at beskytte dine fremskridt, hvis du misser en dag.\n• Rutiner (Routines): Tidsblokke med start- og sluttid (søvn, arbejde eller studie), der tegnes som farvede buer med 4 geometriske mønstre på urskiven."
+    "q": "Hvad er forskellen mellem afslappede opgaver, kontinuerlige vaner og rutiner?",
+    "a": "• Afslappede opgaver (Casual Tasks): Engangsopgaver knyttet til en specifik dato og tid (Suwaya eller borgerlig).\n• Kontinuerlige vaner (Continuous Habits): Tilbagevendende daglige eller ugentlige handlinger, der sporer dine fuldførelsesrækker (Streaks) og inkluderer 3 Streak-frysninger (Streak Freezes) for at beskytte dine fremskridt, hvis du går glip af en dag.\n• Rutiner (Routines): Tidsblokke med en start- og sluttid (såsom søvn, arbejde eller studie) gengivet som farvede, mønstrede buer (4 geometriske mønstre) på den astronomiske urskive."
   },
   {
-    "q": "Hvordan fungerer Fokustimeren (Suwaya Pomodoro vs. Traditionel Pomodoro)?",
-    "a": "Appen tilbyder to fokustilstande:\n1. Traditionel Pomodoro: Kører på almindelige borgerlige minutter (standard 25 min arbejde / 5 min kort pause og 30 min lang pause for hver 4 cyklusser) med knapper til Start, Pause/Genoptag, Spring over (Skip) og Nulstil samt en indstillingsknap øverst til at tilpasse alle tider.\n2. Suwaya Pomodoro: Låser starttidspunktet, når du åbner opsætningssiden, og sætter som standard sluttidspunktet til næste obligatoriske bøn (eller et valgt tidspunkt mellem 15 minutter og 12 timer/Suwayaer). Den opdeler intervallet i et helt antal virtuelle 25/5-Pomodoroer med en hastighed mellem 0.5x og 2.0x (vælger som standard hastigheden tættest på 1.00x), fratrækker opsætningstiden fra den første Pomodoro og stopper automatisk ved bedetid."
+    "q": "Hvordan fungerer fokustimeren (Suwaya Pomodoro vs. traditionel Pomodoro)?",
+    "a": "Appen tilbyder to fokusindstillinger:\n1. Traditionel Pomodoro: Bruger standard borgerlige minutter (standard 25m arbejde / 5m kort pause og en 30m lang pause hver 4. cyklus) med Start, Pause/Genoptag, Spring over og Nulstil-kontroller, plus en indstillingsknap til at tilpasse alt.\n2. Suwaya Pomodoro: Fastlåser starttiden, når du går ind på opsætningsskærmen, og indstiller som standard sluttiden til den næste obligatoriske bønnetid (eller enhver brugerdefineret tid mellem 15 minutter og 12 timer/Suwayaer). Den deler intervallet op i et helt antal 25/5 virtuelle Pomodoros med en flowhastighed på mellem 0.5x og 2.0x, trækker opsætningstiden fra den første Pomodoro og stopper automatisk ved bønnetid."
   },
   {
-    "q": "Kræver appen internetforbindelse for at beregne tider eller søge efter byer?",
-    "a": "Nej. Suwaya er Offline-First og indeholder en indbygget lokal database med tusindvis af byer verden over. Selv når du bruger GPS, finder den nærmeste by og indstiller automatisk beregningsmetode og retsskole (Madhab) uden internet."
+    "q": "Kræver appen en internetforbindelse for at beregne tider eller søge efter byer?",
+    "a": "Nej. Suwaya er Offline-First; den inkluderer en indbygget lokal database med tusindvis af byer over hele verden. Selv når du bruger GPS, finder den din nærmeste by og konfigurerer beregningsmetoden og Madhab automatisk uden at have brug for internetadgang."
   },
   {
-    "q": "Der er et par minutters forskel mellem appen og min lokale moské. Hvordan justerer jeg det?",
-    "a": "Åbn sidemenuen, og gå til (Indstillinger) -> (Astronomiske Beregninger) for at vælge beregningsmetode og Madhab, eller gå til (Manuelle Tidsjusteringer) for at justere hver enkelt bøn med -30 til +30 minutter."
+    "q": "Der er en forskel på et par minutter mellem appen og min lokale moské. Hvordan kan jeg justere det?",
+    "a": "Åbn sidemenuen, gå til (Indstillinger) -> (Avancerede Astro-indstillinger), hvor du kan ændre beregningsmetoden, Madhab eller brugerdefinerede vinkler, eller tryk på (Manuelle tidsforskydninger) for at justere hver obligatorisk bøn individuelt fra -30 til +30 minutter."
   },
   {
-    "q": "Hvilke påmindelsesniveauer findes der for bønner, Qiyam, opgaver og rutiner?",
-    "a": "Du kan indstille hvert element til et af 3 niveauer:\n1. Lydløs: Ingen notifikationer.\n2. Standardnotifikation: En stille besked i systemets notifikationspanel.\n3. Stærk alarm (Væk skærm): En fuldskærmsalarm over låseskærmen med gradvist stigende lydstyrke (Fade-in), som kan stoppes eller udskydes (Snooze) ved at stryge på skærmen eller trykke på telefonens lydstyrkeknapper."
+    "q": "Hvilke advarselsniveauer er tilgængelige for bønner, Qiyam, opgaver og rutiner?",
+    "a": "Du kan konfigurere hvert element med et af 3 advarselsniveauer:\n1. Lydløs: Ingen meddelelser.\n2. Standardmeddelelse: En stille meddelelse i systembakken.\n3. Høj alarm (Vækker skærmen): En fuldskærmsalarm, der vises over låseskærmen med en gradvis lyd-fade-in, som understøtter swipe-for-at-stoppe/snooze, samt brugen af hardware-lydstyrkeknapper til snooze."
   },
   {
-    "q": "Hvad sker der med mine gamle opgaver efter opdatering til det nye V2-system?",
-    "a": "Appen har en automatisk Migreringstjeneste (Migration Service) ved opstart, som sikkert konverterer opgaver og rutiner fra den tidligere model til en borgerlig standardtid (kl. 10:00), så ingen data går tabt, og du nemt kan flytte dem til din ønskede Suwaya."
+    "q": "Hvad vil der ske med mine gamle opgaver efter opdatering til det nye V2-tidssystem?",
+    "a": "Appen inkluderer en automatisk migrationsservice, der kører ved opstart; den opgraderer sikkert opgaver og rutiner oprettet under den gamle model til en standard borgerlig tid (kl. 10:00), så ingen af dine opgaver går tabt, så du kan omplanlægge dem til din foretrukne Suwaya."
   },
   {
     "q": "Hvor gemmes mine data, og hvad er Suwayas privatlivspolitik?",
-    "a": "Alle dine opgaver, vaner, rutiner, indstillinger og placeringer gemmes udelukkende lokalt på din enhed i en hurtig lokal database (Isar). Suwaya har ingen cloud-servere og indsamler eller deler ingen personlige data eller reklamedata."
+    "a": "Alle dine opgaver, vaner, rutiner, indstillinger og gemte placeringer gemmes lokalt på din enhed i en hurtig lokal database (Isar). Suwaya har ingen cloud-servere og indsamler, sporer eller deler ingen personlige data eller reklamedata."
   }
 ]

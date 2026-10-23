@@ -37,7 +37,8 @@
     "delete": "Moƴƴin",
     "unknown": "Anndaaka",
     "startup_error": "Yaafó, fawre waɗii e fuɗɗoode",
-    "save": "Danndu"
+    "save": "Danndu",
+    "suwaya_time": "Wakkati Suwaya"
   },
   "night_parts": {
     "half_1": "Feccere Arande",
@@ -62,7 +63,9 @@
     "manage_periods": "Yuɓɓin Golle e Wakkatiiji",
     "no_tasks": "Alaa golle jooni, welta e wakkati ma!",
     "period_info": "Kabaaru Wakkati",
-    "suwayas_count": "Limngal Suwaya:"
+    "suwayas_count": "Limngal Suwaya:",
+    "edit_dial": "Moƴƴin Dial",
+    "dial_markers_settings": "Teelte Dial e Wakkatiiji Jemma"
   },
   "details": {
     "total_length": "Njuuteendi Fof:",
@@ -112,7 +115,8 @@
       "time_title": "Teeltu Wakkati",
       "time_desc": "Meem ngam teeltude wakkati golle nde. Suɓo hakkunde wakkati montor maa wakkati astro.",
       "modes_title": "Laabi Wakkati",
-      "modes_desc": "1. Wakkatiiji: Jokkindir e juulde.\n2. Limoore: Suɓo Suwaya diga 0 haa 47.\n3. Montor: Wakkati gollirde bana sa'a."
+      "modes_desc": "1. Wakkatiiji: Jokkindir e juulde.\n2. Limoore: Suɓo Suwaya diga 0 haa 47.\n3. Montor: Wakkati gollirde bana sa'a.",
+      "night_day": "Jemma / Ñalawma"
     },
     "time_required": "Foti teelteede wakkati artii!",
     "permissions_required": "Yamiiroore alarm ina haaji!",
@@ -401,7 +405,7 @@
     "show_sunrise": "Hollu Fuɗngo Naange",
     "show_sunrise_desc": "Ena holla fuɗngo naange e nder limto juulde",
     "no_qiyam": "A suɓaaki wakkatiiji Qiyam.\nMeem maandeeji dow ngam hollude ɗum.",
-    "peak_time": "Wakkati Ɓurɗo ngam Tahajjud & Dua",
+    "peak_time": "Wakkati ɓurɗo ngam Tahajjud e Dua",
     "starts_at": "Fuɗɗii e:",
     "ends_at": "Joofi e:",
     "alert_for": "Hito ngam:",
@@ -441,156 +445,63 @@
     "error_gps_timeout": "Ƴaamde nokkuure waawaa. Fuɗɗit.",
     "current_location": "Nokkuure Am Jooni"
   },
-  "periods": {
-    "fajr": "Fajiri",
-    "duha": "Duha",
-    "dhuhr": "Zuhuri",
-    "asr": "Asiri",
-    "maghrib": "Magaribi",
-    "middle_third": "Tatabere Caka",
-    "last_third": "Tatabere Sakkitorde",
-    "period_1": "Wakkati Arande",
-    "period_2": "Wakkati Ɗiɗaɓere",
-    "period_3": "Wakkati Tatabere",
-    "period_4": "Wakkati Nayaɓere",
-    "period_5": "Wakkati Joyaɓere",
-    "period_6": "Wakkati Jeegom",
-    "period_7": "Wakkati Jeɗɗaɓere"
-  },
-  "prayers": {
-    "fajr": "Fajiri",
-    "dhuhr": "Zuhuri",
-    "asr": "Asiri",
-    "maghrib": "Magaribi",
-    "isha": "Ichaa"
-  },
-  "languages": {
-    "tr": "Turkce", "ru": "Riis", "ur": "Urdu", "ar": "Aarabeeɓe",
-    "hi": "Hindi", "bn": "Bengali", "th": "Taay", "ja": "Sapoŋ",
-    "zh": "Siin", "ug": "Uyghur", "pt": "Portugee", "ff": "Pulaar",
-    "az": "Aserbayjaan", "id": "Indonesi", "ms": "Malay", "da": "Danmark",
-    "de": "Almaañ", "en": "Engeele", "es": "Esipaañ", "fr": "Farayse",
-    "it": "Itali", "nl": "Holanndee"
-  },
-  "drawer": {
-    "faq": "Lamnde Heewɗe (FAQ)",
-    "contact": "Jokkondir & Mballa",
-    "about_app": "Haa App",
-    "check_updates": "Ƴeew Hesɗitinde",
-    "develop_with_us": "Yahr e Amen",
-    "checking_updates": "Ena ƴeewa hesɗitinde...",
-    "up_to_date": "A huutoriima sifaa Suwaya sakkitiingol 🌟",
-    "update_check_failed": "Ƴeewde hesɗitinde waawaa. Ƴeew enternet ma.",
-    "update_available": "Hesɗitinde Keso Ina Woodi!",
-    "new_version_desc": "Sifaa keso moƴƴinaaɗo e Suwaya ina woodi jooni.",
-    "do_you_want_to_download": "Aɗa yiɗi aafde e stallude hesɗitinde ndee?",
-    "download": "Aafu Jooni",
-    "guest_user": "Kodo",
-    "secure_data": "Danndu kabaaru ma ☁️",
-    "tap_to_login": "Meem ngam naatde e gootol",
-    "manage_account": "Yuɓɓin Konto & Gootol",
-    "github_connection_failed": "Jokkondiral e GitHub waawaa",
-    "time_engineered": "Wakkati Mahiraaɗo",
-    "support_app": "Mballu App",
-    "ios_update_msg": "Hesɗitinde ina tawii e App Store sistem ma.",
-    "update_error_msg": "Jokkondiral e Google Play Store waawaa. Fuɗɗit caggal."
-  },
-  "alarm": {
-    "suwaya_alert": "Hito Suwaya",
-    "time_for_task": "Ko wakkati golle ma!",
-    "snooze_10m": "Nattito 10m",
-    "swipe_to_stop": "Boosu ngam darta walla nattito",
-    "stop": "Darta",
-    "default_title": "Hito Suwaya",
-    "max_snoozes_reached": "Nattito ɓurndi yettii",
-    "snooze": "Nattito"
-  },
-  "analytics": {
-    "title": "Limtooji & Sifaa",
-    "coming_soon": "Taalol limtooji ina mahi ɗo ɓooyataa...",
-    "daily_progress": "Yahrude Ñalawma",
-    "perfect_day": "Ñalawma Moƴƴo! 🌟",
-    "keep_going": "Jokku e jalbude, Suwaya kala ina waɗi waylo.",
-    "current_streak": "Jokkondiral Jooni",
-    "days": "Balɗe",
-    "focus_time": "Wakkati Hakkille",
-    "hours": "Wakkatiiji",
-    "weekly_overview": "Sifaa Yontere"
-  },
-  "pomodoro": {
-    "suwaya_info": "Kabaaru Suwaya",
-    "current_time": "Wakkati Jooni:",
-    "time_speed": "Yaawnde Wakkati:",
-    "actual_length": "Njuuteendi Suwaya:",
-    "customize_suwaya": "Teeltu Wakkati Suwaya",
-    "absolute_focus": "Hakkille Timmuɗo",
-    "absolute_focus_desc": "Suwaya timmuɗo e golle mawɗe.",
-    "balanced_default": "Fotndaa (Tawaango)",
-    "balanced_desc": "25 min hakkille, caggal ɗum fooftin gite e ɓanndu ma.",
-    "relaxed": "Fooftaade",
-    "relaxed_desc": "20 min hakkille, e poofte juutɗe.",
-    "focus_rest": "Teeltu Hakkille / Fofte",
-    "in_flow": "E nder yahrude...",
-    "break_remaining": "Foofto Luttuɗo",
-    "focus_remaining": "Hakkille Luttuɗo",
-    "deep_relaxation": "Foofto luggiingo...",
-    "balanced": "Fotndaa\n25/5",
-    "no_tasks": "Alaa golle rokkiraa e oo Suwaya",
-    "focus_now_on": "Hakkille jooni e:"
-  },
-  "splash": {
-    "app_title_ar": "سُـويـعَـة",
-    "app_title_en": "Suwaya"
-  },
-  "stats": {
-    "discovery_title": "Ena yiytude 🔭",
-    "discovery_desc": "Timmin golle goonga ngam yiytude sifaa astro ma.",
-    "fajr_title": "Henndu Fajiri 🕊️",
-    "fajr_desc": "Doole fuɗɗoode e barke ina feeñi e golle ma subaka.",
-    "duha_title": "Pionier Duha 🌤️",
-    "duha_desc": "Naange subaka ina yornya golle ma, a woni e dow hakkille ma ñalawma.",
-    "day_title": "Caliido Ñalawma 🐎",
-    "day_desc": "A anndaa mbañu caka ñalawma, golle ma ina jokki, ina tiiɗi.",
-    "night_title": "Njiƴtoo Jemma 🌙",
-    "night_desc": "Tawa yimɓe ina ɗaanii, golle ma e pellite ma ina ummo deeyngal.",
-    "balanced_title": "Fotndaa ⚖️",
-    "balanced_desc": "A fecci tiiɗaare ma no moƴƴi ñalawma fof.",
-    "insight_harmony_high": "Njuɓɓudi astro ma ina towi sanne! Gootol moƴƴol e yontere ɓennunde.",
-    "insight_harmony_low": "A waɗi yontere tiiɗnde. Ɛtu feccude golle ma ngam usta doole.",
-    "insight_fajr_focus": "Hakkille ma e Fajiri rokkat ma ɓural e laaɓal hakkille ñalawma fof.",
-    "insight_night_focus": "Golle ma jemma ina moƴƴi, kono ƴeew so a fooftiima ɓanndu no heewi.",
-    "insight_stable": "Yahrude ma ina darndii, a fecci doole ma no moƴƴi e wakkatiiji ceertuɗi."
-  },
-  "faq": {
-    "offline_error": "Ena wayi no a walaa e laylaytol, FAQ aafaaka tawo."
-  },
-  "privacy": {
-    "offline_error": "Waawaa udditde sariya sutura jooni. Ƴeew laylaytol ma."
-  },
-  "support": {
-    "title": "Mballu App",
-    "success_msg": "Jaaraama e mballa Suwaya! Maande ma oocaama no moƴƴi.",
-    "philosophy_msg": "Suwaya wonaa tan app; ko miijo ngam ruttude e njuɓɓudi tagoore ñalawma e yiytude barke (Barakah) e wakkati. App o ina lutta haa abada walaa ceede, walaa jeeyngal, e lencitde sutura ma.\n\nMubindol ma ɗo waawaa udditde huunde suuɗiinde—ko \"Maande Teddungal\" dow innde ma. Ko mballa laaɓtungo e hoolaare e miijo ngo, ngam wallude amen yoɓde njoɓdi teelte e yahrude.",
-    "badges_title": "Maandeeji Mballooɓe",
-    "bronze_title": "Maande Njamndi Mbodeeri",
-    "silver_title": "Maande Kaalis",
-    "gold_title": "Maande Kaŋŋe",
-    "diamond_title": "Maande Diaman",
-    "price_monthly": "{price} / lewru kala",
-    "feature_bronze": "Hollu Maande Njamndi Mbodeeri dow innde app",
-    "feature_silver": "Hollu Maande Kaalis dow innde app",
-    "feature_gold": "Hollu Maande Kaŋŋe dow innde app",
-    "feature_diamond": "Hollu Maande Diaman dow innde app",
-    "feature_support": "Mballu miijo ngo e jokkondiral firo",
-    "auto_renew_note": "Mubindi fof ko lewru, kono \"Hesɗitin Ooto\" ko tawaango ngam ɗeeyde hakkille ma—alaa njoɓdi waɗate caggal ɗum tawa a jaɓaani.",
-    "restoring_msg": "Ena ƴeewa mballa ma ɓennungo...",
-    "restore_purchases": "Ruttu maande ɓennunde",
-    "active": "Oocii"
-  },
   "nav": {
     "tasks": "Golle",
     "ibadat": "Ibaada",
     "home": "Jaɓɓorgo",
-    "pomodoro": "Hakkille"
+    "pomodoro": "Hakkille",
+    "calendar": "Nalngu"
+  },
+  "calendar": {
+    "today": "Hannde",
+    "no_items_in_phase": "Alaa golle paawaaɗe e ndee wakkati"
+  },
+  "alarm_screen": {
+    "default_title": "Hito Suwaya",
+    "default_body": "Ko wakkati golle ma!",
+    "snooze": "Nattito 10m",
+    "stop": "Darta"
+  },
+  "pomodoro": {
+    "choose_mode": "Suɓo Laawol Hakkille",
+    "traditional": "Pomodoro Gila Mbaadi",
+    "traditional_desc": "Hojomaaji goonga ngam golle e fooftere",
+    "suwaya_mode": "Suwaya Pomodoro",
+    "suwaya_mode_desc": "Hakkille lencitɗo e wakkatiiji juulde e yahrude astro",
+    "suwaya_setup": "Teeltu Suwaya Pomodoro",
+    "starts_now": "Fuɗɗo Jooni",
+    "ends_at": "Joofo e {}",
+    "actual_minutes_avail": "Hojomaaji goonga",
+    "time_too_short": "Wakkati oo ko raɓɓiɗi (Ɓuri famɗude 15 hojomaaji)",
+    "flow_speed": "Feccere Eɓɓooji e Yaawnde",
+    "recommended": "Waawaa Yiɗeede",
+    "alternative": "Lencit",
+    "focus_rest_split": "Hakkille / Fooftere",
+    "start_session": "Fuɗɗo",
+    "time_up_prayer": "Wakkati Juulde",
+    "time_up_desc": "Suwaya Pomodoro ma joofii e wakkati lencitɗo.",
+    "deep_relaxation": "Foofto luggiingo...",
+    "in_flow": "E nder yahrude...",
+    "end_session": "Darta",
+    "long_break": "Fooftere Juutnde",
+    "start": "Fuɗɗo",
+    "reset": "Darta e Ruttu",
+    "pause": "Daro",
+    "resume": "Jokku",
+    "skip": "Diw",
+    "traditional_settings": "Teelte Pomodoro Gila Mbaadi",
+    "work_duration": "Wakkati Pomodoro (Golle)",
+    "short_break_duration": "Fooftere Rammunde",
+    "long_break_duration": "Fooftere Juutnde",
+    "cycles_before_long_break": "Fooftere juutnde caggal",
+    "end_must_be_after_start": "Wakkati joofnde foti wonde caggal fuɗɗoode",
+    "max_12_hours": "Wakkati waawaa ɓurde 12 Suwayaaji/Hojomaaji",
+    "recommended_closest": "Tawaango (Ɓadiiɗo njaaweeki 1.00x)",
+    "slower_option": "Lelo (Hakkille deeyɗo)",
+    "faster_option": "Yaaw (Hakkille tiiɗɗo)",
+    "custom_time": "Wakkati Cuɓaaɗo"
+  },
+  "countries": {
+    "AF": "Afganistaan", "AX": "Duuɗe Aland", "AL": "Albanii", "DZ": "Alaseri", "AS": "Samowa Amerik", "AD": "Anndoora", "AO": "Anngolaa", "AI": "Anngiyaa", "AQ": "Antarktik", "AG": "Antiguwa e Barbuda", "AR": "Arjantiin", "AM": "Armenii", "AW": "Aruuba", "AU": "Ostaraalii", "AT": "Otiriis", "AZ": "Aserbayjaan", "BS": "Bahamaas", "BH": "Bahreyn", "BD": "Banglaadees", "BB": "Barbadoos", "BY": "Belaarus", "BE": "Beljik", "BZ": "Beliis", "BJ": "Benee", "BM": "Bermudaa", "BT": "Butaan", "BO": "Boliwii", "BA": "Bosnii-Hersegowiin", "BW": "Botswaana", "BV": "Duuɗe Buwet", "BR": "Beresiil", "IO": "Territoire britannique de l'océan Indien", "BN": "Buruney", "BG": "Bulgarii", "BF": "Burkina Faso", "BI": "Burunndi", "KH": "Kambod", "CM": "Kameruun", "CA": "Kanadaa", "CV": "Kabo Werde", "KY": "Duuɗe Kayman", "CF": "Republik Sentiraafrik", "TD": "Caad", "CL": "Cili", "CN": "Siin", "CX": "Duuɗe Kirismas", "CC": "Duuɗe Kokos", "CO": "Kolombii", "KM": "Komoor", "CG": "Konngo", "CD": "Republik Demokaraatik Konngo", "CK": "Duuɗe Kukk", "CR": "Kosta Rika", "CI": "Kodiwaar", "HR": "Korowasii", "CU": "Kubaa", "CY": "Sipir", "CZ": "Cekkiya", "DK": "Danmark", "DJ": "Jibutii", "DM": "Dominika", "DO": "Republik Dominika", "EC": "Ekuwatoor", "EG": "Ejipt", "SV": "El Salwador", "GQ": "Gine Ekuwatoriyaal", "ER": "Eriteree", "EE": "Estoni", "ET": "Ecopi", "FK": "Duuɗe Falkland", "FO": "Duuɗe Feroe", "FJ": "Fijji", "FI": "Finlannd", "FR": "Farayse", "GF": "Giyaan Farayse", "PF": "Polinesii Farayse", "TF": "Leyɗeele Farayse e Antarktik", "GA": "Gabon", "GM": "Gammbi", "GE": "Jeorjii", "DE": "Almaañ", "GH": "Ganaa", "GI": "Jibraltaar", "GR": "Geres", "GL": "Gorland", "GD": "Gerenad", "GP": "Guwaadaluup", "GU": "Gwam", "GT": "Gwaatemalaa", "GG": "Gernsee", "GN": "Gine", "GW": "Gine-Bisaawo", "GY": "Giyaan", "HT": "Haytii", "HM": "Duuɗe Heard e McDonald", "VA": "Dowla Watikaan", "HN": "Honduraas", "HK": "Hong Kong", "HU": "Hunngarii", "IS": "Iselannd", "IN": "Enndo", "ID": "Enndonesii", "IR": "Iraan", "IQ": "Iraak", "IE": "Irlannd", "IM": "Duuɗe Man", "IL": "Israayel", "IT": "Italii", "JM": "Jamayka", "JP": "Sapoo", "JE": "Jersee", "JO": "Jordani", "KZ": "Kasakstan", "KE": "Keñaa", "KI": "Kiribati", "KP": "Koree Wuoyla", "KR": "Koree Worgo", "KW": "Kuweyt", "KG": "Kirgistaan", "LA": "Laos", "LV": "Letonii", "LB": "Libaan", "LS": "Lesoto", "LR": "Liberiyaa", "LY": "Libi", "LI": "Liyestenstayn", "LT": "Litwanii", "LU": "Luksemmburg", "MO": "Makaw", "MK": "Maseduwaan", "MG": "Madagaskaar", "MW": "Malaawi", "MY": "Malesii", "MV": "Maldiwe", "ML": "Maali", "MT": "Malta", "MH": "Duuɗe Marsaal", "MQ": "Martinik", "MR": "Muritani", "MU": "Moriis", "YT": "Mayot", "MX": "Meksik", "FM": "Mikronesii", "MD": "Moldawii", "MC": "Monako", "MN": "Monngolii", "ME": "Montenegoro", "MS": "Monseraat", "MA": "Maruk", "MZ": "Mosammbik", "MM": "Miyanmaar", "NA": "Namibii", "NR": "Nawuru", "NP": "Nepaal", "NL": "Holannda", "NC": "Nuwell Kaledonii", "NZ": "Nuwel Selannd", "NI": "Nikaraguwaa", "NE": "Nijeer", "NG": "Nijeriyaa", "NU": "Niyuwe", "NF": "Duuɗe Norfolk", "MP": "Duuɗe Mariyaan Wuoyla", "NO": "Norwees", "OM": "Omaan", "PK": "Pakistaan", "PW": "Palaw", "PS": "Palestiin", "PA": "Panamaa", "PG": "Papuwaa Nuwel Gine", "PY": "Paraguwaay", "PE": "Peru", "PH": "Filippiin", "PN": "Duuɗe Pitkairn", "PL": "Poloñ", "PT": "Portugaal", "PR": "Porto Riko", "QA": "Kataar", "RE": "Reeniyon", "RO": "Rumanii", "RU": "Riisii", "RW": "Ruwannɗaa", "BL": "Sen Bartelemi", "SH": "Sen Helena", "KN": "Sen Kitts e Newis", "LC": "Sen Lusiya", "MF": "Sen Martin", "PM": "Sen Piyeer e Mikelon", "VC": "Sen Winsan e Grenadiin", "WS": "Samowaa", "SM": "San Marino", "ST": "Sawo Tome e Piriinsipe", "SA": "Arabi Sawdit", "SN": "Senegaal", "RS": "Serbii", "SC": "Seysel", "SL": "Siyera Leyoon", "SG": "Sinngapuur", "SK": "Slowakii", "SI": "Slowenii", "SB": "Duuɗe Solomon", "SO": "Somaali", "ZA": "Afrik Worgo", "GS": "Jeorjii Worgo e Duuɗe Sandwich Worgo", "ES": "Espaañ", "LK": "Siri Lanka", "SD": "Sudaan", "SR": "Surinaam", "SJ": "Svalbard e Jan Mayen", "SZ": "Eswatini", "SE": "Suwed", "CH": "Suwis", "SY": "Sirii", "TW": "Taywaan", "TJ": "Tajikistaan", "TZ": "Tansanii", "TH": "Taylannd", "TL": "Timor Fuɗnaange", "TG": "Togo", "TK": "Tokelaw", "TO": "Tonnga", "TT": "Tirinidaad e Tobaago", "TN": "Tunisii", "TR": "Turkii", "TM": "Turkmenistaan", "TC": "Duuɗe Turks e Kaykos", "TV": "Tuwalu", "UG": "Uganndaa", "UA": "Ukereen", "AE": "Emiraat Araab Denntuɗe", "GB": "Laamu Dentungu", "US": "Dowlaaji Dentuɗi", "UM": "Duuɗe Tokosɗe Dowlaaji Dentuɗi", "UY": "Uruguwaay", "UZ": "Usbekistaan", "VU": "Wanuwatu", "VE": "Wenesuwelaa", "VN": "Wiyetnaam", "BQ": "Boneyr", "CW": "Kurasaw", "SS": "Sudaan Worgo", "SX": "Sin Maarten", "XK": "Kosowo", "VG": "Duuɗe Wirjin Biritaan", "VI": "Duuɗe Wirjin Dowlaaji Dentuɗi", "WF": "Wallis e Futuna", "EH": "Saharaa Hirnaange", "YE": "Yemen", "ZM": "Sammbi", "ZW": "Simbaabuwe"
   }
 }

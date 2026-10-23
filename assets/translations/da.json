@@ -37,7 +37,8 @@
     "delete": "Slet",
     "unknown": "Ukendt",
     "startup_error": "Beklager, der opstod en fejl under opstarten",
-    "save": "Gem"
+    "save": "Gem",
+    "suwaya_time": "Suwaya Tid"
   },
   "night_parts": {
     "half_1": "Første Halvdel",
@@ -62,7 +63,9 @@
     "manage_periods": "Administrer Opgaver & Perioder",
     "no_tasks": "Ingen opgaver lige nu, nyd din tid!",
     "period_info": "Periode Info",
-    "suwayas_count": "Antal Suwayaer:"
+    "suwayas_count": "Antal Suwayaer:",
+    "edit_dial": "Tilpas urskive",
+    "dial_markers_settings": "Indstillinger for Urskive & Nat"
   },
   "details": {
     "total_length": "Samlet Længde:",
@@ -112,7 +115,8 @@
       "time_title": "Indstil Tid",
       "time_desc": "Tryk for at indstille opgavetiden. Vælg mellem en fast civil tid eller en fleksibel astro tid.",
       "modes_title": "Tidstilstande",
-      "modes_desc": "1. Perioder: Knyt til en specifik bøn.\n2. Kumulativ: Vælg et Suwaya-indeks fra 0 til 47.\n3. Civil: Standard klokkeslæt som et møde."
+      "modes_desc": "1. Perioder: Knyt til en specifik bøn.\n2. Kumulativ: Vælg et Suwaya-indeks fra 0 til 47.\n3. Civil: Standard klokkeslæt som et møde.",
+      "night_day": "Nat / Dag"
     },
     "time_required": "Der skal først indstilles en tid!",
     "permissions_required": "Alarmtilladelser er påkrævet!",
@@ -441,6 +445,62 @@
     "error_gps_timeout": "Anmodning om placering fik timeout. Prøv igen.",
     "current_location": "Min Nuværende Placering"
   },
+  "nav": {
+    "tasks": "Opgaver",
+    "ibadat": "Tilbedelse",
+    "home": "Hjem",
+    "pomodoro": "Fokus",
+    "calendar": "Kalender"
+  },
+  "calendar": {
+    "today": "I dag",
+    "no_items_in_phase": "Ingen opgaver planlagt i denne fase"
+  },
+  "alarm_screen": {
+    "default_title": "Suwaya Alarm",
+    "default_body": "Det er tid til din opgave!",
+    "snooze": "Slumre 10 min",
+    "stop": "Stop"
+  },
+  "pomodoro": {
+    "choose_mode": "Vælg Fokustilstand",
+    "traditional": "Traditionel Pomodoro",
+    "traditional_desc": "Standard arbejds- og pausecyklusser med ur-minutter",
+    "suwaya_mode": "Suwaya Pomodoro",
+    "suwaya_mode_desc": "Fokussessioner synkroniseret med bønnetider og astronomisk tid",
+    "suwaya_setup": "Opsætning af Suwaya Pomodoro",
+    "starts_now": "Starter Nu",
+    "ends_at": "Slutter kl. {}",
+    "actual_minutes_avail": "faktiske minutter tilgængelige",
+    "time_too_short": "Tilgængelig tid er for kort (mindre end 15 minutter)",
+    "flow_speed": "Sessionsinddeling & Tidsstrøms Hastighed",
+    "recommended": "Anbefalet",
+    "alternative": "Alternativ",
+    "focus_rest_split": "Fokus / Pause Fordeling",
+    "start_session": "Start Session",
+    "time_up_prayer": "Tid til Bøn",
+    "time_up_desc": "Din Suwaya Pomodoro-session er afsluttet til planlagt tid.",
+    "deep_relaxation": "Dyb Afslapning (Pause)",
+    "in_flow": "I Flow (Fokus)",
+    "end_session": "Afslut Session",
+    "long_break": "Lang Pause",
+    "start": "Start",
+    "reset": "Stop & Nulstil",
+    "pause": "Pause",
+    "resume": "Genoptag",
+    "skip": "Spring over",
+    "traditional_settings": "Traditionelle Pomodoro Indstillinger",
+    "work_duration": "Pomodoro Varighed (Arbejde)",
+    "short_break_duration": "Kort Pause Varighed",
+    "long_break_duration": "Lang Pause Varighed",
+    "cycles_before_long_break": "Lang Pause Efter Hver",
+    "end_must_be_after_start": "Sluttid skal være efter starttid",
+    "max_12_hours": "Varighed må ikke overstige 12 Suwayas/timer",
+    "recommended_closest": "Standard (Tættest på 1.00x hastighed)",
+    "slower_option": "Lavere hastighed (Roligt tempo)",
+    "faster_option": "Højere hastighed (Intensivt fokus)",
+    "custom_time": "Brugerdefineret Tid"
+  },
   "periods": {
     "fajr": "Fajr",
     "duha": "Duha",
@@ -495,16 +555,6 @@
     "ios_update_msg": "Opdateringer er tilgængelige via dit systems App Store.",
     "update_error_msg": "Kunne ikke oprette forbindelse til Google Play Butik. Prøv igen senere."
   },
-  "alarm": {
-    "suwaya_alert": "Suwaya Alarm",
-    "time_for_task": "Det er tid til din opgave!",
-    "snooze_10m": "Slumre 10 min",
-    "swipe_to_stop": "Stryg for at stoppe eller slumre",
-    "stop": "Stop",
-    "default_title": "Suwaya Alarm",
-    "max_snoozes_reached": "Maksimum antal slumre nået",
-    "snooze": "Slumre"
-  },
   "analytics": {
     "title": "Analyse & Statistik",
     "coming_soon": "Analysedashboardet vil snart blive bygget her...",
@@ -516,27 +566,6 @@
     "focus_time": "Fokustid",
     "hours": "Timer",
     "weekly_overview": "Ugentlig Oversigt"
-  },
-  "pomodoro": {
-    "suwaya_info": "Suwaya Information",
-    "current_time": "Nuværende Tid:",
-    "time_speed": "Tidsstrøms Hastighed:",
-    "actual_length": "Faktisk Suwaya Længde:",
-    "customize_suwaya": "Tilpas Suwaya Tid",
-    "absolute_focus": "Absolut Fokus",
-    "absolute_focus_desc": "En fuld Suwaya af dybt arbejde.",
-    "balanced_default": "Balanceret (Standard)",
-    "balanced_desc": "25 min fokus, derefter afslapning for øjne og krop.",
-    "relaxed": "Afslappet",
-    "relaxed_desc": "20 min fokus, med længere pauser.",
-    "focus_rest": "Tilpas Fokus / Hvile",
-    "in_flow": "I flow-tilstand...",
-    "break_remaining": "Resterende Pause",
-    "focus_remaining": "Resterende Fokus",
-    "deep_relaxation": "Dyb afslapning...",
-    "balanced": "Balanceret\n25/5",
-    "no_tasks": "Ingen opgaver tildelt for denne Suwaya",
-    "focus_now_on": "Fokuser nu på:"
   },
   "splash": {
     "app_title_ar": "سُـويـعَـة",
@@ -587,10 +616,7 @@
     "restore_purchases": "Gendan tidligere badge",
     "active": "Aktiv"
   },
-  "nav": {
-    "tasks": "Opgaver",
-    "ibadat": "Tilbedelse",
-    "home": "Hjem",
-    "pomodoro": "Fokus"
+  "countries": {
+    "AF": "Afghanistan", "AX": "Åland", "AL": "Albanien", "DZ": "Algeriet", "AS": "Amerikansk Samoa", "AD": "Andorra", "AO": "Angola", "AI": "Anguilla", "AQ": "Antarktis", "AG": "Antigua og Barbuda", "AR": "Argentina", "AM": "Armenien", "AW": "Aruba", "AU": "Australien", "AT": "Østrig", "AZ": "Aserbajdsjan", "BS": "Bahamas", "BH": "Bahrain", "BD": "Bangladesh", "BB": "Barbados", "BY": "Hviderusland", "BE": "Belgien", "BZ": "Belize", "BJ": "Benin", "BM": "Bermuda", "BT": "Bhutan", "BO": "Bolivia", "BA": "Bosnien-Hercegovina", "BW": "Botswana", "BV": "Bouvetøen", "BR": "Brasilien", "IO": "Det Britiske Territorium i Det Indiske Ocean", "BN": "Brunei", "BG": "Bulgarien", "BF": "Burkina Faso", "BI": "Burundi", "KH": "Cambodja", "CM": "Cameroun", "CA": "Canada", "CV": "Kap Verde", "KY": "Caymanøerne", "CF": "Den Centralafrikanske Republik", "TD": "Tchad", "CL": "Chile", "CN": "Kina", "CX": "Juleøen", "CC": "Cocosøerne", "CO": "Colombia", "KM": "Comorerne", "CG": "Congo", "CD": "Den Demokratiske Republik Congo", "CK": "Cookøerne", "CR": "Costa Rica", "CI": "Elfenbenskysten", "HR": "Kroatien", "CU": "Cuba", "CY": "Cypern", "CZ": "Tjekkiet", "DK": "Danmark", "DJ": "Djibouti", "DM": "Dominica", "DO": "Den Dominikanske Republik", "EC": "Ecuador", "EG": "Egypten", "SV": "El Salvador", "GQ": "Ækvatorialguinea", "ER": "Eritrea", "EE": "Estland", "ET": "Etiopien", "FK": "Falklandsøerne", "FO": "Færøerne", "FJ": "Fiji", "FI": "Finland", "FR": "Frankrig", "GF": "Fransk Guyana", "PF": "Fransk Polynesien", "TF": "Franske Besiddelser i Det Sydlige Indiske Ocean", "GA": "Gabon", "GM": "Gambia", "GE": "Georgien", "DE": "Tyskland", "GH": "Ghana", "GI": "Gibraltar", "GR": "Grækenland", "GL": "Grønland", "GD": "Grenada", "GP": "Guadeloupe", "GU": "Guam", "GT": "Guatemala", "GG": "Guernsey", "GN": "Guinea", "GW": "Guinea-Bissau", "GY": "Guyana", "HT": "Haiti", "HM": "Heard- og McDonaldøerne", "VA": "Vatikanstaten", "HN": "Honduras", "HK": "Hongkong", "HU": "Ungarn", "IS": "Island", "IN": "Indien", "ID": "Indonesien", "IR": "Iran", "IQ": "Irak", "IE": "Irland", "IM": "Isle of Man", "IL": "Israel", "IT": "Italien", "JM": "Jamaica", "JP": "Japan", "JE": "Jersey", "JO": "Jordan", "KZ": "Kasakhstan", "KE": "Kenya", "KI": "Kiribati", "KP": "Nordkorea", "KR": "Sydkorea", "KW": "Kuwait", "KG": "Kirgisistan", "LA": "Laos", "LV": "Letland", "LB": "Libanon", "LS": "Lesotho", "LR": "Liberia", "LY": "Libyen", "LI": "Liechtenstein", "LT": "Litauen", "LU": "Luxembourg", "MO": "Macao", "MK": "Nordmakedonien", "MG": "Madagaskar", "MW": "Malawi", "MY": "Malaysia", "MV": "Maldiverne", "ML": "Mali", "MT": "Malta", "MH": "Marshalløerne", "MQ": "Martinique", "MR": "Mauretanien", "MU": "Mauritius", "YT": "Mayotte", "MX": "Mexico", "FM": "Mikronesien", "MD": "Moldova", "MC": "Monaco", "MN": "Mongoliet", "ME": "Montenegro", "MS": "Montserrat", "MA": "Marokko", "MZ": "Mozambique", "MM": "Myanmar", "NA": "Namibia", "NR": "Nauru", "NP": "Nepal", "NL": "Holland", "NC": "Ny Kaledonien", "NZ": "New Zealand", "NI": "Nicaragua", "NE": "Niger", "NG": "Nigeria", "NU": "Niue", "NF": "Norfolkøen", "MP": "Nordmarianerne", "NO": "Norge", "OM": "Oman", "PK": "Pakistan", "PW": "Palau", "PS": "Palæstina", "PA": "Panama", "PG": "Papua Ny Guinea", "PY": "Paraguay", "PE": "Peru", "PH": "Filippinerne", "PN": "Pitcairn", "PL": "Polen", "PT": "Portugal", "PR": "Puerto Rico", "QA": "Qatar", "RE": "Réunion", "RO": "Rumænien", "RU": "Rusland", "RW": "Rwanda", "BL": "Saint Barthélemy", "SH": "St. Helena", "KN": "Saint Kitts og Nevis", "LC": "Saint Lucia", "MF": "Saint Martin", "PM": "Saint Pierre og Miquelon", "VC": "Saint Vincent og Grenadinerne", "WS": "Samoa", "SM": "San Marino", "ST": "São Tomé og Príncipe", "SA": "Saudi-Arabien", "SN": "Senegal", "RS": "Serbien", "SC": "Seychellerne", "SL": "Sierra Leone", "SG": "Singapore", "SK": "Slovakiet", "SI": "Slovenien", "SB": "Salomonøerne", "SO": "Somalia", "ZA": "Sydafrika", "GS": "South Georgia og South Sandwich Islands", "ES": "Spanien", "LK": "Sri Lanka", "SD": "Sudan", "SR": "Surinam", "SJ": "Svalbard og Jan Mayen", "SZ": "Eswatini", "SE": "Sverige", "CH": "Schweiz", "SY": "Syrien", "TW": "Taiwan", "TJ": "Tadsjikistan", "TZ": "Tanzania", "TH": "Thailand", "TL": "Østtimor", "TG": "Togo", "TK": "Tokelau", "TO": "Tonga", "TT": "Trinidad og Tobago", "TN": "Tunesien", "TR": "Tyrkiet", "TM": "Turkmenistan", "TC": "Turks- og Caicosøerne", "TV": "Tuvalu", "UG": "Uganda", "UA": "Ukraine", "AE": "Forenede Arabiske Emirate", "GB": "Storbritannien", "US": "USA", "UM": "USA's ydre småøer", "UY": "Uruguay", "UZ": "Usbekistan", "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "BQ": "Bonaire", "CW": "Curaçao", "SS": "Sydsudan", "SX": "Sint Maarten", "XK": "Kosovo", "VG": "De Britiske Jomfruøer", "VI": "De Amerikanske Jomfruøer", "WF": "Wallis og Futuna", "EH": "Vestsahara", "YE": "Yemen", "ZM": "Zambia", "ZW": "Zimbabwe"
   }
 }

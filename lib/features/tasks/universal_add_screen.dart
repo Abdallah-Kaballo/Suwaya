@@ -61,7 +61,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  /// 🌟 التحقق مما إذا كان الوقت المختار للمهمة العابرة في اليوم الحالي قد مضى بالفعل
   bool _isCandidateTaskTimeInPast({
     required int mode,
     required int candidateGlobalSuwaya,
@@ -70,25 +69,40 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     required int candidateCivilMin,
   }) {
     if (_tabController.index != 0) return false;
+    
+    final astroState = ref.read(astroProvider);
     final cityNow = virtualDateTimeNotifier.value;
-    final targetDate = _selectedDate ?? cityNow;
-    if (!_isSameDay(targetDate, cityNow)) return false;
+    
+    final logicalToday = getLogicalDateForMode(
+      isAstroTime: mode == 0,
+      astroState: astroState,
+      civilReference: cityNow,
+    );
+    
+    final targetDate = _selectedDate ?? logicalToday;
+    
+    // إذا كان التاريخ في الغد أو المستقبل، مسموح حتماً
+    if (targetDate.isAfter(logicalToday) && !_isSameDay(targetDate, logicalToday)) {
+      return false;
+    }
+    // إذا كان التاريخ المختار في الأمس، ممنوع حتماً
+    if (targetDate.isBefore(logicalToday) && !_isSameDay(targetDate, logicalToday)) {
+      return true; 
+    }
 
-    if (mode == 1) {
+    // إذا كان في نفس اليوم المنطقي (اليوم)، نفحص الساعة والدقيقة بدقة
+    if (mode == 1) { // مدني
       final nowMins = cityNow.hour * 60 + cityNow.minute;
       final selectedMins = candidateCivilHour * 60 + candidateCivilMin;
       return selectedMins <= nowMins;
-    } else {
-      final astroState = ref.read(astroProvider);
+    } else { // سويعي
       if (astroState.periods.isEmpty) return false;
       final ct = astroState.currentSuwayaTime;
       final int currentGlobalSuwaya = ct.phase.isNight
           ? (ct.phaseSlotNumber - 1)
           : (12 + ct.phaseSlotNumber - 1);
-      final int currentTotalVirtualMins =
-          currentGlobalSuwaya * 60 + ct.virtualMinute;
-      final int selectedTotalVirtualMins =
-          candidateGlobalSuwaya * 60 + candidateVirtualMin;
+      final int currentTotalVirtualMins = currentGlobalSuwaya * 60 + ct.virtualMinute;
+      final int selectedTotalVirtualMins = candidateGlobalSuwaya * 60 + candidateVirtualMin;
       return selectedTotalVirtualMins <= currentTotalVirtualMins;
     }
   }

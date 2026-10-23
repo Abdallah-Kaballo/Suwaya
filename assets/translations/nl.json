@@ -37,7 +37,8 @@
     "delete": "Verwijderen",
     "unknown": "Onbekend",
     "startup_error": "Sorry, er is een fout opgetreden bij het opstarten",
-    "save": "Opslaan"
+    "save": "Opslaan",
+    "suwaya_time": "Suwaya Tijd"
   },
   "night_parts": {
     "half_1": "Eerste Helft",
@@ -62,7 +63,9 @@
     "manage_periods": "Beheer Taken en Periodes",
     "no_tasks": "Momenteel geen taken, geniet van je tijd!",
     "period_info": "Periode Info",
-    "suwayas_count": "Aantal Suwaya's:"
+    "suwayas_count": "Aantal Suwaya's:",
+    "edit_dial": "Wijzerplaat Aanpassen",
+    "dial_markers_settings": "Instellingen Wijzerplaat & Nacht"
   },
   "details": {
     "total_length": "Totale Duur:",
@@ -112,7 +115,8 @@
       "time_title": "Tijd Instellen",
       "time_desc": "Tik om de tijd in te stellen. Kies tussen een vaste civiele tijd of een flexibele astro tijd.",
       "modes_title": "Tijdmodi",
-      "modes_desc": "1. Periodes: Koppel aan een specifiek gebed.\n2. Cumulatief: Kies een Suwaya-index van 0 tot 47.\n3. Civiel: Standaard kloktijd zoals bij een vergadering."
+      "modes_desc": "1. Periodes: Koppel aan een specifiek gebed.\n2. Cumulatief: Kies een Suwaya-index van 0 tot 47.\n3. Civiel: Standaard kloktijd zoals bij een vergadering.",
+      "night_day": "Nacht / Dag"
     },
     "time_required": "Er moet eerst een tijd worden ingesteld!",
     "permissions_required": "Alarmrechten zijn vereist!",
@@ -223,7 +227,7 @@
     "app_color": "App-kleur",
     "choose_app_color": "Kies App-kleur",
     "color_gold": "Goud (Standaard)",
-    "color_ocean": "Oceaan",
+    "color_ocean": "Oceano",
     "color_forest": "Bos",
     "color_desert": "Woestijn",
     "dial_design": "Wijzerplaat Ontwerp",
@@ -352,7 +356,7 @@
     "title": "Systeemrechten",
     "desc": "Zorg ervoor dat de volgende rechten zijn verleend voor een perfecte ervaring en nauwkeurige tijdige waarschuwingen:",
     "location": "Locatie (GPS)",
-    "location_desc": "Cruciaal om gebedstijden en nachtdelen nauwkeurig te berekenen op basis van jouw stad.",
+    "location_desc": "Crucial om gebedstijden en nachtdelen nauwkeurig te berekenen op basis van jouw stad.",
     "notifications": "Meldingen & Waarschuwingen",
     "notifications_desc": "Om Adhan, Suwaya-meldingen en periode-overgangsmeldingen te verzenden.",
     "exact_alarms": "Exacte Alarmen",
@@ -406,7 +410,7 @@
     "ends_at": "Eindigt om:",
     "alert_for": "Waarschuwing voor:",
     "silent": "Stil (Geen waarschuwing)",
-    "notification": "Melding (Stil bericht)",
+    "notification": "Melding (Stille bericht)",
     "alarm": "Alarm / Adhan (Wekt scherm)",
     "customize_qiyam": "Qiyam Tijden Aanpassen",
     "sunrise": "Zonsopkomst",
@@ -441,156 +445,63 @@
     "error_gps_timeout": "Time-out bij locatieverzoek. Probeer het opnieuw.",
     "current_location": "Mijn Huidige Locatie"
   },
-  "periods": {
-    "fajr": "Fajr",
-    "duha": "Duha",
-    "dhuhr": "Dhuhr",
-    "asr": "Asr",
-    "maghrib": "Maghrib",
-    "middle_third": "Middelste Derde",
-    "last_third": "Laatste Derde",
-    "period_1": "Eerste Periode",
-    "period_2": "Tweede Periode",
-    "period_3": "Derde Periode",
-    "period_4": "Vierde Periode",
-    "period_5": "Vijfde Periode",
-    "period_6": "Zesde Periode",
-    "period_7": "Zevende Periode"
-  },
-  "prayers": {
-    "fajr": "Fajr",
-    "dhuhr": "Dhuhr",
-    "asr": "Asr",
-    "maghrib": "Maghrib",
-    "isha": "Isha"
-  },
-  "languages": {
-    "tr": "Turks", "ru": "Russisch", "ur": "Urdu", "ar": "Arabisch",
-    "hi": "Hindi", "bn": "Bengaals", "th": "Thais", "ja": "Japans",
-    "zh": "Chinees", "ug": "Oeigoers", "pt": "Portugees", "ff": "Pulaar",
-    "az": "Azerbeidzjaans", "id": "Indonesisch", "ms": "Maleis", "da": "Deens",
-    "de": "Duits", "en": "Engels", "es": "Spaans", "fr": "Frans",
-    "it": "Italiaans", "nl": "Nederlands"
-  },
-  "drawer": {
-    "faq": "Veelgestelde Vragen (FAQ)",
-    "contact": "Contact & Support",
-    "about_app": "Over de App",
-    "check_updates": "Controleer op Updates",
-    "develop_with_us": "Ontwikkel met ons mee",
-    "checking_updates": "Controleren op updates...",
-    "up_to_date": "Je gebruikt de nieuwste versie van Suwaya 🌟",
-    "update_check_failed": "Kan niet controleren op updates. Controleer je internet.",
-    "update_available": "Nieuwe Update Beschikbaar!",
-    "new_version_desc": "Een nieuwe en verbeterde versie van Suwaya is nu beschikbaar.",
-    "do_you_want_to_download": "Wil je de update downloaden en installeren?",
-    "download": "Nu Downloaden",
-    "guest_user": "Gastgebruiker",
-    "secure_data": "Beveilig je gegevens ☁️",
-    "tap_to_login": "Tik om in te loggen en te synchroniseren",
-    "manage_account": "Beheer Account & Synchronisatie",
-    "github_connection_failed": "Kan geen verbinding maken met GitHub",
-    "time_engineered": "Tijd Geëngineerd",
-    "support_app": "Ondersteun de App",
-    "ios_update_msg": "Updates zijn beschikbaar via de App Store van uw systeem.",
-    "update_error_msg": "Kan geen verbinding maken met Google Play Store. Probeer het later opnieuw."
-  },
-  "alarm": {
-    "suwaya_alert": "Suwaya Waarschuwing",
-    "time_for_task": "Het is tijd voor je taak!",
-    "snooze_10m": "Sluimer 10 min",
-    "swipe_to_stop": "Veeg om te stoppen of sluimeren",
-    "stop": "Stop",
-    "default_title": "Suwaya Waarschuwing",
-    "max_snoozes_reached": "Maximum aantal sluimers bereikt",
-    "snooze": "Sluimeren"
-  },
-  "analytics": {
-    "title": "Analyses & Statistieken",
-    "coming_soon": "Het analysedashboard wordt binnenkort hier gebouwd...",
-    "daily_progress": "Dagelijkse Voortgang",
-    "perfect_day": "Perfecte Dag! 🌟",
-    "keep_going": "Blijf stralen, elke Suwaya maakt een verschil.",
-    "current_streak": "Huidige Reeks",
-    "days": "Dagen",
-    "focus_time": "Focustijd",
-    "hours": "Uren",
-    "weekly_overview": "Wekelijks Overzicht"
-  },
-  "pomodoro": {
-    "suwaya_info": "Suwaya Informatie",
-    "current_time": "Huidige Tijd:",
-    "time_speed": "Tijdsnelheid:",
-    "actual_length": "Werkelijke Suwaya Lengte:",
-    "customize_suwaya": "Suwaya Tijd Aanpassen",
-    "absolute_focus": "Absolute Focus",
-    "absolute_focus_desc": "Een volledige Suwaya van diep werk.",
-    "balanced_default": "Gebalanceerd (Standaard)",
-    "balanced_desc": "25 min focus, ontspan dan je ogen en lichaam.",
-    "relaxed": "Ontspannen",
-    "relaxed_desc": "20 min focus, met langere pauzes.",
-    "focus_rest": "Focus / Rust Aanpassen",
-    "in_flow": "In flow staat...",
-    "break_remaining": "Resterende Pauze",
-    "focus_remaining": "Resterende Focus",
-    "deep_relaxation": "Diepe ontspanning...",
-    "balanced": "Gebalanceerd\n25/5",
-    "no_tasks": "Geen taken toegewezen voor deze Suwaya",
-    "focus_now_on": "Focus je nu op:"
-  },
-  "splash": {
-    "app_title_ar": "سُـويـعَـة",
-    "app_title_en": "Suwaya"
-  },
-  "stats": {
-    "discovery_title": "Ontdekken 🔭",
-    "discovery_desc": "Voltooi meer taken om je astronomische patroon te ontdekken.",
-    "fajr_title": "Fajr Bries 🕊️",
-    "fajr_desc": "De energie van het begin en zegeningen manifesteren zich in je ochtendprestaties.",
-    "duha_title": "Duha Pionier 🌤️",
-    "duha_desc": "De ochtendzon verlicht je productiviteit, je bent op je piek van focus overdag.",
-    "day_title": "Ridder van de Dag 🐎",
-    "day_desc": "Je kent geen luiheid op het midden van de dag, je prestaties zijn continu en sterk.",
-    "night_title": "Nachtwaker 🌙",
-    "night_desc": "Terwijl mensen slapen, stijgen je werk en prestaties stilletjes.",
-    "balanced_title": "Gebalanceerd ⚖️",
-    "balanced_desc": "Je verdeelt je inspanningen op briljante wijze over de hele dag.",
-    "insight_harmony_high": "Je astronomische harmonie is erg hoog! Geweldige consistentie afgelopen week.",
-    "insight_harmony_low": "Het lijkt erop dat je een drukke week had. Probeer je taken te verdelen om de druk te verminderen.",
-    "insight_fajr_focus": "Je focus bij Fajr geeft je een ongelooflijk voordeel en mentale helderheid voor de rest van de dag.",
-    "insight_night_focus": "Je nachtactiviteit is uitstekend, maar zorg voor voldoende fysieke rust.",
-    "insight_stable": "Je prestaties zijn stabiel en je verdeelt je energie goed over verschillende perioden."
-  },
-  "faq": {
-    "offline_error": "Het lijkt erop dat je offline bent en de FAQ's niet eerder zijn geladen."
-  },
-  "privacy": {
-    "offline_error": "Kan het privacybeleid momenteel niet laden. Controleer je internetverbinding."
-  },
-  "support": {
-    "title": "Ondersteun de App",
-    "success_msg": "Heel erg bedankt voor het ondersteunen van Suwaya! Je badge is succesvol geactiveerd.",
-    "philosophy_msg": "Suwaya is niet zomaar een app; het is een filosofie om weer in contact te komen met het natuurlijke ritme van de dag en zegen (Barakah) in tijd te vinden. De app blijft volledig gratis, advertentievrij en respecteert je privacy.\n\nJe abonnement hier ontgrendelt geen verborgen functies—het dient als een \"Ere-badge\" naast je naam. Het is pure ondersteuning en geloof in het idee, en helpt ons hosting- en ontwikkelingskosten te dekken.",
-    "badges_title": "Supporter Badges",
-    "bronze_title": "Bronzen Badge",
-    "silver_title": "Zilveren Badge",
-    "gold_title": "Gouden Badge",
-    "diamond_title": "Diamanten Badge",
-    "price_monthly": "{price} / maandelijks",
-    "feature_bronze": "Toont de Bronzen badge naast de app-naam",
-    "feature_silver": "Toont de Zilveren badge naast de app-naam",
-    "feature_gold": "Toont de Gouden badge naast de app-naam",
-    "feature_diamond": "Toont de Diamanten badge naast de app-naam",
-    "feature_support": "Ondersteun de filosofie en projectcontinuïteit",
-    "auto_renew_note": "Alle abonnementen zijn maandelijks, maar \"Automatisch verlengen\" is standaard uitgeschakeld om je gemoedsrust te garanderen—er zullen geen toekomstige kosten in rekening worden gebracht zonder je toestemming.",
-    "restoring_msg": "Je eerdere ondersteuning wordt gecontroleerd...",
-    "restore_purchases": "Herstel eerdere badge",
-    "active": "Actief"
-  },
   "nav": {
     "tasks": "Taken",
     "ibadat": "Aanbidding",
     "home": "Home",
-    "pomodoro": "Focus"
+    "pomodoro": "Focus",
+    "calendar": "Kalender"
+  },
+  "calendar": {
+    "today": "Vandaag",
+    "no_items_in_phase": "Geen taken gepland in deze fase"
+  },
+  "alarm_screen": {
+    "default_title": "Suwaya Waarschuwing",
+    "default_body": "Het is tijd voor je taak!",
+    "snooze": "Sluimer 10 min",
+    "stop": "Stop"
+  },
+  "pomodoro": {
+    "choose_mode": "Kies Focusmodus",
+    "traditional": "Traditionele Pomodoro",
+    "traditional_desc": "Werk- en pauzecycli met standaard klokminuten",
+    "suwaya_mode": "Suwaya Pomodoro",
+    "suwaya_mode_desc": "Focussessies gesynchroniseerd met gebedstijden en astronomische flow",
+    "suwaya_setup": "Suwaya Pomodoro Instellen",
+    "starts_now": "Begint Nu",
+    "ends_at": "Eindigt om {}",
+    "actual_minutes_avail": "werkelijke minuten beschikbaar",
+    "time_too_short": "Beschikbare tijd is te kort (minder dan 15 minuten)",
+    "flow_speed": "Sessie-indeling & Stroomsnelheid",
+    "recommended": "Aanbevolen",
+    "alternative": "Alternatief",
+    "focus_rest_split": "Focus / Rust Verdeling",
+    "start_session": "Start Sessie",
+    "time_up_prayer": "Tijd voor Gebed",
+    "time_up_desc": "Je Suwaya Pomodoro-sessie is op de geplande tijd beëindigd.",
+    "deep_relaxation": "Diepe Ontspanning (Pauze)",
+    "in_flow": "In Flow (Focus)",
+    "end_session": "Sessie Beëindigen",
+    "long_break": "Lange Pauze",
+    "start": "Start",
+    "reset": "Stop & Reset",
+    "pause": "Pauze",
+    "resume": "Hervatten",
+    "skip": "Overslaan",
+    "traditional_settings": "Traditionele Pomodoro Instellingen",
+    "work_duration": "Pomodoro Duur (Werk)",
+    "short_break_duration": "Korte Pauze",
+    "long_break_duration": "Lange Pauze",
+    "cycles_before_long_break": "Lange Pauze Elke",
+    "end_must_be_after_start": "Eindtijd moet na starttijd zijn",
+    "max_12_hours": "Duur mag 12 Suwayas/uur niet overschrijden",
+    "recommended_closest": "Standaard (Dichtst bij 1.00x snelheid)",
+    "slower_option": "Lagere snelheid (Rustiger tempo)",
+    "faster_option": "Hogere snelheid (Intensieve focus)",
+    "custom_time": "Aangepaste Tijd"
+  },
+  "countries": {
+    "AF": "Afghanistan", "AX": "Åland", "AL": "Albanië", "DZ": "Algerije", "AS": "Amerikaans-Samoa", "AD": "Andorra", "AO": "Angola", "AI": "Anguilla", "AQ": "Antarctica", "AG": "Antigua en Barbuda", "AR": "Argentinië", "AM": "Armenië", "AW": "Aruba", "AU": "Australië", "AT": "Oostenrijk", "AZ": "Azerbeidzjan", "BS": "Bahama's", "BH": "Bahrein", "BD": "Bangladesh", "BB": "Barbados", "BY": "Wit-Rusland", "BE": "België", "BZ": "Belize", "BJ": "Benin", "BM": "Bermuda", "BT": "Bhutan", "BO": "Bolivia", "BA": "Bosnië en Herzegovina", "BW": "Botswana", "BV": "Bouveteiland", "BR": "Brazilië", "IO": "Brits Indische Oceaanterritorium", "BN": "Brunei", "BG": "Bulgarije", "BF": "Burkina Faso", "BI": "Burundi", "KH": "Cambodja", "CM": "Kameroen", "CA": "Canada", "CV": "Kaapverdië", "KY": "Kaaimaneilanden", "CF": "Centraal-Afrikaanse Republiek", "TD": "Tsjaad", "CL": "Chili", "CN": "China", "CX": "Christmaseiland", "CC": "Cocoseilanden", "CO": "Colombia", "KM": "Comoren", "CG": "Congo-Brazzaville", "CD": "Congo-Kinshasa", "CK": "Cookeilanden", "CR": "Costa Rica", "CI": "Ivoorkust", "HR": "Kroatië", "CU": "Cuba", "CY": "Cyprus", "CZ": "Tsjechië", "DK": "Denemarken", "DJ": "Djibouti", "DM": "Dominica", "DO": "Dominicaanse Republiek", "EC": "Ecuador", "EG": "Egypte", "SV": "El Salvador", "GQ": "Equatoriaal-Guinea", "ER": "Eritrea", "EE": "Estland", "ET": "Ethiopië", "FK": "Falklandeilanden", "FO": "Faeröer", "FJ": "Fiji", "FI": "Finland", "FR": "Frankrijk", "GF": "Frans-Guyana", "PF": "Frans-Polynesië", "TF": "Franse Zuidelijke Gebieden", "GA": "Gabon", "GM": "Gambia", "GE": "Georgië", "DE": "Duitsland", "GH": "Ghana", "GI": "Gibraltar", "GR": "Griekenland", "GL": "Groenland", "GD": "Grenada", "GP": "Guadeloupe", "GU": "Guam", "GT": "Guatemala", "GG": "Guernsey", "GN": "Guinee", "GW": "Guinee-Bissau", "GY": "Guyana", "HT": "Haïti", "HM": "Heard en McDonaldeilanden", "VA": "Vaticaanstad", "HN": "Honduras", "HK": "Hongkong", "HU": "Hongarije", "IS": "IJsland", "IN": "India", "ID": "Indonesië", "IR": "Iran", "IQ": "Irak", "IE": "Ierland", "IM": "Isle of Man", "IL": "Israël", "IT": "Italië", "JM": "Jamaica", "JP": "Japan", "JE": "Jersey", "JO": "Jordanië", "KZ": "Kazachstan", "KE": "Kenia", "KI": "Kiribati", "KP": "Noord-Korea", "KR": "Zuid-Korea", "KW": "Koeweit", "KG": "Kirgizië", "LA": "Laos", "LV": "Letland", "LB": "Libanon", "LS": "Lesotho", "LR": "Liberia", "LY": "Libië", "LI": "Liechtenstein", "LT": "Litouwen", "LU": "Luxemburg", "MO": "Macau", "MK": "Noord-Macedonië", "MG": "Madagaskar", "MW": "Malawi", "MY": "Maleisië", "MV": "Malediven", "ML": "Mali", "MT": "Malta", "MH": "Marshalleilanden", "MQ": "Martinique", "MR": "Mauritanië", "MU": "Mauritius", "YT": "Mayotte", "MX": "Mexico", "FM": "Micronesië", "MD": "Moldavië", "MC": "Monaco", "MN": "Mongolië", "ME": "Montenegro", "MS": "Montserrat", "MA": "Marokko", "MZ": "Mozambique", "MM": "Myanmar", "NA": "Namibië", "NR": "Nauru", "NP": "Nepal", "NL": "Nederland", "NC": "Nieuw-Caledonië", "NZ": "Nieuw-Zeeland", "NI": "Nicaragua", "NE": "Niger", "NG": "Nigeria", "NU": "Niue", "NF": "Norfolkeiland", "MP": "Noordelijke Marianen", "NO": "Noorwegen", "OM": "Oman", "PK": "Pakistan", "PW": "Palau", "PS": "Palestina", "PA": "Panama", "PG": "Papoea-Nieuw-Guinea", "PY": "Paraguay", "PE": "Peru", "PH": "Filipijnen", "PN": "Pitcairneilanden", "PL": "Polen", "PT": "Portugal", "PR": "Puerto Rico", "QA": "Qatar", "RE": "Réunion", "RO": "Roemenië", "RU": "Rusland", "RW": "Rwanda", "BL": "Saint-Barthélemy", "SH": "Sint-Helena", "KN": "Saint Kitts en Nevis", "LC": "Saint Lucia", "MF": "Sint-Maarten", "PM": "Saint-Pierre en Miquelon", "VC": "Saint Vincent en de Grenadines", "WS": "Samoa", "SM": "San Marino", "ST": "Sao Tomé en Principe", "SA": "Saoedi-Arabië", "SN": "Senegal", "RS": "Servië", "SC": "Seychellen", "SL": "Sierra Leone", "SG": "Singapore", "SK": "Slowakije", "SI": "Slovenië", "SB": "Salomonseilanden", "SO": "Somalië", "ZA": "Zuid-Afrika", "GS": "Zuid-Georgia en de Zuidelijke Sandwicheilanden", "ES": "Spanje", "LK": "Sri Lanka", "SD": "Soedan", "SR": "Suriname", "SJ": "Spitsbergen en Jan Mayen", "SZ": "Eswatini", "SE": "Zweden", "CH": "Zwitserland", "SY": "Syrië", "TW": "Taiwan", "TJ": "Tadzjikistan", "TZ": "Tanzania", "TH": "Thailand", "TL": "Oost-Timor", "TG": "Togo", "TK": "Tokelau", "TO": "Tonga", "TT": "Trinidad en Tobago", "TN": "Tunesië", "TR": "Turkije", "TM": "Turkmenistan", "TC": "Turks- en Caicoseilanden", "TV": "Tuvalu", "UG": "Oeganda", "UA": "Oekraïne", "AE": "VAE", "GB": "Verenigd Koninkrijk", "US": "Verenigde Staten", "UM": "Kleine afgelegen eilanden van de VS", "UY": "Uruguay", "UZ": "Oezbekistan", "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "BQ": "Bonaire", "CW": "Curaçao", "SS": "Zuid-Soedan", "SX": "Sint Maarten", "XK": "Kosovo", "VG": "Britse Maagdeneilanden", "VI": "Amerikaanse Maagdeneilanden", "WF": "Wallis en Futuna", "EH": "Westelijke Sahara", "YE": "Jemen", "ZM": "Zambia", "ZW": "Zimbabwe"
   }
 }

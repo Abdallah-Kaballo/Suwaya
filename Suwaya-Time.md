@@ -1,39 +1,39 @@
 # Suwaya Time
 
-A comprehensive reference for Suwaya's astronomical time system (Schedule Model V2) and the pure Dart `packages/suwaya_time` package[cite: 1, 3]. The package transforms changing solar events and prayer timings into a structured 24-Suwaya virtual day divided into 12 Night Suwayas and 12 Day Suwayas[cite: 1].
+A comprehensive reference for Suwaya's astronomical time system (Schedule Model V2) and the pure Dart `packages/suwaya_time` package[cite: 3]. This package transforms continuously changing solar events and prayer timings into a highly structured 24-Suwaya virtual day, perfectly divided into 12 Night Suwayas and 12 Day Suwayas[cite: 1, 3].
 
-> This document describes the V2 behavior implemented in the current codebase (`scheduleModelVersion = 2`)[cite: 1, 3].
+> **Note:** This document describes the V2 behavior implemented in the current codebase (`scheduleModelVersion = 2`)[cite: 1, 3].
 
 ## 1. Core Concept
 
-Civil time measures the day with fixed 60-minute clock hours starting at midnight[cite: 3]. Suwaya starts from the astronomical and Islamic cycle—where night precedes day (**Maghrib to the following Maghrib**)—and divides the cycle into meaningful periods anchored by prayer and solar events[cite: 1, 3]:
+Civil time measures the day with fixed 60-minute clock hours starting at midnight[cite: 3]. Suwaya shifts the paradigm by starting from the astronomical and Islamic cycle—where the night precedes the day (**Maghrib to the following Maghrib**)—and dividing this cycle into meaningful periods anchored by prayer times and solar events[cite: 1, 3]:
 
 ```text
-Location + date + calculation settings
+Location + Date + Calculation Settings
                  |
                  v
-     Prayer and solar event timings
+   Prayer and Solar Event Timings (via Adhan)
                  |
                  v
-   From active Maghrib to next Maghrib
+   From Active Maghrib to Next Maghrib
                  |
                  v
-     Seven contiguous astronomical periods
-   (4 Night periods: 12 Suwayas | 3 Day periods: 12 Suwayas)
+   Seven Contiguous Astronomical Periods
+ (4 Night Periods = 12 Suwayas | 3 Day Periods = 12 Suwayas)
                  |
                  v
-   Current Period, SuwayaClockTime, and Virtual Flow Speed
+ Current Period, SuwayaClockTime, and Virtual Flow Speed
 
 ```
 
-A Suwaya is not a fixed 60 real minutes. Each Suwaya represents **60 virtual minutes (3,600 virtual seconds)**, while its real duration expands and contracts according to the length of the astronomical period that contains it.
+A Suwaya does not consist of a fixed 60 real-world minutes. Instead, **each Suwaya represents exactly 60 virtual minutes (3,600 virtual seconds)**. Its *real* duration expands and contracts according to the physical length of the astronomical period that contains it.
 
-Therefore:
+**Key Invariants:**
 
 * A complete astronomical cycle runs from **Maghrib to the next Maghrib** (`cycleEndMaghrib`).
 
 
-* A complete cycle contains **24 Suwayas**:
+* A complete cycle contains exactly **24 Suwayas**.
 
 
 * **Night Phase (`SuwayaPhase.night`):** 12 Suwayas (from Maghrib to Sunrise), numbered `01` to `12` (`🌑` / `ل` / `N`).
@@ -44,19 +44,19 @@ Therefore:
 
 
 
-* A complete virtual day equals `24 × 60 virtual minutes = 1,440 virtual minutes`.
+* A complete virtual day always equals `24 × 60 = 1,440 virtual minutes`.
 
 
 * Global Suwaya indices run from `0` to `23` (`0..11` for Night, `12..23` for Day).
 
 
-* The speed of virtual time (`timeSpeedMultiplier` / `flowSpeed`) changes dynamically from one period to another.
+* The speed of virtual time (`timeSpeedMultiplier` / `flowSpeed`) dynamically accelerates or decelerates from one period to another.
 
 
 
 ## 2. Package Components
 
-The domain source is located under `packages/suwaya_time/lib/`:
+The domain logic is strictly isolated in `packages/suwaya_time/lib/`:
 
 ```text
 packages/suwaya_time/lib/
@@ -66,7 +66,8 @@ packages/suwaya_time/lib/
     │   ├── prayer_calculator.dart
     │   └── night_division.dart
     ├── engine/
-    │   └── suwaya_time_engine.dart
+    │   ├── suwaya_time_engine.dart
+    │   └── temporal_context_engine.dart
     ├── generators/
     │   ├── period_generator.dart
     │   └── suwaya_distributor.dart
@@ -75,31 +76,13 @@ packages/suwaya_time/lib/
 
 ```
 
-The package is pure Dart. It does not depend on Flutter, Riverpod, `BuildContext`, localization, or platform services. Prayer calculations use the `adhan` package.
-
-The public library exports:
-
-* Models: `AstroPeriod`, `NightPart`, `IbadatTimings`, `CycleAnchors`, `SuwayaClockTime`, `SuwayaPhase`, `PeriodKey`, `SuwayaDay`, and `AstroState`.
-
-
-* Engine: `SuwayaTimeEngine`.
-
-
-* Calculators: `PrayerCalculator` and `NightDivision`.
-
-
-* Generators: `PeriodGenerator` and `SuwayaDistributor`.
-
-
-* Configuration types: `CalculationMethodType`, `MadhabType`, `HighLatitudeRuleType`, and `PrayerKey`.
-
-
+The package is **pure Dart**. It has zero dependencies on Flutter, Riverpod, `BuildContext`, localization, or platform channels, ensuring calculations are universally testable and stable. Prayer calculations are powered by the robust `adhan` package.
 
 ## 3. Calculation Inputs
 
-The engine generates an astronomical day from the following inputs:
+The engine generates an astronomical day based on the following precise inputs:
 
-| Input | Type | Meaning |
+| Input | Type | Description |
 | --- | --- | --- |
 | `lat` | `double` | Latitude in degrees
 
@@ -110,7 +93,7 @@ The engine generates an astronomical day from the following inputs:
 | `date` | `DateTime` | Anchor date for the Maghrib-to-Maghrib cycle
 
  |
-| `methodType` | `CalculationMethodType` | Prayer-time calculation method
+| `methodType` | `CalculationMethodType` | Prayer-time calculation method (e.g., MWL, Umm Al-Qura)
 
  |
 | `madhabType` | `MadhabType` | Asr shadow calculation school (`shafi` or `hanafi`)
@@ -119,343 +102,192 @@ The engine generates an astronomical day from the following inputs:
 | `highLatRuleType` | `HighLatitudeRuleType` | High-latitude adjustment rule
 
  |
-| `customFajr` | `double` | Fajr angle when using the `custom` method
-
- |
-| `customIsha` | `double` | Isha angle when using the `custom` method
+| `customFajr` / `customIsha` | `double` | Custom angles when the `custom` method is selected
 
  |
 | `cityOffset` | `Duration` | Timezone offset applied to UTC `adhan` results
 
  |
-| `manualOffsets` | `Map<PrayerKey, int>?` | Manual minute adjustments (`-30` to `+30`) for prayers
+| `manualOffsets` | `Map<PrayerKey, int>?` | Manual minute adjustments (`-30` to `+30`) per prayer
 
  |
 
-The main call is:
+## 4. The Seven Astronomical Periods (Maghrib-to-Maghrib)
 
-```dart
-final day = SuwayaTimeEngine.generateDay(
-  latitude,
-  longitude,
-  date,
-  methodEnum,
-  madhabEnum,
-  highLatEnum,
-  customFajrAngle,
-  customIshaAngle,
-  cityOffset,
-  manualOffsets: manualOffsetsMap,
-);
+`PeriodGenerator` divides the Maghrib-to-Maghrib cycle into **7 contiguous periods** (`id` 1 to 7) identified by their `PeriodKey`:
 
-```
-
-## 4. Calculation Methods, Madhab, and High-Latitude Rules
-
-### 4.1 Calculation Methods
-
-The engine and application support the following calculation methods:
-
-* `muslimWorldLeague`
-* `egyptian`
-* `ummAlQura`
-* `dubai`
-* `qatar`
-* `kuwait`
-* `karachi`
-* `northAmerica`
-* `turkey`
-* `tehran`
-* `france_uoif` / `russia` / `singapore`
-* `custom` (uses `customFajr` and `customIsha` angles configurable between `10.0°` and `20.0°`)
-
-
-
-### 4.2 Madhab
-
-```dart
-enum MadhabType { hanafi, shafi }
-
-```
-
-* `shafi`: Standard shadow length factor.
-
-
-* `hanafi`: Later Asr time.
-
-
-
-### 4.3 High-Latitude Rules
-
-```dart
-enum HighLatitudeRuleType {
-  middleOfTheNight,
-  seventhOfTheNight,
-  twilightAngle,
-}
-
-```
-
-Used at high latitudes where twilight persists or nights/days are unusually short.
-
-## 5. Prayer Timings and Manual Offsets
-
-`PrayerCalculator.getIbadatTimings` computes prayer and solar events across the cycle boundary and applies:
-
-```text
-Adjusted Time = adhanTime.toUtc() + cityOffset + manualOffset
-
-```
-
-### Manual Offsets
-
-Manual offsets are supplied via `PrayerKey` (`fajr`, `dhuhr`, `asr`, `maghrib`, `isha`) and clamped to:
-
-```text
--30 minutes <= offset <= +30 minutes
-
-```
-
-* Manual offsets are not applied to `sunrise`.
-
-
-* Each manual offset adjusts only its target prayer without astronomically recalculating other prayers, while period boundaries anchored to that prayer shift accordingly.
-
-
-
-## 6. The Seven Astronomical Periods (Maghrib-to-Maghrib)
-
-`PeriodGenerator` divides the Maghrib-to-Maghrib cycle into **7 contiguous periods** (`id` 1 to 7) identified by `PeriodKey`:
-
-| ID | `PeriodKey` | Phase | Name Key / Role | Start Boundary | End Boundary | Suwayas | Global Indices (`0..23`) |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `nightMaghribIsha` | Night (`🌑`) | `periods.maghrib` | Maghrib | Isha | Shared with Period 2 (Total = 5) | Starts at `0` (`01 🌑`)
+| ID | `PeriodKey` | Phase | Start Boundary | End Boundary | Suwayas | Global Indices (`0..23`) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `nightMaghribIsha` | Night 🌑 | Maghrib | Isha | Shared with Period 2 (Total = 5) | Starts at `0` (`01 🌑`)
 
  |
-| 2 | `nightIshaMidnight` | Night (`🌑`) | `periods.isha` | Isha | Astronomical Midnight | Shared with Period 1 (Total = 5) | Ends at `4` (`05 🌑`)
+| 2 | `nightIshaMidnight` | Night 🌑 | Isha | Astronomical Midnight | Shared with Period 1 (Total = 5) | Ends at `4` (`05 🌑`)
 
  |
-| 3 | `nightMidnightFajr` | Night (`🌑`) | `ibadat.qiyam_tab` (Second Half) | Astronomical Midnight | Fajr | **6** (Fixed) | `5 .. 10` (`06..11 🌑`)
+| 3 | `nightMidnightFajr` | Night 🌑 | Astronomical Midnight | Fajr | **6** (Fixed) | `5 .. 10` (`06..11 🌑`)
 
  |
-| 4 | `nightFajrSunrise` | Night (`🌑`) | `periods.fajr` | Fajr | Sunrise | **1** (Fixed) | `11` (`12 🌑`)
+| 4 | `nightFajrSunrise` | Night 🌑 | Fajr | Sunrise | **1** (Fixed) | `11` (`12 🌑`)
 
  |
-| 5 | `daySunriseDhuhr` | Day (`☀️`) | `periods.duha` | Sunrise | Dhuhr | Dynamic Day Allocation | Starts at `12` (`01 ☀️`)
+| 5 | `daySunriseDhuhr` | Day ☀️ | Sunrise | Dhuhr | Dynamic Allocation | Starts at `12` (`01 ☀️`)
 
  |
-| 6 | `dayDhuhrAsr` | Day (`☀️`) | `periods.dhuhr` | Dhuhr | Asr | Dynamic Day Allocation | Follows Period 5
+| 6 | `dayDhuhrAsr` | Day ☀️ | Dhuhr | Asr | Dynamic Allocation | Follows Period 5
 
  |
-| 7 | `dayAsrMaghrib` | Day (`☀️`) | `periods.asr` | Asr | Next Maghrib | Dynamic Day Allocation | Ends at `23` (`12 ☀️`)
+| 7 | `dayAsrMaghrib` | Day ☀️ | Asr | Next Maghrib | Dynamic Allocation | Ends at `23` (`12 ☀️`)
 
  |
 
-### Key Structural Invariants of the 7 Periods:
+## 5. Second-Half Night Division (Qiyam Parts)
 
-1. **Night Phase Total = 12 Suwayas (Global Indices `0..11`)**:
+Because the first half of the night (Maghrib to Midnight) is managed by Period 1 and Period 2, `NightDivision` focuses exclusively on dividing **Period 3 (Astronomical Midnight to Fajr, spanning 6 Suwayas)** into the 5 canonical Qiyam parts:
 
+| ID | Name Key / Concept | Duration in Suwayas | Suwaya Start | Suwaya End |
+| --- | --- | --- | --- | --- |
+| `half_2` | Second Half of the Night | **6 Suwayas** | `06 | 00 🌑` |
+| `third_3` | Last Third of the Night | **4 Suwayas** | `08 | 00 🌑` |
+| `sixth_4` | Fourth Sixth of the Night | **2 Suwayas** | `06 | 00 🌑` |
+| `sixth_5` | Fifth Sixth of the Night | **2 Suwayas** | `08 | 00 🌑` |
+| `sixth_6` | Sixth Sixth of the Night | **2 Suwayas** | `10 | 00 🌑` |
 
-* **Periods 1 & 2 (First Half of the Night: Maghrib -> Midnight):** Share `5` Suwayas (`0..4`, Night Suwayas `01..05 🌑`) proportionally based on their real durations.
+**Smart Conflict Resolution:** The application enforces mutual exclusivity when displaying dial markers. Selecting `third_3` (4 Suwayas) automatically deselects the smaller subdivisions `sixth_5` and `sixth_6` to prevent visual overlapping on the Astrolabe Dial.
 
+## 6. Real Suwaya Duration and Flow Speed (`PeriodMetrics`)
 
-* **Period 3 (Second Half of the Night: Midnight -> Fajr):** Always contains `6` Suwayas (`5..10`, Night Suwayas `06..11 🌑`).
-
-
-* **Period 4 (Fajr -> Sunrise):** Always contains `1` Suwaya (`11`, Night Suwaya `12 🌑`).
-
-
-
-
-2. **Day Phase Total = 12 Suwayas (Global Indices `12..23`)**:
-
-
-* Distributed across Period 5 (`daySunriseDhuhr`), Period 6 (`dayDhuhrAsr`), and Period 7 (`dayAsrMaghrib`) so that their sum always equals `12` Suwayas (`01..12 ☀️`).
-
-
-
-
-3. **Total Cycle Suwayas = 24 Suwayas**.
-
-
-
-## 7. Second-Half Night Division (`NightPart` — Qiyam Parts)
-
-Because the first half of the night (Maghrib to Midnight) is already represented by Period 1 (`nightMaghribIsha`) and Period 2 (`nightIshaMidnight`), `NightDivision` focuses exclusively on the **5 canonical Qiyam parts** within the second half of the night (**Period 3: Astronomical Midnight to Fajr**, spanning 6 Suwayas):
-
-| ID | Localization Key | Duration in Suwayas | Suwaya Start | Suwaya End | Global Indices |
-| --- | --- | --- | --- | --- | --- |
-| `half_2` | `night_parts.half_2` (Second Half of the Night) | **6 Suwayas** | `06|00 🌑` | `11|59 🌑` (Fajr) | `5 .. 10`<br> |
-| `third_3` | `night_parts.third_3` (Last Third of the Night) | **4 Suwayas** | `08|00 🌑` | `11|59 🌑` (Fajr) | `7 .. 10`<br> |
-| `sixth_4` | `night_parts.sixth_4` (Fourth Sixth of the Night) | **2 Suwayas** | `06|00 🌑` | `07|59 🌑` | `5 .. 6`<br> |
-| `sixth_5` | `night_parts.sixth_5` (Fifth Sixth of the Night) | **2 Suwayas** | `08|00 🌑` | `09|59 🌑` | `7 .. 8`<br> |
-| `sixth_6` | `night_parts.sixth_6` (Sixth Sixth of the Night) | **2 Suwayas** | `10|00 🌑` | `11|59 🌑` (Fajr) | `9 .. 10`<br> |
-
-### Smart Conflict Resolution Rules
-
-Since these 5 parts represent overlapping slices of the same 6-Suwaya window (`Midnight -> Fajr`), the application enforces mutual exclusivity when toggling visible night parts and dial markers:
-
-* Selecting `third_3` (4 Suwayas: `08..11 🌑`) automatically deselects `sixth_5` and `sixth_6` (and vice versa).
-
-
-* Selecting `half_2` (all 6 Suwayas: `06..11 🌑`) automatically deselects `sixth_4` (and overlapping subdivisions).
-
-
-
-## 8. Real Suwaya Duration and Flow Speed (`PeriodMetrics`)
-
-For any `AstroPeriod` with real duration `period.totalDuration` and `suwayasCount = n`:
+For any `AstroPeriod` with a real physical duration `period.totalDuration` and `suwayasCount = n`:
 
 ```text
 actualSuwayaDuration = period.totalDuration / n
 
 ```
 
-Because 1 Suwaya equals **60 virtual minutes (3,600 virtual seconds)**, the virtual time flow speed is:
+Because 1 Suwaya equals exactly **60 virtual minutes (3,600 virtual seconds)**, the virtual time flow speed is calculated as:
 
 ```text
 flowSpeed = 3600 / actualSuwayaDurationInSeconds
 
 ```
 
-Interpretation:
-
-* **`flowSpeed == 1.00x`**: 1 Suwaya lasts 60 real minutes. Virtual time and civil time move at the exact same pace.
+* **`flowSpeed == 1.00x`**: 1 Suwaya lasts 60 real minutes. Virtual and civil time move at the exact same pace.
 
 
-* **`flowSpeed > 1.00x`** (e.g., `1.25x`): The real Suwaya is shorter than 60 real minutes (48 real minutes). Virtual time flows faster than civil time.
+* **`flowSpeed > 1.00x`**: The real Suwaya is shorter than 60 real minutes. Virtual time flows *faster* than civil time.
 
 
-* **`flowSpeed < 1.00x`** (e.g., `0.80x`): The real Suwaya is longer than 60 real minutes (75 real minutes). Virtual time flows more slowly than civil time.
+* **`flowSpeed < 1.00x`**: The real Suwaya is longer than 60 real minutes. Virtual time flows *slower* than civil time.
 
 
 
-## 9. `SuwayaClockTime` and Virtual Time Formatting
+## 7. Flutter Runtime Adapter (`AstroNotifier`)
 
-At any timestamp `now`, `SuwayaTimeEngine.calculateCurrentState(day, now)` computes `currentSuwayaTime` (`SuwayaClockTime`):
+Located at `lib/core/astro_engine/astro_provider.dart`, `AstroNotifier` securely bridges the pure `SuwayaTimeEngine` with Flutter's reactive ecosystem:
 
-* `phase`: `SuwayaPhase.night` or `SuwayaPhase.day`.
-
-
-* `phaseSlotNumber`: `1` to `12` within the active phase.
+1. **Settings Fingerprint:** Re-evaluates only when core location, calculation, or timezone parameters change.
 
 
-* `periodLocalSlotNumber`: `1` to `period.suwayasCount` within the active period.
+2. **Dual-Timer Architecture:**
+* **Smart State Timer (`_stateTimer`):** Goes to sleep and wakes up exactly at the microsecond of the next Suwaya boundary. It minimizes rebuilds by only notifying listeners when `currentPeriod.id` or `periodLocalSlotNumber` physically changes.
 
 
-* `virtualMinute`: `0` to `59` within the current Suwaya.
-
-
-
-### Visual Formatting Standard (`formatSuwayaTime`)
-
-Suwaya time uses the vertical bar separator `|` to distinguish it visually from civil time (`:`):
-
-* **Emoji Mode (`suwayaIconMode == 'emoji'`)**:
-
-
-* Night: `04|15 🌑` (LTR) or `🌑 04|15` (RTL)
-
-
-* Day: `09|42 ☀️` (LTR) or `☀️ 09|42` (RTL)
+* **1-Second UI Ticker (`_uiTimer`):** A lightweight 250ms periodic ticker that drives the `virtualDateTimeNotifier` and `virtualTimeNotifier`. This allows the `PremiumAstroDial` needles and digital clocks to animate smoothly at 60fps without causing heavy widget tree rebuilds.
 
 
 
 
-* **Text Mode (`suwayaIconMode == 'text'`)**:
-
-
-* Uses `ل` / `ن` in Arabic (`RTL`) and `N` / `D` in `LTR` locales.
-
-
-
-
-* **Color Coding**:
-
-
-* Suwaya time is rendered in **Astro Gold (`#F2C94C`)**, while civil time is rendered in white/neutral surface text.
-
-
-
-
-
-## 10. Resolving Scheduled Suwaya Times (`routine_time_resolver.dart`)
-
-When a task or routine is scheduled at `(period, localSuwaya, virtualMinute)`, its exact real `DateTime` is resolved using integer microsecond arithmetic:
-
-```dart
-final count = period.suwayasCount > 0 ? period.suwayasCount : 1;
-final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
-final minute = virtualMinute.clamp(0, 59);
-
-final periodDuration = period.totalDuration.inMicroseconds;
-final denominator = count * 60;
-final requestedUnits = suwayaIndex * 60 + minute;
-final offsetMicroseconds = (periodDuration * requestedUnits + denominator - 1) ~/ denominator;
-
-final realTime = period.startTime.add(Duration(microseconds: offsetMicroseconds));
 
 ```
 
-## 11. Flutter Runtime Adapter (`AstroNotifier`)
+---
 
-Located at `lib/core/astro_engine/astro_provider.dart`, `AstroNotifier` bridges `SuwayaTimeEngine` with Flutter:
+### 2. ملف `docs/privacy.md`
 
-1. **Settings Fingerprint:** Watches location coordinates, timezone, calculation method, Madhab, high-latitude rule, custom angles, and manual offsets.
+```markdown
+# Privacy Policy for Suwaya (سُويعَة)
 
+**Last updated: October 2026**
 
-2. **Maghrib-to-Maghrib Cycle Selection:**
-* Evaluates today's Maghrib (`tempIbadat.maghrib`).
+Abdallah Kaballo ("we", "our", or "us") develops and maintains Suwaya, an open-source Flutter application for astronomical prayer times, virtual Suwaya time, tasks, routines, and focus sessions. This policy explains what information the current version of the application accesses, how it is used, and where it is stored[cite: 6].
 
+## 1. Scope and Current Data Model
 
-* If `cityNow.isBefore(tempIbadat.maghrib)`, it generates the cycle anchored to **yesterday's Maghrib** (`cityNow.subtract(const Duration(days: 1))`).
+The current application operates on a **local-first** basis[cite: 6]. It does not provide user accounts, authentication, cloud synchronization, or a configured remote database[cite: 6]. 
 
+Most application data is stored exclusively on your device within an Isar Community database[cite: 6]. The current database contains your customized settings, tasks, habits, routines, and saved geographic information[cite: 6]. The application also bundles a read-only SQLite database for local offline city search and location matching[cite: 6].
 
-* Otherwise, it generates the cycle anchored to **today's Maghrib**.
+## 2. Information the Application Uses
 
+### Location Information
+When you opt to use automatic location detection, Suwaya requests location permissions and uses your device's coordinates locally to[cite: 6]:
+- Calculate precise prayer and astronomical times[cite: 6].
+- Select the correct timezone context[cite: 6].
+- Find your approximate nearest city and country via the bundled offline city database[cite: 6].
+- Suggest accurate calculation methods and Madhab defaults[cite: 6].
 
+**These coordinates are never sent to a Suwaya server.** Suwaya does not track your movement in the background, build a location history, or sell location data[cite: 6]. You may alternatively choose a location manually and deny location permissions entirely[cite: 6].
 
+### Application Data
+Depending on the features you use, Suwaya stores locally[cite: 6]:
+- Calculation preferences, UI language, visual themes, and notification settings[cite: 6].
+- Tasks, task schedules, completion history, streaks, and Suwaya contexts[cite: 6].
+- Focus routines and their associated parameters[cite: 6].
 
-3. **In-Memory Day Cache:** Caches up to 3 generated `SuwayaDay` instances keyed by `YYYY-M-D_fingerprint`.
+### Notifications and Alarms
+If enabled, Suwaya schedules local notifications and full-screen exact alarms through the operating system[cite: 6]. Suwaya uses these to deliver time-sensitive reminders but does not transmit notification histories to any remote server[cite: 6].
 
+## 3. Information We Do Not Collect & Supporter Purchases
 
-4. **Dual-Timer Architecture:**
-* **Smart State Timer (`_stateTimer`):** Sleeps until the exact microsecond of the next Suwaya boundary (or `cycleAnchors.cycleEndMaghrib`), rebuilding Riverpod providers only when `currentPeriod.id` or `periodLocalSlotNumber` changes.
+The application does not collect or transmit[cite: 6]:
+- Personal authentication identifiers or account details[cite: 6].
+- Advertising identifiers or behavioral analytics tracking[cite: 6].
+- Task or routine data to any cloud backend[cite: 6].
 
+If you optionally choose to purchase a Supporter Badge, Suwaya utilizes Google Play Billing (or Apple App Store) alongside the RevenueCat SDK to verify your entitlement via an anonymous app user ID[cite: 6]. Financial and payment details are processed exclusively by the platform store and are never accessed, captured, or stored by Suwaya[cite: 6].
 
-* **1-Second UI Ticker (`_uiTimer`):** Updates `virtualDateTimeNotifier` and `virtualTimeNotifier` every second so the central dial and live clocks tick smoothly without triggering full widget-tree rebuilds.
+## 4. Data Storage, Retention, and Deletion
 
+Local data remains on your device until you delete it through the app's interface, clear the application’s storage via your OS settings, or uninstall the application[cite: 6]. Suwaya does not retain a server-side copy of your local tasks, routines, or settings[cite: 6].
 
+## 5. Permissions
 
+Suwaya may request the following system permissions to function correctly[cite: 6]:
 
+| Permission | Purpose |
+|---|---|
+| **Location** | For automatic location detection and location-aware prayer calculations[cite: 6]. |
+| **Notifications** | To deliver local task, routine, and prayer reminders[cite: 6]. |
+| **Exact Alarms** | To schedule time-sensitive, full-screen lockscreen alarms[cite: 6]. |
+| **Vibration** | To provide haptic feedback during local notifications and alarms[cite: 6]. |
+| **Internet** | To fetch Markdown documentation updates (FAQ/Privacy), check for app updates, and process optional Supporter badge purchases[cite: 6]. |
 
-## 12. Invariants to Preserve
+You can deny or revoke these permissions at any time through your operating system settings[cite: 6].
 
-1. The astronomical cycle starts at `maghrib` and ends at `cycleEndMaghrib` (next day's Maghrib).
+## 6. Third-Party Libraries and Network Services
 
+Suwaya uses open-source libraries for Flutter, local persistence (`isar_community`, `sqflite`), astronomical calculations (`adhan`), geolocation, localization, and notifications[cite: 6]. Network access is strictly limited to[cite: 6]:
+- Fetching FAQ and Privacy Policy JSON updates directly from the official GitHub repository[cite: 6].
+- Checking for in-app updates via official store APIs (`in_app_update`)[cite: 6].
+- Verifying optional supporter badge entitlements via Google Play Billing and RevenueCat[cite: 6].
 
-2. Each cycle produces 7 contiguous periods with no gaps or overlaps.
+## 7. Security
 
+Local data protection depends on the security of your device and operating system[cite: 6]. We strongly recommend keeping your device protected with standard security controls (PIN/Biometrics) and advise against using rooted or compromised devices if you store sensitive personal schedules[cite: 6].
 
-3. The Night phase (`maghrib` -> `sunrise`) always totals **12 Suwayas** (global indices `0..11`).
+## 8. Children
 
+Suwaya is not designed to knowingly collect personal information from children[cite: 6]. Because the application operates offline-first and provides no cloud account system, it does not intentionally create child user profiles or collect data remotely[cite: 6].
 
-4. The Day phase (`sunrise` -> `nextMaghrib`) always totals **12 Suwayas** (global indices `12..23`).
+## 9. Changes to This Policy
 
+This policy may be updated if the application's data practices evolve. The "Last updated" date at the top of this page indicates the latest revision[cite: 6]. Material changes will be reflected in the project documentation and release notes[cite: 6].
 
-5. The full cycle always totals **24 Suwayas**.
+## 10. Contact
 
+For questions, corrections, or privacy concerns, please contact the project maintainer by opening an issue on the official Suwaya GitHub repository[cite: 6]:
 
-6. Each Suwaya consists of **60 virtual minutes** (`0..59`), or `3,600` virtual seconds.
+<https://github.com/Abdallah-Kaballo/Suwaya>
 
+Suwaya is open-source and licensed under the GNU General Public License v3.0[cite: 6]. Its source code is publicly available for review in the repository[cite: 6].
 
-7. Period 3 (`nightMidnightFajr`) has `6` Suwayas and Period 4 (`nightFajrSunrise`) has `1` Suwaya.
-
-
-8. Qiyam night parts are strictly the 5 second-half parts (`half_2`, `third_3`, `sixth_4`, `sixth_5`, `sixth_6`) within Period 3.
-
-
-9. Manual offsets are clamped to `[-30, +30]` minutes and never apply to `sunrise`.
-
-
-10. `packages/suwaya_time` remains 100% pure Dart with zero Flutter or Riverpod dependencies.
+```

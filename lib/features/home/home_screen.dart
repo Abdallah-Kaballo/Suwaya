@@ -88,24 +88,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     DateTime cityNow,
     SettingsModel settings,
   ) {
-    // 🌟 قراءة الفجر والغروب الفلكي الصافي من مواقيت اليوم المدني الحالي (civilDayIbadat)
     final DateTime rawFajr = astroState.civilDayIbadat.fajr;
     final DateTime rawSunset = astroState.civilDayIbadat.calculatedSunset ??
         astroState.civilDayIbadat.maghrib;
 
     final DateTime todayFajr = DateTime(
-      cityNow.year,
-      cityNow.month,
-      cityNow.day,
-      rawFajr.hour,
-      rawFajr.minute,
+      cityNow.year, cityNow.month, cityNow.day, rawFajr.hour, rawFajr.minute,
     );
     final DateTime todaySunset = DateTime(
-      cityNow.year,
-      cityNow.month,
-      cityNow.day,
-      rawSunset.hour,
-      rawSunset.minute,
+      cityNow.year, cityNow.month, cityNow.day, rawSunset.hour, rawSunset.minute,
     );
 
     final langCode = context.locale.languageCode;
@@ -114,7 +105,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     late final DateTime islamicDate;
     late final bool isNight;
 
-    // 🌟 قبل الفجر: نحن في ليلة اليوم الحالي (التاريخ الهجري تقدم بالفعل عند غروب الأمس ولا يتقدم مجدداً عند 00:00)
     if (cityNow.isBefore(todayFajr)) {
       islamicDate = cityNow;
       isNight = true;
@@ -122,23 +112,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       islamicDate = cityNow;
       isNight = false;
     } else {
-      // 🌟 بعد الغروب الفلكي: دخلت ليلة اليوم الهجري الجديد
       islamicDate = cityNow.add(const Duration(days: 1));
       isNight = true;
     }
 
     final String dayName = DateFormat('EEEE', safeIntl).format(islamicDate);
-    final String dayNightStr = _formatDayNightTitle(context, isNight, dayName);
-
-    const hijriProvider = UmmAlQuraHijriProvider();
-    final hijriDate = hijriProvider.dateForGregorianDate(
-      date: CivilDate(islamicDate.year, islamicDate.month, islamicDate.day),
-      adjustmentDays: settings.hijriOffsetDays,
-    );
-    final monthName = 'hijri.m${hijriDate.month}'.tr();
-    final hijriStr = '${hijriDate.day} $monthName ${hijriDate.year}';
-
     final textColor = isDark ? Colors.white : Colors.black87;
+
+    String primaryTitle;
+    String secondaryTitle;
+
+    // 🌟 التعديل: التبديل بين العرض المدني والسويعي
+    if (settings.useAstroTimeForIbadat) {
+      primaryTitle = _formatDayNightTitle(context, isNight, dayName);
+      const hijriProvider = UmmAlQuraHijriProvider();
+      final hijriDate = hijriProvider.dateForGregorianDate(
+        date: CivilDate(islamicDate.year, islamicDate.month, islamicDate.day),
+        adjustmentDays: settings.hijriOffsetDays,
+      );
+      final monthName = 'hijri.m${hijriDate.month}'.tr();
+      secondaryTitle = '${hijriDate.day} $monthName ${hijriDate.year} ${'common.ah'.tr()}';
+    } else {
+      // 🌟 العرض المدني (يعتمد على منتصف الليل 12:00)
+      primaryTitle = DateFormat('EEEE', safeIntl).format(cityNow);
+      secondaryTitle = DateFormat('d MMMM yyyy', safeIntl).format(cityNow);
+    }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -153,16 +151,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(
-                      isNight ? LucideIcons.moon : LucideIcons.sun,
-                      color: pColor,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
+                    if (settings.useAstroTimeForIbadat) ...[
+                      Icon(
+                        isNight ? LucideIcons.moon : LucideIcons.sun,
+                        color: pColor,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     Stack(
                       children: [
                         Text(
-                          dayNightStr,
+                          primaryTitle,
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.normal,
@@ -174,7 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                         ),
                         Text(
-                          dayNightStr,
+                          primaryTitle,
                           style: TextStyle(
                             color: textColor,
                             fontSize: 22,
@@ -188,10 +188,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '$hijriStr ${'common.ah'.tr()}',
+                  secondaryTitle,
                   style: TextStyle(
                     color: textColor,
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.w900,
                     fontFamily: 'Tajawal',
                     letterSpacing: 0.5,

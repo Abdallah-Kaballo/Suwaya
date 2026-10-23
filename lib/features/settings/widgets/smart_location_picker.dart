@@ -588,7 +588,16 @@ class _CitySearchSheet extends StatefulWidget {
 
 class _CitySearchSheetState extends State<_CitySearchSheet> {
   String _query = '';
-  Timer? _debounceTimer; 
+  Timer? _debounceTimer;
+
+  // 🌟 خريطة أسماء اللغات بلغاتها الأم لعرضها في حقل البحث
+  static const Map<String, String> _nativeLanguageNames = {
+    'tr': 'Türkçe', 'ru': 'Русский', 'ur': 'اردو', 'ar': 'عربي', 'hi': 'हिन्दी',
+    'bn': 'বাংলা', 'th': 'ไทย', 'ja': '日本語', 'zh': '中文', 'ug': 'ئۇيغۇرچە',
+    'pt': 'Português', 'ff': 'Pulaar', 'az': 'Azərbaycanca', 'id': 'Bahasa Indonesia',
+    'ms': 'Bahasa Melayu', 'da': 'Dansk', 'de': 'Deutsch', 'en': 'English',
+    'es': 'Español', 'fr': 'Français', 'it': 'Italiano', 'nl': 'Nederlands',
+  };
 
   @override
   void dispose() {
@@ -611,11 +620,21 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
     final primaryColor = Theme.of(context).primaryColor;
 
     final langCode = context.locale.languageCode;
+    
+    // 🌟 استخلاص الكلمة الأساسية من الترجمة ("ابحث عن مدينتك") وتجاهل ما بين الأقواس القديمة
+    final String baseHint = 'location_picker.search_city_hint'.tr().split('(').first.trim();
+    final String nativeLangName = _nativeLanguageNames[langCode] ?? 'English';
+    
+    // 🌟 بناء النص الإرشادي الديناميكي
+    final String dynamicHintText = langCode == 'en' 
+        ? '$baseHint (English)...' 
+        : '$baseHint ($nativeLangName/English)...';
+
     final filtered = widget.cities.where((c) {
-      final nameAr = (c['name'] ?? '').toString().toLowerCase();
+      final nameLocal = (c['name'] ?? '').toString().toLowerCase();
       final nameEn = (c['nameEn'] ?? '').toString().toLowerCase();
       final q = _query.toLowerCase();
-      return nameAr.contains(q) || nameEn.contains(q);
+      return nameLocal.contains(q) || nameEn.contains(q);
     }).toList();
     
     return Container(
@@ -627,7 +646,14 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
             autofocus: true, 
             onChanged: _onSearchChanged, 
             style: TextStyle(color: textColor),
-            decoration: InputDecoration(hintText: 'location_picker.search_city_hint'.tr(), hintStyle: TextStyle(color: hintColor), prefixIcon: Icon(LucideIcons.search, color: hintColor), filled: true, fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
+            decoration: InputDecoration(
+              hintText: dynamicHintText, 
+              hintStyle: TextStyle(color: hintColor), 
+              prefixIcon: Icon(LucideIcons.search, color: hintColor), 
+              filled: true, 
+              fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05), 
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -638,11 +664,37 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final city = filtered[index];
-                      final cityName = langCode == 'ar' ? (city['name'] ?? city['nameEn']) : (city['nameEn'] ?? city['name']);
+                      
+                      // 🌟 العمود name يمثل الاسم المحلي (عربي، ياباني، الخ) والعمود nameEn يمثل الانجليزي
+                      final String nameLocal = (city['name'] ?? '').toString().trim();
+                      final String nameEn = (city['nameEn'] ?? '').toString().trim();
+                      
+                      String primaryName;
+                      String? secondaryName;
+                      
+                      // 🌟 منطق العرض الذكي بناءً على لغة التطبيق الحالية
+                      if (nameLocal.isEmpty) {
+                        primaryName = nameEn;
+                      } else if (nameEn.isEmpty) {
+                        primaryName = nameLocal;
+                      } else if (nameLocal.toLowerCase() == nameEn.toLowerCase()) {
+                        primaryName = nameEn; // لا داعي للتكرار إذا تطابقا
+                      } else {
+                        if (langCode == 'en') {
+                          primaryName = nameEn;
+                          secondaryName = nameLocal;
+                        } else {
+                          primaryName = nameLocal;
+                          secondaryName = nameEn;
+                        }
+                      }
+
                       return ListTile(
                         leading: Icon(LucideIcons.map_pin, color: primaryColor),
-                        title: Text(cityName, style: TextStyle(color: textColor)),
-                        subtitle: langCode == 'ar' && city['nameEn'] != null ? Text(city['nameEn'], style: TextStyle(color: hintColor, fontSize: 12)) : null,
+                        title: Text(primaryName, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                        subtitle: secondaryName != null 
+                            ? Text(secondaryName, style: TextStyle(color: hintColor, fontSize: 12)) 
+                            : null,
                         onTap: () { Navigator.pop(context); widget.onSelected(city); },
                       );
                     },
