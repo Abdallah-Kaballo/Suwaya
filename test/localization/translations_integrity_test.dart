@@ -1,24 +1,56 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:suwaya/core/localization/app_locales.dart';
 
-Set<String> _flattenKeys(Map<String, dynamic> map, [String prefix = '']) {
-  final keys = <String>{};
-  for (final entry in map.entries) {
-    final fullKey = prefix.isEmpty ? entry.key : '$prefix.${entry.key}';
-    if (entry.value is Map<String, dynamic>) {
-      keys.addAll(_flattenKeys(entry.value as Map<String, dynamic>, fullKey));
-    } else {
-      keys.add(fullKey);
+void _expectSectionMatchesEnglish({
+  required String localeCode,
+  required String sectionName,
+  required Map<String, dynamic> localeMap,
+  required Map<String, dynamic> englishMap,
+}) {
+  final value = localeMap[sectionName];
+  expect(
+    value,
+    isA<Map<String, dynamic>>(),
+    reason: 'Locale $localeCode.json section "$sectionName" must be a JSON object',
+  );
+  if (value is! Map<String, dynamic>) return;
+
+  final englishValue = englishMap[sectionName];
+  expect(
+    englishValue,
+    isA<Map<String, dynamic>>(),
+    reason: 'English reference section "$sectionName" must be a JSON object',
+  );
+  if (englishValue is! Map<String, dynamic>) return;
+
+  expect(
+    value.keys.toSet(),
+    englishValue.keys.toSet(),
+    reason: 'Locale $localeCode.json section "$sectionName" must use the same keys as en.json',
+  );
+
+  for (final entry in value.entries) {
+    expect(
+      entry.value,
+      isA<String>(),
+      reason: 'Translation for "$sectionName.${entry.key}" in $localeCode.json must be a string',
+    );
+    if (entry.value is String) {
+      expect(
+        (entry.value as String).trim(),
+        isNotEmpty,
+        reason: 'Empty translation for "$sectionName.${entry.key}" in $localeCode.json',
+      );
     }
   }
-  return keys;
 }
 
 void main() {
-  group('22-Language Translations JSON Integrity Tests', () {
-    test('All 22 supported locale JSON files exist, parse cleanly, and contain core astronomical and UI sections', () {
+  group('22-language translation JSON integrity', () {
+    test('Every supported locale exists, parses, and contains the required core sections', () {
       const requiredTopLevelSections = [
         'app_name',
         'common',
@@ -34,9 +66,9 @@ void main() {
 
       final enFile = File('assets/translations/en.json');
       expect(enFile.existsSync(), isTrue);
-      final enMap = jsonDecode(enFile.readAsStringSync()) as Map<String, dynamic>;
-      final enKeys = _flattenKeys(enMap);
-      expect(enKeys, isNotEmpty);
+      final englishMap =
+          jsonDecode(enFile.readAsStringSync()) as Map<String, dynamic>;
+      expect(englishMap.keys, isNotEmpty);
 
       for (final locale in AppLocales.supported) {
         final code = locale.languageCode;
@@ -63,13 +95,12 @@ void main() {
           );
         }
 
-        // التأكد من عدم وجود قيم فارغة في مفاتيح الفترات والصلوات
-        final periods = decoded['periods'] as Map<String, dynamic>;
-        for (final pEntry in periods.entries) {
-          expect(
-            (pEntry.value as String).trim().isNotEmpty,
-            isTrue,
-            reason: 'Empty period translation for ${pEntry.key} in $code.json',
+        for (final section in ['periods', 'prayers']) {
+          _expectSectionMatchesEnglish(
+            localeCode: code,
+            sectionName: section,
+            localeMap: decoded,
+            englishMap: englishMap,
           );
         }
       }

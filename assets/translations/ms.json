@@ -515,7 +515,9 @@
     "period_4": "Tempoh Keempat",
     "period_5": "Tempoh Kelima",
     "period_6": "Tempoh Keenam",
-    "period_7": "Tempoh Ketujuh"
+    "period_7": "Tempoh Ketujuh",
+    "isha": "Isyak",
+    "qiyam": "Separuh kedua malam"
   },
   "prayers": {
     "fajr": "Subuh",

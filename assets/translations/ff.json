@@ -501,6 +501,31 @@
     "faster_option": "Yaaw (Hakkille tiiɗɗo)",
     "custom_time": "Wakkati Cuɓaaɗo"
   },
+  "periods": {
+    "fajr": "Fajr",
+    "duha": "Duha",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "middle_third": "Nder hakkunde lewru",
+    "last_third": "Nder cakkitiiɗo lewru",
+    "period_1": "Wakkati arande",
+    "period_2": "Wakkati ɗiɗaɓo",
+    "period_3": "Wakkati tataɓo",
+    "period_4": "Wakkati naanaɓo",
+    "period_5": "Wakkati jowiɓo",
+    "period_6": "Wakkati jeegoɓo",
+    "period_7": "Wakkati jeeɗiɗaɓo",
+    "isha": "Isha",
+    "qiyam": "Fannu ɗiɗaɓo lewru"
+  },
+  "prayers": {
+    "fajr": "Fajr",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha"
+  },
   "countries": {
     "AF": "Afganistaan", "AX": "Duuɗe Aland", "AL": "Albanii", "DZ": "Alaseri", "AS": "Samowa Amerik", "AD": "Anndoora", "AO": "Anngolaa", "AI": "Anngiyaa", "AQ": "Antarktik", "AG": "Antiguwa e Barbuda", "AR": "Arjantiin", "AM": "Armenii", "AW": "Aruuba", "AU": "Ostaraalii", "AT": "Otiriis", "AZ": "Aserbayjaan", "BS": "Bahamaas", "BH": "Bahreyn", "BD": "Banglaadees", "BB": "Barbadoos", "BY": "Belaarus", "BE": "Beljik", "BZ": "Beliis", "BJ": "Benee", "BM": "Bermudaa", "BT": "Butaan", "BO": "Boliwii", "BA": "Bosnii-Hersegowiin", "BW": "Botswaana", "BV": "Duuɗe Buwet", "BR": "Beresiil", "IO": "Territoire britannique de l'océan Indien", "BN": "Buruney", "BG": "Bulgarii", "BF": "Burkina Faso", "BI": "Burunndi", "KH": "Kambod", "CM": "Kameruun", "CA": "Kanadaa", "CV": "Kabo Werde", "KY": "Duuɗe Kayman", "CF": "Republik Sentiraafrik", "TD": "Caad", "CL": "Cili", "CN": "Siin", "CX": "Duuɗe Kirismas", "CC": "Duuɗe Kokos", "CO": "Kolombii", "KM": "Komoor", "CG": "Konngo", "CD": "Republik Demokaraatik Konngo", "CK": "Duuɗe Kukk", "CR": "Kosta Rika", "CI": "Kodiwaar", "HR": "Korowasii", "CU": "Kubaa", "CY": "Sipir", "CZ": "Cekkiya", "DK": "Danmark", "DJ": "Jibutii", "DM": "Dominika", "DO": "Republik Dominika", "EC": "Ekuwatoor", "EG": "Ejipt", "SV": "El Salwador", "GQ": "Gine Ekuwatoriyaal", "ER": "Eriteree", "EE": "Estoni", "ET": "Ecopi", "FK": "Duuɗe Falkland", "FO": "Duuɗe Feroe", "FJ": "Fijji", "FI": "Finlannd", "FR": "Farayse", "GF": "Giyaan Farayse", "PF": "Polinesii Farayse", "TF": "Leyɗeele Farayse e Antarktik", "GA": "Gabon", "GM": "Gammbi", "GE": "Jeorjii", "DE": "Almaañ", "GH": "Ganaa", "GI": "Jibraltaar", "GR": "Geres", "GL": "Gorland", "GD": "Gerenad", "GP": "Guwaadaluup", "GU": "Gwam", "GT": "Gwaatemalaa", "GG": "Gernsee", "GN": "Gine", "GW": "Gine-Bisaawo", "GY": "Giyaan", "HT": "Haytii", "HM": "Duuɗe Heard e McDonald", "VA": "Dowla Watikaan", "HN": "Honduraas", "HK": "Hong Kong", "HU": "Hunngarii", "IS": "Iselannd", "IN": "Enndo", "ID": "Enndonesii", "IR": "Iraan", "IQ": "Iraak", "IE": "Irlannd", "IM": "Duuɗe Man", "IL": "Israayel", "IT": "Italii", "JM": "Jamayka", "JP": "Sapoo", "JE": "Jersee", "JO": "Jordani", "KZ": "Kasakstan", "KE": "Keñaa", "KI": "Kiribati", "KP": "Koree Wuoyla", "KR": "Koree Worgo", "KW": "Kuweyt", "KG": "Kirgistaan", "LA": "Laos", "LV": "Letonii", "LB": "Libaan", "LS": "Lesoto", "LR": "Liberiyaa", "LY": "Libi", "LI": "Liyestenstayn", "LT": "Litwanii", "LU": "Luksemmburg", "MO": "Makaw", "MK": "Maseduwaan", "MG": "Madagaskaar", "MW": "Malaawi", "MY": "Malesii", "MV": "Maldiwe", "ML": "Maali", "MT": "Malta", "MH": "Duuɗe Marsaal", "MQ": "Martinik", "MR": "Muritani", "MU": "Moriis", "YT": "Mayot", "MX": "Meksik", "FM": "Mikronesii", "MD": "Moldawii", "MC": "Monako", "MN": "Monngolii", "ME": "Montenegoro", "MS": "Monseraat", "MA": "Maruk", "MZ": "Mosammbik", "MM": "Miyanmaar", "NA": "Namibii", "NR": "Nawuru", "NP": "Nepaal", "NL": "Holannda", "NC": "Nuwell Kaledonii", "NZ": "Nuwel Selannd", "NI": "Nikaraguwaa", "NE": "Nijeer", "NG": "Nijeriyaa", "NU": "Niyuwe", "NF": "Duuɗe Norfolk", "MP": "Duuɗe Mariyaan Wuoyla", "NO": "Norwees", "OM": "Omaan", "PK": "Pakistaan", "PW": "Palaw", "PS": "Palestiin", "PA": "Panamaa", "PG": "Papuwaa Nuwel Gine", "PY": "Paraguwaay", "PE": "Peru", "PH": "Filippiin", "PN": "Duuɗe Pitkairn", "PL": "Poloñ", "PT": "Portugaal", "PR": "Porto Riko", "QA": "Kataar", "RE": "Reeniyon", "RO": "Rumanii", "RU": "Riisii", "RW": "Ruwannɗaa", "BL": "Sen Bartelemi", "SH": "Sen Helena", "KN": "Sen Kitts e Newis", "LC": "Sen Lusiya", "MF": "Sen Martin", "PM": "Sen Piyeer e Mikelon", "VC": "Sen Winsan e Grenadiin", "WS": "Samowaa", "SM": "San Marino", "ST": "Sawo Tome e Piriinsipe", "SA": "Arabi Sawdit", "SN": "Senegaal", "RS": "Serbii", "SC": "Seysel", "SL": "Siyera Leyoon", "SG": "Sinngapuur", "SK": "Slowakii", "SI": "Slowenii", "SB": "Duuɗe Solomon", "SO": "Somaali", "ZA": "Afrik Worgo", "GS": "Jeorjii Worgo e Duuɗe Sandwich Worgo", "ES": "Espaañ", "LK": "Siri Lanka", "SD": "Sudaan", "SR": "Surinaam", "SJ": "Svalbard e Jan Mayen", "SZ": "Eswatini", "SE": "Suwed", "CH": "Suwis", "SY": "Sirii", "TW": "Taywaan", "TJ": "Tajikistaan", "TZ": "Tansanii", "TH": "Taylannd", "TL": "Timor Fuɗnaange", "TG": "Togo", "TK": "Tokelaw", "TO": "Tonnga", "TT": "Tirinidaad e Tobaago", "TN": "Tunisii", "TR": "Turkii", "TM": "Turkmenistaan", "TC": "Duuɗe Turks e Kaykos", "TV": "Tuwalu", "UG": "Uganndaa", "UA": "Ukereen", "AE": "Emiraat Araab Denntuɗe", "GB": "Laamu Dentungu", "US": "Dowlaaji Dentuɗi", "UM": "Duuɗe Tokosɗe Dowlaaji Dentuɗi", "UY": "Uruguwaay", "UZ": "Usbekistaan", "VU": "Wanuwatu", "VE": "Wenesuwelaa", "VN": "Wiyetnaam", "BQ": "Boneyr", "CW": "Kurasaw", "SS": "Sudaan Worgo", "SX": "Sin Maarten", "XK": "Kosowo", "VG": "Duuɗe Wirjin Biritaan", "VI": "Duuɗe Wirjin Dowlaaji Dentuɗi", "WF": "Wallis e Futuna", "EH": "Saharaa Hirnaange", "YE": "Yemen", "ZM": "Sammbi", "ZW": "Simbaabuwe"
   }
