@@ -1,6 +1,6 @@
 name: suwaya_time
 description: A pure Dart astronomical and temporal engine that divides the Maghrib-to-Maghrib cycle into 24 virtual Suwayas.
-version: 2.0.0
+version: 3.0.0
 publish_to: 'none'
 
 environment:
