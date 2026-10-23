@@ -459,7 +459,9 @@
     "period_4": "Quarto Periodo",
     "period_5": "Quinto Periodo",
     "period_6": "Sesto Periodo",
-    "period_7": "Settimo Periodo"
+    "period_7": "Settimo Periodo",
+    "isha": "Isha",
+    "qiyam": "Seconda metà della notte"
   },
   "prayers": {
     "fajr": "Fajr",

@@ -515,7 +515,9 @@
     "period_4": "Fjerde Periode",
     "period_5": "Femte Periode",
     "period_6": "Sjette Periode",
-    "period_7": "Syvende Periode"
+    "period_7": "Syvende Periode",
+    "isha": "Isha",
+    "qiyam": "Nattens anden halvdel"
   },
   "prayers": {
     "fajr": "Fajr",
