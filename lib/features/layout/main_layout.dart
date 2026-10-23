@@ -27,16 +27,18 @@ class MainLayout extends ConsumerWidget {
       backgroundColor: bgColor,
       extendBody: true,
       body: RepaintBoundary(child: navigationShell),
-      bottomNavigationBar: AnimatedSlide(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOutCubic,
-        offset: hideBottomBar ? const Offset(0, 1.5) : Offset.zero,
-        child: _buildFloatingNavBar(
-          context,
-          navigationShell.currentIndex,
-          isDark,
-          primaryColor,
-          navigationShell,
+      bottomNavigationBar: RepaintBoundary(
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubic,
+          offset: hideBottomBar ? const Offset(0, 1.5) : Offset.zero,
+          child: _buildFloatingNavBar(
+            context,
+            navigationShell.currentIndex,
+            isDark,
+            primaryColor,
+            navigationShell,
+          ),
         ),
       ),
     );

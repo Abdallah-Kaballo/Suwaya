@@ -8,6 +8,7 @@ import '../../features/settings/settings_provider.dart';
 
 final virtualTimeNotifier = ValueNotifier<String>("00|00|00");
 final virtualDateTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
+final dialQuantizedTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
 final Map<String, SuwayaDay> _dayCache = {};
 
 // استبدل الكلاس AstroNotifier بالمقطع التالي:
@@ -120,6 +121,7 @@ class AstroNotifier extends Notifier<AstroState> {
 
       Future.microtask(() {
         virtualDateTimeNotifier.value = initialState.virtualTime;
+        dialQuantizedTimeNotifier.value = initialState.virtualTime;
         virtualTimeNotifier.value =
             _formatVirtualTime(initialState.currentSuwayaTime);
       });
@@ -188,23 +190,25 @@ class AstroNotifier extends Notifier<AstroState> {
     }
   }
 
-  /// تحديث حي كل 250ms يعتمد على UTC الحقيقي لمنع أي انحراف أثناء التوقيت الصيفي
   void _startUITicker(SuwayaDay day, SavedLocation? loc) {
     _uiTimer?.cancel();
-    int lastCivilSecond = -1;
+    int lastCivilMinute = -1;
+    int lastQuantized15SecSlot = -1;
     String lastFormattedVirtual = virtualTimeNotifier.value;
 
-    _uiTimer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+    void scheduleNextAdaptiveTick() {
+      _uiTimer?.cancel();
       final nowUtc = DateTime.now().toUtc();
       final tickNow = _getCityNowFromUtc(loc, nowUtc);
 
-      // عند عبور منتصف الليل المدني (00:00)، نعيد بناء المزود لتحديث civilDayIbadat لليوم الجديد
+      // 1. عند عبور منتصف الليل المدني (00:00)، نعيد بناء المزود لتحديث مواقيت اليوم الجديد
       if (_lastCivilDay != -1 && tickNow.day != _lastCivilDay) {
         _lastCivilDay = tickNow.day;
         Future.microtask(() => ref.invalidateSelf());
         return;
       }
 
+      // 2. حساب الحالة الفلكية الحالية وتحديث الساعة السويعية الرقمية
       final newState = SuwayaTimeEngine.calculateCurrentState(
         day,
         tickNow,
@@ -217,11 +221,58 @@ class AstroNotifier extends Notifier<AstroState> {
         virtualTimeNotifier.value = formatted;
       }
 
-      if (tickNow.second != lastCivilSecond) {
-        lastCivilSecond = tickNow.second;
+      // 3. تحديث الوقت المدني عند تغير الدقيقة (أو في المرة الأولى) لأن جميع الساعات المدنية تعرض HH:mm
+      final currentEpochMinute = tickNow.millisecondsSinceEpoch ~/ 60000;
+      if (currentEpochMinute != lastCivilMinute) {
+        lastCivilMinute = currentEpochMinute;
         virtualDateTimeNotifier.value = tickNow;
       }
-    });
+
+      // 4. تحديث زاوية القرص الفلكي مرة واحدة فقط كل 15 ثانية لمنع إعادة رسم الحلقات غير الضرورية
+      final current15SecSlot = tickNow.millisecondsSinceEpoch ~/ 15000;
+      if (current15SecSlot != lastQuantized15SecSlot) {
+        lastQuantized15SecSlot = current15SecSlot;
+        dialQuantizedTimeNotifier.value = tickNow;
+      }
+
+      // 5. حساب المدة الفيزيائية الدقيقة المتبقية حتى بداية الثانية الافتراضية التالية في الفترة الحالية
+      final activePeriod = newState.currentPeriod;
+      final sCount =
+          activePeriod.suwayasCount > 0 ? activePeriod.suwayasCount : 1;
+      final periodMicro = activePeriod.totalDuration.inMicroseconds;
+
+      Duration nextWakeDelay;
+      if (periodMicro > 0 && activePeriod.startUtc != null) {
+        final totalVirtualSecondsInPeriod = sCount * 3600;
+        final elapsedMicro =
+            nowUtc.difference(activePeriod.startUtc!).inMicroseconds;
+
+        // رقم الثانية الافتراضية الحالية داخل الفترة
+        final currentVirtualSecIndex =
+            (elapsedMicro * totalVirtualSecondsInPeriod) ~/ periodMicro;
+        final nextVirtualSecIndex = currentVirtualSecIndex + 1;
+
+        // اللحظة المايكروثانية الدقيقة لدخول الثانية الافتراضية التالية
+        final nextBoundaryMicro = (nextVirtualSecIndex * periodMicro +
+                totalVirtualSecondsInPeriod -
+                1) ~/
+            totalVirtualSecondsInPeriod;
+
+        final remainingMicro = nextBoundaryMicro - elapsedMicro;
+        nextWakeDelay = Duration(
+          microseconds: remainingMicro.clamp(50000, 5000000), // بين 50ms و5s كحدود أمان
+        );
+      } else {
+        // مسار احتياطي: بداية الثانية الفيزيائية التالية
+        nextWakeDelay = Duration(
+          milliseconds: 1000 - (nowUtc.millisecond % 1000),
+        );
+      }
+
+      _uiTimer = Timer(nextWakeDelay, scheduleNextAdaptiveTick);
+    }
+
+    scheduleNextAdaptiveTick();
   }
 
   void _scheduleSmartStateUpdate(

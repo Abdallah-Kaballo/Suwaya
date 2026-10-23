@@ -30,7 +30,7 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
     _loadAndSyncTier();
   }
 
-  bool get _isStoreSupported =>
+  bool get isStoreSupported =>
       (Platform.isAndroid || Platform.isIOS) &&
       AppBootstrap.isRevenueCatConfigured;
 
@@ -42,23 +42,23 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
       orElse: () => SupporterTier.none,
     );
 
-    if (_isStoreSupported) {
+    if (isStoreSupported) {
+      Purchases.addCustomerInfoUpdateListener((customerInfo) {
+        final updatedTier = _extractTierFromCustomerInfo(customerInfo);
+        _persistTier(updatedTier);
+      });
       await syncWithStore();
     }
   }
 
-  /// مزامنة الشارة مع المشتريات الفعلية في المتجر (دعم الاشتراكات والمشتريات غير المتجددة)
+  /// مزامنة الشارة مع المشتريات الفعلية في المتجر (بما في ذلك انتهاء الاشتراك أو الاسترداد)
   Future<SupporterTier> syncWithStore() async {
-    if (!_isStoreSupported) return state;
+    if (!isStoreSupported) return state;
     try {
       final customerInfo = await Purchases.getCustomerInfo();
       final detected = _extractTierFromCustomerInfo(customerInfo);
-      // لا نستبدل الشارة المحفوظة محلياً بـ none إذا كانت المعاملة استهلاكية سبق توثيقها
-      if (detected != SupporterTier.none) {
-        await _persistTier(detected);
-        return detected;
-      }
-      return state;
+      await _persistTier(detected);
+      return detected;
     } catch (e) {
       debugPrint('RevenueCat sync error: $e');
       return state;
@@ -93,25 +93,18 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
   Future<void> _persistTier(SupporterTier tier) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('supporter_tier', tier.name);
-    state = tier;
+    if (mounted) {
+      state = tier;
+    }
   }
 
   Future<({bool success, bool userCancelled, String? errorMessage})>
       purchaseTierPackage(SupporterTier targetTier) async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
+    if (!isStoreSupported) {
       return (
         success: false,
         userCancelled: false,
-        errorMessage: 'In-app purchases are only supported on Android and iOS.',
-      );
-    }
-
-    if (!AppBootstrap.isRevenueCatConfigured) {
-      return (
-        success: false,
-        userCancelled: false,
-        errorMessage:
-            'Store billing is not configured for this build (--dart-define API key missing).',
+        errorMessage: null, // ستتكفل الواجهة بعرض رسالة مترجمة مناسبة
       );
     }
 
@@ -119,32 +112,32 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
       final offerings = await Purchases.getOfferings();
       final currentOffering = offerings.current;
       if (currentOffering == null) {
-        return (
-          success: false,
-          userCancelled: false,
-          errorMessage: 'No active store offerings found.',
-        );
+        return (success: false, userCancelled: false, errorMessage: null);
       }
 
       final package = currentOffering.getPackage(targetTier.packageId);
       if (package == null) {
-        return (
-          success: false,
-          userCancelled: false,
-          errorMessage: 'Package "${targetTier.packageId}" is not available.',
-        );
+        return (success: false, userCancelled: false, errorMessage: null);
       }
 
-      await Purchases.purchase(PurchaseParams.package(package));
+      // استخدام النتيجة المعادة مباشرة من عملية الشراء
+      final purchaseResult = await Purchases.purchase(
+        PurchaseParams.package(package),
+      );
+      final verifiedTier =
+          _extractTierFromCustomerInfo(purchaseResult.customerInfo);
 
-      final customerInfo = await Purchases.getCustomerInfo();
-      final verifiedTier = _extractTierFromCustomerInfo(customerInfo);
+      if (verifiedTier != SupporterTier.none) {
+        await _persistTier(verifiedTier);
+        return (success: true, userCancelled: false, errorMessage: null);
+      }
 
-      final finalTier =
-          verifiedTier != SupporterTier.none ? verifiedTier : targetTier;
-      await _persistTier(finalTier);
-
-      return (success: true, userCancelled: false, errorMessage: null);
+      // في حال كانت الدفعة معلقة (Pending) ولم تُعتمد بعد
+      return (
+        success: false,
+        userCancelled: false,
+        errorMessage: null,
+      );
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
@@ -153,27 +146,25 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
       return (
         success: false,
         userCancelled: false,
-        errorMessage: e.message ?? 'Purchase failed.',
+        errorMessage: null,
       );
     } catch (e) {
+      debugPrint('Purchase error: $e');
       return (
         success: false,
         userCancelled: false,
-        errorMessage: e.toString(),
+        errorMessage: null,
       );
     }
   }
 
   Future<bool> restorePurchases() async {
-    if (!_isStoreSupported) return false;
+    if (!isStoreSupported) return false;
     try {
       final customerInfo = await Purchases.restorePurchases();
       final restoredTier = _extractTierFromCustomerInfo(customerInfo);
-      if (restoredTier != SupporterTier.none) {
-        await _persistTier(restoredTier);
-        return true;
-      }
-      return false;
+      await _persistTier(restoredTier);
+      return restoredTier != SupporterTier.none;
     } catch (e) {
       debugPrint('Restore purchases error: $e');
       return false;

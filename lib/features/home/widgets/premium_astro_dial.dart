@@ -629,7 +629,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         alignment: Alignment.center,
         children: [
           ValueListenableBuilder<DateTime>(
-            valueListenable: virtualDateTimeNotifier,
+            valueListenable: dialQuantizedTimeNotifier,
             builder: (context, liveTime, _) {
               // 🌟 تكميم الوقت المستخدم لدوران القرص والعقرب إلى خطوات كل 15 ثانية
               // (15 ثانية تعادل 0.06 درجة فقط، أي أقل من 0.2 بكسل غير مرئية للعين)
@@ -814,8 +814,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       height: handLength,
       cacheHeight: (handLength * dpr).round(),
       fit: BoxFit.contain,
-      filterQuality: FilterQuality.medium,
+      filterQuality: FilterQuality.low, // أسرع على الـ GPU عند التدوير
     );
+
+    // إزالة ImageFilter.blur المزدوج الذي يسبب ثقل الـ GPU عند فتح الشاشة الرئيسية
+    final Widget styledHand = isDark
+        ? ColorFiltered(
+            colorFilter: const ColorFilter.matrix(silverWhiteMatrix),
+            child: baseHandImage,
+          )
+        : baseHandImage;
 
     return IgnorePointer(
       child: Transform.rotate(
@@ -823,42 +831,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: Transform.translate(
           offset: Offset(0, centerOffsetY),
           child: RepaintBoundary(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Transform.translate(
-                  offset: const Offset(0, 2.0),
-                  child: ImageFiltered(
-                    imageFilter: ui.ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withValues(alpha: isDark ? 0.80 : 0.45),
-                        BlendMode.srcIn,
-                      ),
-                      child: baseHandImage,
-                    ),
-                  ),
-                ),
-                if (isDark)
-                  ImageFiltered(
-                    imageFilter: ui.ImageFilter.blur(sigmaX: 6.5, sigmaY: 6.5),
-                    child: ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        const Color(0xFFE0F2FE).withValues(alpha: 0.75),
-                        BlendMode.srcIn,
-                      ),
-                      child: baseHandImage,
-                    ),
-                  ),
-                if (isDark)
-                  ColorFiltered(
-                    colorFilter: const ColorFilter.matrix(silverWhiteMatrix),
-                    child: baseHandImage,
-                  )
-                else
-                  baseHandImage,
-              ],
-            ),
+            child: styledHand,
           ),
         ),
       ),
@@ -968,6 +941,26 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     final double centerDiameter = widget.size * (kInnerR - 0.02);
     const Color centerClockColor = Color(0xFFFFF3C4);
 
+    const TextStyle commonClockStyle = TextStyle(
+      fontWeight: FontWeight.w600, // تخفيف السماكة من w900 إلى w600 الأكثر أناقة
+      color: centerClockColor,
+      fontFamily: 'Tajawal', // خط أنعم وأكثر تناسقاً مع هوية التطبيق
+      letterSpacing: 0.5, // تقليل التباعد للسماح بتكبير الأرقام داخل الدائرة
+      height: 1.0,
+      fontFeatures: [ui.FontFeature.tabularFigures()],
+      shadows: [
+        Shadow(
+          color: Colors.black,
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+        Shadow(
+          color: Colors.black87,
+          blurRadius: 16,
+        ),
+      ],
+    );
+
     if (!settings.useAstroTimeForIbadat) {
       return IgnorePointer(
         child: SizedBox(
@@ -975,7 +968,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           height: centerDiameter,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: ValueListenableBuilder<DateTime>(
                 valueListenable: virtualDateTimeNotifier,
                 builder: (context, liveTime, child) {
@@ -991,24 +984,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                     child: Text(
                       civilTimeString,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.w900,
-                        color: centerClockColor,
-                        fontFamily: 'Inter',
-                        letterSpacing: 1.2,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 10,
-                            offset: Offset(0, 2),
-                          ),
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 20,
-                          ),
-                        ],
-                      ),
+                      style: commonClockStyle.copyWith(fontSize: 46),
                     ),
                   );
                 },
@@ -1029,9 +1005,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             alignment: Alignment.center,
             children: [
               Align(
-                alignment: Alignment.center,
+                alignment: const Alignment(0.0, -0.06),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: ValueListenableBuilder<String>(
                     valueListenable: virtualTimeNotifier,
                     builder: (context, virtualTime, child) {
@@ -1040,25 +1016,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                         child: Text(
                           virtualTime,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w900,
-                            color: centerClockColor,
-                            fontFamily: 'Inter',
-                            letterSpacing: 1.4,
-                            fontFeatures: [ui.FontFeature.tabularFigures()],
-                            shadows: [
-                              Shadow(
-                                color: Colors.black,
-                                blurRadius: 10,
-                                offset: Offset(0, 2),
-                              ),
-                              Shadow(
-                                color: Colors.black,
-                                blurRadius: 20,
-                              ),
-                            ],
-                          ),
+                          style: commonClockStyle.copyWith(fontSize: 44),
                         ),
                       );
                     },
@@ -1066,7 +1024,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                 ),
               ),
               const Align(
-                alignment: Alignment(0.0, 0.58),
+                alignment: Alignment(0.0, 0.62),
                 child: TimeSpeedIndicator(),
               ),
             ],

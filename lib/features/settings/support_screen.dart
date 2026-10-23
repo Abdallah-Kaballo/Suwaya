@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:purchases_flutter/purchases_flutter.dart';
+import '../../core/bootstrap/app_bootstrap.dart';
 import 'supporter_provider.dart';
 
 class SupportScreen extends ConsumerStatefulWidget {
@@ -24,6 +25,13 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   }
 
   Future<void> _fetchStoreOfferings() async {
+    if (!AppBootstrap.isRevenueCatConfigured) {
+      if (mounted) {
+        setState(() => _isLoadingOfferings = false);
+      }
+      return;
+    }
+
     try {
       final offerings = await Purchases.getOfferings();
       if (offerings.current != null) {
@@ -268,39 +276,6 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
             onTap: () => _processStorePurchase(SupporterTier.diamond),
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.blueAccent.withValues(alpha: 0.1)
-                  : Colors.blue.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.blueAccent.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  LucideIcons.info,
-                  color: Colors.blueAccent,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'support.auto_renew_note'.tr(),
-                    style: TextStyle(
-                      color: textColor.withValues(alpha: 0.8),
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
           TextButton(
             onPressed: _handleRestorePurchases,
             child: Text(

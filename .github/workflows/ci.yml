@@ -72,4 +72,4 @@ jobs:
           ORG_GRADLE_PROJECT_allowDebugReleaseSign: "true"
         run: |
           flutter build apk --release
-          flutter build appbundle --release
+          flutter build appbundle --release --dart-define=REVENUECAT_GOOGLE_API_KEY=goog_xxxxxxxxxxxxxxxxx

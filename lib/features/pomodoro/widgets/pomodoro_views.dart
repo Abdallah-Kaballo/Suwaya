@@ -459,6 +459,18 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     );
   }
 
+  /// تنسيق عدد جلسات البومودورو حسب قواعد اللغة (1 جلسة، 2 جلستان، 3 جلسات...)
+  String _formatSessionsCount(BuildContext context, int count) {
+    final lang = context.locale.languageCode;
+    if (lang == 'ar') {
+      if (count == 1) return '1 جلسة';
+      if (count == 2) return '2 جلستان';
+      if (count >= 3 && count <= 10) return '$count جلسات';
+      return '$count جلسة';
+    }
+    return count == 1 ? '1 Session' : '$count Sessions';
+  }
+
   ({int globalIndex, int minute}) _dateTimeToAstroParts(
     DateTime time,
     AstroState astroState,
@@ -1278,13 +1290,13 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${opt.pomodoroCount} ${'nav.pomodoro'.tr()} · ${opt.flowSpeed.toStringAsFixed(2)}x',
-                              style: TextStyle(
-                                color: isSelected ? primaryColor : textColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                         '${_formatSessionsCount(context, opt.pomodoroCount)} · ${opt.flowSpeed.toStringAsFixed(2)}x',
+                       style: TextStyle(
+                        color: isSelected ? primaryColor : textColor,
+                         fontWeight: FontWeight.bold,
+                       fontSize: 15,
                               ),
-                            ),
+                                 ),
                             const SizedBox(height: 2),
                             Text(
                               subtitleText,
