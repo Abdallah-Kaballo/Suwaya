@@ -460,8 +460,10 @@ class SuwayaTimeFormatter {
   static const String civilTimeFormat12Hour = '12-hour';
   static const String civilTimeFormat24Hour = '24-hour';
 
-  static String _safeLocale(String locale) =>
-      (locale == 'ff' || locale == 'ug') ? 'en' : locale;
+  static String _safeLocale(String locale) {
+    if (locale.isEmpty || locale == 'ff' || locale == 'ug') return 'en';
+    return DateFormat.localeExists(locale) ? locale : 'en';
+  }
 
   /// تنسيق كائن القيمة الصريح CivilWallClock وفق إعدادات 12/24 ساعة واتجاه اللغة
   static String formatCivilWallClock(

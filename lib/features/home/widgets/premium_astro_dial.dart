@@ -409,6 +409,22 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     }
   }
 
+  /// بناء مواقيت العبادات المتطابقة 100% مع مراسي الدورة الفلكية النشطة (من المغرب إلى المغرب)
+  IbadatTimings _cycleAlignedIbadat(AstroState state) {
+    final anchors = state.cycleAnchors;
+    return IbadatTimings(
+      maghrib: anchors.cycleStartMaghrib,
+      isha: anchors.cycleIsha,
+      fajr: anchors.cycleFajr,
+      sunrise: anchors.cycleSunrise,
+      dhuhr: anchors.cycleDhuhr,
+      asr: anchors.cycleAsr,
+      nextFajr: anchors.cycleFajr,
+      calculatedSunset: anchors.calculatedStartSunset,
+      nightParts: state.ibadatTimings.nightParts,
+    );
+  }
+
   List<Map<String, dynamic>> _activeNightMarkers(AstroState state) {
     final settings = ref.read(settingsProvider);
     final markers = <Map<String, dynamic>>[];
@@ -425,7 +441,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       markers.add({
         'id': 'sunrise',
         'n': 'ibadat.sunrise'.tr(),
-        't': state.ibadatTimings.sunrise,
+        't': state.cycleAnchors.cycleSunrise,
       });
     }
     return markers;
@@ -577,7 +593,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
 
     final precomputedMarkerLayouts = layoutDialMarkers(
       size: Size(widget.size, widget.size),
-      ibadat: astroState.ibadatTimings,
+      ibadat: _cycleAlignedIbadat(astroState),
       nightMarkers: activeNightMarkers,
       tasks: List.of(_currentDialTasks),
       design: selectedDesign,
@@ -686,7 +702,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                             ),
                             _buildLayer(
                               RailwayRingPainter(
-                                ibadat: astroState.ibadatTimings,
+                                ibadat: _cycleAlignedIbadat(astroState),
                                 nightMarkers: activeNightMarkers,
                                 tasks: List.of(_currentDialTasks),
                                 periods: astroState.periods,

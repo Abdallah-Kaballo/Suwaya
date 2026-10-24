@@ -146,13 +146,16 @@ class AstroNotifier extends Notifier<AstroState> {
         },
         onResume: () {
           final resumeUtc = DateTime.now().toUtc();
-          final resumeWall = _getCityNowFromUtc(loc, resumeUtc);
+          final resumeOffset = _getUtcOffsetForInstant(loc, resumeUtc);
+          final resumeWall = resumeUtc.add(resumeOffset);
           final cycleEndUtc = generatedDay.cycleAnchors.cycleEndMaghribUtc;
           final hasCycleEnded = cycleEndUtc != null
               ? !resumeUtc.isBefore(cycleEndUtc)
               : !resumeWall.isBefore(generatedDay.cycleAnchors.cycleEndMaghrib);
 
-          if (resumeWall.day != _lastCivilDay || hasCycleEnded) {
+          if (resumeWall.day != _lastCivilDay ||
+              hasCycleEnded ||
+              resumeOffset != temporalContext.timezone.utcOffset) {
             ref.invalidateSelf();
             return;
           }
@@ -178,7 +181,7 @@ class AstroNotifier extends Notifier<AstroState> {
           _scheduleSmartStateUpdate(
             generatedDay,
             loc,
-            _getUtcOffsetForInstant(loc, resumeUtc),
+            resumeOffset,
           );
           _startUITicker(generatedDay, loc);
         },

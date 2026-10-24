@@ -12,7 +12,7 @@ import '../dial_models.dart';
 
 List<DialMarkerLayout> layoutDialMarkers({
   required Size size,
-  required IbadatTimings ibadat, // 🌟 نوع صريح بدلاً من dynamic
+  required IbadatTimings ibadat,
   required List<Map<String, dynamic>> nightMarkers,
   required List<DialTask> tasks,
   required DialDesign design,
@@ -29,6 +29,16 @@ List<DialMarkerLayout> layoutDialMarkers({
     outerTrackTip - trackStep,
     outerTrackTip - trackStep * 2,
   ];
+
+  double normalizeAngle(double angle) {
+    final mod = angle % (2 * pi);
+    return mod < 0 ? mod + (2 * pi) : mod;
+  }
+
+  double circularAngleDistance(double a, double b) {
+    final diff = (normalizeAngle(a) - normalizeAngle(b)).abs();
+    return diff > pi ? (2 * pi) - diff : diff;
+  }
 
   final prayerItems = <UnifiedDialItem>[
     UnifiedDialItem(
@@ -119,8 +129,7 @@ List<DialMarkerLayout> layoutDialMarkers({
     for (var track = 0; track < occupied.length; track++) {
       var isFree = true;
       for (final existing in occupied[track]) {
-        var difference = (angle - existing['angle']!).abs();
-        if (difference > pi) difference = 2 * pi - difference;
+        final difference = circularAngleDistance(angle, existing['angle']!);
         if (difference < taskMargin + existing['margin']!) {
           isFree = false;
           break;

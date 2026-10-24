@@ -441,6 +441,7 @@ class SuwayaSetupView extends ConsumerStatefulWidget {
 
 class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
   late final DateTime _anchoredStartTime;
+  late final DateTime _anchoredStartUtc;
   bool? _localStartUseAstroOverride;
   bool _useDefaultNextPrayer = true;
   DateTime? _customEndTime;
@@ -451,6 +452,14 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
   @override
   void initState() {
     super.initState();
+    final nowUtc = DateTime.now().toUtc();
+    _anchoredStartUtc = DateTime.utc(
+      nowUtc.year,
+      nowUtc.month,
+      nowUtc.day,
+      nowUtc.hour,
+      nowUtc.minute,
+    );
     final cityNow = virtualDateTimeNotifier.value;
     _anchoredStartTime = DateTime.utc(
       cityNow.year,
@@ -1266,6 +1275,10 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                         SuwayaSessionConfig(
                           anchoredStartTime: _anchoredStartTime,
                           endTime: effectiveEndTime,
+                          anchoredStartUtc: _anchoredStartUtc,
+                          endUtc: _anchoredStartUtc.add(
+                            effectiveEndTime.difference(_anchoredStartTime),
+                          ),
                           endLabel: endLabel,
                           totalPomodoros: selectedOpt.pomodoroCount,
                           flowSpeed: selectedOpt.flowSpeed,

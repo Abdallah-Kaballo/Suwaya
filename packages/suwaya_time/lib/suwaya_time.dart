@@ -14,7 +14,7 @@ export 'src/engine/suwaya_recurrence_engine.dart';
 export 'src/engine/suwaya_binary_codec.dart';
 export 'src/engine/suwaya_ics_exporter.dart';
 // إخفاء SuwayaIcsExporter من suwaya_live_clock لمنع التعارض المزدوج
-export 'src/engine/suwaya_live_clock.dart' hide SuwayaIcsExporter;
+export 'src/engine/suwaya_live_clock.dart';
 export 'src/engine/suwaya_schedule_engine.dart';
 
 // 3. الحاسبات الفلكية، المحلل القطبي، كتالوج المواسم، والمولدات

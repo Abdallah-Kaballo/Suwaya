@@ -183,7 +183,8 @@ class NotificationScheduler {
       } catch (_) {}
     }
 
-    return DateTime(
+    // في حال الإحداثيات المخصصة بدون معرّف منطقة زمنية، نحسب الفارق الزمني الحقيقي نسبةً لوقت المدينة الحالي
+    final cleanTargetUtc = DateTime.utc(
       targetCityWallTime.year,
       targetCityWallTime.month,
       targetCityWallTime.day,
@@ -191,6 +192,16 @@ class NotificationScheduler {
       targetCityWallTime.minute,
       targetCityWallTime.second,
     );
+    final cleanCityNowUtc = DateTime.utc(
+      cityNowWallTime.year,
+      cityNowWallTime.month,
+      cityNowWallTime.day,
+      cityNowWallTime.hour,
+      cityNowWallTime.minute,
+      cityNowWallTime.second,
+    );
+    final realDelta = cleanTargetUtc.difference(cleanCityNowUtc);
+    return DateTime.now().add(realDelta);
   }
 
   String _getAssetAudioPath(String? soundId) {

@@ -1,6 +1,6 @@
 import 'package:hijri/hijri_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
-
+import '../calculators/polar_cycle_synthesizer.dart';
 import '../calculators/prayer_calculator.dart';
 import '../models/astro_models.dart';
 import 'suwaya_time_engine.dart';
@@ -145,6 +145,16 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     }
   }
 
+  int daysInHijriMonth(int hYear, int hMonth) {
+    final safeMonth = hMonth.clamp(1, 12);
+    try {
+      return HijriCalendar().getDaysInMonth(hYear, safeMonth);
+    } catch (_) {
+      return (safeMonth.isOdd || (safeMonth == 12 && _isTabularLeap(hYear)))
+          ? 30
+          : 29;
+    }
+  }
   /// خوارزمية التقويم الهجري القياسي (Kuwaiti/Tabular Arithmetic) للتواريخ البعيدة خارج جدول أم القرى
   static HijriDate _tabularHijriFromGregorian(
     DateTime gregUtc,
@@ -324,10 +334,20 @@ class TimezoneResolver {
       }
     }
 
-    final offset = fallbackOffset ?? DateTime.now().timeZoneOffset;
+    if (fallbackOffset != null) {
+      return TimezoneContext(
+        timezoneId: null,
+        utcOffset: fallbackOffset,
+        isDaylightSavingTime: false,
+        confidence: TemporalConfidence.adjusted,
+      );
+    }
+
+    // حساب إزاحة النظام المحلي في نفس اللحظة التاريخية/المستقبلية المطلوبة وليس اللحظة الحالية
+    final localAtInstant = utc.toLocal();
     return TimezoneContext(
       timezoneId: null,
-      utcOffset: offset,
+      utcOffset: localAtInstant.timeZoneOffset,
       isDaylightSavingTime: false,
       confidence: TemporalConfidence.fallback,
     );
@@ -408,23 +428,27 @@ class TemporalContextEngine {
     required double latitude,
     required double longitude,
     required String? timezoneId,
+    required Duration? fallbackOffset,
     required CalculationMethodType methodType,
     required MadhabType madhabType,
     required HighLatitudeRuleType highLatRuleType,
     required double customFajrAngle,
     required double customIshaAngle,
     required Map<PrayerKey, int>? manualOffsets,
+    required PolarResolutionPolicy polarPolicy,
   }) {
     final latKey = (latitude * 10000).round();
     final lngKey = (longitude * 10000).round();
+    final fallbackKey = fallbackOffset?.inMinutes.toString() ?? 'none';
     final offsetsKey = manualOffsets == null || manualOffsets.isEmpty
         ? ''
-        : manualOffsets.entries
+        : (manualOffsets.entries.toList()
+              ..sort((a, b) => a.key.index.compareTo(b.key.index)))
             .map((e) => '${e.key.index}:${e.value}')
             .join(',');
-    return '$latKey:$lngKey:${timezoneId ?? ''}:${methodType.index}:'
+    return '$latKey:$lngKey:${timezoneId ?? ''}:$fallbackKey:${methodType.index}:'
         '${madhabType.index}:${highLatRuleType.index}:'
-        '$customFajrAngle:$customIshaAngle:$offsetsKey';
+        '$customFajrAngle:$customIshaAngle:${polarPolicy.index}:$offsetsKey';
   }
 
   /// توليد السياق الزمني الكامل للحظة معينة مع تخزين مؤقت تلقائي عالي السرعة O(1)
@@ -443,6 +467,7 @@ class TemporalContextEngine {
     Map<PrayerKey, int>? manualOffsets,
     int hijriAdjustmentDays = 0,
     HijriCalendarProvider hijriProvider = _defaultHijriProvider,
+    PolarResolutionPolicy polarPolicy = PolarResolutionPolicy.nearestLatitude45,
     SuwayaDay? cachedDay,
   }) {
     final utcNow = instantUtc.toUtc();
@@ -465,12 +490,14 @@ class TemporalContextEngine {
       latitude: latitude,
       longitude: longitude,
       timezoneId: timezoneId,
+      fallbackOffset: fallbackOffset,
       methodType: methodType,
       madhabType: madhabType,
       highLatRuleType: highLatRuleType,
       customFajrAngle: customFajrAngle,
       customIshaAngle: customIshaAngle,
       manualOffsets: manualOffsets,
+      polarPolicy: polarPolicy,
     );
 
     final civilCacheKey =
@@ -515,31 +542,32 @@ class TemporalContextEngine {
             ? cityNowWall.subtract(const Duration(days: 1))
             : cityNowWall;
 
+    final nextDayAnchor = anchorDateForCycle.add(const Duration(days: 1));
+    final cycleStartOffset = offsetAt(
+      DateTime.utc(
+        anchorDateForCycle.year,
+        anchorDateForCycle.month,
+        anchorDateForCycle.day,
+        12,
+      ),
+    );
+    final cycleNextDayOffset = offsetAt(
+      DateTime.utc(
+        nextDayAnchor.year,
+        nextDayAnchor.month,
+        nextDayAnchor.day,
+        12,
+      ),
+    );
+
     final cycleCacheKey =
-        '${anchorDateForCycle.year}-${anchorDateForCycle.month}-${anchorDateForCycle.day}_$configKey';
+        '${anchorDateForCycle.year}-${anchorDateForCycle.month}-${anchorDateForCycle.day}_'
+        '${cycleStartOffset.inMinutes}_${cycleNextDayOffset.inMinutes}_$configKey';
 
     SuwayaDay? baseDay = cachedDay ?? _internalDayCache.remove(cycleCacheKey);
     if (baseDay != null) {
       _internalDayCache[cycleCacheKey] = baseDay;
     } else {
-      final nextDayAnchor = anchorDateForCycle.add(const Duration(days: 1));
-      final cycleStartOffset = offsetAt(
-        DateTime.utc(
-          anchorDateForCycle.year,
-          anchorDateForCycle.month,
-          anchorDateForCycle.day,
-          12,
-        ),
-      );
-      final cycleNextDayOffset = offsetAt(
-        DateTime.utc(
-          nextDayAnchor.year,
-          nextDayAnchor.month,
-          nextDayAnchor.day,
-          12,
-        ),
-      );
-
       baseDay = SuwayaTimeEngine.generateDay(
         latitude,
         longitude,
@@ -554,6 +582,7 @@ class TemporalContextEngine {
         manualOffsets: manualOffsets,
         offsetResolver: offsetAt,
         civilDayIbadatOverride: todayIbadat,
+        polarPolicy: polarPolicy,
       );
       if (_internalDayCache.length >= _maxCachedDays) {
         _internalDayCache.remove(_internalDayCache.keys.first);

@@ -220,6 +220,26 @@ class TasksNotifier extends Notifier<TasksState> {
     await ref.read(taskRepositoryProvider).deleteTasks(ids);
   }
 
+  int _recalculateHabitStreak(List<DateTime> history) {
+    if (history.isEmpty) return 0;
+    final uniqueDays = history
+        .map((d) => DateTime.utc(d.year, d.month, d.day))
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    int streak = 1;
+    for (int i = 0; i < uniqueDays.length - 1; i++) {
+      final diffDays = uniqueDays[i].difference(uniqueDays[i + 1]).inDays;
+      if (diffDays == 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
   Future<void> toggleTaskStatus(TaskModel task) async {
     final astroState = ref.read(astroProvider);
     final logicalToday = getLogicalDateForMode(
@@ -232,27 +252,41 @@ class TasksNotifier extends Notifier<TasksState> {
     if (task.type == TaskType.permanent) {
       final wasCompletedToday = task.isCompletedOnDate(logicalToday);
       if (!wasCompletedToday) {
+        final updatedHistory = [
+          ...task.completionHistory.where(
+            (d) => !(d.year == logicalToday.year &&
+                d.month == logicalToday.month &&
+                d.day == logicalToday.day),
+          ),
+          logicalToday,
+        ]..sort((a, b) => a.compareTo(b));
+
+        task.completionHistory = updatedHistory;
         task.lastCompletedDate = logicalToday;
-        task.completionHistory = [...task.completionHistory, logicalToday];
-        task.currentStreak =
-            task.completionHistory.length == 1 ? 1 : task.currentStreak + 1;
+        task.currentStreak = _recalculateHabitStreak(updatedHistory);
         if (task.currentStreak > task.longestStreak) {
           task.longestStreak = task.currentStreak;
         }
         isAchievedNow = true;
       } else {
-        task.lastCompletedDate = null;
-        task.completionHistory = task.completionHistory
-            .where((d) => !(d.year == logicalToday.year &&
-                d.month == logicalToday.month &&
-                d.day == logicalToday.day))
-            .toList();
-        task.currentStreak = (task.currentStreak - 1).clamp(0, 9999);
+        final remainingHistory = task.completionHistory
+            .where(
+              (d) => !(d.year == logicalToday.year &&
+                  d.month == logicalToday.month &&
+                  d.day == logicalToday.day),
+            )
+            .toList()
+          ..sort((a, b) => a.compareTo(b));
+
+        task.completionHistory = remainingHistory;
+        task.lastCompletedDate =
+            remainingHistory.isNotEmpty ? remainingHistory.last : null;
+        task.currentStreak = _recalculateHabitStreak(remainingHistory);
         isAchievedNow = false;
       }
     } else {
       task.isCompleted = !task.isCompleted;
-      task.completedAt = task.isCompleted ? DateTime.now() : null;
+      task.completedAt = task.isCompleted ? virtualDateTimeNotifier.value : null;
       isAchievedNow = task.isCompleted;
     }
 

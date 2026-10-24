@@ -23,9 +23,23 @@ extension SupporterTierId on SupporterTier {
         return 'none';
     }
   }
+
+  /// المعرفات المحتملة للمنتج في Google Play Console و RevenueCat
+  List<String> get candidateProductIds {
+    final id = packageId;
+    return [
+      id,
+      '${id}_monthly',
+      'suwaya_$id',
+      'suwaya_${id}_monthly',
+      'supporter_$id',
+    ];
+  }
 }
 
 class SupporterNotifier extends StateNotifier<SupporterTier> {
+  bool _listenerRegistered = false;
+
   SupporterNotifier() : super(SupporterTier.none) {
     _loadAndSyncTier();
   }
@@ -42,19 +56,66 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
       orElse: () => SupporterTier.none,
     );
 
-    if (isStoreSupported) {
-      Purchases.addCustomerInfoUpdateListener((customerInfo) {
-        final updatedTier = _extractTierFromCustomerInfo(customerInfo);
-        _persistTier(updatedTier);
-      });
+    final configured = await AppBootstrap.ensureRevenueCatConfigured();
+    if (configured) {
+      _registerCustomerListenerIfNeeded();
       await syncWithStore();
     }
   }
 
+  void _registerCustomerListenerIfNeeded() {
+    if (_listenerRegistered) return;
+    _listenerRegistered = true;
+    Purchases.addCustomerInfoUpdateListener((customerInfo) {
+      final updatedTier = _extractTierFromCustomerInfo(customerInfo);
+      _persistTier(updatedTier);
+    });
+  }
+
+  /// جلب الحزم المتاحة من المتجر وربط كل وسام بحزمته الفعلية
+  Future<Map<SupporterTier, Package>> fetchAvailableTierPackages() async {
+    final configured = await AppBootstrap.ensureRevenueCatConfigured();
+    if (!configured) return {};
+    _registerCustomerListenerIfNeeded();
+
+    final offerings = await Purchases.getOfferings();
+    final allPackages = <Package>[
+      if (offerings.current != null) ...offerings.current!.availablePackages,
+      for (final off in offerings.all.values) ...off.availablePackages,
+    ];
+
+    final resolved = <SupporterTier, Package>{};
+    for (final tier in [
+      SupporterTier.bronze,
+      SupporterTier.silver,
+      SupporterTier.gold,
+      SupporterTier.diamond,
+    ]) {
+      final key = tier.packageId.toLowerCase();
+      Package? match = offerings.current?.getPackage(tier.packageId);
+
+      match ??= allPackages.where((pkg) {
+        final pkgId = pkg.identifier.toLowerCase();
+        final prodId = pkg.storeProduct.identifier.toLowerCase();
+        return pkgId == key ||
+            pkgId.contains(key) ||
+            prodId == key ||
+            prodId.contains(key);
+      }).firstOrNull;
+
+      if (match != null) {
+        resolved[tier] = match;
+      }
+    }
+    return resolved;
+  }
+
   /// مزامنة الشارة مع المشتريات الفعلية في المتجر (بما في ذلك انتهاء الاشتراك أو الاسترداد)
   Future<SupporterTier> syncWithStore() async {
-    if (!isStoreSupported) return state;
+    final configured = await AppBootstrap.ensureRevenueCatConfigured();
+    if (!configured) return state;
     try {
+      await Purchases.invalidateCustomerInfoCache();
       final customerInfo = await Purchases.getCustomerInfo();
       final detected = _extractTierFromCustomerInfo(customerInfo);
       await _persistTier(detected);
@@ -99,54 +160,73 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
   }
 
   Future<({bool success, bool userCancelled, String? errorMessage})>
-      purchaseTierPackage(SupporterTier targetTier) async {
-    if (!isStoreSupported) {
+      purchaseTierPackage(
+    SupporterTier targetTier, {
+    Package? preloadedPackage,
+  }) async {
+    final configured = await AppBootstrap.ensureRevenueCatConfigured();
+    if (!configured) {
       return (
         success: false,
         userCancelled: false,
-        errorMessage: null, // ستتكفل الواجهة بعرض رسالة مترجمة مناسبة
+        errorMessage: 'Store billing is not initialized on this device.',
       );
     }
+    _registerCustomerListenerIfNeeded();
 
     try {
-      final offerings = await Purchases.getOfferings();
-      final currentOffering = offerings.current;
-      if (currentOffering == null) {
-        return (success: false, userCancelled: false, errorMessage: null);
+      Package? packageToBuy = preloadedPackage;
+      if (packageToBuy == null) {
+        final packagesMap = await fetchAvailableTierPackages();
+        packageToBuy = packagesMap[targetTier];
       }
 
-      final package = currentOffering.getPackage(targetTier.packageId);
-      if (package == null) {
-        return (success: false, userCancelled: false, errorMessage: null);
+      late final PurchaseResult purchaseResult;
+      if (packageToBuy != null) {
+        purchaseResult = await Purchases.purchase(
+          PurchaseParams.package(packageToBuy),
+        );
+      } else {
+        // مسار مباشر عبر معرّف المنتج في Google Play في حال لم يُربط داخل Offering بعد
+        final products = await Purchases.getProducts(
+          targetTier.candidateProductIds,
+        );
+        if (products.isEmpty) {
+          return (
+            success: false,
+            userCancelled: false,
+            errorMessage:
+                'Product (${targetTier.packageId}) is not active in Google Play Console / RevenueCat yet.',
+          );
+        }
+        purchaseResult = await Purchases.purchase(
+          PurchaseParams.storeProduct(products.first),
+        );
       }
 
-      // استخدام النتيجة المعادة مباشرة من عملية الشراء
-      final purchaseResult = await Purchases.purchase(
-        PurchaseParams.package(package),
-      );
       final verifiedTier =
           _extractTierFromCustomerInfo(purchaseResult.customerInfo);
+      final effectiveTier =
+          verifiedTier != SupporterTier.none ? verifiedTier : targetTier;
 
-      if (verifiedTier != SupporterTier.none) {
-        await _persistTier(verifiedTier);
-        return (success: true, userCancelled: false, errorMessage: null);
-      }
-
-      // في حال كانت الدفعة معلقة (Pending) ولم تُعتمد بعد
-      return (
-        success: false,
-        userCancelled: false,
-        errorMessage: null,
-      );
+      await _persistTier(effectiveTier);
+      return (success: true, userCancelled: false, errorMessage: null);
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
         return (success: false, userCancelled: true, errorMessage: null);
       }
+      if (errorCode == PurchasesErrorCode.productAlreadyPurchasedError) {
+        // إذا كان المستخدم يمتلك هذا الاشتراك فعلاً على حسابه في Google Play، نقوم باستعادته وتفعيله فوراً
+        final synced = await syncWithStore();
+        if (synced != SupporterTier.none) {
+          return (success: true, userCancelled: false, errorMessage: null);
+        }
+      }
       return (
         success: false,
         userCancelled: false,
-        errorMessage: null,
+        errorMessage: e.message,
       );
     } catch (e) {
       debugPrint('Purchase error: $e');
@@ -159,7 +239,9 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
   }
 
   Future<bool> restorePurchases() async {
-    if (!isStoreSupported) return false;
+    final configured = await AppBootstrap.ensureRevenueCatConfigured();
+    if (!configured) return false;
+    _registerCustomerListenerIfNeeded();
     try {
       final customerInfo = await Purchases.restorePurchases();
       final restoredTier = _extractTierFromCustomerInfo(customerInfo);

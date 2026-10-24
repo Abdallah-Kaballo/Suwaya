@@ -308,6 +308,19 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       return;
     }
 
+    // 🌟 منع حفظ مهمة عابرة أو عادة مستمرة بدون تحديد وقت (يمنع نشوء مهام صامتة بلا فترة أو منبه)
+    if (_tabController.index != 2 && !_hasTime) {
+      HapticFeedback.heavyImpact();
+      setState(() => _timeError = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('add_screen.time_required'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     if (_tabController.index == 0 &&
         _isCandidateTaskTimeInPast(
           mode: _timeMode,
@@ -1156,8 +1169,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   }
 
   Widget _buildRoutineDashboardGrid(
-      Color textColor, Color surfaceColor, Color accentColor) {
-    String recurrenceStr = _routineRecurrenceDays.isEmpty
+    Color textColor,
+    Color surfaceColor,
+    Color accentColor,
+  ) {
+    final String recurrenceStr = _routineRecurrenceDays.isEmpty
         ? 'add_screen.daily'.tr()
         : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
     final settings = ref.watch(settingsProvider);
@@ -1167,8 +1183,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     if (_routineTimeMode == 1) {
       startPreview = ClockTimeText.civilClock(
         civilClock: CivilWallClock(
-          hour: _targetCivilHour,
-          minute: _targetCivilMinute,
+          hour: _routineStartCivilHour,
+          minute: _routineStartCivilMinute,
         ),
         civilTimeFormat: settings.civilTimeFormat,
         locale: context.locale.languageCode,
@@ -1181,8 +1197,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       );
       endPreview = ClockTimeText.civilClock(
         civilClock: CivilWallClock(
-          hour: _targetCivilHour,
-          minute: _targetCivilMinute,
+          hour: _routineEndCivilHour,
+          minute: _routineEndCivilMinute,
         ),
         civilTimeFormat: settings.civilTimeFormat,
         locale: context.locale.languageCode,
@@ -1194,7 +1210,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
         ),
       );
     } else {
-      // 🌟 استخدام ClockTimeText.suwaya لمنع انعكاس السويعات والدقائق في الروتين
       startPreview = ClockTimeText.suwaya(
         globalSuwayaIndex: _routineStartGlobalSuwaya,
         virtualMinute: _routineStartVirtualMinute,
@@ -1225,7 +1240,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           child: SegmentedButton<int>(
             segments: [
               ButtonSegment(value: 0, label: Text('ibadat.astro_time'.tr())),
-              ButtonSegment(value: 1, label: Text('add_screen.civil'.tr()))
+              ButtonSegment(value: 1, label: Text('add_screen.civil'.tr())),
             ],
             selected: {_routineTimeMode},
             onSelectionChanged: (set) {
@@ -1233,71 +1248,95 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
               setState(() => _routineTimeMode = set.first);
             },
             style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.resolveWith((states) =>
-                    states.contains(WidgetState.selected)
-                        ? accentColor.withValues(alpha: 0.2)
-                        : Colors.transparent),
-                foregroundColor: WidgetStateProperty.resolveWith((states) =>
-                    states.contains(WidgetState.selected)
-                        ? accentColor
-                        : textColor.withValues(alpha: 0.5))),
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? accentColor.withValues(alpha: 0.2)
+                    : Colors.transparent,
+              ),
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? accentColor
+                    : textColor.withValues(alpha: 0.5),
+              ),
+            ),
           ),
         ),
         Row(
           children: [
             _buildGridCard(
-                surfaceColor,
+              surfaceColor,
+              accentColor,
+              textColor,
+              'add_screen.start_time'.tr(),
+              '',
+              LucideIcons.sunset,
+              true,
+              false,
+              () => _showTimeDialog(
                 accentColor,
+                surfaceColor,
                 textColor,
-                'add_screen.start_time'.tr(),
-                '',
-                LucideIcons.sunset,
-                true,
-                false,
-                () => _showTimeDialog(accentColor, surfaceColor, textColor,
-                    isRoutine: true, isStart: true),
-                valueWidget: startPreview),
+                isRoutine: true,
+                isStart: true,
+              ),
+              valueWidget: startPreview,
+            ),
             const SizedBox(width: 12),
             _buildGridCard(
-                surfaceColor,
+              surfaceColor,
+              accentColor,
+              textColor,
+              'add_screen.end_time'.tr(),
+              '',
+              LucideIcons.sunrise,
+              true,
+              false,
+              () => _showTimeDialog(
                 accentColor,
+                surfaceColor,
                 textColor,
-                'add_screen.end_time'.tr(),
-                '',
-                LucideIcons.sunrise,
-                true,
-                false,
-                () => _showTimeDialog(accentColor, surfaceColor, textColor,
-                    isRoutine: true, isStart: false),
-                valueWidget: endPreview),
+                isRoutine: true,
+                isStart: false,
+              ),
+              valueWidget: endPreview,
+            ),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             _buildGridCard(
-                surfaceColor,
+              surfaceColor,
+              accentColor,
+              textColor,
+              'add_screen.pattern_color'.tr(),
+              _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(),
+              LucideIcons.paint_bucket,
+              true,
+              false,
+              () => _showRoutinePatternDialog(
                 accentColor,
+                surfaceColor,
                 textColor,
-                'add_screen.pattern_color'.tr(),
-                _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(),
-                LucideIcons.paint_bucket,
-                true,
-                false,
-                () => _showRoutinePatternDialog(
-                    accentColor, surfaceColor, textColor)),
+              ),
+            ),
             const SizedBox(width: 12),
             _buildGridCard(
-                surfaceColor,
+              surfaceColor,
+              accentColor,
+              textColor,
+              'add_screen.recurrence'.tr(),
+              recurrenceStr,
+              LucideIcons.calendar_days,
+              false,
+              false,
+              () => _showDateRecurrenceDialog(
                 accentColor,
+                surfaceColor,
                 textColor,
-                'add_screen.recurrence'.tr(),
-                recurrenceStr,
-                LucideIcons.calendar_days,
-                false,
-                false,
-                () => _showDateRecurrenceDialog(
-                    accentColor, surfaceColor, textColor, true)),
+                true,
+              ),
+            ),
           ],
         ),
       ],

@@ -9,7 +9,7 @@ import '../notification/notification_service.dart';
 class AppBootstrap {
   static const String revenueCatGoogleApiKey = String.fromEnvironment(
     'REVENUECAT_GOOGLE_API_KEY',
-    defaultValue: '',
+    defaultValue: 'goog_JcnVefJVnUvvVCneWsmfNfOsMcL',
   );
   static const String revenueCatAppleApiKey = String.fromEnvironment(
     'REVENUECAT_APPLE_API_KEY',
@@ -33,19 +33,33 @@ class AppBootstrap {
 
     await NotificationService().init();
     await Alarm.init();
+    await ensureRevenueCatConfigured();
+  }
+
+  static Future<bool> ensureRevenueCatConfigured() async {
+    if (isRevenueCatConfigured) return true;
+    if (!Platform.isAndroid && !Platform.isIOS) return false;
 
     final String activeApiKey = Platform.isAndroid
-        ? revenueCatGoogleApiKey
-        : (Platform.isIOS ? revenueCatAppleApiKey : '');
+        ? revenueCatGoogleApiKey.trim()
+        : revenueCatAppleApiKey.trim();
 
-    if (activeApiKey.isNotEmpty) {
-      try {
-        await Purchases.configure(PurchasesConfiguration(activeApiKey));
+    if (activeApiKey.isEmpty || activeApiKey.contains('xxxxxxxx')) {
+      return false;
+    }
+
+    try {
+      if (await Purchases.isConfigured) {
         isRevenueCatConfigured = true;
-      } catch (e) {
-        debugPrint('⚠️ RevenueCat init warning: $e');
-        isRevenueCatConfigured = false;
+        return true;
       }
+      await Purchases.configure(PurchasesConfiguration(activeApiKey));
+      isRevenueCatConfigured = true;
+      return true;
+    } catch (e) {
+      debugPrint('⚠️ RevenueCat init warning: $e');
+      isRevenueCatConfigured = false;
+      return false;
     }
   }
 }

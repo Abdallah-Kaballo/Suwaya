@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import 'package:hijri/hijri_calendar.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 // 🌟 1. العجلة السويعية (سويعات 1-12، دقائق 0-59، وزر ليل/نهار)
 class AstroTimePicker extends StatefulWidget {
@@ -552,22 +552,36 @@ class HijriCalendarDatePicker extends StatefulWidget {
 }
 
 class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
+  static const UmmAlQuraHijriProvider _hijriProvider =
+      UmmAlQuraHijriProvider();
+
   late DateTime _selectedDate;
   late DateTime _minDate;
   late DateTime _maxDate;
   late int _displayedHijriYear;
   late int _displayedHijriMonth;
 
-  HijriCalendar _toAdjustedHijri(DateTime gregorianDate) {
+  HijriDate _toAdjustedHijri(DateTime gregorianDate) {
     final offset = widget.hijriOffsetDays.clamp(-2, 2);
-    return HijriCalendar.fromDate(gregorianDate.add(Duration(days: offset)));
+    return _hijriProvider.dateForGregorianDate(
+      date: CivilDate(
+        gregorianDate.year,
+        gregorianDate.month,
+        gregorianDate.day,
+      ),
+      adjustmentDays: offset,
+    );
   }
 
   DateTime _fromAdjustedHijri(int hYear, int hMonth, int hDay) {
     final offset = widget.hijriOffsetDays.clamp(-2, 2);
-    final rawGreg = HijriCalendar().hijriToGregorian(hYear, hMonth, hDay);
-    return DateTime(rawGreg.year, rawGreg.month, rawGreg.day)
-        .subtract(Duration(days: offset));
+    final civil = _hijriProvider.gregorianForHijriDate(
+      hYear: hYear,
+      hMonth: hMonth,
+      hDay: hDay,
+      adjustmentDays: offset,
+    );
+    return DateTime(civil.year, civil.month, civil.day);
   }
 
   @override
@@ -592,8 +606,8 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
     _selectedDate = cleanInit.isBefore(_minDate) ? _minDate : cleanInit;
 
     final hInit = _toAdjustedHijri(_selectedDate);
-    _displayedHijriYear = hInit.hYear;
-    _displayedHijriMonth = hInit.hMonth;
+    _displayedHijriYear = hInit.year;
+    _displayedHijriMonth = hInit.month;
   }
 
   bool _isSameDay(DateTime a, DateTime b) =>
@@ -606,8 +620,7 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
       prevM = 12;
       prevY--;
     }
-    final hCal = HijriCalendar();
-    final daysInPrev = hCal.getDaysInMonth(prevY, prevM);
+    final daysInPrev = _hijriProvider.daysInHijriMonth(prevY, prevM);
     final cleanLast = _fromAdjustedHijri(prevY, prevM, daysInPrev);
     return !cleanLast.isBefore(_minDate);
   }
@@ -642,8 +655,7 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final hCal = HijriCalendar();
-    final int daysInMonth = hCal.getDaysInMonth(
+    final int daysInMonth = _hijriProvider.daysInHijriMonth(
       _displayedHijriYear,
       _displayedHijriMonth,
     );

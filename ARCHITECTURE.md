@@ -29,7 +29,7 @@ Persistent scheduling models (`TaskModel` and `RoutineModel`) carry a `scheduleM
 - `packages/suwaya_time/`: The pure Dart astronomical domain engine.
 
 ### 2.5 Pure Domain Logic
-The `packages/suwaya_time` package is 100% pure Dart and depends only on `adhan`. It must never import Flutter, Riverpod, `BuildContext`, localization, or platform plugins. It accepts explicit coordinates, dates, calculation parameters, and manual offsets, returning deterministic domain models.
+The `packages/suwaya_time` package is 100% pure Dart and depends only on pure Dart packages (`adhan`, `timezone`, `hijri`, and `intl`). It must never import Flutter, Riverpod, `BuildContext`, localization, or platform plugins. It accepts explicit coordinates, dates, calculation parameters, and manual offsets, returning deterministic domain models.
 
 ### 2.6 Layer Ownership
 

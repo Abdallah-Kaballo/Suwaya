@@ -58,11 +58,9 @@ The pure Dart `packages/suwaya_time` engine calculates prayer timings, night par
 * **Night Parts (Qiyam):** The second half of the night is automatically subdivided into 5 canonical parts (e.g., Last Third, Fourth Sixth) for precise night prayer scheduling.
 
 
-* **Independent Engine:** The engine remains completely independent of Flutter, relying solely on mathematical models and the `adhan` package.
+* **Independent Engine:** The engine remains 100% pure Dart and completely independent of Flutter, relying only on mathematical models and pure Dart packages (`adhan`, `timezone`, `hijri`, and `intl`).
 
-
-
-For a deep dive into the mathematical and astronomical specifications of the V2 time model, see [Suwaya-Time.md](https://www.google.com/search?q=Suwaya-Time.md).
+For a deep dive into the mathematical and astronomical specifications of the V2 time model, see [Suwaya-Time.md](Suwaya-Time.md).
 
 ## Current Features
 
@@ -170,9 +168,9 @@ Suwaya globally supports **22 languages**, seamlessly handling Right-To-Left (RT
 
 * **Location:** Strictly calculated on-device to determine accurate sun positions.
 * **Notifications & Exact Alarms:** Used exclusively to trigger your localized scheduled reminders, prayers, and task notifications.
-* **Internet:** Used minimally to fetch dynamic Markdown documentation (FAQ/Privacy), check for app updates, or verify optional supporter tier purchases (via RevenueCat/Google Play Billing)[cite: 2].
+* **Internet:** Used minimally to fetch dynamic JSON documentation updates (FAQ/Privacy), check for app updates, or verify optional supporter tier purchases (via RevenueCat/Google Play Billing).
 
-Read [docs/privacy.md](https://www.google.com/search?q=docs/privacy.md) for the comprehensive privacy policy.
+Read [docs/privacy.md](docs/privacy.md) for the comprehensive privacy policy.
 
 ## Contributing
 
@@ -189,5 +187,5 @@ Contributions are welcome! Please follow these guidelines:
 
 ## License
 
-Suwaya is open-source software licensed under the **GNU General Public License v3.0**. See the [LICENSE](https://www.google.com/search?q=LICENSE) file for more details.
+Suwaya is open-source software licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for more details.
 

@@ -85,6 +85,38 @@ class PrayerCalculator {
   }
 
   /// استدعاء آمن لمكتبة adhan يمنع انهيار TimeComponents.fromDouble(NaN) في العروض القطبية والعليا
+  static bool _isStrictlyMonotonicPair(PrayerTimes d1, PrayerTimes d2) {
+    final f1 = d1.fajr.toUtc();
+    final sr1 = d1.sunrise.toUtc();
+    final dh1 = d1.dhuhr.toUtc();
+    final as1 = d1.asr.toUtc();
+    final mg1 = d1.maghrib.toUtc();
+    final is1 = d1.isha.toUtc();
+
+    final f2 = d2.fajr.toUtc();
+    final sr2 = d2.sunrise.toUtc();
+    final dh2 = d2.dhuhr.toUtc();
+    final as2 = d2.asr.toUtc();
+    final mg2 = d2.maghrib.toUtc();
+
+    final validOrder = f1.isBefore(sr1) &&
+        sr1.isBefore(dh1) &&
+        dh1.isBefore(as1) &&
+        as1.isBefore(mg1) &&
+        mg1.isBefore(is1) &&
+        is1.isBefore(f2) &&
+        f2.isBefore(sr2) &&
+        sr2.isBefore(dh2) &&
+        dh2.isBefore(as2) &&
+        as2.isBefore(mg2);
+
+    if (!validOrder) return false;
+
+    final cycleHours = mg2.difference(mg1).inHours;
+    return cycleHours >= 20 && cycleHours <= 28;
+  }
+
+  /// استدعاء آمن لمكتبة adhan يمنع انهيار TimeComponents.fromDouble(NaN) أو انقلاب ترتيب الصلوات في العروض القطبية وشبه القطبية
   static ({PrayerTimes day1, PrayerTimes day2, double effectiveLat})
       _safeComputePrayerTimesPair({
     required double lat,
@@ -92,22 +124,25 @@ class PrayerCalculator {
     required DateTime date,
     required CalculationParameters params,
   }) {
+    final safeLat = lat.clamp(-90.0, 90.0);
     final safeLng = lng.clamp(-180.0, 180.0);
     final d1 = DateComponents.from(date);
     final d2 = DateComponents.from(date.add(const Duration(days: 1)));
 
-    if (lat.abs() <= PolarCycleSynthesizer.polarThresholdLatitude) {
+    if (safeLat.abs() <= PolarCycleSynthesizer.polarThresholdLatitude) {
       try {
-        final coords = Coordinates(lat, safeLng);
+        final coords = Coordinates(safeLat, safeLng);
         final p1 = PrayerTimes(coords, d1, params);
         final p2 = PrayerTimes(coords, d2, params);
-        return (day1: p1, day2: p2, effectiveLat: lat);
+        if (_isStrictlyMonotonicPair(p1, p2)) {
+          return (day1: p1, day2: p2, effectiveLat: safeLat);
+        }
       } catch (_) {
-        // السقوط الآمن إلى خط العرض القياسي ±45° عند حدوث NaN في زاوية الشفق أو الشروق/الغروب
+        // السقوط الآمن إلى خط العرض القياسي ±45° عند حدوث NaN أو اختلال الرتابة
       }
     }
 
-    final clampedLat = lat >= 0 ? 45.0 : -45.0;
+    final clampedLat = safeLat >= 0 ? 45.0 : -45.0;
     final fallbackCoords = Coordinates(clampedLat, safeLng);
     return (
       day1: PrayerTimes(fallbackCoords, d1, params),
@@ -274,6 +309,7 @@ class PrayerCalculator {
     Map<PrayerKey, int>? manualOffsets,
     Duration Function(DateTime utcInstant)? offsetResolver,
     double elevationMeters = 0.0,
+    PolarResolutionPolicy polarPolicy = PolarResolutionPolicy.nearestLatitude45,
   }) {
     final rawAnchors = computeRawCycleAnchors(
       lat,
@@ -305,7 +341,26 @@ class PrayerCalculator {
       nextDayCityOffset: nextDayCityOffset,
       manualOffsets: manualOffsets,
       offsetResolver: offsetResolver,
+      policy: polarPolicy,
     );
+  }
+
+  static DateTime _clampBefore(
+    DateTime candidate,
+    DateTime upperBound, {
+    Duration minGap = const Duration(minutes: 2),
+  }) {
+    final maxAllowed = upperBound.subtract(minGap);
+    return candidate.isAfter(maxAllowed) ? maxAllowed : candidate;
+  }
+
+  static DateTime _clampAfter(
+    DateTime candidate,
+    DateTime lowerBound, {
+    Duration minGap = const Duration(minutes: 2),
+  }) {
+    final minAllowed = lowerBound.add(minGap);
+    return candidate.isBefore(minAllowed) ? minAllowed : candidate;
   }
 
   static SuwayaCycleAnchors computeRawCycleAnchors(
@@ -356,43 +411,53 @@ class PrayerCalculator {
     final rawStartSunsetUtc = dayD.maghrib.toUtc().add(elevationShift);
     final rawEndSunsetUtc = dayDPlus1.maghrib.toUtc().add(elevationShift);
 
-    final cycleStartMaghribUtc = _applyOffset(
+    var cycleStartMaghribUtc = _applyOffset(
       rawStartSunsetUtc,
       PrayerKey.maghrib,
       allowedManualOffsets,
     );
-    final cycleIshaUtc = _applyOffset(
+    var cycleIshaUtc = _applyOffset(
       dayD.isha.toUtc(),
       PrayerKey.isha,
       allowedManualOffsets,
     );
-    final cycleFajrUtc = _applyOffset(
+    var cycleFajrUtc = _applyOffset(
       dayDPlus1.fajr.toUtc(),
       PrayerKey.fajr,
       allowedManualOffsets,
     );
     final cycleSunriseUtc = dayDPlus1.sunrise.toUtc().subtract(elevationShift);
-    final cycleDhuhrUtc = _applyOffset(
+    var cycleDhuhrUtc = _applyOffset(
       dayDPlus1.dhuhr.toUtc(),
       PrayerKey.dhuhr,
       allowedManualOffsets,
     );
-    final cycleAsrUtc = _applyOffset(
+    var cycleAsrUtc = _applyOffset(
       dayDPlus1.asr.toUtc(),
       PrayerKey.asr,
       allowedManualOffsets,
     );
-    final cycleEndMaghribUtc = _applyOffset(
+    var cycleEndMaghribUtc = _applyOffset(
       rawEndSunsetUtc,
       PrayerKey.maghrib,
       allowedManualOffsets,
     );
 
+    // ضمان عدم تسبب الإزاحات اليدوية في قلب ترتيب المراسي الفلكية في العروض العليا
+    cycleFajrUtc = _clampBefore(cycleFajrUtc, cycleSunriseUtc);
     final realNightMicroseconds =
         cycleFajrUtc.difference(cycleStartMaghribUtc).inMicroseconds;
     final sharIMidnightUtc = cycleStartMaghribUtc.add(
       Duration(microseconds: realNightMicroseconds ~/ 2),
     );
+
+    cycleStartMaghribUtc = _clampBefore(cycleStartMaghribUtc, cycleIshaUtc);
+    cycleIshaUtc = _clampAfter(cycleIshaUtc, cycleStartMaghribUtc);
+    cycleIshaUtc = _clampBefore(cycleIshaUtc, sharIMidnightUtc);
+
+    cycleDhuhrUtc = _clampAfter(cycleDhuhrUtc, cycleSunriseUtc);
+    cycleAsrUtc = _clampAfter(cycleAsrUtc, cycleDhuhrUtc);
+    cycleEndMaghribUtc = _clampAfter(cycleEndMaghribUtc, cycleAsrUtc);
 
     DateTime toEveningWall(DateTime utc) =>
         utc.add(offsetResolver != null ? offsetResolver(utc) : cityOffset);

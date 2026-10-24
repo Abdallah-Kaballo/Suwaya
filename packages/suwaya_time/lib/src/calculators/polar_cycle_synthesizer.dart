@@ -40,6 +40,18 @@ class PolarCycleSynthesizer {
     Duration Function(DateTime utcInstant)? offsetResolver,
     PolarResolutionPolicy policy = PolarResolutionPolicy.nearestLatitude45,
   }) {
+    final bool isPolarLatitude = latitude.abs() > polarThresholdLatitude;
+
+    if (isPolarLatitude &&
+        policy == PolarResolutionPolicy.equinoxProportional) {
+      return _synthesizeEquinoxCycle(
+        targetDate: targetDate,
+        cityOffset: cityOffset,
+        nextDayCityOffset: nextDayCityOffset ?? cityOffset,
+        offsetResolver: offsetResolver,
+      );
+    }
+
     if (candidateAnchors != null && _isHealthySpan(candidateAnchors)) {
       return candidateAnchors;
     }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:purchases_flutter/purchases_flutter.dart';
-import '../../core/bootstrap/app_bootstrap.dart';
 import 'supporter_provider.dart';
 
 class SupportScreen extends ConsumerStatefulWidget {
@@ -15,7 +14,7 @@ class SupportScreen extends ConsumerStatefulWidget {
 }
 
 class _SupportScreenState extends ConsumerState<SupportScreen> {
-  Map<String, Package> _storePackages = {};
+  Map<SupporterTier, Package> _storePackages = {};
   bool _isLoadingOfferings = true;
 
   @override
@@ -25,54 +24,33 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   }
 
   Future<void> _fetchStoreOfferings() async {
-    if (!AppBootstrap.isRevenueCatConfigured) {
-      if (mounted) {
-        setState(() => _isLoadingOfferings = false);
-      }
-      return;
-    }
-
     try {
-      final offerings = await Purchases.getOfferings();
-      if (offerings.current != null) {
-        final current = offerings.current!;
-        final map = <String, Package>{};
-
-        final bronzePkg = current.getPackage('bronze');
-        final silverPkg = current.getPackage('silver');
-        final goldPkg = current.getPackage('gold');
-        final diamondPkg = current.getPackage('diamond');
-
-        if (bronzePkg != null) map['bronze'] = bronzePkg;
-        if (silverPkg != null) map['silver'] = silverPkg;
-        if (goldPkg != null) map['gold'] = goldPkg;
-        if (diamondPkg != null) map['diamond'] = diamondPkg;
-
-        if (mounted) {
-          setState(() {
-            _storePackages = map;
-            _isLoadingOfferings = false;
-          });
-        }
-        return;
+      final packages = await ref
+          .read(supporterProvider.notifier)
+          .fetchAvailableTierPackages();
+      if (mounted) {
+        setState(() {
+          _storePackages = packages;
+          _isLoadingOfferings = false;
+        });
       }
     } catch (e) {
       debugPrint('Error loading RevenueCat offerings: $e');
-    }
-    if (mounted) {
-      setState(() => _isLoadingOfferings = false);
+      if (mounted) {
+        setState(() => _isLoadingOfferings = false);
+      }
     }
   }
 
   String _getPriceLabel(SupporterTier tier, String fallbackPrice) {
-    final pkg = _storePackages[tier.packageId];
+    final pkg = _storePackages[tier];
     if (pkg != null && pkg.storeProduct.priceString.isNotEmpty) {
       return '${pkg.storeProduct.priceString} / ${context.locale.languageCode == 'ar' ? 'شهرياً' : 'month'}';
     }
     return 'support.price_monthly'.tr(namedArgs: {'price': fallbackPrice});
   }
 
-  /// 🌟 تنفيذ عملية الدفع الحقيقية عبر Google Play / RevenueCat
+  /// 🌟 تنفيذ عملية الدفع الفعلية عبر Google Play / RevenueCat
   Future<void> _processStorePurchase(SupporterTier tier) async {
     HapticFeedback.selectionClick();
     showDialog(
@@ -81,8 +59,10 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       builder: (ctx) => const Center(child: CircularProgressIndicator()),
     );
 
-    final result =
-        await ref.read(supporterProvider.notifier).purchaseTierPackage(tier);
+    final result = await ref.read(supporterProvider.notifier).purchaseTierPackage(
+          tier,
+          preloadedPackage: _storePackages[tier],
+        );
 
     if (!mounted) return;
     Navigator.pop(context); // إغلاق مؤشر التحميل

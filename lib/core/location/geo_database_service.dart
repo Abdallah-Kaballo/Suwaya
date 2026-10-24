@@ -241,27 +241,79 @@ class GeoDatabaseService {
   // ==========================================
   // 3. Utils: الهندسة العكسية (Reverse Geocoding)
   // ==========================================
+
   static Future<Map<String, dynamic>?> getNearestLocationData(
-      double lat, double lng, String langCode) async {
+    double lat,
+    double lng,
+    String langCode,
+  ) async {
     await loadDatabase();
 
-    double limit = 2.0;
-    final results = await _database!.rawQuery('''
-      SELECT name_ar, name_en, country_code, lat, lng, timezone
-      FROM cities
-      WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?
-    ''', [lat - limit, lat + limit, lng - limit, lng + limit]);
+    final safeLat = lat.clamp(-90.0, 90.0);
+    final safeLng = ((lng + 180.0) % 360.0 + 360.0) % 360.0 - 180.0;
+
+    List<Map<String, Object?>> results = const [];
+
+    // توسيع نطاق البحث تدريجياً لضمان العثور على أقرب مدينة ومنطقة زمنية في الصحاري والمحيطات والعروض العليا
+    for (final double latRadius in [2.0, 6.0, 15.0, 45.0]) {
+      final minLat = (safeLat - latRadius).clamp(-90.0, 90.0);
+      final maxLat = (safeLat + latRadius).clamp(-90.0, 90.0);
+
+      // تعويض تقارب خطوط الطول عند الاتجاه نحو القطبين
+      final cosLat = cos(safeLat.abs().clamp(0.0, 80.0) * 0.017453292519943295);
+      final lngRadius = (latRadius / (cosLat > 0.15 ? cosLat : 0.15)).clamp(
+        latRadius,
+        180.0,
+      );
+
+      if (lngRadius >= 180.0) {
+        results = await _database!.rawQuery('''
+          SELECT name_ar, name_en, country_code, lat, lng, timezone
+          FROM cities
+          WHERE lat BETWEEN ? AND ?
+        ''', [minLat, maxLat]);
+      } else {
+        final minLng = safeLng - lngRadius;
+        final maxLng = safeLng + lngRadius;
+
+        if (minLng < -180.0) {
+          // عبور خط التاريخ الدولي غرباً (-180° / +180°)
+          results = await _database!.rawQuery('''
+            SELECT name_ar, name_en, country_code, lat, lng, timezone
+            FROM cities
+            WHERE lat BETWEEN ? AND ?
+              AND (lng BETWEEN ? AND 180.0 OR lng BETWEEN -180.0 AND ?)
+          ''', [minLat, maxLat, minLng + 360.0, maxLng]);
+        } else if (maxLng > 180.0) {
+          // عبور خط التاريخ الدولي شرقاً (+180° / -180°)
+          results = await _database!.rawQuery('''
+            SELECT name_ar, name_en, country_code, lat, lng, timezone
+            FROM cities
+            WHERE lat BETWEEN ? AND ?
+              AND (lng BETWEEN ? AND 180.0 OR lng BETWEEN -180.0 AND ?)
+          ''', [minLat, maxLat, minLng, maxLng - 360.0]);
+        } else {
+          results = await _database!.rawQuery('''
+            SELECT name_ar, name_en, country_code, lat, lng, timezone
+            FROM cities
+            WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?
+          ''', [minLat, maxLat, minLng, maxLng]);
+        }
+      }
+
+      if (results.isNotEmpty) break;
+    }
 
     if (results.isEmpty) return null;
 
     Map<String, dynamic>? closest;
     double minDistance = double.infinity;
 
-    for (var row in results) {
-      double cityLat = (row['lat'] as num).toDouble();
-      double cityLng = (row['lng'] as num).toDouble();
+    for (final row in results) {
+      final cityLat = (row['lat'] as num).toDouble();
+      final cityLng = (row['lng'] as num).toDouble();
 
-      double distance = calculateDistance(lat, lng, cityLat, cityLng);
+      final distance = calculateDistance(safeLat, safeLng, cityLat, cityLng);
       if (distance < minDistance) {
         minDistance = distance;
         closest = Map<String, dynamic>.from(row);
@@ -269,25 +321,30 @@ class GeoDatabaseService {
     }
 
     if (closest != null) {
-      String cityName = langCode == 'ar'
+      final String cityName = langCode == 'ar'
           ? (closest['name_ar'] ?? closest['name_en'])
           : (closest['name_en'] ?? closest['name_ar']);
       return {
         'cityName': cityName,
         'countryCode': closest['country_code'],
-        'timezone': closest['timezone'], // 🌟 إرجاع المنطقة الزمنية
+        'timezone': closest['timezone'],
       };
     }
     return null;
   }
 
   static double calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     const p = 0.017453292519943295; // Math.PI / 180
-    final a = 0.5 -
+    final rawA = 0.5 -
         cos((lat2 - lat1) * p) / 2 +
         cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a)); // 2 * R; R = 6371 km
+    final clampedA = rawA.clamp(0.0, 1.0);
+    return 12742 * asin(sqrt(clampedA)); // 2 * R; R = 6371 km
   }
 
   static String getFlagEmoji(String countryCode) {

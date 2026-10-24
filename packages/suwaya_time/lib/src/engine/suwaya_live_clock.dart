@@ -1,7 +1,5 @@
 import 'dart:async';
 import '../models/astro_models.dart';
-import 'suwaya_coordinate_mapper.dart';
-import 'suwaya_recurrence_engine.dart';
 import 'temporal_context_engine.dart';
 
 /// 1. ساعة البث التفاعلي النقية (Pure Dart Reactive Virtual Clock)
@@ -96,89 +94,5 @@ class SuwayaLiveClock {
     }
 
     _adaptiveTimer = Timer(nextDelay, _scheduleNextVirtualSecond);
-  }
-}
-
-/// 2. مُصدّر تقويم iCalendar القياسي (RFC 5545 .ics Exporter)
-/// يتيح تصدير الفترات السبع وأجزاء قيام الليل إلى Google Calendar و Apple Calendar و Outlook
-class SuwayaIcsExporter {
-  static String _formatIcsUtc(DateTime utc) {
-    final u = utc.toUtc();
-    final y = u.year.toString().padLeft(4, '0');
-    final m = u.month.toString().padLeft(2, '0');
-    final d = u.day.toString().padLeft(2, '0');
-    final h = u.hour.toString().padLeft(2, '0');
-    final min = u.minute.toString().padLeft(2, '0');
-    final s = u.second.toString().padLeft(2, '0');
-    return '$y$m${d}T$h$min${s}Z';
-  }
-
-  /// توليد محتوى ملف .ics قياسي من قائمة نوافذ الأيام الفلكية
-  static String exportWindowsToIcs(
-    List<SuwayaScheduledDayWindow> windows, {
-    String calendarName = 'Suwaya Astronomical Calendar',
-    bool includePeriods = true,
-    bool includeQiyamParts = true,
-  }) {
-    final nowStamp = _formatIcsUtc(DateTime.now().toUtc());
-    final sb = StringBuffer()
-      ..writeln('BEGIN:VCALENDAR')
-      ..writeln('VERSION:2.0')
-      ..writeln('PRODID:-//Suwaya//Suwaya Time Engine V2//EN')
-      ..writeln('CALSCALE:GREGORIAN')
-      ..writeln('METHOD:PUBLISH')
-      ..writeln('X-WR-CALNAME:$calendarName');
-
-    for (final w in windows) {
-      if (includePeriods) {
-        int globalOffset = 0;
-        for (final p in w.periods) {
-          final startUtc = p.startUtc ?? p.startTime.toUtc();
-          final endUtc = p.endUtc ?? p.endTime.toUtc();
-          final startCoord = SuwayaCoordinateMapper.formatString(
-            globalOffset,
-            0,
-            isRTL: false,
-          );
-          final uid =
-              'suwaya-period-${w.astroLogicalDate.year}${w.astroLogicalDate.month}${w.astroLogicalDate.day}-p${p.id}@suwaya.app';
-
-          sb
-            ..writeln('BEGIN:VEVENT')
-            ..writeln('UID:$uid')
-            ..writeln('DTSTAMP:$nowStamp')
-            ..writeln('DTSTART:${_formatIcsUtc(startUtc)}')
-            ..writeln('DTEND:${_formatIcsUtc(endUtc)}')
-            ..writeln(
-              'SUMMARY:Period ${p.id} (${p.periodKey.name}) - ${p.suwayasCount} Suwayas',
-            )
-            ..writeln(
-              'DESCRIPTION:Starts at $startCoord | Suwayas: ${p.suwayasCount}',
-            )
-            ..writeln('END:VEVENT');
-
-          globalOffset += p.suwayasCount;
-        }
-      }
-
-      if (includeQiyamParts) {
-        for (final np in w.ibadat.nightParts) {
-          if (np.startUtc == null || np.endUtc == null) continue;
-          final uid =
-              'suwaya-qiyam-${w.astroLogicalDate.year}${w.astroLogicalDate.month}${w.astroLogicalDate.day}-${np.id}@suwaya.app';
-          sb
-            ..writeln('BEGIN:VEVENT')
-            ..writeln('UID:$uid')
-            ..writeln('DTSTAMP:$nowStamp')
-            ..writeln('DTSTART:${_formatIcsUtc(np.startUtc!)}')
-            ..writeln('DTEND:${_formatIcsUtc(np.endUtc!)}')
-            ..writeln('SUMMARY:Qiyam - ${np.id}')
-            ..writeln('END:VEVENT');
-        }
-      }
-    }
-
-    sb.writeln('END:VCALENDAR');
-    return sb.toString();
   }
 }

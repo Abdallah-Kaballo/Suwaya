@@ -1,3 +1,5 @@
+import 'package:suwaya_time/src/calculators/polar_cycle_synthesizer.dart';
+
 import '../models/astro_models.dart';
 import '../calculators/prayer_calculator.dart';
 import '../generators/period_generator.dart';
@@ -20,6 +22,7 @@ class SuwayaTimeEngine {
     Duration Function(DateTime utcInstant)? offsetResolver,
     IbadatTimings? civilDayIbadatOverride,
     SuwayaAllocationMode allocationMode = SuwayaAllocationMode.canonicalMadhab,
+    PolarResolutionPolicy polarPolicy = PolarResolutionPolicy.nearestLatitude45,
   }) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat,
@@ -49,6 +52,7 @@ class SuwayaTimeEngine {
       nextDayCityOffset: nextDayCityOffset,
       manualOffsets: manualOffsets,
       offsetResolver: offsetResolver,
+      polarPolicy: polarPolicy,
     );
 
     final distribution = SuwayaDistributor.resolveDistribution(

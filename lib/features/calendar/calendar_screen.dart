@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:go_router/go_router.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:suwaya_time/suwaya_time.dart';
+
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/providers/ui_providers.dart';
@@ -141,22 +143,78 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     _syncFocusedMonthToDate(_selectedDate);
   }
 
-  // 🌟 دوال مساعدة لتحويل التاريخ مع مراعاة تصحيح التاريخ الهجري (hijriOffsetDays)
+  static const UmmAlQuraHijriProvider _hijriProvider =
+      UmmAlQuraHijriProvider();
+
   HijriCalendar _toHijri(DateTime gregorianDate) {
     final offsetDays = ref.read(settingsProvider).hijriOffsetDays;
-    return HijriCalendar.fromDate(
-      gregorianDate.add(Duration(days: offsetDays)),
+    final resolved = _hijriProvider.dateForGregorianDate(
+      date: CivilDate(
+        gregorianDate.year,
+        gregorianDate.month,
+        gregorianDate.day,
+      ),
+      adjustmentDays: offsetDays,
     );
+    return HijriCalendar()
+      ..hYear = resolved.year
+      ..hMonth = resolved.month
+      ..hDay = resolved.day;
   }
 
   DateTime _fromHijri(int hYear, int hMonth, int hDay) {
     final offsetDays = ref.read(settingsProvider).hijriOffsetDays;
-    final rawGreg = HijriCalendar().hijriToGregorian(hYear, hMonth, hDay);
-    return DateTime(
-      rawGreg.year,
-      rawGreg.month,
-      rawGreg.day,
-    ).subtract(Duration(days: offsetDays));
+    final civil = _hijriProvider.gregorianForHijriDate(
+      hYear: hYear,
+      hMonth: hMonth,
+      hDay: hDay,
+      adjustmentDays: offsetDays,
+    );
+    return DateTime(civil.year, civil.month, civil.day);
+  }
+
+  List<CalendarDayCellData> _generateMonthCells(bool isHijriPrimary) {
+    final List<CalendarDayCellData> cells = [];
+
+    if (isHijriPrimary) {
+      final daysCount = _hijriProvider.daysInHijriMonth(
+        _focusedHijriYear,
+        _focusedHijriMonth,
+      );
+      for (int d = 1; d <= daysCount; d++) {
+        final cleanGDate = _fromHijri(
+          _focusedHijriYear,
+          _focusedHijriMonth,
+          d,
+        );
+        final hObj = HijriCalendar()
+          ..hYear = _focusedHijriYear
+          ..hMonth = _focusedHijriMonth
+          ..hDay = d;
+        cells.add(
+          CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
+        );
+      }
+    } else {
+      final daysCount = DateTime(
+        _focusedGregorianYear,
+        _focusedGregorianMonth + 1,
+        0,
+      ).day;
+      for (int d = 1; d <= daysCount; d++) {
+        final cleanGDate = DateTime(
+          _focusedGregorianYear,
+          _focusedGregorianMonth,
+          d,
+        );
+        final hObj = _toHijri(cleanGDate);
+        cells.add(
+          CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
+        );
+      }
+    }
+
+    return cells;
   }
 
   void _syncFocusedMonthToDate(DateTime date) {
@@ -220,51 +278,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         _selectedDate = nextGreg;
       }
     });
-  }
-
-  List<CalendarDayCellData> _generateMonthCells(bool isHijriPrimary) {
-    final List<CalendarDayCellData> cells = [];
-
-    if (isHijriPrimary) {
-      final hCal = HijriCalendar();
-      final daysCount = hCal.getDaysInMonth(
-        _focusedHijriYear,
-        _focusedHijriMonth,
-      );
-      for (int d = 1; d <= daysCount; d++) {
-        final cleanGDate = _fromHijri(
-          _focusedHijriYear,
-          _focusedHijriMonth,
-          d,
-        );
-        final hObj = HijriCalendar()
-          ..hYear = _focusedHijriYear
-          ..hMonth = _focusedHijriMonth
-          ..hDay = d;
-        cells.add(
-          CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
-        );
-      }
-    } else {
-      final daysCount = DateTime(
-        _focusedGregorianYear,
-        _focusedGregorianMonth + 1,
-        0,
-      ).day;
-      for (int d = 1; d <= daysCount; d++) {
-        final cleanGDate = DateTime(
-          _focusedGregorianYear,
-          _focusedGregorianMonth,
-          d,
-        );
-        final hObj = _toHijri(cleanGDate);
-        cells.add(
-          CalendarDayCellData(gregorianDate: cleanGDate, hijriDate: hObj),
-        );
-      }
-    }
-
-    return cells;
   }
 
   List<TaskModel> _getTasksForDay(DateTime date, List<TaskModel> allTasks) {

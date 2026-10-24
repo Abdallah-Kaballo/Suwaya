@@ -4,6 +4,7 @@ import 'package:suwaya/core/location/permissions_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../core/repositories/settings_repository.dart';
 import 'package:suwaya/models/settings_model.dart';
+import '../../core/astro_engine/astro_provider.dart';
 
 class AstroDefaults {
   final String method;
@@ -18,7 +19,10 @@ class AstroDefaults {
 
 class AstroSmartDefaults {
   static AstroDefaults getDefaultsForCountry(String? countryCode) {
-    if (countryCode == null || countryCode == 'CUSTOM') {
+    if (countryCode == null ||
+        countryCode.isEmpty ||
+        countryCode == 'CUSTOM' ||
+        countryCode == 'XX') {
       return const AstroDefaults(
         method: 'muslim_world_league',
         madhab: 'shafi',
@@ -31,6 +35,7 @@ class AstroSmartDefaults {
     String highLatRule = 'middle_of_the_night';
 
     switch (countryCode.toUpperCase()) {
+      // مصر، الشام، السودان، ليبيا
       case 'EG':
       case 'SD':
       case 'SS':
@@ -41,8 +46,13 @@ class AstroSmartDefaults {
       case 'PS':
         method = 'egyptian';
         break;
+
+      // الجزيرة العربية والخليج
       case 'SA':
-        method = 'ummAlQura'; // 🌟 توحيد التسمية مع باقي شاشات التطبيق
+      case 'YE':
+      case 'BH':
+      case 'OM':
+        method = 'ummAlQura';
         break;
       case 'AE':
         method = 'dubai';
@@ -53,61 +63,109 @@ class AstroSmartDefaults {
       case 'KW':
         method = 'kuwait';
         break;
+
+      // العراق وإيران
       case 'IR':
       case 'IQ':
         method = 'tehran';
         break;
+
+      // شبه القارة الهندية وجنوب آسيا
       case 'PK':
       case 'AF':
       case 'BD':
       case 'IN':
       case 'LK':
       case 'MV':
+      case 'NP':
         method = 'karachi';
         madhab = 'hanafi';
         break;
+
+      // جنوب شرق آسيا
       case 'MY':
       case 'SG':
       case 'ID':
       case 'BN':
+      case 'TH':
+      case 'PH':
         method = 'singapore';
         break;
+
+      // تركيا، القوقاز، آسيا الوسطى، والبلقان
       case 'TR':
       case 'AZ':
       case 'TM':
       case 'UZ':
       case 'KG':
+      case 'TJ':
+      case 'BA':
+      case 'AL':
+      case 'XK':
+      case 'MK':
         method = 'turkey';
         madhab = 'hanafi';
         break;
+      case 'KZ':
+        method = 'turkey';
+        madhab = 'hanafi';
+        highLatRule = 'seventh_of_the_night';
+        break;
+
+      // فرنسا وجنوب غرب أوروبا
       case 'FR':
       case 'BE':
       case 'IT':
       case 'ES':
+      case 'PT':
       case 'CH':
+      case 'AT':
         method = 'france_uoif';
+        if (countryCode.toUpperCase() == 'BE' ||
+            countryCode.toUpperCase() == 'CH' ||
+            countryCode.toUpperCase() == 'AT') {
+          highLatRule = 'seventh_of_the_night';
+        }
         break;
+
+      // روسيا وشرق أوروبا (عروض عليا)
       case 'RU':
       case 'BY':
       case 'UA':
+      case 'MD':
         method = 'russia';
+        madhab = 'hanafi';
         highLatRule = 'seventh_of_the_night';
         break;
+
+      // شمال ووسط أوروبا (عروض عليا بين 48° و56°)
       case 'GB':
       case 'IE':
       case 'DE':
       case 'NL':
+      case 'PL':
+      case 'CZ':
+      case 'SK':
+      case 'HU':
+      case 'LT':
+      case 'LV':
+      case 'EE':
         method = 'muslim_world_league';
         highLatRule = 'seventh_of_the_night';
         break;
+
+      // الدول الإسكندنافية والقطبية (> 56°)
       case 'SE':
       case 'NO':
       case 'FI':
       case 'DK':
       case 'IS':
+      case 'GL':
         method = 'muslim_world_league';
         highLatRule = 'twilight_angle';
         break;
+
+      // أمريكا الشمالية
       case 'US':
       case 'CA':
         method = 'north_america';
@@ -116,6 +174,7 @@ class AstroSmartDefaults {
             : 'middle_of_the_night';
         break;
     }
+
     return AstroDefaults(
       method: method,
       madhab: madhab,
@@ -147,10 +206,13 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     final settings = state.clone();
     if (settings.lastStreakDate == null || settings.currentStreak == 0) return;
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final lastDate = DateTime(settings.lastStreakDate!.year,
-        settings.lastStreakDate!.month, settings.lastStreakDate!.day);
+    final cityNow = virtualDateTimeNotifier.value;
+    final today = DateTime(cityNow.year, cityNow.month, cityNow.day);
+    final lastDate = DateTime(
+      settings.lastStreakDate!.year,
+      settings.lastStreakDate!.month,
+      settings.lastStreakDate!.day,
+    );
 
     int missedDays = today.difference(lastDate).inDays - 1;
 
@@ -172,6 +234,43 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
       await _repository.saveSettings(settings);
       state = settings;
+    }
+  }
+
+  Future<void> updateGlobalStreak() async {
+    final newState = state.clone();
+    final cityNow = virtualDateTimeNotifier.value;
+    final today = DateTime(cityNow.year, cityNow.month, cityNow.day);
+    bool isUpdated = false;
+
+    if (newState.lastStreakDate == null) {
+      newState.currentStreak = 1;
+      if (newState.longestStreak < 1) newState.longestStreak = 1;
+      newState.lastStreakDate = today;
+      isUpdated = true;
+    } else {
+      final lastDate = DateTime(
+        newState.lastStreakDate!.year,
+        newState.lastStreakDate!.month,
+        newState.lastStreakDate!.day,
+      );
+      final difference = today.difference(lastDate).inDays;
+      if (difference == 1) {
+        newState.currentStreak += 1;
+        if (newState.currentStreak > newState.longestStreak) {
+          newState.longestStreak = newState.currentStreak;
+        }
+        newState.lastStreakDate = today;
+        isUpdated = true;
+      } else if (difference > 1) {
+        newState.currentStreak = 1;
+        newState.lastStreakDate = today;
+        isUpdated = true;
+      }
+    }
+    if (isUpdated) {
+      state = newState;
+      await _repository.saveSettings(newState);
     }
   }
 
@@ -433,40 +532,6 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       );
     } catch (e) {
       rethrow;
-    }
-  }
-
-  Future<void> updateGlobalStreak() async {
-    final newState = state.clone();
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    bool isUpdated = false;
-
-    if (newState.lastStreakDate == null) {
-      newState.currentStreak = 1;
-      newState.longestStreak = 1;
-      newState.lastStreakDate = today;
-      isUpdated = true;
-    } else {
-      final lastDate = DateTime(newState.lastStreakDate!.year,
-          newState.lastStreakDate!.month, newState.lastStreakDate!.day);
-      final difference = today.difference(lastDate).inDays;
-      if (difference == 1) {
-        newState.currentStreak += 1;
-        if (newState.currentStreak > newState.longestStreak) {
-          newState.longestStreak = newState.currentStreak;
-        }
-        newState.lastStreakDate = today;
-        isUpdated = true;
-      } else if (difference > 1) {
-        newState.currentStreak = 1;
-        newState.lastStreakDate = today;
-        isUpdated = true;
-      }
-    }
-    if (isUpdated) {
-      state = newState;
-      await _repository.saveSettings(newState);
     }
   }
 
