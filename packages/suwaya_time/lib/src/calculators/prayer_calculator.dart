@@ -73,6 +73,9 @@ class PrayerCalculator {
         break;
       case HighLatitudeRuleType.twilightAngle:
         params.highLatitudeRule = HighLatitudeRule.twilight_angle;
+        // في طريقتي أم القرى وقطر تكون ishaInterval = 90 و ishaAngle = null؛
+        // تزويد زاوية شفق مرجعية يمنع انهيار nightPortions() في adhan مع بقاء العشاء معتمداً على ishaInterval
+        params.ishaAngle ??= 18.0;
         break;
       case HighLatitudeRuleType.middleOfTheNight:
         params.highLatitudeRule = HighLatitudeRule.middle_of_the_night;

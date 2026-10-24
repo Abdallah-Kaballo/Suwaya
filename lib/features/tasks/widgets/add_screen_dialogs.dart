@@ -293,7 +293,8 @@ Future<void> showCategoryDialModal({
                               ),
                             ),
                             const SizedBox(width: 6),
-                            Text(cat.displayName, style: TextStyle(color: text)),
+                            Text(cat.displayName,
+                                style: TextStyle(color: text)),
                           ],
                         ),
                       ),
@@ -373,7 +374,8 @@ Future<void> showAlertsModal({
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? pColor.withValues(alpha: 0.15) : Colors.transparent,
+            color:
+                isActive ? pColor.withValues(alpha: 0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isActive ? pColor : text.withValues(alpha: 0.1),

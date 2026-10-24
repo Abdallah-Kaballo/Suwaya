@@ -7,8 +7,11 @@ void main() {
     tz_data.initializeTimeZones();
   });
 
-  group('Phase 1 & 2: Strict Primitives & Bi-Directional Coordinate Mapper', () {
-    test('1. Round-trip identity across all 1,440 virtual minutes (including DST Spring-Forward night)', () {
+  group('Phase 1 & 2: Strict Primitives & Bi-Directional Coordinate Mapper',
+      () {
+    test(
+        '1. Round-trip identity across all 1,440 virtual minutes (including DST Spring-Forward night)',
+        () {
       // ليلة قفزة التوقيت الصيفي في نيويورك (8 مارس 2026)
       final ctx = TemporalContextEngine.evaluate(
         instantUtc: DateTime.utc(2026, 3, 8, 1, 0),
@@ -44,13 +47,16 @@ void main() {
           expect(
             roundTrip.virtualMinute,
             equals(vMin),
-            reason: 'Virtual minute mismatch at globalSlot=$globalSlot, vMin=$vMin',
+            reason:
+                'Virtual minute mismatch at globalSlot=$globalSlot, vMin=$vMin',
           );
         }
       }
     });
 
-    test('2. Global <-> Local slot mapping is symmetric for both Shafi and Hanafi distributions', () {
+    test(
+        '2. Global <-> Local slot mapping is symmetric for both Shafi and Hanafi distributions',
+        () {
       for (final madhab in MadhabType.values) {
         final ctx = TemporalContextEngine.evaluate(
           instantUtc: DateTime.utc(2026, 10, 22, 12, 0),
@@ -74,19 +80,23 @@ void main() {
       }
     });
 
-    test('3. ZonedWallTime preserves exact physical duration across DST shift', () {
+    test('3. ZonedWallTime preserves exact physical duration across DST shift',
+        () {
       final beforeDst = ZonedWallTime.fromInstant(
-        InstantUtc.fromDateTime(DateTime.utc(2026, 3, 8, 6, 0)), // 01:00 EST (-5)
+        InstantUtc.fromDateTime(
+            DateTime.utc(2026, 3, 8, 6, 0)), // 01:00 EST (-5)
         timezoneId: 'America/New_York',
       );
       final afterDst = ZonedWallTime.fromInstant(
-        InstantUtc.fromDateTime(DateTime.utc(2026, 3, 8, 8, 0)), // 04:00 EDT (-4)
+        InstantUtc.fromDateTime(
+            DateTime.utc(2026, 3, 8, 8, 0)), // 04:00 EDT (-4)
         timezoneId: 'America/New_York',
       );
 
       // الفرق على ساعة الحائط يبدو 3 ساعات (من 1:00 إلى 4:00)، لكن الفرق الفيزيائي الفعلي ساعتان فقط
       expect(afterDst.hour - beforeDst.hour, equals(3));
-      expect(afterDst.realDifference(beforeDst), equals(const Duration(hours: 2)));
+      expect(
+          afterDst.realDifference(beforeDst), equals(const Duration(hours: 2)));
     });
   });
 }

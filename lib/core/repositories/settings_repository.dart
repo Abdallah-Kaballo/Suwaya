@@ -22,7 +22,7 @@ class SettingsRepository {
       ..id = 1
       ..isFirstLaunch = true
       ..savedLocations = [];
-      
+
     await saveSettings(defaultSettings);
     return defaultSettings;
   }
@@ -36,9 +36,11 @@ class SettingsRepository {
   Future<void> updateActiveLocation(SavedLocation location) async {
     final settings = await getSettings();
     settings.activeLocation = location;
-    
-    if (!settings.savedLocations.any((l) => l.latitude == location.latitude && l.longitude == location.longitude)) {
-      settings.savedLocations = List.from(settings.savedLocations)..add(location);
+
+    if (!settings.savedLocations.any((l) =>
+        l.latitude == location.latitude && l.longitude == location.longitude)) {
+      settings.savedLocations = List.from(settings.savedLocations)
+        ..add(location);
     }
 
     await saveSettings(settings);

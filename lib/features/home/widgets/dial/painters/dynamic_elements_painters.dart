@@ -408,8 +408,8 @@ class RailwayRingPainter extends CustomPainter {
           center,
           r,
           Paint()
-            ..color = (isDark ? Colors.white : Colors.black)
-                .withValues(alpha: 0.12)
+            ..color =
+                (isDark ? Colors.white : Colors.black).withValues(alpha: 0.12)
             ..style = PaintingStyle.stroke
             ..strokeWidth = 0.6,
         );
@@ -575,7 +575,6 @@ class RailwayRingPainter extends CustomPainter {
     return false;
   }
 }
-
 
 class DynamicNeedlePainter extends CustomPainter {
   final DateTime currentTime;

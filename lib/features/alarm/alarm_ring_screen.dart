@@ -239,308 +239,309 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
             ),
             RepaintBoundary(
               child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // 🌟 القسم العلوي: شارة نوع الحدث، الأيقونة، الساعة المدنية والسويعية، العنوان
-                    Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: accentColor.withValues(alpha: 0.4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // 🌟 القسم العلوي: شارة نوع الحدث، الأيقونة، الساعة المدنية والسويعية، العنوان
+                      Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: accentColor.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(_kindIcon(), color: accentColor, size: 15),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _kindBadgeLabel(context),
+                                  style: TextStyle(
+                                    color: accentColor,
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(_kindIcon(), color: accentColor, size: 15),
-                              const SizedBox(width: 6),
-                              Text(
-                                _kindBadgeLabel(context),
-                                style: TextStyle(
-                                  color: accentColor,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
+                          const SizedBox(height: 18),
+                          ValueListenableBuilder<DateTime>(
+                            valueListenable: virtualDateTimeNotifier,
+                            builder: (context, liveCivilNow, _) {
+                              return ClockTimeText.civil(
+                                civilTime: liveCivilNow,
+                                civilTimeFormat: settings.civilTimeFormat,
+                                locale: context.locale.languageCode,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 62,
+                                  fontWeight: FontWeight.w900,
+                                  fontFamily: 'Inter',
                                 ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        ),
-                        const SizedBox(height: 18),
-                      
-                        ValueListenableBuilder<DateTime>(
-                          valueListenable: virtualDateTimeNotifier,
-                          builder: (context, liveCivilNow, _) {
-                            return ClockTimeText.civil(
-                              civilTime: liveCivilNow,
-                              civilTimeFormat: settings.civilTimeFormat,
-                              locale: context.locale.languageCode,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 62,
-                                fontWeight: FontWeight.w900,
-                                fontFamily: 'Inter',
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          taskTitle,
-                          style: TextStyle(
-                            color: accentColor,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (taskBody.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(
-                            taskBody,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
+                            taskTitle,
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
                             ),
                             textAlign: TextAlign.center,
                           ),
+                          if (taskBody.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              taskBody,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          if (canSnooze)
+                            Text(
+                              '${'alarm.snooze'.tr()} +$snoozeMins ${'details.minute'.tr()} (${snoozeCount + 1}/$maxSnoozes)',
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            )
+                          else if (!isPrayer &&
+                              parsedData.snoozeAllowed &&
+                              snoozeCount >= maxSnoozes)
+                            Text(
+                              'alarm.max_snoozes_reached'.tr(),
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                         ],
-                        const SizedBox(height: 12),
-                        if (canSnooze)
-                          Text(
-                            '${'alarm.snooze'.tr()} +$snoozeMins ${'details.minute'.tr()} (${snoozeCount + 1}/$maxSnoozes)',
-                            style: const TextStyle(
-                              color: Colors.white54,
-                              fontSize: 13,
-                            ),
-                          )
-                        else if (!isPrayer &&
-                            parsedData.snoozeAllowed &&
-                            snoozeCount >= maxSnoozes)
-                          Text(
-                            'alarm.max_snoozes_reached'.tr(),
-                            style: const TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                      ],
-                    ),
-                    
-                    
+                      ),
 
-                    // 🌟 القسم السفلي: شريط السحب والأزرار الصريحة
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text(
-                            'alarm.swipe_to_stop'.tr(),
-                            style: const TextStyle(
-                              color: Colors.white54,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                      // 🌟 القسم السفلي: شريط السحب والأزرار الصريحة
+                      Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Text(
+                              'alarm.swipe_to_stop'.tr(),
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                        ExcludeSemantics(
-                          child: Directionality(
-                            textDirection: ui.TextDirection.ltr,
-                            child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final trackWidth = constraints.maxWidth - 16;
-                              return Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  borderRadius: BorderRadius.circular(40),
-                                  border: Border.all(
-                                    color: Colors.white24,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                          ExcludeSemantics(
+                            child: Directionality(
+                              textDirection: ui.TextDirection.ltr,
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final trackWidth = constraints.maxWidth - 16;
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.5),
+                                      borderRadius: BorderRadius.circular(40),
+                                      border: Border.all(
+                                        color: Colors.white24,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.center,
                                       children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 24.0,
-                                          ),
-                                          child: Text(
-                                            'alarm.snooze'.tr(),
-                                            style: TextStyle(
-                                              color: canSnooze
-                                                  ? Colors.white54
-                                                  : Colors.transparent,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 24.0,
+                                              ),
+                                              child: Text(
+                                                'alarm.snooze'.tr(),
+                                                style: TextStyle(
+                                                  color: canSnooze
+                                                      ? Colors.white54
+                                                      : Colors.transparent,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 24.0,
+                                              ),
+                                              child: Text(
+                                                'alarm.stop'.tr(),
+                                                style: const TextStyle(
+                                                  color: Colors.white54,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: 24.0,
-                                          ),
-                                          child: Text(
-                                            'alarm.stop'.tr(),
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                        Positioned(
+                                          left: (trackWidth / 2) -
+                                              35 +
+                                              _dragPosition,
+                                          child: GestureDetector(
+                                            onHorizontalDragUpdate: (details) {
+                                              if (_isProcessingAction) return;
+                                              setState(() {
+                                                _dragPosition = (_dragPosition +
+                                                        details.delta.dx)
+                                                    .clamp(
+                                                  canSnooze
+                                                      ? -_maxDragThreshold - 20
+                                                      : 0.0,
+                                                  _maxDragThreshold + 20,
+                                                );
+                                              });
+                                            },
+                                            onHorizontalDragEnd: (details) {
+                                              if (_isProcessingAction) return;
+                                              if (_dragPosition >
+                                                  _maxDragThreshold) {
+                                                _triggerStop();
+                                              } else if (_dragPosition <
+                                                      -_maxDragThreshold &&
+                                                  canSnooze) {
+                                                _triggerSnooze();
+                                              } else {
+                                                setState(
+                                                    () => _dragPosition = 0);
+                                              }
+                                            },
+                                            child: AnimatedContainer(
+                                              duration: _dragPosition == 0
+                                                  ? const Duration(
+                                                      milliseconds: 300)
+                                                  : Duration.zero,
+                                              curve: Curves.elasticOut,
+                                              width: 70,
+                                              height: 70,
+                                              decoration: BoxDecoration(
+                                                color: _dragPosition > 50
+                                                    ? Colors.redAccent
+                                                    : (_dragPosition < -50
+                                                        ? Colors.amber
+                                                        : accentColor),
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color:
+                                                        accentColor.withValues(
+                                                      alpha: 0.5,
+                                                    ),
+                                                    blurRadius: 15,
+                                                    spreadRadius: 2,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Icon(
+                                                _dragPosition > 50
+                                                    ? LucideIcons.x
+                                                    : (_dragPosition < -50
+                                                        ? Icons.snooze
+                                                        : _kindIcon()),
+                                                color: Colors.white,
+                                                size: 30,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    Positioned(
-                                      left:
-                                          (trackWidth / 2) - 35 + _dragPosition,
-                                      child: GestureDetector(
-                                        onHorizontalDragUpdate: (details) {
-                                          if (_isProcessingAction) return;
-                                          setState(() {
-                                            _dragPosition = (_dragPosition +
-                                                    details.delta.dx)
-                                                .clamp(
-                                              canSnooze
-                                                  ? -_maxDragThreshold - 20
-                                                  : 0.0,
-                                              _maxDragThreshold + 20,
-                                            );
-                                          });
-                                        },
-                                        onHorizontalDragEnd: (details) {
-                                          if (_isProcessingAction) return;
-                                          if (_dragPosition >
-                                              _maxDragThreshold) {
-                                            _triggerStop();
-                                          } else if (_dragPosition <
-                                                  -_maxDragThreshold &&
-                                              canSnooze) {
-                                            _triggerSnooze();
-                                          } else {
-                                            setState(() => _dragPosition = 0);
-                                          }
-                                        },
-                                        child: AnimatedContainer(
-                                          duration: _dragPosition == 0
-                                              ? const Duration(milliseconds: 300)
-                                              : Duration.zero,
-                                          curve: Curves.elasticOut,
-                                          width: 70,
-                                          height: 70,
-                                          decoration: BoxDecoration(
-                                            color: _dragPosition > 50
-                                                ? Colors.redAccent
-                                                : (_dragPosition < -50
-                                                    ? Colors.amber
-                                                    : accentColor),
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: accentColor.withValues(
-                                                  alpha: 0.5,
-                                                ),
-                                                blurRadius: 15,
-                                                spreadRadius: 2,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Icon(
-                                            _dragPosition > 50
-                                                ? LucideIcons.x
-                                                : (_dragPosition < -50
-                                                    ? Icons.snooze
-                                                    : _kindIcon()),
-                                            color: Colors.white,
-                                            size: 30,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                          
-                        ),
-                    
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (canSnooze) ...[
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (canSnooze) ...[
+                                TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.white70,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                  onPressed: _isProcessingAction
+                                      ? null
+                                      : _triggerSnooze,
+                                  icon: const Icon(Icons.snooze),
+                                  label: Text(
+                                    'alarm.snooze'.tr(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
                               TextButton.icon(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white70,
+                                  foregroundColor: Colors.redAccent,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                     vertical: 14,
                                   ),
                                 ),
                                 onPressed:
-                                    _isProcessingAction ? null : _triggerSnooze,
-                                icon: const Icon(Icons.snooze),
+                                    _isProcessingAction ? null : _triggerStop,
+                                icon: const Icon(LucideIcons.power_off),
                                 label: Text(
-                                  'alarm.snooze'.tr(),
+                                  'alarm.stop'.tr(),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
                             ],
-                            TextButton.icon(
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.redAccent,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 14,
-                                ),
-                              ),
-                              onPressed:
-                                  _isProcessingAction ? null : _triggerStop,
-                              icon: const Icon(LucideIcons.power_off),
-                              label: Text(
-                                'alarm.stop'.tr(),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -32,7 +32,8 @@ void main() {
     await initializeDateFormatting('ar');
   });
 
-  testWidgets('SuwayaTimeText renders correctly in emoji and text modes (RTL & LTR)',
+  testWidgets(
+      'SuwayaTimeText renders correctly in emoji and text modes (RTL & LTR)',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
@@ -70,7 +71,8 @@ void main() {
     expect(find.text('ن'), findsOneWidget);
   });
 
-  testWidgets('ClockTimeText renders suwaya and civil time correctly with overridden repository',
+  testWidgets(
+      'ClockTimeText renders suwaya and civil time correctly with overridden repository',
       (WidgetTester tester) async {
     final fakeRepo = _FakeSettingsRepository(
       SettingsModel()..suwayaIconMode = 'emoji',

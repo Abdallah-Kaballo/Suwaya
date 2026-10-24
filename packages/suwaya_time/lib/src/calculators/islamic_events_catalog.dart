@@ -120,9 +120,8 @@ class IslamicEventsCatalog {
         type: IslamicFastingType.tasua,
         titleKey: 'fasting.tasua_title',
         reasonKey: 'fasting.tasua_reason',
-        title: isAr
-            ? 'صيام يوم تاسوعاء (9 محرم)'
-            : 'Fasting Tasu\'a (9 Muharram)',
+        title:
+            isAr ? 'صيام يوم تاسوعاء (9 محرم)' : 'Fasting Tasu\'a (9 Muharram)',
         reason: isAr
             ? 'يُستحب صيامه مع يوم عاشوراء.'
             : 'Recommended to fast along with the Day of Ashura.',

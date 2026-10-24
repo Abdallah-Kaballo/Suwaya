@@ -38,7 +38,8 @@ class LocationService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw LocationException('location_picker.error_permission_denied_forever');
+      throw LocationException(
+          'location_picker.error_permission_denied_forever');
     }
 
     Position? lastKnown;

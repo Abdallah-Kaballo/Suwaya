@@ -39,7 +39,8 @@ class AppTheme {
     const borderGray = Color(0xFF2E3340);
     const textPrimary = Color(0xFFF3F4F6);
     const textSecondary = Color(0xFFA1A8B8);
-    const onPrimaryDark = Color(0xFF0F172A); // تباين فائق (> 10:1) فوق الذهبي والألوان الفاتحة
+    const onPrimaryDark =
+        Color(0xFF0F172A); // تباين فائق (> 10:1) فوق الذهبي والألوان الفاتحة
 
     return ThemeData(
       useMaterial3: true,

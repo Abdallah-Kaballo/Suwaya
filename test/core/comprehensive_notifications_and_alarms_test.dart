@@ -13,8 +13,12 @@ void main() {
     tz_data.initializeTimeZones();
   });
 
-  group('1. 8-Day Isolate Astro Window & Deterministic ID Namespace Collision Tests', () {
-    test('Generates 8-day windows (-1 to +6) in Isolate with zero ID collisions across prayers, qiyam, routines, and tasks', () async {
+  group(
+      '1. 8-Day Isolate Astro Window & Deterministic ID Namespace Collision Tests',
+      () {
+    test(
+        'Generates 8-day windows (-1 to +6) in Isolate with zero ID collisions across prayers, qiyam, routines, and tasks',
+        () async {
       final cityNow = DateTime.utc(2026, 10, 22, 12, 0);
       final offsets = List.filled(9, const Duration(hours: 3));
 
@@ -88,7 +92,9 @@ void main() {
       }
     });
 
-    test('Same-second collision resolver prioritizes Adhan at +0s and caps stagger at +30s under heavy load', () {
+    test(
+        'Same-second collision resolver prioritizes Adhan at +0s and caps stagger at +30s under heavy load',
+        () {
       final occupied = <int>{};
       final baseAdhanTime = DateTime(2026, 10, 22, 18, 0, 0);
 
@@ -118,7 +124,9 @@ void main() {
   });
 
   group('2. ScheduleFingerprint Sensitivity & Determinism Tests', () {
-    test('Fingerprint changes on any relevant mutation in settings, tasks, or routines', () {
+    test(
+        'Fingerprint changes on any relevant mutation in settings, tasks, or routines',
+        () {
       final cityNow = DateTime.utc(2026, 10, 22, 12, 0);
       const offset = Duration(hours: 3);
 
@@ -198,7 +206,9 @@ void main() {
   });
 
   group('3. SettingsModel Period Normalization & Hijri Offset Persistence', () {
-    test('Normalizes legacy numeric prayer IDs (1,3,4,5,9) to canonical names and clamps hijriOffsetDays', () {
+    test(
+        'Normalizes legacy numeric prayer IDs (1,3,4,5,9) to canonical names and clamps hijriOffsetDays',
+        () {
       final s = SettingsModel();
       expect(SettingsModel.normalizePeriodId('1'), 'fajr');
       expect(SettingsModel.normalizePeriodId('3'), 'dhuhr');
@@ -213,7 +223,9 @@ void main() {
       expect(s.hijriOffsetDays, -2);
     });
 
-    test('ParsedAlarmData copyWith increments snoozeCount and enforces maxSnoozes boundary', () {
+    test(
+        'ParsedAlarmData copyWith increments snoozeCount and enforces maxSnoozes boundary',
+        () {
       const data = ParsedAlarmData(
         eventId: 401011,
         kind: AlarmEventKind.task,

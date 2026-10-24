@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -16,7 +15,6 @@ import '../../core/location/permissions_provider.dart';
 import '../../features/settings/settings_provider.dart';
 import '../../shared/widgets/suwaya_time_text.dart';
 import '../../core/utils/time_formatters.dart';
-
 
 import 'widgets/add_screen_pickers.dart';
 import 'widgets/add_screen_dialogs.dart';
@@ -167,8 +165,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   @override
   void initState() {
     super.initState();
-    final int startTab =
-        widget.existingRoutine != null ? 2 : widget.initialTab;
+    final int startTab = widget.existingRoutine != null ? 2 : widget.initialTab;
     _tabController = TabController(
       length: 3,
       vsync: this,
@@ -336,43 +333,53 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     if (_tabController.index == 2) {
       // 🌟 فحص موحد لصلاحيات الإشعارات والمنبهات قبل حفظ الروتين أو المهمة
-    if (_alertLevel >= 1) {
-      final permsNotifier = ref.read(permissionsProvider.notifier);
-      final hasNotif = await permsNotifier.ensureNotificationPermission();
-      final hasExactAlarm = _alertLevel == 2
-          ? await permsNotifier.ensureExactAlarmPermission()
-          : true;
-      if (!mounted) return;
-      if (!hasNotif || !hasExactAlarm) {
-        scaffold.showSnackBar(
-          SnackBar(
-            content: Text('add_screen.permissions_required'.tr()),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-        return;
+      if (_alertLevel >= 1) {
+        final permsNotifier = ref.read(permissionsProvider.notifier);
+        final hasNotif = await permsNotifier.ensureNotificationPermission();
+        final hasExactAlarm = _alertLevel == 2
+            ? await permsNotifier.ensureExactAlarmPermission()
+            : true;
+        if (!mounted) return;
+        if (!hasNotif || !hasExactAlarm) {
+          scaffold.showSnackBar(
+            SnackBar(
+              content: Text('add_screen.permissions_required'.tr()),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+          return;
+        }
       }
-    }
 
       final routine = widget.existingRoutine ?? RoutineModel();
       routine.title = title;
       routine.colorValue = _routineColor.toARGB32();
       routine.pattern = _routinePattern;
       routine.isActive = true;
-      routine.recurrenceDays = _routineRecurrenceDays.isEmpty ? null : _routineRecurrenceDays;
+      routine.recurrenceDays =
+          _routineRecurrenceDays.isEmpty ? null : _routineRecurrenceDays;
       routine.alertLevel = _alertLevel;
       routine.alarmTone = _alarmTone;
       routine.alarmVolume = _alarmVolume;
 
-      if (_routineTimeMode == 1) { // المدني
+      if (_routineTimeMode == 1) {
+        // المدني
         routine.isAstroTime = false;
-        routine.startTimeMinutes = (_routineStartCivilHour * 60) + _routineStartCivilMinute;
-        routine.endTimeMinutes = (_routineEndCivilHour * 60) + _routineEndCivilMinute;
-        routine.startPeriodId = null; routine.startSuwaya = null; routine.startVirtualMinute = null;
-        routine.endPeriodId = null; routine.endSuwaya = null; routine.endVirtualMinute = null;
-      } else { // السويعي
+        routine.startTimeMinutes =
+            (_routineStartCivilHour * 60) + _routineStartCivilMinute;
+        routine.endTimeMinutes =
+            (_routineEndCivilHour * 60) + _routineEndCivilMinute;
+        routine.startPeriodId = null;
+        routine.startSuwaya = null;
+        routine.startVirtualMinute = null;
+        routine.endPeriodId = null;
+        routine.endSuwaya = null;
+        routine.endVirtualMinute = null;
+      } else {
+        // السويعي
         routine.isAstroTime = true;
-        routine.startTimeMinutes = null; routine.endTimeMinutes = null;
+        routine.startTimeMinutes = null;
+        routine.endTimeMinutes = null;
 
         final sm = _mapGlobalToLocal(_routineStartGlobalSuwaya, periods);
         routine.startPeriodId = sm['pId'];
@@ -411,10 +418,12 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     final task = widget.existingTask ?? TaskModel();
     task.title = title;
-    task.type = _tabController.index == 1 ? TaskType.permanent : TaskType.casual;
+    task.type =
+        _tabController.index == 1 ? TaskType.permanent : TaskType.casual;
     task.category = _selectedCategory;
     task.showOnDial = _showOnDial;
-    task.dialShortName = _showOnDial ? (title.length > 6 ? title.substring(0, 6) : title) : '';
+    task.dialShortName =
+        _showOnDial ? (title.length > 6 ? title.substring(0, 6) : title) : '';
     task.alarmMode = _alertLevel == 2;
     task.notifyMode = _alertLevel >= 1;
     task.vibrateMode = _alertLevel == 2;
@@ -424,8 +433,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     if (_hasTime) {
       if (_timeMode == 1) {
         task.isAstroTime = false;
-        task.targetCivilTimeMinutes = (_targetCivilHour * 60) + _targetCivilMinute;
-        task.targetPeriodId = null; task.targetSuwayas = []; task.targetVirtualMinute = 0;
+        task.targetCivilTimeMinutes =
+            (_targetCivilHour * 60) + _targetCivilMinute;
+        task.targetPeriodId = null;
+        task.targetSuwayas = [];
+        task.targetVirtualMinute = 0;
       } else {
         task.isAstroTime = true;
         task.targetCivilTimeMinutes = null;
@@ -869,13 +881,18 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final surfaceColor = isDark ? const Color(0xFF13131A) : Colors.white;
     final accentColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white : Colors.black87;
-    
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, elevation: 0,
-        leading: IconButton(icon: Icon(LucideIcons.x, color: textColor), onPressed: () => Navigator.pop(context)),
-        title: Text('add_screen.new_addition'.tr(), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+            icon: Icon(LucideIcons.x, color: textColor),
+            onPressed: () => Navigator.pop(context)),
+        title: Text('add_screen.new_addition'.tr(),
+            style: TextStyle(
+                color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -885,50 +902,114 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
             children: [
               Container(
                 height: 48,
-                decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: accentColor.withValues(alpha: 0.1))),
+                decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border:
+                        Border.all(color: accentColor.withValues(alpha: 0.1))),
                 child: TabBar(
-                  controller: _tabController, indicatorSize: TabBarIndicatorSize.tab,
-                  indicator: BoxDecoration(color: accentColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14), border: Border.all(color: accentColor, width: 2)),
-                  labelColor: accentColor, unselectedLabelColor: textColor.withValues(alpha: 0.4),
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  tabs: [Tab(text: 'tasks.casual_task'.tr()), Tab(text: 'tasks.continuous_habit'.tr()), Tab(text: 'tasks.routine_period'.tr())],
+                  controller: _tabController,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: accentColor, width: 2)),
+                  labelColor: accentColor,
+                  unselectedLabelColor: textColor.withValues(alpha: 0.4),
+                  labelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
+                  tabs: [
+                    Tab(text: 'tasks.casual_task'.tr()),
+                    Tab(text: 'tasks.continuous_habit'.tr()),
+                    Tab(text: 'tasks.routine_period'.tr())
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(color: surfaceColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: accentColor.withValues(alpha: 0.2))),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border:
+                        Border.all(color: accentColor.withValues(alpha: 0.2))),
                 child: TextField(
-                  controller: _titleController, autofocus: true,
-                  style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900),
-                  decoration: InputDecoration(border: InputBorder.none, hintText: 'add_screen.what_to_add'.tr(), hintStyle: TextStyle(color: textColor.withValues(alpha: 0.3))),
+                  controller: _titleController,
+                  autofocus: true,
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900),
+                  decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'add_screen.what_to_add'.tr(),
+                      hintStyle:
+                          TextStyle(color: textColor.withValues(alpha: 0.3))),
                 ),
               ),
               const SizedBox(height: 24),
               Expanded(
                 child: TabBarView(
-                  controller: _tabController, physics: const NeverScrollableScrollPhysics(),
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    _buildDashboardGrid(textColor, surfaceColor, accentColor, false),
-                    _buildDashboardGrid(textColor, surfaceColor, accentColor, true),
-                    _buildRoutineDashboardGrid(textColor, surfaceColor, accentColor),
+                    _buildDashboardGrid(
+                        textColor, surfaceColor, accentColor, false),
+                    _buildDashboardGrid(
+                        textColor, surfaceColor, accentColor, true),
+                    _buildRoutineDashboardGrid(
+                        textColor, surfaceColor, accentColor),
                   ],
                 ),
               ),
               Row(
                 children: [
-                  if (widget.existingTask != null || widget.existingRoutine != null) ...[
-                    Expanded(flex: 1, child: SizedBox(height: 60, child: OutlinedButton(onPressed: () {
-                      if (widget.existingTask != null) {
-                      ref.read(tasksProvider.notifier).deleteTask(widget.existingTask!.id);
-                      } else if (widget.existingRoutine != null) {
-                      ref.read(routinesProvider.notifier).deleteRoutine(widget.existingRoutine!.id);
-                      }
-                      Navigator.pop(context);
-                    }, style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.redAccent), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: const Icon(LucideIcons.trash, color: Colors.redAccent)))),
+                  if (widget.existingTask != null ||
+                      widget.existingRoutine != null) ...[
+                    Expanded(
+                        flex: 1,
+                        child: SizedBox(
+                            height: 60,
+                            child: OutlinedButton(
+                                onPressed: () {
+                                  if (widget.existingTask != null) {
+                                    ref
+                                        .read(tasksProvider.notifier)
+                                        .deleteTask(widget.existingTask!.id);
+                                  } else if (widget.existingRoutine != null) {
+                                    ref
+                                        .read(routinesProvider.notifier)
+                                        .deleteRoutine(
+                                            widget.existingRoutine!.id);
+                                  }
+                                  Navigator.pop(context);
+                                },
+                                style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(
+                                        color: Colors.redAccent),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20))),
+                                child: const Icon(LucideIcons.trash,
+                                    color: Colors.redAccent)))),
                     const SizedBox(width: 12),
                   ],
-                  Expanded(flex: 3, child: SizedBox(height: 60, child: ElevatedButton(onPressed: _saveItem, style: ElevatedButton.styleFrom(backgroundColor: accentColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))), child: Text('add_screen.save_and_add'.tr(), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))))),
+                  Expanded(
+                      flex: 3,
+                      child: SizedBox(
+                          height: 60,
+                          child: ElevatedButton(
+                              onPressed: _saveItem,
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: accentColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20))),
+                              child: Text('add_screen.save_and_add'.tr(),
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold))))),
                 ],
               ),
               const SizedBox(height: 16),
@@ -1019,7 +1100,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
               LucideIcons.palette,
               _showOnDial,
               false,
-              () => _showCategoryDialDialog(accentColor, surfaceColor, textColor),
+              () =>
+                  _showCategoryDialDialog(accentColor, surfaceColor, textColor),
             ),
             const SizedBox(width: 12),
             _buildGridCard(
@@ -1073,17 +1155,21 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
-  Widget _buildRoutineDashboardGrid(Color textColor, Color surfaceColor, Color accentColor) {
-    String recurrenceStr = _routineRecurrenceDays.isEmpty ? 'add_screen.daily'.tr() : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
+  Widget _buildRoutineDashboardGrid(
+      Color textColor, Color surfaceColor, Color accentColor) {
+    String recurrenceStr = _routineRecurrenceDays.isEmpty
+        ? 'add_screen.daily'.tr()
+        : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
     final settings = ref.watch(settingsProvider);
-    
-    Widget startPreview; Widget endPreview;
+
+    Widget startPreview;
+    Widget endPreview;
     if (_routineTimeMode == 1) {
       startPreview = ClockTimeText.civilClock(
-          civilClock: CivilWallClock(
-            hour: _targetCivilHour,
-            minute: _targetCivilMinute,
-          ),
+        civilClock: CivilWallClock(
+          hour: _targetCivilHour,
+          minute: _targetCivilMinute,
+        ),
         civilTimeFormat: settings.civilTimeFormat,
         locale: context.locale.languageCode,
         style: TextStyle(
@@ -1094,10 +1180,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
         ),
       );
       endPreview = ClockTimeText.civilClock(
-          civilClock: CivilWallClock(
-            hour: _targetCivilHour,
-            minute: _targetCivilMinute,
-          ),
+        civilClock: CivilWallClock(
+          hour: _targetCivilHour,
+          minute: _targetCivilMinute,
+        ),
         civilTimeFormat: settings.civilTimeFormat,
         locale: context.locale.languageCode,
         style: TextStyle(
@@ -1134,30 +1220,84 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     return Column(
       children: [
         Container(
-          width: double.infinity, margin: const EdgeInsets.only(bottom: 16),
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 16),
           child: SegmentedButton<int>(
             segments: [
               ButtonSegment(value: 0, label: Text('ibadat.astro_time'.tr())),
               ButtonSegment(value: 1, label: Text('add_screen.civil'.tr()))
             ],
             selected: {_routineTimeMode},
-            onSelectionChanged: (set) { HapticFeedback.selectionClick(); setState(() => _routineTimeMode = set.first); },
-            style: ButtonStyle(backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor.withValues(alpha: 0.2) : Colors.transparent), foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? accentColor : textColor.withValues(alpha: 0.5))),
+            onSelectionChanged: (set) {
+              HapticFeedback.selectionClick();
+              setState(() => _routineTimeMode = set.first);
+            },
+            style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith((states) =>
+                    states.contains(WidgetState.selected)
+                        ? accentColor.withValues(alpha: 0.2)
+                        : Colors.transparent),
+                foregroundColor: WidgetStateProperty.resolveWith((states) =>
+                    states.contains(WidgetState.selected)
+                        ? accentColor
+                        : textColor.withValues(alpha: 0.5))),
           ),
         ),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.start_time'.tr(), '', LucideIcons.sunset, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, isRoutine: true, isStart: true), valueWidget: startPreview),
+            _buildGridCard(
+                surfaceColor,
+                accentColor,
+                textColor,
+                'add_screen.start_time'.tr(),
+                '',
+                LucideIcons.sunset,
+                true,
+                false,
+                () => _showTimeDialog(accentColor, surfaceColor, textColor,
+                    isRoutine: true, isStart: true),
+                valueWidget: startPreview),
             const SizedBox(width: 12),
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.end_time'.tr(), '', LucideIcons.sunrise, true, false, () => _showTimeDialog(accentColor, surfaceColor, textColor, isRoutine: true, isStart: false), valueWidget: endPreview),
+            _buildGridCard(
+                surfaceColor,
+                accentColor,
+                textColor,
+                'add_screen.end_time'.tr(),
+                '',
+                LucideIcons.sunrise,
+                true,
+                false,
+                () => _showTimeDialog(accentColor, surfaceColor, textColor,
+                    isRoutine: true, isStart: false),
+                valueWidget: endPreview),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.pattern_color'.tr(), _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(), LucideIcons.paint_bucket, true, false, () => _showRoutinePatternDialog(accentColor, surfaceColor, textColor)),
+            _buildGridCard(
+                surfaceColor,
+                accentColor,
+                textColor,
+                'add_screen.pattern_color'.tr(),
+                _availablePatterns[_routinePattern] ?? 'patterns.linear'.tr(),
+                LucideIcons.paint_bucket,
+                true,
+                false,
+                () => _showRoutinePatternDialog(
+                    accentColor, surfaceColor, textColor)),
             const SizedBox(width: 12),
-            _buildGridCard(surfaceColor, accentColor, textColor, 'add_screen.recurrence'.tr(), recurrenceStr, LucideIcons.calendar_days, false, false, () => _showDateRecurrenceDialog(accentColor, surfaceColor, textColor, true)),
+            _buildGridCard(
+                surfaceColor,
+                accentColor,
+                textColor,
+                'add_screen.recurrence'.tr(),
+                recurrenceStr,
+                LucideIcons.calendar_days,
+                false,
+                false,
+                () => _showDateRecurrenceDialog(
+                    accentColor, surfaceColor, textColor, true)),
           ],
         ),
       ],

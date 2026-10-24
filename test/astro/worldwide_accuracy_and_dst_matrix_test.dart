@@ -127,9 +127,13 @@ void main() {
     DateTime.utc(2026, 12, 31, 20, 0), // ليلة رأس السنة الميلادية
   ];
 
-  group('1. Global Geographical & Seasonal Matrix (100% Mathematical Invariants)', () {
+  group(
+      '1. Global Geographical & Seasonal Matrix (100% Mathematical Invariants)',
+      () {
     for (final city in worldCities) {
-      test('Verifies 7 contiguous periods, 24 Suwayas, and microsecond precision in ${city.name}', () {
+      test(
+          'Verifies 7 contiguous periods, 24 Suwayas, and microsecond precision in ${city.name}',
+          () {
         for (final baseInstant in keyDatesUtc) {
           final ctx = TemporalContextEngine.evaluate(
             instantUtc: baseInstant,
@@ -143,18 +147,18 @@ void main() {
 
           final day = ctx.suwayaDay;
           expect(day.cycleAnchors.isValidSequence, isTrue,
-              reason: 'Invalid anchor sequence in ${city.name} at $baseInstant');
+              reason:
+                  'Invalid anchor sequence in ${city.name} at $baseInstant');
           expect(day.periods.length, 7);
 
           // المجموع الكلي 24 سويعة: 12 ليل (1+4+6+1) و 12 نهار
-          final nightSuwayas = day.periods
-              .take(4)
-              .fold<int>(0, (s, p) => s + p.suwayasCount);
-          final daySuwayas = day.periods
-              .skip(4)
-              .fold<int>(0, (s, p) => s + p.suwayasCount);
+          final nightSuwayas =
+              day.periods.take(4).fold<int>(0, (s, p) => s + p.suwayasCount);
+          final daySuwayas =
+              day.periods.skip(4).fold<int>(0, (s, p) => s + p.suwayasCount);
 
-          expect(nightSuwayas, 12, reason: 'Night suwayas != 12 in ${city.name}');
+          expect(nightSuwayas, 12,
+              reason: 'Night suwayas != 12 in ${city.name}');
           expect(daySuwayas, 12, reason: 'Day suwayas != 12 in ${city.name}');
 
           // اتصال الفترات السبع بدون أي فجوة أو تداخل بالمايكروثانية
@@ -162,12 +166,14 @@ void main() {
             expect(
               day.periods[i].endUtc,
               equals(day.periods[i + 1].startUtc),
-              reason: 'UTC gap between period ${i + 1} and ${i + 2} in ${city.name}',
+              reason:
+                  'UTC gap between period ${i + 1} and ${i + 2} in ${city.name}',
             );
             expect(
               day.periods[i].endTime,
               equals(day.periods[i + 1].startTime),
-              reason: 'Wall-clock gap between period ${i + 1} and ${i + 2} in ${city.name}',
+              reason:
+                  'Wall-clock gap between period ${i + 1} and ${i + 2} in ${city.name}',
             );
             expect(day.periods[i].totalDuration.inMicroseconds, greaterThan(0));
           }
@@ -200,10 +206,14 @@ void main() {
     }
   });
 
-  group('2. Daylight Saving Time (Spring Forward & Fall Back) Immunity Tests', () {
-    test('Spring-Forward (+1h) and Fall-Back (-1h) in New York & London never distort virtual minutes or slot resolution', () {
+  group('2. Daylight Saving Time (Spring Forward & Fall Back) Immunity Tests',
+      () {
+    test(
+        'Spring-Forward (+1h) and Fall-Back (-1h) in New York & London never distort virtual minutes or slot resolution',
+        () {
       // 1. نيويورك: تقديم الساعة (Spring Forward) يوم 8 مارس 2026 الساعة 02:00 صباحاً (UTC-5 -> UTC-4)
-      final nySpringEveningUtc = DateTime.utc(2026, 3, 8, 1, 0); // بعد مغرب السبت 7 مارس بتوقيت نيويورك
+      final nySpringEveningUtc = DateTime.utc(
+          2026, 3, 8, 1, 0); // بعد مغرب السبت 7 مارس بتوقيت نيويورك
       final nySpringCtx = TemporalContextEngine.evaluate(
         instantUtc: nySpringEveningUtc,
         latitude: 40.7128,
@@ -225,7 +235,8 @@ void main() {
       expect(sumPeriodsMicro, equals(totalRealCycleMicro));
 
       // فحص كل سويعة ودقيقة افتراضية خلال فترة الفجر والقيام العابرة للتوقيت الصيفي
-      final qiyamPeriod = springDay.periods[2]; // الفترة 3 (تعبر الساعة 02:00 صباحاً لحظة قفزة التوقيت الصيفي)
+      final qiyamPeriod = springDay.periods[
+          2]; // الفترة 3 (تعبر الساعة 02:00 صباحاً لحظة قفزة التوقيت الصيفي)
       for (int s = 1; s <= qiyamPeriod.suwayasCount; s++) {
         for (int vm = 0; vm < 60; vm += 15) {
           final slotUtc = qiyamPeriod.resolveSlotUtc(s, vm);
@@ -300,7 +311,8 @@ void main() {
   });
 
   group('3. Manual Offsets Clamping & Sunrise Protection Tests', () {
-    test('Clamps extreme manual offsets to [-30, +30] and never shifts Sunrise', () {
+    test('Clamps extreme manual offsets to [-30, +30] and never shifts Sunrise',
+        () {
       final date = DateTime.utc(2026, 5, 10);
       const offset = Duration(hours: 3);
 

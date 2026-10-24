@@ -3,17 +3,28 @@ import 'package:flutter/material.dart';
 class PatternPreviewPainter extends CustomPainter {
   final String pattern;
   final Color color;
-  
+
   PatternPreviewPainter(this.pattern, this.color);
-  
-  @override 
+
+  @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(6));
-    canvas.drawRRect(rRect, Paint()..color = color.withValues(alpha: 0.2)..style = PaintingStyle.fill);
-    canvas.drawRRect(rRect, Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 2);
-    
-    final p = Paint()..color = color..strokeWidth = 2;
+    canvas.drawRRect(
+        rRect,
+        Paint()
+          ..color = color.withValues(alpha: 0.2)
+          ..style = PaintingStyle.fill);
+    canvas.drawRRect(
+        rRect,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2);
+
+    final p = Paint()
+      ..color = color
+      ..strokeWidth = 2;
     if (pattern == 'linear') {
       canvas.drawLine(const Offset(0, 10), const Offset(30, 10), p);
       canvas.drawLine(const Offset(0, 20), const Offset(30, 20), p);
@@ -29,6 +40,6 @@ class PatternPreviewPainter extends CustomPainter {
     }
   }
 
-  @override 
+  @override
   bool shouldRepaint(covariant CustomPainter old) => true;
 }

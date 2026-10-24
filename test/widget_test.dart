@@ -4,7 +4,8 @@ import 'package:suwaya/main.dart';
 
 void main() {
   group('اختبارات واجهة التطبيق (Widget Tests)', () {
-    testWidgets('اختبار عمل شاشة الإقلاع البديلة بنجاح (Bootstrap Failure Screen)',
+    testWidgets(
+        'اختبار عمل شاشة الإقلاع البديلة بنجاح (Bootstrap Failure Screen)',
         (WidgetTester tester) async {
       bool retried = false;
 

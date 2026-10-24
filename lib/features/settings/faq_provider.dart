@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -40,8 +39,8 @@ Future<List<FaqItem>> _loadBundledFaq(String langCode) async {
   return const [];
 }
 
-final faqProvider =
-    FutureProvider.family.autoDispose<List<FaqItem>, String>((ref, langCode) async {
+final faqProvider = FutureProvider.family
+    .autoDispose<List<FaqItem>, String>((ref, langCode) async {
   final prefs = await SharedPreferences.getInstance();
   final cacheKey = 'suwaya_faq_cache_$langCode';
   final url =

@@ -20,7 +20,8 @@ class NightDivision {
     final half2StartUtc = baseStart.add(Duration(microseconds: halfMicro));
     final half2EndUtc = baseEnd;
 
-    final third3StartUtc = baseStart.add(Duration(microseconds: twoThirdsMicro));
+    final third3StartUtc =
+        baseStart.add(Duration(microseconds: twoThirdsMicro));
     final third3EndUtc = baseEnd;
 
     final s4StartUtc = half2StartUtc;

@@ -32,7 +32,9 @@ double contrastRatio(Color foreground, Color background) {
 
 void main() {
   group('Design & Color Contrast Audit (WCAG 2.1 Compliance)', () {
-    test('1. All 4 AppColorThemes meet WCAG AAA/AA text & button contrast in Dark and Light modes', () {
+    test(
+        '1. All 4 AppColorThemes meet WCAG AAA/AA text & button contrast in Dark and Light modes',
+        () {
       for (final colorTheme in AppColorTheme.values) {
         final darkTheme = AppTheme.getDarkTheme(colorTheme);
         final lightTheme = AppTheme.getLightTheme(colorTheme);
@@ -75,7 +77,9 @@ void main() {
       }
     });
 
-    test('2. New Silver-White Hours Hand & Task Ring have high visibility and separation', () {
+    test(
+        '2. New Silver-White Hours Hand & Task Ring have high visibility and separation',
+        () {
       const darkDialBg = Color(0xFF121316);
       const lightenedTaskRingDark = Color(0xFF282D3A);
       const silverWhiteHand = Color(0xFFF8FAFC);
@@ -99,7 +103,9 @@ void main() {
       );
     });
 
-    test('3. All 7 Astronomical Period dial colors achieve >= 4.5:1 contrast with white carved text', () {
+    test(
+        '3. All 7 Astronomical Period dial colors achieve >= 4.5:1 contrast with white carved text',
+        () {
       final now = DateTime.utc(2026, 10, 22);
       for (int id = 1; id <= 7; id++) {
         final period = AstroPeriod(
@@ -128,7 +134,9 @@ void main() {
       }
     });
 
-    test('4. All 8 Task Categories achieve high contrast against card surfaces and task ring in Dark & Light modes', () {
+    test(
+        '4. All 8 Task Categories achieve high contrast against card surfaces and task ring in Dark & Light modes',
+        () {
       const darkCard = Color(0xFF1C1E24);
       const darkTaskRing = Color(0xFF282D3A);
       const lightCard = Color(0xFFFFFFFF);
@@ -155,7 +163,9 @@ void main() {
       }
     });
 
-    test('5. Suwaya Gold Time & Prayer Accent Colors (including Isha) are clearly visible in both modes', () {
+    test(
+        '5. Suwaya Gold Time & Prayer Accent Colors (including Isha) are clearly visible in both modes',
+        () {
       const darkCard = Color(0xFF1C1E24);
       const lightCard = Color(0xFFFFFFFF);
 

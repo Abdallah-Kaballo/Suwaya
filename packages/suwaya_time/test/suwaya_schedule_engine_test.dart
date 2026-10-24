@@ -12,7 +12,9 @@ void main() {
   });
 
   group('1. Zero-Ambiguity Time Types: CivilWallClock & ZonedWallTime', () {
-    test('CivilWallClock enforces immutability, clamps bounds, and converts to/from minutes and 12h/24h formats', () {
+    test(
+        'CivilWallClock enforces immutability, clamps bounds, and converts to/from minutes and 12h/24h formats',
+        () {
       const clock = CivilWallClock(hour: 14, minute: 35, second: 20);
       expect(clock.minutesSinceMidnight, equals(14 * 60 + 35));
       expect(clock.secondsSinceMidnight, equals(14 * 3600 + 35 * 60 + 20));
@@ -40,7 +42,9 @@ void main() {
       );
     });
 
-    test('ZonedWallTime constructs from CivilDate + CivilWallClock and truncates to minute accurately', () {
+    test(
+        'ZonedWallTime constructs from CivilDate + CivilWallClock and truncates to minute accurately',
+        () {
       final zwt = ZonedWallTime.fromCivilDateAndClock(
         date: const CivilDate(2026, 10, 24),
         clock: const CivilWallClock(hour: 18, minute: 42, second: 49),
@@ -82,7 +86,9 @@ void main() {
       }
     });
 
-    test('resolveLogicalCivilDate distinguishes Astro Maghrib rollover from Civil Midnight rollover', () {
+    test(
+        'resolveLogicalCivilDate distinguishes Astro Maghrib rollover from Civil Midnight rollover',
+        () {
       // بعد مغرب يوم 24 أكتوبر (16:00 UTC = 19:00 بتوقيت مكة)
       final afterMaghribCtx = TemporalContextEngine.evaluate(
         instantUtc: DateTime.utc(2026, 10, 24, 16, 0),
@@ -108,7 +114,9 @@ void main() {
       expect(civilLogical, equals(const CivilDate(2026, 10, 24)));
     });
 
-    test('resolveTaskDynamicAstroSlot, isScheduleItemInNightPhase, and isCandidateTaskTimeInPast work accurately', () {
+    test(
+        'resolveTaskDynamicAstroSlot, isScheduleItemInNightPhase, and isCandidateTaskTimeInPast work accurately',
+        () {
       final state = makkahContext.astroState;
 
       // مهمة مدنية الساعة 02:00 ليلاً تقع في الفترة الثالثة (القيام) وفي طور الليل
@@ -162,7 +170,9 @@ void main() {
       expect(isPastAfternoon, isFalse);
     });
 
-    test('computeRoutineDialArc and resolveDialDropTarget compute valid polar geometry', () {
+    test(
+        'computeRoutineDialArc and resolveDialDropTarget compute valid polar geometry',
+        () {
       final periods = makkahContext.suwayaDay.periods;
 
       final astroArc = SuwayaScheduleEngine.computeRoutineDialArc(
@@ -196,7 +206,8 @@ void main() {
       expect(drop!.periodId, equals(5));
     });
 
-    test('computeNextPrayerCountdown & SuwayaFlowPlanner window validation', () {
+    test('computeNextPrayerCountdown & SuwayaFlowPlanner window validation',
+        () {
       final state = makkahContext.astroState;
 
       final astroCountdown = SuwayaScheduleEngine.computeNextPrayerCountdown(

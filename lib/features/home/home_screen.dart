@@ -38,7 +38,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   bool get wantKeepAlive => true;
 
-
   DateTime _getCityTime(SettingsModel settings) {
     final loc = settings.activeLocation;
     if (loc != null && loc.timezone != null && loc.timezone!.isNotEmpty) {
@@ -59,7 +58,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   /// 🌟 دالة مساعدة تضمن ظهور كلمة (نهار/ليلة) متبوعة باسم يوم الأسبوع دائماً في كل اللغات
-  String _formatDayNightTitle(BuildContext context, bool isNight, String dayName) {
+  String _formatDayNightTitle(
+      BuildContext context, bool isNight, String dayName) {
     final key = isNight ? 'home.night_of' : 'home.day_of';
     final translated = key.tr(args: [dayName]);
 
@@ -93,10 +93,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         astroState.civilDayIbadat.maghrib;
 
     final DateTime todayFajr = DateTime(
-      cityNow.year, cityNow.month, cityNow.day, rawFajr.hour, rawFajr.minute,
+      cityNow.year,
+      cityNow.month,
+      cityNow.day,
+      rawFajr.hour,
+      rawFajr.minute,
     );
     final DateTime todaySunset = DateTime(
-      cityNow.year, cityNow.month, cityNow.day, rawSunset.hour, rawSunset.minute,
+      cityNow.year,
+      cityNow.month,
+      cityNow.day,
+      rawSunset.hour,
+      rawSunset.minute,
     );
 
     final langCode = context.locale.languageCode;
@@ -131,7 +139,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         adjustmentDays: settings.hijriOffsetDays,
       );
       final monthName = 'hijri.m${hijriDate.month}'.tr();
-      secondaryTitle = '${hijriDate.day} $monthName ${hijriDate.year} ${'common.ah'.tr()}';
+      secondaryTitle =
+          '${hijriDate.day} $monthName ${hijriDate.year} ${'common.ah'.tr()}';
     } else {
       // 🌟 العرض المدني (يعتمد على منتصف الليل 12:00)
       primaryTitle = DateFormat('EEEE', safeIntl).format(cityNow);
@@ -491,7 +500,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   final tasksForLegend =
                       todayTasks.where((t) => t.showOnDial).toList();
 
-      
                   final routines = ref.watch(routinesProvider);
                   final activeRoutines = routines.where((r) {
                     if (!r.isActive) return false;

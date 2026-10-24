@@ -21,7 +21,6 @@ import '../../shared/widgets/suwaya_time_text.dart';
 import '../../core/providers/ui_providers.dart';
 import '../settings/settings_provider.dart';
 
-
 int _getGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
   int global = 0;
   for (var p in periods) {
@@ -221,10 +220,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
               child: FloatingActionButton(
                 heroTag: null,
                 backgroundColor: accentColor,
-                foregroundColor:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black
-                        : Colors.white,
+                foregroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black
+                    : Colors.white,
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -422,7 +420,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
       'currentPeriodId': astro.currentPeriod.id,
       'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
       'existingTask': task,
-      'initialTab': task.type == TaskType.permanent ? 1 : 0, // 0 للعابرة، 1 للمستمرة
+      'initialTab':
+          task.type == TaskType.permanent ? 1 : 0, // 0 للعابرة، 1 للمستمرة
     });
   }
 
@@ -467,7 +466,8 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     final t = widget.task;
     final settings = ref.watch(settingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final catColor = t.category.uiColor(isDark); // 🌟 استخدام الدالة الموحدة المتكيفة مع الثيم
+    final catColor = t.category
+        .uiColor(isDark); // 🌟 استخدام الدالة الموحدة المتكيفة مع الثيم
     final surfaceColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).colorScheme.onSurface;
 
@@ -551,7 +551,8 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                     setState(() => _isLocalCompleted = true);
                     Future.delayed(
                       const Duration(milliseconds: 400),
-                      () => ref.read(tasksProvider.notifier).toggleTaskStatus(t),
+                      () =>
+                          ref.read(tasksProvider.notifier).toggleTaskStatus(t),
                     );
                   },
                   child: SizedBox(
@@ -564,10 +565,12 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: catColor, width: 2),
-                          color: _isLocalCompleted ? catColor : Colors.transparent,
+                          color:
+                              _isLocalCompleted ? catColor : Colors.transparent,
                         ),
                         child: _isLocalCompleted
-                            ? const Icon(Icons.check, size: 16, color: Colors.white)
+                            ? const Icon(Icons.check,
+                                size: 16, color: Colors.white)
                             : null,
                       ),
                     ),

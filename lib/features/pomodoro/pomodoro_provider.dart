@@ -226,8 +226,8 @@ class PomodoroEngine extends Notifier<PomodoroState> {
         cyclesBeforeLongBreak: cycles,
       );
 
-      final ratio = loaded.workMinutes /
-          (loaded.workMinutes + loaded.shortBreakMinutes);
+      final ratio =
+          loaded.workMinutes / (loaded.workMinutes + loaded.shortBreakMinutes);
 
       if (state.status == PomodoroStatus.idle &&
           state.currentView != PomodoroView.suwayaActive) {
@@ -388,9 +388,8 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     final title = isWork
         ? '${'pomodoro.in_flow'.tr()} ($cycleNumber/$totalCycles)'
         : 'pomodoro.deep_relaxation'.tr();
-    final body = isWork
-        ? 'pomodoro.start_session'.tr()
-        : 'pomodoro.choose_mode'.tr();
+    final body =
+        isWork ? 'pomodoro.start_session'.tr() : 'pomodoro.choose_mode'.tr();
 
     await NotificationService().playPomodoroTransitionAlert(
       title: title,

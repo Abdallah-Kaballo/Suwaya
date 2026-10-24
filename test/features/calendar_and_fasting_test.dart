@@ -5,7 +5,9 @@ import 'package:suwaya_time/suwaya_time.dart';
 
 void main() {
   group('Hijri Calendar & Seasonal Fasting Recommendations Tests', () {
-    test('1. Identifies Day of Arafah (9 Dhu al-Hijjah) and Ashura/Tasua (9 & 10 Muharram)', () {
+    test(
+        '1. Identifies Day of Arafah (9 Dhu al-Hijjah) and Ashura/Tasua (9 & 10 Muharram)',
+        () {
       final arafah = HijriCalendar()
         ..hYear = 1448
         ..hMonth = 12
@@ -27,7 +29,9 @@ void main() {
       expect(getSeasonalFastingInfo(ashura, 'en')!.title, contains('Ashura'));
     });
 
-    test('2. Identifies White Days (13, 14, 15) and strictly excludes 13 Dhu al-Hijjah (Tashreeq) and Ramadan', () {
+    test(
+        '2. Identifies White Days (13, 14, 15) and strictly excludes 13 Dhu al-Hijjah (Tashreeq) and Ramadan',
+        () {
       for (final day in [13, 14, 15]) {
         final shaabanWhiteDay = HijriCalendar()
           ..hYear = 1448
@@ -64,7 +68,9 @@ void main() {
       expect(getSeasonalFastingInfo(dhuAlHijjah14, 'ar'), isNotNull);
     });
 
-    test('3. UmmAlQuraHijriProvider round-trip conversion with hijriAdjustmentDays (-2 to +2) is consistent', () {
+    test(
+        '3. UmmAlQuraHijriProvider round-trip conversion with hijriAdjustmentDays (-2 to +2) is consistent',
+        () {
       const provider = UmmAlQuraHijriProvider();
       const baseDate = CivilDate(2026, 10, 22);
 

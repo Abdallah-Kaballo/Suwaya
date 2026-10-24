@@ -74,7 +74,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-       GoRoute(
+      GoRoute(
         path: '/faq',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const FAQScreen(),
@@ -104,7 +104,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SupportScreen(),
       ),
-
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainLayout(navigationShell: navigationShell);

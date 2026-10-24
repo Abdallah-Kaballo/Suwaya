@@ -21,7 +21,11 @@ class _InMemoryTranslationLoader extends AssetLoader {
   @override
   Future<Map<String, dynamic>> load(String path, Locale locale) async {
     return {
-      'common': {'done': 'تم', 'cancel': 'إلغاء', 'suwaya_time': 'الوقت السُويعي'},
+      'common': {
+        'done': 'تم',
+        'cancel': 'إلغاء',
+        'suwaya_time': 'الوقت السُويعي'
+      },
       'periods': {
         'fajr': 'الفجر',
         'duha': 'الضحى',

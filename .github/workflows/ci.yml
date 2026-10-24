@@ -40,21 +40,21 @@ jobs:
           dart --version
           java -version
 
-      - name: Check Dart formatting
-        run: dart format --output=none --set-exit-if-changed lib test packages/suwaya_time
-
       - name: Install app dependencies
         run: flutter pub get
+
+      - name: Install suwaya_time package dependencies
+        working-directory: packages/suwaya_time
+        run: dart pub get
+
+      - name: Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed lib test packages/suwaya_time
 
       - name: Analyze Flutter app
         run: flutter analyze
 
       - name: Run Flutter tests
         run: flutter test
-
-      - name: Install suwaya_time package dependencies
-        working-directory: packages/suwaya_time
-        run: dart pub get
 
       - name: Analyze suwaya_time package
         working-directory: packages/suwaya_time

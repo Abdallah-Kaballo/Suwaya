@@ -50,9 +50,10 @@ FastingRecommendation? getSeasonalFastingInfo(
     hMonth: hDate.hMonth,
     hDay: hDate.hDay,
     langCode: langCode,
-    localizedMonthName: 'hijri.m${hDate.hMonth}'.tr() != 'hijri.m${hDate.hMonth}'
-        ? 'hijri.m${hDate.hMonth}'.tr()
-        : null,
+    localizedMonthName:
+        'hijri.m${hDate.hMonth}'.tr() != 'hijri.m${hDate.hMonth}'
+            ? 'hijri.m${hDate.hMonth}'.tr()
+            : null,
   );
   if (rec == null) return null;
   return FastingRecommendation(
@@ -277,9 +278,8 @@ class CalendarDayAgenda extends ConsumerWidget {
             ref: ref,
             title: '$dayHeaderTitle ☀️',
             icon: LucideIcons.sun,
-            phaseColor: isDark
-                ? const Color(0xFFFFB300)
-                : const Color(0xFFB25000),
+            phaseColor:
+                isDark ? const Color(0xFFFFB300) : const Color(0xFFB25000),
             tasks: dayPhaseTasks,
             routines: dayPhaseRoutines,
             surfaceColor: surfaceColor,
@@ -489,7 +489,8 @@ class CalendarDayAgenda extends ConsumerWidget {
                             : Colors.transparent,
                       ),
                       child: isCompletedOnSelectedDate
-                          ? const Icon(Icons.check, size: 14, color: Colors.white)
+                          ? const Icon(Icons.check,
+                              size: 14, color: Colors.white)
                           : null,
                     ),
                   ),
@@ -591,7 +592,8 @@ class CalendarDayAgenda extends ConsumerWidget {
         );
       }
       if (!routine.isAstroTime && civilMins != null) {
-        return Text(formatCivilRoutineTime(civilMins, locale), style: clockStyle);
+        return Text(formatCivilRoutineTime(civilMins, locale),
+            style: clockStyle);
       }
       return Text('--:--', style: clockStyle);
     }

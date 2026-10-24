@@ -26,9 +26,8 @@ class PomodoroScreen extends ConsumerWidget {
     final primaryColor = Theme.of(context).primaryColor;
 
     final isSubView = pomodoroState.currentView != PomodoroView.selector;
-    final isTimerView =
-        pomodoroState.currentView == PomodoroView.traditional ||
-            pomodoroState.currentView == PomodoroView.suwayaActive;
+    final isTimerView = pomodoroState.currentView == PomodoroView.traditional ||
+        pomodoroState.currentView == PomodoroView.suwayaActive;
 
     return PopScope(
       canPop: !pomodoroState.isFullScreen && !isSubView,
@@ -42,8 +41,7 @@ class PomodoroScreen extends ConsumerWidget {
       },
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
-        drawerEnableOpenDragGesture:
-            !isSubView && !pomodoroState.isFullScreen,
+        drawerEnableOpenDragGesture: !isSubView && !pomodoroState.isFullScreen,
         drawerEdgeDragWidth: MediaQuery.of(context).size.width,
         drawer: const AppDrawer(),
         onDrawerChanged: (isOpen) =>
@@ -91,9 +89,8 @@ class PomodoroScreen extends ConsumerWidget {
                         pomodoroState.isMuted
                             ? LucideIcons.volume_x
                             : LucideIcons.volume_2,
-                        color: pomodoroState.isMuted
-                            ? Colors.grey
-                            : primaryColor,
+                        color:
+                            pomodoroState.isMuted ? Colors.grey : primaryColor,
                         size: 20,
                       ),
                       onPressed: () {
@@ -143,9 +140,7 @@ class PomodoroScreen extends ConsumerWidget {
                             style: TextStyle(
                               color: settings.useAstroTimeForIbadat
                                   ? primaryColor
-                                  : (isDark
-                                      ? Colors.white70
-                                      : Colors.black54),
+                                  : (isDark ? Colors.white70 : Colors.black54),
                               fontSize: 11.0,
                               fontWeight: FontWeight.bold,
                             ),

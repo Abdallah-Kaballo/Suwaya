@@ -55,7 +55,8 @@ extension TaskCategoryExtension on TaskCategory {
       case TaskCategory.personal:
         return const Color(0xFFC084FC); // أرجواني لافندر متوازن
       case TaskCategory.social:
-        return const Color(0xFF4ADE80); // أخضر نعناعي متناغم بدلاً من الليموني الفاقع
+        return const Color(
+            0xFF4ADE80); // أخضر نعناعي متناغم بدلاً من الليموني الفاقع
       case TaskCategory.unspecified:
         return const Color(0xFF94A3B8); // فضي أردوازي
     }
@@ -89,12 +90,12 @@ class TaskModel {
   Id id = Isar.autoIncrement;
 
   String title = '';
-  
+
   @enumerated
   TaskType type = TaskType.casual;
 
   @enumerated
-  TaskCategory category = TaskCategory.unspecified; 
+  TaskCategory category = TaskCategory.unspecified;
 
   bool isCompleted = false;
   DateTime? completedAt;
@@ -113,14 +114,14 @@ class TaskModel {
 
   bool isAstroTime = true;
   int? targetCivilTimeMinutes;
-  
-  List<int>? recurrenceDays; 
 
-  bool notifyMode = true;   
-  bool alarmMode = false;   
-  bool vibrateMode = false; 
+  List<int>? recurrenceDays;
 
-  String alarmTone = 'assets/audio/default.mp3'; 
+  bool notifyMode = true;
+  bool alarmMode = false;
+  bool vibrateMode = false;
+
+  String alarmTone = 'assets/audio/default.mp3';
   double alarmVolume = 1.0;
 
   bool showOnDial = false;
@@ -128,7 +129,7 @@ class TaskModel {
 
   List<DateTime> completionHistory = [];
   @Index()
-  DateTime? lastCompletedDate; 
+  DateTime? lastCompletedDate;
   int currentStreak = 0;
   int longestStreak = 0;
 
@@ -141,8 +142,8 @@ class TaskModel {
     if (lastCompletedDate == null) return false;
     final now = DateTime.now();
     return lastCompletedDate!.year == now.year &&
-           lastCompletedDate!.month == now.month &&
-           lastCompletedDate!.day == now.day;
+        lastCompletedDate!.month == now.month &&
+        lastCompletedDate!.day == now.day;
   }
 
   /// 🌟 فحص إنجاز المهمة/العادة بناءً على التاريخ المنطقي (السويعي من المغرب أو المدني من منتصف الليل)
@@ -150,8 +151,8 @@ class TaskModel {
     if (type == TaskType.casual) return isCompleted;
     if (lastCompletedDate == null) return false;
     return lastCompletedDate!.year == logicalDate.year &&
-           lastCompletedDate!.month == logicalDate.month &&
-           lastCompletedDate!.day == logicalDate.day;
+        lastCompletedDate!.month == logicalDate.month &&
+        lastCompletedDate!.day == logicalDate.day;
   }
 
   @ignore
@@ -160,9 +161,8 @@ class TaskModel {
       : null;
 
   set targetCivilDate(CivilDate? value) {
-    targetDate = value != null
-        ? DateTime(value.year, value.month, value.day)
-        : null;
+    targetDate =
+        value != null ? DateTime(value.year, value.month, value.day) : null;
   }
 
   @ignore

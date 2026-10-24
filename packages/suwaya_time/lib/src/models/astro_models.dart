@@ -1,7 +1,5 @@
 import 'package:suwaya_time/suwaya_time.dart';
 
-
-
 /// يحدد النطاق العام للسويعة (ليل أم نهار)
 enum SuwayaPhase {
   night,
@@ -188,7 +186,9 @@ class AstroPeriod {
   Duration get actualSuwayaDuration {
     if (suwayasCount <= 0) return Duration.zero;
     final actualMicro = totalDuration.inMicroseconds ~/ suwayasCount;
-    return actualMicro > 0 ? Duration(microseconds: actualMicro) : Duration.zero;
+    return actualMicro > 0
+        ? Duration(microseconds: actualMicro)
+        : Duration.zero;
   }
 
   /// سرعة تدفق الزمن في هذه الفترة (60 دقيقة افتراضية / الطول الفعلي)

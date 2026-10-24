@@ -26,8 +26,7 @@ class _InMemoryTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<void> deleteTask(int id) async =>
-      tasks.removeWhere((t) => t.id == id);
+  Future<void> deleteTask(int id) async => tasks.removeWhere((t) => t.id == id);
 
   @override
   Future<void> deleteTasks(List<int> ids) async =>
@@ -84,7 +83,9 @@ class _InMemorySettingsRepository implements SettingsRepository {
 
 void main() {
   group('MigrationService V1 (48 Suwayas) to V2 (24 Suwayas) Tests', () {
-    test('1 & 2. Converts V1 period/suwaya/virtualMinute to V2 while preserving IDs, titles, and streak history', () async {
+    test(
+        '1 & 2. Converts V1 period/suwaya/virtualMinute to V2 while preserving IDs, titles, and streak history',
+        () async {
       final historyDate = DateTime(2026, 10, 10);
       final v1Task = TaskModel()
         ..id = 101
@@ -127,7 +128,9 @@ void main() {
       expect(migrated.targetVirtualMinute, 30);
     });
 
-    test('3. Converts incomplete astro routines and tasks safely to civil fallback (10:00 - 11:00)', () async {
+    test(
+        '3. Converts incomplete astro routines and tasks safely to civil fallback (10:00 - 11:00)',
+        () async {
       final incompleteTask = TaskModel()
         ..id = 202
         ..title = 'مهمة ناقصة'
@@ -169,7 +172,9 @@ void main() {
       expect(incompleteRoutine.endTimeMinutes, 11 * 60);
     });
 
-    test('4 & 5. Idempotency & interrupted restart: does not re-migrate records already at version 2', () async {
+    test(
+        '4 & 5. Idempotency & interrupted restart: does not re-migrate records already at version 2',
+        () async {
       final v1Task = TaskModel()
         ..id = 1
         ..scheduleModelVersion = 1
@@ -204,7 +209,8 @@ void main() {
       expect(v1Task.targetVirtualMinute, 20);
     });
 
-    test('6. Respects Hanafi vs Shafi max Suwayas clamping for Dhuhr and Asr', () async {
+    test('6. Respects Hanafi vs Shafi max Suwayas clamping for Dhuhr and Asr',
+        () async {
       // في المذهب الحنفي: الظهر 4 سويعات والعصر 2 سويعتان
       // في مذهب الجمهور: الظهر 3 سويعات والعصر 3 سويعات
       final asrTaskHanafi = TaskModel()

@@ -6,24 +6,29 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:suwaya/core/theme/astro_ui_extensions.dart';
 import 'package:suwaya/features/settings/settings_provider.dart';
 
-
 class _PrayerOffsetPreset {
   final String id;
   final String labelKey;
   final Color uiColor;
 
-  const _PrayerOffsetPreset({required this.id, required this.labelKey, required this.uiColor});
+  const _PrayerOffsetPreset(
+      {required this.id, required this.labelKey, required this.uiColor});
 }
 
 class ManualOffsetsScreen extends ConsumerWidget {
   const ManualOffsetsScreen({super.key});
 
   static const List<_PrayerOffsetPreset> _allowedPrayers = [
-    _PrayerOffsetPreset(id: 'fajr', labelKey: 'periods.fajr', uiColor: Color(0xFF64B5F6)),
-    _PrayerOffsetPreset(id: 'dhuhr', labelKey: 'periods.dhuhr', uiColor: Color(0xFFFFCA28)),
-    _PrayerOffsetPreset(id: 'asr', labelKey: 'periods.asr', uiColor: Color(0xFFFF9800)),
-    _PrayerOffsetPreset(id: 'maghrib', labelKey: 'periods.maghrib', uiColor: Color(0xFFE53935)),
-    _PrayerOffsetPreset(id: 'isha', labelKey: 'prayers.isha', uiColor: Color(0xFF1A237E)),
+    _PrayerOffsetPreset(
+        id: 'fajr', labelKey: 'periods.fajr', uiColor: Color(0xFF64B5F6)),
+    _PrayerOffsetPreset(
+        id: 'dhuhr', labelKey: 'periods.dhuhr', uiColor: Color(0xFFFFCA28)),
+    _PrayerOffsetPreset(
+        id: 'asr', labelKey: 'periods.asr', uiColor: Color(0xFFFF9800)),
+    _PrayerOffsetPreset(
+        id: 'maghrib', labelKey: 'periods.maghrib', uiColor: Color(0xFFE53935)),
+    _PrayerOffsetPreset(
+        id: 'isha', labelKey: 'prayers.isha', uiColor: Color(0xFF1A237E)),
   ];
 
   @override
@@ -46,10 +51,16 @@ class ManualOffsetsScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(context.locale.languageCode == 'ar' ? LucideIcons.arrow_right : LucideIcons.arrow_left, color: textColor),
+          icon: Icon(
+              context.locale.languageCode == 'ar'
+                  ? LucideIcons.arrow_right
+                  : LucideIcons.arrow_left,
+              color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('settings.manual_offset'.tr(), style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
+        title: Text('settings.manual_offset'.tr(),
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: textColor, fontSize: 18)),
         centerTitle: true,
         actions: [
           IconButton(
@@ -57,10 +68,12 @@ class ManualOffsetsScreen extends ConsumerWidget {
             color: primaryColor,
             tooltip: 'settings.reset_all_offsets'.tr(),
             onPressed: () {
-               HapticFeedback.heavyImpact();
+              HapticFeedback.heavyImpact();
               notifier.resetAllOffsets();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('settings.offsets_reset_success'.tr()), backgroundColor: Colors.green.shade800),
+                SnackBar(
+                    content: Text('settings.offsets_reset_success'.tr()),
+                    backgroundColor: Colors.green.shade800),
               );
             },
           )
@@ -82,18 +95,21 @@ class ManualOffsetsScreen extends ConsumerWidget {
                   Icon(LucideIcons.info, color: primaryColor, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('settings.manual_offset_desc'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 12, height: 1.5)),
+                    child: Text('settings.manual_offset_desc'.tr(),
+                        style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            fontSize: 12,
+                            height: 1.5)),
                   ),
                 ],
               ),
             ),
           ),
-
           Expanded(
-             child: ListView.builder(
+            child: ListView.builder(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
-              itemCount: _allowedPrayers.length, 
+              itemCount: _allowedPrayers.length,
               itemBuilder: (context, index) {
                 final prayer = _allowedPrayers[index];
                 final String pId = prayer.id;
@@ -123,51 +139,82 @@ class ManualOffsetsScreen extends ConsumerWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(prayer.labelKey.tr(), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(prayer.labelKey.tr(),
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold)),
                             const SizedBox(height: 2),
                             Text(
-                              currentOffset == 0 
-                                  ? 'settings.no_offset'.tr() 
-                                  : (currentOffset > 0 ? '+ $currentOffset ${'details.minute'.tr()}' : '$currentOffset ${'details.minute'.tr()}'),
+                              currentOffset == 0
+                                  ? 'settings.no_offset'.tr()
+                                  : (currentOffset > 0
+                                      ? '+ $currentOffset ${'details.minute'.tr()}'
+                                      : '$currentOffset ${'details.minute'.tr()}'),
                               style: TextStyle(
-                                color: currentOffset == 0 ? hintColor : (currentOffset > 0 ? Colors.green : Colors.redAccent), 
-                                fontSize: 12, fontWeight: currentOffset == 0 ? FontWeight.normal : FontWeight.bold
-                              ),
+                                  color: currentOffset == 0
+                                      ? hintColor
+                                      : (currentOffset > 0
+                                          ? Colors.green
+                                          : Colors.redAccent),
+                                  fontSize: 12,
+                                  fontWeight: currentOffset == 0
+                                      ? FontWeight.normal
+                                      : FontWeight.bold),
                             ),
                           ],
                         ),
                       ),
-                      
                       Row(
                         children: [
                           _buildAdjustButton(
-                            icon: LucideIcons.minus, 
-                            color: canDecrease ? (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)) : Colors.transparent,
-                            iconColor: canDecrease ? textColor : hintColor.withValues(alpha: 0.3),
-                            onTap: canDecrease ? () {
-                              HapticFeedback.lightImpact();
-                              notifier.updateManualOffset(pId, currentOffset - 1);
-                            } : () {} 
-                          ),
+                              icon: LucideIcons.minus,
+                              color: canDecrease
+                                  ? (isDark
+                                      ? Colors.white.withValues(alpha: 0.1)
+                                      : Colors.black.withValues(alpha: 0.05))
+                                  : Colors.transparent,
+                              iconColor: canDecrease
+                                  ? textColor
+                                  : hintColor.withValues(alpha: 0.3),
+                              onTap: canDecrease
+                                  ? () {
+                                      HapticFeedback.lightImpact();
+                                      notifier.updateManualOffset(
+                                          pId, currentOffset - 1);
+                                    }
+                                  : () {}),
                           SizedBox(
                             width: 45,
                             child: Text(
                               currentOffset.toString(),
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                              style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'monospace'),
                             ),
                           ),
                           _buildAdjustButton(
-                            icon: LucideIcons.plus, 
-                            color: canIncrease ? (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)) : Colors.transparent,
-                            iconColor: canIncrease ? textColor : hintColor.withValues(alpha: 0.3),
-                            onTap: canIncrease ? () {
-                              HapticFeedback.lightImpact();
-                              notifier.updateManualOffset(pId, currentOffset + 1);
-                            } : () {} 
-                          ),
+                              icon: LucideIcons.plus,
+                              color: canIncrease
+                                  ? (isDark
+                                      ? Colors.white.withValues(alpha: 0.1)
+                                      : Colors.black.withValues(alpha: 0.05))
+                                  : Colors.transparent,
+                              iconColor: canIncrease
+                                  ? textColor
+                                  : hintColor.withValues(alpha: 0.3),
+                              onTap: canIncrease
+                                  ? () {
+                                      HapticFeedback.lightImpact();
+                                      notifier.updateManualOffset(
+                                          pId, currentOffset + 1);
+                                    }
+                                  : () {}),
                         ],
                       ),
                     ],

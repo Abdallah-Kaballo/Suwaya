@@ -25,7 +25,6 @@ import 'features/tasks/tasks_provider.dart';
 import 'core/notification/scheduler_service.dart';
 import 'core/services/alarm_service.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppBootstrap.initialize();
@@ -341,20 +340,24 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Material(
                     elevation: 8,
                     borderRadius: BorderRadius.circular(20),
                     color: const Color(0xFF1C1E24),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFE5C158), width: 1.5),
+                        border: Border.all(
+                            color: const Color(0xFFE5C158), width: 1.5),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.volume_up_rounded, color: Color(0xFFE5C158)),
+                          const Icon(Icons.volume_up_rounded,
+                              color: Color(0xFFE5C158)),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -370,7 +373,8 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
                           ),
                           TextButton.icon(
                             style: TextButton.styleFrom(
-                              backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
+                              backgroundColor:
+                                  Colors.redAccent.withValues(alpha: 0.2),
                               foregroundColor: Colors.redAccent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -382,7 +386,8 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
                                 setState(() => _activeCurtainAlarm = null);
                               }
                             },
-                            icon: const Icon(Icons.stop_circle_outlined, size: 18),
+                            icon: const Icon(Icons.stop_circle_outlined,
+                                size: 18),
                             label: Text('alarm.stop'.tr()),
                           ),
                         ],

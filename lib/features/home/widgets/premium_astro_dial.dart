@@ -468,7 +468,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     return autoRotationOffset + _manualRotation.value;
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     final astroState = ref.watch(astroProvider);
     final settings = ref.watch(settingsProvider);
@@ -764,10 +764,26 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     final double centerOffsetY = -(startRadius + (handLength / 2));
 
     const List<double> silverWhiteMatrix = <double>[
-      0.55, 0.55, 0.55, 0.0, 145.0,
-      0.57, 0.57, 0.57, 0.0, 150.0,
-      0.62, 0.62, 0.62, 0.0, 162.0,
-      0.0,  0.0,  0.0,  1.0, 0.0,
+      0.55,
+      0.55,
+      0.55,
+      0.0,
+      145.0,
+      0.57,
+      0.57,
+      0.57,
+      0.0,
+      150.0,
+      0.62,
+      0.62,
+      0.62,
+      0.0,
+      162.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
     ];
 
     final dpr = MediaQuery.devicePixelRatioOf(context);
@@ -826,9 +842,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
 
   Widget _buildCenterGlow(bool isDark, DialDesign design, bool isDayPhase) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
-    final String imagePath = isDayPhase
-        ? 'assets/icons/sun.png'
-        : 'assets/icons/moon.png';
+    final String imagePath =
+        isDayPhase ? 'assets/icons/sun.png' : 'assets/icons/moon.png';
 
     return IgnorePointer(
       child: Container(

@@ -93,7 +93,8 @@ Future<void> showDialItemDetailsDialog({
     }
   }
 
-  final Color adaptedColor = selection.color.adapt(context); // 🌟 تطبيق التكيف اللوني
+  final Color adaptedColor =
+      selection.color.adapt(context); // 🌟 تطبيق التكيف اللوني
 
   await showDialog<void>(
     context: context,

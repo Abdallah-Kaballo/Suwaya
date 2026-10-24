@@ -27,7 +27,7 @@ class SettingsModel {
 
   String timeDisplayMode = 'suwaya';
   // 🌟 الخيار الجديد: 'emoji' (☀️/🌑) أو 'text' (ن/ل - D/N)
-  String suwayaIconMode = 'emoji'; 
+  String suwayaIconMode = 'emoji';
 
   bool qiyamAlarmEnabled = false;
   List<int> hiddenPeriods = [];
@@ -35,7 +35,7 @@ class SettingsModel {
   String dialPinMode = 'suwaya24';
   String suwayaNumberStyle = 'english';
   List<String> activeNightMarkers = ['sixth_5'];
-  
+
   List<PeriodConfig> periodConfigs = [];
 
   bool useAstroTimeForIbadat = true;
@@ -157,7 +157,7 @@ class SettingsModel {
   double getPeriodVolume(String pId, [double defaultVal = 1.0]) {
     return _getConfig(pId)?.volume ?? defaultVal;
   }
-  
+
   /// 🌟 قراءة وحفظ تصحيح التاريخ الهجري (-2 إلى +2 يوم) داخل Isar دون الحاجة لإعادة توليد settings_model.g.dart
   int get hijriOffsetDays {
     for (final c in periodConfigs) {

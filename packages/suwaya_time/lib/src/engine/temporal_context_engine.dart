@@ -150,7 +150,8 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     DateTime gregUtc,
     int adjustmentDays,
   ) {
-    final int jd = _gregorianToJulianDay(gregUtc.year, gregUtc.month, gregUtc.day);
+    final int jd =
+        _gregorianToJulianDay(gregUtc.year, gregUtc.month, gregUtc.day);
     final int l = jd - 1948440 + 10632;
     final int n = (l - 1) ~/ 10631;
     final int l2 = l - 10631 * n + 354;
@@ -163,9 +164,8 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     final int hMonth = (24 * l3) ~/ 709;
     final int hDay = l3 - (709 * hMonth) ~/ 24;
     final int hYear = 30 * n + j - 30;
-    final int monthLen = (hMonth.isOdd || (hMonth == 12 && _isTabularLeap(hYear)))
-        ? 30
-        : 29;
+    final int monthLen =
+        (hMonth.isOdd || (hMonth == 12 && _isTabularLeap(hYear))) ? 30 : 29;
 
     return HijriDate(
       year: hYear,
@@ -281,9 +281,11 @@ class TimezoneResolver {
     double latitudeDegrees,
   ) {
     if (elevationMeters <= 0) return Duration.zero;
-    final dipDegrees = 0.0347 * (elevationMeters > 10000 ? 100.0 : _sqrt(elevationMeters));
+    final dipDegrees =
+        0.0347 * (elevationMeters > 10000 ? 100.0 : _sqrt(elevationMeters));
     // كل درجة قوسية للشمس تعادل 4 دقائق زمنية عند خط الاستواء وتزداد مع جيب تمام خط العرض
-    final latRad = (latitudeDegrees.abs().clamp(0.0, 60.0)) * 0.017453292519943295;
+    final latRad =
+        (latitudeDegrees.abs().clamp(0.0, 60.0)) * 0.017453292519943295;
     final cosLat = _cosApprox(latRad);
     final extraMinutes = (4.0 * dipDegrees) / (cosLat > 0.25 ? cosLat : 0.25);
     return Duration(microseconds: (extraMinutes * 60 * 1000000).round());
@@ -417,7 +419,9 @@ class TemporalContextEngine {
     final lngKey = (longitude * 10000).round();
     final offsetsKey = manualOffsets == null || manualOffsets.isEmpty
         ? ''
-        : manualOffsets.entries.map((e) => '${e.key.index}:${e.value}').join(',');
+        : manualOffsets.entries
+            .map((e) => '${e.key.index}:${e.value}')
+            .join(',');
     return '$latKey:$lngKey:${timezoneId ?? ''}:${methodType.index}:'
         '${madhabType.index}:${highLatRuleType.index}:'
         '$customFajrAngle:$customIshaAngle:$offsetsKey';
@@ -472,7 +476,8 @@ class TemporalContextEngine {
     final civilCacheKey =
         '${civilDate.year}-${civilDate.month}-${civilDate.day}_${currentTz.utcOffset.inMinutes}_$configKey';
 
-    IbadatTimings? todayIbadat = _internalCivilIbadatCache.remove(civilCacheKey);
+    IbadatTimings? todayIbadat =
+        _internalCivilIbadatCache.remove(civilCacheKey);
     if (todayIbadat != null) {
       _internalCivilIbadatCache[civilCacheKey] = todayIbadat;
     } else {
@@ -505,9 +510,10 @@ class TemporalContextEngine {
       _internalCivilIbadatCache[civilCacheKey] = todayIbadat;
     }
 
-    final DateTime anchorDateForCycle = cityNowWall.isBefore(todayIbadat.maghrib)
-        ? cityNowWall.subtract(const Duration(days: 1))
-        : cityNowWall;
+    final DateTime anchorDateForCycle =
+        cityNowWall.isBefore(todayIbadat.maghrib)
+            ? cityNowWall.subtract(const Duration(days: 1))
+            : cityNowWall;
 
     final cycleCacheKey =
         '${anchorDateForCycle.year}-${anchorDateForCycle.month}-${anchorDateForCycle.day}_$configKey';

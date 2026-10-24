@@ -34,15 +34,20 @@ class PrivacyScreen extends ConsumerWidget {
         ),
         title: Text(
           'settings.privacy_policy'.tr(),
-          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+              color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: true,
       ),
       body: privacyAsyncValue.when(
-        loading: () => Center(child: CircularProgressIndicator(color: primaryColor)),
-        error: (err, stack) => _buildErrorState(context, primaryColor, textColor),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: primaryColor)),
+        error: (err, stack) =>
+            _buildErrorState(context, primaryColor, textColor),
         data: (sections) {
-          if (sections.isEmpty) return _buildErrorState(context, primaryColor, textColor);
+          if (sections.isEmpty) {
+            return _buildErrorState(context, primaryColor, textColor);
+          }
 
           return RefreshIndicator(
             color: primaryColor,
@@ -51,7 +56,8 @@ class PrivacyScreen extends ConsumerWidget {
               ref.invalidate(privacyProvider(langCode));
             },
             child: ListView.builder(
-              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics()),
               padding: const EdgeInsets.all(20),
               itemCount: sections.length,
               itemBuilder: (context, index) {
@@ -63,14 +69,21 @@ class PrivacyScreen extends ConsumerWidget {
                     color: surfaceColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: borderColor),
-                    boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8)],
+                    boxShadow: isDark
+                        ? []
+                        : [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 8)
+                          ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(LucideIcons.shield_check, color: primaryColor, size: 20),
+                          Icon(LucideIcons.shield_check,
+                              color: primaryColor, size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -104,14 +117,16 @@ class PrivacyScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, Color primaryColor, Color textColor) {
+  Widget _buildErrorState(
+      BuildContext context, Color primaryColor, Color textColor) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.wifi_off, size: 64, color: primaryColor.withValues(alpha: 0.5)),
+            Icon(LucideIcons.wifi_off,
+                size: 64, color: primaryColor.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
             Text(
               'privacy.offline_error'.tr(), // 🌟 تم التحديث هنا

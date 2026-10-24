@@ -112,7 +112,8 @@ class NotificationService {
     bool playSound = true,
     bool enableVibration = true,
   }) async {
-    final safeTime = _getSafeScheduledTime(scheduledTime, isDailyRoutine: false);
+    final safeTime =
+        _getSafeScheduledTime(scheduledTime, isDailyRoutine: false);
     if (safeTime.isBefore(DateTime.now())) return true;
 
     final stopText =
@@ -184,7 +185,8 @@ class NotificationService {
       presentSound: androidDetails.playSound,
     );
     final tzTime = tz.TZDateTime.from(time, tz.local);
-    final details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+    final details =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
 
     try {
       await flutterLocalNotificationsPlugin.zonedSchedule(

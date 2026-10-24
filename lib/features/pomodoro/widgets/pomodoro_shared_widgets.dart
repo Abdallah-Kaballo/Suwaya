@@ -96,9 +96,8 @@ class LinkedTaskBar extends ConsumerWidget {
                       ? textColor
                       : textColor.withValues(alpha: 0.55),
                   fontSize: 13,
-                  fontWeight: linkedTask != null
-                      ? FontWeight.bold
-                      : FontWeight.w500,
+                  fontWeight:
+                      linkedTask != null ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
             ),
@@ -108,7 +107,9 @@ class LinkedTaskBar extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
                   HapticFeedback.heavyImpact();
-                  ref.read(tasksProvider.notifier).toggleTaskStatus(linkedTask!);
+                  ref
+                      .read(tasksProvider.notifier)
+                      .toggleTaskStatus(linkedTask!);
                   ref.read(pomodoroProvider.notifier).selectLinkedTask(null);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

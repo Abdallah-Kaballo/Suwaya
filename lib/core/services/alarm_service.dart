@@ -300,7 +300,8 @@ class AlarmService {
           snoozeDurationMinutes:
               ((decoded['sd'] as int?) ?? defaultSnoozeMinutes).clamp(1, 120),
           snoozeCount: ((decoded['sc'] as int?) ?? 0).clamp(0, 99),
-          maxSnoozes: ((decoded['ms'] as int?) ?? defaultMaxSnoozes).clamp(0, 20),
+          maxSnoozes:
+              ((decoded['ms'] as int?) ?? defaultMaxSnoozes).clamp(0, 20),
           loopAudio: (decoded['l'] as bool?) ?? policy.loopAudioDefault,
           volumePolicy: AlarmVolumePolicy.fromString(decoded['vp'] as String?),
         );
@@ -321,9 +322,8 @@ class AlarmService {
         (parts.isNotEmpty && parts[0].isNotEmpty && parts[0] != 'تنبيه')
             ? parts[0]
             : fallbackTitle;
-    final colorVal = parts.length > 1
-        ? (int.tryParse(parts[1]) ?? 0xFFD4AF37)
-        : 0xFFD4AF37;
+    final colorVal =
+        parts.length > 1 ? (int.tryParse(parts[1]) ?? 0xFFD4AF37) : 0xFFD4AF37;
     final snoozes =
         parts.length > 2 ? (int.tryParse(parts[2]) ?? 0).clamp(0, 99) : 0;
 

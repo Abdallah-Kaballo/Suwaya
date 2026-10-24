@@ -7,18 +7,18 @@ class GeoCountry {
   Id id = Isar.autoIncrement;
 
   @Index(unique: true)
-  late String code; 
+  late String code;
 
   @Index(type: IndexType.value)
-  late String nameAr; 
+  late String nameAr;
 
   @Index(type: IndexType.value)
-  late String nameEn; 
+  late String nameEn;
 
-  late String defaultMethod; 
-  late String defaultMadhab; 
+  late String defaultMethod;
+  late String defaultMadhab;
 
-  bool isDownloaded = false; 
+  bool isDownloaded = false;
 }
 
 @collection
@@ -26,18 +26,18 @@ class GeoPlace {
   Id id = Isar.autoIncrement;
 
   @Index()
-  late String countryCode; 
+  late String countryCode;
 
   @Index(type: IndexType.value)
-  late String nameAr; 
+  late String nameAr;
 
   @Index(type: IndexType.value)
-  late String nameEn; 
+  late String nameEn;
 
   late double latitude;
   late double longitude;
 
-  late String type; 
-  
+  late String type;
+
   late String? timezone;
 }

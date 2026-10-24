@@ -7,7 +7,6 @@ import '../../models/settings_model.dart';
 import '../../models/geo_models.dart';
 import '../../models/routine_model.dart';
 
-
 class DatabaseService {
   static Future<Isar> init() async {
     final existingInstance = Isar.getInstance();
@@ -31,7 +30,8 @@ class DatabaseService {
         inspector: !kReleaseMode,
       );
     } catch (e, stackTrace) {
-      debugPrint('🚨 فشل فتح قاعدة بيانات Isar في المسار (${dir.path}): $e\n$stackTrace');
+      debugPrint(
+          '🚨 فشل فتح قاعدة بيانات Isar في المسار (${dir.path}): $e\n$stackTrace');
       throw StateError(
         'تعذر فتح قاعدة البيانات المحلية (قد تكون مقفلة بواسطة عملية أخرى أو لا توجد مساحة كافية): $e',
       );

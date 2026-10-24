@@ -285,12 +285,12 @@ class IbadatScreen extends ConsumerWidget {
 
     if (astroState.periods.isEmpty) {
       return Scaffold(
-      backgroundColor: scaffoldBgColor,
-      drawerEnableOpenDragGesture: true,
-      drawerEdgeDragWidth: MediaQuery.of(context).size.width,
-      drawer: const AppDrawer(),
-      onDrawerChanged: (isOpen) =>
-          ref.read(isDrawerOpenProvider.notifier).state = isOpen,
+        backgroundColor: scaffoldBgColor,
+        drawerEnableOpenDragGesture: true,
+        drawerEdgeDragWidth: MediaQuery.of(context).size.width,
+        drawer: const AppDrawer(),
+        onDrawerChanged: (isOpen) =>
+            ref.read(isDrawerOpenProvider.notifier).state = isOpen,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -379,7 +379,7 @@ class IbadatScreen extends ConsumerWidget {
               );
             },
           ),
-          
+
           // 🌟 زر فتح النافذة الموحدة لإعدادات القرص وأوقات الليل
           IconButton(
             visualDensity: VisualDensity.compact,
@@ -388,8 +388,7 @@ class IbadatScreen extends ConsumerWidget {
               color: Theme.of(context).primaryColor,
               size: 20,
             ),
-            onPressed: () =>
-                showDialAndIbadatMarkersSheet(context, astroState),
+            onPressed: () => showDialAndIbadatMarkersSheet(context, astroState),
           ),
           const SizedBox(width: 6),
         ],
@@ -488,8 +487,7 @@ class IbadatScreen extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final int totalCards =
-            prayerRowsData.length + visibleNightParts.length;
+        final int totalCards = prayerRowsData.length + visibleNightParts.length;
         final bool isCompact = constraints.maxHeight < 680 || totalCards >= 8;
 
         final double cardGap = isCompact ? 4.5 : 6.5;
@@ -802,7 +800,8 @@ class IbadatScreen extends ConsumerWidget {
       bellColor = pColor;
     }
 
-    final String originalTitle = ('night_parts.${part.nameKey.replaceAll("np_", "")}').tr();
+    final String originalTitle =
+        ('night_parts.${part.nameKey.replaceAll("np_", "")}').tr();
     // 🌟 التعديل: استبدال المسافة الأولى بسطر جديد لضمان ظهور الكلمتين فوق بعضهما
     final String partTitle = originalTitle.replaceFirst(' ', '\n');
 
@@ -844,19 +843,34 @@ class IbadatScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildClockTime(
-                      context, part.startTime, astroState, settings, isDark, part.id,
-                      fontSize: clockFontSize, isEnd: false,
+                      context,
+                      part.startTime,
+                      astroState,
+                      settings,
+                      isDark,
+                      part.id,
+                      fontSize: clockFontSize,
+                      isEnd: false,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Icon(
-                        isRTL ? LucideIcons.arrow_left : LucideIcons.arrow_right,
-                        size: 15, color: isDark ? Colors.white54 : Colors.black54,
+                        isRTL
+                            ? LucideIcons.arrow_left
+                            : LucideIcons.arrow_right,
+                        size: 15,
+                        color: isDark ? Colors.white54 : Colors.black54,
                       ),
                     ),
                     _buildClockTime(
-                      context, part.endTime, astroState, settings, isDark, part.id,
-                      fontSize: clockFontSize, isEnd: true,
+                      context,
+                      part.endTime,
+                      astroState,
+                      settings,
+                      isDark,
+                      part.id,
+                      fontSize: clockFontSize,
+                      isEnd: true,
                     ),
                   ],
                 ),
@@ -871,7 +885,8 @@ class IbadatScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
               onTap: () {
                 HapticFeedback.mediumImpact();
-                _showAlarmChoiceSheet(context, ref, part.id, originalTitle, isDark);
+                _showAlarmChoiceSheet(
+                    context, ref, part.id, originalTitle, isDark);
               },
               child: SizedBox(
                 width: 44,

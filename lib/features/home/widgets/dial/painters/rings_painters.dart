@@ -685,7 +685,8 @@ class OuterRingPainter extends CustomPainter {
 }
 
 /// 🌟 رسم التاج الإسطرلابي الذهبي الفخم فوق نقطة المغرب (بنفس حجم وموقع السهم السابق)
-void drawAstrolabeMaghribCrown(Canvas canvas, Offset center, double outerRadius) {
+void drawAstrolabeMaghribCrown(
+    Canvas canvas, Offset center, double outerRadius) {
   final double crownBaseY = center.dy - outerRadius - 2;
   final double crownHeight = outerRadius * 0.13; // حجم متناسق مع السهم السابق
   final double crownHalfWidth = crownHeight * 0.92;
@@ -776,7 +777,8 @@ void drawAstrolabeMaghribCrown(Canvas canvas, Offset center, double outerRadius)
     ..close();
 
   // ظل خلفي ناعم لإبراز التاج فوق الحافة
-  canvas.drawShadow(outerCrown, Colors.black.withValues(alpha: 0.65), 4.0, false);
+  canvas.drawShadow(
+      outerCrown, Colors.black.withValues(alpha: 0.65), 4.0, false);
   canvas.drawPath(outerCrown, goldFillPaint);
   canvas.drawPath(outerCrown, goldRimPaint);
 

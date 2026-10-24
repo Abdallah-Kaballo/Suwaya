@@ -11,9 +11,12 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('calculateSuwayaFlowOptions selects N closest to 1.00x as recommended first option', () {
+    test(
+        'calculateSuwayaFlowOptions selects N closest to 1.00x as recommended first option',
+        () {
       final start = DateTime.utc(2026, 10, 16, 12, 0);
-      final end = DateTime.utc(2026, 10, 16, 13, 30); // 90 دقيقة فعلية = 3 بومودورو عند سرعة 1.00x
+      final end = DateTime.utc(
+          2026, 10, 16, 13, 30); // 90 دقيقة فعلية = 3 بومودورو عند سرعة 1.00x
 
       final options = PomodoroEngine.calculateSuwayaFlowOptions(start, end);
 
@@ -23,11 +26,15 @@ void main() {
       expect(options.first.flowSpeed, closeTo(1.0, 0.001));
 
       // التحقق من وجود خيار أبطأ (N=2 -> 0.67x) وخيار أسرع (N=4 -> 1.33x)
-      expect(options.any((o) => o.tag == 'slower' && o.pomodoroCount == 2), isTrue);
-      expect(options.any((o) => o.tag == 'faster' && o.pomodoroCount == 4), isTrue);
+      expect(options.any((o) => o.tag == 'slower' && o.pomodoroCount == 2),
+          isTrue);
+      expect(options.any((o) => o.tag == 'faster' && o.pomodoroCount == 4),
+          isTrue);
     });
 
-    test('calculateSuwayaFlowOptions returns empty list if duration is under 15 minutes', () {
+    test(
+        'calculateSuwayaFlowOptions returns empty list if duration is under 15 minutes',
+        () {
       final start = DateTime.utc(2026, 10, 16, 12, 0);
       final end = DateTime.utc(2026, 10, 16, 12, 14);
 
@@ -35,7 +42,9 @@ void main() {
       expect(options, isEmpty);
     });
 
-    test('Traditional Pomodoro cycles through work, short break, and triggers long break after 4 cycles', () {
+    test(
+        'Traditional Pomodoro cycles through work, short break, and triggers long break after 4 cycles',
+        () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -52,7 +61,8 @@ void main() {
         expect(container.read(pomodoroProvider).currentCycle, c);
         expect(container.read(pomodoroProvider).phase, PomodoroPhase.work);
         notifier.skipTraditionalPhase(); // ينتقل للراحة القصيرة
-        expect(container.read(pomodoroProvider).phase, PomodoroPhase.shortBreak);
+        expect(
+            container.read(pomodoroProvider).phase, PomodoroPhase.shortBreak);
         notifier.skipTraditionalPhase(); // ينتقل لدورة العمل التالية
       }
 

@@ -18,7 +18,9 @@ Set<String> _flattenKeys(Map<String, dynamic> map, [String prefix = '']) {
 
 void main() {
   group('22-Language Translations JSON Integrity Tests', () {
-    test('All 22 supported locale JSON files exist, parse cleanly, and contain core astronomical and UI sections', () {
+    test(
+        'All 22 supported locale JSON files exist, parse cleanly, and contain core astronomical and UI sections',
+        () {
       const requiredTopLevelSections = [
         'app_name',
         'common',
@@ -34,7 +36,8 @@ void main() {
 
       final enFile = File('assets/translations/en.json');
       expect(enFile.existsSync(), isTrue);
-      final enMap = jsonDecode(enFile.readAsStringSync()) as Map<String, dynamic>;
+      final enMap =
+          jsonDecode(enFile.readAsStringSync()) as Map<String, dynamic>;
       final enKeys = _flattenKeys(enMap);
       expect(enKeys, isNotEmpty);
 

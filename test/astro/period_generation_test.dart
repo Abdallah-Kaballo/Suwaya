@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
 void main() {
-  test('Period generation creates exactly 7 continuous periods totaling 24 suwayas', () {
+  test(
+      'Period generation creates exactly 7 continuous periods totaling 24 suwayas',
+      () {
     final now = DateTime.now();
     final anchors = SuwayaCycleAnchors(
       cycleStartMaghrib: now,
@@ -15,11 +17,12 @@ void main() {
       cycleEndMaghrib: now.add(const Duration(hours: 24)),
     );
 
-    final distribution = SuwayaDistributor.getDistributionForMadhab(MadhabType.shafi);
+    final distribution =
+        SuwayaDistributor.getDistributionForMadhab(MadhabType.shafi);
     final periods = PeriodGenerator.generatePeriods(anchors, distribution);
 
     expect(periods.length, 7);
-    
+
     // Check continuity
     for (int i = 0; i < periods.length - 1; i++) {
       expect(periods[i].endTime, equals(periods[i + 1].startTime));

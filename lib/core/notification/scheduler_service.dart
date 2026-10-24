@@ -420,7 +420,8 @@ class NotificationScheduler {
                   snoozeDurationMinutes: userSnoozeMins,
                   snoozeCount: 0,
                   maxSnoozes: 0,
-                  loopAudio: false, // الأذان يعمل مرة واحدة كاملاً دون تكرار مزعج
+                  loopAudio:
+                      false, // الأذان يعمل مرة واحدة كاملاً دون تكرار مزعج
                   volumePolicy: AlarmVolumePolicy.userAdjustable,
                 ).toPayloadString();
 
@@ -956,8 +957,8 @@ class NotificationScheduler {
                   loc: loc,
                 );
 
-                if (rawDeviceTime.isBefore(
-                    DateTime.now().add(const Duration(seconds: 5)))) {
+                if (rawDeviceTime
+                    .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
                   continue;
                 }
 
@@ -1057,7 +1058,8 @@ class NotificationScheduler {
       }
 
       // 🌟 دمج الإشعارات المعلقة فعلياً في النظام مع الذاكرة لضمان حذف الإشعارات القديمة حتى بعد إعادة تشغيل التطبيق
-      final osPendingNormalIds = await _service.getPendingNormalNotificationIds();
+      final osPendingNormalIds =
+          await _service.getPendingNormalNotificationIds();
       final knownNormalIds = {
         ..._previouslyScheduledNormalIds,
         ...osPendingNormalIds,

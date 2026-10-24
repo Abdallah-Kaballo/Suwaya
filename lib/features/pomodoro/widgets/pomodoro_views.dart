@@ -273,9 +273,12 @@ class TraditionalTimerView extends ConsumerWidget {
               ),
               label: Text(
                 state.status == PomodoroStatus.running
-                    ? trPomodoro(context, 'pomodoro.pause', 'إيقاف مؤقت', 'Pause')
-                    : trPomodoro(context, 'pomodoro.resume', 'استئناف', 'Resume'),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ? trPomodoro(
+                        context, 'pomodoro.pause', 'إيقاف مؤقت', 'Pause')
+                    : trPomodoro(
+                        context, 'pomodoro.resume', 'استئناف', 'Resume'),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -554,7 +557,6 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
       SuwayaFlowValidationError.none => (isValid: true, errorMessage: null),
     };
   }
-
 
   bool _isCivil12HourActive(BuildContext context, String civilTimeFormat) {
     if (civilTimeFormat == civilTimeFormat12Hour) return true;
@@ -907,7 +909,8 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                           child: Text(
                             startFormatted,
                             style: TextStyle(
-                              color: startDisplayAstro ? suwayaColor : textColor,
+                              color:
+                                  startDisplayAstro ? suwayaColor : textColor,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               fontFamily: 'Inter',
@@ -1218,13 +1221,13 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                         '${_formatSessionsCount(context, opt.pomodoroCount)} · ${opt.flowSpeed.toStringAsFixed(2)}x',
-                       style: TextStyle(
-                        color: isSelected ? primaryColor : textColor,
-                         fontWeight: FontWeight.bold,
-                       fontSize: 15,
+                              '${_formatSessionsCount(context, opt.pomodoroCount)} · ${opt.flowSpeed.toStringAsFixed(2)}x',
+                              style: TextStyle(
+                                color: isSelected ? primaryColor : textColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
                               ),
-                                 ),
+                            ),
                             const SizedBox(height: 2),
                             Text(
                               subtitleText,

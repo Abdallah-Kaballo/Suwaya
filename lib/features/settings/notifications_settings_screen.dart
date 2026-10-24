@@ -13,10 +13,12 @@ class NotificationsSettingsScreen extends ConsumerStatefulWidget {
   const NotificationsSettingsScreen({super.key});
 
   @override
-  ConsumerState<NotificationsSettingsScreen> createState() => _NotificationsSettingsScreenState();
+  ConsumerState<NotificationsSettingsScreen> createState() =>
+      _NotificationsSettingsScreenState();
 }
 
-class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSettingsScreen> {
+class _NotificationsSettingsScreenState
+    extends ConsumerState<NotificationsSettingsScreen> {
   late final Map<String, String> _availableTones;
 
   @override
@@ -94,12 +96,12 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
               await ref
                   .read(settingsProvider.notifier)
                   .updateBatchPeriodNotificationSettings(
-                    periodIds: const ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'],
-                    isEnabled: level > 0,
-                    alertLevel: level,
-                    soundPath: tone,
-                    volume: vol,
-                  );
+                periodIds: const ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'],
+                isEnabled: level > 0,
+                alertLevel: level,
+                soundPath: tone,
+                volume: vol,
+              );
             },
           ),
           const SizedBox(height: 20),
@@ -121,18 +123,18 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
               await ref
                   .read(settingsProvider.notifier)
                   .updateBatchPeriodNotificationSettings(
-                    periodIds: const [
-                      'half_2',
-                      'third_3',
-                      'sixth_4',
-                      'sixth_5',
-                      'sixth_6',
-                    ],
-                    isEnabled: level > 0,
-                    alertLevel: level,
-                    soundPath: tone,
-                    volume: vol,
-                  );
+                periodIds: const [
+                  'half_2',
+                  'third_3',
+                  'sixth_4',
+                  'sixth_5',
+                  'sixth_6',
+                ],
+                isEnabled: level > 0,
+                alertLevel: level,
+                soundPath: tone,
+                volume: vol,
+              );
             },
           ),
           const SizedBox(height: 32),
@@ -277,7 +279,6 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
       ),
     );
   }
-
 
   Future<void> _requestPermissions(WidgetRef ref) async {
     final perms = ref.read(permissionsProvider.notifier);
@@ -598,7 +599,8 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     );
   }
 
-  Widget _buildSegmentButton(BuildContext context, String title, bool isActive, Color textColor, Color accentColor, VoidCallback onTap) {
+  Widget _buildSegmentButton(BuildContext context, String title, bool isActive,
+      Color textColor, Color accentColor, VoidCallback onTap) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -606,9 +608,19 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isActive ? (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF334155) : Colors.white) : Colors.transparent,
+            color: isActive
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF334155)
+                    : Colors.white)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: isActive ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : [],
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 4)
+                  ]
+                : [],
           ),
           alignment: Alignment.center,
           child: Text(
@@ -624,29 +636,52 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
     );
   }
 
-  void _showTonePicker(BuildContext context, String currentTone, Color surfaceColor, Color textColor, Color accentColor, Function(String) onSelected) {
+  void _showTonePicker(
+      BuildContext context,
+      String currentTone,
+      Color surfaceColor,
+      Color textColor,
+      Color accentColor,
+      Function(String) onSelected) {
     showModalBottomSheet(
       context: context,
       backgroundColor: surfaceColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: textColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(2))),
+            Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: textColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 20),
-            Text('notifications.default_tone'.tr(), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('notifications.default_tone'.tr(),
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ..._availableTones.entries.map((e) => ListTile(
-              title: Text(e.value, style: TextStyle(color: textColor, fontWeight: currentTone == e.key ? FontWeight.bold : FontWeight.normal)),
-              trailing: currentTone == e.key ? Icon(LucideIcons.check, color: accentColor) : null,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                onSelected(e.key);
-                Navigator.pop(context);
-              },
-            )),
+                  title: Text(e.value,
+                      style: TextStyle(
+                          color: textColor,
+                          fontWeight: currentTone == e.key
+                              ? FontWeight.bold
+                              : FontWeight.normal)),
+                  trailing: currentTone == e.key
+                      ? Icon(LucideIcons.check, color: accentColor)
+                      : null,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelected(e.key);
+                    Navigator.pop(context);
+                  },
+                )),
             const SizedBox(height: 20),
           ],
         ),
@@ -857,7 +892,8 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    border: Border.all(color: textColor.withValues(alpha: 0.12)),
+                    border:
+                        Border.all(color: textColor.withValues(alpha: 0.12)),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: DropdownButtonHideUnderline(
@@ -876,8 +912,7 @@ class _NotificationsSettingsScreenState extends ConsumerState<NotificationsSetti
                             ),
                           )
                           .toList(),
-                      onChanged: (val) =>
-                          setSheetState(() => tempTone = val!),
+                      onChanged: (val) => setSheetState(() => tempTone = val!),
                     ),
                   ),
                 ),

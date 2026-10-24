@@ -178,7 +178,6 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   Future<void> _loadSettings() async {
     final settings = await _repository.getSettings();
     state = settings.clone();
-    
   }
 
   Future<void> updatePeriodNotificationSettings(
@@ -366,7 +365,8 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       ..countryCode = countryCode
       ..timezone = timezone
       ..locationType = locationType
-      ..isAutoLocation = (locationType == 'gps') // 🌟 ربط التحديث التلقائي بنوع GPS
+      ..isAutoLocation =
+          (locationType == 'gps') // 🌟 ربط التحديث التلقائي بنوع GPS
       ..nearestCity = nearestCity;
 
     final newState = state.clone()..activeLocation = loc;
@@ -408,11 +408,14 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       if (!isLocGranted) throw Exception('permissions.location_required'.tr());
 
       // 🌟 استخدام المسار المحلي الموحد لضمان جلب وحفظ المنطقة الزمنية (timezone) وأقرب مدينة
-      final locData = await LocationService.fetchOfflineLocation(state.languageCode);
-      final String detectedCountryCode = (locData['countryCode'] as String?) ?? 'SA';
+      final locData =
+          await LocationService.fetchOfflineLocation(state.languageCode);
+      final String detectedCountryCode =
+          (locData['countryCode'] as String?) ?? 'SA';
 
       await addAndSelectLocation(
-        (locData['formattedName'] as String?) ?? 'location_picker.current_location'.tr(),
+        (locData['formattedName'] as String?) ??
+            'location_picker.current_location'.tr(),
         (locData['lat'] as num).toDouble(),
         (locData['lng'] as num).toDouble(),
         detectedCountryCode,
@@ -580,7 +583,7 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
   Future<void> toggleVisibleNightPart(String partId) async {
     final newState = state.clone();
-    
+
     if (newState.visibleNightParts.contains(partId)) {
       newState.visibleNightParts.remove(partId);
     } else {
@@ -595,7 +598,7 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       } else if (partId == 'sixth_4') {
         newState.visibleNightParts.remove('half_2');
       }
-      
+
       newState.visibleNightParts.add(partId);
     }
 
@@ -625,7 +628,7 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     state = newState;
     await _repository.saveSettings(newState);
   }
-  
+
   // 🌟 دالة تحديث تصحيح التاريخ الهجري (-2 إلى +2 يوم)
   Future<void> updateHijriOffsetDays(int days) async {
     final newState = state.clone()..hijriOffsetDays = days.clamp(-2, 2);

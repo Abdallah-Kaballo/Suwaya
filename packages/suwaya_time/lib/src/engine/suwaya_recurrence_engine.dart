@@ -59,18 +59,18 @@ class SuwayaRecurrenceEngine {
                   timezoneId: timezoneId,
                 ).utcOffset;
 
-      final Duration fallbackNext = (fallbackDayOffsets != null &&
-              index + 1 < fallbackDayOffsets.length)
-          ? fallbackDayOffsets[index + 1]
-          : TimezoneResolver.resolveForInstant(
-              DateTime.utc(
-                targetDate.year,
-                targetDate.month,
-                targetDate.day,
-                12,
-              ).add(const Duration(days: 1)),
-              timezoneId: timezoneId,
-            ).utcOffset;
+      final Duration fallbackNext =
+          (fallbackDayOffsets != null && index + 1 < fallbackDayOffsets.length)
+              ? fallbackDayOffsets[index + 1]
+              : TimezoneResolver.resolveForInstant(
+                  DateTime.utc(
+                    targetDate.year,
+                    targetDate.month,
+                    targetDate.day,
+                    12,
+                  ).add(const Duration(days: 1)),
+                  timezoneId: timezoneId,
+                ).utcOffset;
 
       Duration resolveOffset(DateTime utcInstant) {
         return TimezoneResolver.resolveForInstant(

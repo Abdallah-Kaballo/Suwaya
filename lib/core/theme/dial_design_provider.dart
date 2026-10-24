@@ -20,7 +20,8 @@ extension DialDesignExt on DialDesign {
   }
 }
 
-final dialDesignProvider = StateNotifierProvider<DialDesignNotifier, DialDesign>((ref) {
+final dialDesignProvider =
+    StateNotifierProvider<DialDesignNotifier, DialDesign>((ref) {
   return DialDesignNotifier();
 });
 

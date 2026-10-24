@@ -51,7 +51,9 @@ _FastingRecommendation? _getSeasonalFastingInfo(
   // 1. يوم عرفة (9 ذو الحجة)
   if (hDate.hMonth == 12 && hDate.hDay == 9) {
     return _FastingRecommendation(
-      title: isAr ? 'صيام يوم عرفة (9 ذو الحجة)' : 'Fasting Day of Arafah (9 Dhu al-Hijjah)',
+      title: isAr
+          ? 'صيام يوم عرفة (9 ذو الحجة)'
+          : 'Fasting Day of Arafah (9 Dhu al-Hijjah)',
       reason: isAr
           ? 'يُستحب صيامه لغير الحاج؛ يكفّر السنة الماضية والباقية.'
           : 'Recommended for non-pilgrims; expiates sins of the previous and coming year.',
@@ -62,7 +64,9 @@ _FastingRecommendation? _getSeasonalFastingInfo(
   // 2. يوم عاشوراء (10 محرم) وتاسوعاء (9 محرم)
   if (hDate.hMonth == 1 && hDate.hDay == 10) {
     return _FastingRecommendation(
-      title: isAr ? 'صيام يوم عاشوراء (10 محرم)' : 'Fasting Day of Ashura (10 Muharram)',
+      title: isAr
+          ? 'صيام يوم عاشوراء (10 محرم)'
+          : 'Fasting Day of Ashura (10 Muharram)',
       reason: isAr
           ? 'صيام يوم عاشوراء يكفّر السنة التي قبله.'
           : 'Recommended fast; expiates the sins of the preceding year.',
@@ -71,7 +75,8 @@ _FastingRecommendation? _getSeasonalFastingInfo(
   }
   if (hDate.hMonth == 1 && hDate.hDay == 9) {
     return _FastingRecommendation(
-      title: isAr ? 'صيام يوم تاسوعاء (9 محرم)' : 'Fasting Tasu\'a (9 Muharram)',
+      title:
+          isAr ? 'صيام يوم تاسوعاء (9 محرم)' : 'Fasting Tasu\'a (9 Muharram)',
       reason: isAr
           ? 'يُستحب صيامه مع يوم عاشوراء.'
           : 'Recommended to fast along with the Day of Ashura.',
@@ -594,8 +599,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         if (firstH.hMonth == lastH.hMonth) {
           secondarySubtitle = '$hm1 ${firstH.hYear}${'common.ah'.tr()}';
         } else if (firstH.hYear == lastH.hYear) {
-          secondarySubtitle =
-              '$hm1 -$hm2 ${firstH.hYear}${'common.ah'.tr()}';
+          secondarySubtitle = '$hm1 -$hm2 ${firstH.hYear}${'common.ah'.tr()}';
         } else {
           secondarySubtitle =
               '$hm1 ${firstH.hYear} -$hm2 ${lastH.hYear}${'common.ah'.tr()}';

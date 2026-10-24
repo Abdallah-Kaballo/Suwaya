@@ -254,7 +254,8 @@ class SuwayaCoordinateMapper {
             1) ~/
         totalVirtualSecondsInPeriod;
 
-    final resolvedUtc = baseStartUtc.add(Duration(microseconds: offsetUtcMicro));
+    final resolvedUtc =
+        baseStartUtc.add(Duration(microseconds: offsetUtcMicro));
 
     if (period.startUtc != null && toWallClock != null) {
       return (instantUtc: resolvedUtc, wallTime: toWallClock(resolvedUtc));

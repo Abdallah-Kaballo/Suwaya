@@ -28,11 +28,9 @@ class TaskRepository {
             .group((q2) => q2
                 .isCompletedEqualTo(false)
                 .and()
-                .targetDateGreaterThan(thirtyDaysAgo)
-            )
+                .targetDateGreaterThan(thirtyDaysAgo))
             .or()
-            .completedAtGreaterThan(todayStart)
-        )
+            .completedAtGreaterThan(todayStart))
         .findAll();
   }
 
@@ -65,7 +63,8 @@ class TaskRepository {
   }
 
   Future<List<TaskModel>> getRecentCompletedTasks(DateTime since) async {
-    final completedTasks = await _isar.taskModels.filter()
+    final completedTasks = await _isar.taskModels
+        .filter()
         .isCompletedEqualTo(true)
         .and()
         .completedAtGreaterThan(since)

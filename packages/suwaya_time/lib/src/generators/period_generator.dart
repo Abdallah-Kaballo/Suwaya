@@ -6,7 +6,8 @@ class PeriodGenerator {
     List<int> distribution,
   ) {
     if (!anchors.isValidSequence) {
-      throw Exception('Invalid Astro Sequence: Boundaries overlap or are backwards.');
+      throw Exception(
+          'Invalid Astro Sequence: Boundaries overlap or are backwards.');
     }
 
     return [

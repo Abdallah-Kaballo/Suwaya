@@ -41,7 +41,8 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  Future<void> _checkForUpdates(BuildContext context, Color primaryColor) async {
+  Future<void> _checkForUpdates(
+      BuildContext context, Color primaryColor) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
@@ -62,7 +63,7 @@ class AppDrawer extends ConsumerWidget {
 
     BuildContext? loadingDialogContext;
     showDialog(
-      context: rootNav.context, 
+      context: rootNav.context,
       barrierDismissible: false,
       builder: (ctx) {
         loadingDialogContext = ctx;
@@ -206,22 +207,34 @@ class AppDrawer extends ConsumerWidget {
                             Consumer(
                               builder: (context, ref, child) {
                                 final tier = ref.watch(supporterProvider);
-                                if (tier == SupporterTier.none) return const SizedBox.shrink();
-                                
+                                if (tier == SupporterTier.none) {
+                                  return const SizedBox.shrink();
+                                }
+
                                 IconData badgeIcon;
                                 Color badgeColor;
                                 switch (tier) {
                                   case SupporterTier.bronze:
-                                    badgeIcon = LucideIcons.medal; badgeColor = const Color(0xFFCD7F32); break;
+                                    badgeIcon = LucideIcons.medal;
+                                    badgeColor = const Color(0xFFCD7F32);
+                                    break;
                                   case SupporterTier.silver:
-                                    badgeIcon = LucideIcons.award; badgeColor = const Color(0xFFC0C0C0); break;
+                                    badgeIcon = LucideIcons.award;
+                                    badgeColor = const Color(0xFFC0C0C0);
+                                    break;
                                   case SupporterTier.gold:
-                                    badgeIcon = LucideIcons.crown; badgeColor = const Color(0xFFFFD700); break;
+                                    badgeIcon = LucideIcons.crown;
+                                    badgeColor = const Color(0xFFFFD700);
+                                    break;
                                   case SupporterTier.diamond:
-                                    badgeIcon = LucideIcons.gem; badgeColor = const Color(0xFF00E5FF); break;
-                                  default: return const SizedBox.shrink();
+                                    badgeIcon = LucideIcons.gem;
+                                    badgeColor = const Color(0xFF00E5FF);
+                                    break;
+                                  default:
+                                    return const SizedBox.shrink();
                                 }
-                                return Icon(badgeIcon, color: badgeColor, size: 24);
+                                return Icon(badgeIcon,
+                                    color: badgeColor, size: 24);
                               },
                             ),
                           ],
@@ -259,11 +272,8 @@ class AppDrawer extends ConsumerWidget {
                               color: primaryColor,
                               fontSize: 12,
                               fontWeight: FontWeight.bold))),
-                  _buildDrawerItem(
-                      context,
-                      LucideIcons.heart_handshake,
-                      'drawer.support_app'.tr(),
-                      () {
+                  _buildDrawerItem(context, LucideIcons.heart_handshake,
+                      'drawer.support_app'.tr(), () {
                     Navigator.pop(context);
                     context.push('/support');
                   }, iconColor: const Color(0xFFFFD700)),

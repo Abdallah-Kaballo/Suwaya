@@ -1,1 +1,2 @@
-export 'notification_service.dart' show notificationServiceProvider, NotificationService;
+export 'notification_service.dart'
+    show notificationServiceProvider, NotificationService;

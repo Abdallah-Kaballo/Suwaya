@@ -8,7 +8,9 @@ void main() {
   });
 
   group('Phase 3: Polar Cycle Synthesizer & Islamic Events Catalog', () {
-    test('1. PolarCycleSynthesizer guarantees valid 7 periods & 24 Suwayas in Tromsø (69.65°N) during Polar Summer & Winter', () {
+    test(
+        '1. PolarCycleSynthesizer guarantees valid 7 periods & 24 Suwayas in Tromsø (69.65°N) during Polar Summer & Winter',
+        () {
       for (final date in [
         DateTime.utc(2026, 6, 21), // شمس منتصف الليل القطبية
         DateTime.utc(2026, 12, 21), // الليل القطبي
@@ -52,7 +54,9 @@ void main() {
       }
     });
 
-    test('2. IslamicEventsCatalog identifies Arafah, Ashura, White Days, and strictly excludes 13 Dhu al-Hijjah & Ramadan', () {
+    test(
+        '2. IslamicEventsCatalog identifies Arafah, Ashura, White Days, and strictly excludes 13 Dhu al-Hijjah & Ramadan',
+        () {
       expect(
         IslamicEventsCatalog.evaluateFastingForHijri(hMonth: 12, hDay: 9)?.type,
         equals(IslamicFastingType.arafah),
@@ -78,7 +82,9 @@ void main() {
   });
 
   group('Phase 4: SuwayaFlowPlanner & SuwayaRecurrenceEngine', () {
-    test('3. SuwayaFlowPlanner selects 1.00x as recommended option for 90m window and evaluates live session accurately', () {
+    test(
+        '3. SuwayaFlowPlanner selects 1.00x as recommended option for 90m window and evaluates live session accurately',
+        () {
       final start = DateTime.utc(2026, 10, 22, 12, 0);
       final end = DateTime.utc(2026, 10, 22, 13, 30); // 90 دقيقة
 
@@ -111,7 +117,9 @@ void main() {
       expect(snapshotNearPrayer.isPrePrayerWarningActive, isTrue);
     });
 
-    test('4. SuwayaRecurrenceEngine generates 8-day windows and staggers colliding timestamps by +2s', () {
+    test(
+        '4. SuwayaRecurrenceEngine generates 8-day windows and staggers colliding timestamps by +2s',
+        () {
       final windows = SuwayaRecurrenceEngine.generateMultiDayWindows(
         latitude: 21.4225,
         longitude: 39.8262,
@@ -126,8 +134,10 @@ void main() {
 
       final occupied = <int>{};
       final base = DateTime.utc(2026, 10, 22, 18, 0, 0);
-      final t1 = SuwayaRecurrenceEngine.resolveCollisionSafeTime(base, occupied);
-      final t2 = SuwayaRecurrenceEngine.resolveCollisionSafeTime(base, occupied);
+      final t1 =
+          SuwayaRecurrenceEngine.resolveCollisionSafeTime(base, occupied);
+      final t2 =
+          SuwayaRecurrenceEngine.resolveCollisionSafeTime(base, occupied);
       expect(t1, equals(base));
       expect(t2, equals(base.add(const Duration(seconds: 2))));
     });

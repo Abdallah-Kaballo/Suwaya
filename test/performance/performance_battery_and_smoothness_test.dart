@@ -86,8 +86,7 @@ class _PerfTaskRepo implements TaskRepository {
   }
 
   @override
-  Future<void> deleteTask(int id) async =>
-      tasks.removeWhere((t) => t.id == id);
+  Future<void> deleteTask(int id) async => tasks.removeWhere((t) => t.id == id);
   @override
   Future<void> deleteTasks(List<int> ids) async =>
       tasks.removeWhere((t) => ids.contains(t.id));
@@ -146,22 +145,23 @@ void main() {
       expect(
         notificationsWhilePaused,
         equals(0),
-        reason: 'UI Timer continued ticking while app was paused in background!',
+        reason:
+            'UI Timer continued ticking while app was paused in background!',
       );
 
       virtualDateTimeNotifier.removeListener(listener);
 
       // 2. محاكاة عودة التطبيق للواجهة (Resume)
       tester.binding.handleAppLifecycleStateChanged(
-      AppLifecycleState.hidden,
+        AppLifecycleState.hidden,
       );
 
       tester.binding.handleAppLifecycleStateChanged(
-      AppLifecycleState.inactive,
+        AppLifecycleState.inactive,
       );
 
       tester.binding.handleAppLifecycleStateChanged(
-      AppLifecycleState.resumed,
+        AppLifecycleState.resumed,
       );
       await tester.pump(const Duration(seconds: 2));
 

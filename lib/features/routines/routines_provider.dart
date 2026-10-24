@@ -57,8 +57,7 @@ class RoutinesNotifier extends Notifier<List<RoutineModel>> {
   }
 }
 
-final routinesProvider =
-    NotifierProvider<RoutinesNotifier, List<RoutineModel>>(
+final routinesProvider = NotifierProvider<RoutinesNotifier, List<RoutineModel>>(
   RoutinesNotifier.new,
 );
 

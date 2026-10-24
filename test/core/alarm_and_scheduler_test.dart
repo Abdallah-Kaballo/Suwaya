@@ -34,7 +34,9 @@ AlarmSettings _mockAlarmSettings({
 
 void main() {
   group('AlarmPayload Schema V2 & Legacy Compatibility Tests', () {
-    test('Serializes and parses V2 JSON payload accurately independent of language', () {
+    test(
+        'Serializes and parses V2 JSON payload accurately independent of language',
+        () {
       const original = ParsedAlarmData(
         eventId: 101001,
         kind: AlarmEventKind.prayer,
@@ -66,7 +68,9 @@ void main() {
       expect(parsed.volumePolicy, AlarmVolumePolicy.userAdjustable);
     });
 
-    test('Parses legacy V1 pipe-delimited curtain and fullscreen payloads safely', () {
+    test(
+        'Parses legacy V1 pipe-delimited curtain and fullscreen payloads safely',
+        () {
       final legacyCurtain = _mockAlarmSettings(
         id: 101003,
         payload: 'curtain|Dhuhr Prayer|0xFFD4AF37|0',
@@ -93,7 +97,9 @@ void main() {
       expect(parsedTask.canSnooze, isTrue);
     });
 
-    test('Handles missing or malformed payload gracefully using deterministic ID range', () {
+    test(
+        'Handles missing or malformed payload gracefully using deterministic ID range',
+        () {
       final noPayloadRoutine = _mockAlarmSettings(
         id: 302005,
         payload: null,
@@ -108,7 +114,9 @@ void main() {
   });
 
   group('AlarmPolicyTable Invariants Tests', () {
-    test('Adhan policy never loops audio, disallows snooze, and allows user volume control', () {
+    test(
+        'Adhan policy never loops audio, disallows snooze, and allows user volume control',
+        () {
       final fajrPolicy = AlarmPolicyTable.forEvent(
         kind: AlarmEventKind.prayer,
         sourceId: 'fajr',
@@ -133,7 +141,9 @@ void main() {
   });
 
   group('Scheduler Deterministic IDs & Same-Second Collision Resolution', () {
-    test('stableNightPartCode produces unique, deterministic integers for all 5 Qiyam parts', () {
+    test(
+        'stableNightPartCode produces unique, deterministic integers for all 5 Qiyam parts',
+        () {
       const canonicalParts = [
         'half_2',
         'third_3',
@@ -141,13 +151,14 @@ void main() {
         'sixth_5',
         'sixth_6',
       ];
-      final codes = canonicalParts
-          .map(NotificationScheduler.stableNightPartCode)
-          .toSet();
+      final codes =
+          canonicalParts.map(NotificationScheduler.stableNightPartCode).toSet();
       expect(codes.length, canonicalParts.length);
     });
 
-    test('resolveCollisionSafeTime keeps first event at +0s and staggers coinciding events by +2s', () {
+    test(
+        'resolveCollisionSafeTime keeps first event at +0s and staggers coinciding events by +2s',
+        () {
       final occupied = <int>{};
       final baseTime = DateTime(2026, 10, 21, 18, 15, 0);
 

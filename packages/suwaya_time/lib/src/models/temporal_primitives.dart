@@ -31,8 +31,7 @@ class InstantUtc implements Comparable<InstantUtc> {
   bool isBefore(InstantUtc other) =>
       epochMicroseconds < other.epochMicroseconds;
 
-  bool isAfter(InstantUtc other) =>
-      epochMicroseconds > other.epochMicroseconds;
+  bool isAfter(InstantUtc other) => epochMicroseconds > other.epochMicroseconds;
 
   bool isAtSameMomentAs(InstantUtc other) =>
       epochMicroseconds == other.epochMicroseconds;
@@ -71,7 +70,7 @@ class InstantUtc implements Comparable<InstantUtc> {
 /// كائن قيمة غير قابل للتغيير (Immutable Value Object) يمثل وقت الحائط المدني المجرد (ساعة، دقيقة، ثانية)
 /// يقضي نهائياً على استخدام DateTime(2000, 1, 1, h, m) أو الدقائق الخام في الواجهة
 class CivilWallClock implements Comparable<CivilWallClock> {
-  final int hour;   // 0..23
+  final int hour; // 0..23
   final int minute; // 0..59
   final int second; // 0..59
 
@@ -131,8 +130,7 @@ class CivilWallClock implements Comparable<CivilWallClock> {
     required bool isRTL,
   }) {
     final parts = to12HourParts;
-    final digits =
-        '${parts.hour12}:${parts.minute.toString().padLeft(2, '0')}';
+    final digits = '${parts.hour12}:${parts.minute.toString().padLeft(2, '0')}';
     final marker = parts.isPm ? pmMarker : amMarker;
     if (isRTL) {
       return '\u202A\u200E$marker\u200E \u200E$digits\u200E\u202C';
@@ -276,7 +274,7 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
         'isDst': isDaylightSavingTime,
         'wallClock':
             '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}T'
-            '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}',
+                '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}',
       };
 
   @override
@@ -292,6 +290,7 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
   @override
   int get hashCode => Object.hash(instant, utcOffset, timezoneId);
 }
+
 /// 3. الإحداثي الزمني السُويعي الموحد (SuwayaCoordinate)
 class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
   final int globalSlotIndex;
@@ -346,9 +345,15 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     final isNight = match.group(1)!.toUpperCase() == 'N';
     final slotNum = int.tryParse(match.group(2)!) ?? 1;
     final vMin = int.tryParse(match.group(3)!) ?? 0;
-    final vSec = match.group(4) != null ? (int.tryParse(match.group(4)!) ?? 0) : 0;
+    final vSec =
+        match.group(4) != null ? (int.tryParse(match.group(4)!) ?? 0) : 0;
 
-    if (slotNum < 1 || slotNum > 12 || vMin < 0 || vMin > 59 || vSec < 0 || vSec > 59) {
+    if (slotNum < 1 ||
+        slotNum > 12 ||
+        vMin < 0 ||
+        vMin > 59 ||
+        vSec < 0 ||
+        vSec > 59) {
       return null;
     }
 

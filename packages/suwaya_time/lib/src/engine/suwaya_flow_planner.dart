@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:suwaya_time/suwaya_time.dart';
 
-
 /// خيار سرعة التدفق للبومودورو السُويعي
 class SuwayaFlowOption {
   final int pomodoroCount;
@@ -157,7 +156,7 @@ class SuwayaFlowPlanner {
     }
     return resolved;
   }
-  
+
   /// حساب خيارات البومودورو السويعي المتاحة بين وقت البداية ووقت النهاية (الأقرب لـ 1.00x أولاً)
   static List<SuwayaFlowOption> calculateFlowOptions(
     DateTime startTime,
@@ -290,8 +289,7 @@ class SuwayaFlowPlanner {
     final int actualElapsedSecs =
         math.max(0, nowUtc.difference(anchoredStartUtc).inSeconds);
     final double totalVirtualElapsed = actualElapsedSecs * flowSpeed;
-    final double sessionMaxVirtualSecs =
-        totalPomodoros * cycleTotalVirtualSecs;
+    final double sessionMaxVirtualSecs = totalPomodoros * cycleTotalVirtualSecs;
 
     if (totalVirtualElapsed >= sessionMaxVirtualSecs) {
       return SuwayaFlowLiveSnapshot(

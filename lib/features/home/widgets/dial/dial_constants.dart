@@ -9,13 +9,13 @@ const Color goldBase = Color(0xFFD4AF37);
 const Color goldLight = Color(0xFFFFE58F);
 const Color goldDark = Color(0xFFAA7900);
 const Color carvedText = Color(0xFFFFD87A);
-const Color astroGold = Color(0xFFF2C94C); 
+const Color astroGold = Color(0xFFF2C94C);
 
 // 🌟 الأبعاد النسبية (Radii)
-const double kInnerR = 0.35;   
-const double kPeriodR = 0.50;  
-const double kRailwayR = 0.82; 
-const double kOuterR = 0.98;   
+const double kInnerR = 0.35;
+const double kPeriodR = 0.50;
+const double kRailwayR = 0.82;
+const double kOuterR = 0.98;
 
 // 🌟 مزود حالة توهج المهام (تم عزله ليكون متاحاً لجميع أجزاء القرص)
 final highlightedTaskProvider = StateProvider<int?>((ref) => null);

@@ -10,12 +10,14 @@ void main() {
       periodKey: PeriodKey.nightMidnightFajr,
       nameKey: 'ibadat.qiyam_tab',
       startTime: DateTime.utc(2026, 10, 16, 0, 0),
-      endTime: DateTime.utc(2026, 10, 16, 6, 0), // 6 ساعات = 6 سويعات (كل سويعة 60 دقيقة فعلية)
+      endTime: DateTime.utc(
+          2026, 10, 16, 6, 0), // 6 ساعات = 6 سويعات (كل سويعة 60 دقيقة فعلية)
       suwayasCount: 6,
       colorValue: 0xFF1A237E,
     );
 
-    test('resolves start of first Suwaya (localSuwaya: 1, virtualMinute: 0)', () {
+    test('resolves start of first Suwaya (localSuwaya: 1, virtualMinute: 0)',
+        () {
       final resolved = resolveAstroRoutineTime(
         period: period,
         localSuwaya: 1,
@@ -24,7 +26,8 @@ void main() {
       expect(resolved, DateTime.utc(2026, 10, 16, 0, 0));
     });
 
-    test('resolves midpoint of 3rd Suwaya (localSuwaya: 3, virtualMinute: 30)', () {
+    test('resolves midpoint of 3rd Suwaya (localSuwaya: 3, virtualMinute: 30)',
+        () {
       final resolved = resolveAstroRoutineTime(
         period: period,
         localSuwaya: 3,

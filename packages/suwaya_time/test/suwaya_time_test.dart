@@ -8,8 +8,10 @@ void main() {
   });
 
   group('SuwayaTimeEngine Pure Package Invariants', () {
-    test('Shafi [1,4,6,1,6,3,3] and Hanafi [1,4,6,1,6,4,2] sum to 24 Suwayas', () {
-      final shafi = SuwayaDistributor.getDistributionForMadhab(MadhabType.shafi);
+    test('Shafi [1,4,6,1,6,3,3] and Hanafi [1,4,6,1,6,4,2] sum to 24 Suwayas',
+        () {
+      final shafi =
+          SuwayaDistributor.getDistributionForMadhab(MadhabType.shafi);
       final hanafi =
           SuwayaDistributor.getDistributionForMadhab(MadhabType.hanafi);
 
@@ -86,7 +88,9 @@ void main() {
       expect(state.currentSuwayaTime.virtualMinute, 0);
     });
 
-    test('TemporalContextEngine separates civilDayIbadat from yesterday cycle ibadatTimings before Maghrib', () {
+    test(
+        'TemporalContextEngine separates civilDayIbadat from yesterday cycle ibadatTimings before Maghrib',
+        () {
       // ظهر يوم 22 أكتوبر 2026 (10:00 UTC = 13:00 بتوقيت مكة، أي قبل المغرب)
       final context = TemporalContextEngine.evaluate(
         instantUtc: DateTime.utc(2026, 10, 22, 10, 0),

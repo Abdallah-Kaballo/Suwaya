@@ -25,11 +25,11 @@ class RoutineModel {
   int? endSuwaya;
   int? endVirtualMinute;
 
-  List<int>? recurrenceDays; 
+  List<int>? recurrenceDays;
   @Index()
   bool isActive = true;
 
-  int alertLevel = 0; 
+  int alertLevel = 0;
   String alarmTone = 'assets/audio/default.mp3';
   double alarmVolume = 1.0;
 

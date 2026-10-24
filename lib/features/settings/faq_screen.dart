@@ -33,16 +33,21 @@ class FAQScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'drawer.faq'.tr(), 
-          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
+          'drawer.faq'.tr(),
+          style: TextStyle(
+              color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         centerTitle: true,
       ),
       body: faqAsyncValue.when(
-        loading: () => Center(child: CircularProgressIndicator(color: primaryColor)),
-        error: (err, stack) => _buildErrorState(context, primaryColor, textColor),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: primaryColor)),
+        error: (err, stack) =>
+            _buildErrorState(context, primaryColor, textColor),
         data: (faqs) {
-          if (faqs.isEmpty) return _buildErrorState(context, primaryColor, textColor);
+          if (faqs.isEmpty) {
+            return _buildErrorState(context, primaryColor, textColor);
+          }
 
           return RefreshIndicator(
             color: primaryColor,
@@ -51,7 +56,8 @@ class FAQScreen extends ConsumerWidget {
               ref.invalidate(faqProvider(langCode));
             },
             child: ListView.builder(
-              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics()),
               padding: const EdgeInsets.all(20),
               itemCount: faqs.length,
               itemBuilder: (context, index) {
@@ -62,13 +68,21 @@ class FAQScreen extends ConsumerWidget {
                     color: surfaceColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: borderColor),
-                    boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8)],
+                    boxShadow: isDark
+                        ? []
+                        : [
+                            BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 8)
+                          ],
                   ),
                   child: Theme(
-                    data: ThemeData().copyWith(dividerColor: Colors.transparent),
+                    data:
+                        ThemeData().copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       iconColor: primaryColor,
-                      collapsedIconColor: isDark ? Colors.white54 : Colors.black54,
+                      collapsedIconColor:
+                          isDark ? Colors.white54 : Colors.black54,
                       title: Text(
                         faq.question,
                         style: TextStyle(
@@ -102,14 +116,16 @@ class FAQScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, Color primaryColor, Color textColor) {
+  Widget _buildErrorState(
+      BuildContext context, Color primaryColor, Color textColor) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.wifi_off, size: 64, color: primaryColor.withValues(alpha: 0.5)),
+            Icon(LucideIcons.wifi_off,
+                size: 64, color: primaryColor.withValues(alpha: 0.5)),
             const SizedBox(height: 24),
             // 🌟 تم تطبيق مفتاح الترجمة هنا
             Text(

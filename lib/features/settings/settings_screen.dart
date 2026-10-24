@@ -203,13 +203,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   textColor,
                   primaryColor,
                 ),
-                
                 _buildSettingsGroup(
                   'settings.general'.tr(),
                   [
-                    
-                    
-
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.clock_3,
@@ -242,7 +238,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       primaryColor: primaryColor,
                       textColor: textColor,
                     ),
-                    
+
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.calendar,
@@ -351,7 +347,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             (e) => e.name == val,
                             orElse: () => AppColorTheme.gold,
                           );
-                          ref.read(themeColorProvider.notifier).changeTheme(selected);
+                          ref
+                              .read(themeColorProvider.notifier)
+                              .changeTheme(selected);
                         },
                         isDark,
                         surfaceColor,
@@ -369,7 +367,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: switch (ref.watch(dialDesignProvider)) {
                         DialDesign.classic => 'settings.design_classic'.tr(),
                         DialDesign.minimal => 'settings.design_minimal'.tr(),
-                        DialDesign.geometric => 'settings.design_geometric'.tr(),
+                        DialDesign.geometric =>
+                          'settings.design_geometric'.tr(),
                       },
                       onTap: () => _showSelectionSheet(
                         'settings.choose_dial_design'.tr(),
@@ -384,7 +383,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             (e) => e.name == val,
                             orElse: () => DialDesign.classic,
                           );
-                          ref.read(dialDesignProvider.notifier).changeDesign(selected);
+                          ref
+                              .read(dialDesignProvider.notifier)
+                              .changeDesign(selected);
                         },
                         isDark,
                         surfaceColor,
@@ -548,7 +549,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   ) {
     final Color mainColor = textColor;
     final Color iconBgColor = Theme.of(context).scaffoldBackgroundColor;
-        
+
     bool isUpdating = false;
 
     return StatefulBuilder(
@@ -634,8 +635,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           }
                           final locData =
                               await LocationService.fetchOfflineLocation(
-                                langCode,
-                              );
+                            langCode,
+                          );
                           await ref
                               .read(settingsProvider.notifier)
                               .addAndSelectLocation(
@@ -871,31 +872,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 String _themeModeLabel(BuildContext context, String mode) {
-    final isAr = context.locale.languageCode == 'ar';
-    switch (mode) {
-      case 'light':
-        final tr = 'settings.theme_light'.tr();
-        return tr != 'settings.theme_light'
-            ? tr
-            : (isAr ? 'الوضع الفاتح' : 'Light Mode');
-      case 'dark':
-        final tr = 'settings.theme_dark'.tr();
-        return tr != 'settings.theme_dark'
-            ? tr
-            : (isAr ? 'الوضع الداكن' : 'Dark Mode');
-      case 'mixed':
-        final tr = 'settings.theme_mixed'.tr();
-        return tr != 'settings.theme_mixed'
-            ? tr
-            : (isAr
-                ? 'فلكي مختلط (فاتح نهاراً / داكن ليلاً)'
-                : 'Astro Mixed (Day Light / Night Dark)');
-      case 'system':
-      default:
-        return 'settings.theme_system'.tr();
+  final isAr = context.locale.languageCode == 'ar';
+  switch (mode) {
+    case 'light':
+      final tr = 'settings.theme_light'.tr();
+      return tr != 'settings.theme_light'
+          ? tr
+          : (isAr ? 'الوضع الفاتح' : 'Light Mode');
+    case 'dark':
+      final tr = 'settings.theme_dark'.tr();
+      return tr != 'settings.theme_dark'
+          ? tr
+          : (isAr ? 'الوضع الداكن' : 'Dark Mode');
+    case 'mixed':
+      final tr = 'settings.theme_mixed'.tr();
+      return tr != 'settings.theme_mixed'
+          ? tr
+          : (isAr
+              ? 'فلكي مختلط (فاتح نهاراً / داكن ليلاً)'
+              : 'Astro Mixed (Day Light / Night Dark)');
+    case 'system':
+    default:
+      return 'settings.theme_system'.tr();
   }
 }
-
 
 class _SettingRow extends StatelessWidget {
   final BuildContext context;

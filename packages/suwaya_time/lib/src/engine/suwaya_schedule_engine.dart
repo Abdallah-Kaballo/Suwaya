@@ -27,7 +27,8 @@ class NextPrayerCountdownSnapshot {
   final PrayerKey prayerKey;
   final String prayerId;
   final DateTime prayerTime;
-  final int primaryUnits;   // سويعات (في الوضع السويعي) أو ساعات (في الوضع المدني)
+  final int
+      primaryUnits; // سويعات (في الوضع السويعي) أو ساعات (في الوضع المدني)
   final int secondaryUnits; // دقائق افتراضية أو دقائق مدنية
   final int totalRemainingSeconds;
 
@@ -108,8 +109,7 @@ class SuwayaScheduleEngine {
           final suwayaDuration =
               p.endTime.difference(p.startTime).inMicroseconds / count;
           final elapsed = dt.difference(p.startTime).inMicroseconds;
-          final sIndex =
-              (elapsed / suwayaDuration).floor().clamp(0, count - 1);
+          final sIndex = (elapsed / suwayaDuration).floor().clamp(0, count - 1);
           return (periodId: p.id, localSuwaya: sIndex + 1);
         }
       }
@@ -260,8 +260,7 @@ class SuwayaScheduleEngine {
     final totalDayMicro = dayEnd.difference(dayStart).inMicroseconds;
     if (totalDayMicro <= 0) return null;
 
-    final totalSuwayas =
-        periods.fold<int>(0, (sum, p) => sum + p.suwayasCount);
+    final totalSuwayas = periods.fold<int>(0, (sum, p) => sum + p.suwayasCount);
     final effectiveTotalSuwayas = totalSuwayas > 0 ? totalSuwayas : 24;
 
     double getAstroAngle(int globalSuwaya, int virtualMinute) {
@@ -500,11 +499,8 @@ class SuwayaTimeFormatter {
     if (days == null || days.isEmpty) return null;
     final safeLoc = _safeLocale(locale);
     final monday = DateTime.utc(2024, 1, 1);
-    final orderedDays = days
-        .toSet()
-        .where((day) => day >= 1 && day <= 7)
-        .toList()
-      ..sort();
+    final orderedDays =
+        days.toSet().where((day) => day >= 1 && day <= 7).toList()..sort();
     return orderedDays
         .map(
           (day) => DateFormat('EEE', safeLoc)

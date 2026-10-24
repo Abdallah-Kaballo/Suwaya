@@ -13,7 +13,7 @@ void main() {
       cycleStartDate: now,
       instant: now,
     );
-    
+
     expect(clockTime.periodLocalSlotNumber, 1);
   });
 }

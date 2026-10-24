@@ -4,7 +4,7 @@ import 'package:suwaya_time/suwaya_time.dart';
 void main() {
   test('AstroState returns correct virtual time string', () {
     final now = DateTime(2023, 1, 1, 12, 0);
-    
+
     final clockTime = SuwayaClockTime(
       phase: SuwayaPhase.day,
       phaseSlotNumber: 6,

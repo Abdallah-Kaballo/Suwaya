@@ -9,7 +9,9 @@ void main() {
   });
 
   group('1. Strict Monotonicity & Zero-Retrograde Torture Test', () {
-    test('Time never moves backward across 24 hours stepped minute-by-minute (even during Fall-Back DST)', () {
+    test(
+        'Time never moves backward across 24 hours stepped minute-by-minute (even during Fall-Back DST)',
+        () {
       // ليلة تأخير الساعة الشتوي في نيويورك (1 نوفمبر 2026: الساعة 01:00..01:59 تتكرر مرتين!)
       final startUtc = DateTime.utc(2026, 10, 31, 21, 50); // مغرب نيويورك
       final ctx = TemporalContextEngine.evaluate(
@@ -53,15 +55,20 @@ void main() {
     });
   });
 
-  group('2. Global Randomized Fuzz Testing (250 Random Earth Coordinates & Dates)', () {
-    test('Holds all 12 Suwaya invariants across random latitudes (-89.9°..+89.9°), longitudes, methods, and manual offsets', () {
+  group(
+      '2. Global Randomized Fuzz Testing (250 Random Earth Coordinates & Dates)',
+      () {
+    test(
+        'Holds all 12 Suwaya invariants across random latitudes (-89.9°..+89.9°), longitudes, methods, and manual offsets',
+        () {
       final rng = math.Random(20261024); // بذرة حتمية قابلة للتكرار
       const methods = CalculationMethodType.values;
       const madhabs = MadhabType.values;
       const rules = HighLatitudeRuleType.values;
 
       for (int i = 0; i < 250; i++) {
-        final lat = (rng.nextDouble() * 179.8) - 89.9; // يشمل القطب الشمالي والجنوبي
+        final lat =
+            (rng.nextDouble() * 179.8) - 89.9; // يشمل القطب الشمالي والجنوبي
         final lng = (rng.nextDouble() * 360.0) - 180.0;
         final year = 2020 + rng.nextInt(15);
         final month = 1 + rng.nextInt(12);
@@ -91,10 +98,13 @@ void main() {
         );
 
         final periods = ctx.suwayaDay.periods;
-        expect(periods.length, equals(7), reason: 'Failed at iter $i (lat=$lat, lng=$lng)');
+        expect(periods.length, equals(7),
+            reason: 'Failed at iter $i (lat=$lat, lng=$lng)');
 
-        final nightSum = periods.take(4).fold<int>(0, (s, p) => s + p.suwayasCount);
-        final daySum = periods.skip(4).fold<int>(0, (s, p) => s + p.suwayasCount);
+        final nightSum =
+            periods.take(4).fold<int>(0, (s, p) => s + p.suwayasCount);
+        final daySum =
+            periods.skip(4).fold<int>(0, (s, p) => s + p.suwayasCount);
         expect(nightSum, equals(12));
         expect(daySum, equals(12));
 
@@ -107,7 +117,9 @@ void main() {
   });
 
   group('3. Dynamic Proportional Allocation & 47-Bit Binary Codec Tests', () {
-    test('DynamicProportional mode always sums to 12 Night (5+6+1) and 12 Day Suwayas', () {
+    test(
+        'DynamicProportional mode always sums to 12 Night (5+6+1) and 12 Day Suwayas',
+        () {
       final anchors = PrayerCalculator.getCycleAnchors(
         51.5074,
         -0.1278, // لندن في الانقلاب الصيفي (نهار طويل جداً وليل قصير)
@@ -134,7 +146,9 @@ void main() {
       expect(dynamicDist.every((count) => count >= 1), isTrue);
     });
 
-    test('SuwayaBinaryCodec packs and unpacks 47-bit integers and parses ISO-Suwaya strings losslessly', () {
+    test(
+        'SuwayaBinaryCodec packs and unpacks 47-bit integers and parses ISO-Suwaya strings losslessly',
+        () {
       const original = SuwayaCoordinate(
         globalSlotIndex: 15,
         phase: SuwayaPhase.day,
