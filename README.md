@@ -5,9 +5,9 @@
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
 [![Languages](https://img.shields.io/badge/languages-22-green)](assets/translations/)
 
-Suwaya is an open-source Astro-Productivity Flutter application that organizes your day around astronomical events and prayer times[cite: 3]. It replaces rigid civil clock hours with a dynamic **24-Suwaya Maghrib-to-Maghrib virtual time model** (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes)[cite: 1, 3]. 
+Suwaya is an open-source Astro-Productivity Flutter application that organizes your day around astronomical events and prayer times. It replaces rigid civil clock hours with a dynamic **24-Suwaya Maghrib-to-Maghrib virtual time model** (12 Night Suwayas and 12 Day Suwayas, each representing 60 virtual minutes). 
 
-The app unifies casual tasks, continuous habits, routines, a dual-mode Pomodoro focus timer, an interactive Hijri calendar with seasonal fasting recommendations, offline geolocation, and full-screen lockscreen alarms[cite: 1, 2, 3]. It operates strictly **local-first** with absolute privacy, utilizing on-device databases (Isar Community & SQLite) without requiring user authentication or a cloud backend[cite: 1, 3].
+The app unifies casual tasks, continuous habits, routines, a dual-mode Pomodoro focus timer, an interactive Hijri calendar with seasonal fasting recommendations, offline geolocation, and full-screen lockscreen alarms. It operates strictly **local-first** with absolute privacy, utilizing on-device databases (Isar Community & SQLite) without requiring user authentication or a cloud backend.
 
 ## Contents
 
@@ -24,7 +24,7 @@ The app unifies casual tasks, continuous habits, routines, a dual-mode Pomodoro 
 
 ## Overview
 
-Civil time treats every clock hour as equal[cite: 3]. Suwaya adds an astronomical layer based on the actual sun movement at your selected location[cite: 3]:
+Civil time treats every clock hour as equal. Suwaya adds an astronomical layer based on the actual sun movement at your selected location:
 
 ```text
 Location + Date + Calculation Settings
@@ -73,7 +73,7 @@ For a deep dive into the mathematical and astronomical specifications of the V2 
 * **Hijri Calendar & Fasting:** A built-in dual calendar (Civil & Hijri) highlighting seasonal fasting recommendations like Arafah, Ashura, and the White Days.
 * **Smart Task Management:** Three distinct modes:
 * *Casual Tasks:* One-time events.
-* *Continuous Habits:* Recurring actions with streak tracking and streak-freeze protection[cite: 1, 2].
+* *Continuous Habits:* Recurring actions with streak tracking and streak-freeze protection.
 * *Routines:* Time blocks (e.g., work, reading) rendered as patterned colored arcs directly on the Astro Dial.
 
 
@@ -122,15 +122,15 @@ For a detailed breakdown of the application structure, startup sequence, and dep
 ```text
 lib/
 ├── main.dart
-├── core/               # App bootstrap, Database, Theme, Notifications, Router, Repositories[cite: 1, 3]
-├── features/           # Home, Ibadat, Tasks, Calendar, Pomodoro, Settings, Alarm[cite: 1, 3]
-├── models/             # Isar persistent models & generated adapters[cite: 3]
-└── shared/widgets/     # Reusable UI components (AppDrawer, SuwayaTimeText, etc.)[cite: 3]
-packages/suwaya_time/   # Pure Dart astronomical engine package[cite: 3]
+├── core/               # App bootstrap, Database, Theme, Notifications, Router, Repositories
+├── features/           # Home, Ibadat, Tasks, Calendar, Pomodoro, Settings, Alarm
+├── models/             # Isar persistent models & generated adapters
+└── shared/widgets/     # Reusable UI components (AppDrawer, SuwayaTimeText, etc.)
+packages/suwaya_time/   # Pure Dart astronomical engine package
 assets/
 ├── db/                 # Bundled SQLite databases (Cities_V2.db)
 ├── icons/              # App icons and dial graphical assets
-└── translations/       # 22 language JSON files[cite: 3]
+└── translations/       # 22 language JSON files
 
 ```
 

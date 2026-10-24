@@ -1,293 +1,404 @@
-# Suwaya Time
+# Suwaya Time Engine (`packages/suwaya_time`)
 
-A comprehensive reference for Suwaya's astronomical time system (Schedule Model V2) and the pure Dart `packages/suwaya_time` package[cite: 3]. This package transforms continuously changing solar events and prayer timings into a highly structured 24-Suwaya virtual day, perfectly divided into 12 Night Suwayas and 12 Day Suwayas[cite: 1, 3].
+A comprehensive architectural and mathematical specification for Suwaya's astronomical temporal kernel (**Schedule Model V2 / Solid Core**). The `packages/suwaya_time` package is a 100% pure Dart temporal engine that transforms solar events, prayer timings, and regional calendars into a deterministic 24-Suwaya virtual day (12 Night Suwayas and 12 Day Suwayas), designed to power mobile applications, wearables, calendar integrations, and cloud/edge APIs.
 
-> **Note:** This document describes the V2 behavior implemented in the current codebase (`scheduleModelVersion = 2`)[cite: 1, 3].
+> **Model Version:** `scheduleModelVersion = 2` (Kernel Architecture v2.1)
 
-## 1. Core Concept
+## Contents
 
-Civil time measures the day with fixed 60-minute clock hours starting at midnight[cite: 3]. Suwaya shifts the paradigm by starting from the astronomical and Islamic cycle—where the night precedes the day (**Maghrib to the following Maghrib**)—and dividing this cycle into meaningful periods anchored by prayer times and solar events[cite: 1, 3]:
+ 1. [Core Philosophy & Temporal Model](#1-core-philosophy--temporal-model)
 
-```text
-Location + Date + Calculation Settings
-                 |
-                 v
-   Prayer and Solar Event Timings (via Adhan)
-                 |
-                 v
-   From Active Maghrib to Next Maghrib
-                 |
-                 v
-   Seven Contiguous Astronomical Periods
- (4 Night Periods = 12 Suwayas | 3 Day Periods = 12 Suwayas)
-                 |
-                 v
- Current Period, SuwayaClockTime, and Virtual Flow Speed
+ 2. [Four-Layer Kernel Architecture](#2-four-layer-kernel-architecture)
+
+ 3. [Strict Temporal Primitives (`temporal_primitives.dart`)](#3-strict-temporal-primitives-temporal_primitivesdart)
+
+ 4. [Astronomical & Calendar Inputs](#4-astronomical--calendar-inputs)
+
+ 5. [The Seven Astronomical Periods & Allocation Modes](#5-the-seven-astronomical-periods--allocation-modes)
+
+ 6. [Second-Half Night Division (`NightPart` — Qiyam Parts)](#6-second-half-night-division-nightpart--qiyam-parts)
+
+ 7. [Bi-Directional Coordinate Mapping (`SuwayaCoordinateMapper`)](#7-bi-directional-coordinate-mapping-suwayacoordinatemapper)
+
+ 8. [Polar Resilience & Topocentric Elevation (`PolarCycleSynthesizer`)](#8-polar-resilience--topocentric-elevation-polarcyclesynthesizer)
+
+ 9. [Unified Temporal Context & \$O(1)$ Caching (`TemporalContextEngine`)](#9-unified-temporal-context--o1-caching-temporalcontextengine)
+
+10. [Islamic Seasonal & Fasting Catalog (`IslamicEventsCatalog`)](#10-islamic-seasonal--fasting-catalog-islamiceventscatalog)
+
+11. [Suwaya Flow & Focus Planner (`SuwayaFlowPlanner`)](#11-suwaya-flow--focus-planner-suwayaflowplanner)
+
+12. [Multi-Day Recurrence & Collision Resolution (`SuwayaRecurrenceEngine`)](#12-multi-day-recurrence--collision-resolution-suwayarecurrenceengine)
+
+13. [47-Bit Binary Codec & ISO-Suwaya Grammar (`SuwayaBinaryCodec`)](#13-47-bit-binary-codec--iso-suwaya-grammar-suwayabinarycodec)
+
+14. [RFC 5545 iCalendar Exporter (`SuwayaIcsExporter`)](#14-rfc-5545-icalendar-exporter-suwayaicsexporter)
+
+15. [Flutter Runtime Adapter & Adaptive Virtual-Second Ticker](#15-flutter-runtime-adapter--adaptive-virtual-second-ticker)
+
+16. [Mathematical Invariants & Torture Test Matrix](#16-mathematical-invariants--torture-test-matrix)
+
+## 1. Core Philosophy & Temporal Model
+
+Civil time divides the solar day into 24 fixed 60-minute hours anchored at midnight (`00:00`). Suwaya models the natural astronomical and Islamic cycle—where night precedes day (**Maghrib to the following Maghrib**)—and divides it into 7 contiguous periods anchored by solar and prayer events:
+
+```
+Geographic Coordinates + Instant (UTC) + Calculation Parameters
+                               |
+                               v
+     True UTC Solar & Prayer Anchors (DST-Immune Instants)
+                               |
+                               v
+          Active Maghrib-to-Maghrib Astronomical Cycle
+                               |
+                               v
+        7 Contiguous Periods (4 Night Periods | 3 Day Periods)
+                               |
+                               v
+   24 Virtual Suwayas (12 Night Suwayas | 12 Day Suwayas)
+   Each Suwaya = 60 Virtual Minutes = 3,600 Virtual Seconds
 
 ```
 
-A Suwaya does not consist of a fixed 60 real-world minutes. Instead, **each Suwaya represents exactly 60 virtual minutes (3,600 virtual seconds)**. Its *real* duration expands and contracts according to the physical length of the astronomical period that contains it.
+### Fundamental Definitions
 
-**Key Invariants:**
+* **Astronomical Cycle:** Runs from active Maghrib (`cycleStartMaghribUtc`) to the next day's Maghrib (`cycleEndMaghribUtc`).
 
-* A complete astronomical cycle runs from **Maghrib to the next Maghrib** (`cycleEndMaghrib`).
+* **Suwaya (سُويعَة):** A flexible astronomical hour representing exactly **60 virtual minutes** ($3600$ virtual seconds). Its physical duration expands and contracts according to the real duration of the period containing it.
 
+* **Two 12-Suwaya Phases:**
 
-* A complete cycle contains exactly **24 Suwayas**.
+  * **Night Phase (`SuwayaPhase.night`):** Spans from Maghrib to Sunrise. Contains **12 Suwayas** numbered `01` to `12` (`🌑` / `ل` / `N`), corresponding to global indices `0..11`.
 
+  * **Day Phase (`SuwayaPhase.day`):** Spans from Sunrise to the next Maghrib. Contains **12 Suwayas** numbered `01` to `12` (`☀️` / `ن` / `D`), corresponding to global indices `12..23`.
 
-* **Night Phase (`SuwayaPhase.night`):** 12 Suwayas (from Maghrib to Sunrise), numbered `01` to `12` (`🌑` / `ل` / `N`).
+* **Total Virtual Day:**
+  
 
+  $$
+  24 \text{ Suwayas} \times 60 \text{ Virtual Minutes} = 1440 \text{ Virtual Minutes} = 86400 \text{ Virtual Seconds}
+  $$
 
-* **Day Phase (`SuwayaPhase.day`):** 12 Suwayas (from Sunrise to next Maghrib), numbered `01` to `12` (`☀️` / `ن` / `D`).
+* **Flow Speed (`timeSpeedMultiplier` / `flowSpeed`):** The ratio of virtual seconds to physical seconds within a given period:
+  
 
+  $$
+  \text{Flow Speed} = \frac{3600}{\text{Actual Suwaya Duration in Physical Seconds}}
+  $$
 
+## 2. Four-Layer Kernel Architecture
 
+The `packages/suwaya_time` package is organized into four pure-Dart layers with zero dependencies on Flutter, Riverpod, `BuildContext`, or platform channels:
 
-* A complete virtual day always equals `24 × 60 = 1,440 virtual minutes`.
-
-
-* Global Suwaya indices run from `0` to `23` (`0..11` for Night, `12..23` for Day).
-
-
-* The speed of virtual time (`timeSpeedMultiplier` / `flowSpeed`) dynamically accelerates or decelerates from one period to another.
-
-
-
-## 2. Package Components
-
-The domain logic is strictly isolated in `packages/suwaya_time/lib/`:
-
-```text
+```
 packages/suwaya_time/lib/
-├── suwaya_time.dart
+├── suwaya_time.dart                       # Public barrel export
 └── src/
-    ├── calculators/
-    │   ├── prayer_calculator.dart
-    │   └── night_division.dart
-    ├── engine/
-    │   ├── suwaya_time_engine.dart
-    │   └── temporal_context_engine.dart
-    ├── generators/
-    │   ├── period_generator.dart
-    │   └── suwaya_distributor.dart
-    └── models/
-        └── astro_models.dart
+    ├── models/                            # Layer 1: Strict Primitives & Domain Models
+    │   ├── temporal_primitives.dart       # InstantUtc, ZonedWallTime, SuwayaCoordinate
+    │   └── astro_models.dart              # SuwayaDay, AstroPeriod, IbadatTimings, AstroState
+    ├── calculators/                       # Layer 2: Ephemeris, Polar & Seasonal Calculators
+    │   ├── prayer_calculator.dart         # 14 calculation methods, manual offsets, UTC anchors
+    │   ├── polar_cycle_synthesizer.dart   # High-latitude (> 65 deg) cycle synthesis
+    │   ├── night_division.dart            # 5 canonical second-half Qiyam subdivisions
+    │   └── islamic_events_catalog.dart    # White Days, Arafah, Ashura, Tasu'a & Tashreeq rules
+    ├── generators/                        # Layer 2: Period & Slot Generators
+    │   ├── suwaya_distributor.dart        # Canonical Madhab & Dynamic Proportional allocation
+    │   └── period_generator.dart          # Contiguous 7-period builder
+    └── engine/                            # Layer 3 & 4: Context, Mapping, Flow, RRule & Codecs
+        ├── suwaya_time_engine.dart        # Cycle generation & state calculation
+        ├── temporal_context_engine.dart   # Unified civil/Islamic context & O(1) LRU cache
+        ├── suwaya_coordinate_mapper.dart  # Bi-directional microsecond coordinate resolution
+        ├── suwaya_flow_planner.dart       # Suwaya Pomodoro flow calculator & live evaluator
+        ├── suwaya_recurrence_engine.dart  # Multi-day window planner & collision resolver
+        ├── suwaya_binary_codec.dart       # 47-bit integer packing & ISO-Suwaya parser
+        ├── suwaya_ics_exporter.dart       # RFC 5545 iCalendar (.ics) generator
+        └── suwaya_live_clock.dart         # Pure Dart reactive virtual-second stream
 
 ```
 
-The package is **pure Dart**. It has zero dependencies on Flutter, Riverpod, `BuildContext`, localization, or platform channels, ensuring calculations are universally testable and stable. Prayer calculations are powered by the robust `adhan` package.
+## 3. Strict Temporal Primitives (`temporal_primitives.dart`)
 
-## 3. Calculation Inputs
+To prevent wall-clock vs. UTC ambiguity across Daylight Saving Time (DST) transitions, the kernel defines three immutable value objects:
 
-The engine generates an astronomical day based on the following precise inputs:
+### 3.1 `InstantUtc`
 
-| Input | Type | Description |
-| --- | --- | --- |
-| `lat` | `double` | Latitude in degrees
+Wraps `int epochMicroseconds` in UTC. Guarantees that all physical duration calculations ($\Delta t = t_2 - t_1$) are immune to local clock shifts.
 
- |
-| `lng` | `double` | Longitude in degrees
+### 3.2 `ZonedWallTime`
 
- |
-| `date` | `DateTime` | Anchor date for the Maghrib-to-Maghrib cycle
+Pairs an `InstantUtc instant` with its resolved `Duration utcOffset`, `String? timezoneId`, and `bool isDaylightSavingTime`. Exposes local calendar getters (`year`, `month`, `day`, `hour`, `minute`, `second`, `weekday`) via `wallClockProjection` while computing `realDifference(other)` strictly in UTC microseconds.
 
- |
-| `methodType` | `CalculationMethodType` | Prayer-time calculation method (e.g., MWL, Umm Al-Qura)
+### 3.3 `SuwayaCoordinate`
 
- |
-| `madhabType` | `MadhabType` | Asr shadow calculation school (`shafi` or `hanafi`)
+A complete, self-contained address in Suwaya time:
 
- |
-| `highLatRuleType` | `HighLatitudeRuleType` | High-latitude adjustment rule
+* `globalSlotIndex`: `0..23` (`0..11` Night, `12..23` Day).
 
- |
-| `customFajr` / `customIsha` | `double` | Custom angles when the `custom` method is selected
+* `phase`: `SuwayaPhase.night` or `SuwayaPhase.day`.
 
- |
-| `cityOffset` | `Duration` | Timezone offset applied to UTC `adhan` results
+* `phaseSlotNumber`: `1..12`.
 
- |
-| `manualOffsets` | `Map<PrayerKey, int>?` | Manual minute adjustments (`-30` to `+30`) per prayer
+* `periodId`: `1..7` and `periodKey`: `PeriodKey`.
 
- |
+* `periodLocalSlotNumber`: `1..suwayasCount`.
 
-## 4. The Seven Astronomical Periods (Maghrib-to-Maghrib)
+* `virtualMinute`: `0..59` and `virtualSecond`: `0..59`.
 
-`PeriodGenerator` divides the Maghrib-to-Maghrib cycle into **7 contiguous periods** (`id` 1 to 7) identified by their `PeriodKey`:
+* `slotProgress`: $0.0 \le p < 1.0$.
 
-| ID | `PeriodKey` | Phase | Start Boundary | End Boundary | Suwayas | Global Indices (`0..23`) |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | `nightMaghribIsha` | Night 🌑 | Maghrib | Isha | Shared with Period 2 (Total = 5) | Starts at `0` (`01 🌑`)
+* `totalVirtualMinutes`: `0..1439` and `totalVirtualSeconds`: `0..86399`.
 
- |
-| 2 | `nightIshaMidnight` | Night 🌑 | Isha | Astronomical Midnight | Shared with Period 1 (Total = 5) | Ends at `4` (`05 🌑`)
+## 4. Astronomical & Calendar Inputs
 
- |
-| 3 | `nightMidnightFajr` | Night 🌑 | Astronomical Midnight | Fajr | **6** (Fixed) | `5 .. 10` (`06..11 🌑`)
+### 4.1 Calculation Methods (`CalculationMethodType`)
 
- |
-| 4 | `nightFajrSunrise` | Night 🌑 | Fajr | Sunrise | **1** (Fixed) | `11` (`12 🌑`)
+Supports 14 international standards:
+`muslimWorldLeague`, `egyptian`, `karachi`, `ummAlQura`, `dubai`, `northAmerica`, `kuwait`, `qatar`, `singapore`, `tehran`, `turkey`, `franceUoif` ($12^\circ / 12^\circ$), `russia` ($16^\circ / 15^\circ$), and `custom` (configurable Fajr and Isha depression angles between $10.0^\circ$ and $20.0^\circ$).
 
- |
-| 5 | `daySunriseDhuhr` | Day ☀️ | Sunrise | Dhuhr | Dynamic Allocation | Starts at `12` (`01 ☀️`)
+### 4.2 Madhab (`MadhabType`) & High-Latitude Rules (`HighLatitudeRuleType`)
 
- |
-| 6 | `dayDhuhrAsr` | Day ☀️ | Dhuhr | Asr | Dynamic Allocation | Follows Period 5
+* **Madhab:** `shafi` (standard shadow factor $1$) and `hanafi` (shadow factor $2$, later Asr).
 
- |
-| 7 | `dayAsrMaghrib` | Day ☀️ | Asr | Next Maghrib | Dynamic Allocation | Ends at `23` (`12 ☀️`)
+* **High-Latitude Rules:** `middleOfTheNight`, `seventhOfTheNight`, and `twilightAngle`.
 
- |
+### 4.3 Manual Prayer Offsets & Sunrise Protection
 
-## 5. Second-Half Night Division (Qiyam Parts)
+Manual offsets are supplied via `Map<PrayerKey, int>` and clamped to:
 
-Because the first half of the night (Maghrib to Midnight) is managed by Period 1 and Period 2, `NightDivision` focuses exclusively on dividing **Period 3 (Astronomical Midnight to Fajr, spanning 6 Suwayas)** into the 5 canonical Qiyam parts:
+$$
+-30 \text{ minutes} \le \text{offset} \le +30 \text{ minutes}
+$$
 
-| ID | Name Key / Concept | Duration in Suwayas | Suwaya Start | Suwaya End |
-| --- | --- | --- | --- | --- |
-| `half_2` | Second Half of the Night | **6 Suwayas** | `06 | 00 🌑` |
-| `third_3` | Last Third of the Night | **4 Suwayas** | `08 | 00 🌑` |
-| `sixth_4` | Fourth Sixth of the Night | **2 Suwayas** | `06 | 00 🌑` |
-| `sixth_5` | Fifth Sixth of the Night | **2 Suwayas** | `08 | 00 🌑` |
-| `sixth_6` | Sixth Sixth of the Night | **2 Suwayas** | `10 | 00 🌑` |
+* Manual offsets **never** apply to `PrayerKey.sunrise`.
 
-**Smart Conflict Resolution:** The application enforces mutual exclusivity when displaying dial markers. Selecting `third_3` (4 Suwayas) automatically deselects the smaller subdivisions `sixth_5` and `sixth_6` to prevent visual overlapping on the Astrolabe Dial.
+* **Crucial Distinction:** `IbadatTimings` and `SuwayaCycleAnchors` preserve both the user-adjusted Maghrib (`maghrib`) and the pure astronomical sunset (`calculatedSunset` / `calculatedStartSunsetUtc`). The Hijri date transitions at pure astronomical sunset regardless of manual Adhan offsets.
 
-## 6. Real Suwaya Duration and Flow Speed (`PeriodMetrics`)
+## 5. The Seven Astronomical Periods & Allocation Modes
 
-For any `AstroPeriod` with a real physical duration `period.totalDuration` and `suwayasCount = n`:
+`PeriodGenerator` divides the Maghrib-to-Maghrib cycle into **7 contiguous periods** (`id` 1 to 7):
 
-```text
-actualSuwayaDuration = period.totalDuration / n
+| ID | `PeriodKey` | Phase | Name Key | Start Anchor | End Anchor | Canonical Shafi | Canonical Hanafi | Dynamic Proportional Mode | 
+| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | 
+| 1 | `nightMaghribIsha` | Night (`🌑`) | `periods.maghrib` | Maghrib | Isha | `1` (`01 🌑`) | `1` (`01 🌑`) | Shared with Period 2 (Sum = 5, $\min = 1$) | 
+| 2 | `nightIshaMidnight` | Night (`🌑`) | `periods.isha` | Isha | Shar'i Midnight | `4` (`02..05 🌑`) | `4` (`02..05 🌑`) | Shared with Period 1 (Sum = 5, $\min = 1$) | 
+| 3 | `nightMidnightFajr` | Night (`🌑`) | `periods.qiyam` | Shar'i Midnight | Fajr | **6** (`06..11 🌑`) | **6** (`06..11 🌑`) | **6** (Fixed: `06..11 🌑`) | 
+| 4 | `nightFajrSunrise` | Night (`🌑`) | `periods.fajr` | Fajr | Sunrise | **1** (`12 🌑`) | **1** (`12 🌑`) | **1** (Fixed: `12 🌑`) | 
+| 5 | `daySunriseDhuhr` | Day (`☀️`) | `periods.duha` | Sunrise | Dhuhr | `6` (`01..06 ☀️`) | `6` (`01..06 ☀️`) | Shared across 5, 6, 7 (Sum = 12, $\min = 1$) | 
+| 6 | `dayDhuhrAsr` | Day (`☀️`) | `periods.dhuhr` | Dhuhr | Asr | `3` (`07..09 ☀️`) | `4` (`07..10 ☀️`) | Shared across 5, 6, 7 (Sum = 12, $\min = 1$) | 
+| 7 | `dayAsrMaghrib` | Day (`☀️`) | `periods.asr` | Asr | Next Maghrib | `3` (`10..12 ☀️`) | `2` (`11..12 ☀️`) | Shared across 5, 6, 7 (Sum = 12, $\min = 1$) | 
+
+### Allocation Modes (`SuwayaDistributionMode`)
+
+`SuwayaDistributor.resolveDistribution` supports two mathematical allocation strategies:
+
+1. **`SuwayaDistributionMode.canonicalMadhab` (Default):** Uses the fixed jurisprudential distributions (`[1, 4, 6, 1, 6, 3, 3]` for Jumhur/Shafi and `[1, 4, 6, 1, 6, 4, 2]` for Hanafi) so prayer boundaries always map to predictable Suwaya numbers year-round.
+
+2. **`SuwayaDistributionMode.dynamicProportional`:** Uses Hamilton's Largest Remainder method (`_allocateProportional`) to distribute the 5 first-half night Suwayas across Periods 1 & 2 and the 12 day Suwayas across Periods 5, 6, & 7 according to their exact physical UTC durations on that date, while keeping Period 3 fixed at 6 Suwayas and Period 4 fixed at 1 Suwaya.
+
+## 6. Second-Half Night Division (`NightPart` — Qiyam Parts)
+
+`NightDivision.calculateNightParts` computes the **5 canonical Qiyam subdivisions** within the second half of the night (**Period 3: Shar'i Midnight to Fajr**, spanning 6 Night Suwayas `06|00 🌑` to `11|59 🌑`) using true UTC microsecond spans:
+
+| ID | Localization Key | Duration in Suwayas | Suwaya Start | Suwaya End | Global Indices | 
+| ----- | ----- | ----- | ----- | ----- | ----- | 
+| `half_2` | `night_parts.half_2` | **6 Suwayas** | \`06 | 00 🌑\` | \`11 | 
+| `third_3` | `night_parts.third_3` | **4 Suwayas** | \`08 | 00 🌑\` | \`11 | 
+| `sixth_4` | `night_parts.sixth_4` | **2 Suwayas** | \`06 | 00 🌑\` | \`07 | 
+| `sixth_5` | `night_parts.sixth_5` | **2 Suwayas** | \`08 | 00 🌑\` | \`09 | 
+| `sixth_6` | `night_parts.sixth_6` | **2 Suwayas** | \`10 | 00 🌑\` | \`11 | 
+
+## 7. Bi-Directional Coordinate Mapping (`SuwayaCoordinateMapper`)
+
+`SuwayaCoordinateMapper` centralizes all forward and reverse conversions between physical time and Suwaya coordinates, guaranteeing **Round-Trip Microsecond Identity**:
+
+$$
+\text{instantToCoordinate}\big(\text{coordinateToInstant}(G, M, S)\big) = (G, M, S)
+$$
+
+### Key Operations
+
+* **Forward Resolution (`instantToCoordinate`):**
+  Given a `SuwayaDay` and an instant (`nowUtc`), computes the exact `SuwayaCoordinate` using 64-bit integer microsecond math:
+  
+
+  $$
+  \text{currentVirtualSecond} = \left\lfloor \frac{\text{elapsedMicro} \times (\text{suwayasCount} \times 3600)}{\text{periodMicro}} \right\rfloor
+  $$
+
+* **Reverse Resolution (`coordinateToInstant` & `periodSlotToInstant`):**
+  Resolves any `(globalSlotIndex, virtualMinute, virtualSecond)` or `(period, localSuwaya, virtualMinute, virtualSecond)` to its exact `instantUtc` and local `wallTime` using ceiling integer division:
+  
+
+  $$
+  \text{offsetMicro} = \left\lfloor \frac{\text{periodMicro} \times \text{requestedVirtualSeconds} + \text{totalVirtualSeconds} - 1}{\text{totalVirtualSeconds}} \right\rfloor
+  $$
+
+* **Slot Normalization:**
+
+  * `globalToLocal(globalSlotIndex, periods)` $\leftrightarrow$ `localToGlobal(periodId, localSuwaya, periods)`
+
+  * `uiPhaseToGlobal(uiHour, isNight)` $\leftrightarrow$ `globalToUiPhase(globalSlotIndex)`
+
+  * `fixedBoundaryCoordinate(identifier, periods, isEnd: ...)`
+
+  * `formatParts(...)` and `formatString(...)`
+
+## 8. Polar Resilience & Topocentric Elevation (`PolarCycleSynthesizer`)
+
+### 8.1 Extreme High-Latitude Synthesis ($\vert{}\text{lat}\vert{} > 65^\circ$)
+
+In polar regions (such as Tromsø, Norway at $69.65^\circ\text{N}$ or extreme southern latitudes) during summer midnight sun or winter polar night, standard solar depression angles may fail to intersect the horizon or produce inverted timestamps.
+
+`PrayerCalculator.getCycleAnchors` automatically passes raw anchors through `PolarCycleSynthesizer.ensureValidAnchors`:
+
+1. Verifies `isValidSequence` and checks that the total cycle span falls within $20\text{h} \le \Delta t \le 28\text{h}$.
+
+2. **`PolarResolutionPolicy.nearestLatitude45` (Default):** Projects solar timings from the nearest temperate parallel ($\pm 45.0^\circ$ latitude) at the same longitude and IANA timezone.
+
+3. **`PolarResolutionPolicy.equinoxProportional` (Fallback):** Synthesizes a balanced 24-hour cycle anchored at local 18:00 so `PeriodGenerator` never throws an exception and always produces 7 valid periods and 24 Suwayas.
+
+### 8.2 Topocentric Elevation Dip (`TimezoneResolver.elevationDipTimeAdjustment`)
+
+For high-altitude cities, horizon dip is calculated as:
+
+$$
+\Delta \theta \approx 0.0347^\circ \times \sqrt{h_{\text{meters}}}
+$$
+
+
+translating to earlier sunrise and later astronomical sunset proportional to $\frac{4.0 \times \Delta \theta}{\cos(\text{lat})}$.
+
+## 9. Unified Temporal Context & $O(1)$ Caching (`TemporalContextEngine`)
+
+`TemporalContextEngine.evaluate` is the single entry point for evaluating any moment in time:
+
+```
+final context = TemporalContextEngine.evaluate(
+  instantUtc: DateTime.now().toUtc(),
+  latitude: 21.4225,
+  longitude: 39.8262,
+  timezoneId: 'Asia/Riyadh',
+  methodType: CalculationMethodType.ummAlQura,
+  madhabType: MadhabType.shafi,
+  hijriAdjustmentDays: 0,
+);
 
 ```
 
-Because 1 Suwaya equals exactly **60 virtual minutes (3,600 virtual seconds)**, the virtual time flow speed is calculated as:
+### Dual Date Separation
 
-```text
-flowSpeed = 3600 / actualSuwayaDurationInSeconds
+`SuwayaTemporalContext` simultaneously resolves two distinct logical dates:
 
-```
+1. **`civilDate` & `civilWeekday`:** Advances at local midnight (`00:00`). Used for civil tasks, civil routines, and `civilDayIbadat` (displaying today's 5 prayers on the Ibadat screen even before Maghrib).
 
-* **`flowSpeed == 1.00x`**: 1 Suwaya lasts 60 real minutes. Virtual and civil time move at the exact same pace.
+2. **`islamicLogicalGregorianDate`, `islamicWeekday`, & `hijriDate`:** Advances at **astronomical sunset** (`calculatedSunset`) and **does not** double-advance at `00:00` midnight.
 
+### Built-In Multi-City LRU Cache
 
-* **`flowSpeed > 1.00x`**: The real Suwaya is shorter than 60 real minutes. Virtual time flows *faster* than civil time.
+* `TimezoneResolver` maintains a 32-entry LRU cache of resolved IANA `tz.Location` objects.
 
+* `TemporalContextEngine` maintains a 24-entry LRU cache for `SuwayaDay` cycles and `IbadatTimings`, turning repeated evaluations for the same day/location into sub-microsecond $O(1)$ lookups.
 
-* **`flowSpeed < 1.00x`**: The real Suwaya is longer than 60 real minutes. Virtual time flows *slower* than civil time.
+## 10. Islamic Seasonal & Fasting Catalog (`IslamicEventsCatalog`)
 
+`IslamicEventsCatalog.evaluateFastingForHijri` provides pure-domain evaluation of voluntary and seasonal fasting days:
 
+* **Day of Arafah:** 9 Dhu al-Hijjah (`IslamicFastingType.arafah`).
 
-## 7. Flutter Runtime Adapter (`AstroNotifier`)
+* **Day of Ashura & Tasu'a:** 10 & 9 Muharram (`IslamicFastingType.ashura`, `IslamicFastingType.tasua`).
 
-Located at `lib/core/astro_engine/astro_provider.dart`, `AstroNotifier` securely bridges the pure `SuwayaTimeEngine` with Flutter's reactive ecosystem:
+* **White Days (الأيام البيض):** 13, 14, and 15 of every Hijri month (`IslamicFastingType.whiteDays`), while **strictly excluding** Ramadan (month 9) and the 13th of Dhu al-Hijjah (the 3rd day of Tashreeq, when voluntary fasting is prohibited).
 
-1. **Settings Fingerprint:** Re-evaluates only when core location, calculation, or timezone parameters change.
+## 11. Suwaya Flow & Focus Planner (`SuwayaFlowPlanner`)
 
+`SuwayaFlowPlanner` powers **Suwaya Pomodoro** sessions synchronized with prayer boundaries:
 
-2. **Dual-Timer Architecture:**
-* **Smart State Timer (`_stateTimer`):** Goes to sleep and wakes up exactly at the microsecond of the next Suwaya boundary. It minimizes rebuilds by only notifying listeners when `currentPeriod.id` or `periodLocalSlotNumber` physically changes.
+1. **`calculateFlowOptions(startTime, endTime)`:**
+   Given an anchored start time and a target end time (e.g., the next mandatory prayer resolved via `resolveNextCyclePrayer`), finds all integer Pomodoro counts $N \in [1, 48]$ (each consisting of $25$ virtual work minutes + $5$ virtual break minutes = $1800$ virtual seconds) whose required flow speed $v$ satisfies:
+   
 
+   $$
+   v = \frac{N \times 1800}{\Delta t_{\text{actualSeconds}}} \in [0.50\text{x}, 2.00\text{x}]
+   $$
 
-* **1-Second UI Ticker (`_uiTimer`):** A lightweight 250ms periodic ticker that drives the `virtualDateTimeNotifier` and `virtualTimeNotifier`. This allows the `PremiumAstroDial` needles and digital clocks to animate smoothly at 60fps without causing heavy widget tree rebuilds.
+   
+   Returns up to 3 options ordered with the speed closest to $1.00\text{x}$ first (`tag: 'recommended'`), followed by `'slower'` ($N - 1$) and `'faster'` ($N + 1$).
 
+2. **`evaluateLiveSession(...)`:**
+   Computes the real-time `SuwayaFlowLiveSnapshot` (current cycle, work vs. break phase, remaining virtual seconds, progress ratios, and the 120-second `isPrePrayerWarningActive` flag) directly from UTC timestamps.
 
+## 12. Multi-Day Recurrence & Collision Resolution (`SuwayaRecurrenceEngine`)
 
+`SuwayaRecurrenceEngine` provides background-isolate-ready scheduling primitives:
 
+* **`generateMultiDayWindows(...)`:** Generates an 8-day rolling window (`dayOffset` from `-1` to `+6`) of `SuwayaScheduledDayWindow` objects with full DST transition awareness.
 
-```
+* **`stableNightPartCode(nightPartId)`:** Maps canonical Qiyam IDs (`half_2`, `third_3`, `sixth_4`, `sixth_5`, `sixth_6`) to deterministic integer codes (`12`, `23`, `34`, `35`, `36`), avoiding non-deterministic `String.hashCode` across isolates and app restarts.
 
----
+* **`resolveCollisionSafeTime(desiredTime, occupiedEpochSeconds)`:** Guarantees that mandatory Adhan alerts fire at $+0\text{s}$ while staggering any coinciding routine or task alerts by $+2\text{s}$ increments (capped at $+30\text{s}$).
 
-### 2. ملف `docs/privacy.md`
+## 13. 47-Bit Binary Codec & ISO-Suwaya Grammar (`SuwayaBinaryCodec`)
 
-```markdown
-# Privacy Policy for Suwaya (سُويعَة)
+For high-performance database indexing, WebAssembly/JavaScript interoperability (within IEEE 754's 53-bit safe integer limit), and REST APIs, `SuwayaBinaryCodec` provides:
 
-**Last updated: October 2026**
+### 13.1 47-Bit Integer Packing (`pack` / `unpack`)
 
-Abdallah Kaballo ("we", "our", or "us") develops and maintains Suwaya, an open-source Flutter application for astronomical prayer times, virtual Suwaya time, tasks, routines, and focus sessions. This policy explains what information the current version of the application accesses, how it is used, and where it is stored[cite: 6].
+Packs a complete Hijri date and `SuwayaCoordinate` into a single 47-bit integer that preserves chronological sort order (`a < b`):
 
-## 1. Scope and Current Data Model
+| Bits | Width | Field | Range | 
+| ----- | ----- | ----- | ----- | 
+| `0..5` | 6 bits | `virtualSecond` | `0..59` | 
+| `6..11` | 6 bits | `virtualMinute` | `0..59` | 
+| `12..15` | 4 bits | `periodLocalSlotNumber` | `1..12` | 
+| `16..18` | 3 bits | `periodId` | `1..7` | 
+| `19..23` | 5 bits | `globalSlotIndex` | `0..23` | 
+| `24..28` | 5 bits | `hijriDay` | `1..30` | 
+| `29..32` | 4 bits | `hijriMonth` | `1..12` | 
+| `33..46` | 14 bits | `hijriYear` | `0..16383` | 
 
-The current application operates on a **local-first** basis[cite: 6]. It does not provide user accounts, authentication, cloud synchronization, or a configured remote database[cite: 6]. 
+### 13.2 ISO-Suwaya String Grammar (`toIsoSuwayaString` / `tryParseIsoSuwaya`)
 
-Most application data is stored exclusively on your device within an Isar Community database[cite: 6]. The current database contains your customized settings, tasks, habits, routines, and saved geographic information[cite: 6]. The application also bundles a read-only SQLite database for local offline city search and location matching[cite: 6].
+Formats and parses standardized strings of the form:
 
-## 2. Information the Application Uses
+* `SWY-N04:15` or `SWY-N04:15:30` (4th Night Suwaya, 15m 30s)
 
-### Location Information
-When you opt to use automatic location detection, Suwaya requests location permissions and uses your device's coordinates locally to[cite: 6]:
-- Calculate precise prayer and astronomical times[cite: 6].
-- Select the correct timezone context[cite: 6].
-- Find your approximate nearest city and country via the bundled offline city database[cite: 6].
-- Suggest accurate calculation methods and Madhab defaults[cite: 6].
+* `SWY-D09:42` or `SWY-D09:42:00` (9th Day Suwaya, 42m 00s)
 
-**These coordinates are never sent to a Suwaya server.** Suwaya does not track your movement in the background, build a location history, or sell location data[cite: 6]. You may alternatively choose a location manually and deny location permissions entirely[cite: 6].
+## 14. RFC 5545 iCalendar Exporter (`SuwayaIcsExporter`)
 
-### Application Data
-Depending on the features you use, Suwaya stores locally[cite: 6]:
-- Calculation preferences, UI language, visual themes, and notification settings[cite: 6].
-- Tasks, task schedules, completion history, streaks, and Suwaya contexts[cite: 6].
-- Focus routines and their associated parameters[cite: 6].
+`SuwayaIcsExporter.exportWindowsToIcs` serializes multi-day `SuwayaScheduledDayWindow` lists into standard RFC 5545 `VCALENDAR` / `VEVENT` payloads (`.ics`), allowing users and external tools to subscribe to Suwaya periods and Qiyam parts in Google Calendar, Apple Calendar, and Outlook.
 
-### Notifications and Alarms
-If enabled, Suwaya schedules local notifications and full-screen exact alarms through the operating system[cite: 6]. Suwaya uses these to deliver time-sensitive reminders but does not transmit notification histories to any remote server[cite: 6].
+## 15. Flutter Runtime Adapter & Adaptive Virtual-Second Ticker
 
-## 3. Information We Do Not Collect & Supporter Purchases
+In the Flutter application (`lib/core/astro_engine/astro_provider.dart`), `AstroNotifier` bridges `suwaya_time` with the UI using three coordinated mechanisms:
 
-The application does not collect or transmit[cite: 6]:
-- Personal authentication identifiers or account details[cite: 6].
-- Advertising identifiers or behavioral analytics tracking[cite: 6].
-- Task or routine data to any cloud backend[cite: 6].
+1. **Smart State Timer (`_stateTimer`):** Sleeps until the exact microsecond of the next Suwaya boundary (`durationUntilNextSuwaya`), rebuilding Riverpod consumers only when `currentPeriod.id` or `periodLocalSlotNumber` changes.
 
-If you optionally choose to purchase a Supporter Badge, Suwaya utilizes Google Play Billing (or Apple App Store) alongside the RevenueCat SDK to verify your entitlement via an anonymous app user ID[cite: 6]. Financial and payment details are processed exclusively by the platform store and are never accessed, captured, or stored by Suwaya[cite: 6].
+2. **Adaptive Virtual-Second UI Ticker (`_uiTimer`):** Instead of polling at a fixed `250ms` interval (which causes beat-frequency aliasing jitter when virtual seconds are faster or slower than physical seconds), `_startUITicker` computes the exact microsecond boundary of the **next virtual second** in the active period:
+   
 
-## 4. Data Storage, Retention, and Deletion
+   $$
+   \text{nextBoundaryMicro} = \left\lfloor \frac{(\text{currentVirtualSecIndex} + 1) \times \text{periodMicro} + \text{totalVirtualSeconds} - 1}{\text{totalVirtualSeconds}} \right\rfloor
+   $$
 
-Local data remains on your device until you delete it through the app's interface, clear the application’s storage via your OS settings, or uninstall the application[cite: 6]. Suwaya does not retain a server-side copy of your local tasks, routines, or settings[cite: 6].
+   
+   This eliminates visual jitter ($0\%$ aliasing) and reduces CPU wake-ups by up to $75\%$.
 
-## 5. Permissions
+3. **Decoupled 15-Second Dial Quantizer (`dialQuantizedTimeNotifier`):** Updates the rotation angle of `PremiumAstroDial` once every 15 physical seconds ($0.06^\circ$ arc step) while `virtualTimeNotifier` ticks every virtual second for the central digital clock, preventing unnecessary `CustomPainter` rebuilds.
 
-Suwaya may request the following system permissions to function correctly[cite: 6]:
+4. **Zero-Battery Background Lifecycle:** Both `_stateTimer` and `_uiTimer` are immediately canceled on `AppLifecycleState.paused` and `AppLifecycleState.hidden`, and resynchronized on `AppLifecycleState.resumed`.
 
-| Permission | Purpose |
-|---|---|
-| **Location** | For automatic location detection and location-aware prayer calculations[cite: 6]. |
-| **Notifications** | To deliver local task, routine, and prayer reminders[cite: 6]. |
-| **Exact Alarms** | To schedule time-sensitive, full-screen lockscreen alarms[cite: 6]. |
-| **Vibration** | To provide haptic feedback during local notifications and alarms[cite: 6]. |
-| **Internet** | To fetch Markdown documentation updates (FAQ/Privacy), check for app updates, and process optional Supporter badge purchases[cite: 6]. |
+## 16. Mathematical Invariants & Torture Test Matrix
 
-You can deny or revoke these permissions at any time through your operating system settings[cite: 6].
+Every change to `packages/suwaya_time` must pass the automated test suite (`dart test` in `packages/suwaya_time` and `flutter test` in root):
 
-## 6. Third-Party Libraries and Network Services
+1. **Contiguity & Conservation:** Every generated day has exactly 7 periods with `periods[i].endUtc == periods[i + 1].startUtc` and $\sum \text{suwayasCount} = 24$ ($12$ Night + $12$ Day).
 
-Suwaya uses open-source libraries for Flutter, local persistence (`isar_community`, `sqflite`), astronomical calculations (`adhan`), geolocation, localization, and notifications[cite: 6]. Network access is strictly limited to[cite: 6]:
-- Fetching FAQ and Privacy Policy JSON updates directly from the official GitHub repository[cite: 6].
-- Checking for in-app updates via official store APIs (`in_app_update`)[cite: 6].
-- Verifying optional supporter badge entitlements via Google Play Billing and RevenueCat[cite: 6].
+2. **Round-Trip Identity:** Across all $1440$ virtual minutes of the day (including Spring-Forward and Fall-Back DST nights), `instantToCoordinate(coordinateToInstant(G, M)) == (G, M)`.
 
-## 7. Security
+3. **Strict Monotonicity (Zero-Retrograde):** Stepping forward in UTC from `cycleStartMaghribUtc` to `cycleEndMaghribUtc` produces strictly non-decreasing `totalVirtualSeconds` ($\text{sec}_{t+1} \ge \text{sec}_t$), even when local wall-clock time repeats an hour during Fall-Back DST.
 
-Local data protection depends on the security of your device and operating system[cite: 6]. We strongly recommend keeping your device protected with standard security controls (PIN/Biometrics) and advise against using rooted or compromised devices if you store sensitive personal schedules[cite: 6].
+4. **Polar Immunity:** For any latitude $\in [-89.9^\circ, +89.9^\circ]$ and any day of the year (tested via 250-iteration randomized fuzz testing), `SuwayaTimeEngine.generateDay` never throws and always yields positive microsecond durations.
 
-## 8. Children
-
-Suwaya is not designed to knowingly collect personal information from children[cite: 6]. Because the application operates offline-first and provides no cloud account system, it does not intentionally create child user profiles or collect data remotely[cite: 6].
-
-## 9. Changes to This Policy
-
-This policy may be updated if the application's data practices evolve. The "Last updated" date at the top of this page indicates the latest revision[cite: 6]. Material changes will be reflected in the project documentation and release notes[cite: 6].
-
-## 10. Contact
-
-For questions, corrections, or privacy concerns, please contact the project maintainer by opening an issue on the official Suwaya GitHub repository[cite: 6]:
-
-<https://github.com/Abdallah-Kaballo/Suwaya>
-
-Suwaya is open-source and licensed under the GNU General Public License v3.0[cite: 6]. Its source code is publicly available for review in the repository[cite: 6].
-
-```
+5. **Offset Isolation:** Manual prayer offsets are clamped to $[-30, +30]$ minutes, never shift `sunrise`, and never alter `calculatedSunset` used for Hijri date rollover.

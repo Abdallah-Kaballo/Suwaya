@@ -1,13 +1,24 @@
+import 'package:suwaya_time/suwaya_time.dart';
+
+
+
 /// يحدد النطاق العام للسويعة (ليل أم نهار)
 enum SuwayaPhase {
-  night, day;
+  night,
+  day;
+
   bool get isNight => this == SuwayaPhase.night;
   bool get isDay => this == SuwayaPhase.day;
 }
 
 enum PeriodKey {
-  nightMaghribIsha, nightIshaMidnight, nightMidnightFajr, nightFajrSunrise,
-  daySunriseDhuhr, dayDhuhrAsr, dayAsrMaghrib;
+  nightMaghribIsha,
+  nightIshaMidnight,
+  nightMidnightFajr,
+  nightFajrSunrise,
+  daySunriseDhuhr,
+  dayDhuhrAsr,
+  dayAsrMaghrib;
 }
 
 class SuwayaCycleAnchors {
@@ -20,7 +31,6 @@ class SuwayaCycleAnchors {
       cycleAsr,
       cycleEndMaghrib;
 
-  // 🌟 اللحظات العالمية الحقيقية (UTC Instants) لضمان دقة المدد عبر التوقيت الصيفي
   final DateTime? cycleStartMaghribUtc,
       cycleIshaUtc,
       sharIMidnightUtc,
@@ -30,7 +40,6 @@ class SuwayaCycleAnchors {
       cycleAsrUtc,
       cycleEndMaghribUtc;
 
-  // 🌟 الغروب الفلكي الصافي (غير متأثر بالتعديل اليدوي لدقائق الأذان) لتحديد بداية التاريخ الهجري
   final DateTime? calculatedStartSunset, calculatedEndSunset;
   final DateTime? calculatedStartSunsetUtc, calculatedEndSunsetUtc;
 
@@ -82,6 +91,21 @@ class SuwayaCycleAnchors {
         cycleDhuhr.isBefore(cycleAsr) &&
         cycleAsr.isBefore(cycleEndMaghrib);
   }
+
+  Map<String, dynamic> toJson() => {
+        'cycleStartMaghrib': cycleStartMaghrib.toIso8601String(),
+        'cycleIsha': cycleIsha.toIso8601String(),
+        'sharIMidnight': sharIMidnight.toIso8601String(),
+        'cycleFajr': cycleFajr.toIso8601String(),
+        'cycleSunrise': cycleSunrise.toIso8601String(),
+        'cycleDhuhr': cycleDhuhr.toIso8601String(),
+        'cycleAsr': cycleAsr.toIso8601String(),
+        'cycleEndMaghrib': cycleEndMaghrib.toIso8601String(),
+        if (cycleStartMaghribUtc != null)
+          'cycleStartMaghribUtc': cycleStartMaghribUtc!.toIso8601String(),
+        if (cycleEndMaghribUtc != null)
+          'cycleEndMaghribUtc': cycleEndMaghribUtc!.toIso8601String(),
+      };
 }
 
 class SuwayaClockTime {
@@ -94,13 +118,27 @@ class SuwayaClockTime {
   final DateTime instant;
 
   const SuwayaClockTime({
-    required this.phase, required this.phaseSlotNumber, required this.periodKey,
-    required this.periodLocalSlotNumber, required this.slotProgress,
-    required this.cycleStartDate, required this.instant,
+    required this.phase,
+    required this.phaseSlotNumber,
+    required this.periodKey,
+    required this.periodLocalSlotNumber,
+    required this.slotProgress,
+    required this.cycleStartDate,
+    required this.instant,
   });
 
   int get virtualMinute => ((slotProgress * 3600) ~/ 60).clamp(0, 59);
   int get virtualSecond => ((slotProgress * 3600).floor() % 60).clamp(0, 59);
+
+  Map<String, dynamic> toJson() => {
+        'phase': phase.name,
+        'phaseSlotNumber': phaseSlotNumber,
+        'periodKey': periodKey.name,
+        'periodLocalSlotNumber': periodLocalSlotNumber,
+        'virtualMinute': virtualMinute,
+        'virtualSecond': virtualSecond,
+        'slotProgress': slotProgress,
+      };
 }
 
 class AstroPeriod {
@@ -123,7 +161,22 @@ class AstroPeriod {
     required this.colorValue,
   });
 
-  /// المدة الحقيقية المنقضية بالثواني العالمية (محصنة ضد قفزات التوقيت الصيفي)
+  /// أنواع زمنية صريحة غير قابلة للتغيير (Zero-Ambiguity Value Objects)
+  InstantUtc get startInstant =>
+      InstantUtc.fromDateTime(startUtc ?? startTime.toUtc());
+  InstantUtc get endInstant =>
+      InstantUtc.fromDateTime(endUtc ?? endTime.toUtc());
+
+  ZonedWallTime get startWall => ZonedWallTime(
+        instant: startInstant,
+        utcOffset: startTime.difference(startInstant.toDateTimeUtc()),
+      );
+
+  ZonedWallTime get endWall => ZonedWallTime(
+        instant: endInstant,
+        utcOffset: endTime.difference(endInstant.toDateTimeUtc()),
+      );
+
   Duration get totalDuration {
     if (startUtc != null && endUtc != null) {
       return endUtc!.difference(startUtc!);
@@ -131,41 +184,68 @@ class AstroPeriod {
     return endTime.difference(startTime);
   }
 
-  /// حساب اللحظة العالمية (UTC) لأي سويعة ودقيقة افتراضية داخل الفترة
-  DateTime resolveSlotUtc(int localSuwaya, int virtualMinute) {
-    final count = suwayasCount > 0 ? suwayasCount : 1;
-    final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
-    final minute = virtualMinute.clamp(0, 59);
-    final baseStart = startUtc ?? startTime;
-    final periodMicro = totalDuration.inMicroseconds;
-    final denominator = count * 60;
-    final requestedUnits = suwayaIndex * 60 + minute;
-    final offsetMicroseconds =
-        (periodMicro * requestedUnits + denominator - 1) ~/ denominator;
-    return baseStart.add(Duration(microseconds: offsetMicroseconds));
+  /// الطول الفيزيائي الفعلي للسويعة الواحدة داخل هذه الفترة
+  Duration get actualSuwayaDuration {
+    if (suwayasCount <= 0) return Duration.zero;
+    final actualMicro = totalDuration.inMicroseconds ~/ suwayasCount;
+    return actualMicro > 0 ? Duration(microseconds: actualMicro) : Duration.zero;
   }
 
-  /// حساب وقت الحائط المحلي للمدينة لأي سويعة ودقيقة افتراضية
+  /// سرعة تدفق الزمن في هذه الفترة (60 دقيقة افتراضية / الطول الفعلي)
+  double get flowSpeed {
+    final micro = actualSuwayaDuration.inMicroseconds;
+    if (micro <= 0) return 0.0;
+    return 3600.0 / (micro / Duration.microsecondsPerSecond);
+  }
+
+  ZonedWallTime resolveSlotZonedTime(
+    int localSuwaya,
+    int virtualMinute, {
+    int virtualSecond = 0,
+    String? timezoneId,
+    Duration? fallbackOffset,
+  }) {
+    final resolved = SuwayaCoordinateMapper.periodSlotToInstant(
+      period: this,
+      localSuwaya: localSuwaya,
+      virtualMinute: virtualMinute,
+      virtualSecond: virtualSecond,
+    );
+    return ZonedWallTime.fromInstant(
+      InstantUtc.fromDateTime(resolved.instantUtc),
+      timezoneId: timezoneId,
+      fallbackOffset: fallbackOffset ?? startWall.utcOffset,
+    );
+  }
+
+  DateTime resolveSlotUtc(
+    int localSuwaya,
+    int virtualMinute, [
+    int virtualSecond = 0,
+  ]) {
+    return SuwayaCoordinateMapper.periodSlotToInstant(
+      period: this,
+      localSuwaya: localSuwaya,
+      virtualMinute: virtualMinute,
+      virtualSecond: virtualSecond,
+    ).instantUtc;
+  }
+
   DateTime resolveSlotWallTime(
     int localSuwaya,
     int virtualMinute, {
+    int virtualSecond = 0,
     DateTime Function(DateTime utcInstant)? toWallClock,
   }) {
-    if (startUtc != null && toWallClock != null) {
-      return toWallClock(resolveSlotUtc(localSuwaya, virtualMinute));
-    }
-    final count = suwayasCount > 0 ? suwayasCount : 1;
-    final suwayaIndex = (localSuwaya - 1).clamp(0, count - 1);
-    final minute = virtualMinute.clamp(0, 59);
-    final wallSpanMicro = endTime.difference(startTime).inMicroseconds;
-    final denominator = count * 60;
-    final requestedUnits = suwayaIndex * 60 + minute;
-    final offsetMicroseconds =
-        (wallSpanMicro * requestedUnits + denominator - 1) ~/ denominator;
-    return startTime.add(Duration(microseconds: offsetMicroseconds));
+    return SuwayaCoordinateMapper.periodSlotToInstant(
+      period: this,
+      localSuwaya: localSuwaya,
+      virtualMinute: virtualMinute,
+      virtualSecond: virtualSecond,
+      toWallClock: toWallClock,
+    ).wallTime;
   }
 
-  /// حساب المدة الفيزيائية الحقيقية المتبقية حتى بداية السويعة التالية
   Duration durationUntilNextSuwaya({
     required int currentLocalSlotNumber,
     required DateTime now,
@@ -186,6 +266,20 @@ class AstroPeriod {
     );
     return nextTransitionWall.difference(now);
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'periodKey': periodKey.name,
+        'nameKey': nameKey,
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
+        if (startUtc != null) 'startUtc': startUtc!.toIso8601String(),
+        if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
+        'suwayasCount': suwayasCount,
+        'durationSeconds': totalDuration.inSeconds,
+        'flowSpeed': flowSpeed,
+        'colorValue': colorValue,
+      };
 }
 
 class NightPart {
@@ -202,15 +296,24 @@ class NightPart {
     this.endUtc,
   });
 
-  Duration get realDuration =>
-      (startUtc != null && endUtc != null)
-          ? endUtc!.difference(startUtc!)
-          : endTime.difference(startTime);
+  Duration get realDuration => (startUtc != null && endUtc != null)
+      ? endUtc!.difference(startUtc!)
+      : endTime.difference(startTime);
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nameKey': nameKey,
+        'startTime': startTime.toIso8601String(),
+        'endTime': endTime.toIso8601String(),
+        if (startUtc != null) 'startUtc': startUtc!.toIso8601String(),
+        if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
+        'durationSeconds': realDuration.inSeconds,
+      };
 }
 
 class IbadatTimings {
   final DateTime fajr, sunrise, dhuhr, asr, maghrib, isha, nextFajr;
-  final DateTime? calculatedSunset; // 🌟 الغروب الفلكي الصافي لبداية الليلة الهجرية
+  final DateTime? calculatedSunset;
   final List<NightPart> nightParts;
 
   const IbadatTimings({
@@ -224,13 +327,23 @@ class IbadatTimings {
     this.calculatedSunset,
     required this.nightParts,
   });
+
+  Map<String, dynamic> toJson() => {
+        'fajr': fajr.toIso8601String(),
+        'sunrise': sunrise.toIso8601String(),
+        'dhuhr': dhuhr.toIso8601String(),
+        'asr': asr.toIso8601String(),
+        'maghrib': maghrib.toIso8601String(),
+        'isha': isha.toIso8601String(),
+        'nextFajr': nextFajr.toIso8601String(),
+        if (calculatedSunset != null)
+          'calculatedSunset': calculatedSunset!.toIso8601String(),
+        'nightParts': nightParts.map((np) => np.toJson()).toList(),
+      };
 }
 
 class SuwayaDay {
-  /// مواقيت الدورة الفلكية النشطة (تبدأ من المغرب وتشمل أجزاء الليل النشطة)
   final IbadatTimings ibadatTimings;
-
-  /// مواقيت اليوم المدني الحالي (لعرض صلوات التاريخ الميلادي الجاري بدقة قبل المغرب وبعده)
   final IbadatTimings civilDayIbadat;
   final SuwayaCycleAnchors cycleAnchors;
   final List<AstroPeriod> periods;
@@ -250,6 +363,13 @@ class SuwayaDay {
       periods: periods,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'ibadatTimings': ibadatTimings.toJson(),
+        'civilDayIbadat': civilDayIbadat.toJson(),
+        'cycleAnchors': cycleAnchors.toJson(),
+        'periods': periods.map((p) => p.toJson()).toList(),
+      };
 }
 
 class AstroState {
@@ -275,11 +395,22 @@ class AstroState {
     required this.cycleAnchors,
   }) : civilDayIbadat = civilDayIbadat ?? ibadatTimings;
 
-  /// أجزاء الليل المناسبة للعرض: أثناء الليل تعرض الليلة الجارية، وأثناء النهار تعرض الليلة القادمة
   List<NightPart> get activeOrUpcomingNightParts =>
       currentSuwayaTime.phase.isNight
           ? ibadatTimings.nightParts
           : civilDayIbadat.nightParts;
+
+  Map<String, dynamic> toJson() => {
+        'virtualTime': virtualTime.toIso8601String(),
+        if (instantUtc != null) 'instantUtc': instantUtc!.toIso8601String(),
+        'currentPeriod': currentPeriod.toJson(),
+        'currentSuwayaTime': currentSuwayaTime.toJson(),
+        'timeSpeedMultiplier': timeSpeedMultiplier,
+        'periods': periods.map((p) => p.toJson()).toList(),
+        'ibadatTimings': ibadatTimings.toJson(),
+        'civilDayIbadat': civilDayIbadat.toJson(),
+        'cycleAnchors': cycleAnchors.toJson(),
+      };
 }
 
 enum CalculationMethodType {
@@ -294,8 +425,8 @@ enum CalculationMethodType {
   singapore,
   tehran,
   turkey,
-  franceUoif, // 🌟 إضافة طريقة اتحاد المنظمات الإسلامية في فرنسا (UOIF)
-  russia,     // 🌟 إضافة طريقة الإدارة الدينية لمسلمي روسيا
+  franceUoif,
+  russia,
   custom,
 }
 

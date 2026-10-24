@@ -27,17 +27,8 @@ String trCal(
   return context.locale.languageCode == 'ar' ? arFallback : enFallback;
 }
 
-int resolveCalendarGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) {
-  int global = 0;
-  for (final p in periods) {
-    if (p.id == pId) {
-      final count = p.suwayasCount > 0 ? p.suwayasCount : 1;
-      return global + (sNum - 1).clamp(0, count - 1);
-    }
-    global += p.suwayasCount;
-  }
-  return 0;
-}
+int resolveCalendarGlobalSuwaya(int pId, int sNum, List<AstroPeriod> periods) =>
+    SuwayaCoordinateMapper.localToGlobal(pId, sNum, periods);
 
 class FastingRecommendation {
   final String title;
@@ -55,58 +46,20 @@ FastingRecommendation? getSeasonalFastingInfo(
   HijriCalendar hDate,
   String langCode,
 ) {
-  final isAr = langCode == 'ar';
-
-  if (hDate.hMonth == 12 && hDate.hDay == 9) {
-    return FastingRecommendation(
-      title: isAr
-          ? 'صيام يوم عرفة (9 ذو الحجة)'
-          : 'Fasting Day of Arafah (9 Dhu al-Hijjah)',
-      reason: isAr
-          ? 'يُستحب صيامه لغير الحاج؛ يكفّر السنة الماضية والباقية.'
-          : 'Recommended for non-pilgrims; expiates sins of the previous and coming year.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-
-  if (hDate.hMonth == 1 && hDate.hDay == 10) {
-    return FastingRecommendation(
-      title: isAr
-          ? 'صيام يوم عاشوراء (10 محرم)'
-          : 'Fasting Day of Ashura (10 Muharram)',
-      reason: isAr
-          ? 'صيام يوم عاشوراء يكفّر السنة التي قبله.'
-          : 'Recommended fast; expiates the sins of the preceding year.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-  if (hDate.hMonth == 1 && hDate.hDay == 9) {
-    return FastingRecommendation(
-      title: isAr
-          ? 'صيام يوم تاسوعاء (9 محرم)'
-          : 'Fasting Tasu\'a (9 Muharram)',
-      reason: isAr
-          ? 'يُستحب صيامه مع يوم عاشوراء.'
-          : 'Recommended to fast along with the Day of Ashura.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-
-  if (hDate.hMonth != 9 &&
-      (hDate.hDay == 13 || hDate.hDay == 14 || hDate.hDay == 15)) {
-    if (hDate.hMonth == 12 && hDate.hDay == 13) return null;
-    return FastingRecommendation(
-      title: isAr
-          ? 'من الأيام البيض (${hDate.hDay} ${'hijri.m${hDate.hMonth}'.tr()})'
-          : 'White Days Fast (${hDate.hDay} ${'hijri.m${hDate.hMonth}'.tr()})',
-      reason: isAr
-          ? 'يُندب صيام الأيام البيض (13 و14 و15) من كل شهر هجري، وصيامها كصيام الدهر.'
-          : 'Recommended monthly fast on the 13th, 14th, and 15th of the Hijri month.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-
-  return null;
+  final rec = IslamicEventsCatalog.evaluateFastingForHijri(
+    hMonth: hDate.hMonth,
+    hDay: hDate.hDay,
+    langCode: langCode,
+    localizedMonthName: 'hijri.m${hDate.hMonth}'.tr() != 'hijri.m${hDate.hMonth}'
+        ? 'hijri.m${hDate.hMonth}'.tr()
+        : null,
+  );
+  if (rec == null) return null;
+  return FastingRecommendation(
+    title: rec.title,
+    reason: rec.reason,
+    highlightColor: Color(rec.highlightColorHex),
+  );
 }
 
 class CalendarDayCellData {
@@ -141,41 +94,21 @@ class CalendarDayAgenda extends ConsumerWidget {
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   bool _isTaskInNightPhase(TaskModel task) {
-    if (task.isAstroTime && task.targetPeriodId != null) {
-      return task.targetPeriodId! >= 1 && task.targetPeriodId! <= 4;
-    }
-    if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
-      final mins = task.targetCivilTimeMinutes!;
-      final sunriseMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.sunrise.hour * 60 +
-              astroState.ibadatTimings.sunrise.minute)
-          : 360;
-      final maghribMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.maghrib.hour * 60 +
-              astroState.ibadatTimings.maghrib.minute)
-          : 1080;
-      return mins >= maghribMins || mins < sunriseMins;
-    }
-    return false;
+    return SuwayaScheduleEngine.isScheduleItemInNightPhase(
+      isAstroTime: task.isAstroTime,
+      periodId: task.targetPeriodId,
+      civilClock: task.targetCivilClock,
+      astroState: astroState,
+    );
   }
 
   bool _isRoutineInNightPhase(RoutineModel routine) {
-    if (routine.isAstroTime && routine.startPeriodId != null) {
-      return routine.startPeriodId! >= 1 && routine.startPeriodId! <= 4;
-    }
-    if (!routine.isAstroTime && routine.startTimeMinutes != null) {
-      final mins = routine.startTimeMinutes!;
-      final sunriseMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.sunrise.hour * 60 +
-              astroState.ibadatTimings.sunrise.minute)
-          : 360;
-      final maghribMins = astroState.periods.isNotEmpty
-          ? (astroState.ibadatTimings.maghrib.hour * 60 +
-              astroState.ibadatTimings.maghrib.minute)
-          : 1080;
-      return mins >= maghribMins || mins < sunriseMins;
-    }
-    return false;
+    return SuwayaScheduleEngine.isScheduleItemInNightPhase(
+      isAstroTime: routine.isAstroTime,
+      periodId: routine.startPeriodId,
+      civilClock: routine.startCivilClock,
+      astroState: astroState,
+    );
   }
 
   @override
@@ -483,10 +416,9 @@ class CalendarDayAgenda extends ConsumerWidget {
     );
 
     Widget timeWidget = Text('--:--', style: clockStyle);
-    if (!task.isAstroTime && task.targetCivilTimeMinutes != null) {
-      final mins = task.targetCivilTimeMinutes!;
-      timeWidget = ClockTimeText.civil(
-        civilTime: DateTime(2000, 1, 1, mins ~/ 60, mins % 60),
+    if (!task.isAstroTime && task.targetCivilClock != null) {
+      timeWidget = ClockTimeText.civilClock(
+        civilClock: task.targetCivilClock!,
         civilTimeFormat: settings.civilTimeFormat,
         locale: langCode,
         style: clockStyle,
@@ -494,8 +426,8 @@ class CalendarDayAgenda extends ConsumerWidget {
     } else if (task.isAstroTime &&
         task.targetPeriodId != null &&
         periods.isNotEmpty) {
-      final globalSuwaya = resolveCalendarGlobalSuwaya(
-        task.targetPeriodId!,
+      final globalSuwaya = SuwayaCoordinateMapper.localToGlobal(
+        task.targetPeriodId,
         task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 1,
         periods,
       );

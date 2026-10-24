@@ -22,7 +22,6 @@ class MainLayout extends ConsumerWidget {
     final isPomodoroFullScreen = ref.watch(isPomodoroFullScreenProvider);
     final hideBottomBar = isDrawerOpen || isPomodoroFullScreen;
 
-    ref.watch(isPomodoroFullScreenProvider);
     return Scaffold(
       backgroundColor: bgColor,
       extendBody: true,
@@ -100,7 +99,6 @@ class MainLayout extends ConsumerWidget {
                   'nav.ibadat'.tr(),
                   shell,
                 ),
-                // 🌟 الشاشة الرئيسية (القرص الفلكي) في المنتصف تماماً (الموقع 2)
                 _buildNavItem(
                   LucideIcons.compass,
                   2,
@@ -110,7 +108,6 @@ class MainLayout extends ConsumerWidget {
                   'nav.home'.tr(),
                   shell,
                 ),
-                // 🌟 تبويب التقويم والرزنامة الجديد (الموقع 3)
                 _buildNavItem(
                   LucideIcons.calendar_days,
                   3,
@@ -159,10 +156,7 @@ class MainLayout extends ConsumerWidget {
           onTap: () {
             if (index == currentIndex) return;
             HapticFeedback.selectionClick();
-            // 🌟 تأخير بسيط جداً للسماح للأنيميشن بالعمل قبل تجميد الشاشة في بناء الواجهة الثقيلة
-            Future.delayed(const Duration(milliseconds: 50), () {
-              shell.goBranch(index, initialLocation: index == currentIndex);
-            });
+            shell.goBranch(index, initialLocation: index == currentIndex);
           },
           behavior: HitTestBehavior.opaque,
           child: AnimatedContainer(

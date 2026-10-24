@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 import 'package:vibration/vibration.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -10,18 +10,19 @@ import '../../core/astro_engine/astro_provider.dart';
 import '../../core/notification/notification_service.dart';
 import '../../core/providers/ui_providers.dart';
 
+export 'package:suwaya_time/suwaya_time.dart' show SuwayaFlowOption;
+
 enum PomodoroView { selector, traditional, suwayaSetup, suwayaActive }
 
 enum PomodoroPhase { work, shortBreak, longBreak }
 
 enum PomodoroStatus { idle, running, paused, finished }
 
-// 🌟 1. إعدادات البومودورو التقليدي القابلة للتخصيص
 class TraditionalPomodoroSettings {
-  final int workMinutes; // 25..60 (بمضاعفات 5) - الافتراضي 25
-  final int shortBreakMinutes; // 5 أو 10 - الافتراضي 5
-  final int longBreakMinutes; // 20..40 (بمضاعفات 5) - الافتراضي 30
-  final int cyclesBeforeLongBreak; // 1..6 - الافتراضي 4
+  final int workMinutes;
+  final int shortBreakMinutes;
+  final int longBreakMinutes;
+  final int cyclesBeforeLongBreak;
 
   const TraditionalPomodoroSettings({
     this.workMinutes = 25,
@@ -44,19 +45,6 @@ class TraditionalPomodoroSettings {
           cyclesBeforeLongBreak ?? this.cyclesBeforeLongBreak,
     );
   }
-}
-
-// 🌟 2. خيار سرعة التدفق للبومودورو السُويعي
-class SuwayaFlowOption {
-  final int pomodoroCount; // عدد البومودورات الصحيح (N)
-  final double flowSpeed; // سرعة التدفق (0.5x .. 2.0x)
-  final String tag; // 'slower' | 'recommended' | 'faster'
-
-  const SuwayaFlowOption({
-    required this.pomodoroCount,
-    required this.flowSpeed,
-    required this.tag,
-  });
 }
 
 class SuwayaSessionConfig {
@@ -83,9 +71,7 @@ class SuwayaSessionConfig {
   })  : anchoredStartUtc = anchoredStartUtc ??
             DateTime.now().toUtc().subtract(
                   Duration(
-                    seconds: DateTime.now()
-                        .toUtc()
-                        .second, // محاذاة لبداية الدقيقة الحالية بـ UTC
+                    seconds: DateTime.now().toUtc().second,
                   ),
                 ),
         endUtc = endUtc ??
@@ -96,24 +82,23 @@ class SuwayaSessionConfig {
                 .add(endTime.difference(anchoredStartTime));
 }
 
-// 🌟 4. الحالة الشاملة للبومودورو الاحترافي
 class PomodoroState {
   final PomodoroView currentView;
   final PomodoroStatus status;
   final PomodoroPhase phase;
   final TraditionalPomodoroSettings traditionalSettings;
-  final int currentCycle; // رقم الدورة الحالية (1-based)
-  final double remainingSeconds; // الثواني المتبقية
-  final double phaseProgress; // نسبة التقدم في المرحلة الحالية (0.0 .. 1.0)
-  final double cycleProgress; // نسبة التقدم في الدورة الكاملة (عمل + راحة) للأسطرلاب
-  final double focusRatio; // نسبة وقت العمل من إجمالي الدورة للأسطرلاب
+  final int currentCycle;
+  final double remainingSeconds;
+  final double phaseProgress;
+  final double cycleProgress;
+  final double focusRatio;
   final SuwayaSessionConfig? suwayaConfig;
   final bool isFinished;
-  final bool isMuted; // كتم أصوات الانتقال
-  final bool isFullScreen; // وضع ملء الشاشة الغامر
-  final int? linkedTaskId; // المهمة المرتبطة بالتركيز حالياً
-  final int dailyCompletedSessions; // عدد جلسات التركيز المنجزة اليوم
-  final bool isPrePrayerWarningActive; // تنبيه ما قبل الصلاة بدقيقتين
+  final bool isMuted;
+  final bool isFullScreen;
+  final int? linkedTaskId;
+  final int dailyCompletedSessions;
+  final bool isPrePrayerWarningActive;
 
   const PomodoroState({
     this.currentView = PomodoroView.selector,
@@ -182,14 +167,12 @@ class PomodoroState {
   }
 }
 
-// 🌟 5. المحرك (PomodoroEngine)
 class PomodoroEngine extends Notifier<PomodoroState> {
   Timer? _timer;
 
   DateTime? _traditionalPhaseStartedAt;
   int _traditionalAccumulatedElapsedSecs = 0;
 
-  // متغيرات لتتبع التحولات في البومودورو السُويعي وإطلاق الجرس والاهتزاز
   PomodoroPhase _lastSuwayaPhase = PomodoroPhase.work;
   int _lastSuwayaCycle = 1;
   bool _prePrayerWarningTriggered = false;
@@ -384,7 +367,6 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     }
   }
 
-  // 🌟 تشغيل الجرس والاهتزاز عند الانتقال بين جلسات العمل والراحة
   Future<void> _triggerPhaseTransitionFeedback({
     required PomodoroPhase newPhase,
     required int cycleNumber,
@@ -417,7 +399,6 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     );
   }
 
-  // 🌟 مزامنة إشعار البومودورو الحي على ستارة النظام
   void _syncLiveCurtainNotification() {
     if (state.status != PomodoroStatus.running) {
       NotificationService().cancelLivePomodoroNotification();
@@ -460,7 +441,6 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     );
   }
 
-  // 🌟 التنقل بين الشاشات
   void openTraditionalMode() {
     _timer?.cancel();
     setFullScreen(false);
@@ -521,10 +501,6 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       isPrePrayerWarningActive: false,
     );
   }
-
-  // =========================================================
-  // أ. التحكم في البومودورو التقليدي (Traditional Mode)
-  // =========================================================
 
   void startTraditional() {
     _timer?.cancel();
@@ -717,10 +693,6 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     }
   }
 
-  // =========================================================
-  // ب. التحكم في البومودورو السُويعي (Suwaya Mode)
-  // =========================================================
-
   DateTime _currentCityTime() {
     return virtualDateTimeNotifier.value;
   }
@@ -728,62 +700,8 @@ class PomodoroEngine extends Notifier<PomodoroState> {
   static List<SuwayaFlowOption> calculateSuwayaFlowOptions(
     DateTime startTime,
     DateTime endTime,
-  ) {
-    final totalActualSeconds = endTime.difference(startTime).inSeconds;
-    if (totalActualSeconds < 15 * 60) return [];
-
-    final List<({int n, double v})> valid = [];
-    for (int n = 1; n <= 48; n++) {
-      final double v = (n * 1800.0) / totalActualSeconds;
-      if (v >= 0.5 && v <= 2.0) {
-        valid.add((n: n, v: v));
-      }
-    }
-
-    if (valid.isEmpty) return [];
-
-    int bestIdx = 0;
-    double minDiff = (valid[0].v - 1.0).abs();
-    for (int i = 1; i < valid.length; i++) {
-      final diff = (valid[i].v - 1.0).abs();
-      if (diff < minDiff) {
-        minDiff = diff;
-        bestIdx = i;
-      }
-    }
-
-    final List<SuwayaFlowOption> result = [];
-
-    result.add(
-      SuwayaFlowOption(
-        pomodoroCount: valid[bestIdx].n,
-        flowSpeed: valid[bestIdx].v,
-        tag: 'recommended',
-      ),
-    );
-
-    if (bestIdx - 1 >= 0) {
-      result.add(
-        SuwayaFlowOption(
-          pomodoroCount: valid[bestIdx - 1].n,
-          flowSpeed: valid[bestIdx - 1].v,
-          tag: 'slower',
-        ),
-      );
-    }
-
-    if (bestIdx + 1 < valid.length) {
-      result.add(
-        SuwayaFlowOption(
-          pomodoroCount: valid[bestIdx + 1].n,
-          flowSpeed: valid[bestIdx + 1].v,
-          tag: 'faster',
-        ),
-      );
-    }
-
-    return result;
-  }
+  ) =>
+      SuwayaFlowPlanner.calculateFlowOptions(startTime, endTime);
 
   void startSuwayaSession(SuwayaSessionConfig config) {
     _timer?.cancel();
@@ -824,16 +742,27 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     final nowUtc = DateTime.now().toUtc();
     final nowWall = _currentCityTime();
 
-    // الإنهاء الإجباري عند بلوغ لحظة النهاية العالمية أو المحلية
-    if (!nowUtc.isBefore(config.endUtc) || !nowWall.isBefore(config.endTime)) {
+    if (!nowWall.isBefore(config.endTime)) {
       _endSuwayaForcefully();
       return;
     }
 
-    // فحص تنبيه ما قبل الصلاة بدقيقتين فعليتين (120 ثانية عالمية)
-    final realSecondsToEnd = config.endUtc.difference(nowUtc).inSeconds;
-    final bool isNearPrayer = realSecondsToEnd <= 120 && realSecondsToEnd > 0;
-    if (isNearPrayer && !_prePrayerWarningTriggered) {
+    final snapshot = SuwayaFlowPlanner.evaluateLiveSession(
+      anchoredStartUtc: config.anchoredStartUtc,
+      endUtc: config.endUtc,
+      nowUtc: nowUtc,
+      totalPomodoros: config.totalPomodoros,
+      flowSpeed: config.flowSpeed,
+      workVirtualMinutes: config.workVirtualMinutes,
+      breakVirtualMinutes: config.breakVirtualMinutes,
+    );
+
+    if (snapshot.isFinished) {
+      _endSuwayaForcefully();
+      return;
+    }
+
+    if (snapshot.isPrePrayerWarningActive && !_prePrayerWarningTriggered) {
       _prePrayerWarningTriggered = true;
       try {
         HapticFeedback.mediumImpact();
@@ -841,63 +770,11 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       } catch (_) {}
     }
 
-    final int actualElapsedSecs = max(
-      0,
-      nowUtc.difference(config.anchoredStartUtc).inSeconds,
-    );
-    final double totalVirtualElapsed = actualElapsedSecs * config.flowSpeed;
-
-    const double cycleTotalVirtualSecs = 1800.0; // 30 دقيقة افتراضية (25 + 5)
-    final double sessionMaxVirtualSecs =
-        config.totalPomodoros * cycleTotalVirtualSecs;
-
-    if (totalVirtualElapsed >= sessionMaxVirtualSecs) {
-      _endSuwayaForcefully();
-      return;
-    }
-
-    final int currentPomoIndex =
-        (totalVirtualElapsed ~/ cycleTotalVirtualSecs).clamp(
-      0,
-      config.totalPomodoros - 1,
-    );
-    final int currentCycleNumber = currentPomoIndex + 1;
-    final double elapsedInCurrentPomo =
-        totalVirtualElapsed % cycleTotalVirtualSecs;
-
-    final double focusVirtualSecs = config.workVirtualMinutes * 60.0;
-    final double breakVirtualSecs = config.breakVirtualMinutes * 60.0;
-
-    final bool inBreak = elapsedInCurrentPomo >= focusVirtualSecs;
-
-    double remainingVirtual;
-    double progress;
-    PomodoroPhase currentPhase;
-
-    if (!inBreak) {
-      currentPhase = PomodoroPhase.work;
-      remainingVirtual = focusVirtualSecs - elapsedInCurrentPomo;
-      progress = focusVirtualSecs > 0
-          ? (elapsedInCurrentPomo / focusVirtualSecs).clamp(0.0, 1.0)
-          : 0.0;
-    } else {
-      currentPhase = PomodoroPhase.shortBreak;
-      final double breakElapsed = elapsedInCurrentPomo - focusVirtualSecs;
-      remainingVirtual = breakVirtualSecs - breakElapsed;
-      progress = breakVirtualSecs > 0
-          ? (breakElapsed / breakVirtualSecs).clamp(0.0, 1.0)
-          : 0.0;
-    }
-
-    if (remainingVirtual < 0) remainingVirtual = 0;
-
-    final double cycProgress =
-        (elapsedInCurrentPomo / cycleTotalVirtualSecs).clamp(0.0, 1.0);
-    final double ratio = focusVirtualSecs / cycleTotalVirtualSecs;
-
+    final currentPhase =
+        snapshot.isBreak ? PomodoroPhase.shortBreak : PomodoroPhase.work;
     final bool phaseChanged = !isInitialTick &&
         (currentPhase != _lastSuwayaPhase ||
-            currentCycleNumber != _lastSuwayaCycle);
+            snapshot.currentCycle != _lastSuwayaCycle);
 
     if (phaseChanged) {
       if (_lastSuwayaPhase == PomodoroPhase.work &&
@@ -906,22 +783,22 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       }
       _triggerPhaseTransitionFeedback(
         newPhase: currentPhase,
-        cycleNumber: currentCycleNumber,
+        cycleNumber: snapshot.currentCycle,
         totalCycles: config.totalPomodoros,
       );
     }
 
     _lastSuwayaPhase = currentPhase;
-    _lastSuwayaCycle = currentCycleNumber;
+    _lastSuwayaCycle = snapshot.currentCycle;
 
     state = state.copyWith(
       phase: currentPhase,
-      currentCycle: currentCycleNumber,
-      remainingSeconds: remainingVirtual,
-      phaseProgress: progress,
-      cycleProgress: cycProgress,
-      focusRatio: ratio,
-      isPrePrayerWarningActive: isNearPrayer,
+      currentCycle: snapshot.currentCycle,
+      remainingSeconds: snapshot.remainingVirtualSeconds,
+      phaseProgress: snapshot.phaseProgress,
+      cycleProgress: snapshot.cycleProgress,
+      focusRatio: snapshot.focusRatio,
+      isPrePrayerWarningActive: snapshot.isPrePrayerWarningActive,
     );
 
     if (phaseChanged) {

@@ -28,7 +28,6 @@ class TasksNotifier extends Notifier<TasksState> {
 
   @override
   TasksState build() {
-    // إعادة تحميل المهام عند تغير الفترة الفلكية أو بداية دورة مغرب جديدة
     ref.listen(astroProvider, (prev, next) {
       if (prev?.currentPeriod.id != next.currentPeriod.id ||
           prev?.cycleAnchors.cycleEndMaghrib !=
@@ -59,59 +58,6 @@ class TasksNotifier extends Notifier<TasksState> {
     return const TasksState();
   }
 
-  Map<String, int>? _getDynamicAstro(
-    TaskModel task,
-    AstroState astroState,
-    DateTime now,
-  ) {
-    if (task.isAstroTime && task.targetPeriodId != null) {
-      return {
-        'pId': task.targetPeriodId!,
-        'sNum': task.targetSuwayas.isNotEmpty ? task.targetSuwayas.first : 0,
-      };
-    }
-    if (!task.isAstroTime &&
-        task.targetCivilTimeMinutes != null &&
-        astroState.periods.isNotEmpty) {
-      final pStart = astroState.periods.first.startTime;
-      final DateTime pStartNoSecs = DateTime.utc(
-        pStart.year,
-        pStart.month,
-        pStart.day,
-        pStart.hour,
-        pStart.minute,
-      );
-      DateTime dt = DateTime.utc(
-        pStart.year,
-        pStart.month,
-        pStart.day,
-        task.targetCivilTimeMinutes! ~/ 60,
-        task.targetCivilTimeMinutes! % 60,
-      );
-
-      if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
-      if (dt.isAfter(astroState.periods.last.endTime)) {
-        dt = dt.subtract(const Duration(days: 1));
-      }
-      if (dt.isBefore(pStartNoSecs)) dt = dt.add(const Duration(days: 1));
-
-      for (var p in astroState.periods) {
-        if ((dt.isAfter(p.startTime) || dt.isAtSameMomentAs(p.startTime)) &&
-            (dt.isBefore(p.endTime) || dt.isAtSameMomentAs(p.endTime))) {
-          final suwayaDuration =
-              p.endTime.difference(p.startTime).inMicroseconds /
-                  (p.suwayasCount > 0 ? p.suwayasCount : 1);
-          final elapsed = dt.difference(p.startTime).inMicroseconds;
-          int sIndex = (elapsed / suwayaDuration)
-              .floor()
-              .clamp(0, (p.suwayasCount > 0 ? p.suwayasCount : 1) - 1);
-          return {'pId': p.id, 'sNum': sIndex + 1};
-        }
-      }
-    }
-    return null;
-  }
-
   Future<List<String>> getUniqueTaskTitles() async {
     final activeTasks = await ref.read(taskRepositoryProvider).getActiveTasks();
     return activeTasks.map((t) => t.title).toSet().toList();
@@ -128,32 +74,36 @@ class TasksNotifier extends Notifier<TasksState> {
     final List<TaskModel> todayList = [];
     final List<TaskModel> horizonList = [];
 
-    final Map<int, Map<String, int>> astroCache = {};
+    final Map<int, ({int periodId, int localSuwaya})> astroCache = {};
 
-    for (var task in allTasks) {
-      // 🌟 تحديد اليوم المنطقي للمهمة:
-      // - السويعية: تبدأ من مغرب اليوم السابق (تاريخ cycleEndMaghrib)
-      // - المدنية: تبدأ من 12:00 منتصف الليل (تاريخ cityNow)
-      final logicalToday = getLogicalDateForMode(
+    for (final task in allTasks) {
+      final CivilDate logicalToday =
+          SuwayaScheduleEngine.resolveLogicalCivilDate(
         isAstroTime: task.isAstroTime,
         astroState: astroState,
         civilReference: cityNow,
       );
-      final logicalWeekday = logicalToday.weekday;
+      final int logicalWeekday = logicalToday.weekday;
 
       if (task.type == TaskType.casual && task.isCompleted) continue;
       if (task.type == TaskType.permanent &&
-          task.isCompletedOnDate(logicalToday)) {
+          task.isCompletedOnCivilDate(logicalToday)) {
         continue;
       }
 
       final effectiveDays = task.recurrenceDays;
-      final dynamicAstro = _getDynamicAstro(task, astroState, cityNow);
+      final dynamicAstro = SuwayaScheduleEngine.resolveTaskDynamicAstroSlot(
+        isAstroTime: task.isAstroTime,
+        targetPeriodId: task.targetPeriodId,
+        targetSuwayas: task.targetSuwayas,
+        targetCivilClock: task.targetCivilClock,
+        astroState: astroState,
+      );
 
       if (dynamicAstro != null) astroCache[task.id] = dynamicAstro;
 
-      final pId = dynamicAstro?['pId'];
-      final sNum = dynamicAstro?['sNum'];
+      final pId = dynamicAstro?.periodId;
+      final sNum = dynamicAstro?.localSuwaya;
 
       if (task.type == TaskType.permanent) {
         final bool isPermanentToday = effectiveDays == null ||
@@ -171,11 +121,10 @@ class TasksNotifier extends Notifier<TasksState> {
           horizonList.add(task);
         }
       } else {
-        if (task.targetDate == null) {
+        final targetCivilDate = task.targetCivilDate;
+        if (targetCivilDate == null) {
           horizonList.add(task);
-        } else if (task.targetDate!.year == logicalToday.year &&
-            task.targetDate!.month == logicalToday.month &&
-            task.targetDate!.day == logicalToday.day) {
+        } else if (targetCivilDate == logicalToday) {
           todayList.add(task);
           if (pId == currentPeriodId &&
               (sNum == 0 ||
@@ -183,7 +132,9 @@ class TasksNotifier extends Notifier<TasksState> {
                   task.targetSuwayas.contains(-1))) {
             nowList.add(task);
           }
-        } else if (task.targetDate!.isAfter(logicalToday)) {
+        } else if (targetCivilDate
+            .toDateTimeUtc()
+            .isAfter(logicalToday.toDateTimeUtc())) {
           horizonList.add(task);
         }
       }
@@ -192,19 +143,16 @@ class TasksNotifier extends Notifier<TasksState> {
     todayList.sort((a, b) {
       final astroA = astroCache[a.id];
       final astroB = astroCache[b.id];
-      int periodCompare = (astroA?['pId'] ?? 0).compareTo(astroB?['pId'] ?? 0);
+      final int periodCompare =
+          (astroA?.periodId ?? 0).compareTo(astroB?.periodId ?? 0);
       if (periodCompare != 0) return periodCompare;
-      int aSuwaya = astroA?['sNum'] ?? 0;
-      int bSuwaya = astroB?['sNum'] ?? 0;
-      return aSuwaya.compareTo(bSuwaya);
+      return (astroA?.localSuwaya ?? 0).compareTo(astroB?.localSuwaya ?? 0);
     });
 
     nowList.sort((a, b) {
       final astroA = astroCache[a.id];
       final astroB = astroCache[b.id];
-      int aSuwaya = astroA?['sNum'] ?? 0;
-      int bSuwaya = astroB?['sNum'] ?? 0;
-      return aSuwaya.compareTo(bSuwaya);
+      return (astroA?.localSuwaya ?? 0).compareTo(astroB?.localSuwaya ?? 0);
     });
 
     state = TasksState(

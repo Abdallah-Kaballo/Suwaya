@@ -2,8 +2,7 @@ import '../models/astro_models.dart';
 import '../calculators/prayer_calculator.dart';
 import '../generators/period_generator.dart';
 import '../generators/suwaya_distributor.dart';
-
-// استبدل الكلاس SuwayaTimeEngine بالمقطع التالي:
+import 'suwaya_coordinate_mapper.dart';
 
 class SuwayaTimeEngine {
   static SuwayaDay generateDay(
@@ -20,6 +19,7 @@ class SuwayaTimeEngine {
     Map<PrayerKey, int>? manualOffsets,
     Duration Function(DateTime utcInstant)? offsetResolver,
     IbadatTimings? civilDayIbadatOverride,
+    SuwayaAllocationMode allocationMode = SuwayaAllocationMode.canonicalMadhab,
   }) {
     final ibadat = PrayerCalculator.getIbadatTimings(
       lat,
@@ -51,7 +51,11 @@ class SuwayaTimeEngine {
       offsetResolver: offsetResolver,
     );
 
-    final distribution = SuwayaDistributor.getDistributionForMadhab(madhabType);
+    final distribution = SuwayaDistributor.resolveDistribution(
+      madhab: madhabType,
+      anchors: anchors,
+      mode: allocationMode,
+    );
     final periods = PeriodGenerator.generatePeriods(anchors, distribution);
 
     return SuwayaDay(
@@ -69,103 +73,31 @@ class SuwayaTimeEngine {
   }) {
     if (day.periods.isEmpty) return getFallbackState(now);
 
-    AstroPeriod currentPeriod;
-    final bool useUtcLookup = nowUtc != null &&
-        day.periods.every((p) => p.startUtc != null && p.endUtc != null);
+    final coord = SuwayaCoordinateMapper.instantToCoordinate(
+      day: day,
+      instant: now,
+      instantUtc: nowUtc,
+    );
 
-    try {
-      if (useUtcLookup) {
-        currentPeriod = day.periods.firstWhere(
-          (p) =>
-              (nowUtc.isAfter(p.startUtc!) ||
-                  nowUtc.isAtSameMomentAs(p.startUtc!)) &&
-              nowUtc.isBefore(p.endUtc!),
-        );
-      } else {
-        currentPeriod = day.periods.firstWhere(
-          (p) =>
-              (now.isAfter(p.startTime) || now.isAtSameMomentAs(p.startTime)) &&
-              now.isBefore(p.endTime),
-        );
-      }
-    } catch (_) {
-      if (useUtcLookup) {
-        currentPeriod = nowUtc.isBefore(day.periods.first.startUtc!)
-            ? day.periods.first
-            : day.periods.last;
-      } else {
-        currentPeriod = now.isBefore(day.periods.first.startTime)
-            ? day.periods.first
-            : day.periods.last;
-      }
-    }
-
-    final totalMicroseconds = useUtcLookup
-        ? currentPeriod.totalDuration.inMicroseconds
-        : currentPeriod.endTime.difference(currentPeriod.startTime).inMicroseconds;
-
-    if (totalMicroseconds <= 0) return getFallbackState(now);
+    final currentPeriod = day.periods.firstWhere(
+      (p) => p.id == coord.periodId,
+      orElse: () => day.periods.first,
+    );
 
     final int sCount =
         currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
-    final double suwayaDurationMicroseconds = totalMicroseconds / sCount;
-
-    int elapsedMicroseconds;
-    if (useUtcLookup && currentPeriod.startUtc != null) {
-      elapsedMicroseconds =
-          nowUtc.difference(currentPeriod.startUtc!).inMicroseconds;
-    } else {
-      elapsedMicroseconds =
-          now.difference(currentPeriod.startTime).inMicroseconds;
-    }
-    if (elapsedMicroseconds < 0) elapsedMicroseconds = 0;
-
-    int currentLocalSuwaya =
-        (elapsedMicroseconds / suwayaDurationMicroseconds).floor() + 1;
-    currentLocalSuwaya = currentLocalSuwaya.clamp(1, sCount);
-
-    double progress = (elapsedMicroseconds % suwayaDurationMicroseconds) /
-        suwayaDurationMicroseconds;
-    progress = progress.clamp(0.0, 0.999999);
-
     final double actualPeriodSuwayaMicro =
         currentPeriod.totalDuration.inMicroseconds / sCount;
-    final double speedMultiplier =
-        actualPeriodSuwayaMicro > 0 ? 3600 / (actualPeriodSuwayaMicro / 1000000) : 1.0;
-
-    SuwayaPhase phase;
-    int phaseSlotNumber = 0;
-
-    const nightKeys = [
-      PeriodKey.nightMaghribIsha,
-      PeriodKey.nightIshaMidnight,
-      PeriodKey.nightMidnightFajr,
-      PeriodKey.nightFajrSunrise,
-    ];
-
-    if (nightKeys.contains(currentPeriod.periodKey)) {
-      phase = SuwayaPhase.night;
-      for (final p in day.periods) {
-        if (p.periodKey == currentPeriod.periodKey) break;
-        phaseSlotNumber += p.suwayasCount;
-      }
-    } else {
-      phase = SuwayaPhase.day;
-      for (final p in day.periods) {
-        if (!nightKeys.contains(p.periodKey)) {
-          if (p.periodKey == currentPeriod.periodKey) break;
-          phaseSlotNumber += p.suwayasCount;
-        }
-      }
-    }
-    phaseSlotNumber += currentLocalSuwaya;
+    final double speedMultiplier = actualPeriodSuwayaMicro > 0
+        ? 3600 / (actualPeriodSuwayaMicro / 1000000)
+        : 1.0;
 
     final clockTime = SuwayaClockTime(
-      phase: phase,
-      phaseSlotNumber: phaseSlotNumber,
-      periodKey: currentPeriod.periodKey,
-      periodLocalSlotNumber: currentLocalSuwaya,
-      slotProgress: progress,
+      phase: coord.phase,
+      phaseSlotNumber: coord.phaseSlotNumber,
+      periodKey: coord.periodKey,
+      periodLocalSlotNumber: coord.periodLocalSlotNumber,
+      slotProgress: coord.slotProgress,
       cycleStartDate: day.cycleAnchors.cycleStartMaghrib,
       instant: nowUtc ?? now,
     );

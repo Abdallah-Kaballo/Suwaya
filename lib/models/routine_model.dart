@@ -1,4 +1,5 @@
 import 'package:isar_community/isar.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 part 'routine_model.g.dart';
 
@@ -31,4 +32,22 @@ class RoutineModel {
   int alertLevel = 0; 
   String alarmTone = 'assets/audio/default.mp3';
   double alarmVolume = 1.0;
+
+  @ignore
+  CivilWallClock? get startCivilClock => startTimeMinutes != null
+      ? CivilWallClock.fromMinutesSinceMidnight(startTimeMinutes!)
+      : null;
+
+  set startCivilClock(CivilWallClock? clock) {
+    startTimeMinutes = clock?.minutesSinceMidnight;
+  }
+
+  @ignore
+  CivilWallClock? get endCivilClock => endTimeMinutes != null
+      ? CivilWallClock.fromMinutesSinceMidnight(endTimeMinutes!)
+      : null;
+
+  set endCivilClock(CivilWallClock? clock) {
+    endTimeMinutes = clock?.minutesSinceMidnight;
+  }
 }

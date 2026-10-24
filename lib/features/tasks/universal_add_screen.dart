@@ -58,8 +58,28 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   String _alarmTone = 'assets/audio/default.mp3';
   double _alarmVolume = 1.0;
 
-  bool _isSameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _hasTime = false;
+  int _timeMode = 0; // 0: سويعي (Astro), 1: مدني (Civil)
+
+  int _targetGlobalSuwaya = 0;
+  int _targetVirtualMinute = 0;
+
+  int _targetCivilHour = 8;
+  int _targetCivilMinute = 0;
+
+  int _routineTimeMode = 0;
+  int _routineStartGlobalSuwaya = 0, _routineStartVirtualMinute = 0;
+  int _routineStartCivilHour = 8, _routineStartCivilMinute = 0;
+
+  int _routineEndGlobalSuwaya = 1, _routineEndVirtualMinute = 0;
+  int _routineEndCivilHour = 10, _routineEndCivilMinute = 0;
+
+  String _routinePattern = 'linear';
+  Color _routineColor = const Color(0xFF00E5FF);
+  final List<int> _routineRecurrenceDays = [];
+
+  late final Map<String, String> _availableTones;
+  late final Map<String, String> _availablePatterns;
 
   bool _isCandidateTaskTimeInPast({
     required int mode,
@@ -69,42 +89,37 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     required int candidateCivilMin,
   }) {
     if (_tabController.index != 0) return false;
-    
+
     final astroState = ref.read(astroProvider);
     final cityNow = virtualDateTimeNotifier.value;
-    
-    final logicalToday = getLogicalDateForMode(
-      isAstroTime: mode == 0,
+    final isAstroMode = mode == 0;
+
+    final logicalToday = SuwayaScheduleEngine.resolveLogicalCivilDate(
+      isAstroTime: isAstroMode,
       astroState: astroState,
       civilReference: cityNow,
     );
-    
-    final targetDate = _selectedDate ?? logicalToday;
-    
-    // إذا كان التاريخ في الغد أو المستقبل، مسموح حتماً
-    if (targetDate.isAfter(logicalToday) && !_isSameDay(targetDate, logicalToday)) {
-      return false;
-    }
-    // إذا كان التاريخ المختار في الأمس، ممنوع حتماً
-    if (targetDate.isBefore(logicalToday) && !_isSameDay(targetDate, logicalToday)) {
-      return true; 
-    }
 
-    // إذا كان في نفس اليوم المنطقي (اليوم)، نفحص الساعة والدقيقة بدقة
-    if (mode == 1) { // مدني
-      final nowMins = cityNow.hour * 60 + cityNow.minute;
-      final selectedMins = candidateCivilHour * 60 + candidateCivilMin;
-      return selectedMins <= nowMins;
-    } else { // سويعي
-      if (astroState.periods.isEmpty) return false;
-      final ct = astroState.currentSuwayaTime;
-      final int currentGlobalSuwaya = ct.phase.isNight
-          ? (ct.phaseSlotNumber - 1)
-          : (12 + ct.phaseSlotNumber - 1);
-      final int currentTotalVirtualMins = currentGlobalSuwaya * 60 + ct.virtualMinute;
-      final int selectedTotalVirtualMins = candidateGlobalSuwaya * 60 + candidateVirtualMin;
-      return selectedTotalVirtualMins <= currentTotalVirtualMins;
-    }
+    final targetCivilDate = _selectedDate != null
+        ? CivilDate(
+            _selectedDate!.year,
+            _selectedDate!.month,
+            _selectedDate!.day,
+          )
+        : logicalToday;
+
+    return SuwayaScheduleEngine.isCandidateTaskTimeInPast(
+      isAstroMode: isAstroMode,
+      targetDate: targetCivilDate,
+      candidateGlobalSuwaya: candidateGlobalSuwaya,
+      candidateVirtualMinute: candidateVirtualMin,
+      candidateCivilClock: CivilWallClock(
+        hour: candidateCivilHour,
+        minute: candidateCivilMin,
+      ),
+      astroState: astroState,
+      cityNow: cityNow,
+    );
   }
 
   String _pastTimeErrorMessage(BuildContext context) {
@@ -115,47 +130,24 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
         : 'Cannot schedule a task in a time that has already passed today';
   }
 
-  bool _hasTime = false;
-  // 🌟 0: سويعي (Astro), 1: مدني (Civil)
-  int _timeMode = 0; 
-  
-  // المتغيرات السويعية (محولة من وإلى Global 0-23)
-  int _targetGlobalSuwaya = 0;
-  int _targetVirtualMinute = 0;
-  
-  // المتغيرات المدنية
-  int _targetCivilHour = 8;
-  int _targetCivilMinute = 0;
+  int _mapLocalToGlobal(
+    int? periodId,
+    int? localSuwaya,
+    List<AstroPeriod> periods,
+  ) =>
+      SuwayaCoordinateMapper.localToGlobal(periodId, localSuwaya, periods);
 
-  int _routineTimeMode = 0;
-  int _routineStartGlobalSuwaya = 0, _routineStartVirtualMinute = 0;
-  int _routineStartCivilHour = 8, _routineStartCivilMinute = 0;
-  
-  int _routineEndGlobalSuwaya = 1, _routineEndVirtualMinute = 0;
-  int _routineEndCivilHour = 10, _routineEndCivilMinute = 0;
-  
-  String _routinePattern = 'linear';
-  Color _routineColor = const Color(0xFF00E5FF);
-  final List<int> _routineRecurrenceDays = [];
+  int _uiToGlobal(int uiHour, bool isNight) =>
+      SuwayaCoordinateMapper.uiPhaseToGlobal(uiHour, isNight);
 
-  late final Map<String, String> _availableTones;
-  late final Map<String, String> _availablePatterns;
+  ({int uiHour, bool isNight}) _globalToUi(int globalIndex) {
+    final res = SuwayaCoordinateMapper.globalToUiPhase(globalIndex);
+    return (uiHour: res.uiHour, isNight: res.isNight);
+  }
 
-  // 🌟 دالة لتحويل (رقم الفترة + رقم السويعة المحلي) إلى الفهرس العالمي (0..23)
-  int _mapLocalToGlobal(int? periodId, int? localSuwaya, List<AstroPeriod> periods) {
-    if (periodId == null || periods.isEmpty) return 0;
-    int global = 0;
-    for (final p in periods) {
-      if (p.id == periodId) {
-        final count = p.suwayasCount > 0 ? p.suwayasCount : 1;
-        final safeLocal = (localSuwaya == null || localSuwaya <= 0)
-            ? 1
-            : localSuwaya.clamp(1, count);
-        return (global + safeLocal - 1).clamp(0, 23);
-      }
-      global += p.suwayasCount;
-    }
-    return 0;
+  Map<String, int> _mapGlobalToLocal(int global, List<AstroPeriod> periods) {
+    final res = SuwayaCoordinateMapper.globalToLocal(global, periods);
+    return {'pId': res.periodId, 'sNum': res.localSuwaya};
   }
 
   void _applyDefaultsForTab(int tabIndex) {
@@ -175,7 +167,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   @override
   void initState() {
     super.initState();
-    int startTab = widget.existingRoutine != null ? 2 : widget.initialTab;
+    final int startTab =
+        widget.existingRoutine != null ? 2 : widget.initialTab;
     _tabController = TabController(
       length: 3,
       vsync: this,
@@ -196,7 +189,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     _routineStartGlobalSuwaya = defaultGlobal;
     _routineEndGlobalSuwaya = (defaultGlobal + 1) % 24;
 
-    // 🌟 تحميل الإعدادات الافتراضية للمهمة أو العادة الجديدة
     _applyDefaultsForTab(startTab);
 
     if (widget.existingTask != null) {
@@ -220,11 +212,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           localS,
           periods,
         );
-      } else if (!t.isAstroTime && t.targetCivilTimeMinutes != null) {
+      } else if (!t.isAstroTime && t.targetCivilClock != null) {
         _hasTime = true;
         _timeMode = 1;
-        _targetCivilHour = t.targetCivilTimeMinutes! ~/ 60;
-        _targetCivilMinute = t.targetCivilTimeMinutes! % 60;
+        _targetCivilHour = t.targetCivilClock!.hour;
+        _targetCivilMinute = t.targetCivilClock!.minute;
       }
     }
 
@@ -256,13 +248,13 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
         _routineEndVirtualMinute = r.endVirtualMinute ?? 0;
       } else {
         _routineTimeMode = 1;
-        if (r.startTimeMinutes != null) {
-          _routineStartCivilHour = r.startTimeMinutes! ~/ 60;
-          _routineStartCivilMinute = r.startTimeMinutes! % 60;
+        if (r.startCivilClock != null) {
+          _routineStartCivilHour = r.startCivilClock!.hour;
+          _routineStartCivilMinute = r.startCivilClock!.minute;
         }
-        if (r.endTimeMinutes != null) {
-          _routineEndCivilHour = r.endTimeMinutes! ~/ 60;
-          _routineEndCivilMinute = r.endTimeMinutes! % 60;
+        if (r.endCivilClock != null) {
+          _routineEndCivilHour = r.endCivilClock!.hour;
+          _routineEndCivilMinute = r.endCivilClock!.minute;
         }
       }
     }
@@ -278,7 +270,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 🌟 الاكتفاء بملفات الصوت الموجودة فعلياً في assets/audio/
     _availableTones = {
       'assets/audio/default.mp3': 'alerts.default_ring'.tr(),
       'assets/audio/adhan.mp3': 'alerts.makkah_adhan'.tr(),
@@ -300,31 +291,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     _titleController.dispose();
     _tabController.dispose();
     super.dispose();
-  }
-
-  // 🌟 دوال التحويل بين واجهة المستخدم (1-12 ليل/نهار) والفهرس العالمي (0-23)
-  int _uiToGlobal(int uiHour, bool isNight) {
-    if (isNight) return uiHour - 1; // 1 ليل -> 0
-    return uiHour + 11; // 1 نهار -> 12
-  }
-
-  ({int uiHour, bool isNight}) _globalToUi(int globalIndex) {
-    globalIndex = globalIndex.clamp(0, 23);
-    final isNight = globalIndex < 12;
-    final uiHour = isNight ? globalIndex + 1 : globalIndex - 11;
-    return (uiHour: uiHour, isNight: isNight);
-  }
-
-  Map<String, int> _mapGlobalToLocal(int global, List<AstroPeriod> periods) {
-    int remaining = global.clamp(0, 23);
-    for (var p in periods) {
-      if (remaining < p.suwayasCount) {
-        return {'pId': p.id, 'sNum': remaining + 1};
-      }
-      remaining -= p.suwayasCount;
-    }
-    if (periods.isEmpty) return {'pId': 1, 'sNum': 1};
-    return {'pId': periods.last.id, 'sNum': periods.last.suwayasCount};
   }
 
   Future<void> _saveItem() async {
@@ -985,8 +951,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     if (_hasTime) {
       if (_timeMode == 1) {
-        timePreview = ClockTimeText.civil(
-          civilTime: DateTime(2000, 1, 1, _targetCivilHour, _targetCivilMinute),
+        timePreview = ClockTimeText.civilClock(
+          civilClock: CivilWallClock(
+            hour: _targetCivilHour,
+            minute: _targetCivilMinute,
+          ),
           civilTimeFormat: settings.civilTimeFormat,
           locale: context.locale.languageCode,
           style: TextStyle(
@@ -1110,14 +1079,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     
     Widget startPreview; Widget endPreview;
     if (_routineTimeMode == 1) {
-      startPreview = ClockTimeText.civil(
-        civilTime: DateTime(
-          2000,
-          1,
-          1,
-          _routineStartCivilHour,
-          _routineStartCivilMinute,
-        ),
+      startPreview = ClockTimeText.civilClock(
+          civilClock: CivilWallClock(
+            hour: _targetCivilHour,
+            minute: _targetCivilMinute,
+          ),
         civilTimeFormat: settings.civilTimeFormat,
         locale: context.locale.languageCode,
         style: TextStyle(
@@ -1127,14 +1093,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           fontFamily: 'Inter',
         ),
       );
-      endPreview = ClockTimeText.civil(
-        civilTime: DateTime(
-          2000,
-          1,
-          1,
-          _routineEndCivilHour,
-          _routineEndCivilMinute,
-        ),
+      endPreview = ClockTimeText.civilClock(
+          civilClock: CivilWallClock(
+            hour: _targetCivilHour,
+            minute: _targetCivilMinute,
+          ),
         civilTimeFormat: settings.civilTimeFormat,
         locale: context.locale.languageCode,
         style: TextStyle(

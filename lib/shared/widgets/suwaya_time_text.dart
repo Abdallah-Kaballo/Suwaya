@@ -1,24 +1,37 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/utils/time_formatters.dart';
 import '../../features/settings/settings_provider.dart';
 
 class ClockTimeText extends ConsumerWidget {
-  final DateTime? civilTime;
+  final CivilWallClock? civilClock;
   final int? globalSuwayaIndex;
   final int? virtualMinute;
   final String civilTimeFormat;
   final String locale;
   final TextStyle style;
 
-  const ClockTimeText.civil({
+  /// باني صريح يعتمد على CivilWallClock (Zero-Ambiguity Time Type)
+  const ClockTimeText.civilClock({
     super.key,
-    required this.civilTime,
+    required CivilWallClock this.civilClock,
     required this.civilTimeFormat,
     required this.locale,
     required this.style,
   })  : globalSuwayaIndex = null,
+        virtualMinute = null;
+
+  /// باني متوافق يقبل DateTime أو يحوله داخلياً إلى CivilWallClock
+  ClockTimeText.civil({
+    super.key,
+    required DateTime civilTime,
+    required this.civilTimeFormat,
+    required this.locale,
+    required this.style,
+  })  : civilClock = CivilWallClock.fromDateTime(civilTime),
+        globalSuwayaIndex = null,
         virtualMinute = null;
 
   const ClockTimeText.suwaya({
@@ -26,7 +39,7 @@ class ClockTimeText extends ConsumerWidget {
     required this.globalSuwayaIndex,
     required this.virtualMinute,
     required this.style,
-  })  : civilTime = null,
+  })  : civilClock = null,
         civilTimeFormat = civilTimeFormatSystem,
         locale = 'en';
 
@@ -35,14 +48,14 @@ class ClockTimeText extends ConsumerWidget {
     final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    if (civilTime != null) {
+    if (civilClock != null) {
       final defaultCivilColor =
           isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
       return Directionality(
         textDirection: ui.TextDirection.ltr,
         child: Text(
-          formatCivilTime(
-            civilTime!,
+          formatCivilClock(
+            civilClock!,
             format: civilTimeFormat,
             locale: locale,
             context: context,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isar_community/isar.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 part 'task_model.g.dart';
 
@@ -151,5 +152,33 @@ class TaskModel {
     return lastCompletedDate!.year == logicalDate.year &&
            lastCompletedDate!.month == logicalDate.month &&
            lastCompletedDate!.day == logicalDate.day;
+  }
+
+  @ignore
+  CivilDate? get targetCivilDate => targetDate != null
+      ? CivilDate(targetDate!.year, targetDate!.month, targetDate!.day)
+      : null;
+
+  set targetCivilDate(CivilDate? value) {
+    targetDate = value != null
+        ? DateTime(value.year, value.month, value.day)
+        : null;
+  }
+
+  @ignore
+  CivilWallClock? get targetCivilClock => targetCivilTimeMinutes != null
+      ? CivilWallClock.fromMinutesSinceMidnight(targetCivilTimeMinutes!)
+      : null;
+
+  set targetCivilClock(CivilWallClock? clock) {
+    targetCivilTimeMinutes = clock?.minutesSinceMidnight;
+  }
+
+  bool isCompletedOnCivilDate(CivilDate logicalDate) {
+    if (type == TaskType.casual) return isCompleted;
+    if (lastCompletedDate == null) return false;
+    return lastCompletedDate!.year == logicalDate.year &&
+        lastCompletedDate!.month == logicalDate.month &&
+        lastCompletedDate!.day == logicalDate.day;
   }
 }

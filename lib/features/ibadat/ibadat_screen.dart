@@ -410,47 +410,25 @@ class IbadatScreen extends ConsumerWidget {
     final ibadat = astroState.civilDayIbadat;
     final settings = ref.watch(settingsProvider);
     final bottomSafe = MediaQuery.of(context).padding.bottom;
-    final anchors = astroState.cycleAnchors;
 
-    final mandatoryPrayers = [
-      {'id': 'fajr', 'name': 'periods.fajr'.tr(), 'time': ibadat.fajr},
-      {'id': 'dhuhr', 'name': 'periods.dhuhr'.tr(), 'time': ibadat.dhuhr},
-      {'id': 'asr', 'name': 'periods.asr'.tr(), 'time': ibadat.asr},
-      {'id': 'maghrib', 'name': 'periods.maghrib'.tr(), 'time': ibadat.maghrib},
-      {'id': 'isha', 'name': 'prayers.isha'.tr(), 'time': ibadat.isha},
-    ];
-
-    final candidatePrayers = [
-      ...mandatoryPrayers,
-      {'id': 'fajr', 'name': 'periods.fajr'.tr(), 'time': ibadat.nextFajr},
-      {'id': 'isha', 'name': 'prayers.isha'.tr(), 'time': anchors.cycleIsha},
-      {'id': 'fajr', 'name': 'periods.fajr'.tr(), 'time': anchors.cycleFajr},
-      {'id': 'dhuhr', 'name': 'periods.dhuhr'.tr(), 'time': anchors.cycleDhuhr},
-      {'id': 'asr', 'name': 'periods.asr'.tr(), 'time': anchors.cycleAsr},
-      {
-        'id': 'maghrib',
-        'name': 'periods.maghrib'.tr(),
-        'time': anchors.cycleEndMaghrib,
-      },
-    ];
-
-    Map<String, dynamic> resolveNextPrayer(DateTime now) {
-      Map<String, dynamic> next = mandatoryPrayers.first;
-      int minDiffSecs = 86400 * 2;
-      for (final p in candidatePrayers) {
-        final DateTime pTime = p['time'] as DateTime;
-        final int diffSecs = pTime.difference(now).inSeconds;
-        if (diffSecs > 0 && diffSecs < minDiffSecs) {
-          minDiffSecs = diffSecs;
-          next = p;
-        }
-      }
-      return {'prayer': next, 'diffSecs': minDiffSecs};
+    String prayerTitleForKey(PrayerKey key) {
+      return switch (key) {
+        PrayerKey.fajr => 'periods.fajr'.tr(),
+        PrayerKey.dhuhr => 'periods.dhuhr'.tr(),
+        PrayerKey.asr => 'periods.asr'.tr(),
+        PrayerKey.maghrib => 'periods.maghrib'.tr(),
+        PrayerKey.isha => 'prayers.isha'.tr(),
+        PrayerKey.sunrise => 'ibadat.sunrise'.tr(),
+      };
     }
 
-    final initialResolved = resolveNextPrayer(virtualDateTimeNotifier.value);
-    final initialNextId =
-        (initialResolved['prayer'] as Map<String, dynamic>)['id'] as String;
+    final initialCountdown = SuwayaScheduleEngine.computeNextPrayerCountdown(
+      astroState: astroState,
+      liveNow: virtualDateTimeNotifier.value,
+      useAstroTime: settings.useAstroTimeForIbadat,
+      nowUtc: DateTime.now().toUtc(),
+    );
+    final String initialNextId = initialCountdown.prayerId;
 
     final prayerRowsData = <Map<String, dynamic>>[
       {
@@ -525,61 +503,25 @@ class IbadatScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 🌟 عزل التحديث الحي داخل بطاقة العداد التنازلي العلوية فقط
               RepaintBoundary(
                 child: ValueListenableBuilder<DateTime>(
                   valueListenable: virtualDateTimeNotifier,
                   builder: (context, liveNow, _) {
-                    final resolved = resolveNextPrayer(liveNow);
-                    final nextPrayer =
-                        resolved['prayer'] as Map<String, dynamic>;
-                    final int minDiffSecs = resolved['diffSecs'] as int;
+                    final countdown =
+                        SuwayaScheduleEngine.computeNextPrayerCountdown(
+                      astroState: astroState,
+                      liveNow: liveNow,
+                      useAstroTime: settings.useAstroTimeForIbadat,
+                      nowUtc: DateTime.now().toUtc(),
+                    );
 
-                    int sCount, mCount;
-                    String topLabel;
-
-                    if (settings.useAstroTimeForIbadat) {
-                      topLabel = 'ibadat.virtual_remaining'.tr();
-                      final liveAstroState =
-                          SuwayaTimeEngine.calculateCurrentState(
-                        SuwayaDay(
-                          ibadatTimings: astroState.ibadatTimings,
-                          civilDayIbadat: astroState.civilDayIbadat,
-                          cycleAnchors: astroState.cycleAnchors,
-                          periods: astroState.periods,
-                        ),
-                        liveNow,
-                        nowUtc: DateTime.now().toUtc(),
-                      );
-                      final ct = liveAstroState.currentSuwayaTime;
-                      final int currentGlobalIndex = ct.phase.isNight
-                          ? (ct.phaseSlotNumber - 1)
-                          : (12 + ct.phaseSlotNumber - 1);
-                      final int currentVirtualTotalMins =
-                          (currentGlobalIndex * 60) + ct.virtualMinute;
-
-                      final targetAstro = getFixedAstroTime(
-                        nextPrayer['id'] as String,
-                        astroState,
-                        isEnd: false,
-                      );
-                      final int targetVirtualTotalMins =
-                          (targetAstro.globalIndex * 60) + targetAstro.minute;
-
-                      int virtualRemainingMins =
-                          targetVirtualTotalMins - currentVirtualTotalMins;
-                      if (virtualRemainingMins <= 0) {
-                        virtualRemainingMins += 1440;
-                      }
-
-                      sCount = virtualRemainingMins ~/ 60;
-                      mCount = virtualRemainingMins % 60;
-                    } else {
-                      topLabel = 'ibadat.civil_remaining'.tr();
-                      final int remainingMins = (minDiffSecs / 60).ceil();
-                      sCount = remainingMins ~/ 60;
-                      mCount = remainingMins % 60;
-                    }
+                    final String nextPrayerName =
+                        prayerTitleForKey(countdown.prayerKey);
+                    final String topLabel = settings.useAstroTimeForIbadat
+                        ? 'ibadat.virtual_remaining'.tr()
+                        : 'ibadat.civil_remaining'.tr();
+                    final int sCount = countdown.primaryUnits;
+                    final int mCount = countdown.secondaryUnits;
 
                     return Container(
                       padding: EdgeInsets.symmetric(
@@ -630,7 +572,7 @@ class IbadatScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                nextPrayer['name'] as String,
+                                nextPrayerName,
                                 style: TextStyle(
                                   color: isDark ? Colors.white : Colors.black87,
                                   fontSize: isCompact ? 21.0 : 24.0,

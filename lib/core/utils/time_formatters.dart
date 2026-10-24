@@ -1,11 +1,29 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
-const civilTimeFormatSystem = 'system';
-const civilTimeFormat12Hour = '12-hour';
-const civilTimeFormat24Hour = '24-hour';
+const civilTimeFormatSystem = SuwayaTimeFormatter.civilTimeFormatSystem;
+const civilTimeFormat12Hour = SuwayaTimeFormatter.civilTimeFormat12Hour;
+const civilTimeFormat24Hour = SuwayaTimeFormatter.civilTimeFormat24Hour;
+
+String formatCivilClock(
+  CivilWallClock clock, {
+  required String format,
+  required String locale,
+  required BuildContext context,
+}) {
+  final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+  final bool use24Hour = format == civilTimeFormat24Hour ||
+      (format == civilTimeFormatSystem &&
+          (MediaQuery.maybeAlwaysUse24HourFormatOf(context) ?? false));
+
+  return SuwayaTimeFormatter.formatCivilWallClock(
+    clock,
+    use24Hour: use24Hour,
+    locale: locale,
+    isRTL: isRTL,
+  );
+}
 
 String formatCivilTime(
   DateTime time, {
@@ -13,137 +31,104 @@ String formatCivilTime(
   required String locale,
   required BuildContext context,
 }) {
-  final safeLocale = (locale == 'ff' || locale == 'ug') ? 'en' : locale;
-  final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
-
-  // التحقق مما إذا كان المطلوب 24 ساعة (سواء باختيار صريح أو حسب إعدادات نظام الهاتف)
-  final bool use24Hour = format == civilTimeFormat24Hour ||
-      (format == civilTimeFormatSystem &&
-          (MediaQuery.maybeAlwaysUse24HourFormatOf(context) ?? false));
-
-  if (use24Hour) {
-    final time24 = DateFormat('HH:mm', safeLocale).format(time);
-    return '\u202A\u200E$time24\u200E\u202C';
-  }
-
-  // 🌟 التعديل 5: نظام 12 ساعة
-  // في اللغات RTL (كالعربية): يظهر رمز (ص/م) يسار الساعة -> [م 5:30]
-  // في اللغات LTR (كالإنجليزية): يظهر رمز (AM/PM) يمين الساعة -> [5:30 PM]
-  final timeDigits = DateFormat('h:mm', safeLocale).format(time);
-  final periodMarker = DateFormat('a', safeLocale).format(time);
-
-  if (isRTL) {
-    return '\u202A\u200E$periodMarker\u200E \u200E$timeDigits\u200E\u202C';
-  } else {
-    return '\u202A\u200E$timeDigits\u200E \u200E$periodMarker\u200E\u202C';
-  }
+  return formatCivilClock(
+    CivilWallClock.fromDateTime(time),
+    format: format,
+    locale: locale,
+    context: context,
+  );
 }
 
 String getSuwayaIcon(bool isNight, bool isRTL, String iconMode) {
-  if (iconMode == 'text') {
-    return isNight ? (isRTL ? 'ل' : 'N') : (isRTL ? 'ن' : 'D');
-  }
-  return isNight ? '🌑' : '☀️';
+  return SuwayaCoordinateMapper.formatParts(
+    isNight ? 0 : 12,
+    0,
+    isRTL: isRTL,
+    iconMode: iconMode,
+  ).icon;
 }
 
-({String suwayaStr, String minStr, String icon}) getSuwayaTimeParts(int globalSuwayaIndex, int minute, bool isRTL, String iconMode) {
-  globalSuwayaIndex = globalSuwayaIndex.clamp(0, 23);
-  final isNight = globalSuwayaIndex < 12;
-  final localSlot = isNight ? globalSuwayaIndex + 1 : globalSuwayaIndex - 11;
-  
-  final slotStr = localSlot.toString().padLeft(2, '0');
-  final minStr = minute.toString().padLeft(2, '0');
-  final icon = getSuwayaIcon(isNight, isRTL, iconMode);
-  
-  return (suwayaStr: slotStr, minStr: minStr, icon: icon);
+({String suwayaStr, String minStr, String icon}) getSuwayaTimeParts(
+  int globalSuwayaIndex,
+  int minute,
+  bool isRTL,
+  String iconMode,
+) {
+  return SuwayaCoordinateMapper.formatParts(
+    globalSuwayaIndex,
+    minute,
+    isRTL: isRTL,
+    iconMode: iconMode,
+  );
 }
 
-String formatSuwayaClockTime(SuwayaClockTime time, {String separator = '|', required bool isRTL, String iconMode = 'emoji'}) {
-  final slotStr = time.phaseSlotNumber.toString().padLeft(2, '0');
-  final minStr = time.virtualMinute.toString().padLeft(2, '0');
-  final icon = getSuwayaIcon(time.phase.isNight, isRTL, iconMode); 
-  final timeString = '$slotStr$separator$minStr';
-  return isRTL ? '$icon $timeString' : '$timeString $icon';
+String formatSuwayaClockTime(
+  SuwayaClockTime time, {
+  String separator = '|',
+  required bool isRTL,
+  String iconMode = 'emoji',
+}) {
+  final globalIndex = time.phase.isNight
+      ? (time.phaseSlotNumber - 1)
+      : (12 + time.phaseSlotNumber - 1);
+  return SuwayaCoordinateMapper.formatString(
+    globalIndex,
+    time.virtualMinute,
+    separator: separator,
+    isRTL: isRTL,
+    iconMode: iconMode,
+  );
 }
 
-String formatSuwayaTime(int globalSuwayaIndex, int minute, {String separator = '|', bool isRTL = true, String iconMode = 'emoji'}) {
-  final parts = getSuwayaTimeParts(globalSuwayaIndex, minute, isRTL, iconMode);
-  final timeString = '${parts.suwayaStr}$separator${parts.minStr}';
-  return isRTL ? '${parts.icon} $timeString' : '$timeString ${parts.icon}';
+String formatSuwayaTime(
+  int globalSuwayaIndex,
+  int minute, {
+  String separator = '|',
+  bool isRTL = true,
+  String iconMode = 'emoji',
+}) {
+  return SuwayaCoordinateMapper.formatString(
+    globalSuwayaIndex,
+    minute,
+    separator: separator,
+    isRTL: isRTL,
+    iconMode: iconMode,
+  );
 }
 
-// 🌟 الخريطة الفلكية الثابتة للنظام الجديد (V2: 24 سويعة + 5 أجزاء لقيام الليل)
-({int globalIndex, int minute}) getFixedAstroTime(String id, AstroState state, {bool isEnd = false}) {
-  int getCount(PeriodKey k) {
-    try {
-      return state.periods.firstWhere((p) => p.periodKey == k).suwayasCount;
-    } catch (_) {
-      return 1;
-    }
-  }
-  
-  int startG = 0;
-  int length = 0;
-  final sid = id.toLowerCase();
-  
-  if (sid == '1' || sid.contains('maghrib')) {
-    startG = 0;
-    length = getCount(PeriodKey.nightMaghribIsha);
-  } else if (sid == '2' || sid.contains('isha')) {
-    startG = getCount(PeriodKey.nightMaghribIsha);
-    length = getCount(PeriodKey.nightIshaMidnight);
-  } else if (sid == '3' || sid.contains('qiyam') || sid.contains('half_2')) {
-    // 🌟 النصف الثاني من الليل (الفترة 3): يبدأ من الفهرس العالمي 5 (السويعة 06 🌑) بطول 6 سويعات
-    startG = 5;
-    length = 6;
-  } else if (sid == '4' || sid.contains('fajr')) {
-    startG = 11;
-    length = 1;
-  } else if (sid == '5' || sid.contains('duha') || sid.contains('sunrise')) {
-    startG = 12;
-    length = getCount(PeriodKey.daySunriseDhuhr);
-  } else if (sid == '6' || sid.contains('dhuhr')) {
-    startG = 12 + getCount(PeriodKey.daySunriseDhuhr);
-    length = getCount(PeriodKey.dayDhuhrAsr);
-  } else if (sid == '7' || sid.contains('asr')) {
-    startG = 12 + getCount(PeriodKey.daySunriseDhuhr) + getCount(PeriodKey.dayDhuhrAsr);
-    length = getCount(PeriodKey.dayAsrMaghrib);
-  } else if (sid.contains('third_3')) {
-    // 🌟 الثلث الأخير من الليل: 4 سويعات (من 08|00 🌑 إلى 11|59 🌑)
-    startG = 7;
-    length = 4;
-  } else if (sid.contains('sixth_4')) {
-    // 🌟 السدس الرابع: سويعتان (من 06|00 🌑 إلى 07|59 🌑)
-    startG = 5;
-    length = 2;
-  } else if (sid.contains('sixth_5')) {
-    // 🌟 السدس الخامس: سويعتان (من 08|00 🌑 إلى 09|59 🌑)
-    startG = 7;
-    length = 2;
-  } else if (sid.contains('sixth_6')) {
-    // 🌟 السدس السادس: سويعتان (من 10|00 🌑 إلى 11|59 🌑)
-    startG = 9;
-    length = 2;
-  } else {
-    startG = 0;
-    length = 1;
-  }
-  
-  if (isEnd) {
-    final int endTotalMinutes = (startG * 60) + (length * 60) - 1;
-    return (globalIndex: (endTotalMinutes ~/ 60) % 24, minute: endTotalMinutes % 60);
-  }
-  return (globalIndex: startG % 24, minute: 0);
+({int globalIndex, int minute}) getFixedAstroTime(
+  String id,
+  AstroState state, {
+  bool isEnd = false,
+}) {
+  return SuwayaCoordinateMapper.fixedBoundaryCoordinate(
+    id,
+    state.periods,
+    isEnd: isEnd,
+  );
 }
+
+CivilDate getLogicalCivilDateForMode({
+  required bool isAstroTime,
+  required AstroState astroState,
+  DateTime? civilReference,
+}) {
+  return SuwayaScheduleEngine.resolveLogicalCivilDate(
+    isAstroTime: isAstroTime,
+    astroState: astroState,
+    civilReference: civilReference,
+  );
+}
+
 DateTime getLogicalDateForMode({
   required bool isAstroTime,
   required AstroState astroState,
   DateTime? civilReference,
 }) {
-  final civil = civilReference ?? astroState.virtualTime;
-  if (isAstroTime && astroState.periods.isNotEmpty) {
-    final endMaghrib = astroState.cycleAnchors.cycleEndMaghrib;
-    return DateTime(endMaghrib.year, endMaghrib.month, endMaghrib.day);
-  }
-  return DateTime(civil.year, civil.month, civil.day);
+  final civilDate = getLogicalCivilDateForMode(
+    isAstroTime: isAstroTime,
+    astroState: astroState,
+    civilReference: civilReference,
+  );
+  return DateTime(civilDate.year, civilDate.month, civilDate.day);
 }

@@ -8,10 +8,11 @@ import '../../features/settings/settings_provider.dart';
 
 final virtualTimeNotifier = ValueNotifier<String>("00|00|00");
 final virtualDateTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
-final dialQuantizedTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
-final Map<String, SuwayaDay> _dayCache = {};
 
-// استبدل الكلاس AstroNotifier بالمقطع التالي:
+/// يتحدث كل 15 ثانية فقط لتحريك عقرب القرص الفلكي دون إعادة بناء القرص 60 مرة في الدقيقة
+final dialQuantizedTimeNotifier = ValueNotifier<DateTime>(DateTime.now());
+
+final Map<String, SuwayaDay> _dayCache = {};
 
 class AstroNotifier extends Notifier<AstroState> {
   Timer? _stateTimer;
@@ -77,7 +78,7 @@ class AstroNotifier extends Notifier<AstroState> {
         _uiTimer?.cancel();
         _uiTimer = null;
         _lifecycleListener?.dispose();
-        _lifecycleListener = null; // 🌟 تصفير المرجع لمنع استدعاء dispose مرتين عند إعادة بناء المزود
+        _lifecycleListener = null;
       });
 
       final Map<PrayerKey, int> manualOffsetsMap = {};
@@ -133,7 +134,6 @@ class AstroNotifier extends Notifier<AstroState> {
       );
       _startUITicker(generatedDay, loc);
 
-      // 🌟 إيقاف المؤقتات تماماً في الخلفية لحماية البطارية واستئنافها فور فتح الشاشة
       _lifecycleListener?.dispose();
       _lifecycleListener = AppLifecycleListener(
         onPause: () {
@@ -163,6 +163,7 @@ class AstroNotifier extends Notifier<AstroState> {
             nowUtc: resumeUtc,
           );
           virtualDateTimeNotifier.value = resumeWall;
+          dialQuantizedTimeNotifier.value = resumeWall;
           virtualTimeNotifier.value =
               _formatVirtualTime(resumedState.currentSuwayaTime);
 
@@ -190,9 +191,10 @@ class AstroNotifier extends Notifier<AstroState> {
     }
   }
 
+  /// مؤقت تكيّفي ذكي يستيقظ بالضبط عند ولادة الثانية الافتراضية التالية في الفترة النشطة
   void _startUITicker(SuwayaDay day, SavedLocation? loc) {
     _uiTimer?.cancel();
-    int lastCivilMinute = -1;
+    int lastCivilSecond = -1;
     int lastQuantized15SecSlot = -1;
     String lastFormattedVirtual = virtualTimeNotifier.value;
 
@@ -201,14 +203,12 @@ class AstroNotifier extends Notifier<AstroState> {
       final nowUtc = DateTime.now().toUtc();
       final tickNow = _getCityNowFromUtc(loc, nowUtc);
 
-      // 1. عند عبور منتصف الليل المدني (00:00)، نعيد بناء المزود لتحديث مواقيت اليوم الجديد
       if (_lastCivilDay != -1 && tickNow.day != _lastCivilDay) {
         _lastCivilDay = tickNow.day;
         Future.microtask(() => ref.invalidateSelf());
         return;
       }
 
-      // 2. حساب الحالة الفلكية الحالية وتحديث الساعة السويعية الرقمية
       final newState = SuwayaTimeEngine.calculateCurrentState(
         day,
         tickNow,
@@ -221,21 +221,17 @@ class AstroNotifier extends Notifier<AstroState> {
         virtualTimeNotifier.value = formatted;
       }
 
-      // 3. تحديث الوقت المدني عند تغير الدقيقة (أو في المرة الأولى) لأن جميع الساعات المدنية تعرض HH:mm
-      final currentEpochMinute = tickNow.millisecondsSinceEpoch ~/ 60000;
-      if (currentEpochMinute != lastCivilMinute) {
-        lastCivilMinute = currentEpochMinute;
+      if (tickNow.second != lastCivilSecond) {
+        lastCivilSecond = tickNow.second;
         virtualDateTimeNotifier.value = tickNow;
       }
 
-      // 4. تحديث زاوية القرص الفلكي مرة واحدة فقط كل 15 ثانية لمنع إعادة رسم الحلقات غير الضرورية
       final current15SecSlot = tickNow.millisecondsSinceEpoch ~/ 15000;
       if (current15SecSlot != lastQuantized15SecSlot) {
         lastQuantized15SecSlot = current15SecSlot;
         dialQuantizedTimeNotifier.value = tickNow;
       }
 
-      // 5. حساب المدة الفيزيائية الدقيقة المتبقية حتى بداية الثانية الافتراضية التالية في الفترة الحالية
       final activePeriod = newState.currentPeriod;
       final sCount =
           activePeriod.suwayasCount > 0 ? activePeriod.suwayasCount : 1;
@@ -247,12 +243,10 @@ class AstroNotifier extends Notifier<AstroState> {
         final elapsedMicro =
             nowUtc.difference(activePeriod.startUtc!).inMicroseconds;
 
-        // رقم الثانية الافتراضية الحالية داخل الفترة
         final currentVirtualSecIndex =
             (elapsedMicro * totalVirtualSecondsInPeriod) ~/ periodMicro;
         final nextVirtualSecIndex = currentVirtualSecIndex + 1;
 
-        // اللحظة المايكروثانية الدقيقة لدخول الثانية الافتراضية التالية
         final nextBoundaryMicro = (nextVirtualSecIndex * periodMicro +
                 totalVirtualSecondsInPeriod -
                 1) ~/
@@ -260,10 +254,9 @@ class AstroNotifier extends Notifier<AstroState> {
 
         final remainingMicro = nextBoundaryMicro - elapsedMicro;
         nextWakeDelay = Duration(
-          microseconds: remainingMicro.clamp(50000, 5000000), // بين 50ms و5s كحدود أمان
+          microseconds: remainingMicro.clamp(50000, 2000000),
         );
       } else {
-        // مسار احتياطي: بداية الثانية الفيزيائية التالية
         nextWakeDelay = Duration(
           milliseconds: 1000 - (nowUtc.millisecond % 1000),
         );

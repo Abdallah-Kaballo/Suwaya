@@ -1,68 +1,23 @@
+import 'package:suwaya_time/suwaya_time.dart';
 import '../../models/routine_model.dart';
 import '../../models/settings_model.dart';
 import '../../models/task_model.dart';
 import 'routine_time_resolver.dart';
 
 class ScheduleFingerprint {
-  /// معرف رقمي ثابت وحتمي لأجزاء الليل الخمسة (بدلاً من String.hashCode غير المستقر)
-  static int stableNightPartCode(String nightPartId) {
-    switch (nightPartId.trim().toLowerCase()) {
-      case 'half_1':
-        return 11;
-      case 'half_2':
-        return 12;
-      case 'third_1':
-        return 21;
-      case 'third_2':
-        return 22;
-      case 'third_3':
-        return 23;
-      case 'sixth_1':
-        return 31;
-      case 'sixth_2':
-        return 32;
-      case 'sixth_3':
-        return 33;
-      case 'sixth_4':
-        return 34;
-      case 'sixth_5':
-        return 35;
-      case 'sixth_6':
-        return 36;
-      default:
-        int acc = 50;
-        for (final unit in nightPartId.codeUnits) {
-          acc = ((acc * 31) + unit) % 40 + 50;
-        }
-        return acc;
-    }
-  }
+  /// معرف رقمي ثابت وحتمي لأجزاء الليل الخمسة عبر النواة
+  static int stableNightPartCode(String nightPartId) =>
+      SuwayaRecurrenceEngine.stableNightPartCode(nightPartId);
 
-  /// منع تصادم تنبيهين في نفس الثانية الفعلية:
-  /// الأولوية المطلقة للأذان في الثانية +0s، وتُزاح التنبيهات المتزامنة معه بمقدار +2s تتابعياً
+  /// منع تصادم تنبيهين في نفس الثانية الفعلية عبر النواة
   static DateTime resolveCollisionSafeTime(
     DateTime desiredTime,
     Set<int> occupiedEpochSeconds,
-  ) {
-    final cleanTime = DateTime(
-      desiredTime.year,
-      desiredTime.month,
-      desiredTime.day,
-      desiredTime.hour,
-      desiredTime.minute,
-      desiredTime.second,
-    );
-    int candidateSec = cleanTime.millisecondsSinceEpoch ~/ 1000;
-    int offsetSeconds = 0;
-
-    while (occupiedEpochSeconds.contains(candidateSec) && offsetSeconds < 30) {
-      offsetSeconds += 2;
-      candidateSec += 2;
-    }
-
-    occupiedEpochSeconds.add(candidateSec);
-    return cleanTime.add(Duration(seconds: offsetSeconds));
-  }
+  ) =>
+      SuwayaRecurrenceEngine.resolveCollisionSafeTime(
+        desiredTime,
+        occupiedEpochSeconds,
+      );
 
   /// بناء بصمة التغييرات الشاملة للموقع والإعدادات والمهام والروتينات
   static String compute({

@@ -7,7 +7,6 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../../core/astro_engine/astro_provider.dart';
-import '../../../core/notification/routine_time_resolver.dart';
 import '../../../core/theme/astro_ui_extensions.dart';
 import '../../../core/utils/time_formatters.dart';
 import '../../../models/settings_model.dart';
@@ -459,7 +458,6 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     );
   }
 
-  /// تنسيق عدد جلسات البومودورو حسب قواعد اللغة (1 جلسة، 2 جلستان، 3 جلسات...)
   String _formatSessionsCount(BuildContext context, int count) {
     final lang = context.locale.languageCode;
     if (lang == 'ar') {
@@ -471,104 +469,25 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     return count == 1 ? '1 Session' : '$count Sessions';
   }
 
-  ({int globalIndex, int minute}) _dateTimeToAstroParts(
-    DateTime time,
-    AstroState astroState,
-  ) {
-    if (astroState.periods.isEmpty) return (globalIndex: 0, minute: 0);
-    final anchors = astroState.cycleAnchors;
-    final cycleDuration =
-        anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib);
-
-    if (time.isAtSameMomentAs(anchors.cycleEndMaghrib)) {
-      return (globalIndex: 0, minute: 0);
-    }
-
-    DateTime evalTime = time;
-    if (evalTime.isAfter(anchors.cycleEndMaghrib) &&
-        cycleDuration.inMinutes > 0) {
-      evalTime = evalTime.subtract(cycleDuration);
-    }
-
-    final mockState = SuwayaTimeEngine.calculateCurrentState(
-      SuwayaDay(
-        ibadatTimings: astroState.ibadatTimings,
-        cycleAnchors: astroState.cycleAnchors,
-        periods: astroState.periods,
-      ),
-      evalTime,
-    );
-    final int global = mockState.currentSuwayaTime.phase == SuwayaPhase.day
-        ? 12 + mockState.currentSuwayaTime.phaseSlotNumber - 1
-        : mockState.currentSuwayaTime.phaseSlotNumber - 1;
-    return (
-      globalIndex: global.clamp(0, 23),
-      minute: mockState.currentSuwayaTime.virtualMinute.clamp(0, 59),
-    );
-  }
-
-  DateTime _astroPartsToDateTime(
-    int globalIndex,
-    int virtualMinute,
-    AstroState astroState,
-  ) {
-    int remaining = globalIndex.clamp(0, 23);
-    AstroPeriod targetPeriod = astroState.periods.last;
-    int localSuwaya = targetPeriod.suwayasCount;
-
-    for (final p in astroState.periods) {
-      if (remaining < p.suwayasCount) {
-        targetPeriod = p;
-        localSuwaya = remaining + 1;
-        break;
-      }
-      remaining -= p.suwayasCount;
-    }
-
-    DateTime resolved = resolveAstroRoutineTime(
-      period: targetPeriod,
-      localSuwaya: localSuwaya,
-      virtualMinute: virtualMinute.clamp(0, 59),
-    );
-
-    if (!resolved.isAfter(_anchoredStartTime)) {
-      final cycleDuration = astroState.cycleAnchors.cycleEndMaghrib
-          .difference(astroState.cycleAnchors.cycleStartMaghrib);
-      resolved = resolved.add(
-        cycleDuration.inMinutes > 0 ? cycleDuration : const Duration(days: 1),
-      );
-    }
-    return resolved;
-  }
-
   void _resolveNextPrayer(AstroState astro) {
     final now = virtualDateTimeNotifier.value;
     final referenceTime =
         now.isAfter(_anchoredStartTime) ? now : _anchoredStartTime;
-    final anchors = astro.cycleAnchors;
 
-    final orderedCyclePrayers = <({String name, DateTime time})>[
-      (name: 'prayers.isha'.tr(), time: anchors.cycleIsha),
-      (name: 'periods.fajr'.tr(), time: anchors.cycleFajr),
-      (name: 'periods.dhuhr'.tr(), time: anchors.cycleDhuhr),
-      (name: 'periods.asr'.tr(), time: anchors.cycleAsr),
-      (name: 'periods.maghrib'.tr(), time: anchors.cycleEndMaghrib),
-    ];
-
-    for (final p in orderedCyclePrayers) {
-      if (p.time.isAfter(referenceTime)) {
-        _nextPrayerName = p.name;
-        _nextPrayerTime = p.time;
-        return;
-      }
-    }
-
-    final cycleDuration =
-        anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib);
-    _nextPrayerName = 'prayers.isha'.tr();
-    _nextPrayerTime = anchors.cycleIsha.add(
-      cycleDuration.inMinutes > 0 ? cycleDuration : const Duration(days: 1),
+    final resolved = SuwayaFlowPlanner.resolveNextCyclePrayer(
+      anchors: astro.cycleAnchors,
+      referenceTime: referenceTime,
     );
+
+    _nextPrayerTime = resolved.time;
+    _nextPrayerName = switch (resolved.prayerKey) {
+      PrayerKey.fajr => 'periods.fajr'.tr(),
+      PrayerKey.dhuhr => 'periods.dhuhr'.tr(),
+      PrayerKey.asr => 'periods.asr'.tr(),
+      PrayerKey.maghrib => 'periods.maghrib'.tr(),
+      PrayerKey.isha => 'prayers.isha'.tr(),
+      PrayerKey.sunrise => 'ibadat.sunrise'.tr(),
+    };
   }
 
   String _formatDisplayedTime({
@@ -580,14 +499,14 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
   }) {
     final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
     if (!useAstro) {
-      return formatCivilTime(
-        time,
+      return formatCivilClock(
+        CivilWallClock.fromDateTime(time),
         format: settings.civilTimeFormat,
         locale: context.locale.languageCode,
         context: context,
       );
     }
-    final parts = _dateTimeToAstroParts(time, astroState);
+    final parts = SuwayaFlowPlanner.dateTimeToAstroParts(time, astroState);
     return formatSuwayaTime(
       parts.globalIndex,
       parts.minute,
@@ -602,35 +521,40 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     required AstroState astroState,
     required bool isAstroMode,
   }) {
-    if (!candidateEnd.isAfter(_anchoredStartTime)) {
-      return (
-        isValid: false,
-        errorMessage: trPomodoro(
-          context,
-          'pomodoro.end_must_be_after_start',
-          'يجب أن يكون وقت النهاية بعد وقت البداية',
-          'End time must be after start time',
-        ),
-      );
-    }
+    final result = SuwayaFlowPlanner.validateSessionWindow(
+      anchoredStart: _anchoredStartTime,
+      candidateEnd: candidateEnd,
+    );
 
-    final actualMins = candidateEnd.difference(_anchoredStartTime).inMinutes;
-    if (actualMins < 15) {
-      return (isValid: false, errorMessage: 'pomodoro.time_too_short'.tr());
-    }
-    if (actualMins > 720) {
-      return (
-        isValid: false,
-        errorMessage: trPomodoro(
-          context,
-          'pomodoro.max_12_hours',
-          'لا يمكن أن تزيد المدة عن 12 ساعة',
-          'Duration cannot exceed 12 hours',
+    if (result.isValid) return (isValid: true, errorMessage: null);
+
+    return switch (result.error) {
+      SuwayaFlowValidationError.endBeforeStart => (
+          isValid: false,
+          errorMessage: trPomodoro(
+            context,
+            'pomodoro.end_must_be_after_start',
+            'يجب أن يكون وقت النهاية بعد وقت البداية',
+            'End time must be after start time',
+          ),
         ),
-      );
-    }
-    return (isValid: true, errorMessage: null);
+      SuwayaFlowValidationError.tooShort => (
+          isValid: false,
+          errorMessage: 'pomodoro.time_too_short'.tr(),
+        ),
+      SuwayaFlowValidationError.exceedsMaxHours => (
+          isValid: false,
+          errorMessage: trPomodoro(
+            context,
+            'pomodoro.max_12_hours',
+            'لا يمكن أن تزيد المدة عن 12 ساعة',
+            'Duration cannot exceed 12 hours',
+          ),
+        ),
+      SuwayaFlowValidationError.none => (isValid: true, errorMessage: null),
+    };
   }
+
 
   bool _isCivil12HourActive(BuildContext context, String civilTimeFormat) {
     if (civilTimeFormat == civilTimeFormat12Hour) return true;
@@ -652,7 +576,8 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     final use12Hour = _isCivil12HourActive(context, settings.civilTimeFormat);
 
     int pickerTimeMode = settings.useAstroTimeForIbadat ? 0 : 1;
-    final initialAstro = _dateTimeToAstroParts(currentEffectiveEnd, astroState);
+    final initialAstro =
+        SuwayaFlowPlanner.dateTimeToAstroParts(currentEffectiveEnd, astroState);
     int tempGlobalSuwaya = initialAstro.globalIndex;
     int tempVirtualMinute = initialAstro.minute;
     int tempCivilHour = currentEffectiveEnd.hour;
@@ -716,7 +641,8 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                       accentColor: pColor,
                       iconMode: settings.suwayaIconMode,
                       onChanged: (h, m, night) {
-                        tempGlobalSuwaya = night ? (h - 1) : (h + 11);
+                        tempGlobalSuwaya =
+                            SuwayaCoordinateMapper.uiPhaseToGlobal(h, night);
                         tempVirtualMinute = m;
                         if (dialogError != null) {
                           setDialogState(() => dialogError = null);
@@ -780,10 +706,12 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                           onPressed: () {
                             DateTime candidate;
                             if (pickerTimeMode == 0) {
-                              candidate = _astroPartsToDateTime(
-                                tempGlobalSuwaya,
-                                tempVirtualMinute,
-                                astroState,
+                              candidate =
+                                  SuwayaFlowPlanner.astroPartsToDateTime(
+                                globalIndex: tempGlobalSuwaya,
+                                virtualMinute: tempVirtualMinute,
+                                anchoredStartTime: _anchoredStartTime,
+                                astroState: astroState,
                               );
                             } else {
                               candidate = DateTime.utc(
