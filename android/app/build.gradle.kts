@@ -50,13 +50,16 @@ android {
     buildTypes {
         release {
             val allowDebugFallback = project.findProperty("allowDebugReleaseSign") == "true"
+            val isReleaseTaskRequested = gradle.startParameter.taskNames.any {
+                it.contains("Release", ignoreCase = true)
+            }
 
             isMinifyEnabled = true
             isShrinkResources = true
 
             signingConfig = when {
                 hasKeystore -> signingConfigs.getByName("release")
-                allowDebugFallback -> signingConfigs.getByName("debug")
+                allowDebugFallback || !isReleaseTaskRequested -> signingConfigs.getByName("debug")
                 else -> throw GradleException(
                     "🚨 Missing key.properties for Release build! Provide release signing credentials or pass -PallowDebugReleaseSign=true for testing only."
                 )
