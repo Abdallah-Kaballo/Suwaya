@@ -482,7 +482,7 @@ class _NotificationsSettingsScreenState
                                             child: Row(
                                               children: [
                                                 Icon(
-                                                  LucideIcons.music,
+                                                  LucideIcons.mic,
                                                   color: textColor.withValues(
                                                     alpha: 0.5,
                                                   ),
