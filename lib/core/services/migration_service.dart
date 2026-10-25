@@ -181,16 +181,22 @@ class MigrationService {
       final maxEnd = newEndP.maxSuwayasForMadhab(isHanafi: isHanafi);
 
       routine.startPeriodId = newStartP.id;
-      routine.startSuwaya =
-          (((routine.startSuwaya ?? 1) + 1) ~/ 2).clamp(1, maxStart);
-      routine.startVirtualMinute =
-          ((routine.startVirtualMinute ?? 0) * 2).clamp(0, 59);
+      routine.startSuwaya = (((routine.startSuwaya ?? 1) + 1) ~/ 2).clamp(
+        1,
+        maxStart,
+      );
+      routine.startVirtualMinute = ((routine.startVirtualMinute ?? 0) * 2)
+          .clamp(0, 59);
 
       routine.endPeriodId = newEndP.id;
-      routine.endSuwaya =
-          (((routine.endSuwaya ?? 1) + 1) ~/ 2).clamp(1, maxEnd);
-      routine.endVirtualMinute =
-          ((routine.endVirtualMinute ?? 0) * 2).clamp(0, 59);
+      routine.endSuwaya = (((routine.endSuwaya ?? 1) + 1) ~/ 2).clamp(
+        1,
+        maxEnd,
+      );
+      routine.endVirtualMinute = ((routine.endVirtualMinute ?? 0) * 2).clamp(
+        0,
+        59,
+      );
     } else {
       routine.isAstroTime = false;
       routine.startTimeMinutes ??= 10 * 60;

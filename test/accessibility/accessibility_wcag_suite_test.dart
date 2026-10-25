@@ -24,7 +24,7 @@ class _InMemoryTranslationLoader extends AssetLoader {
       'common': {
         'done': 'تم',
         'cancel': 'إلغاء',
-        'suwaya_time': 'الوقت السُويعي'
+        'suwaya_time': 'الوقت السُويعي',
       },
       'periods': {
         'fajr': 'الفجر',
@@ -90,9 +90,7 @@ Widget _buildLocalizedTestApp({
   double textScale = 1.0,
 }) {
   return ProviderScope(
-    overrides: [
-      settingsRepositoryProvider.overrideWithValue(repo),
-    ],
+    overrides: [settingsRepositoryProvider.overrideWithValue(repo)],
     child: EasyLocalization(
       supportedLocales: AppLocales.supported,
       path: AppLocales.path,
@@ -108,9 +106,9 @@ Widget _buildLocalizedTestApp({
             locale: context.locale,
             theme: AppTheme.getDarkTheme(AppColorTheme.gold),
             builder: (ctx, appChild) => MediaQuery(
-              data: MediaQuery.of(ctx).copyWith(
-                textScaler: TextScaler.linear(textScale),
-              ),
+              data: MediaQuery.of(
+                ctx,
+              ).copyWith(textScaler: TextScaler.linear(textScale)),
               child: appChild!,
             ),
             home: child,
@@ -132,124 +130,127 @@ void main() {
 
   group('Accessibility & WCAG 2.1 Highest Standards Suite', () {
     testWidgets(
-        '1. ManualOffsetsScreen buttons meet 48x48dp Android & 44x44pt iOS tap target guidelines and text scaling without overflow',
-        (WidgetTester tester) async {
-      final handle = tester.ensureSemantics();
-      final repo = _AccessibilityFakeSettingsRepo();
+      '1. ManualOffsetsScreen buttons meet 48x48dp Android & 44x44pt iOS tap target guidelines and text scaling without overflow',
+      (WidgetTester tester) async {
+        final handle = tester.ensureSemantics();
+        final repo = _AccessibilityFakeSettingsRepo();
 
-      await tester.pumpWidget(
-        _buildLocalizedTestApp(
-          repo: repo,
-          textScale: 1.25,
-          child: const ManualOffsetsScreen(),
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          _buildLocalizedTestApp(
+            repo: repo,
+            textScale: 1.25,
+            child: const ManualOffsetsScreen(),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
-      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+        expect(tester.takeException(), isNull);
+        await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
 
-      handle.dispose();
-    });
+        handle.dispose();
+      },
+    );
 
     testWidgets(
-        '2. AlarmRingScreen hides decorative swipe track from screen readers (ExcludeSemantics) and exposes explicit accessible Stop/Snooze buttons',
-        (WidgetTester tester) async {
-      final handle = tester.ensureSemantics();
-      final repo = _AccessibilityFakeSettingsRepo();
+      '2. AlarmRingScreen hides decorative swipe track from screen readers (ExcludeSemantics) and exposes explicit accessible Stop/Snooze buttons',
+      (WidgetTester tester) async {
+        final handle = tester.ensureSemantics();
+        final repo = _AccessibilityFakeSettingsRepo();
 
-      final payload = const ParsedAlarmData(
-        eventId: 401011,
-        kind: AlarmEventKind.task,
-        deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
-        sourceId: '1',
-        title: 'مراجعة الورد اليومي',
-        body: 'السويعة الأولى من الفجر',
-        colorValue: 0xFF22D3EE,
-        snoozeAllowed: true,
-        snoozeDurationMinutes: 10,
-        snoozeCount: 0,
-        maxSnoozes: 3,
-        loopAudio: true,
-        volumePolicy: AlarmVolumePolicy.userAdjustable,
-      ).toPayloadString();
-
-      final alarmSettings = AlarmSettings(
-        id: 401011,
-        dateTime: DateTime(2026, 10, 22, 5, 0),
-        assetAudioPath: 'assets/audio/default.mp3',
-        loopAudio: true,
-        vibrate: true,
-        androidFullScreenIntent: true,
-        payload: payload,
-        volumeSettings: VolumeSettings.fade(
-          volume: 1.0,
-          fadeDuration: const Duration(seconds: 4),
-          volumeEnforced: false,
-        ),
-        notificationSettings: const NotificationSettings(
+        final payload = const ParsedAlarmData(
+          eventId: 401011,
+          kind: AlarmEventKind.task,
+          deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
+          sourceId: '1',
           title: 'مراجعة الورد اليومي',
           body: 'السويعة الأولى من الفجر',
-          stopButton: 'إيقاف',
-        ),
-      );
+          colorValue: 0xFF22D3EE,
+          snoozeAllowed: true,
+          snoozeDurationMinutes: 10,
+          snoozeCount: 0,
+          maxSnoozes: 3,
+          loopAudio: true,
+          volumePolicy: AlarmVolumePolicy.userAdjustable,
+        ).toPayloadString();
 
-      await tester.pumpWidget(
-        _buildLocalizedTestApp(
-          repo: repo,
-          child: AlarmRingScreen(alarmSettings: alarmSettings),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+        final alarmSettings = AlarmSettings(
+          id: 401011,
+          dateTime: DateTime(2026, 10, 22, 5, 0),
+          assetAudioPath: 'assets/audio/default.mp3',
+          loopAudio: true,
+          vibrate: true,
+          androidFullScreenIntent: true,
+          payload: payload,
+          volumeSettings: VolumeSettings.fade(
+            volume: 1.0,
+            fadeDuration: const Duration(seconds: 4),
+            volumeEnforced: false,
+          ),
+          notificationSettings: const NotificationSettings(
+            title: 'مراجعة الورد اليومي',
+            body: 'السويعة الأولى من الفجر',
+            stopButton: 'إيقاف',
+          ),
+        );
 
-      expect(tester.takeException(), isNull);
-      expect(find.text('مراجعة الورد اليومي'), findsOneWidget);
-      expect(find.byType(TextButton), findsNWidgets(2));
-      expect(find.byType(ExcludeSemantics), findsWidgets);
+        await tester.pumpWidget(
+          _buildLocalizedTestApp(
+            repo: repo,
+            child: AlarmRingScreen(alarmSettings: alarmSettings),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
-      handle.dispose();
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.text('مراجعة الورد اليومي'), findsOneWidget);
+        expect(find.byType(TextButton), findsNWidgets(2));
+        expect(find.byType(ExcludeSemantics), findsWidgets);
+
+        handle.dispose();
+      },
+    );
 
     testWidgets(
-        '3. Bidirectional Time Formatting (RTL & LTR) preserves digit order and places phase icons accurately',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: [
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: SuwayaTimeText(
-                    globalSuwayaIndex: 0,
-                    minute: 5,
-                    style: TextStyle(fontSize: 18),
-                    iconMode: 'text',
-                    isRTL: true,
+      '3. Bidirectional Time Formatting (RTL & LTR) preserves digit order and places phase icons accurately',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: [
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: SuwayaTimeText(
+                      globalSuwayaIndex: 0,
+                      minute: 5,
+                      style: TextStyle(fontSize: 18),
+                      iconMode: 'text',
+                      isRTL: true,
+                    ),
                   ),
-                ),
-                Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: SuwayaTimeText(
-                    globalSuwayaIndex: 12,
-                    minute: 45,
-                    style: TextStyle(fontSize: 18),
-                    iconMode: 'text',
-                    isRTL: false,
+                  Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: SuwayaTimeText(
+                      globalSuwayaIndex: 12,
+                      minute: 45,
+                      style: TextStyle(fontSize: 18),
+                      iconMode: 'text',
+                      isRTL: false,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('01'), findsNWidgets(2));
-      expect(find.text('05'), findsOneWidget);
-      expect(find.text('45'), findsOneWidget);
-      expect(find.text('ل'), findsOneWidget);
-      expect(find.text('D'), findsOneWidget);
-    });
+        expect(find.text('01'), findsNWidgets(2));
+        expect(find.text('05'), findsOneWidget);
+        expect(find.text('45'), findsOneWidget);
+        expect(find.text('ل'), findsOneWidget);
+        expect(find.text('D'), findsOneWidget);
+      },
+    );
   });
 }

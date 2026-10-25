@@ -9,14 +9,19 @@ import 'package:suwaya/models/settings_model.dart';
 
 import '../../settings/settings_provider.dart';
 
-final nearestCityProvider =
-    FutureProvider.family.autoDispose<String?, String>((ref, langCode) async {
+final nearestCityProvider = FutureProvider.family.autoDispose<String?, String>((
+  ref,
+  langCode,
+) async {
   final loc = ref.watch(settingsProvider).activeLocation;
   if (loc == null) return null;
 
   if (loc.isAutoLocation || loc.countryCode == 'CUSTOM') {
     final data = await GeoDatabaseService.getNearestLocationData(
-        loc.latitude, loc.longitude, langCode);
+      loc.latitude,
+      loc.longitude,
+      langCode,
+    );
     return data?['cityName'] as String?;
   }
   return null;
@@ -51,8 +56,10 @@ class LocationHeader extends ConsumerWidget {
           children: [
             Icon(LucideIcons.map_pin_off, color: textColor, size: 20),
             const SizedBox(width: 8),
-            Text('header.set_location'.tr(),
-                style: TextStyle(color: textColor, fontSize: 16)),
+            Text(
+              'header.set_location'.tr(),
+              style: TextStyle(color: textColor, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -86,14 +93,18 @@ class LocationHeader extends ConsumerWidget {
           Text(
             '${'header.current_city'.tr()} $city',
             style: TextStyle(
-                color: accentColor, fontSize: 15, fontWeight: FontWeight.bold),
+              color: accentColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       );
     }
 
-    final latStr =
-        loc.latitude.toStringAsFixed(3); // تقليل الأرقام العشرية لتوفير المساحة
+    final latStr = loc.latitude.toStringAsFixed(
+      3,
+    ); // تقليل الأرقام العشرية لتوفير المساحة
     final lngStr = loc.longitude.toStringAsFixed(3);
 
     // 🌟 تصميم مدمج وأنيق يمنع القص ويتسع داخل الـ AppBar
@@ -107,8 +118,11 @@ class LocationHeader extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(type == 'gps' ? LucideIcons.satellite : LucideIcons.navigation,
-                size: 14, color: textColor),
+            Icon(
+              type == 'gps' ? LucideIcons.satellite : LucideIcons.navigation,
+              size: 14,
+              color: textColor,
+            ),
             const SizedBox(width: 6),
             if (type == 'gps')
               Directionality(
@@ -116,26 +130,27 @@ class LocationHeader extends ConsumerWidget {
                 child: Text(
                   '$latStr°N, $lngStr°E',
                   style: TextStyle(
-                      color: textColor,
-                      fontSize: 13,
-                      fontFamily: 'monospace',
-                      letterSpacing: 0.5,
-                      fontWeight: FontWeight.bold),
+                    color: textColor,
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               )
             else
               Text(
                 loc.name,
                 style: TextStyle(
-                    color: textColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold),
+                  color: textColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
           ],
         ),
 
         const SizedBox(height: 2), // مسافة صغيرة جداً
-
         // السطر الثاني: أقرب مدينة
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -146,9 +161,10 @@ class LocationHeader extends ConsumerWidget {
             Text(
               '${'header.nearest_city'.tr()} $city',
               style: TextStyle(
-                  color: accentColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold),
+                color: accentColor,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

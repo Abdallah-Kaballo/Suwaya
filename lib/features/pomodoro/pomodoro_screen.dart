@@ -26,7 +26,8 @@ class PomodoroScreen extends ConsumerWidget {
     final primaryColor = Theme.of(context).primaryColor;
 
     final isSubView = pomodoroState.currentView != PomodoroView.selector;
-    final isTimerView = pomodoroState.currentView == PomodoroView.traditional ||
+    final isTimerView =
+        pomodoroState.currentView == PomodoroView.traditional ||
         pomodoroState.currentView == PomodoroView.suwayaActive;
 
     return PopScope(
@@ -89,8 +90,9 @@ class PomodoroScreen extends ConsumerWidget {
                         pomodoroState.isMuted
                             ? LucideIcons.volume_x
                             : LucideIcons.volume_2,
-                        color:
-                            pomodoroState.isMuted ? Colors.grey : primaryColor,
+                        color: pomodoroState.isMuted
+                            ? Colors.grey
+                            : primaryColor,
                         size: 20,
                       ),
                       onPressed: () {
@@ -151,8 +153,9 @@ class PomodoroScreen extends ConsumerWidget {
                               materialTapTargetSize:
                                   MaterialTapTargetSize.shrinkWrap,
                               value: settings.useAstroTimeForIbadat,
-                              activeThumbColor:
-                                  isDark ? Colors.black : Colors.white,
+                              activeThumbColor: isDark
+                                  ? Colors.black
+                                  : Colors.white,
                               activeTrackColor: primaryColor,
                               onChanged: (val) {
                                 HapticFeedback.lightImpact();
@@ -173,14 +176,18 @@ class PomodoroScreen extends ConsumerWidget {
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 280),
             child: switch (pomodoroState.currentView) {
-              PomodoroView.selector =>
-                const ModeSelectorView(key: ValueKey('selector')),
-              PomodoroView.traditional =>
-                const TraditionalTimerView(key: ValueKey('traditional')),
-              PomodoroView.suwayaSetup =>
-                const SuwayaSetupView(key: ValueKey('suwaya_setup')),
-              PomodoroView.suwayaActive =>
-                const SuwayaActiveTimerView(key: ValueKey('suwaya_active')),
+              PomodoroView.selector => const ModeSelectorView(
+                key: ValueKey('selector'),
+              ),
+              PomodoroView.traditional => const TraditionalTimerView(
+                key: ValueKey('traditional'),
+              ),
+              PomodoroView.suwayaSetup => const SuwayaSetupView(
+                key: ValueKey('suwaya_setup'),
+              ),
+              PomodoroView.suwayaActive => const SuwayaActiveTimerView(
+                key: ValueKey('suwaya_active'),
+              ),
             },
           ),
         ),

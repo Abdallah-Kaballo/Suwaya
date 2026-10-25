@@ -127,227 +127,248 @@ void main() {
     DateTime.utc(2026, 12, 31, 20, 0), // ليلة رأس السنة الميلادية
   ];
 
-  group(
-      '1. Global Geographical & Seasonal Matrix (100% Mathematical Invariants)',
-      () {
+  group('1. Global Geographical & Seasonal Matrix (100% Mathematical Invariants)', () {
     for (final city in worldCities) {
       test(
-          'Verifies 7 contiguous periods, 24 Suwayas, and microsecond precision in ${city.name}',
-          () {
-        for (final baseInstant in keyDatesUtc) {
-          final ctx = TemporalContextEngine.evaluate(
-            instantUtc: baseInstant,
-            latitude: city.lat,
-            longitude: city.lng,
-            timezoneId: city.timezoneId,
-            methodType: city.method,
-            madhabType: city.madhab,
-            highLatRuleType: city.highLatRule,
-          );
-
-          final day = ctx.suwayaDay;
-          expect(day.cycleAnchors.isValidSequence, isTrue,
-              reason:
-                  'Invalid anchor sequence in ${city.name} at $baseInstant');
-          expect(day.periods.length, 7);
-
-          // المجموع الكلي 24 سويعة: 12 ليل (1+4+6+1) و 12 نهار
-          final nightSuwayas =
-              day.periods.take(4).fold<int>(0, (s, p) => s + p.suwayasCount);
-          final daySuwayas =
-              day.periods.skip(4).fold<int>(0, (s, p) => s + p.suwayasCount);
-
-          expect(nightSuwayas, 12,
-              reason: 'Night suwayas != 12 in ${city.name}');
-          expect(daySuwayas, 12, reason: 'Day suwayas != 12 in ${city.name}');
-
-          // اتصال الفترات السبع بدون أي فجوة أو تداخل بالمايكروثانية
-          for (int i = 0; i < day.periods.length - 1; i++) {
-            expect(
-              day.periods[i].endUtc,
-              equals(day.periods[i + 1].startUtc),
-              reason:
-                  'UTC gap between period ${i + 1} and ${i + 2} in ${city.name}',
+        'Verifies 7 contiguous periods, 24 Suwayas, and microsecond precision in ${city.name}',
+        () {
+          for (final baseInstant in keyDatesUtc) {
+            final ctx = TemporalContextEngine.evaluate(
+              instantUtc: baseInstant,
+              latitude: city.lat,
+              longitude: city.lng,
+              timezoneId: city.timezoneId,
+              methodType: city.method,
+              madhabType: city.madhab,
+              highLatRuleType: city.highLatRule,
             );
+
+            final day = ctx.suwayaDay;
             expect(
-              day.periods[i].endTime,
-              equals(day.periods[i + 1].startTime),
-              reason:
-                  'Wall-clock gap between period ${i + 1} and ${i + 2} in ${city.name}',
+              day.cycleAnchors.isValidSequence,
+              isTrue,
+              reason: 'Invalid anchor sequence in ${city.name} at $baseInstant',
             );
-            expect(day.periods[i].totalDuration.inMicroseconds, greaterThan(0));
+            expect(day.periods.length, 7);
+
+            // المجموع الكلي 24 سويعة: 12 ليل (1+4+6+1) و 12 نهار
+            final nightSuwayas = day.periods
+                .take(4)
+                .fold<int>(0, (s, p) => s + p.suwayasCount);
+            final daySuwayas = day.periods
+                .skip(4)
+                .fold<int>(0, (s, p) => s + p.suwayasCount);
+
+            expect(
+              nightSuwayas,
+              12,
+              reason: 'Night suwayas != 12 in ${city.name}',
+            );
+            expect(daySuwayas, 12, reason: 'Day suwayas != 12 in ${city.name}');
+
+            // اتصال الفترات السبع بدون أي فجوة أو تداخل بالمايكروثانية
+            for (int i = 0; i < day.periods.length - 1; i++) {
+              expect(
+                day.periods[i].endUtc,
+                equals(day.periods[i + 1].startUtc),
+                reason:
+                    'UTC gap between period ${i + 1} and ${i + 2} in ${city.name}',
+              );
+              expect(
+                day.periods[i].endTime,
+                equals(day.periods[i + 1].startTime),
+                reason:
+                    'Wall-clock gap between period ${i + 1} and ${i + 2} in ${city.name}',
+              );
+              expect(
+                day.periods[i].totalDuration.inMicroseconds,
+                greaterThan(0),
+              );
+            }
+
+            // التحقق من أجزاء قيام الليل الخمسة ومجموعها المطابق للنصف الثاني من الليل (الفترة 3)
+            final p3 = day.periods[2]; // الفترة الثالثة: النصف الثاني من الليل
+            final parts = day.ibadatTimings.nightParts;
+            expect(parts.length, 5);
+
+            final half2 = parts.firstWhere((np) => np.id == 'half_2');
+            final third3 = parts.firstWhere((np) => np.id == 'third_3');
+            final s4 = parts.firstWhere((np) => np.id == 'sixth_4');
+            final s5 = parts.firstWhere((np) => np.id == 'sixth_5');
+            final s6 = parts.firstWhere((np) => np.id == 'sixth_6');
+
+            expect(half2.startUtc, equals(p3.startUtc));
+            expect(half2.endUtc, equals(p3.endUtc));
+            expect(s4.startUtc, equals(half2.startUtc));
+            expect(s4.endUtc, equals(s5.startUtc));
+            expect(s5.endUtc, equals(s6.startUtc));
+            expect(s6.endUtc, equals(half2.endUtc));
+            expect(
+              (s5.realDuration + s6.realDuration - third3.realDuration)
+                  .inMicroseconds
+                  .abs(),
+              lessThanOrEqualTo(5),
+            );
           }
-
-          // التحقق من أجزاء قيام الليل الخمسة ومجموعها المطابق للنصف الثاني من الليل (الفترة 3)
-          final p3 = day.periods[2]; // الفترة الثالثة: النصف الثاني من الليل
-          final parts = day.ibadatTimings.nightParts;
-          expect(parts.length, 5);
-
-          final half2 = parts.firstWhere((np) => np.id == 'half_2');
-          final third3 = parts.firstWhere((np) => np.id == 'third_3');
-          final s4 = parts.firstWhere((np) => np.id == 'sixth_4');
-          final s5 = parts.firstWhere((np) => np.id == 'sixth_5');
-          final s6 = parts.firstWhere((np) => np.id == 'sixth_6');
-
-          expect(half2.startUtc, equals(p3.startUtc));
-          expect(half2.endUtc, equals(p3.endUtc));
-          expect(s4.startUtc, equals(half2.startUtc));
-          expect(s4.endUtc, equals(s5.startUtc));
-          expect(s5.endUtc, equals(s6.startUtc));
-          expect(s6.endUtc, equals(half2.endUtc));
-          expect(
-            (s5.realDuration + s6.realDuration - third3.realDuration)
-                .inMicroseconds
-                .abs(),
-            lessThanOrEqualTo(5),
-          );
-        }
-      });
+        },
+      );
     }
   });
 
-  group('2. Daylight Saving Time (Spring Forward & Fall Back) Immunity Tests',
-      () {
+  group('2. Daylight Saving Time (Spring Forward & Fall Back) Immunity Tests', () {
     test(
-        'Spring-Forward (+1h) and Fall-Back (-1h) in New York & London never distort virtual minutes or slot resolution',
-        () {
-      // 1. نيويورك: تقديم الساعة (Spring Forward) يوم 8 مارس 2026 الساعة 02:00 صباحاً (UTC-5 -> UTC-4)
-      final nySpringEveningUtc = DateTime.utc(
-          2026, 3, 8, 1, 0); // بعد مغرب السبت 7 مارس بتوقيت نيويورك
-      final nySpringCtx = TemporalContextEngine.evaluate(
-        instantUtc: nySpringEveningUtc,
-        latitude: 40.7128,
-        longitude: -74.0060,
-        timezoneId: 'America/New_York',
-        methodType: CalculationMethodType.northAmerica,
-      );
+      'Spring-Forward (+1h) and Fall-Back (-1h) in New York & London never distort virtual minutes or slot resolution',
+      () {
+        // 1. نيويورك: تقديم الساعة (Spring Forward) يوم 8 مارس 2026 الساعة 02:00 صباحاً (UTC-5 -> UTC-4)
+        final nySpringEveningUtc = DateTime.utc(
+          2026,
+          3,
+          8,
+          1,
+          0,
+        ); // بعد مغرب السبت 7 مارس بتوقيت نيويورك
+        final nySpringCtx = TemporalContextEngine.evaluate(
+          instantUtc: nySpringEveningUtc,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          timezoneId: 'America/New_York',
+          methodType: CalculationMethodType.northAmerica,
+        );
 
-      final springDay = nySpringCtx.suwayaDay;
-      final totalRealCycleMicro = springDay.cycleAnchors.cycleEndMaghribUtc!
-          .difference(springDay.cycleAnchors.cycleStartMaghribUtc!)
-          .inMicroseconds;
-      final sumPeriodsMicro = springDay.periods.fold<int>(
-        0,
-        (sum, p) => sum + p.totalDuration.inMicroseconds,
-      );
+        final springDay = nySpringCtx.suwayaDay;
+        final totalRealCycleMicro = springDay.cycleAnchors.cycleEndMaghribUtc!
+            .difference(springDay.cycleAnchors.cycleStartMaghribUtc!)
+            .inMicroseconds;
+        final sumPeriodsMicro = springDay.periods.fold<int>(
+          0,
+          (sum, p) => sum + p.totalDuration.inMicroseconds,
+        );
 
-      // مجموع مدد الفترات السبع الفعلي يساوي تماماً الفرق بين الغروبين بالـ UTC
-      expect(sumPeriodsMicro, equals(totalRealCycleMicro));
+        // مجموع مدد الفترات السبع الفعلي يساوي تماماً الفرق بين الغروبين بالـ UTC
+        expect(sumPeriodsMicro, equals(totalRealCycleMicro));
 
-      // فحص كل سويعة ودقيقة افتراضية خلال فترة الفجر والقيام العابرة للتوقيت الصيفي
-      final qiyamPeriod = springDay.periods[
-          2]; // الفترة 3 (تعبر الساعة 02:00 صباحاً لحظة قفزة التوقيت الصيفي)
-      for (int s = 1; s <= qiyamPeriod.suwayasCount; s++) {
-        for (int vm = 0; vm < 60; vm += 15) {
-          final slotUtc = qiyamPeriod.resolveSlotUtc(s, vm);
-          final slotWall = qiyamPeriod.resolveSlotWallTime(
-            s,
-            vm,
-            toWallClock: (u) =>
-                TimezoneResolver.toWallClock(u, timezoneId: 'America/New_York'),
-          );
+        // فحص كل سويعة ودقيقة افتراضية خلال فترة الفجر والقيام العابرة للتوقيت الصيفي
+        final qiyamPeriod = springDay
+            .periods[2]; // الفترة 3 (تعبر الساعة 02:00 صباحاً لحظة قفزة التوقيت الصيفي)
+        for (int s = 1; s <= qiyamPeriod.suwayasCount; s++) {
+          for (int vm = 0; vm < 60; vm += 15) {
+            final slotUtc = qiyamPeriod.resolveSlotUtc(s, vm);
+            final slotWall = qiyamPeriod.resolveSlotWallTime(
+              s,
+              vm,
+              toWallClock: (u) => TimezoneResolver.toWallClock(
+                u,
+                timezoneId: 'America/New_York',
+              ),
+            );
 
-          final stateAtSlot = SuwayaTimeEngine.calculateCurrentState(
-            springDay,
-            slotWall,
-            nowUtc: slotUtc,
-          );
+            final stateAtSlot = SuwayaTimeEngine.calculateCurrentState(
+              springDay,
+              slotWall,
+              nowUtc: slotUtc,
+            );
 
-          expect(stateAtSlot.currentPeriod.id, qiyamPeriod.id);
-          expect(stateAtSlot.currentSuwayaTime.periodLocalSlotNumber, s);
-          expect(stateAtSlot.currentSuwayaTime.virtualMinute, vm);
+            expect(stateAtSlot.currentPeriod.id, qiyamPeriod.id);
+            expect(stateAtSlot.currentSuwayaTime.periodLocalSlotNumber, s);
+            expect(stateAtSlot.currentSuwayaTime.virtualMinute, vm);
+          }
         }
-      }
 
-      // 2. نيويورك: تأخير الساعة (Fall Back) يوم 1 نوفمبر 2026 الساعة 02:00 صباحاً (UTC-4 -> UTC-5)
-      // الساعة 01:30 صباحاً تتكرر مرتين على ساعة الحائط! نتحقق من أن الاعتماد على nowUtc يفرّق بينهما بدقة 100%
-      final nyFallEveningUtc = DateTime.utc(2026, 11, 1, 1, 0);
-      final nyFallCtx = TemporalContextEngine.evaluate(
-        instantUtc: nyFallEveningUtc,
-        latitude: 40.7128,
-        longitude: -74.0060,
-        timezoneId: 'America/New_York',
-        methodType: CalculationMethodType.northAmerica,
-      );
+        // 2. نيويورك: تأخير الساعة (Fall Back) يوم 1 نوفمبر 2026 الساعة 02:00 صباحاً (UTC-4 -> UTC-5)
+        // الساعة 01:30 صباحاً تتكرر مرتين على ساعة الحائط! نتحقق من أن الاعتماد على nowUtc يفرّق بينهما بدقة 100%
+        final nyFallEveningUtc = DateTime.utc(2026, 11, 1, 1, 0);
+        final nyFallCtx = TemporalContextEngine.evaluate(
+          instantUtc: nyFallEveningUtc,
+          latitude: 40.7128,
+          longitude: -74.0060,
+          timezoneId: 'America/New_York',
+          methodType: CalculationMethodType.northAmerica,
+        );
 
-      final fallDay = nyFallCtx.suwayaDay;
-      // اللحظة الأولى قبل التراجع (05:30 UTC = 01:30 EDT)
-      final first0130Utc = DateTime.utc(2026, 11, 1, 5, 30);
-      final first0130Wall = TimezoneResolver.toWallClock(
-        first0130Utc,
-        timezoneId: 'America/New_York',
-      );
-      // اللحظة الثانية بعد التراجع بساعة كاملة (06:30 UTC = 01:30 EST)
-      final second0130Utc = DateTime.utc(2026, 11, 1, 6, 30);
-      final second0130Wall = TimezoneResolver.toWallClock(
-        second0130Utc,
-        timezoneId: 'America/New_York',
-      );
+        final fallDay = nyFallCtx.suwayaDay;
+        // اللحظة الأولى قبل التراجع (05:30 UTC = 01:30 EDT)
+        final first0130Utc = DateTime.utc(2026, 11, 1, 5, 30);
+        final first0130Wall = TimezoneResolver.toWallClock(
+          first0130Utc,
+          timezoneId: 'America/New_York',
+        );
+        // اللحظة الثانية بعد التراجع بساعة كاملة (06:30 UTC = 01:30 EST)
+        final second0130Utc = DateTime.utc(2026, 11, 1, 6, 30);
+        final second0130Wall = TimezoneResolver.toWallClock(
+          second0130Utc,
+          timezoneId: 'America/New_York',
+        );
 
-      // رغم أن ساعة الحائط في اللحظتين تشير إلى 01:30، إلا أن الوقت السويعي يتقدم للأمام ولا يتراجع أبداً!
-      expect(first0130Wall.hour, equals(second0130Wall.hour));
-      expect(first0130Wall.minute, equals(second0130Wall.minute));
+        // رغم أن ساعة الحائط في اللحظتين تشير إلى 01:30، إلا أن الوقت السويعي يتقدم للأمام ولا يتراجع أبداً!
+        expect(first0130Wall.hour, equals(second0130Wall.hour));
+        expect(first0130Wall.minute, equals(second0130Wall.minute));
 
-      final stateFirst = SuwayaTimeEngine.calculateCurrentState(
-        fallDay,
-        first0130Wall,
-        nowUtc: first0130Utc,
-      );
-      final stateSecond = SuwayaTimeEngine.calculateCurrentState(
-        fallDay,
-        second0130Wall,
-        nowUtc: second0130Utc,
-      );
+        final stateFirst = SuwayaTimeEngine.calculateCurrentState(
+          fallDay,
+          first0130Wall,
+          nowUtc: first0130Utc,
+        );
+        final stateSecond = SuwayaTimeEngine.calculateCurrentState(
+          fallDay,
+          second0130Wall,
+          nowUtc: second0130Utc,
+        );
 
-      final totalVirtualMinutesFirst =
-          (stateFirst.currentSuwayaTime.phaseSlotNumber - 1) * 60 +
-              stateFirst.currentSuwayaTime.virtualMinute;
-      final totalVirtualMinutesSecond =
-          (stateSecond.currentSuwayaTime.phaseSlotNumber - 1) * 60 +
-              stateSecond.currentSuwayaTime.virtualMinute;
+        final totalVirtualMinutesFirst =
+            (stateFirst.currentSuwayaTime.phaseSlotNumber - 1) * 60 +
+            stateFirst.currentSuwayaTime.virtualMinute;
+        final totalVirtualMinutesSecond =
+            (stateSecond.currentSuwayaTime.phaseSlotNumber - 1) * 60 +
+            stateSecond.currentSuwayaTime.virtualMinute;
 
-      expect(totalVirtualMinutesSecond, greaterThan(totalVirtualMinutesFirst));
-    });
+        expect(
+          totalVirtualMinutesSecond,
+          greaterThan(totalVirtualMinutesFirst),
+        );
+      },
+    );
   });
 
   group('3. Manual Offsets Clamping & Sunrise Protection Tests', () {
-    test('Clamps extreme manual offsets to [-30, +30] and never shifts Sunrise',
-        () {
-      final date = DateTime.utc(2026, 5, 10);
-      const offset = Duration(hours: 3);
+    test(
+      'Clamps extreme manual offsets to [-30, +30] and never shifts Sunrise',
+      () {
+        final date = DateTime.utc(2026, 5, 10);
+        const offset = Duration(hours: 3);
 
-      final baseline = PrayerCalculator.getIbadatTimings(
-        21.4225,
-        39.8262,
-        date,
-        CalculationMethodType.ummAlQura,
-        MadhabType.shafi,
-        HighLatitudeRuleType.middleOfTheNight,
-        18.0,
-        18.0,
-        offset,
-      );
+        final baseline = PrayerCalculator.getIbadatTimings(
+          21.4225,
+          39.8262,
+          date,
+          CalculationMethodType.ummAlQura,
+          MadhabType.shafi,
+          HighLatitudeRuleType.middleOfTheNight,
+          18.0,
+          18.0,
+          offset,
+        );
 
-      final extreme = PrayerCalculator.getIbadatTimings(
-        21.4225,
-        39.8262,
-        date,
-        CalculationMethodType.ummAlQura,
-        MadhabType.shafi,
-        HighLatitudeRuleType.middleOfTheNight,
-        18.0,
-        18.0,
-        offset,
-        manualOffsets: const {
-          PrayerKey.fajr: 999, // يجب أن تُقيد بـ +30
-          PrayerKey.dhuhr: -999, // يجب أن تُقيد بـ -30
-          PrayerKey.sunrise: 25, // يجب أن يتم تجاهلها تماماً
-        },
-      );
+        final extreme = PrayerCalculator.getIbadatTimings(
+          21.4225,
+          39.8262,
+          date,
+          CalculationMethodType.ummAlQura,
+          MadhabType.shafi,
+          HighLatitudeRuleType.middleOfTheNight,
+          18.0,
+          18.0,
+          offset,
+          manualOffsets: const {
+            PrayerKey.fajr: 999, // يجب أن تُقيد بـ +30
+            PrayerKey.dhuhr: -999, // يجب أن تُقيد بـ -30
+            PrayerKey.sunrise: 25, // يجب أن يتم تجاهلها تماماً
+          },
+        );
 
-      expect(extreme.fajr.difference(baseline.fajr).inMinutes, 30);
-      expect(extreme.dhuhr.difference(baseline.dhuhr).inMinutes, -30);
-      expect(extreme.sunrise, equals(baseline.sunrise));
-    });
+        expect(extreme.fajr.difference(baseline.fajr).inMinutes, 30);
+        expect(extreme.dhuhr.difference(baseline.dhuhr).inMinutes, -30);
+        expect(extreme.sunrise, equals(baseline.sunrise));
+      },
+    );
   });
 }

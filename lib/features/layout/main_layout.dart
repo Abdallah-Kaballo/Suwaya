@@ -18,9 +18,8 @@ class MainLayout extends ConsumerWidget {
     final primaryColor = Theme.of(context).primaryColor;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
 
-    final hideBottomBar = ref.watch(
-          isDrawerOpenProvider.select((open) => open),
-        ) ||
+    final hideBottomBar =
+        ref.watch(isDrawerOpenProvider.select((open) => open)) ||
         ref.watch(isPomodoroFullScreenProvider);
 
     return Scaffold(
@@ -55,9 +54,7 @@ class MainLayout extends ConsumerWidget {
         ? 'nav.calendar'.tr()
         : (context.locale.languageCode == 'ar' ? 'التقويم' : 'Calendar');
 
-    final surfaceColor = Theme.of(context)
-        .colorScheme
-        .surfaceContainerHighest
+    final surfaceColor = Theme.of(context).colorScheme.surfaceContainerHighest
         .withValues(alpha: isDark ? 0.90 : 0.94);
     final borderColor = Theme.of(context).dividerColor;
 
@@ -196,8 +193,9 @@ class MainLayout extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       color: isSelected ? primaryColor : inactiveColor,
                     ),
                   ),

@@ -20,17 +20,21 @@ class TaskRepository {
 
     return await _isar.taskModels
         .filter()
-        .group((q) => q
-            .typeEqualTo(TaskType.permanent)
-            .or()
-            .targetDateGreaterThan(todayStart)
-            .or()
-            .group((q2) => q2
-                .isCompletedEqualTo(false)
-                .and()
-                .targetDateGreaterThan(thirtyDaysAgo))
-            .or()
-            .completedAtGreaterThan(todayStart))
+        .group(
+          (q) => q
+              .typeEqualTo(TaskType.permanent)
+              .or()
+              .targetDateGreaterThan(todayStart)
+              .or()
+              .group(
+                (q2) => q2
+                    .isCompletedEqualTo(false)
+                    .and()
+                    .targetDateGreaterThan(thirtyDaysAgo),
+              )
+              .or()
+              .completedAtGreaterThan(todayStart),
+        )
         .findAll();
   }
 

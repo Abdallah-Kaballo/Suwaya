@@ -12,7 +12,7 @@ enum LocationStep {
   manualChoice,
   dropdowns,
   coordinates,
-  savedLocations
+  savedLocations,
 }
 
 Future<void> _applySmartSettings(
@@ -21,7 +21,9 @@ Future<void> _applySmartSettings(
   WidgetRef ref,
 ) async {
   final defaults = AstroSmartDefaults.getDefaultsForCountry(countryCode);
-  await ref.read(settingsProvider.notifier).updateAstroSettings(
+  await ref
+      .read(settingsProvider.notifier)
+      .updateAstroSettings(
         method: defaults.method,
         madhab: defaults.madhab,
         highLatRule: defaults.highLatitudeRule,
@@ -217,29 +219,34 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: BoxDecoration(
-          color: surfaceColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
+        color: surfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       child: Column(
         children: [
           Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12, bottom: 20),
-              decoration: BoxDecoration(
-                  color: hintColor.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(4))),
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(top: 12, bottom: 20),
+            decoration: BoxDecoration(
+              color: hintColor.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 if (_step != LocationStep.method)
                   IconButton(
-                      icon: Icon(
-                          context.locale.languageCode == 'ar'
-                              ? LucideIcons.arrow_right
-                              : LucideIcons.arrow_left,
-                          color: textColor),
-                      onPressed: _goBack)
+                    icon: Icon(
+                      context.locale.languageCode == 'ar'
+                          ? LucideIcons.arrow_right
+                          : LucideIcons.arrow_left,
+                      color: textColor,
+                    ),
+                    onPressed: _goBack,
+                  )
                 else
                   const SizedBox(width: 48),
                 Expanded(
@@ -247,17 +254,18 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                     _step == LocationStep.method
                         ? 'location_picker.locate_accurately'.tr()
                         : _step == LocationStep.manualChoice
-                            ? 'location_picker.manual_choice'.tr()
-                            : _step == LocationStep.dropdowns
-                                ? 'location_picker.choose_region'.tr()
-                                : _step == LocationStep.savedLocations
-                                    ? 'location_picker.saved_locations'.tr()
-                                    : 'location_picker.custom_coordinates'.tr(),
+                        ? 'location_picker.manual_choice'.tr()
+                        : _step == LocationStep.dropdowns
+                        ? 'location_picker.choose_region'.tr()
+                        : _step == LocationStep.savedLocations
+                        ? 'location_picker.saved_locations'.tr()
+                        : 'location_picker.custom_coordinates'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        color: textColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
+                      color: textColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 48),
@@ -269,15 +277,25 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
             child: _isLoadingData
                 ? Center(child: CircularProgressIndicator(color: primaryColor))
                 : _buildCurrentStepView(
-                    isDark, surfaceColor, textColor, hintColor, primaryColor),
+                    isDark,
+                    surfaceColor,
+                    textColor,
+                    hintColor,
+                    primaryColor,
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCurrentStepView(bool isDark, Color surfaceColor, Color textColor,
-      Color hintColor, Color primaryColor) {
+  Widget _buildCurrentStepView(
+    bool isDark,
+    Color surfaceColor,
+    Color textColor,
+    Color hintColor,
+    Color primaryColor,
+  ) {
     switch (_step) {
       case LocationStep.method:
         return _buildMethodStep(isDark, textColor, primaryColor);
@@ -285,13 +303,26 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
         return _buildManualChoiceStep(isDark, textColor);
       case LocationStep.dropdowns:
         return _buildDropdownsStep(
-            isDark, surfaceColor, textColor, hintColor, primaryColor);
+          isDark,
+          surfaceColor,
+          textColor,
+          hintColor,
+          primaryColor,
+        );
       case LocationStep.coordinates:
         return _buildCoordinatesStep(
-            isDark, textColor, hintColor, primaryColor);
+          isDark,
+          textColor,
+          hintColor,
+          primaryColor,
+        );
       case LocationStep.savedLocations:
         return _buildSavedLocationsStep(
-            isDark, textColor, hintColor, primaryColor);
+          isDark,
+          textColor,
+          hintColor,
+          primaryColor,
+        );
     }
   }
 
@@ -347,19 +378,31 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
   }
 
   Widget _buildSavedLocationsStep(
-      bool isDark, Color textColor, Color hintColor, Color primaryColor) {
-    final savedLocs =
-        ref.watch(settingsProvider).savedLocations.reversed.toList();
+    bool isDark,
+    Color textColor,
+    Color hintColor,
+    Color primaryColor,
+  ) {
+    final savedLocs = ref
+        .watch(settingsProvider)
+        .savedLocations
+        .reversed
+        .toList();
     if (savedLocs.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.map_pin_off,
-                size: 48, color: hintColor.withValues(alpha: 0.5)),
+            Icon(
+              LucideIcons.map_pin_off,
+              size: 48,
+              color: hintColor.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
-            Text('location_picker.no_saved_locations'.tr(),
-                style: TextStyle(color: hintColor, fontSize: 16)),
+            Text(
+              'location_picker.no_saved_locations'.tr(),
+              style: TextStyle(color: hintColor, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -379,20 +422,22 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
           elevation: 0,
           margin: const EdgeInsets.only(bottom: 8),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side:
-                  BorderSide(color: isDark ? Colors.white12 : Colors.black12)),
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: isDark ? Colors.white12 : Colors.black12),
+          ),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: primaryColor.withValues(alpha: 0.1),
               child: Icon(
-                  isCustom ? LucideIcons.navigation : LucideIcons.map_pin,
-                  color: primaryColor,
-                  size: 18),
+                isCustom ? LucideIcons.navigation : LucideIcons.map_pin,
+                color: primaryColor,
+                size: 18,
+              ),
             ),
-            title: Text(loc.name,
-                style:
-                    TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+            title: Text(
+              loc.name,
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+            ),
             subtitle: Text(
               isCustom
                   ? '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}'
@@ -418,14 +463,16 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
             icon: const Icon(LucideIcons.list, size: 20),
             label: Text('location_picker.choose_from_lists'.tr()),
             style: ElevatedButton.styleFrom(
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.05),
-                foregroundColor: textColor,
-                minimumSize: const Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                elevation: 0),
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
+              foregroundColor: textColor,
+              minimumSize: const Size(double.infinity, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
             onPressed: () => setState(() => _step = LocationStep.dropdowns),
           ),
           const SizedBox(height: 16),
@@ -433,14 +480,16 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
             icon: const Icon(LucideIcons.map_pin, size: 20),
             label: Text('location_picker.enter_coordinates_manually'.tr()),
             style: ElevatedButton.styleFrom(
-                backgroundColor: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.05),
-                foregroundColor: textColor,
-                minimumSize: const Size(double.infinity, 60),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                elevation: 0),
+              backgroundColor: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
+              foregroundColor: textColor,
+              minimumSize: const Size(double.infinity, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+            ),
             onPressed: () => setState(() => _step = LocationStep.coordinates),
           ),
         ],
@@ -448,8 +497,13 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     );
   }
 
-  Widget _buildDropdownsStep(bool isDark, Color surfaceColor, Color textColor,
-      Color hintColor, Color primaryColor) {
+  Widget _buildDropdownsStep(
+    bool isDark,
+    Color surfaceColor,
+    Color textColor,
+    Color hintColor,
+    Color primaryColor,
+  ) {
     return Column(
       children: [
         Padding(
@@ -467,8 +521,10 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                   isScrollControlled: true,
                   backgroundColor: surfaceColor,
                   shape: const RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(24))),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                  ),
                   builder: (_) => _CountrySearchSheet(
                     countries: _countries,
                     onSelected: (country) {
@@ -484,29 +540,37 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                    border: Border.all(
-                        color: isDark ? Colors.white12 : Colors.black12),
-                    borderRadius: BorderRadius.circular(16)),
+                  border: Border.all(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Row(
                   children: [
-                    Icon(LucideIcons.globe,
-                        color:
-                            _selectedCountry != null ? primaryColor : hintColor,
-                        size: 20),
+                    Icon(
+                      LucideIcons.globe,
+                      color: _selectedCountry != null
+                          ? primaryColor
+                          : hintColor,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
-                        child: Text(
-                      _selectedCountry != null
-                          ? '${GeoDatabaseService.getFlagEmoji(_selectedCountry!['code']!)} ${_selectedCountry!['name']}'
-                          : 'location_picker.select_country'.tr(),
-                      style: TextStyle(
-                          color:
-                              _selectedCountry != null ? textColor : hintColor,
+                      child: Text(
+                        _selectedCountry != null
+                            ? '${GeoDatabaseService.getFlagEmoji(_selectedCountry!['code']!)} ${_selectedCountry!['name']}'
+                            : 'location_picker.select_country'.tr(),
+                        style: TextStyle(
+                          color: _selectedCountry != null
+                              ? textColor
+                              : hintColor,
                           fontSize: 16,
                           fontWeight: _selectedCountry != null
                               ? FontWeight.bold
-                              : FontWeight.normal),
-                    )),
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
                     Icon(LucideIcons.chevron_down, color: hintColor, size: 18),
                   ],
                 ),
@@ -533,13 +597,16 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                           isScrollControlled: true,
                           backgroundColor: surfaceColor,
                           shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(24))),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(24),
+                            ),
+                          ),
                           builder: (_) => _CitySearchSheet(
                             cities: _cities,
                             onSelected: (city) async {
-                              final notifier =
-                                  ref.read(settingsProvider.notifier);
+                              final notifier = ref.read(
+                                settingsProvider.notifier,
+                              );
                               final langCode = context.locale.languageCode;
 
                               final cityName = langCode == 'ar'
@@ -548,7 +615,9 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                               final countryCode = city['countryCode'];
                               final countryName =
                                   GeoDatabaseService.getLocalizedCountryName(
-                                      countryCode, langCode);
+                                    countryCode,
+                                    langCode,
+                                  );
 
                               await notifier.addAndSelectLocation(
                                 cityName,
@@ -561,17 +630,22 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                               );
 
                               await _applySmartSettings(
-                                  countryCode, countryName, ref);
+                                countryCode,
+                                countryName,
+                                ref,
+                              );
 
                               if (!mounted) return;
 
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'location_picker.location_updated'
-                                              .tr()),
-                                      backgroundColor: Colors.green.shade800));
+                                SnackBar(
+                                  content: Text(
+                                    'location_picker.location_updated'.tr(),
+                                  ),
+                                  backgroundColor: Colors.green.shade800,
+                                ),
+                              );
                             },
                           ),
                         );
@@ -580,33 +654,44 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      border: Border.all(
-                          color: isDark ? Colors.white12 : Colors.black12),
-                      borderRadius: BorderRadius.circular(16)),
+                    border: Border.all(
+                      color: isDark ? Colors.white12 : Colors.black12,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.map_pin,
-                          color: _selectedCountry != null
-                              ? primaryColor
-                              : hintColor,
-                          size: 20),
+                      Icon(
+                        LucideIcons.map_pin,
+                        color: _selectedCountry != null
+                            ? primaryColor
+                            : hintColor,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
-                          child: Text(
-                              _isLoadingCities
-                                  ? 'location_picker.loading'.tr()
-                                  : 'location_picker.select_city'.tr(),
-                              style:
-                                  TextStyle(color: hintColor, fontSize: 16))),
+                        child: Text(
+                          _isLoadingCities
+                              ? 'location_picker.loading'.tr()
+                              : 'location_picker.select_city'.tr(),
+                          style: TextStyle(color: hintColor, fontSize: 16),
+                        ),
+                      ),
                       if (_isLoadingCities)
                         SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: primaryColor))
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: primaryColor,
+                          ),
+                        )
                       else
-                        Icon(LucideIcons.chevron_down,
-                            color: hintColor, size: 18),
+                        Icon(
+                          LucideIcons.chevron_down,
+                          color: hintColor,
+                          size: 18,
+                        ),
                     ],
                   ),
                 ),
@@ -619,7 +704,11 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
   }
 
   Widget _buildCoordinatesStep(
-      bool isDark, Color textColor, Color hintColor, Color primaryColor) {
+    bool isDark,
+    Color textColor,
+    Color hintColor,
+    Color primaryColor,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -635,8 +724,9 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                   ? Colors.white.withValues(alpha: 0.05)
                   : Colors.black.withValues(alpha: 0.05),
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none),
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -646,18 +736,22 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                 child: TextField(
                   controller: _latController,
                   keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true, signed: true),
+                    decimal: true,
+                    signed: true,
+                  ),
                   style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                      labelText: 'location_picker.latitude'.tr(),
-                      labelStyle: TextStyle(color: hintColor),
-                      filled: true,
-                      fillColor: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.black.withValues(alpha: 0.05),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none)),
+                    labelText: 'location_picker.latitude'.tr(),
+                    labelStyle: TextStyle(color: hintColor),
+                    filled: true,
+                    fillColor: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -665,18 +759,22 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
                 child: TextField(
                   controller: _lngController,
                   keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true, signed: true),
+                    decimal: true,
+                    signed: true,
+                  ),
                   style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                      labelText: 'location_picker.longitude'.tr(),
-                      labelStyle: TextStyle(color: hintColor),
-                      filled: true,
-                      fillColor: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.black.withValues(alpha: 0.05),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none)),
+                    labelText: 'location_picker.longitude'.tr(),
+                    labelStyle: TextStyle(color: hintColor),
+                    filled: true,
+                    fillColor: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -686,11 +784,13 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
             icon: const Icon(LucideIcons.save, size: 18),
             label: Text('location_picker.save_use'.tr()),
             style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: isDark ? Colors.black87 : Colors.white,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16))),
+              backgroundColor: primaryColor,
+              foregroundColor: isDark ? Colors.black87 : Colors.white,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
             onPressed: _saveCustomCoordinates,
           ),
         ],
@@ -702,8 +802,10 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
 class _CountrySearchSheet extends StatefulWidget {
   final List<Map<String, String>> countries;
   final Function(Map<String, String>) onSelected;
-  const _CountrySearchSheet(
-      {required this.countries, required this.onSelected});
+  const _CountrySearchSheet({
+    required this.countries,
+    required this.onSelected,
+  });
   @override
   State<_CountrySearchSheet> createState() => _CountrySearchSheetState();
 }
@@ -725,27 +827,31 @@ class _CountrySearchSheetState extends State<_CountrySearchSheet> {
       child: Column(
         children: [
           Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                  color: hintColor.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(4))),
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: hintColor.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
           TextField(
             autofocus: true,
             onChanged: (val) => setState(() => _query = val),
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-                hintText: 'location_picker.search_country'.tr(),
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(LucideIcons.search, color: hintColor),
-                filled: true,
-                fillColor: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.05),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none)),
+              hintText: 'location_picker.search_country'.tr(),
+              hintStyle: TextStyle(color: hintColor),
+              prefixIcon: Icon(LucideIcons.search, color: hintColor),
+              filled: true,
+              fillColor: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -756,10 +862,13 @@ class _CountrySearchSheetState extends State<_CountrySearchSheet> {
                 final country = filtered[index];
                 return ListTile(
                   leading: Text(
-                      GeoDatabaseService.getFlagEmoji(country['code']!),
-                      style: const TextStyle(fontSize: 24)),
-                  title: Text(country['name']!,
-                      style: TextStyle(color: textColor)),
+                    GeoDatabaseService.getFlagEmoji(country['code']!),
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  title: Text(
+                    country['name']!,
+                    style: TextStyle(color: textColor),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     widget.onSelected(country);
@@ -835,8 +944,11 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
     final langCode = context.locale.languageCode;
 
     // 🌟 استخلاص الكلمة الأساسية من الترجمة ("ابحث عن مدينتك") وتجاهل ما بين الأقواس القديمة
-    final String baseHint =
-        'location_picker.search_city_hint'.tr().split('(').first.trim();
+    final String baseHint = 'location_picker.search_city_hint'
+        .tr()
+        .split('(')
+        .first
+        .trim();
     final String nativeLangName = _nativeLanguageNames[langCode] ?? 'English';
 
     // 🌟 بناء النص الإرشادي الديناميكي
@@ -857,34 +969,41 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
       child: Column(
         children: [
           Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                  color: hintColor.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(4))),
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: hintColor.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
           TextField(
             autofocus: true,
             onChanged: _onSearchChanged,
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-                hintText: dynamicHintText,
-                hintStyle: TextStyle(color: hintColor),
-                prefixIcon: Icon(LucideIcons.search, color: hintColor),
-                filled: true,
-                fillColor: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.05),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none)),
+              hintText: dynamicHintText,
+              hintStyle: TextStyle(color: hintColor),
+              prefixIcon: Icon(LucideIcons.search, color: hintColor),
+              filled: true,
+              fillColor: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
             child: filtered.isEmpty
                 ? Center(
-                    child: Text('location_picker.try_english_name'.tr(),
-                        style: TextStyle(color: hintColor)))
+                    child: Text(
+                      'location_picker.try_english_name'.tr(),
+                      style: TextStyle(color: hintColor),
+                    ),
+                  )
                 : ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     itemCount: filtered.length,
@@ -892,10 +1011,12 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
                       final city = filtered[index];
 
                       // 🌟 العمود name يمثل الاسم المحلي (عربي، ياباني، الخ) والعمود nameEn يمثل الانجليزي
-                      final String nameLocal =
-                          (city['name'] ?? '').toString().trim();
-                      final String nameEn =
-                          (city['nameEn'] ?? '').toString().trim();
+                      final String nameLocal = (city['name'] ?? '')
+                          .toString()
+                          .trim();
+                      final String nameEn = (city['nameEn'] ?? '')
+                          .toString()
+                          .trim();
 
                       String primaryName;
                       String? secondaryName;
@@ -920,15 +1041,22 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
 
                       return ListTile(
                         leading: Icon(LucideIcons.map_pin, color: primaryColor),
-                        title: Text(primaryName,
-                            style: TextStyle(
-                                color: textColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15)),
+                        title: Text(
+                          primaryName,
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                         subtitle: secondaryName != null
-                            ? Text(secondaryName,
-                                style:
-                                    TextStyle(color: hintColor, fontSize: 12))
+                            ? Text(
+                                secondaryName,
+                                style: TextStyle(
+                                  color: hintColor,
+                                  fontSize: 12,
+                                ),
+                              )
                             : null,
                         onTap: () {
                           Navigator.pop(context);

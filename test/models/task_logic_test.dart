@@ -24,10 +24,16 @@ void main() {
         task.longestStreak = task.currentStreak;
       }
 
-      expect(task.currentStreak, equals(6),
-          reason: 'يجب أن يرتفع الاستريك إلى 6');
-      expect(task.longestStreak, equals(6),
-          reason: 'الاستريك الأطول يجب أن يُحدّث لأنه تم تجاوزه');
+      expect(
+        task.currentStreak,
+        equals(6),
+        reason: 'يجب أن يرتفع الاستريك إلى 6',
+      );
+      expect(
+        task.longestStreak,
+        equals(6),
+        reason: 'الاستريك الأطول يجب أن يُحدّث لأنه تم تجاوزه',
+      );
       expect(task.completionHistory.length, equals(1));
     });
 
@@ -44,33 +50,44 @@ void main() {
 
       // محاكاة التراجع عن الإنجاز (Undo)
       task.lastCompletedDate = null;
-      task.completionHistory =
-          task.completionHistory.where((d) => d != today).toList();
+      task.completionHistory = task.completionHistory
+          .where((d) => d != today)
+          .toList();
       task.currentStreak = (task.currentStreak - 1).clamp(0, 9999);
 
-      expect(task.currentStreak, equals(9),
-          reason: 'يجب أن ينقص الاستريك عند التراجع');
-      expect(task.longestStreak, equals(15),
-          reason: 'الاستريك الأطول يجب ألا يتأثر بالتراجع');
+      expect(
+        task.currentStreak,
+        equals(9),
+        reason: 'يجب أن ينقص الاستريك عند التراجع',
+      );
+      expect(
+        task.longestStreak,
+        equals(15),
+        reason: 'الاستريك الأطول يجب ألا يتأثر بالتراجع',
+      );
       expect(task.completionHistory.isEmpty, isTrue);
     });
 
     test(
-        '3. المهام العابرة (Casual): يجب أن تُسجل كمنجزة ولا تؤثر على الاستريك',
-        () {
-      final task = TaskModel()
-        ..id = 3
-        ..type = TaskType.casual
-        ..isCompleted = false;
+      '3. المهام العابرة (Casual): يجب أن تُسجل كمنجزة ولا تؤثر على الاستريك',
+      () {
+        final task = TaskModel()
+          ..id = 3
+          ..type = TaskType.casual
+          ..isCompleted = false;
 
-      // محاكاة الإنجاز
-      task.isCompleted = true;
-      task.completedAt = DateTime.now();
+        // محاكاة الإنجاز
+        task.isCompleted = true;
+        task.completedAt = DateTime.now();
 
-      expect(task.isCompleted, isTrue);
-      expect(task.completedAt, isNotNull);
-      expect(task.currentStreak, equals(0),
-          reason: 'المهام العابرة لا تمتلك استريك');
-    });
+        expect(task.isCompleted, isTrue);
+        expect(task.completedAt, isNotNull);
+        expect(
+          task.currentStreak,
+          equals(0),
+          reason: 'المهام العابرة لا تمتلك استريك',
+        );
+      },
+    );
   });
 }

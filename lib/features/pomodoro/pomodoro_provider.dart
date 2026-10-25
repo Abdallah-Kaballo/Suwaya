@@ -68,18 +68,18 @@ class SuwayaSessionConfig {
     required this.flowSpeed,
     this.workVirtualMinutes = 25,
     this.breakVirtualMinutes = 5,
-  })  : anchoredStartUtc = anchoredStartUtc ??
-            DateTime.now().toUtc().subtract(
-                  Duration(
-                    seconds: DateTime.now().toUtc().second,
-                  ),
-                ),
-        endUtc = endUtc ??
-            (anchoredStartUtc ??
-                    DateTime.now().toUtc().subtract(
-                          Duration(seconds: DateTime.now().toUtc().second),
-                        ))
-                .add(endTime.difference(anchoredStartTime));
+  }) : anchoredStartUtc =
+           anchoredStartUtc ??
+           DateTime.now().toUtc().subtract(
+             Duration(seconds: DateTime.now().toUtc().second),
+           ),
+       endUtc =
+           endUtc ??
+           (anchoredStartUtc ??
+                   DateTime.now().toUtc().subtract(
+                     Duration(seconds: DateTime.now().toUtc().second),
+                   ))
+               .add(endTime.difference(anchoredStartTime));
 }
 
 class PomodoroState {
@@ -152,13 +152,15 @@ class PomodoroState {
       phaseProgress: phaseProgress ?? this.phaseProgress,
       cycleProgress: cycleProgress ?? this.cycleProgress,
       focusRatio: focusRatio ?? this.focusRatio,
-      suwayaConfig:
-          clearSuwayaConfig ? null : (suwayaConfig ?? this.suwayaConfig),
+      suwayaConfig: clearSuwayaConfig
+          ? null
+          : (suwayaConfig ?? this.suwayaConfig),
       isFinished: isFinished ?? this.isFinished,
       isMuted: isMuted ?? this.isMuted,
       isFullScreen: isFullScreen ?? this.isFullScreen,
-      linkedTaskId:
-          clearLinkedTask ? null : (linkedTaskId ?? this.linkedTaskId),
+      linkedTaskId: clearLinkedTask
+          ? null
+          : (linkedTaskId ?? this.linkedTaskId),
       dailyCompletedSessions:
           dailyCompletedSessions ?? this.dailyCompletedSessions,
       isPrePrayerWarningActive:
@@ -388,8 +390,9 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     final title = isWork
         ? '${'pomodoro.in_flow'.tr()} ($cycleNumber/$totalCycles)'
         : 'pomodoro.deep_relaxation'.tr();
-    final body =
-        isWork ? 'pomodoro.start_session'.tr() : 'pomodoro.choose_mode'.tr();
+    final body = isWork
+        ? 'pomodoro.start_session'.tr()
+        : 'pomodoro.choose_mode'.tr();
 
     await NotificationService().playPomodoroTransitionAlert(
       title: title,
@@ -534,8 +537,9 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     if (state.status != PomodoroStatus.running) return;
     _timer?.cancel();
     if (_traditionalPhaseStartedAt != null) {
-      _traditionalAccumulatedElapsedSecs +=
-          DateTime.now().difference(_traditionalPhaseStartedAt!).inSeconds;
+      _traditionalAccumulatedElapsedSecs += DateTime.now()
+          .difference(_traditionalPhaseStartedAt!)
+          .inSeconds;
       _traditionalPhaseStartedAt = null;
     }
     state = state.copyWith(status: PomodoroStatus.paused);
@@ -601,10 +605,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     );
 
     if (totalElapsed >= phaseTotalSecs) {
-      _advanceTraditionalPhase(
-        keepRunning: true,
-        fromNaturalCompletion: true,
-      );
+      _advanceTraditionalPhase(keepRunning: true, fromNaturalCompletion: true);
       return;
     }
 
@@ -699,8 +700,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
   static List<SuwayaFlowOption> calculateSuwayaFlowOptions(
     DateTime startTime,
     DateTime endTime,
-  ) =>
-      SuwayaFlowPlanner.calculateFlowOptions(startTime, endTime);
+  ) => SuwayaFlowPlanner.calculateFlowOptions(startTime, endTime);
 
   void startSuwayaSession(SuwayaSessionConfig config) {
     _timer?.cancel();
@@ -708,7 +708,8 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     _lastSuwayaPhase = PomodoroPhase.work;
     _lastSuwayaCycle = 1;
 
-    final ratio = config.workVirtualMinutes /
+    final ratio =
+        config.workVirtualMinutes /
         (config.workVirtualMinutes + config.breakVirtualMinutes);
 
     state = state.copyWith(
@@ -769,9 +770,11 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       } catch (_) {}
     }
 
-    final currentPhase =
-        snapshot.isBreak ? PomodoroPhase.shortBreak : PomodoroPhase.work;
-    final bool phaseChanged = !isInitialTick &&
+    final currentPhase = snapshot.isBreak
+        ? PomodoroPhase.shortBreak
+        : PomodoroPhase.work;
+    final bool phaseChanged =
+        !isInitialTick &&
         (currentPhase != _lastSuwayaPhase ||
             snapshot.currentCycle != _lastSuwayaCycle);
 

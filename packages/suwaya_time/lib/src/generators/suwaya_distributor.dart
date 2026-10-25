@@ -1,10 +1,7 @@
 import '../models/astro_models.dart';
 
 /// نمط توزيع السويعات الأربع والعشرين على الفترات السبع
-enum SuwayaDistributionMode {
-  canonicalMadhab,
-  dynamicProportional,
-}
+enum SuwayaDistributionMode { canonicalMadhab, dynamicProportional }
 
 /// اسم بديل متوافق مع SuwayaTimeEngine لمنع خطأ undefined_class
 typedef SuwayaAllocationMode = SuwayaDistributionMode;

@@ -19,8 +19,9 @@ import 'dial/period_metrics.dart';
       selection.type == DialSelectionType.period) {
     return getFixedAstroTime(selection.id, state, isEnd: isEnd);
   } else {
-    final DateTime evalTime =
-        isEnd ? time.subtract(const Duration(microseconds: 1)) : time;
+    final DateTime evalTime = isEnd
+        ? time.subtract(const Duration(microseconds: 1))
+        : time;
     final mockState = SuwayaTimeEngine.calculateCurrentState(
       SuwayaDay(
         ibadatTimings: state.ibadatTimings,
@@ -93,8 +94,9 @@ Future<void> showDialItemDetailsDialog({
     }
   }
 
-  final Color adaptedColor =
-      selection.color.adapt(context); // 🌟 تطبيق التكيف اللوني
+  final Color adaptedColor = selection.color.adapt(
+    context,
+  ); // 🌟 تطبيق التكيف اللوني
 
   await showDialog<void>(
     context: context,
@@ -211,8 +213,12 @@ Widget _buildDialTimeRow(
     fontFamily: 'Inter',
   );
 
-  final fixedTime =
-      _getDynamicOrFixedAstroTime(selection, astroState, time, isEnd);
+  final fixedTime = _getDynamicOrFixedAstroTime(
+    selection,
+    astroState,
+    time,
+    isEnd,
+  );
   final formattedSuwaya = formatSuwayaTime(
     fixedTime.globalIndex,
     fixedTime.minute,

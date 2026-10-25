@@ -32,11 +32,11 @@ class CivilDate {
   }
 
   Map<String, dynamic> toJson() => {
-        'year': year,
-        'month': month,
-        'day': day,
-        'weekday': weekday,
-      };
+    'year': year,
+    'month': month,
+    'day': day,
+    'weekday': weekday,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -70,14 +70,14 @@ class HijriDate {
   });
 
   Map<String, dynamic> toJson() => {
-        'year': year,
-        'month': month,
-        'day': day,
-        'lengthOfMonth': lengthOfMonth,
-        'calendarSystem': calendarSystem.name,
-        'adjustmentDays': adjustmentDays,
-        'confidence': confidence.name,
-      };
+    'year': year,
+    'month': month,
+    'day': day,
+    'lengthOfMonth': lengthOfMonth,
+    'calendarSystem': calendarSystem.name,
+    'adjustmentDays': adjustmentDays,
+    'confidence': confidence.name,
+  };
 }
 
 /// واجهة مجردة قابلة للتبديل لحساب التاريخ الهجري
@@ -137,8 +137,11 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     final clampedAdj = adjustmentDays.clamp(-2, 2);
     try {
       final rawGreg = HijriCalendar().hijriToGregorian(hYear, hMonth, hDay);
-      final adjusted = DateTime.utc(rawGreg.year, rawGreg.month, rawGreg.day)
-          .subtract(Duration(days: clampedAdj));
+      final adjusted = DateTime.utc(
+        rawGreg.year,
+        rawGreg.month,
+        rawGreg.day,
+      ).subtract(Duration(days: clampedAdj));
       return CivilDate(adjusted.year, adjusted.month, adjusted.day);
     } catch (_) {
       return _tabularGregorianFromHijri(hYear, hMonth, hDay, clampedAdj);
@@ -161,14 +164,19 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     DateTime gregUtc,
     int adjustmentDays,
   ) {
-    final int jd =
-        _gregorianToJulianDay(gregUtc.year, gregUtc.month, gregUtc.day);
+    final int jd = _gregorianToJulianDay(
+      gregUtc.year,
+      gregUtc.month,
+      gregUtc.day,
+    );
     final int l = jd - 1948440 + 10632;
     final int n = (l - 1) ~/ 10631;
     final int l2 = l - 10631 * n + 354;
-    final int j = ((10985 - l2) ~/ 5316) * ((50 * l2) ~/ 17719) +
+    final int j =
+        ((10985 - l2) ~/ 5316) * ((50 * l2) ~/ 17719) +
         (l2 ~/ 5670) * ((43 * l2) ~/ 15238);
-    final int l3 = l2 -
+    final int l3 =
+        l2 -
         ((30 - j) ~/ 15) * ((17719 * j) ~/ 50) -
         (j ~/ 16) * ((15238 * j) ~/ 43) +
         29;
@@ -195,7 +203,8 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     int hDay,
     int adjustmentDays,
   ) {
-    final int jd = ((11 * hYear + 3) ~/ 30) +
+    final int jd =
+        ((11 * hYear + 3) ~/ 30) +
         354 * hYear +
         30 * hMonth -
         ((hMonth - 1) ~/ 2) +
@@ -251,11 +260,11 @@ class TimezoneContext {
   });
 
   Map<String, dynamic> toJson() => {
-        'timezoneId': timezoneId,
-        'utcOffsetMinutes': utcOffset.inMinutes,
-        'isDaylightSavingTime': isDaylightSavingTime,
-        'confidence': confidence.name,
-      };
+    'timezoneId': timezoneId,
+    'utcOffsetMinutes': utcOffset.inMinutes,
+    'isDaylightSavingTime': isDaylightSavingTime,
+    'confidence': confidence.name,
+  };
 }
 
 class TimezoneResolver {
@@ -400,15 +409,15 @@ class SuwayaTemporalContext {
   });
 
   Map<String, dynamic> toJson() => {
-        'instantUtc': instantUtc.toIso8601String(),
-        'cityWallTime': cityWallTime.toIso8601String(),
-        'timezone': timezone.toJson(),
-        'civilDate': civilDate.toJson(),
-        'islamicLogicalGregorianDate': islamicLogicalGregorianDate.toJson(),
-        'hijriDate': hijriDate.toJson(),
-        'isIslamicNight': isIslamicNight,
-        'astroState': astroState.toJson(),
-      };
+    'instantUtc': instantUtc.toIso8601String(),
+    'cityWallTime': cityWallTime.toIso8601String(),
+    'timezone': timezone.toJson(),
+    'civilDate': civilDate.toJson(),
+    'islamicLogicalGregorianDate': islamicLogicalGregorianDate.toJson(),
+    'hijriDate': hijriDate.toJson(),
+    'isIslamicNight': isIslamicNight,
+    'astroState': astroState.toJson(),
+  };
 }
 
 class TemporalContextEngine {
@@ -444,9 +453,9 @@ class TemporalContextEngine {
     final offsetsKey = manualOffsets == null || manualOffsets.isEmpty
         ? ''
         : (manualOffsets.entries.toList()
-              ..sort((a, b) => a.key.index.compareTo(b.key.index)))
-            .map((e) => '${e.key.index}:${e.value}')
-            .join(',');
+                ..sort((a, b) => a.key.index.compareTo(b.key.index)))
+              .map((e) => '${e.key.index}:${e.value}')
+              .join(',');
     return '$latKey:$lngKey:${timezoneId ?? ''}:$fallbackKey:${methodType.index}:'
         '${madhabType.index}:${highLatRuleType.index}:'
         '$customFajrAngle:$customIshaAngle:${polarPolicy.index}:$offsetsKey';
@@ -473,10 +482,10 @@ class TemporalContextEngine {
   }) {
     final utcNow = instantUtc.toUtc();
     Duration offsetAt(DateTime utc) => TimezoneResolver.resolveForInstant(
-          utc,
-          timezoneId: timezoneId,
-          fallbackOffset: fallbackOffset,
-        ).utcOffset;
+      utc,
+      timezoneId: timezoneId,
+      fallbackOffset: fallbackOffset,
+    ).utcOffset;
 
     final currentTz = TimezoneResolver.resolveForInstant(
       utcNow,
@@ -484,8 +493,11 @@ class TemporalContextEngine {
       fallbackOffset: fallbackOffset,
     );
     final cityNowWall = utcNow.add(currentTz.utcOffset);
-    final civilDate =
-        CivilDate(cityNowWall.year, cityNowWall.month, cityNowWall.day);
+    final civilDate = CivilDate(
+      cityNowWall.year,
+      cityNowWall.month,
+      cityNowWall.day,
+    );
 
     final configKey = _buildConfigKey(
       latitude: latitude,
@@ -504,8 +516,9 @@ class TemporalContextEngine {
     final civilCacheKey =
         '${civilDate.year}-${civilDate.month}-${civilDate.day}_${currentTz.utcOffset.inMinutes}_$configKey';
 
-    IbadatTimings? todayIbadat =
-        _internalCivilIbadatCache.remove(civilCacheKey);
+    IbadatTimings? todayIbadat = _internalCivilIbadatCache.remove(
+      civilCacheKey,
+    );
     if (todayIbadat != null) {
       _internalCivilIbadatCache[civilCacheKey] = todayIbadat;
     } else {
@@ -540,8 +553,8 @@ class TemporalContextEngine {
 
     final DateTime anchorDateForCycle =
         cityNowWall.isBefore(todayIbadat.maghrib)
-            ? cityNowWall.subtract(const Duration(days: 1))
-            : cityNowWall;
+        ? cityNowWall.subtract(const Duration(days: 1))
+        : cityNowWall;
 
     final nextDayAnchor = anchorDateForCycle.add(const Duration(days: 1));
     final cycleStartOffset = offsetAt(
@@ -600,11 +613,13 @@ class TemporalContextEngine {
 
     final astronomicalSunsetWall =
         todayIbadat.calculatedSunset ?? todayIbadat.maghrib;
-    final bool isAfterTodaySunset =
-        !cityNowWall.isBefore(astronomicalSunsetWall);
+    final bool isAfterTodaySunset = !cityNowWall.isBefore(
+      astronomicalSunsetWall,
+    );
 
-    final CivilDate islamicLogicalDate =
-        isAfterTodaySunset ? civilDate.addDays(1) : civilDate;
+    final CivilDate islamicLogicalDate = isAfterTodaySunset
+        ? civilDate.addDays(1)
+        : civilDate;
 
     final bool isIslamicNight =
         isAfterTodaySunset || cityNowWall.isBefore(todayIbadat.fajr);

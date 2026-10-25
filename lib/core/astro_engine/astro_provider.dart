@@ -26,10 +26,7 @@ class AstroNotifier extends Notifier<AstroState> {
   int _cachedOffsetMinuteEpoch = -1;
   Duration _cachedUtcOffset = Duration.zero;
 
-  Duration _getUtcOffsetForInstant(
-    SavedLocation? loc,
-    DateTime instantUtc,
-  ) {
+  Duration _getUtcOffsetForInstant(SavedLocation? loc, DateTime instantUtc) {
     final currentMinuteEpoch = instantUtc.millisecondsSinceEpoch ~/ 60000;
     if (_cachedOffsetMinuteEpoch == currentMinuteEpoch) {
       return _cachedUtcOffset;
@@ -56,15 +53,18 @@ class AstroNotifier extends Notifier<AstroState> {
 
   @override
   AstroState build() {
-    final fingerprint = ref.watch(settingsProvider.select((s) {
-      String f = '${s.activeLocation?.latitude}_${s.activeLocation?.longitude}_'
-          '${s.activeLocation?.timezone ?? ''}_${s.calculationMethod}_'
-          '${s.madhab}_${s.highLatitudeRule}_${s.customFajrAngle}_${s.customIshaAngle}_${s.hijriOffsetDays}';
-      for (final c in s.periodConfigs) {
-        f += '_${c.periodId}:${c.manualOffsetMinutes}';
-      }
-      return f;
-    }));
+    final fingerprint = ref.watch(
+      settingsProvider.select((s) {
+        String f =
+            '${s.activeLocation?.latitude}_${s.activeLocation?.longitude}_'
+            '${s.activeLocation?.timezone ?? ''}_${s.calculationMethod}_'
+            '${s.madhab}_${s.highLatitudeRule}_${s.customFajrAngle}_${s.customIshaAngle}_${s.hijriOffsetDays}';
+        for (final c in s.periodConfigs) {
+          f += '_${c.periodId}:${c.manualOffsetMinutes}';
+        }
+        return f;
+      }),
+    );
 
     _cachedOffsetMinuteEpoch = -1;
     final settings = ref.read(settingsProvider);
@@ -123,8 +123,9 @@ class AstroNotifier extends Notifier<AstroState> {
       Future.microtask(() {
         virtualDateTimeNotifier.value = initialState.virtualTime;
         dialQuantizedTimeNotifier.value = initialState.virtualTime;
-        virtualTimeNotifier.value =
-            _formatVirtualTime(initialState.currentSuwayaTime);
+        virtualTimeNotifier.value = _formatVirtualTime(
+          initialState.currentSuwayaTime,
+        );
       });
 
       _scheduleSmartStateUpdate(
@@ -167,8 +168,9 @@ class AstroNotifier extends Notifier<AstroState> {
           );
           virtualDateTimeNotifier.value = resumeWall;
           dialQuantizedTimeNotifier.value = resumeWall;
-          virtualTimeNotifier.value =
-              _formatVirtualTime(resumedState.currentSuwayaTime);
+          virtualTimeNotifier.value = _formatVirtualTime(
+            resumedState.currentSuwayaTime,
+          );
 
           if (_lastPeriodId != resumedState.currentPeriod.id ||
               _lastSuwaya !=
@@ -178,11 +180,7 @@ class AstroNotifier extends Notifier<AstroState> {
             state = resumedState;
           }
 
-          _scheduleSmartStateUpdate(
-            generatedDay,
-            loc,
-            resumeOffset,
-          );
+          _scheduleSmartStateUpdate(generatedDay, loc, resumeOffset);
           _startUITicker(generatedDay, loc);
         },
       );
@@ -236,21 +234,24 @@ class AstroNotifier extends Notifier<AstroState> {
       }
 
       final activePeriod = newState.currentPeriod;
-      final sCount =
-          activePeriod.suwayasCount > 0 ? activePeriod.suwayasCount : 1;
+      final sCount = activePeriod.suwayasCount > 0
+          ? activePeriod.suwayasCount
+          : 1;
       final periodMicro = activePeriod.totalDuration.inMicroseconds;
 
       Duration nextWakeDelay;
       if (periodMicro > 0 && activePeriod.startUtc != null) {
         final totalVirtualSecondsInPeriod = sCount * 3600;
-        final elapsedMicro =
-            nowUtc.difference(activePeriod.startUtc!).inMicroseconds;
+        final elapsedMicro = nowUtc
+            .difference(activePeriod.startUtc!)
+            .inMicroseconds;
 
         final currentVirtualSecIndex =
             (elapsedMicro * totalVirtualSecondsInPeriod) ~/ periodMicro;
         final nextVirtualSecIndex = currentVirtualSecIndex + 1;
 
-        final nextBoundaryMicro = (nextVirtualSecIndex * periodMicro +
+        final nextBoundaryMicro =
+            (nextVirtualSecIndex * periodMicro +
                 totalVirtualSecondsInPeriod -
                 1) ~/
             totalVirtualSecondsInPeriod;
@@ -358,5 +359,6 @@ class AstroNotifier extends Notifier<AstroState> {
   void resetToRealTime() => ref.invalidateSelf();
 }
 
-final astroProvider =
-    NotifierProvider<AstroNotifier, AstroState>(AstroNotifier.new);
+final astroProvider = NotifierProvider<AstroNotifier, AstroState>(
+  AstroNotifier.new,
+);

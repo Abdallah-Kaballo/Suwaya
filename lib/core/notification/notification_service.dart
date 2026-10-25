@@ -24,10 +24,10 @@ class NotificationService {
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
@@ -43,23 +43,29 @@ class NotificationService {
 
   Future<void> _createAndSweepChannels() async {
     if (!Platform.isAndroid) return;
-    final androidImplementation =
-        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidImplementation = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     try {
-      await androidImplementation
-          ?.deleteNotificationChannel('suwaya_system_standard_v2');
-      await androidImplementation
-          ?.deleteNotificationChannel('suwaya_system_alarm_v2');
-      await androidImplementation
-          ?.deleteNotificationChannel('suwaya_system_vibrate_v2');
+      await androidImplementation?.deleteNotificationChannel(
+        'suwaya_system_standard_v2',
+      );
+      await androidImplementation?.deleteNotificationChannel(
+        'suwaya_system_alarm_v2',
+      );
+      await androidImplementation?.deleteNotificationChannel(
+        'suwaya_system_vibrate_v2',
+      );
     } catch (_) {}
 
-    const systemAlarmSound =
-        UriAndroidNotificationSound('content://settings/system/alarm_alert');
+    const systemAlarmSound = UriAndroidNotificationSound(
+      'content://settings/system/alarm_alert',
+    );
     const systemNotifSound = UriAndroidNotificationSound(
-        'content://settings/system/notification_sound');
+      'content://settings/system/notification_sound',
+    );
 
     await androidImplementation?.createNotificationChannel(
       AndroidNotificationChannel(
@@ -116,12 +122,15 @@ class NotificationService {
     bool playSound = true,
     bool enableVibration = true,
   }) async {
-    final safeTime =
-        _getSafeScheduledTime(scheduledTime, isDailyRoutine: false);
+    final safeTime = _getSafeScheduledTime(
+      scheduledTime,
+      isDailyRoutine: false,
+    );
     if (safeTime.isBefore(DateTime.now())) return true;
 
-    final stopText =
-        'alarm.stop'.tr() != 'alarm.stop' ? 'alarm.stop'.tr() : 'إيقاف';
+    final stopText = 'alarm.stop'.tr() != 'alarm.stop'
+        ? 'alarm.stop'.tr()
+        : 'إيقاف';
 
     final androidDetails = AndroidNotificationDetails(
       playSound ? _standardChannelId : _vibrateChannelId,
@@ -163,13 +172,15 @@ class NotificationService {
 
   Future<Set<int>> getPendingNormalNotificationIds() async {
     try {
-      final pending =
-          await flutterLocalNotificationsPlugin.pendingNotificationRequests();
+      final pending = await flutterLocalNotificationsPlugin
+          .pendingNotificationRequests();
       return pending
           .map((req) => req.id)
-          .where((id) =>
-              id != _pomodoroLiveNotificationId &&
-              id != _pomodoroChimeNotificationId)
+          .where(
+            (id) =>
+                id != _pomodoroLiveNotificationId &&
+                id != _pomodoroChimeNotificationId,
+          )
           .toSet();
     } catch (_) {
       return {};
@@ -189,8 +200,10 @@ class NotificationService {
       presentSound: androidDetails.playSound,
     );
     final tzTime = tz.TZDateTime.from(time, tz.local);
-    final details =
-        NotificationDetails(android: androidDetails, iOS: iosDetails);
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
 
     try {
       await flutterLocalNotificationsPlugin.zonedSchedule(

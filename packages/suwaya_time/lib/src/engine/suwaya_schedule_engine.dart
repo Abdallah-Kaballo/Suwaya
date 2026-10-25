@@ -28,7 +28,7 @@ class NextPrayerCountdownSnapshot {
   final String prayerId;
   final DateTime prayerTime;
   final int
-      primaryUnits; // سويعات (في الوضع السويعي) أو ساعات (في الوضع المدني)
+  primaryUnits; // سويعات (في الوضع السويعي) أو ساعات (في الوضع المدني)
   final int secondaryUnits; // دقائق افتراضية أو دقائق مدنية
   final int totalRemainingSeconds;
 
@@ -171,11 +171,11 @@ class SuwayaScheduleEngine {
       final mins = civilClock.minutesSinceMidnight;
       final sunriseMins = astroState.periods.isNotEmpty
           ? (astroState.ibadatTimings.sunrise.hour * 60 +
-              astroState.ibadatTimings.sunrise.minute)
+                astroState.ibadatTimings.sunrise.minute)
           : 360;
       final maghribMins = astroState.periods.isNotEmpty
           ? (astroState.ibadatTimings.maghrib.hour * 60 +
-              astroState.ibadatTimings.maghrib.minute)
+                astroState.ibadatTimings.maghrib.minute)
           : 1080;
       return mins >= maghribMins || mins < sunriseMins;
     }
@@ -200,7 +200,7 @@ class SuwayaScheduleEngine {
 
   /// تحويل زاوية إفلات المهمة على القرص إلى (معرف الفترة + السويعة المحلية + الدقيقة الافتراضية)
   static ({int periodId, int localSuwaya, int virtualMinute})?
-      resolveDialDropTarget({
+  resolveDialDropTarget({
     required double dragAngle,
     required List<AstroPeriod> periods,
   }) {
@@ -231,11 +231,7 @@ class SuwayaScheduleEngine {
         if (sIndex >= period.suwayasCount) {
           sIndex = period.suwayasCount - 1;
         }
-        return (
-          periodId: period.id,
-          localSuwaya: sIndex + 1,
-          virtualMinute: 0,
-        );
+        return (periodId: period.id, localSuwaya: sIndex + 1, virtualMinute: 0);
       }
     }
     return null;
@@ -272,8 +268,11 @@ class SuwayaScheduleEngine {
       for (final p in periods) {
         if (normGlobal < accumulatedSuwayas + p.suwayasCount) {
           final int localSuwaya = normGlobal - accumulatedSuwayas;
-          final double pStartAngle =
-              timeToDialAngle(p.startTime, dayStart, dayEnd);
+          final double pStartAngle = timeToDialAngle(
+            p.startTime,
+            dayStart,
+            dayEnd,
+          );
           final double pEndAngle = timeToDialAngle(p.endTime, dayStart, dayEnd);
           double sweep = pEndAngle - pStartAngle;
           if (sweep <= 0) sweep += 2 * math.pi;
@@ -296,10 +295,16 @@ class SuwayaScheduleEngine {
       final eLocal = endSuwaya ?? 1;
       final em = (endVirtualMinute ?? 0).clamp(0, 59);
 
-      final startGlobal =
-          SuwayaCoordinateMapper.localToGlobal(sPId, sLocal, periods);
-      final endGlobal =
-          SuwayaCoordinateMapper.localToGlobal(ePId, eLocal, periods);
+      final startGlobal = SuwayaCoordinateMapper.localToGlobal(
+        sPId,
+        sLocal,
+        periods,
+      );
+      final endGlobal = SuwayaCoordinateMapper.localToGlobal(
+        ePId,
+        eLocal,
+        periods,
+      );
 
       final sPeriod = periods.firstWhere(
         (c) => c.id == sPId,
@@ -506,8 +511,10 @@ class SuwayaTimeFormatter {
         days.toSet().where((day) => day >= 1 && day <= 7).toList()..sort();
     return orderedDays
         .map(
-          (day) => DateFormat('EEE', safeLoc)
-              .format(monday.add(Duration(days: day - 1))),
+          (day) => DateFormat(
+            'EEE',
+            safeLoc,
+          ).format(monday.add(Duration(days: day - 1))),
         )
         .join(', ');
   }

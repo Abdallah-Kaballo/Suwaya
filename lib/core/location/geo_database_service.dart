@@ -8,7 +8,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class GeoDatabaseService {
   static Database? _database;
   static const int _currentBundledDbVersion = 2;
@@ -26,7 +25,8 @@ class GeoDatabaseService {
 
       final prefs = await SharedPreferences.getInstance();
       final installedVersion = prefs.getInt(_dbVersionPrefKey) ?? 0;
-      final needsCopyOrUpgrade = !dbFile.existsSync() ||
+      final needsCopyOrUpgrade =
+          !dbFile.existsSync() ||
           installedVersion < _currentBundledDbVersion ||
           dbFile.lengthSync() == 0;
 
@@ -56,39 +56,49 @@ class GeoDatabaseService {
   }
 
   static Future<List<Map<String, dynamic>>> searchCitiesInCountry(
-      String query, String countryCode) async {
+    String query,
+    String countryCode,
+  ) async {
     await loadDatabase();
     if (query.trim().isEmpty || countryCode.isEmpty) return [];
 
     final q = query.toLowerCase().trim();
-    return await _database!.rawQuery('''
+    return await _database!.rawQuery(
+      '''
       SELECT name_ar as name, name_en as nameEn,
              country_code as countryCode, lat, lng, timezone
       FROM cities
       WHERE country_code = ? AND (name_ar LIKE ? OR name_en LIKE ?)
       LIMIT 30
-    ''', [countryCode.toUpperCase(), '$q%', '$q%']);
+    ''',
+      [countryCode.toUpperCase(), '$q%', '$q%'],
+    );
   }
 
   static Future<List<Map<String, dynamic>>> searchAllCities(
-      String query) async {
+    String query,
+  ) async {
     await loadDatabase();
     if (query.trim().isEmpty) return [];
 
     final q = query.toLowerCase().trim();
-    return await _database!.rawQuery('''
+    return await _database!.rawQuery(
+      '''
       SELECT name_ar as name, name_en as nameEn,
              country_code as countryCode, lat, lng, timezone
       FROM cities
       WHERE name_ar LIKE ? OR name_en LIKE ?
       LIMIT 30
-    ''', ['%$q%', '%$q%']);
+    ''',
+      ['%$q%', '%$q%'],
+    );
   }
 
   static Future<List<Map<String, String>>> getCountries(String langCode) async {
     await loadDatabase();
     final result = await _database!.rawQuery(
-        'SELECT DISTINCT country_code as code FROM cities ORDER BY country_code');
+      'SELECT DISTINCT country_code as code FROM cities ORDER BY country_code',
+    );
 
     final list = result.map((row) {
       final code = row['code'] as String;
@@ -98,16 +108,19 @@ class GeoDatabaseService {
     list.sort((a, b) => a['name']!.compareTo(b['name']!));
     return list;
   }
-  
+
   static Future<List<Map<String, dynamic>>> getCitiesByCountry(
     String countryCode, {
     String langCode = 'ar',
   }) async {
     await loadDatabase();
-    final results = await _database!.rawQuery('''
+    final results = await _database!.rawQuery(
+      '''
       SELECT name_ar as name, name_en as nameEn, country_code as countryCode, lat, lng, timezone
       FROM cities WHERE country_code = ?
-    ''', [countryCode.toUpperCase()]);
+    ''',
+      [countryCode.toUpperCase()],
+    );
 
     final rawList = results.map((r) => Map<String, dynamic>.from(r)).toList();
 
@@ -150,13 +163,15 @@ class GeoDatabaseService {
       }
 
       rawList.sort((a, b) {
-        final nameA = (langCode == 'ar'
+        final nameA =
+            (langCode == 'ar'
                     ? (a['name'] ?? a['nameEn'])
                     : (a['nameEn'] ?? a['name']))
                 ?.toString()
                 .trim() ??
             '';
-        final nameB = (langCode == 'ar'
+        final nameB =
+            (langCode == 'ar'
                     ? (b['name'] ?? b['nameEn'])
                     : (b['nameEn'] ?? b['name']))
                 ?.toString()
@@ -198,37 +213,49 @@ class GeoDatabaseService {
       );
 
       if (lngRadius >= 180.0) {
-        results = await _database!.rawQuery('''
+        results = await _database!.rawQuery(
+          '''
           SELECT name_ar, name_en, country_code, lat, lng, timezone
           FROM cities
           WHERE lat BETWEEN ? AND ?
-        ''', [minLat, maxLat]);
+        ''',
+          [minLat, maxLat],
+        );
       } else {
         final minLng = safeLng - lngRadius;
         final maxLng = safeLng + lngRadius;
 
         if (minLng < -180.0) {
           // عبور خط التاريخ الدولي غرباً (-180° / +180°)
-          results = await _database!.rawQuery('''
+          results = await _database!.rawQuery(
+            '''
             SELECT name_ar, name_en, country_code, lat, lng, timezone
             FROM cities
             WHERE lat BETWEEN ? AND ?
               AND (lng BETWEEN ? AND 180.0 OR lng BETWEEN -180.0 AND ?)
-          ''', [minLat, maxLat, minLng + 360.0, maxLng]);
+          ''',
+            [minLat, maxLat, minLng + 360.0, maxLng],
+          );
         } else if (maxLng > 180.0) {
           // عبور خط التاريخ الدولي شرقاً (+180° / -180°)
-          results = await _database!.rawQuery('''
+          results = await _database!.rawQuery(
+            '''
             SELECT name_ar, name_en, country_code, lat, lng, timezone
             FROM cities
             WHERE lat BETWEEN ? AND ?
               AND (lng BETWEEN ? AND 180.0 OR lng BETWEEN -180.0 AND ?)
-          ''', [minLat, maxLat, minLng, maxLng - 360.0]);
+          ''',
+            [minLat, maxLat, minLng, maxLng - 360.0],
+          );
         } else {
-          results = await _database!.rawQuery('''
+          results = await _database!.rawQuery(
+            '''
             SELECT name_ar, name_en, country_code, lat, lng, timezone
             FROM cities
             WHERE lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?
-          ''', [minLat, maxLat, minLng, maxLng]);
+          ''',
+            [minLat, maxLat, minLng, maxLng],
+          );
         }
       }
 
@@ -271,7 +298,8 @@ class GeoDatabaseService {
     double lon2,
   ) {
     const p = 0.017453292519943295; // Math.PI / 180
-    final rawA = 0.5 -
+    final rawA =
+        0.5 -
         cos((lat2 - lat1) * p) / 2 +
         cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
     final clampedA = rawA.clamp(0.0, 1.0);

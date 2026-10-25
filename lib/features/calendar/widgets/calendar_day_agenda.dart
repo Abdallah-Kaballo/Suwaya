@@ -52,8 +52,8 @@ FastingRecommendation? getSeasonalFastingInfo(
     langCode: langCode,
     localizedMonthName:
         'hijri.m${hDate.hMonth}'.tr() != 'hijri.m${hDate.hMonth}'
-            ? 'hijri.m${hDate.hMonth}'.tr()
-            : null,
+        ? 'hijri.m${hDate.hMonth}'.tr()
+        : null,
   );
   if (rec == null) return null;
   return FastingRecommendation(
@@ -128,24 +128,26 @@ class CalendarDayAgenda extends ConsumerWidget {
     final fastingInfo = getSeasonalFastingInfo(selectedHijriDate, langCode);
 
     final nightTasks = dayTasks.where(_isTaskInNightPhase).toList();
-    final dayPhaseTasks =
-        dayTasks.where((t) => !_isTaskInNightPhase(t)).toList();
+    final dayPhaseTasks = dayTasks
+        .where((t) => !_isTaskInNightPhase(t))
+        .toList();
 
     final nightRoutines = dayRoutines.where(_isRoutineInNightPhase).toList();
-    final dayPhaseRoutines =
-        dayRoutines.where((r) => !_isRoutineInNightPhase(r)).toList();
+    final dayPhaseRoutines = dayRoutines
+        .where((r) => !_isRoutineInNightPhase(r))
+        .toList();
 
     final bool hasAnyItems = dayTasks.isNotEmpty || dayRoutines.isNotEmpty;
 
     final String nightHeaderTitle =
         'home.night_of'.tr(args: [dayName]) != 'home.night_of'
-            ? 'home.night_of'.tr(args: [dayName])
-            : (langCode == 'ar' ? 'ليلة $dayName' : 'Night of $dayName');
+        ? 'home.night_of'.tr(args: [dayName])
+        : (langCode == 'ar' ? 'ليلة $dayName' : 'Night of $dayName');
 
     final String dayHeaderTitle =
         'home.day_of'.tr(args: [dayName]) != 'home.day_of'
-            ? 'home.day_of'.tr(args: [dayName])
-            : (langCode == 'ar' ? 'نهار $dayName' : 'Day of $dayName');
+        ? 'home.day_of'.tr(args: [dayName])
+        : (langCode == 'ar' ? 'نهار $dayName' : 'Day of $dayName');
 
     return ListView(
       physics: const BouncingScrollPhysics(
@@ -263,7 +265,8 @@ class CalendarDayAgenda extends ConsumerWidget {
           _buildPhaseSectionCard(
             context: context,
             ref: ref,
-            title: '$nightHeaderTitle SuwayaPhaseBadge(isNight: true, size: 20)',
+            title:
+                '$nightHeaderTitle SuwayaPhaseBadge(isNight: true, size: 20)',
             icon: LucideIcons.moon,
             phaseColor: const Color(0xFF7986CB),
             tasks: nightTasks,
@@ -278,8 +281,9 @@ class CalendarDayAgenda extends ConsumerWidget {
             ref: ref,
             title: '$dayHeaderTitle SuwayaPhaseBadge(isNight: false, size: 20)',
             icon: LucideIcons.sun,
-            phaseColor:
-                isDark ? const Color(0xFFFFB300) : const Color(0xFFB25000),
+            phaseColor: isDark
+                ? const Color(0xFFFFB300)
+                : const Color(0xFFB25000),
             tasks: dayPhaseTasks,
             routines: dayPhaseRoutines,
             surfaceColor: surfaceColor,
@@ -489,8 +493,11 @@ class CalendarDayAgenda extends ConsumerWidget {
                             : Colors.transparent,
                       ),
                       child: isCompletedOnSelectedDate
-                          ? const Icon(Icons.check,
-                              size: 14, color: Colors.white)
+                          ? const Icon(
+                              Icons.check,
+                              size: 14,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                   ),
@@ -505,8 +512,9 @@ class CalendarDayAgenda extends ConsumerWidget {
                   Text(
                     task.title,
                     style: TextStyle(
-                      color:
-                          isCompletedOnSelectedDate ? Colors.grey : textColor,
+                      color: isCompletedOnSelectedDate
+                          ? Colors.grey
+                          : textColor,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       decoration: isCompletedOnSelectedDate
@@ -585,15 +593,20 @@ class CalendarDayAgenda extends ConsumerWidget {
     }) {
       if (routine.isAstroTime && periodId != null && periods.isNotEmpty) {
         return ClockTimeText.suwaya(
-          globalSuwayaIndex:
-              resolveCalendarGlobalSuwaya(periodId, suwaya ?? 1, periods),
+          globalSuwayaIndex: resolveCalendarGlobalSuwaya(
+            periodId,
+            suwaya ?? 1,
+            periods,
+          ),
           virtualMinute: virtualMin ?? 0,
           style: clockStyle,
         );
       }
       if (!routine.isAstroTime && civilMins != null) {
-        return Text(formatCivilRoutineTime(civilMins, locale),
-            style: clockStyle);
+        return Text(
+          formatCivilRoutineTime(civilMins, locale),
+          style: clockStyle,
+        );
       }
       return Text('--:--', style: clockStyle);
     }
@@ -655,8 +668,9 @@ class CalendarDayAgenda extends ConsumerWidget {
               ),
             ),
             Directionality(
-              textDirection:
-                  isRTL ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              textDirection: isRTL
+                  ? ui.TextDirection.rtl
+                  : ui.TextDirection.ltr,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

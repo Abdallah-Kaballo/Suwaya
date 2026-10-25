@@ -51,32 +51,40 @@ class _OnboardingLocationScreenState
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                            color: isLocationSet
-                                ? Colors.green.withValues(alpha: 0.1)
-                                : primaryColor.withValues(alpha: 0.1),
-                            shape: BoxShape.circle),
+                          color: isLocationSet
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : primaryColor.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
                         child: Icon(
-                            isLocationSet
-                                ? LucideIcons.map_pin_check
-                                : LucideIcons.compass,
-                            color: isLocationSet ? Colors.green : primaryColor,
-                            size: 48),
+                          isLocationSet
+                              ? LucideIcons.map_pin_check
+                              : LucideIcons.compass,
+                          color: isLocationSet ? Colors.green : primaryColor,
+                          size: 48,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Text('onboarding.set_location'.tr(),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: textColor,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold)),
+                    Text(
+                      'onboarding.set_location'.tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    Text('onboarding.location_desc'.tr(),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: textColor.withValues(alpha: 0.6),
-                            fontSize: 14,
-                            height: 1.5)),
+                    Text(
+                      'onboarding.location_desc'.tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.6),
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
                     const SizedBox(height: 48),
                     if (isLocationSet) ...[
                       Container(
@@ -85,30 +93,42 @@ class _OnboardingLocationScreenState
                           color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: Colors.green.withValues(alpha: 0.3)),
+                            color: Colors.green.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Column(
                           children: [
-                            Text('onboarding.location_success'.tr(),
-                                style: const TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16)),
+                            Text(
+                              'onboarding.location_success'.tr(),
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                             const SizedBox(height: 8),
-                            Text(settings.activeLocation!.name,
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold)),
+                            Text(
+                              settings.activeLocation!.name,
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 16),
                             TextButton.icon(
                               onPressed: () =>
                                   _openLocationPicker(context, true),
-                              icon: const Icon(LucideIcons.pencil,
-                                  size: 16, color: Colors.green),
-                              label: Text('onboarding.change_location'.tr(),
-                                  style: const TextStyle(color: Colors.green)),
-                            )
+                              icon: const Icon(
+                                LucideIcons.pencil,
+                                size: 16,
+                                color: Colors.green,
+                              ),
+                              label: Text(
+                                'onboarding.change_location'.tr(),
+                                style: const TextStyle(color: Colors.green),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -119,20 +139,27 @@ class _OnboardingLocationScreenState
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2, color: Colors.white))
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Icon(LucideIcons.crosshair, size: 20),
                         label: Text(
-                            _isFetchingGps
-                                ? 'onboarding.fetching_gps'.tr()
-                                : 'onboarding.update_gps'.tr(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
+                          _isFetchingGps
+                              ? 'onboarding.fetching_gps'.tr()
+                              : 'onboarding.update_gps'.tr(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 60),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 0,
                         ),
                         onPressed: _isFetchingGps
@@ -140,11 +167,13 @@ class _OnboardingLocationScreenState
                             : () async {
                                 setState(() => _isFetchingGps = true);
                                 try {
-                                  final langCode =
-                                      Localizations.localeOf(context)
-                                          .languageCode;
-                                  final locData = await LocationService
-                                      .fetchOfflineLocation(langCode);
+                                  final langCode = Localizations.localeOf(
+                                    context,
+                                  ).languageCode;
+                                  final locData =
+                                      await LocationService.fetchOfflineLocation(
+                                        langCode,
+                                      );
 
                                   await ref
                                       .read(settingsProvider.notifier)
@@ -161,7 +190,8 @@ class _OnboardingLocationScreenState
                                   await ref
                                       .read(settingsProvider.notifier)
                                       .updateCalculationMethod(
-                                          locData['method']);
+                                        locData['method'],
+                                      );
                                   await ref
                                       .read(settingsProvider.notifier)
                                       .updateMadhab(locData['madhab']);
@@ -170,9 +200,11 @@ class _OnboardingLocationScreenState
 
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                        content: Text(
-                                            '${'onboarding.gps_success'.tr()} ${locData['formattedName']}'),
-                                        backgroundColor: Colors.green),
+                                      content: Text(
+                                        '${'onboarding.gps_success'.tr()} ${locData['formattedName']}',
+                                      ),
+                                      backgroundColor: Colors.green,
+                                    ),
                                   );
                                 } catch (e) {
                                   if (!context.mounted) return;
@@ -182,13 +214,15 @@ class _OnboardingLocationScreenState
                                   if (errorMsg.contains('gps_disabled') ||
                                       errorMsg.contains('disabled') ||
                                       errorMsg.contains(
-                                          'location services are disabled')) {
+                                        'location services are disabled',
+                                      )) {
                                     Geolocator.openLocationSettings();
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content:
-                                            Text('onboarding.gps_failed'.tr()),
+                                        content: Text(
+                                          'onboarding.gps_failed'.tr(),
+                                        ),
                                         backgroundColor:
                                             Colors.redAccent.shade700,
                                         behavior: SnackBarBehavior.floating,
@@ -206,9 +240,13 @@ class _OnboardingLocationScreenState
                       ElevatedButton.icon(
                         onPressed: () => _openLocationPicker(context, true),
                         icon: const Icon(LucideIcons.map),
-                        label: Text('onboarding.manual_select'.tr(),
-                            style: const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold)),
+                        label: Text(
+                          'onboarding.manual_select'.tr(),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isDark
                               ? Colors.white.withValues(alpha: 0.1)
@@ -216,7 +254,8 @@ class _OnboardingLocationScreenState
                           foregroundColor: textColor,
                           minimumSize: const Size(double.infinity, 60),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           elevation: 0,
                         ),
                       ),
@@ -231,8 +270,9 @@ class _OnboardingLocationScreenState
                             ? () async {
                                 HapticFeedback.heavyImpact();
 
-                                final perms =
-                                    ref.read(permissionsProvider.notifier);
+                                final perms = ref.read(
+                                  permissionsProvider.notifier,
+                                );
                                 await perms.ensureNotificationPermission();
                                 await perms.ensureExactAlarmPermission();
                                 await perms.ensureLocationPermission();
@@ -243,7 +283,8 @@ class _OnboardingLocationScreenState
                                 if (!context.mounted) return;
 
                                 await Future.delayed(
-                                    const Duration(milliseconds: 150));
+                                  const Duration(milliseconds: 150),
+                                );
 
                                 if (!context.mounted) return;
 
@@ -256,12 +297,17 @@ class _OnboardingLocationScreenState
                           foregroundColor: isDark ? Colors.black : Colors.white,
                           minimumSize: const Size(double.infinity, 60),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           elevation: 0,
                         ),
-                        child: Text('onboarding.start_journey'.tr(),
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'onboarding.start_journey'.tr(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -277,9 +323,10 @@ class _OnboardingLocationScreenState
   void _openLocationPicker(BuildContext context, bool startManual) {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => SmartLocationPicker(startAtManualLists: startManual));
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SmartLocationPicker(startAtManualLists: startManual),
+    );
   }
 }

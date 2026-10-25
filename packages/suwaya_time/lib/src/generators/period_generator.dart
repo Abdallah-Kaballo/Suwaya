@@ -7,7 +7,8 @@ class PeriodGenerator {
   ) {
     if (!anchors.isValidSequence) {
       throw Exception(
-          'Invalid Astro Sequence: Boundaries overlap or are backwards.');
+        'Invalid Astro Sequence: Boundaries overlap or are backwards.',
+      );
     }
 
     return [

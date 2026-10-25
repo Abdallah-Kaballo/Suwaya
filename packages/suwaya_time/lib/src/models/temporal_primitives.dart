@@ -9,9 +9,7 @@ class InstantUtc implements Comparable<InstantUtc> {
   const InstantUtc.fromMicroseconds(this.epochMicroseconds);
 
   factory InstantUtc.fromDateTime(DateTime dateTime) {
-    return InstantUtc.fromMicroseconds(
-      dateTime.toUtc().microsecondsSinceEpoch,
-    );
+    return InstantUtc.fromMicroseconds(dateTime.toUtc().microsecondsSinceEpoch);
   }
 
   factory InstantUtc.now() => InstantUtc.fromDateTime(DateTime.now().toUtc());
@@ -39,9 +37,9 @@ class InstantUtc implements Comparable<InstantUtc> {
   String toIso8601String() => toDateTimeUtc().toIso8601String();
 
   Map<String, dynamic> toJson() => {
-        'epochMicroseconds': epochMicroseconds,
-        'iso8601Utc': toIso8601String(),
-      };
+    'epochMicroseconds': epochMicroseconds,
+    'iso8601Utc': toIso8601String(),
+  };
 
   factory InstantUtc.fromJson(Map<String, dynamic> json) {
     if (json['epochMicroseconds'] is int) {
@@ -74,20 +72,14 @@ class CivilWallClock implements Comparable<CivilWallClock> {
   final int minute; // 0..59
   final int second; // 0..59
 
-  const CivilWallClock({
-    required int hour,
-    required int minute,
-    int second = 0,
-  })  : hour = hour < 0 ? 0 : (hour > 23 ? 23 : hour),
-        minute = minute < 0 ? 0 : (minute > 59 ? 59 : minute),
-        second = second < 0 ? 0 : (second > 59 ? 59 : second);
+  const CivilWallClock({required int hour, required int minute, int second = 0})
+    : hour = hour < 0 ? 0 : (hour > 23 ? 23 : hour),
+      minute = minute < 0 ? 0 : (minute > 59 ? 59 : minute),
+      second = second < 0 ? 0 : (second > 59 ? 59 : second);
 
   factory CivilWallClock.fromMinutesSinceMidnight(int totalMinutes) {
     final normalized = ((totalMinutes % 1440) + 1440) % 1440;
-    return CivilWallClock(
-      hour: normalized ~/ 60,
-      minute: normalized % 60,
-    );
+    return CivilWallClock(hour: normalized ~/ 60, minute: normalized % 60);
   }
 
   factory CivilWallClock.fromZonedWallTime(ZonedWallTime zwt) {
@@ -100,11 +92,7 @@ class CivilWallClock implements Comparable<CivilWallClock> {
 
   /// جسر توافق لتحويل DateTime إلى CivilWallClock عند الحاجة
   factory CivilWallClock.fromDateTime(DateTime dt) {
-    return CivilWallClock(
-      hour: dt.hour,
-      minute: dt.minute,
-      second: dt.second,
-    );
+    return CivilWallClock(hour: dt.hour, minute: dt.minute, second: dt.second);
   }
 
   int get minutesSinceMidnight => (hour * 60) + minute;
@@ -238,7 +226,8 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
 
   /// يضمن تثبيت بداية الدقيقة (تصفير الثواني والمايكروثواني) ككائن غير قابل للتغيير
   ZonedWallTime truncateToMinute() {
-    final excessMicro = (second * Duration.microsecondsPerSecond) +
+    final excessMicro =
+        (second * Duration.microsecondsPerSecond) +
         (instant.epochMicroseconds % Duration.microsecondsPerSecond);
     return ZonedWallTime(
       instant: InstantUtc.fromMicroseconds(
@@ -267,15 +256,15 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
       instant.isAtSameMomentAs(other.instant);
 
   Map<String, dynamic> toJson() => {
-        'instantUtc': instant.toIso8601String(),
-        'epochMicroseconds': instant.epochMicroseconds,
-        'utcOffsetSeconds': utcOffset.inSeconds,
-        'timezoneId': timezoneId,
-        'isDst': isDaylightSavingTime,
-        'wallClock':
-            '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}T'
-                '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}',
-      };
+    'instantUtc': instant.toIso8601String(),
+    'epochMicroseconds': instant.epochMicroseconds,
+    'utcOffsetSeconds': utcOffset.inSeconds,
+    'timezoneId': timezoneId,
+    'isDst': isDaylightSavingTime,
+    'wallClock':
+        '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}T'
+        '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}',
+  };
 
   @override
   int compareTo(ZonedWallTime other) => instant.compareTo(other.instant);
@@ -345,8 +334,9 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     final isNight = match.group(1)!.toUpperCase() == 'N';
     final slotNum = int.tryParse(match.group(2)!) ?? 1;
     final vMin = int.tryParse(match.group(3)!) ?? 0;
-    final vSec =
-        match.group(4) != null ? (int.tryParse(match.group(4)!) ?? 0) : 0;
+    final vSec = match.group(4) != null
+        ? (int.tryParse(match.group(4)!) ?? 0)
+        : 0;
 
     if (slotNum < 1 ||
         slotNum > 12 ||
@@ -410,7 +400,8 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     int periodLocalSlotNumber,
     int virtualMinute,
     int virtualSecond,
-  }) unpackInt64(int packed) {
+  })
+  unpackInt64(int packed) {
     final vs = packed & 0x3F;
     final vm = (packed >> 6) & 0x3F;
     final l = (packed >> 12) & 0x0F;
@@ -433,19 +424,19 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
   }
 
   Map<String, dynamic> toJson() => {
-        'globalSlotIndex': globalSlotIndex,
-        'phase': phase.name,
-        'phaseSlotNumber': phaseSlotNumber,
-        'periodId': periodId,
-        'periodKey': periodKey.name,
-        'periodLocalSlotNumber': periodLocalSlotNumber,
-        'virtualMinute': virtualMinute,
-        'virtualSecond': virtualSecond,
-        'slotProgress': slotProgress,
-        'totalVirtualMinutes': totalVirtualMinutes,
-        'isoSuwaya': toIsoSuwayaString(includeSeconds: true),
-        'packedInt64': toPackedInt64(),
-      };
+    'globalSlotIndex': globalSlotIndex,
+    'phase': phase.name,
+    'phaseSlotNumber': phaseSlotNumber,
+    'periodId': periodId,
+    'periodKey': periodKey.name,
+    'periodLocalSlotNumber': periodLocalSlotNumber,
+    'virtualMinute': virtualMinute,
+    'virtualSecond': virtualSecond,
+    'slotProgress': slotProgress,
+    'totalVirtualMinutes': totalVirtualMinutes,
+    'isoSuwaya': toIsoSuwayaString(includeSeconds: true),
+    'packedInt64': toPackedInt64(),
+  };
 
   @override
   int compareTo(SuwayaCoordinate other) =>
@@ -465,10 +456,10 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
 
   @override
   int get hashCode => Object.hash(
-        globalSlotIndex,
-        periodId,
-        periodLocalSlotNumber,
-        virtualMinute,
-        virtualSecond,
-      );
+    globalSlotIndex,
+    periodId,
+    periodLocalSlotNumber,
+    virtualMinute,
+    virtualSecond,
+  );
 }

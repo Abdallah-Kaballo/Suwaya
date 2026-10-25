@@ -32,7 +32,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.29.0'
           cache: true
 
       - name: Show toolchain versions
@@ -42,11 +41,11 @@ jobs:
           java -version
 
       - name: Install app dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Install suwaya_time package dependencies
         working-directory: packages/suwaya_time
-        run: dart pub get
+        run: dart pub get --enforce-lockfile
 
       - name: Check Dart formatting
         run: dart format --output=none --set-exit-if-changed lib test packages/suwaya_time

@@ -88,8 +88,9 @@ class SuwayaTimeEngine {
       orElse: () => day.periods.first,
     );
 
-    final int sCount =
-        currentPeriod.suwayasCount > 0 ? currentPeriod.suwayasCount : 1;
+    final int sCount = currentPeriod.suwayasCount > 0
+        ? currentPeriod.suwayasCount
+        : 1;
     final double actualPeriodSuwayaMicro =
         currentPeriod.totalDuration.inMicroseconds / sCount;
     final double speedMultiplier = actualPeriodSuwayaMicro > 0

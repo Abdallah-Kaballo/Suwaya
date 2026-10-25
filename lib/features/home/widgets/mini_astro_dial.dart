@@ -23,7 +23,10 @@ class MiniAstroDial extends StatelessWidget {
           isComplex: true,
           willChange: false,
           painter: _MiniDialPainter(
-              periods: periods, isDark: isDark, langCode: currentLang),
+            periods: periods,
+            isDark: isDark,
+            langCode: currentLang,
+          ),
         ),
       ),
     );
@@ -85,8 +88,9 @@ class _MiniDialPainter extends CustomPainter {
         center.dy + innerTextR * sin(middleAngle),
       );
 
-      final countColor =
-          isDark ? const Color(0xFFFFE082) : const Color(0xFF111827);
+      final countColor = isDark
+          ? const Color(0xFFFFE082)
+          : const Color(0xFF111827);
       final strokeBgColor = isDark ? Colors.black87 : Colors.white;
 
       textPainter.text = TextSpan(
@@ -147,8 +151,9 @@ class _MiniDialPainter extends CustomPainter {
           break;
       }
 
-      final String outerText =
-          pName.isNotEmpty ? '${period.id}\n($pName)' : period.id.toString();
+      final String outerText = pName.isNotEmpty
+          ? '${period.id}\n($pName)'
+          : period.id.toString();
 
       final outerTextR = radius + 15;
       final outerP = Offset(

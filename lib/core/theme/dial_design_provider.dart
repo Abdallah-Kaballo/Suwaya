@@ -22,8 +22,8 @@ extension DialDesignExt on DialDesign {
 
 final dialDesignProvider =
     StateNotifierProvider<DialDesignNotifier, DialDesign>((ref) {
-  return DialDesignNotifier();
-});
+      return DialDesignNotifier();
+    });
 
 class DialDesignNotifier extends StateNotifier<DialDesign> {
   DialDesignNotifier() : super(DialDesign.classic) {

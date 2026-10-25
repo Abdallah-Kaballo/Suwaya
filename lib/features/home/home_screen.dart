@@ -60,7 +60,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   /// 🌟 دالة مساعدة تضمن ظهور كلمة (نهار/ليلة) متبوعة باسم يوم الأسبوع دائماً في كل اللغات
   String _formatDayNightTitle(
-      BuildContext context, bool isNight, String dayName) {
+    BuildContext context,
+    bool isNight,
+    String dayName,
+  ) {
     final key = isNight ? 'home.night_of' : 'home.day_of';
     final translated = key.tr(args: [dayName]);
 
@@ -90,7 +93,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     SettingsModel settings,
   ) {
     final DateTime rawFajr = astroState.civilDayIbadat.fajr;
-    final DateTime rawSunset = astroState.civilDayIbadat.calculatedSunset ??
+    final DateTime rawSunset =
+        astroState.civilDayIbadat.calculatedSunset ??
         astroState.civilDayIbadat.maghrib;
 
     final DateTime todayFajr = DateTime(
@@ -255,13 +259,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 color: color,
                 shape: BoxShape.circle,
                 boxShadow: isHighlighted
-                    ? [
-                        BoxShadow(
-                          color: color,
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ]
+                    ? [BoxShadow(color: color, blurRadius: 8, spreadRadius: 2)]
                     : [],
               ),
             ),
@@ -457,8 +455,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     'home.edit_dial'.tr() != 'home.edit_dial'
                                         ? 'home.edit_dial'.tr()
                                         : (context.locale.languageCode == 'ar'
-                                            ? 'تخصيص القرص'
-                                            : 'Customize Dial'),
+                                              ? 'تخصيص القرص'
+                                              : 'Customize Dial'),
                                     style: TextStyle(
                                       color: pColor,
                                       fontSize: 12,
@@ -481,11 +479,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             routineArcs: routineArcs,
                             onItemTapped: (selection) =>
                                 showDialItemDetailsDialog(
-                              context: context,
-                              selection: selection,
-                              astroState: astroState,
-                              settings: settings,
-                            ),
+                                  context: context,
+                                  selection: selection,
+                                  astroState: astroState,
+                                  settings: settings,
+                                ),
                           ),
                         );
                       },
@@ -498,8 +496,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: Builder(
                 builder: (context) {
                   final todayTasks = ref.watch(tasksProvider).todayTasks;
-                  final tasksForLegend =
-                      todayTasks.where((t) => t.showOnDial).toList();
+                  final tasksForLegend = todayTasks
+                      .where((t) => t.showOnDial)
+                      .toList();
 
                   final routines = ref.watch(routinesProvider);
                   final activeRoutines = routines.where((r) {
@@ -576,22 +575,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   HapticFeedback.lightImpact();
                                   ref
                                       .read(highlightedRoutineProvider.notifier)
-                                      .state = r.id;
+                                      .state = r
+                                      .id;
                                   ref
-                                      .read(highlightedTaskProvider.notifier)
-                                      .state = null;
+                                          .read(
+                                            highlightedTaskProvider.notifier,
+                                          )
+                                          .state =
+                                      null;
                                   Future.delayed(
                                     const Duration(seconds: 3),
                                     () {
                                       if (ref.read(
-                                              highlightedRoutineProvider) ==
+                                            highlightedRoutineProvider,
+                                          ) ==
                                           r.id) {
                                         ref
-                                            .read(
-                                              highlightedRoutineProvider
-                                                  .notifier,
-                                            )
-                                            .state = null;
+                                                .read(
+                                                  highlightedRoutineProvider
+                                                      .notifier,
+                                                )
+                                                .state =
+                                            null;
                                       }
                                     },
                                   );
@@ -615,20 +620,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   HapticFeedback.lightImpact();
                                   ref
                                       .read(highlightedTaskProvider.notifier)
-                                      .state = task.id;
+                                      .state = task
+                                      .id;
                                   ref
-                                      .read(highlightedRoutineProvider.notifier)
-                                      .state = null;
+                                          .read(
+                                            highlightedRoutineProvider.notifier,
+                                          )
+                                          .state =
+                                      null;
                                   Future.delayed(
                                     const Duration(seconds: 3),
                                     () {
                                       if (ref.read(highlightedTaskProvider) ==
                                           task.id) {
                                         ref
-                                            .read(
-                                              highlightedTaskProvider.notifier,
-                                            )
-                                            .state = null;
+                                                .read(
+                                                  highlightedTaskProvider
+                                                      .notifier,
+                                                )
+                                                .state =
+                                            null;
                                       }
                                     },
                                   );

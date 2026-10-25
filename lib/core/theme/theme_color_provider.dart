@@ -4,8 +4,8 @@ import 'app_theme.dart';
 
 final themeColorProvider =
     StateNotifierProvider<ThemeColorNotifier, AppColorTheme>((ref) {
-  return ThemeColorNotifier();
-});
+      return ThemeColorNotifier();
+    });
 
 class ThemeColorNotifier extends StateNotifier<AppColorTheme> {
   ThemeColorNotifier() : super(AppColorTheme.gold) {

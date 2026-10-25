@@ -78,7 +78,8 @@ List<DialMarkerLayout> layoutDialMarkers({
     ),
     for (final marker in nightMarkers)
       UnifiedDialItem(
-        id: (marker['id'] as String?) ??
+        id:
+            (marker['id'] as String?) ??
             'marker:${marker['n']}:${(marker['t'] as DateTime).microsecondsSinceEpoch}',
         text: marker['n'] as String,
         time: marker['t'] as DateTime,
@@ -109,18 +110,19 @@ List<DialMarkerLayout> layoutDialMarkers({
     occupied[1].add({'angle': angle, 'margin': 0.10});
   }
 
-  final taskItems = tasks
-      .map(
-        (task) => UnifiedDialItem(
-          id: 'task:${task.taskModel.id}',
-          taskModel: task.taskModel,
-          text: task.shortName,
-          time: task.time,
-          color: task.color,
-        ),
-      )
-      .toList()
-    ..sort((a, b) => a.time.compareTo(b.time));
+  final taskItems =
+      tasks
+          .map(
+            (task) => UnifiedDialItem(
+              id: 'task:${task.taskModel.id}',
+              taskModel: task.taskModel,
+              text: task.shortName,
+              time: task.time,
+              color: task.color,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.time.compareTo(b.time));
 
   for (final item in taskItems) {
     final angle = timeToAngle(item.time, dayStart, dayEnd);
@@ -160,20 +162,27 @@ DialMarkerLayout? hitTestDialMarker({
 }) {
   final center = size.center(Offset.zero);
   final radius = size.width / 2;
-  final candidates = layouts.map((layout) {
-    final angle = layout.angle + totalRotation;
-    final markerPosition = Offset(
-      center.dx + layout.radius * cos(angle),
-      center.dy + layout.radius * sin(angle),
-    );
-    return (layout: layout, distance: (position - markerPosition).distance);
-  }).where((candidate) {
-    final tolerance = candidate.layout.isBadge
-        ? max(18.0, radius * 0.055)
-        : max(15.0, radius * 0.045);
-    return candidate.distance <= tolerance;
-  }).toList()
-    ..sort((a, b) => a.distance.compareTo(b.distance));
+  final candidates =
+      layouts
+          .map((layout) {
+            final angle = layout.angle + totalRotation;
+            final markerPosition = Offset(
+              center.dx + layout.radius * cos(angle),
+              center.dy + layout.radius * sin(angle),
+            );
+            return (
+              layout: layout,
+              distance: (position - markerPosition).distance,
+            );
+          })
+          .where((candidate) {
+            final tolerance = candidate.layout.isBadge
+                ? max(18.0, radius * 0.055)
+                : max(15.0, radius * 0.045);
+            return candidate.distance <= tolerance;
+          })
+          .toList()
+        ..sort((a, b) => a.distance.compareTo(b.distance));
   return candidates.isEmpty ? null : candidates.first.layout;
 }
 
@@ -338,8 +347,9 @@ class RailwayRingPainter extends CustomPainter {
       );
     }
 
-    final Color fillColor =
-        isDark ? const Color(0xFFFFE58F) : const Color(0xFF5C3A00);
+    final Color fillColor = isDark
+        ? const Color(0xFFFFE58F)
+        : const Color(0xFF5C3A00);
     final Color strokeColor = isDark
         ? Colors.black.withValues(alpha: 0.85)
         : Colors.white.withValues(alpha: 0.90);
@@ -417,8 +427,9 @@ class RailwayRingPainter extends CustomPainter {
           center,
           r,
           Paint()
-            ..color =
-                (isDark ? Colors.white : Colors.black).withValues(alpha: 0.12)
+            ..color = (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.12,
+            )
             ..style = PaintingStyle.stroke
             ..strokeWidth = 0.6,
         );
@@ -469,7 +480,8 @@ class RailwayRingPainter extends CustomPainter {
       }
     }
 
-    final markerLayouts = precomputedLayouts ??
+    final markerLayouts =
+        precomputedLayouts ??
         layoutDialMarkers(
           size: size,
           ibadat: ibadat,
@@ -479,8 +491,9 @@ class RailwayRingPainter extends CustomPainter {
           dayStart: dayStart,
           dayEnd: dayEnd,
         );
-    for (final layout
-        in markerLayouts.where((layout) => layout.item.isPrayer)) {
+    for (final layout in markerLayouts.where(
+      (layout) => layout.item.isPrayer,
+    )) {
       final isHighlighted = layout.item.id == highlightedMarkerId;
       if (layout.isBadge) {
         _drawTextBadge(
@@ -506,12 +519,14 @@ class RailwayRingPainter extends CustomPainter {
       }
     }
 
-    for (final layout
-        in markerLayouts.where((layout) => !layout.item.isPrayer)) {
+    for (final layout in markerLayouts.where(
+      (layout) => !layout.item.isPrayer,
+    )) {
       final item = layout.item;
       final isDragged =
           draggedTask != null && item.taskModel!.id == draggedTask!.id;
-      final isHighlighted = highlightedTaskId == item.taskModel!.id ||
+      final isHighlighted =
+          highlightedTaskId == item.taskModel!.id ||
           item.id == highlightedMarkerId;
       final angle = isDragged && dragAngle != null ? dragAngle! : layout.angle;
       _drawEquilateralArrow(
@@ -592,12 +607,13 @@ class DynamicNeedlePainter extends CustomPainter {
   final bool isDark;
   final DialDesign design;
 
-  DynamicNeedlePainter(
-      {required this.currentTime,
-      required this.dayStart,
-      required this.dayEnd,
-      required this.isDark,
-      required this.design});
+  DynamicNeedlePainter({
+    required this.currentTime,
+    required this.dayStart,
+    required this.dayEnd,
+    required this.isDark,
+    required this.design,
+  });
 
   double get angle => timeToAngle(currentTime, dayStart, dayEnd);
 
@@ -614,8 +630,9 @@ class DynamicNeedlePainter extends CustomPainter {
     final needleLength = R * kRailwayR - 8.0;
     final needleStart = R * 0.25;
 
-    final Color minimalHandColor =
-        isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1E293B);
+    final Color minimalHandColor = isDark
+        ? const Color(0xFFF8FAFC)
+        : const Color(0xFF1E293B);
 
     if (design == DialDesign.minimal) {
       if (isDark) {
@@ -654,36 +671,39 @@ class DynamicNeedlePainter extends CustomPainter {
           const Color(0xFF007BFF),
           const Color(0xFF007BFF),
           const Color(0xFFFFD700),
-          const Color(0xFFFFD700)
+          const Color(0xFFFFD700),
         ],
         [0.0, 0.5, 0.5, 1.0],
         TileMode.repeated,
       );
 
     canvas.drawLine(
-        Offset(0, -needleStart),
-        Offset(0, -needleLength),
-        Paint()
-          ..color = const Color(0xFF007BFF).withValues(alpha: 0.8)
-          ..strokeWidth = 8.0
-          ..strokeCap = StrokeCap.round
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12));
+      Offset(0, -needleStart),
+      Offset(0, -needleLength),
+      Paint()
+        ..color = const Color(0xFF007BFF).withValues(alpha: 0.8)
+        ..strokeWidth = 8.0
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+    );
 
     canvas.drawLine(
-        Offset(0, -needleStart),
-        Offset(0, -needleLength),
-        stripedPaint
-          ..strokeWidth = 3.5
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke);
+      Offset(0, -needleStart),
+      Offset(0, -needleLength),
+      stripedPaint
+        ..strokeWidth = 3.5
+        ..strokeCap = StrokeCap.round
+        ..style = PaintingStyle.stroke,
+    );
 
     canvas.drawLine(
-        Offset(0, -needleStart),
-        Offset(0, -needleLength),
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.7)
-          ..strokeWidth = 1.0
-          ..strokeCap = StrokeCap.round);
+      Offset(0, -needleStart),
+      Offset(0, -needleLength),
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.7)
+        ..strokeWidth = 1.0
+        ..strokeCap = StrokeCap.round,
+    );
 
     final Path compassArrow = Path()
       ..moveTo(0, -needleLength - 8)
@@ -693,11 +713,12 @@ class DynamicNeedlePainter extends CustomPainter {
 
     canvas.drawPath(compassArrow, stripedPaint..style = PaintingStyle.fill);
     canvas.drawPath(
-        compassArrow,
-        Paint()
-          ..color = isDark ? Colors.black87 : Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8);
+      compassArrow,
+      Paint()
+        ..color = isDark ? Colors.black87 : Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8,
+    );
 
     canvas.restore();
   }

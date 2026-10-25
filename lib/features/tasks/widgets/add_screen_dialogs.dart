@@ -61,8 +61,8 @@ class AddGridCard extends StatelessWidget {
                     color: isError
                         ? Colors.redAccent
                         : (isHighlighted
-                            ? accentColor
-                            : textColor.withValues(alpha: 0.5)),
+                              ? accentColor
+                              : textColor.withValues(alpha: 0.5)),
                     size: 16,
                   ),
                   const SizedBox(width: 6),
@@ -140,35 +140,36 @@ Future<void> showRoutinePatternModal({
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: [
-                    const Color(0xFF00E5FF),
-                    const Color(0xFF00E676),
-                    const Color(0xFFFF3D00),
-                    const Color(0xFFFFC400),
-                    const Color(0xFFFF4081),
-                    const Color(0xFFD500F9),
-                  ].map((color) {
-                    final isSelected = currentColor == color;
-                    return GestureDetector(
-                      onTap: () {
-                        setDialogState(() => currentColor = color);
-                        onChanged(currentColor, currentPattern);
-                      },
-                      child: Container(
-                        margin: const EdgeInsetsDirectional.only(end: 12),
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: isSelected ? 3 : 0,
+                  children:
+                      [
+                        const Color(0xFF00E5FF),
+                        const Color(0xFF00E676),
+                        const Color(0xFFFF3D00),
+                        const Color(0xFFFFC400),
+                        const Color(0xFFFF4081),
+                        const Color(0xFFD500F9),
+                      ].map((color) {
+                        final isSelected = currentColor == color;
+                        return GestureDetector(
+                          onTap: () {
+                            setDialogState(() => currentColor = color);
+                            onChanged(currentColor, currentPattern);
+                          },
+                          child: Container(
+                            margin: const EdgeInsetsDirectional.only(end: 12),
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: isSelected ? 3 : 0,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
                 ),
               ),
               const SizedBox(height: 20),
@@ -184,8 +185,9 @@ Future<void> showRoutinePatternModal({
                     entry.value,
                     style: TextStyle(
                       color: isSelected ? pColor : text,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   trailing: isSelected
@@ -293,8 +295,10 @@ Future<void> showCategoryDialModal({
                               ),
                             ),
                             const SizedBox(width: 6),
-                            Text(cat.displayName,
-                                style: TextStyle(color: text)),
+                            Text(
+                              cat.displayName,
+                              style: TextStyle(color: text),
+                            ),
                           ],
                         ),
                       ),
@@ -374,8 +378,9 @@ Future<void> showAlertsModal({
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color:
-                isActive ? pColor.withValues(alpha: 0.15) : Colors.transparent,
+            color: isActive
+                ? pColor.withValues(alpha: 0.15)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isActive ? pColor : text.withValues(alpha: 0.1),
@@ -404,7 +409,6 @@ Future<void> showAlertsModal({
       ),
     );
   }
-
 
   await showDialog(
     context: context,

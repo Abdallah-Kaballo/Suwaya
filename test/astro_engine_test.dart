@@ -13,8 +13,17 @@ void main() {
     const customIsha = 18.0;
     const cityOffset = Duration(hours: 3);
 
-    final day = SuwayaTimeEngine.generateDay(lat, lng, date, method, madhab,
-        hlRule, customFajr, customIsha, cityOffset);
+    final day = SuwayaTimeEngine.generateDay(
+      lat,
+      lng,
+      date,
+      method,
+      madhab,
+      hlRule,
+      customFajr,
+      customIsha,
+      cityOffset,
+    );
 
     int totalSuwayas = day.periods.fold(0, (sum, p) => sum + p.suwayasCount);
     expect(totalSuwayas, equals(24));

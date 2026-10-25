@@ -120,7 +120,8 @@ class SettingsModel {
   }
 
   bool isPeriodEnabled(String pId, {bool defaultVal = true}) {
-    final smartDefault = (pId == 'sunrise' ||
+    final smartDefault =
+        (pId == 'sunrise' ||
             pId.startsWith('half') ||
             pId.startsWith('third') ||
             pId.startsWith('sixth'))
@@ -142,10 +143,7 @@ class SettingsModel {
     return 0;
   }
 
-  String getPeriodSound(
-    String pId, [
-    String? defaultVal,
-  ]) {
+  String getPeriodSound(String pId, [String? defaultVal]) {
     final saved = _getConfig(pId)?.soundPath;
     if (saved != null && saved.isNotEmpty) return saved;
     if (_isMandatoryPrayer(pId)) {
@@ -202,31 +200,35 @@ class SettingsModel {
       ..calculationMethod = calculationMethod
       ..madhab = madhab
       ..highLatitudeRule = highLatitudeRule
-      ..customFajrAngle = customFajrAngle // 🌟 حفظ زاوية الفجر المخصصة
-      ..customIshaAngle = customIshaAngle // 🌟 حفظ زاوية العشاء المخصصة
+      ..customFajrAngle =
+          customFajrAngle // 🌟 حفظ زاوية الفجر المخصصة
+      ..customIshaAngle =
+          customIshaAngle // 🌟 حفظ زاوية العشاء المخصصة
       ..timeDisplayMode = timeDisplayMode
       ..suwayaIconMode = suwayaIconMode
       ..activeLocation = activeLocation != null
           ? (SavedLocation()
-            ..name = activeLocation!.name
-            ..latitude = activeLocation!.latitude
-            ..longitude = activeLocation!.longitude
-            ..countryCode = activeLocation!.countryCode
-            ..isAutoLocation = activeLocation!.isAutoLocation
-            ..timezone = activeLocation!.timezone
-            ..locationType = activeLocation!.locationType
-            ..nearestCity = activeLocation!.nearestCity)
+              ..name = activeLocation!.name
+              ..latitude = activeLocation!.latitude
+              ..longitude = activeLocation!.longitude
+              ..countryCode = activeLocation!.countryCode
+              ..isAutoLocation = activeLocation!.isAutoLocation
+              ..timezone = activeLocation!.timezone
+              ..locationType = activeLocation!.locationType
+              ..nearestCity = activeLocation!.nearestCity)
           : null
       ..savedLocations = savedLocations
-          .map((l) => SavedLocation()
-            ..name = l.name
-            ..latitude = l.latitude
-            ..longitude = l.longitude
-            ..countryCode = l.countryCode
-            ..isAutoLocation = l.isAutoLocation
-            ..timezone = l.timezone
-            ..locationType = l.locationType
-            ..nearestCity = l.nearestCity)
+          .map(
+            (l) => SavedLocation()
+              ..name = l.name
+              ..latitude = l.latitude
+              ..longitude = l.longitude
+              ..countryCode = l.countryCode
+              ..isAutoLocation = l.isAutoLocation
+              ..timezone = l.timezone
+              ..locationType = l.locationType
+              ..nearestCity = l.nearestCity,
+          )
           .toList()
       ..currentStreak = currentStreak
       ..longestStreak = longestStreak
@@ -246,13 +248,15 @@ class SettingsModel {
       ..snoozeDurationMinutes = snoozeDurationMinutes
       ..maxSnoozeCount = maxSnoozeCount
       ..periodConfigs = periodConfigs
-          .map((c) => PeriodConfig()
-            ..periodId = c.periodId
-            ..isEnabled = c.isEnabled
-            ..alertLevel = c.alertLevel
-            ..soundPath = c.soundPath
-            ..volume = c.volume
-            ..manualOffsetMinutes = c.manualOffsetMinutes)
+          .map(
+            (c) => PeriodConfig()
+              ..periodId = c.periodId
+              ..isEnabled = c.isEnabled
+              ..alertLevel = c.alertLevel
+              ..soundPath = c.soundPath
+              ..volume = c.volume
+              ..manualOffsetMinutes = c.manualOffsetMinutes,
+          )
           .toList();
   }
 }

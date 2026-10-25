@@ -19,63 +19,66 @@ Set<String> _flattenKeys(Map<String, dynamic> map, [String prefix = '']) {
 void main() {
   group('22-Language Translations JSON Integrity Tests', () {
     test(
-        'All 22 supported locale JSON files exist, parse cleanly, and contain core astronomical and UI sections',
-        () {
-      const requiredTopLevelSections = [
-        'app_name',
-        'common',
-        'night_parts',
-        'home',
-        'periods',
-        'prayers',
-        'ibadat',
-        'tasks',
-        'settings',
-        'pomodoro',
-      ];
+      'All 22 supported locale JSON files exist, parse cleanly, and contain core astronomical and UI sections',
+      () {
+        const requiredTopLevelSections = [
+          'app_name',
+          'common',
+          'night_parts',
+          'home',
+          'periods',
+          'prayers',
+          'ibadat',
+          'tasks',
+          'settings',
+          'pomodoro',
+        ];
 
-      final enFile = File('assets/translations/en.json');
-      expect(enFile.existsSync(), isTrue);
-      final enMap =
-          jsonDecode(enFile.readAsStringSync()) as Map<String, dynamic>;
-      final enKeys = _flattenKeys(enMap);
-      expect(enKeys, isNotEmpty);
+        final enFile = File('assets/translations/en.json');
+        expect(enFile.existsSync(), isTrue);
+        final enMap =
+            jsonDecode(enFile.readAsStringSync()) as Map<String, dynamic>;
+        final enKeys = _flattenKeys(enMap);
+        expect(enKeys, isNotEmpty);
 
-      for (final locale in AppLocales.supported) {
-        final code = locale.languageCode;
-        final file = File('assets/translations/$code.json');
-        expect(
-          file.existsSync(),
-          isTrue,
-          reason: 'Missing translation file for locale: $code',
-        );
-
-        final rawContent = file.readAsStringSync();
-        late final Map<String, dynamic> decoded;
-        expect(
-          () => decoded = jsonDecode(rawContent) as Map<String, dynamic>,
-          returnsNormally,
-          reason: 'Invalid JSON syntax in assets/translations/$code.json',
-        );
-
-        for (final section in requiredTopLevelSections) {
+        for (final locale in AppLocales.supported) {
+          final code = locale.languageCode;
+          final file = File('assets/translations/$code.json');
           expect(
-            decoded.containsKey(section),
+            file.existsSync(),
             isTrue,
-            reason: 'Locale $code.json is missing required section "$section"',
+            reason: 'Missing translation file for locale: $code',
           );
-        }
 
-        // التأكد من عدم وجود قيم فارغة في مفاتيح الفترات والصلوات
-        final periods = decoded['periods'] as Map<String, dynamic>;
-        for (final pEntry in periods.entries) {
+          final rawContent = file.readAsStringSync();
+          late final Map<String, dynamic> decoded;
           expect(
-            (pEntry.value as String).trim().isNotEmpty,
-            isTrue,
-            reason: 'Empty period translation for ${pEntry.key} in $code.json',
+            () => decoded = jsonDecode(rawContent) as Map<String, dynamic>,
+            returnsNormally,
+            reason: 'Invalid JSON syntax in assets/translations/$code.json',
           );
+
+          for (final section in requiredTopLevelSections) {
+            expect(
+              decoded.containsKey(section),
+              isTrue,
+              reason:
+                  'Locale $code.json is missing required section "$section"',
+            );
+          }
+
+          // التأكد من عدم وجود قيم فارغة في مفاتيح الفترات والصلوات
+          final periods = decoded['periods'] as Map<String, dynamic>;
+          for (final pEntry in periods.entries) {
+            expect(
+              (pEntry.value as String).trim().isNotEmpty,
+              isTrue,
+              reason:
+                  'Empty period translation for ${pEntry.key} in $code.json',
+            );
+          }
         }
-      }
-    });
+      },
+    );
   });
 }

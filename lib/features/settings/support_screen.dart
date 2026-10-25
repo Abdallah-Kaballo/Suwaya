@@ -59,11 +59,9 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       builder: (ctx) => const Center(child: CircularProgressIndicator()),
     );
 
-    final result =
-        await ref.read(supporterProvider.notifier).purchaseTierPackage(
-              tier,
-              preloadedPackage: _storePackages[tier],
-            );
+    final result = await ref
+        .read(supporterProvider.notifier)
+        .purchaseTierPackage(tier, preloadedPackage: _storePackages[tier]);
 
     if (!mounted) return;
     Navigator.pop(context); // إغلاق مؤشر التحميل
@@ -93,12 +91,13 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
 
   Future<void> _handleRestorePurchases() async {
     HapticFeedback.lightImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('support.restoring_msg'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('support.restoring_msg'.tr())));
 
-    final restored =
-        await ref.read(supporterProvider.notifier).restorePurchases();
+    final restored = await ref
+        .read(supporterProvider.notifier)
+        .restorePurchases();
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -108,8 +107,8 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
           restored
               ? 'support.success_msg'.tr()
               : (context.locale.languageCode == 'ar'
-                  ? 'لم يتم العثور على اشتراكات فعالة سابقة.'
-                  : 'No active previous subscriptions found.'),
+                    ? 'لم يتم العثور على اشتراكات فعالة سابقة.'
+                    : 'No active previous subscriptions found.'),
         ),
         backgroundColor: restored ? Colors.green.shade700 : Colors.orange,
       ),
@@ -290,8 +289,8 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
         color: isCurrent
             ? color.withValues(alpha: 0.1)
             : (isDark
-                ? Colors.white.withValues(alpha: 0.03)
-                : Colors.black.withValues(alpha: 0.02)),
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : Colors.black.withValues(alpha: 0.02)),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isCurrent ? color : (isDark ? Colors.white12 : Colors.black12),

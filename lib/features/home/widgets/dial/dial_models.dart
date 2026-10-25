@@ -7,11 +7,12 @@ class DialTask {
   final DateTime time;
   final Color color;
 
-  DialTask(
-      {required this.taskModel,
-      required this.shortName,
-      required this.time,
-      required this.color});
+  DialTask({
+    required this.taskModel,
+    required this.shortName,
+    required this.time,
+    required this.color,
+  });
 }
 
 class UnifiedDialItem {
@@ -22,13 +23,14 @@ class UnifiedDialItem {
   final TaskModel? taskModel;
   final bool isPrayer;
 
-  UnifiedDialItem(
-      {required this.id,
-      required this.text,
-      required this.time,
-      required this.color,
-      this.taskModel,
-      this.isPrayer = false});
+  UnifiedDialItem({
+    required this.id,
+    required this.text,
+    required this.time,
+    required this.color,
+    this.taskModel,
+    this.isPrayer = false,
+  });
 }
 
 class DialMarkerLayout {

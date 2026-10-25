@@ -31,51 +31,53 @@ List<PrivacySection> _parsePrivacyJson(String rawJson) {
 
 final privacyProvider = FutureProvider.family
     .autoDispose<List<PrivacySection>, String>((ref, langCode) async {
-  final targetLang = (langCode == 'ar') ? 'ar' : 'en';
-  final prefs = await SharedPreferences.getInstance();
-  final cacheKey = 'suwaya_privacy_cache_$targetLang';
-  final url =
-      'https://raw.githubusercontent.com/Abdallah-Kaballo/Suwaya/main/docs/privacy/privacy_$targetLang.json';
+      final targetLang = (langCode == 'ar') ? 'ar' : 'en';
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'suwaya_privacy_cache_$targetLang';
+      final url =
+          'https://raw.githubusercontent.com/Abdallah-Kaballo/Suwaya/main/docs/privacy/privacy_$targetLang.json';
 
-  List<PrivacySection> localSections = const [];
+      List<PrivacySection> localSections = const [];
 
-  final cachedData = prefs.getString(cacheKey);
-  if (cachedData != null && cachedData.isNotEmpty) {
-    try {
-      localSections = _parsePrivacyJson(cachedData);
-    } catch (_) {}
-  }
-
-  if (localSections.isEmpty) {
-    try {
-      final bundled =
-          await rootBundle.loadString('docs/privacy/privacy_$targetLang.json');
-      localSections = _parsePrivacyJson(bundled);
-    } catch (_) {}
-  }
-
-  if (localSections.isEmpty) {
-    localSections = _defaultPrivacySections(targetLang);
-  }
-
-  // تحديث صامت في الخلفية دون تعطيل عرض الصفحة للمستخدم
-  unawaited(() async {
-    try {
-      final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200 && response.body != cachedData) {
-        final parsed = _parsePrivacyJson(response.body);
-        if (parsed.isNotEmpty) {
-          await prefs.setString(cacheKey, response.body);
-        }
+      final cachedData = prefs.getString(cacheKey);
+      if (cachedData != null && cachedData.isNotEmpty) {
+        try {
+          localSections = _parsePrivacyJson(cachedData);
+        } catch (_) {}
       }
-    } catch (e) {
-      debugPrint('Privacy background refresh skipped: $e');
-    }
-  }());
 
-  return localSections;
-});
+      if (localSections.isEmpty) {
+        try {
+          final bundled = await rootBundle.loadString(
+            'docs/privacy/privacy_$targetLang.json',
+          );
+          localSections = _parsePrivacyJson(bundled);
+        } catch (_) {}
+      }
+
+      if (localSections.isEmpty) {
+        localSections = _defaultPrivacySections(targetLang);
+      }
+
+      // تحديث صامت في الخلفية دون تعطيل عرض الصفحة للمستخدم
+      unawaited(() async {
+        try {
+          final response = await http
+              .get(Uri.parse(url))
+              .timeout(const Duration(seconds: 5));
+          if (response.statusCode == 200 && response.body != cachedData) {
+            final parsed = _parsePrivacyJson(response.body);
+            if (parsed.isNotEmpty) {
+              await prefs.setString(cacheKey, response.body);
+            }
+          }
+        } catch (e) {
+          debugPrint('Privacy background refresh skipped: $e');
+        }
+      }());
+
+      return localSections;
+    });
 
 List<PrivacySection> _defaultPrivacySections(String lang) {
   if (lang == 'ar') {

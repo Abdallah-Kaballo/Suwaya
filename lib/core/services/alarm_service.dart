@@ -239,10 +239,12 @@ class AlarmService {
     final notifTitle = settings.notificationSettings.title;
     final notifBody = settings.notificationSettings.body;
 
-    final fallbackTitle =
-        notifTitle.isNotEmpty ? notifTitle : 'alarm.default_title'.tr();
-    final fallbackBody =
-        notifBody.isNotEmpty ? notifBody : 'alarm.swipe_to_stop'.tr();
+    final fallbackTitle = notifTitle.isNotEmpty
+        ? notifTitle
+        : 'alarm.default_title'.tr();
+    final fallbackBody = notifBody.isNotEmpty
+        ? notifBody
+        : 'alarm.swipe_to_stop'.tr();
 
     final inferredKind = inferKindFromAlarmId(settings.id);
     final defaultPolicy = AlarmPolicyTable.forEvent(kind: inferredKind);
@@ -273,8 +275,9 @@ class AlarmService {
       try {
         final decoded = jsonDecode(rawPayload) as Map<String, dynamic>;
         final kind = AlarmEventKind.fromString(decoded['k'] as String?);
-        final effectiveKind =
-            kind == AlarmEventKind.unknown ? inferredKind : kind;
+        final effectiveKind = kind == AlarmEventKind.unknown
+            ? inferredKind
+            : kind;
         final policy = AlarmPolicyTable.forEvent(
           kind: effectiveKind,
           sourceId: decoded['sId'] as String?,
@@ -300,8 +303,10 @@ class AlarmService {
           snoozeDurationMinutes:
               ((decoded['sd'] as int?) ?? defaultSnoozeMinutes).clamp(1, 120),
           snoozeCount: ((decoded['sc'] as int?) ?? 0).clamp(0, 99),
-          maxSnoozes:
-              ((decoded['ms'] as int?) ?? defaultMaxSnoozes).clamp(0, 20),
+          maxSnoozes: ((decoded['ms'] as int?) ?? defaultMaxSnoozes).clamp(
+            0,
+            20,
+          ),
           loopAudio: (decoded['l'] as bool?) ?? policy.loopAudioDefault,
           volumePolicy: AlarmVolumePolicy.fromString(decoded['vp'] as String?),
         );
@@ -320,12 +325,14 @@ class AlarmService {
 
     final payloadTitle =
         (parts.isNotEmpty && parts[0].isNotEmpty && parts[0] != 'تنبيه')
-            ? parts[0]
-            : fallbackTitle;
-    final colorVal =
-        parts.length > 1 ? (int.tryParse(parts[1]) ?? 0xFFD4AF37) : 0xFFD4AF37;
-    final snoozes =
-        parts.length > 2 ? (int.tryParse(parts[2]) ?? 0).clamp(0, 99) : 0;
+        ? parts[0]
+        : fallbackTitle;
+    final colorVal = parts.length > 1
+        ? (int.tryParse(parts[1]) ?? 0xFFD4AF37)
+        : 0xFFD4AF37;
+    final snoozes = parts.length > 2
+        ? (int.tryParse(parts[2]) ?? 0).clamp(0, 99)
+        : 0;
 
     return ParsedAlarmData(
       schemaVersion: 1,

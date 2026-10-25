@@ -19,17 +19,14 @@ class DatabaseService {
 
     try {
       isar = await Isar.open(
-        [
-          TaskModelSchema,
-          SettingsModelSchema,
-          RoutineModelSchema,
-        ],
+        [TaskModelSchema, SettingsModelSchema, RoutineModelSchema],
         directory: dir.path,
         inspector: !kReleaseMode,
       );
     } catch (e, stackTrace) {
       debugPrint(
-          '🚨 فشل فتح قاعدة بيانات Isar في المسار (${dir.path}): $e\n$stackTrace');
+        '🚨 فشل فتح قاعدة بيانات Isar في المسار (${dir.path}): $e\n$stackTrace',
+      );
       throw StateError(
         'تعذر فتح قاعدة البيانات المحلية (قد تكون مقفلة بواسطة عملية أخرى أو لا توجد مساحة كافية): $e',
       );

@@ -31,15 +31,22 @@ class AstroCalculationsScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-            icon: Icon(
-                context.locale.languageCode == 'ar'
-                    ? LucideIcons.arrow_right
-                    : LucideIcons.arrow_left,
-                color: textColor),
-            onPressed: () => Navigator.pop(context)),
-        title: Text('astro_calc.title'.tr(),
-            style: TextStyle(
-                color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
+          icon: Icon(
+            context.locale.languageCode == 'ar'
+                ? LucideIcons.arrow_right
+                : LucideIcons.arrow_left,
+            color: textColor,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'astro_calc.title'.tr(),
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         centerTitle: true,
       ),
       body: ListView(
@@ -49,19 +56,24 @@ class AstroCalculationsScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: primaryColor.withValues(alpha: 0.3))),
+              color: primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+            ),
             child: Row(
               children: [
                 Icon(LucideIcons.info, color: primaryColor),
                 const SizedBox(width: 12),
                 Expanded(
-                    child: Text('astro_calc.warning'.tr(),
-                        style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black87,
-                            fontSize: 12,
-                            height: 1.5))),
+                  child: Text(
+                    'astro_calc.warning'.tr(),
+                    style: TextStyle(
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -69,146 +81,161 @@ class AstroCalculationsScreen extends ConsumerWidget {
 
           // 🌟 تم تطبيق مفاتيح الترجمة هنا
           _buildActionRow(
-              context,
-              LucideIcons.sliders_horizontal,
-              'astro_calc.manual_offset_title'.tr(),
-              'astro_calc.manual_offset_subtitle'.tr(),
-              () => context.push('/settings/manual-offsets'),
-              surfaceColor,
-              borderColor,
-              textColor,
-              primaryColor,
-              isDark),
+            context,
+            LucideIcons.sliders_horizontal,
+            'astro_calc.manual_offset_title'.tr(),
+            'astro_calc.manual_offset_subtitle'.tr(),
+            () => context.push('/settings/manual-offsets'),
+            surfaceColor,
+            borderColor,
+            textColor,
+            primaryColor,
+            isDark,
+          ),
           const SizedBox(height: 12),
 
           _buildGroupTitle('astro_calc.calc_method'.tr(), primaryColor),
           _buildCard(surfaceColor, borderColor, [
             _buildRadioItem(
-                'muslim_world_league',
-                'astro_calc.mwl'.tr(),
-                'astro_calc.mwl_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'muslim_world_league',
+              'astro_calc.mwl'.tr(),
+              'astro_calc.mwl_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'egyptian',
-                'astro_calc.egypt'.tr(),
-                'astro_calc.egypt_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'egyptian',
+              'astro_calc.egypt'.tr(),
+              'astro_calc.egypt_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'ummAlQura',
-                'astro_calc.makkah'.tr(),
-                'astro_calc.makkah_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'ummAlQura',
+              'astro_calc.makkah'.tr(),
+              'astro_calc.makkah_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'dubai',
-                'astro_calc.dubai'.tr(),
-                'astro_calc.dubai_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'dubai',
+              'astro_calc.dubai'.tr(),
+              'astro_calc.dubai_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'qatar',
-                'astro_calc.qatar'.tr(),
-                'astro_calc.qatar_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'qatar',
+              'astro_calc.qatar'.tr(),
+              'astro_calc.qatar_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'kuwait',
-                'astro_calc.kuwait'.tr(),
-                'astro_calc.kuwait_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'kuwait',
+              'astro_calc.kuwait'.tr(),
+              'astro_calc.kuwait_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'karachi',
-                'astro_calc.karachi'.tr(),
-                'astro_calc.karachi_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'karachi',
+              'astro_calc.karachi'.tr(),
+              'astro_calc.karachi_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'north_america',
-                'astro_calc.isna'.tr(),
-                'astro_calc.isna_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'north_america',
+              'astro_calc.isna'.tr(),
+              'astro_calc.isna_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'turkey',
-                'astro_calc.turkey'.tr(),
-                'astro_calc.turkey_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'turkey',
+              'astro_calc.turkey'.tr(),
+              'astro_calc.turkey_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'tehran',
-                'astro_calc.tehran'.tr(),
-                'astro_calc.tehran_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'tehran',
+              'astro_calc.tehran'.tr(),
+              'astro_calc.tehran_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'france_uoif',
-                'astro_calc.uoif'.tr(),
-                'astro_calc.uoif_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'france_uoif',
+              'astro_calc.uoif'.tr(),
+              'astro_calc.uoif_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'russia',
-                'astro_calc.russia'.tr(),
-                'astro_calc.russia_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'russia',
+              'astro_calc.russia'.tr(),
+              'astro_calc.russia_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'singapore',
-                'astro_calc.singapore'.tr(),
-                'astro_calc.singapore_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'singapore',
+              'astro_calc.singapore'.tr(),
+              'astro_calc.singapore_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'custom',
-                'astro_calc.custom'.tr(),
-                'astro_calc.custom_desc'.tr(),
-                settings.calculationMethod,
-                (v) => notifier.updateAstroSettings(method: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'custom',
+              'astro_calc.custom'.tr(),
+              'astro_calc.custom_desc'.tr(),
+              settings.calculationMethod,
+              (v) => notifier.updateAstroSettings(method: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
           ]),
 
           if (isCustomMethod) ...[
@@ -216,47 +243,59 @@ class AstroCalculationsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                  color: surfaceColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: primaryColor.withValues(alpha: 0.5))),
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: primaryColor.withValues(alpha: 0.5)),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(LucideIcons.settings_2,
-                          color: primaryColor, size: 20),
+                      Icon(
+                        LucideIcons.settings_2,
+                        color: primaryColor,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
-                      Text('astro_calc.custom_angles'.tr(),
-                          style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
+                      Text(
+                        'astro_calc.custom_angles'.tr(),
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
                   _buildAngleSlider(
-                      title: 'astro_calc.fajr_angle'.tr(),
-                      value: settings.customFajrAngle,
-                      isDark: isDark,
-                      textColor: textColor,
-                      primaryColor: primaryColor,
-                      hintColor: hintColor,
-                      onChanged: (v) => notifier.updateAstroSettings(
-                          fajrAngle: v, ishaAngle: settings.customIshaAngle)),
+                    title: 'astro_calc.fajr_angle'.tr(),
+                    value: settings.customFajrAngle,
+                    isDark: isDark,
+                    textColor: textColor,
+                    primaryColor: primaryColor,
+                    hintColor: hintColor,
+                    onChanged: (v) => notifier.updateAstroSettings(
+                      fajrAngle: v,
+                      ishaAngle: settings.customIshaAngle,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Divider(color: borderColor, height: 1),
                   const SizedBox(height: 16),
                   _buildAngleSlider(
-                      title: 'astro_calc.isha_angle'.tr(),
-                      value: settings.customIshaAngle,
-                      isDark: isDark,
-                      textColor: textColor,
-                      primaryColor: primaryColor,
-                      hintColor: hintColor,
-                      onChanged: (v) => notifier.updateAstroSettings(
-                          fajrAngle: settings.customFajrAngle, ishaAngle: v)),
+                    title: 'astro_calc.isha_angle'.tr(),
+                    value: settings.customIshaAngle,
+                    isDark: isDark,
+                    textColor: textColor,
+                    primaryColor: primaryColor,
+                    hintColor: hintColor,
+                    onChanged: (v) => notifier.updateAstroSettings(
+                      fajrAngle: settings.customFajrAngle,
+                      ishaAngle: v,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -266,55 +305,60 @@ class AstroCalculationsScreen extends ConsumerWidget {
           _buildGroupTitle('astro_calc.asr_madhab'.tr(), primaryColor),
           _buildCard(surfaceColor, borderColor, [
             _buildRadioItem(
-                'shafi',
-                'astro_calc.shafi'.tr(),
-                'astro_calc.shafi_desc'.tr(),
-                settings.madhab,
-                (v) => notifier.updateAstroSettings(madhab: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'shafi',
+              'astro_calc.shafi'.tr(),
+              'astro_calc.shafi_desc'.tr(),
+              settings.madhab,
+              (v) => notifier.updateAstroSettings(madhab: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'hanafi',
-                'astro_calc.hanafi'.tr(),
-                'astro_calc.hanafi_desc'.tr(),
-                settings.madhab,
-                (v) => notifier.updateAstroSettings(madhab: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'hanafi',
+              'astro_calc.hanafi'.tr(),
+              'astro_calc.hanafi_desc'.tr(),
+              settings.madhab,
+              (v) => notifier.updateAstroSettings(madhab: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
           ]),
 
           const SizedBox(height: 24),
           _buildGroupTitle('astro_calc.high_lat'.tr(), primaryColor),
           _buildCard(surfaceColor, borderColor, [
             _buildRadioItem(
-                'middle_of_the_night',
-                'astro_calc.midnight'.tr(),
-                'astro_calc.midnight_desc'.tr(),
-                settings.highLatitudeRule,
-                (v) => notifier.updateAstroSettings(highLatRule: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'middle_of_the_night',
+              'astro_calc.midnight'.tr(),
+              'astro_calc.midnight_desc'.tr(),
+              settings.highLatitudeRule,
+              (v) => notifier.updateAstroSettings(highLatRule: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'seventh_of_the_night',
-                'astro_calc.seventh'.tr(),
-                'astro_calc.seventh_desc'.tr(),
-                settings.highLatitudeRule,
-                (v) => notifier.updateAstroSettings(highLatRule: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'seventh_of_the_night',
+              'astro_calc.seventh'.tr(),
+              'astro_calc.seventh_desc'.tr(),
+              settings.highLatitudeRule,
+              (v) => notifier.updateAstroSettings(highLatRule: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
             _buildRadioItem(
-                'twilight_angle',
-                'astro_calc.twilight'.tr(),
-                'astro_calc.twilight_desc'.tr(),
-                settings.highLatitudeRule,
-                (v) => notifier.updateAstroSettings(highLatRule: v),
-                textColor,
-                isDark,
-                primaryColor),
+              'twilight_angle',
+              'astro_calc.twilight'.tr(),
+              'astro_calc.twilight_desc'.tr(),
+              settings.highLatitudeRule,
+              (v) => notifier.updateAstroSettings(highLatRule: v),
+              textColor,
+              isDark,
+              primaryColor,
+            ),
           ]),
           const SizedBox(height: 40),
         ],
@@ -323,16 +367,17 @@ class AstroCalculationsScreen extends ConsumerWidget {
   }
 
   Widget _buildActionRow(
-      BuildContext context,
-      IconData icon,
-      String title,
-      String subtitle,
-      VoidCallback onTap,
-      Color surfaceColor,
-      Color borderColor,
-      Color textColor,
-      Color primaryColor,
-      bool isDark) {
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+    Color surfaceColor,
+    Color borderColor,
+    Color textColor,
+    Color primaryColor,
+    bool isDark,
+  ) {
     return Material(
       color: surfaceColor,
       borderRadius: BorderRadius.circular(16),
@@ -345,15 +390,17 @@ class AstroCalculationsScreen extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-              border: Border.all(color: borderColor),
-              borderRadius: BorderRadius.circular(16)),
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    color: primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10)),
+                  color: primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: Icon(icon, color: primaryColor, size: 20),
               ),
               const SizedBox(width: 16),
@@ -361,25 +408,32 @@ class AstroCalculationsScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: TextStyle(
-                            color: textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15)),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(subtitle,
-                        style: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.black54,
-                            fontSize: 12)),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Icon(
-                  context.locale.languageCode == 'ar'
-                      ? LucideIcons.chevron_left
-                      : LucideIcons.chevron_right,
-                  color: isDark ? Colors.white38 : Colors.black38,
-                  size: 20),
+                context.locale.languageCode == 'ar'
+                    ? LucideIcons.chevron_left
+                    : LucideIcons.chevron_right,
+                color: isDark ? Colors.white38 : Colors.black38,
+                size: 20,
+              ),
             ],
           ),
         ),
@@ -387,14 +441,15 @@ class AstroCalculationsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAngleSlider(
-      {required String title,
-      required double value,
-      required bool isDark,
-      required Color textColor,
-      required Color primaryColor,
-      required Color hintColor,
-      required Function(double) onChanged}) {
+  Widget _buildAngleSlider({
+    required String title,
+    required double value,
+    required bool isDark,
+    required Color textColor,
+    required Color primaryColor,
+    required Color hintColor,
+    required Function(double) onChanged,
+  }) {
     final displayValue = value.toStringAsFixed(1);
 
     return Column(
@@ -403,21 +458,25 @@ class AstroCalculationsScreen extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title,
-                style:
-                    TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text('$displayValue°',
-                  style: TextStyle(
-                      color: primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'monospace',
-                      fontSize: 16)),
+              child: Text(
+                '$displayValue°',
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  fontSize: 16,
+                ),
+              ),
             ),
           ],
         ),
@@ -425,11 +484,13 @@ class AstroCalculationsScreen extends ConsumerWidget {
         Row(
           children: [
             IconButton(
-              icon: Icon(LucideIcons.minus,
-                  size: 20,
-                  color: value > 10.0
-                      ? textColor
-                      : hintColor.withValues(alpha: 0.3)),
+              icon: Icon(
+                LucideIcons.minus,
+                size: 20,
+                color: value > 10.0
+                    ? textColor
+                    : hintColor.withValues(alpha: 0.3),
+              ),
               onPressed: value > 10.0
                   ? () {
                       HapticFeedback.lightImpact();
@@ -446,7 +507,9 @@ class AstroCalculationsScreen extends ConsumerWidget {
                   thumbColor: primaryColor,
                   overlayColor: primaryColor.withValues(alpha: 0.2),
                   valueIndicatorTextStyle: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 child: Slider(
                   value: value,
@@ -462,11 +525,13 @@ class AstroCalculationsScreen extends ConsumerWidget {
               ),
             ),
             IconButton(
-              icon: Icon(LucideIcons.plus,
-                  size: 20,
-                  color: value < 20.0
-                      ? textColor
-                      : hintColor.withValues(alpha: 0.3)),
+              icon: Icon(
+                LucideIcons.plus,
+                size: 20,
+                color: value < 20.0
+                    ? textColor
+                    : hintColor.withValues(alpha: 0.3),
+              ),
               onPressed: value < 20.0
                   ? () {
                       HapticFeedback.lightImpact();
@@ -483,33 +548,43 @@ class AstroCalculationsScreen extends ConsumerWidget {
   Widget _buildGroupTitle(String title, Color primaryColor) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, right: 8),
-      child: Text(title,
-          style: TextStyle(
-              color: primaryColor, fontSize: 14, fontWeight: FontWeight.bold)),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: primaryColor,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
   Widget _buildCard(
-      Color surfaceColor, Color borderColor, List<Widget> children) {
+    Color surfaceColor,
+    Color borderColor,
+    List<Widget> children,
+  ) {
     return Container(
       decoration: BoxDecoration(
-          color: surfaceColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor)),
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+      ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
     );
   }
 
   Widget _buildRadioItem(
-      String value,
-      String title,
-      String subtitle,
-      String? groupValue,
-      Function(String) onChanged,
-      Color textColor,
-      bool isDark,
-      Color primaryColor) {
+    String value,
+    String title,
+    String subtitle,
+    String? groupValue,
+    Function(String) onChanged,
+    Color textColor,
+    bool isDark,
+    Color primaryColor,
+  ) {
     final isSelected = value == groupValue;
     return Material(
       color: Colors.transparent,
@@ -527,17 +602,24 @@ class AstroCalculationsScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: TextStyle(
-                            color: isSelected ? primaryColor : textColor,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w600,
-                            fontSize: 14)),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: isSelected ? primaryColor : textColor,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(subtitle,
-                        style: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.black54,
-                            fontSize: 12)),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -549,10 +631,11 @@ class AstroCalculationsScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                      color: isSelected
-                          ? primaryColor
-                          : (isDark ? Colors.white38 : Colors.black38),
-                      width: 2),
+                    color: isSelected
+                        ? primaryColor
+                        : (isDark ? Colors.white38 : Colors.black38),
+                    width: 2,
+                  ),
                 ),
                 child: isSelected
                     ? Center(
@@ -560,7 +643,9 @@ class AstroCalculationsScreen extends ConsumerWidget {
                           width: 12,
                           height: 12,
                           decoration: BoxDecoration(
-                              color: primaryColor, shape: BoxShape.circle),
+                            color: primaryColor,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       )
                     : null,

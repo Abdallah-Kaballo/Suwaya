@@ -56,7 +56,8 @@ extension TaskCategoryExtension on TaskCategory {
         return const Color(0xFFC084FC); // أرجواني لافندر متوازن
       case TaskCategory.social:
         return const Color(
-            0xFF4ADE80); // أخضر نعناعي متناغم بدلاً من الليموني الفاقع
+          0xFF4ADE80,
+        ); // أخضر نعناعي متناغم بدلاً من الليموني الفاقع
       case TaskCategory.unspecified:
         return const Color(0xFF94A3B8); // فضي أردوازي
     }
@@ -161,8 +162,9 @@ class TaskModel {
       : null;
 
   set targetCivilDate(CivilDate? value) {
-    targetDate =
-        value != null ? DateTime(value.year, value.month, value.day) : null;
+    targetDate = value != null
+        ? DateTime(value.year, value.month, value.day)
+        : null;
   }
 
   @ignore

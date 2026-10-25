@@ -39,8 +39,10 @@ Future<List<FaqItem>> _loadBundledFaq(String langCode) async {
   return const [];
 }
 
-final faqProvider = FutureProvider.family
-    .autoDispose<List<FaqItem>, String>((ref, langCode) async {
+final faqProvider = FutureProvider.family.autoDispose<List<FaqItem>, String>((
+  ref,
+  langCode,
+) async {
   final prefs = await SharedPreferences.getInstance();
   final cacheKey = 'suwaya_faq_cache_$langCode';
   final url =
@@ -63,8 +65,9 @@ final faqProvider = FutureProvider.family
   if (initialItems.isNotEmpty) {
     unawaited(() async {
       try {
-        final response =
-            await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+        final response = await http
+            .get(Uri.parse(url))
+            .timeout(const Duration(seconds: 5));
         if (response.statusCode == 200 && response.body != cachedData) {
           final parsed = _parseFaqJson(response.body);
           if (parsed.isNotEmpty) {
@@ -80,8 +83,9 @@ final faqProvider = FutureProvider.family
 
   // 3. مسار احتياطي أخير عبر الشبكة فقط إذا لم توجد أصول مدمجة ولا ذاكرة مخبأة
   try {
-    final response =
-        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+    final response = await http
+        .get(Uri.parse(url))
+        .timeout(const Duration(seconds: 5));
     if (response.statusCode == 200) {
       await prefs.setString(cacheKey, response.body);
       return _parseFaqJson(response.body);

@@ -15,11 +15,12 @@ class PolarCycleSynthesizer {
 
   static bool _isHealthySpan(SuwayaCycleAnchors anchors) {
     if (!anchors.isValidSequence) return false;
-    final totalSpanHours = anchors.cycleEndMaghribUtc != null &&
+    final totalSpanHours =
+        anchors.cycleEndMaghribUtc != null &&
             anchors.cycleStartMaghribUtc != null
         ? anchors.cycleEndMaghribUtc!
-            .difference(anchors.cycleStartMaghribUtc!)
-            .inHours
+              .difference(anchors.cycleStartMaghribUtc!)
+              .inHours
         : anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib).inHours;
     return totalSpanHours >= 20 && totalSpanHours <= 28;
   }
@@ -57,8 +58,9 @@ class PolarCycleSynthesizer {
     }
 
     if (policy == PolarResolutionPolicy.nearestLatitude45) {
-      final double clampedLat =
-          latitude.abs() > 45.0 ? (latitude >= 0 ? 45.0 : -45.0) : latitude;
+      final double clampedLat = latitude.abs() > 45.0
+          ? (latitude >= 0 ? 45.0 : -45.0)
+          : latitude;
 
       final projected = PrayerCalculator.computeRawCycleAnchors(
         clampedLat,
@@ -123,24 +125,26 @@ class PolarCycleSynthesizer {
 
     final startMaghribUtc = baseLocalDayUtc;
     final ishaUtc = startMaghribUtc.add(const Duration(hours: 1, minutes: 30));
-    final midnightUtc =
-        startMaghribUtc.add(const Duration(hours: 5, minutes: 15));
+    final midnightUtc = startMaghribUtc.add(
+      const Duration(hours: 5, minutes: 15),
+    );
     final fajrUtc = startMaghribUtc.add(const Duration(hours: 10, minutes: 30));
     final sunriseUtc = startMaghribUtc.add(const Duration(hours: 12));
     final dhuhrUtc = startMaghribUtc.add(const Duration(hours: 18));
     final asrUtc = startMaghribUtc.add(const Duration(hours: 21));
     final endMaghribUtc = startMaghribUtc.add(const Duration(hours: 24));
 
-    DateTime toNextWall(DateTime u) => u.add(
-          offsetResolver != null ? offsetResolver(u) : nextDayCityOffset,
-        );
+    DateTime toNextWall(DateTime u) =>
+        u.add(offsetResolver != null ? offsetResolver(u) : nextDayCityOffset);
 
     return SuwayaCycleAnchors(
-      cycleStartMaghrib: startMaghribUtc
-          .add(offsetResolver?.call(startMaghribUtc) ?? cityOffset),
+      cycleStartMaghrib: startMaghribUtc.add(
+        offsetResolver?.call(startMaghribUtc) ?? cityOffset,
+      ),
       cycleIsha: ishaUtc.add(offsetResolver?.call(ishaUtc) ?? cityOffset),
-      sharIMidnight:
-          midnightUtc.add(offsetResolver?.call(midnightUtc) ?? cityOffset),
+      sharIMidnight: midnightUtc.add(
+        offsetResolver?.call(midnightUtc) ?? cityOffset,
+      ),
       cycleFajr: toNextWall(fajrUtc),
       cycleSunrise: toNextWall(sunriseUtc),
       cycleDhuhr: toNextWall(dhuhrUtc),
@@ -154,8 +158,9 @@ class PolarCycleSynthesizer {
       cycleDhuhrUtc: dhuhrUtc,
       cycleAsrUtc: asrUtc,
       cycleEndMaghribUtc: endMaghribUtc,
-      calculatedStartSunset: startMaghribUtc
-          .add(offsetResolver?.call(startMaghribUtc) ?? cityOffset),
+      calculatedStartSunset: startMaghribUtc.add(
+        offsetResolver?.call(startMaghribUtc) ?? cityOffset,
+      ),
       calculatedEndSunset: toNextWall(endMaghribUtc),
       calculatedStartSunsetUtc: startMaghribUtc,
       calculatedEndSunsetUtc: endMaghribUtc,

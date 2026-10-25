@@ -19,7 +19,8 @@ class _PermissionsScreenState extends ConsumerState<PermissionsScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Future.microtask(
-        () => ref.read(permissionsProvider.notifier).checkAllPermissions());
+      () => ref.read(permissionsProvider.notifier).checkAllPermissions(),
+    );
   }
 
   @override
@@ -45,8 +46,10 @@ class _PermissionsScreenState extends ConsumerState<PermissionsScreen>
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('permissions.title'.tr(),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        title: Text(
+          'permissions.title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -121,9 +124,10 @@ class _PermissionsScreenState extends ConsumerState<PermissionsScreen>
         color: surfaceColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: isGranted
-                ? Colors.green.withValues(alpha: 0.5)
-                : (isDark ? Colors.white12 : Colors.black12)),
+          color: isGranted
+              ? Colors.green.withValues(alpha: 0.5)
+              : (isDark ? Colors.white12 : Colors.black12),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,36 +137,48 @@ class _PermissionsScreenState extends ConsumerState<PermissionsScreen>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    color: isGranted
-                        ? Colors.green.withValues(alpha: 0.1)
-                        : primaryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle),
-                child: Icon(icon,
-                    color: isGranted ? Colors.green : primaryColor, size: 24),
+                  color: isGranted
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : primaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: isGranted ? Colors.green : primaryColor,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(isGranted ? Icons.check_circle : Icons.error,
-                            size: 14,
-                            color: isGranted ? Colors.green : Colors.red),
+                        Icon(
+                          isGranted ? Icons.check_circle : Icons.error,
+                          size: 14,
+                          color: isGranted ? Colors.green : Colors.red,
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                            isGranted
-                                ? 'permissions.granted'.tr()
-                                : 'permissions.not_granted'.tr(),
-                            style: TextStyle(
-                                color: isGranted ? Colors.green : Colors.red,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold)),
+                          isGranted
+                              ? 'permissions.granted'.tr()
+                              : 'permissions.not_granted'.tr(),
+                          style: TextStyle(
+                            color: isGranted ? Colors.green : Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -171,11 +187,14 @@ class _PermissionsScreenState extends ConsumerState<PermissionsScreen>
             ],
           ),
           const SizedBox(height: 12),
-          Text(description,
-              style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black54,
-                  fontSize: 12,
-                  height: 1.5)),
+          Text(
+            description,
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -188,15 +207,17 @@ class _PermissionsScreenState extends ConsumerState<PermissionsScreen>
                 foregroundColor: isGranted ? Colors.grey : Colors.black,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: Text(
-                  isGranted
-                      ? 'permissions.active'.tr()
-                      : (isPermanentlyDenied
+                isGranted
+                    ? 'permissions.active'.tr()
+                    : (isPermanentlyDenied
                           ? 'permissions.open_settings'.tr()
                           : 'permissions.grant'.tr()),
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],

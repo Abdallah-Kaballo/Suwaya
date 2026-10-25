@@ -65,8 +65,9 @@ class TasksNotifier extends Notifier<TasksState> {
 
   void _refreshFromMemory(List<TaskModel> allTasks) {
     final astroState = ref.read(astroProvider);
-    final currentPeriodId =
-        astroState.periods.isNotEmpty ? astroState.currentPeriod.id : null;
+    final currentPeriodId = astroState.periods.isNotEmpty
+        ? astroState.currentPeriod.id
+        : null;
     final currentSuwaya = astroState.currentSuwayaTime.periodLocalSlotNumber;
     final cityNow = virtualDateTimeNotifier.value;
 
@@ -79,10 +80,10 @@ class TasksNotifier extends Notifier<TasksState> {
     for (final task in allTasks) {
       final CivilDate logicalToday =
           SuwayaScheduleEngine.resolveLogicalCivilDate(
-        isAstroTime: task.isAstroTime,
-        astroState: astroState,
-        civilReference: cityNow,
-      );
+            isAstroTime: task.isAstroTime,
+            astroState: astroState,
+            civilReference: cityNow,
+          );
       final int logicalWeekday = logicalToday.weekday;
 
       if (task.type == TaskType.casual && task.isCompleted) continue;
@@ -106,7 +107,8 @@ class TasksNotifier extends Notifier<TasksState> {
       final sNum = dynamicAstro?.localSuwaya;
 
       if (task.type == TaskType.permanent) {
-        final bool isPermanentToday = effectiveDays == null ||
+        final bool isPermanentToday =
+            effectiveDays == null ||
             effectiveDays.isEmpty ||
             effectiveDays.contains(logicalWeekday);
         if (isPermanentToday) {
@@ -132,9 +134,9 @@ class TasksNotifier extends Notifier<TasksState> {
                   task.targetSuwayas.contains(-1))) {
             nowList.add(task);
           }
-        } else if (targetCivilDate
-            .toDateTimeUtc()
-            .isAfter(logicalToday.toDateTimeUtc())) {
+        } else if (targetCivilDate.toDateTimeUtc().isAfter(
+          logicalToday.toDateTimeUtc(),
+        )) {
           horizonList.add(task);
         }
       }
@@ -143,8 +145,9 @@ class TasksNotifier extends Notifier<TasksState> {
     todayList.sort((a, b) {
       final astroA = astroCache[a.id];
       final astroB = astroCache[b.id];
-      final int periodCompare =
-          (astroA?.periodId ?? 0).compareTo(astroB?.periodId ?? 0);
+      final int periodCompare = (astroA?.periodId ?? 0).compareTo(
+        astroB?.periodId ?? 0,
+      );
       if (periodCompare != 0) return periodCompare;
       return (astroA?.localSuwaya ?? 0).compareTo(astroB?.localSuwaya ?? 0);
     });
@@ -178,8 +181,9 @@ class TasksNotifier extends Notifier<TasksState> {
     } else {
       task.notifyMode = true;
     }
-    final updatedTasks =
-        state.allTasks.map((t) => t.id == task.id ? task : t).toList();
+    final updatedTasks = state.allTasks
+        .map((t) => t.id == task.id ? task : t)
+        .toList();
     _refreshFromMemory(updatedTasks);
     await ref.read(taskRepositoryProvider).saveTask(task);
   }
@@ -214,19 +218,21 @@ class TasksNotifier extends Notifier<TasksState> {
   }
 
   Future<void> deleteMultipleTasks(List<int> ids) async {
-    final updatedList =
-        state.allTasks.where((t) => !ids.contains(t.id)).toList();
+    final updatedList = state.allTasks
+        .where((t) => !ids.contains(t.id))
+        .toList();
     _refreshFromMemory(updatedList);
     await ref.read(taskRepositoryProvider).deleteTasks(ids);
   }
 
   int _recalculateHabitStreak(List<DateTime> history) {
     if (history.isEmpty) return 0;
-    final uniqueDays = history
-        .map((d) => DateTime.utc(d.year, d.month, d.day))
-        .toSet()
-        .toList()
-      ..sort((a, b) => b.compareTo(a));
+    final uniqueDays =
+        history
+            .map((d) => DateTime.utc(d.year, d.month, d.day))
+            .toSet()
+            .toList()
+          ..sort((a, b) => b.compareTo(a));
 
     int streak = 1;
     for (int i = 0; i < uniqueDays.length - 1; i++) {
@@ -254,9 +260,10 @@ class TasksNotifier extends Notifier<TasksState> {
       if (!wasCompletedToday) {
         final updatedHistory = [
           ...task.completionHistory.where(
-            (d) => !(d.year == logicalToday.year &&
-                d.month == logicalToday.month &&
-                d.day == logicalToday.day),
+            (d) =>
+                !(d.year == logicalToday.year &&
+                    d.month == logicalToday.month &&
+                    d.day == logicalToday.day),
           ),
           logicalToday,
         ]..sort((a, b) => a.compareTo(b));
@@ -269,30 +276,35 @@ class TasksNotifier extends Notifier<TasksState> {
         }
         isAchievedNow = true;
       } else {
-        final remainingHistory = task.completionHistory
-            .where(
-              (d) => !(d.year == logicalToday.year &&
-                  d.month == logicalToday.month &&
-                  d.day == logicalToday.day),
-            )
-            .toList()
-          ..sort((a, b) => a.compareTo(b));
+        final remainingHistory =
+            task.completionHistory
+                .where(
+                  (d) =>
+                      !(d.year == logicalToday.year &&
+                          d.month == logicalToday.month &&
+                          d.day == logicalToday.day),
+                )
+                .toList()
+              ..sort((a, b) => a.compareTo(b));
 
         task.completionHistory = remainingHistory;
-        task.lastCompletedDate =
-            remainingHistory.isNotEmpty ? remainingHistory.last : null;
+        task.lastCompletedDate = remainingHistory.isNotEmpty
+            ? remainingHistory.last
+            : null;
         task.currentStreak = _recalculateHabitStreak(remainingHistory);
         isAchievedNow = false;
       }
     } else {
       task.isCompleted = !task.isCompleted;
-      task.completedAt =
-          task.isCompleted ? virtualDateTimeNotifier.value : null;
+      task.completedAt = task.isCompleted
+          ? virtualDateTimeNotifier.value
+          : null;
       isAchievedNow = task.isCompleted;
     }
 
-    final updatedTasks =
-        state.allTasks.map((t) => t.id == task.id ? task : t).toList();
+    final updatedTasks = state.allTasks
+        .map((t) => t.id == task.id ? task : t)
+        .toList();
     _refreshFromMemory(updatedTasks);
 
     await ref.read(taskRepositoryProvider).saveTask(task);
@@ -316,16 +328,18 @@ class TasksNotifier extends Notifier<TasksState> {
     task.targetVirtualMinute = vMin;
     task.targetCivilTimeMinutes = null;
 
-    final updatedTasks =
-        state.allTasks.map((t) => t.id == task.id ? task : t).toList();
+    final updatedTasks = state.allTasks
+        .map((t) => t.id == task.id ? task : t)
+        .toList();
     _refreshFromMemory(updatedTasks);
 
     await ref.read(taskRepositoryProvider).saveTask(task);
   }
 }
 
-final tasksProvider =
-    NotifierProvider<TasksNotifier, TasksState>(TasksNotifier.new);
+final tasksProvider = NotifierProvider<TasksNotifier, TasksState>(
+  TasksNotifier.new,
+);
 final currentTasksProvider = FutureProvider<List<TaskModel>>(
   (ref) async => ref.watch(tasksProvider).nowTasks,
 );

@@ -16,7 +16,7 @@ enum PeriodKey {
   nightFajrSunrise,
   daySunriseDhuhr,
   dayDhuhrAsr,
-  dayAsrMaghrib;
+  dayAsrMaghrib,
 }
 
 class SuwayaCycleAnchors {
@@ -91,19 +91,19 @@ class SuwayaCycleAnchors {
   }
 
   Map<String, dynamic> toJson() => {
-        'cycleStartMaghrib': cycleStartMaghrib.toIso8601String(),
-        'cycleIsha': cycleIsha.toIso8601String(),
-        'sharIMidnight': sharIMidnight.toIso8601String(),
-        'cycleFajr': cycleFajr.toIso8601String(),
-        'cycleSunrise': cycleSunrise.toIso8601String(),
-        'cycleDhuhr': cycleDhuhr.toIso8601String(),
-        'cycleAsr': cycleAsr.toIso8601String(),
-        'cycleEndMaghrib': cycleEndMaghrib.toIso8601String(),
-        if (cycleStartMaghribUtc != null)
-          'cycleStartMaghribUtc': cycleStartMaghribUtc!.toIso8601String(),
-        if (cycleEndMaghribUtc != null)
-          'cycleEndMaghribUtc': cycleEndMaghribUtc!.toIso8601String(),
-      };
+    'cycleStartMaghrib': cycleStartMaghrib.toIso8601String(),
+    'cycleIsha': cycleIsha.toIso8601String(),
+    'sharIMidnight': sharIMidnight.toIso8601String(),
+    'cycleFajr': cycleFajr.toIso8601String(),
+    'cycleSunrise': cycleSunrise.toIso8601String(),
+    'cycleDhuhr': cycleDhuhr.toIso8601String(),
+    'cycleAsr': cycleAsr.toIso8601String(),
+    'cycleEndMaghrib': cycleEndMaghrib.toIso8601String(),
+    if (cycleStartMaghribUtc != null)
+      'cycleStartMaghribUtc': cycleStartMaghribUtc!.toIso8601String(),
+    if (cycleEndMaghribUtc != null)
+      'cycleEndMaghribUtc': cycleEndMaghribUtc!.toIso8601String(),
+  };
 }
 
 class SuwayaClockTime {
@@ -129,14 +129,14 @@ class SuwayaClockTime {
   int get virtualSecond => ((slotProgress * 3600).floor() % 60).clamp(0, 59);
 
   Map<String, dynamic> toJson() => {
-        'phase': phase.name,
-        'phaseSlotNumber': phaseSlotNumber,
-        'periodKey': periodKey.name,
-        'periodLocalSlotNumber': periodLocalSlotNumber,
-        'virtualMinute': virtualMinute,
-        'virtualSecond': virtualSecond,
-        'slotProgress': slotProgress,
-      };
+    'phase': phase.name,
+    'phaseSlotNumber': phaseSlotNumber,
+    'periodKey': periodKey.name,
+    'periodLocalSlotNumber': periodLocalSlotNumber,
+    'virtualMinute': virtualMinute,
+    'virtualSecond': virtualSecond,
+    'slotProgress': slotProgress,
+  };
 }
 
 class AstroPeriod {
@@ -166,14 +166,14 @@ class AstroPeriod {
       InstantUtc.fromDateTime(endUtc ?? endTime.toUtc());
 
   ZonedWallTime get startWall => ZonedWallTime(
-        instant: startInstant,
-        utcOffset: startTime.difference(startInstant.toDateTimeUtc()),
-      );
+    instant: startInstant,
+    utcOffset: startTime.difference(startInstant.toDateTimeUtc()),
+  );
 
   ZonedWallTime get endWall => ZonedWallTime(
-        instant: endInstant,
-        utcOffset: endTime.difference(endInstant.toDateTimeUtc()),
-      );
+    instant: endInstant,
+    utcOffset: endTime.difference(endInstant.toDateTimeUtc()),
+  );
 
   Duration get totalDuration {
     if (startUtc != null && endUtc != null) {
@@ -268,18 +268,18 @@ class AstroPeriod {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'periodKey': periodKey.name,
-        'nameKey': nameKey,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
-        if (startUtc != null) 'startUtc': startUtc!.toIso8601String(),
-        if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
-        'suwayasCount': suwayasCount,
-        'durationSeconds': totalDuration.inSeconds,
-        'flowSpeed': flowSpeed,
-        'colorValue': colorValue,
-      };
+    'id': id,
+    'periodKey': periodKey.name,
+    'nameKey': nameKey,
+    'startTime': startTime.toIso8601String(),
+    'endTime': endTime.toIso8601String(),
+    if (startUtc != null) 'startUtc': startUtc!.toIso8601String(),
+    if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
+    'suwayasCount': suwayasCount,
+    'durationSeconds': totalDuration.inSeconds,
+    'flowSpeed': flowSpeed,
+    'colorValue': colorValue,
+  };
 }
 
 class NightPart {
@@ -301,14 +301,14 @@ class NightPart {
       : endTime.difference(startTime);
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nameKey': nameKey,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
-        if (startUtc != null) 'startUtc': startUtc!.toIso8601String(),
-        if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
-        'durationSeconds': realDuration.inSeconds,
-      };
+    'id': id,
+    'nameKey': nameKey,
+    'startTime': startTime.toIso8601String(),
+    'endTime': endTime.toIso8601String(),
+    if (startUtc != null) 'startUtc': startUtc!.toIso8601String(),
+    if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
+    'durationSeconds': realDuration.inSeconds,
+  };
 }
 
 class IbadatTimings {
@@ -329,17 +329,17 @@ class IbadatTimings {
   });
 
   Map<String, dynamic> toJson() => {
-        'fajr': fajr.toIso8601String(),
-        'sunrise': sunrise.toIso8601String(),
-        'dhuhr': dhuhr.toIso8601String(),
-        'asr': asr.toIso8601String(),
-        'maghrib': maghrib.toIso8601String(),
-        'isha': isha.toIso8601String(),
-        'nextFajr': nextFajr.toIso8601String(),
-        if (calculatedSunset != null)
-          'calculatedSunset': calculatedSunset!.toIso8601String(),
-        'nightParts': nightParts.map((np) => np.toJson()).toList(),
-      };
+    'fajr': fajr.toIso8601String(),
+    'sunrise': sunrise.toIso8601String(),
+    'dhuhr': dhuhr.toIso8601String(),
+    'asr': asr.toIso8601String(),
+    'maghrib': maghrib.toIso8601String(),
+    'isha': isha.toIso8601String(),
+    'nextFajr': nextFajr.toIso8601String(),
+    if (calculatedSunset != null)
+      'calculatedSunset': calculatedSunset!.toIso8601String(),
+    'nightParts': nightParts.map((np) => np.toJson()).toList(),
+  };
 }
 
 class SuwayaDay {
@@ -365,11 +365,11 @@ class SuwayaDay {
   }
 
   Map<String, dynamic> toJson() => {
-        'ibadatTimings': ibadatTimings.toJson(),
-        'civilDayIbadat': civilDayIbadat.toJson(),
-        'cycleAnchors': cycleAnchors.toJson(),
-        'periods': periods.map((p) => p.toJson()).toList(),
-      };
+    'ibadatTimings': ibadatTimings.toJson(),
+    'civilDayIbadat': civilDayIbadat.toJson(),
+    'cycleAnchors': cycleAnchors.toJson(),
+    'periods': periods.map((p) => p.toJson()).toList(),
+  };
 }
 
 class AstroState {
@@ -397,20 +397,20 @@ class AstroState {
 
   List<NightPart> get activeOrUpcomingNightParts =>
       currentSuwayaTime.phase.isNight
-          ? ibadatTimings.nightParts
-          : civilDayIbadat.nightParts;
+      ? ibadatTimings.nightParts
+      : civilDayIbadat.nightParts;
 
   Map<String, dynamic> toJson() => {
-        'virtualTime': virtualTime.toIso8601String(),
-        if (instantUtc != null) 'instantUtc': instantUtc!.toIso8601String(),
-        'currentPeriod': currentPeriod.toJson(),
-        'currentSuwayaTime': currentSuwayaTime.toJson(),
-        'timeSpeedMultiplier': timeSpeedMultiplier,
-        'periods': periods.map((p) => p.toJson()).toList(),
-        'ibadatTimings': ibadatTimings.toJson(),
-        'civilDayIbadat': civilDayIbadat.toJson(),
-        'cycleAnchors': cycleAnchors.toJson(),
-      };
+    'virtualTime': virtualTime.toIso8601String(),
+    if (instantUtc != null) 'instantUtc': instantUtc!.toIso8601String(),
+    'currentPeriod': currentPeriod.toJson(),
+    'currentSuwayaTime': currentSuwayaTime.toJson(),
+    'timeSpeedMultiplier': timeSpeedMultiplier,
+    'periods': periods.map((p) => p.toJson()).toList(),
+    'ibadatTimings': ibadatTimings.toJson(),
+    'civilDayIbadat': civilDayIbadat.toJson(),
+    'cycleAnchors': cycleAnchors.toJson(),
+  };
 }
 
 enum CalculationMethodType {
@@ -432,11 +432,7 @@ enum CalculationMethodType {
 
 enum MadhabType { hanafi, shafi }
 
-enum HighLatitudeRuleType {
-  middleOfTheNight,
-  seventhOfTheNight,
-  twilightAngle,
-}
+enum HighLatitudeRuleType { middleOfTheNight, seventhOfTheNight, twilightAngle }
 
 enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
 
@@ -450,9 +446,9 @@ extension AstroStringParsers on String {
       );
 
   MadhabType toMadhab() => MadhabType.values.firstWhere(
-        (e) => e.name.toLowerCase() == _normalized,
-        orElse: () => MadhabType.shafi,
-      );
+    (e) => e.name.toLowerCase() == _normalized,
+    orElse: () => MadhabType.shafi,
+  );
 
   HighLatitudeRuleType toHighLatRule() =>
       HighLatitudeRuleType.values.firstWhere(

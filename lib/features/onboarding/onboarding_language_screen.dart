@@ -64,8 +64,10 @@ class _OnboardingLanguageScreenState
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('onboarding.welcome_sub'.tr(),
-            style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+        title: Text(
+          'onboarding.welcome_sub'.tr(),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -74,14 +76,21 @@ class _OnboardingLanguageScreenState
             Expanded(
               child: ListView.builder(
                 physics: const BouncingScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 itemCount: _appLanguages.length,
                 itemBuilder: (context, index) {
                   final code = _appLanguages.keys.elementAt(index);
                   final nativeName = _appLanguages[code]!;
                   return _buildLangCard(
-                      code, nativeName, primaryColor, textColor, isDark);
+                    code,
+                    nativeName,
+                    primaryColor,
+                    textColor,
+                    isDark,
+                  );
                 },
               ),
             ),
@@ -103,12 +112,17 @@ class _OnboardingLanguageScreenState
                   foregroundColor: isDark ? Colors.black : Colors.white,
                   minimumSize: const Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   elevation: 0,
                 ),
-                child: Text('onboarding.continue_btn'.tr(),
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'onboarding.continue_btn'.tr(),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -117,8 +131,13 @@ class _OnboardingLanguageScreenState
     );
   }
 
-  Widget _buildLangCard(String code, String nativeName, Color primaryColor,
-      Color textColor, bool isDark) {
+  Widget _buildLangCard(
+    String code,
+    String nativeName,
+    Color primaryColor,
+    Color textColor,
+    bool isDark,
+  ) {
     final isSelected = _selectedLang == code;
     return Column(
       children: [
@@ -132,25 +151,34 @@ class _OnboardingLanguageScreenState
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             child: Row(
               children: [
-                Icon(isSelected ? LucideIcons.circle_dot : LucideIcons.circle,
-                    color: isSelected ? primaryColor : Colors.grey, size: 28),
+                Icon(
+                  isSelected ? LucideIcons.circle_dot : LucideIcons.circle,
+                  color: isSelected ? primaryColor : Colors.grey,
+                  size: 28,
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(nativeName,
-                          style: TextStyle(
-                              color: textColor,
-                              fontSize: 16,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal)),
+                      Text(
+                        nativeName,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('languages.$code'.tr(),
-                          style: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.black54,
-                              fontSize: 13)),
+                      Text(
+                        'languages.$code'.tr(),
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : Colors.black54,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -159,9 +187,10 @@ class _OnboardingLanguageScreenState
           ),
         ),
         Divider(
-            height: 1,
-            color: isDark ? Colors.white12 : Colors.black12,
-            indent: 50),
+          height: 1,
+          color: isDark ? Colors.white12 : Colors.black12,
+          indent: 50,
+        ),
       ],
     );
   }

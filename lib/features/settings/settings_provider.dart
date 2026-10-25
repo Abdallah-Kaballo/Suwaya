@@ -279,15 +279,17 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     state = settings.clone();
   }
 
-  Future<void> updatePeriodNotificationSettings(
-      {required String periodId,
-      required bool isEnabled,
-      required int alertLevel,
-      required String soundPath,
-      required double volume}) async {
+  Future<void> updatePeriodNotificationSettings({
+    required String periodId,
+    required bool isEnabled,
+    required int alertLevel,
+    required String soundPath,
+    required double volume,
+  }) async {
     final newState = state.clone();
-    int index =
-        newState.periodConfigs.indexWhere((c) => c.periodId == periodId);
+    int index = newState.periodConfigs.indexWhere(
+      (c) => c.periodId == periodId,
+    );
     if (index >= 0) {
       newState.periodConfigs[index]
         ..isEnabled = isEnabled
@@ -295,12 +297,14 @@ class SettingsNotifier extends Notifier<SettingsModel> {
         ..soundPath = soundPath
         ..volume = volume;
     } else {
-      newState.periodConfigs.add(PeriodConfig()
-        ..periodId = periodId
-        ..isEnabled = isEnabled
-        ..alertLevel = alertLevel
-        ..soundPath = soundPath
-        ..volume = volume);
+      newState.periodConfigs.add(
+        PeriodConfig()
+          ..periodId = periodId
+          ..isEnabled = isEnabled
+          ..alertLevel = alertLevel
+          ..soundPath = soundPath
+          ..volume = volume,
+      );
     }
     state = newState;
     await _repository.saveSettings(newState);
@@ -308,14 +312,17 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
   Future<void> updateManualOffset(String periodId, int minutesOffset) async {
     final newState = state.clone();
-    int index =
-        newState.periodConfigs.indexWhere((c) => c.periodId == periodId);
+    int index = newState.periodConfigs.indexWhere(
+      (c) => c.periodId == periodId,
+    );
     if (index >= 0) {
       newState.periodConfigs[index].manualOffsetMinutes = minutesOffset;
     } else {
-      newState.periodConfigs.add(PeriodConfig()
-        ..periodId = periodId
-        ..manualOffsetMinutes = minutesOffset);
+      newState.periodConfigs.add(
+        PeriodConfig()
+          ..periodId = periodId
+          ..manualOffsetMinutes = minutesOffset,
+      );
     }
     state = newState;
     await _repository.saveSettings(newState);
@@ -344,14 +351,17 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
   Future<void> updatePeriodSound(String periodId, String soundId) async {
     final newState = state.clone();
-    int index =
-        newState.periodConfigs.indexWhere((c) => c.periodId == periodId);
+    int index = newState.periodConfigs.indexWhere(
+      (c) => c.periodId == periodId,
+    );
     if (index >= 0) {
       newState.periodConfigs[index].soundPath = soundId;
     } else {
-      newState.periodConfigs.add(PeriodConfig()
-        ..periodId = periodId
-        ..soundPath = soundId);
+      newState.periodConfigs.add(
+        PeriodConfig()
+          ..periodId = periodId
+          ..soundPath = soundId,
+      );
     }
     state = newState;
     await _repository.saveSettings(newState);
@@ -368,24 +378,28 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       if (!isNotifGranted || !isAlarmGranted) return;
     }
     final newState = state.clone();
-    int index =
-        newState.periodConfigs.indexWhere((c) => c.periodId == periodId);
+    int index = newState.periodConfigs.indexWhere(
+      (c) => c.periodId == periodId,
+    );
     if (index >= 0) {
       newState.periodConfigs[index].isEnabled = isEnabled;
     } else {
-      newState.periodConfigs.add(PeriodConfig()
-        ..periodId = periodId
-        ..isEnabled = isEnabled);
+      newState.periodConfigs.add(
+        PeriodConfig()
+          ..periodId = periodId
+          ..isEnabled = isEnabled,
+      );
     }
     state = newState;
     await _repository.saveSettings(newState);
   }
 
-  Future<void> updateProductivityDefaults(
-      {required bool isTask,
-      required int alertLevel,
-      required String tone,
-      required double volume}) async {
+  Future<void> updateProductivityDefaults({
+    required bool isTask,
+    required int alertLevel,
+    required String tone,
+    required double volume,
+  }) async {
     final newState = state.clone();
     if (isTask) {
       newState.defaultTaskAlertLevel = alertLevel;
@@ -400,8 +414,10 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     await _repository.saveSettings(newState);
   }
 
-  Future<void> updateSnoozeSettings(
-      {required int durationMinutes, required int maxCount}) async {
+  Future<void> updateSnoozeSettings({
+    required int durationMinutes,
+    required int maxCount,
+  }) async {
     final newState = state.clone();
     newState.snoozeDurationMinutes = durationMinutes;
     newState.maxSnoozeCount = maxCount;
@@ -421,12 +437,13 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     await _repository.saveSettings(newState);
   }
 
-  Future<void> updateAstroSettings(
-      {String? method,
-      String? madhab,
-      String? highLatRule,
-      double? fajrAngle,
-      double? ishaAngle}) async {
+  Future<void> updateAstroSettings({
+    String? method,
+    String? madhab,
+    String? highLatRule,
+    double? fajrAngle,
+    double? ishaAngle,
+  }) async {
     final newState = state.clone();
     if (method != null) newState.calculationMethod = method;
     if (madhab != null) newState.madhab = madhab;
@@ -470,8 +487,9 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
     final newState = state.clone()..activeLocation = loc;
 
-    final existingIndex = newState.savedLocations
-        .indexWhere((l) => l.latitude == lat && l.longitude == lng);
+    final existingIndex = newState.savedLocations.indexWhere(
+      (l) => l.latitude == lat && l.longitude == lng,
+    );
     if (existingIndex != -1) {
       newState.savedLocations.removeAt(existingIndex);
     }
@@ -507,8 +525,9 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       if (!isLocGranted) throw Exception('permissions.location_required'.tr());
 
       // 🌟 استخدام المسار المحلي الموحد لضمان جلب وحفظ المنطقة الزمنية (timezone) وأقرب مدينة
-      final locData =
-          await LocationService.fetchOfflineLocation(state.languageCode);
+      final locData = await LocationService.fetchOfflineLocation(
+        state.languageCode,
+      );
       final String detectedCountryCode =
           (locData['countryCode'] as String?) ?? 'SA';
 
@@ -523,8 +542,9 @@ class SettingsNotifier extends Notifier<SettingsModel> {
         nearestCity: (locData['city'] as String?) ?? '',
       );
 
-      final defaults =
-          AstroSmartDefaults.getDefaultsForCountry(detectedCountryCode);
+      final defaults = AstroSmartDefaults.getDefaultsForCountry(
+        detectedCountryCode,
+      );
       await updateAstroSettings(
         method: defaults.method,
         madhab: defaults.madhab,
@@ -603,8 +623,9 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   }) async {
     final newState = state.clone();
     for (final periodId in periodIds) {
-      final index =
-          newState.periodConfigs.indexWhere((c) => c.periodId == periodId);
+      final index = newState.periodConfigs.indexWhere(
+        (c) => c.periodId == periodId,
+      );
       if (index >= 0) {
         newState.periodConfigs[index]
           ..isEnabled = isEnabled
@@ -678,10 +699,11 @@ class SettingsNotifier extends Notifier<SettingsModel> {
       'sixth_3',
       'sixth_4',
       'sixth_5',
-      'sixth_6'
+      'sixth_6',
     ];
-    newState.visibleNightParts
-        .sort((a, b) => order.indexOf(a).compareTo(order.indexOf(b)));
+    newState.visibleNightParts.sort(
+      (a, b) => order.indexOf(a).compareTo(order.indexOf(b)),
+    );
 
     state = newState;
     await _repository.saveSettings(newState);
@@ -702,5 +724,6 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   }
 }
 
-final settingsProvider =
-    NotifierProvider<SettingsNotifier, SettingsModel>(SettingsNotifier.new);
+final settingsProvider = NotifierProvider<SettingsNotifier, SettingsModel>(
+  SettingsNotifier.new,
+);

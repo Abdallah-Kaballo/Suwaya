@@ -114,8 +114,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/tasks',
                 builder: (context, state) => TasksScreen(
-                  initialTab:
-                      state.uri.queryParameters['tab'] == 'periods' ? 2 : 0,
+                  initialTab: state.uri.queryParameters['tab'] == 'periods'
+                      ? 2
+                      : 0,
                 ),
               ),
             ],

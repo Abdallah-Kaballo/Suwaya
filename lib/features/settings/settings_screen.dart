@@ -619,8 +619,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       onPressed: () async {
                         HapticFeedback.lightImpact();
-                        final langCode =
-                            Localizations.localeOf(context).languageCode;
+                        final langCode = Localizations.localeOf(
+                          context,
+                        ).languageCode;
                         setState(() => isUpdating = true);
                         try {
                           bool serviceEnabled =
@@ -632,8 +633,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           }
                           final locData =
                               await LocationService.fetchOfflineLocation(
-                            langCode,
-                          );
+                                langCode,
+                              );
                           await ref
                               .read(settingsProvider.notifier)
                               .addAndSelectLocation(
@@ -832,16 +833,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: items.entries.map((entry) {
                     final isSelected = entry.key == selectedValue;
                     return ListTile(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 24),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                      ),
                       title: Text(
                         entry.value,
                         style: TextStyle(
                           color: isSelected
                               ? primaryColor
                               : (isDark ? Colors.white70 : Colors.black87),
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           fontSize: 15,
                         ),
                       ),
@@ -886,8 +889,8 @@ String _themeModeLabel(BuildContext context, String mode) {
       return tr != 'settings.theme_mixed'
           ? tr
           : (isAr
-              ? 'فلكي مختلط (فاتح نهاراً / داكن ليلاً)'
-              : 'Astro Mixed (Day Light / Night Dark)');
+                ? 'فلكي مختلط (فاتح نهاراً / داكن ليلاً)'
+                : 'Astro Mixed (Day Light / Night Dark)');
     case 'system':
     default:
       return 'settings.theme_system'.tr();
@@ -988,10 +991,12 @@ class _SettingRow extends StatelessWidget {
                     onChanged: onToggle,
                     activeThumbColor: isDark ? Colors.black : Colors.white,
                     activeTrackColor: primaryColor,
-                    inactiveTrackColor:
-                        isDark ? const Color(0xFF2E3745) : Colors.black12,
-                    inactiveThumbColor:
-                        isDark ? Colors.white70 : Colors.black54,
+                    inactiveTrackColor: isDark
+                        ? const Color(0xFF2E3745)
+                        : Colors.black12,
+                    inactiveThumbColor: isDark
+                        ? Colors.white70
+                        : Colors.black54,
                   ),
                 )
               else

@@ -76,8 +76,9 @@ _FastingRecommendation? _getSeasonalFastingInfo(
   }
   if (hDate.hMonth == 1 && hDate.hDay == 9) {
     return _FastingRecommendation(
-      title:
-          isAr ? 'صيام يوم تاسوعاء (9 محرم)' : 'Fasting Tasu\'a (9 Muharram)',
+      title: isAr
+          ? 'صيام يوم تاسوعاء (9 محرم)'
+          : 'Fasting Tasu\'a (9 Muharram)',
       reason: isAr
           ? 'يُستحب صيامه مع يوم عاشوراء.'
           : 'Recommended to fast along with the Day of Ashura.',
@@ -180,11 +181,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         _focusedHijriMonth,
       );
       for (int d = 1; d <= daysCount; d++) {
-        final cleanGDate = _fromHijri(
-          _focusedHijriYear,
-          _focusedHijriMonth,
-          d,
-        );
+        final cleanGDate = _fromHijri(_focusedHijriYear, _focusedHijriMonth, d);
         final hObj = HijriCalendar()
           ..hYear = _focusedHijriYear
           ..hMonth = _focusedHijriMonth
@@ -251,11 +248,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         _focusedHijriYear = newYear;
         _focusedHijriMonth = newMonth;
 
-        final firstGreg = _fromHijri(
-          _focusedHijriYear,
-          _focusedHijriMonth,
-          1,
-        );
+        final firstGreg = _fromHijri(_focusedHijriYear, _focusedHijriMonth, 1);
         _focusedGregorianYear = firstGreg.year;
         _focusedGregorianMonth = firstGreg.month;
         _selectedDate = firstGreg;
@@ -310,17 +303,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final allTasks = ref.watch(tasksProvider).allTasks;
     final allRoutines = ref.watch(routinesProvider);
 
-    ref.listen<bool>(
-      settingsProvider.select((s) => s.useAstroTimeForIbadat),
-      (prev, next) {
-        if (prev != next) {
-          setState(() {
-            _manualHijriPrimaryOverride = null;
-            _syncFocusedMonthToDate(_selectedDate);
-          });
-        }
-      },
-    );
+    ref.listen<bool>(settingsProvider.select((s) => s.useAstroTimeForIbadat), (
+      prev,
+      next,
+    ) {
+      if (prev != next) {
+        setState(() {
+          _manualHijriPrimaryOverride = null;
+          _syncFocusedMonthToDate(_selectedDate);
+        });
+      }
+    });
 
     final bool isHijriPrimary =
         _manualHijriPrimaryOverride ?? settings.useAstroTimeForIbadat;
@@ -443,9 +436,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 decoration: BoxDecoration(
                   color: surfaceColor,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor,
-                  ),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -769,10 +760,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         final bool isFastingDay = fastingInfo != null;
         const fastingEmerald = Color(0xFF10B981);
 
-        final int primaryNum =
-            isHijriPrimary ? cell.hijriDate.hDay : cell.gregorianDate.day;
-        final int secondaryNum =
-            isHijriPrimary ? cell.gregorianDate.day : cell.hijriDate.hDay;
+        final int primaryNum = isHijriPrimary
+            ? cell.hijriDate.hDay
+            : cell.gregorianDate.day;
+        final int secondaryNum = isHijriPrimary
+            ? cell.gregorianDate.day
+            : cell.hijriDate.hDay;
 
         final dayTasks = _getTasksForDay(cell.gregorianDate, allTasks);
         final dotColors = dayTasks
@@ -794,19 +787,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               color: isSelected
                   ? primaryColor.withValues(alpha: 0.22)
                   : (isFastingDay
-                      ? fastingEmerald.withValues(alpha: isDark ? 0.14 : 0.10)
-                      : (isToday
-                          ? primaryColor.withValues(alpha: 0.08)
-                          : Colors.transparent)),
+                        ? fastingEmerald.withValues(alpha: isDark ? 0.14 : 0.10)
+                        : (isToday
+                              ? primaryColor.withValues(alpha: 0.08)
+                              : Colors.transparent)),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected
                     ? primaryColor
                     : (isFastingDay
-                        ? fastingEmerald.withValues(alpha: 0.55)
-                        : (isToday
-                            ? primaryColor.withValues(alpha: 0.45)
-                            : Colors.transparent)),
+                          ? fastingEmerald.withValues(alpha: 0.55)
+                          : (isToday
+                                ? primaryColor.withValues(alpha: 0.45)
+                                : Colors.transparent)),
                 width: isSelected ? 1.8 : 1.1,
               ),
             ),
@@ -831,8 +824,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         color: isSelected
                             ? primaryColor
                             : (isFastingDay
-                                ? fastingEmerald
-                                : textColor.withValues(alpha: 0.42)),
+                                  ? fastingEmerald
+                                  : textColor.withValues(alpha: 0.42)),
                         fontSize: 8.5,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Inter',
@@ -847,8 +840,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     color: isSelected
                         ? primaryColor
                         : (isFastingDay
-                            ? fastingEmerald
-                            : (isToday ? primaryColor : textColor)),
+                              ? fastingEmerald
+                              : (isToday ? primaryColor : textColor)),
                     fontSize: 14.5,
                     fontWeight: (isSelected || isToday || isFastingDay)
                         ? FontWeight.w900

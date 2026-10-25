@@ -129,11 +129,13 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
   SupporterTier _extractTierFromCustomerInfo(CustomerInfo info) {
     final allActiveIds = <String>{
       ...info.entitlements.active.keys.map((e) => e.toLowerCase()),
-      ...info.entitlements.active.values
-          .map((e) => e.productIdentifier.toLowerCase()),
+      ...info.entitlements.active.values.map(
+        (e) => e.productIdentifier.toLowerCase(),
+      ),
       ...info.activeSubscriptions.map((s) => s.toLowerCase()),
-      ...info.nonSubscriptionTransactions
-          .map((t) => t.productIdentifier.toLowerCase()),
+      ...info.nonSubscriptionTransactions.map(
+        (t) => t.productIdentifier.toLowerCase(),
+      ),
     };
 
     if (allActiveIds.any((id) => id.contains('diamond'))) {
@@ -160,7 +162,7 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
   }
 
   Future<({bool success, bool userCancelled, String? errorMessage})>
-      purchaseTierPackage(
+  purchaseTierPackage(
     SupporterTier targetTier, {
     Package? preloadedPackage,
   }) async {
@@ -204,10 +206,12 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
         );
       }
 
-      final verifiedTier =
-          _extractTierFromCustomerInfo(purchaseResult.customerInfo);
-      final effectiveTier =
-          verifiedTier != SupporterTier.none ? verifiedTier : targetTier;
+      final verifiedTier = _extractTierFromCustomerInfo(
+        purchaseResult.customerInfo,
+      );
+      final effectiveTier = verifiedTier != SupporterTier.none
+          ? verifiedTier
+          : targetTier;
 
       await _persistTier(effectiveTier);
       return (success: true, userCancelled: false, errorMessage: null);
@@ -223,18 +227,10 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
           return (success: true, userCancelled: false, errorMessage: null);
         }
       }
-      return (
-        success: false,
-        userCancelled: false,
-        errorMessage: e.message,
-      );
+      return (success: false, userCancelled: false, errorMessage: e.message);
     } catch (e) {
       debugPrint('Purchase error: $e');
-      return (
-        success: false,
-        userCancelled: false,
-        errorMessage: null,
-      );
+      return (success: false, userCancelled: false, errorMessage: null);
     }
   }
 
@@ -256,5 +252,5 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
 
 final supporterProvider =
     StateNotifierProvider<SupporterNotifier, SupporterTier>((ref) {
-  return SupporterNotifier();
-});
+      return SupporterNotifier();
+    });

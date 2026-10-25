@@ -73,20 +73,22 @@ class SuwayaLiveClock {
     }
 
     final activePeriod = ctx.astroState.currentPeriod;
-    final sCount =
-        activePeriod.suwayasCount > 0 ? activePeriod.suwayasCount : 1;
+    final sCount = activePeriod.suwayasCount > 0
+        ? activePeriod.suwayasCount
+        : 1;
     final periodMicro = activePeriod.totalDuration.inMicroseconds;
 
     Duration nextDelay;
     if (periodMicro > 0 && activePeriod.startUtc != null) {
       final totalVirtualSecs = sCount * 3600;
-      final elapsedMicro =
-          nowUtc.difference(activePeriod.startUtc!).inMicroseconds;
+      final elapsedMicro = nowUtc
+          .difference(activePeriod.startUtc!)
+          .inMicroseconds;
       final nextVirtualSecIdx =
           ((elapsedMicro * totalVirtualSecs) ~/ periodMicro) + 1;
       final nextBoundaryMicro =
           (nextVirtualSecIdx * periodMicro + totalVirtualSecs - 1) ~/
-              totalVirtualSecs;
+          totalVirtualSecs;
       final remMicro = nextBoundaryMicro - elapsedMicro;
       nextDelay = Duration(microseconds: remMicro.clamp(50000, 2000000));
     } else {

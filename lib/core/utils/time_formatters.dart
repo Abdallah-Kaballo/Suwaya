@@ -13,7 +13,8 @@ String formatCivilClock(
   required BuildContext context,
 }) {
   final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
-  final bool use24Hour = format == civilTimeFormat24Hour ||
+  final bool use24Hour =
+      format == civilTimeFormat24Hour ||
       (format == civilTimeFormatSystem &&
           (MediaQuery.maybeAlwaysUse24HourFormatOf(context) ?? false));
 

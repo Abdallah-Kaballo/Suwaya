@@ -35,7 +35,10 @@ class PrivacyScreen extends ConsumerWidget {
         title: Text(
           'settings.privacy_policy'.tr(),
           style: TextStyle(
-              color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -57,7 +60,8 @@ class PrivacyScreen extends ConsumerWidget {
             },
             child: ListView.builder(
               physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics()),
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               padding: const EdgeInsets.all(20),
               itemCount: sections.length,
               itemBuilder: (context, index) {
@@ -73,8 +77,9 @@ class PrivacyScreen extends ConsumerWidget {
                         ? []
                         : [
                             BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.02),
-                                blurRadius: 8)
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 8,
+                            ),
                           ],
                   ),
                   child: Column(
@@ -82,8 +87,11 @@ class PrivacyScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(LucideIcons.shield_check,
-                              color: primaryColor, size: 20),
+                          Icon(
+                            LucideIcons.shield_check,
+                            color: primaryColor,
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
@@ -118,15 +126,21 @@ class PrivacyScreen extends ConsumerWidget {
   }
 
   Widget _buildErrorState(
-      BuildContext context, Color primaryColor, Color textColor) {
+    BuildContext context,
+    Color primaryColor,
+    Color textColor,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.wifi_off,
-                size: 64, color: primaryColor.withValues(alpha: 0.5)),
+            Icon(
+              LucideIcons.wifi_off,
+              size: 64,
+              color: primaryColor.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 24),
             Text(
               'privacy.offline_error'.tr(), // 🌟 تم التحديث هنا

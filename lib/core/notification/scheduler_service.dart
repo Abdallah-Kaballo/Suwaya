@@ -46,34 +46,37 @@ final notificationSchedulerProvider = Provider<NotificationScheduler>((ref) {
   });
 
   // 🌟 إعادة تحريك نافذة الجدولة تلقائياً عند دخول دورة مغرب جديدة أو تغير الفترة الفلكية
-  ref.listen(
-    astroProvider.select((a) => a.cycleAnchors.cycleEndMaghrib),
-    (prev, next) {
-      if (prev != next) triggerSchedule();
-    },
-  );
+  ref.listen(astroProvider.select((a) => a.cycleAnchors.cycleEndMaghrib), (
+    prev,
+    next,
+  ) {
+    if (prev != next) triggerSchedule();
+  });
 
   // 🌟 مراقبة شاملة لجميع حقول الإعدادات المؤثرة في الجدولة (شاملة visibleNightParts والغفوة)
-  ref.listen(settingsProvider.select((s) {
-    final sb = StringBuffer()
-      ..write(
-        'loc=${s.activeLocation?.latitude},${s.activeLocation?.longitude},${s.activeLocation?.timezone};',
-      )
-      ..write(
-        'astro=${s.calculationMethod},${s.madhab},${s.highLatitudeRule},${s.customFajrAngle},${s.customIshaAngle},${s.useAstroTimeForIbadat};',
-      )
-      ..write(
-        'night=${s.visibleNightParts.join(",")};snooze=${s.snoozeDurationMinutes},${s.maxSnoozeCount};',
-      );
-    for (var c in s.periodConfigs) {
-      sb.write(
-        'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};',
-      );
-    }
-    return sb.toString();
-  }), (prev, nextFingerprint) {
-    triggerSchedule();
-  });
+  ref.listen(
+    settingsProvider.select((s) {
+      final sb = StringBuffer()
+        ..write(
+          'loc=${s.activeLocation?.latitude},${s.activeLocation?.longitude},${s.activeLocation?.timezone};',
+        )
+        ..write(
+          'astro=${s.calculationMethod},${s.madhab},${s.highLatitudeRule},${s.customFajrAngle},${s.customIshaAngle},${s.useAstroTimeForIbadat};',
+        )
+        ..write(
+          'night=${s.visibleNightParts.join(",")};snooze=${s.snoozeDurationMinutes},${s.maxSnoozeCount};',
+        );
+      for (var c in s.periodConfigs) {
+        sb.write(
+          'p=${c.periodId}:${c.isEnabled}:${c.alertLevel}:${c.soundPath}:${c.volume}:${c.manualOffsetMinutes};',
+        );
+      }
+      return sb.toString();
+    }),
+    (prev, nextFingerprint) {
+      triggerSchedule();
+    },
+  );
 
   return scheduler;
 });
@@ -102,11 +105,10 @@ class NotificationScheduler {
   static DateTime resolveCollisionSafeTime(
     DateTime desiredTime,
     Set<int> occupiedEpochSeconds,
-  ) =>
-      ScheduleFingerprint.resolveCollisionSafeTime(
-        desiredTime,
-        occupiedEpochSeconds,
-      );
+  ) => ScheduleFingerprint.resolveCollisionSafeTime(
+    desiredTime,
+    occupiedEpochSeconds,
+  );
 
   Duration _getUtcOffsetForDate(
     SavedLocation? loc,
@@ -261,31 +263,29 @@ class NotificationScheduler {
 
       final manualOffsetsMap = {
         for (var c in settings.periodConfigs)
-          if (c.periodId != null) c.periodId!: c.manualOffsetMinutes
+          if (c.periodId != null) c.periodId!: c.manualOffsetMinutes,
       };
 
       final List<Duration> weekCityOffsets = List.generate(
         9,
-        (index) => _getUtcOffsetForDate(
-          loc,
-          cityNow.add(Duration(days: index - 1)),
-        ),
+        (index) =>
+            _getUtcOffsetForDate(loc, cityNow.add(Duration(days: index - 1))),
       );
 
       final List<ScheduledDayAstroWindow> weekAstroWindows =
           await SchedulePlanBuilder.computeWeekAstroWindows(
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        timezoneId: loc.timezone,
-        isolatedCityNow: cityNow,
-        fallbackDayOffsets: weekCityOffsets,
-        calcMethod: settings.calculationMethod.toCalculationMethod(),
-        madhab: settings.madhab.toMadhab(),
-        hlRule: settings.highLatitudeRule.toHighLatRule(),
-        fajrAngle: settings.customFajrAngle,
-        ishaAngle: settings.customIshaAngle,
-        manualOffsets: manualOffsetsMap.toPrayerKeyMap(),
-      );
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            timezoneId: loc.timezone,
+            isolatedCityNow: cityNow,
+            fallbackDayOffsets: weekCityOffsets,
+            calcMethod: settings.calculationMethod.toCalculationMethod(),
+            madhab: settings.madhab.toMadhab(),
+            hlRule: settings.highLatitudeRule.toHighLatRule(),
+            fajrAngle: settings.customFajrAngle,
+            ishaAngle: settings.customIshaAngle,
+            manualOffsets: manualOffsetsMap.toPrayerKeyMap(),
+          );
 
       final currentAstroEnd = weekAstroWindows
           .firstWhere(
@@ -392,8 +392,9 @@ class NotificationScheduler {
                   loc: loc,
                 );
 
-                if (rawDeviceTime
-                    .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+                if (rawDeviceTime.isBefore(
+                  DateTime.now().add(const Duration(seconds: 5)),
+                )) {
                   continue;
                 }
 
@@ -403,8 +404,10 @@ class NotificationScheduler {
 
                 if (alertLevel == 2) {
                   // المستوى 2: تنبيه كامل (يوقظ الشاشة المقفلة أو يظهر كتنبيه علوي مع صوت الأذان)
-                  final String soundId =
-                      settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
+                  final String soundId = settings.getPeriodSound(
+                    pId,
+                    'assets/audio/adhan.mp3',
+                  );
                   final String assetPath = _getAssetAudioPath(soundId);
 
                   final realAlarmTime = resolveCollisionSafeTime(
@@ -497,8 +500,10 @@ class NotificationScheduler {
           for (var nightPart in ibadat.nightParts) {
             if (settings.visibleNightParts.contains(nightPart.id) &&
                 nightPart.startTime.isAfter(cityNow)) {
-              final int alertLevel =
-                  settings.getPeriodAlertLevel(nightPart.id, 0);
+              final int alertLevel = settings.getPeriodAlertLevel(
+                nightPart.id,
+                0,
+              );
               if (alertLevel > 0) {
                 final String soundId = settings.getPeriodSound(
                   nightPart.id,
@@ -515,8 +520,9 @@ class NotificationScheduler {
                   loc: loc,
                 );
 
-                if (rawDeviceTime
-                    .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+                if (rawDeviceTime.isBefore(
+                  DateTime.now().add(const Duration(seconds: 5)),
+                )) {
                   continue;
                 }
 
@@ -620,8 +626,9 @@ class NotificationScheduler {
               continue;
             }
             try {
-              final p =
-                  periods.firstWhere((p) => p.id == routine.startPeriodId);
+              final p = periods.firstWhere(
+                (p) => p.id == routine.startPeriodId,
+              );
               routineAlarmTime = resolveAstroRoutineTime(
                 period: p,
                 localSuwaya: routine.startSuwaya ?? 1,
@@ -659,8 +666,9 @@ class NotificationScheduler {
               loc: loc,
             );
 
-            if (rawDeviceTime
-                .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+            if (rawDeviceTime.isBefore(
+              DateTime.now().add(const Duration(seconds: 5)),
+            )) {
               continue;
             }
 
@@ -782,9 +790,9 @@ class NotificationScheduler {
                   task.recurrenceDays!.contains(astroWeekday)) {
                 final isCurrentActiveCycle =
                     astroCycleLogicalDate.year == currentActiveAstroDate.year &&
-                        astroCycleLogicalDate.month ==
-                            currentActiveAstroDate.month &&
-                        astroCycleLogicalDate.day == currentActiveAstroDate.day;
+                    astroCycleLogicalDate.month ==
+                        currentActiveAstroDate.month &&
+                    astroCycleLogicalDate.day == currentActiveAstroDate.day;
                 if (!(isCurrentActiveCycle &&
                     task.isCompletedOnDate(astroCycleLogicalDate))) {
                   isForThisCycle = true;
@@ -793,12 +801,14 @@ class NotificationScheduler {
             }
 
             if (isForThisCycle) {
-              final suwayaCount =
-                  period.suwayasCount > 0 ? period.suwayasCount : 1;
+              final suwayaCount = period.suwayasCount > 0
+                  ? period.suwayasCount
+                  : 1;
 
               for (var suwayaNum in task.targetSuwayas) {
-                final int effectiveSuwayaNum =
-                    suwayaNum == -1 ? (suwayaCount ~/ 2) + 1 : suwayaNum;
+                final int effectiveSuwayaNum = suwayaNum == -1
+                    ? (suwayaCount ~/ 2) + 1
+                    : suwayaNum;
                 final DateTime taskCityTime = period.resolveSlotWallTime(
                   effectiveSuwayaNum,
                   task.targetVirtualMinute,
@@ -810,7 +820,8 @@ class NotificationScheduler {
                 );
 
                 if (taskCityTime.isAfter(cityNow)) {
-                  final int taskNotifId = 400000 +
+                  final int taskNotifId =
+                      400000 +
                       (safeOffsetIndex * 10000) +
                       ((task.id % 1000) * 10) +
                       effectiveSuwayaNum;
@@ -829,7 +840,8 @@ class NotificationScheduler {
                   );
 
                   if (rawDeviceTime.isBefore(
-                      DateTime.now().add(const Duration(seconds: 5)))) {
+                    DateTime.now().add(const Duration(seconds: 5)),
+                  )) {
                     continue;
                   }
 
@@ -948,8 +960,8 @@ class NotificationScheduler {
                   task.recurrenceDays!.contains(civilWeekday)) {
                 final isTodayCivil =
                     civilLogicalDate.year == currentCivilDate.year &&
-                        civilLogicalDate.month == currentCivilDate.month &&
-                        civilLogicalDate.day == currentCivilDate.day;
+                    civilLogicalDate.month == currentCivilDate.month &&
+                    civilLogicalDate.day == currentCivilDate.day;
                 if (!(isTodayCivil &&
                     task.isCompletedOnDate(civilLogicalDate))) {
                   isForThisCivilDay = true;
@@ -978,8 +990,9 @@ class NotificationScheduler {
                   loc: loc,
                 );
 
-                if (rawDeviceTime
-                    .isBefore(DateTime.now().add(const Duration(seconds: 5)))) {
+                if (rawDeviceTime.isBefore(
+                  DateTime.now().add(const Duration(seconds: 5)),
+                )) {
                   continue;
                 }
 
@@ -1079,8 +1092,8 @@ class NotificationScheduler {
       }
 
       // 🌟 دمج الإشعارات المعلقة فعلياً في النظام مع الذاكرة لضمان حذف الإشعارات القديمة حتى بعد إعادة تشغيل التطبيق
-      final osPendingNormalIds =
-          await _service.getPendingNormalNotificationIds();
+      final osPendingNormalIds = await _service
+          .getPendingNormalNotificationIds();
       final knownNormalIds = {
         ..._previouslyScheduledNormalIds,
         ...osPendingNormalIds,
@@ -1133,12 +1146,14 @@ class NotificationScheduler {
         _pendingRoutines = null;
         _pendingForceRefresh = false;
 
-        Future.microtask(() => scheduleAhead(
-              nextSettings,
-              nextTasks,
-              nextRoutines,
-              forceRefresh: nextForce,
-            ));
+        Future.microtask(
+          () => scheduleAhead(
+            nextSettings,
+            nextTasks,
+            nextRoutines,
+            forceRefresh: nextForce,
+          ),
+        );
       }
     }
   }

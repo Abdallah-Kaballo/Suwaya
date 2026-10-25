@@ -8,18 +8,22 @@ void main() {
   });
 
   group('SuwayaTimeEngine Pure Package Invariants', () {
-    test('Shafi [1,4,6,1,6,3,3] and Hanafi [1,4,6,1,6,4,2] sum to 24 Suwayas',
-        () {
-      final shafi =
-          SuwayaDistributor.getDistributionForMadhab(MadhabType.shafi);
-      final hanafi =
-          SuwayaDistributor.getDistributionForMadhab(MadhabType.hanafi);
+    test(
+      'Shafi [1,4,6,1,6,3,3] and Hanafi [1,4,6,1,6,4,2] sum to 24 Suwayas',
+      () {
+        final shafi = SuwayaDistributor.getDistributionForMadhab(
+          MadhabType.shafi,
+        );
+        final hanafi = SuwayaDistributor.getDistributionForMadhab(
+          MadhabType.hanafi,
+        );
 
-      expect(shafi, equals([1, 4, 6, 1, 6, 3, 3]));
-      expect(hanafi, equals([1, 4, 6, 1, 6, 4, 2]));
-      expect(shafi.reduce((a, b) => a + b), 24);
-      expect(hanafi.reduce((a, b) => a + b), 24);
-    });
+        expect(shafi, equals([1, 4, 6, 1, 6, 3, 3]));
+        expect(hanafi, equals([1, 4, 6, 1, 6, 4, 2]));
+        expect(shafi.reduce((a, b) => a + b), 24);
+        expect(hanafi.reduce((a, b) => a + b), 24);
+      },
+    );
 
     test('calculateCurrentState with nowUtc prevents wall-clock DST drift', () {
       // محاكاة فترة ليلية يقفز فيها التوقيت الصيفي ساعة للأمام (+2 إلى +3)
@@ -89,22 +93,23 @@ void main() {
     });
 
     test(
-        'TemporalContextEngine separates civilDayIbadat from yesterday cycle ibadatTimings before Maghrib',
-        () {
-      // ظهر يوم 22 أكتوبر 2026 (10:00 UTC = 13:00 بتوقيت مكة، أي قبل المغرب)
-      final context = TemporalContextEngine.evaluate(
-        instantUtc: DateTime.utc(2026, 10, 22, 10, 0),
-        latitude: 21.4225,
-        longitude: 39.8262,
-        timezoneId: 'Asia/Riyadh',
-        methodType: CalculationMethodType.ummAlQura,
-      );
+      'TemporalContextEngine separates civilDayIbadat from yesterday cycle ibadatTimings before Maghrib',
+      () {
+        // ظهر يوم 22 أكتوبر 2026 (10:00 UTC = 13:00 بتوقيت مكة، أي قبل المغرب)
+        final context = TemporalContextEngine.evaluate(
+          instantUtc: DateTime.utc(2026, 10, 22, 10, 0),
+          latitude: 21.4225,
+          longitude: 39.8262,
+          timezoneId: 'Asia/Riyadh',
+          methodType: CalculationMethodType.ummAlQura,
+        );
 
-      // الدورة بدأت في مغرب الأمس (21 أكتوبر)
-      expect(context.astroState.cycleAnchors.cycleStartMaghrib.day, 21);
-      // لكن مواقيت اليوم المدني (civilDayIbadat) تخص اليوم الجاري (22 أكتوبر)
-      expect(context.astroState.civilDayIbadat.dhuhr.day, 22);
-      expect(context.astroState.civilDayIbadat.maghrib.day, 22);
-    });
+        // الدورة بدأت في مغرب الأمس (21 أكتوبر)
+        expect(context.astroState.cycleAnchors.cycleStartMaghrib.day, 21);
+        // لكن مواقيت اليوم المدني (civilDayIbadat) تخص اليوم الجاري (22 أكتوبر)
+        expect(context.astroState.civilDayIbadat.dhuhr.day, 22);
+        expect(context.astroState.civilDayIbadat.maghrib.day, 22);
+      },
+    );
   });
 }

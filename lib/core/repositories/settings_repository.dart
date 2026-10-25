@@ -37,8 +37,10 @@ class SettingsRepository {
     final settings = await getSettings();
     settings.activeLocation = location;
 
-    if (!settings.savedLocations.any((l) =>
-        l.latitude == location.latitude && l.longitude == location.longitude)) {
+    if (!settings.savedLocations.any(
+      (l) =>
+          l.latitude == location.latitude && l.longitude == location.longitude,
+    )) {
       settings.savedLocations = List.from(settings.savedLocations)
         ..add(location);
     }

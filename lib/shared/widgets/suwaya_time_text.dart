@@ -37,7 +37,9 @@ class SuwayaPhaseBadge extends StatelessWidget {
 
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final targetCacheSize = (size * dpr).round().clamp(24, 96);
-    final assetPath = isNight ? 'assets/icons/moon.png' : 'assets/icons/sun.png';
+    final assetPath = isNight
+        ? 'assets/icons/moon.png'
+        : 'assets/icons/sun.png';
 
     return Container(
       width: size,
@@ -80,8 +82,8 @@ class ClockTimeText extends ConsumerWidget {
     required this.civilTimeFormat,
     required this.locale,
     required this.style,
-  })  : globalSuwayaIndex = null,
-        virtualMinute = null;
+  }) : globalSuwayaIndex = null,
+       virtualMinute = null;
 
   ClockTimeText.civil({
     super.key,
@@ -89,18 +91,18 @@ class ClockTimeText extends ConsumerWidget {
     required this.civilTimeFormat,
     required this.locale,
     required this.style,
-  })  : civilClock = CivilWallClock.fromDateTime(civilTime),
-        globalSuwayaIndex = null,
-        virtualMinute = null;
+  }) : civilClock = CivilWallClock.fromDateTime(civilTime),
+       globalSuwayaIndex = null,
+       virtualMinute = null;
 
   const ClockTimeText.suwaya({
     super.key,
     required this.globalSuwayaIndex,
     required this.virtualMinute,
     required this.style,
-  })  : civilClock = null,
-        civilTimeFormat = civilTimeFormatSystem,
-        locale = 'en';
+  }) : civilClock = null,
+       civilTimeFormat = civilTimeFormatSystem,
+       locale = 'en';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,8 +110,9 @@ class ClockTimeText extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (civilClock != null) {
-      final defaultCivilColor =
-          isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
+      final defaultCivilColor = isDark
+          ? const Color(0xFFF3F4F6)
+          : const Color(0xFF111827);
       return Directionality(
         textDirection: ui.TextDirection.ltr,
         child: Text(
@@ -125,8 +128,9 @@ class ClockTimeText extends ConsumerWidget {
     }
 
     final settings = ref.watch(settingsProvider);
-    final suwayaGoldColor =
-        isDark ? const Color(0xFFF2C94C) : const Color(0xFF8A5A00);
+    final suwayaGoldColor = isDark
+        ? const Color(0xFFF2C94C)
+        : const Color(0xFF8A5A00);
 
     return SuwayaTimeText(
       globalSuwayaIndex: globalSuwayaIndex!,

@@ -35,7 +35,10 @@ class FAQScreen extends ConsumerWidget {
         title: Text(
           'drawer.faq'.tr(),
           style: TextStyle(
-              color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -57,7 +60,8 @@ class FAQScreen extends ConsumerWidget {
             },
             child: ListView.builder(
               physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics()),
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               padding: const EdgeInsets.all(20),
               itemCount: faqs.length,
               itemBuilder: (context, index) {
@@ -72,17 +76,20 @@ class FAQScreen extends ConsumerWidget {
                         ? []
                         : [
                             BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.02),
-                                blurRadius: 8)
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 8,
+                            ),
                           ],
                   ),
                   child: Theme(
-                    data:
-                        ThemeData().copyWith(dividerColor: Colors.transparent),
+                    data: ThemeData().copyWith(
+                      dividerColor: Colors.transparent,
+                    ),
                     child: ExpansionTile(
                       iconColor: primaryColor,
-                      collapsedIconColor:
-                          isDark ? Colors.white54 : Colors.black54,
+                      collapsedIconColor: isDark
+                          ? Colors.white54
+                          : Colors.black54,
                       title: Text(
                         faq.question,
                         style: TextStyle(
@@ -117,15 +124,21 @@ class FAQScreen extends ConsumerWidget {
   }
 
   Widget _buildErrorState(
-      BuildContext context, Color primaryColor, Color textColor) {
+    BuildContext context,
+    Color primaryColor,
+    Color textColor,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.wifi_off,
-                size: 64, color: primaryColor.withValues(alpha: 0.5)),
+            Icon(
+              LucideIcons.wifi_off,
+              size: 64,
+              color: primaryColor.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 24),
             // 🌟 تم تطبيق مفتاح الترجمة هنا
             Text(

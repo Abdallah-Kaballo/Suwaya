@@ -149,17 +149,24 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
         title: _isSelectionMode
             ? Text(
                 '${_selectedTaskIds.length + _selectedRoutineIds.length} ${'tasks.selected'.tr()}',
-                style:
-                    TextStyle(color: accentColor, fontWeight: FontWeight.bold))
-            : Text('tasks.suwaya_management'.tr(),
                 style: TextStyle(
-                    color: textColor,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 22)),
+                  color: accentColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            : Text(
+                'tasks.suwaya_management'.tr(),
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                ),
+              ),
         leading: _isSelectionMode
             ? IconButton(
                 icon: Icon(LucideIcons.x, color: textColor),
-                onPressed: _clearSelection)
+                onPressed: _clearSelection,
+              )
             : Builder(
                 builder: (ctx) => IconButton(
                   icon: Icon(LucideIcons.menu, color: textColor),
@@ -169,8 +176,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
         actions: [
           if (_isSelectionMode)
             IconButton(
-                icon: const Icon(LucideIcons.trash, color: Colors.redAccent),
-                onPressed: _deleteSelectedItems),
+              icon: const Icon(LucideIcons.trash, color: Colors.redAccent),
+              onPressed: _deleteSelectedItems,
+            ),
           const SizedBox(width: 8),
         ],
         bottom: PreferredSize(
@@ -180,25 +188,28 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                  color: surfaceColor,
-                  borderRadius: BorderRadius.circular(16),
-                  border:
-                      Border.all(color: accentColor.withValues(alpha: 0.1))),
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: accentColor.withValues(alpha: 0.1)),
+              ),
               child: TabBar(
                 controller: _tabController,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: accentColor, width: 2)),
+                  color: accentColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: accentColor, width: 2),
+                ),
                 labelColor: accentColor,
                 unselectedLabelColor: textColor.withValues(alpha: 0.4),
-                labelStyle:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
                 tabs: [
                   Tab(text: 'tasks.tab_casual'.tr()),
                   Tab(text: 'tasks.tab_habits'.tr()),
-                  Tab(text: 'tasks.tab_routines'.tr())
+                  Tab(text: 'tasks.tab_routines'.tr()),
                 ],
               ),
             ),
@@ -230,7 +241,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
   }
 
   Widget _buildTasksList(
-      List<TaskModel> tasks, List<AstroPeriod> periods, bool isHabit) {
+    List<TaskModel> tasks,
+    List<AstroPeriod> periods,
+    bool isHabit,
+  ) {
     if (tasks.isEmpty) return _buildEmptyState('tasks.empty_tasks'.tr());
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
@@ -267,7 +281,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
   }
 
   Widget _buildRoutinesList(
-      List<RoutineModel> routines, List<AstroPeriod> periods) {
+    List<RoutineModel> routines,
+    List<AstroPeriod> periods,
+  ) {
     if (routines.isEmpty) return _buildEmptyState('tasks.empty_routines'.tr());
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
@@ -304,14 +320,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
     );
   }
 
-  void _showOptionsSheet(BuildContext context,
-      {TaskModel? task, RoutineModel? routine}) {
+  void _showOptionsSheet(
+    BuildContext context, {
+    TaskModel? task,
+    RoutineModel? routine,
+  }) {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -328,8 +348,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
             ),
             ListTile(
               leading: const Icon(LucideIcons.trash, color: Colors.redAccent),
-              title: Text('common.delete'.tr(),
-                  style: const TextStyle(color: Colors.redAccent)),
+              title: Text(
+                'common.delete'.tr(),
+                style: const TextStyle(color: Colors.redAccent),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 if (task != null) {
@@ -388,37 +410,51 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
 
   Widget _buildEmptyState(String msg) {
     return Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(LucideIcons.layout_list,
-          size: 64, color: Colors.grey.withValues(alpha: 0.2)),
-      const SizedBox(height: 16),
-      Text(msg, style: const TextStyle(color: Colors.grey))
-    ]));
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            LucideIcons.layout_list,
+            size: 64,
+            color: Colors.grey.withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(msg, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
   }
 
   void _editTask(TaskModel task) {
     HapticFeedback.selectionClick();
     final astro = ref.read(astroProvider);
     // 🌟 التوجيه للشاشة الشاملة مع تحديد نوع التبويب لحماية نوع المهمة
-    context.push('/add-task', extra: {
-      'currentPeriodId': astro.currentPeriod.id,
-      'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
-      'existingTask': task,
-      'initialTab':
-          task.type == TaskType.permanent ? 1 : 0, // 0 للعابرة، 1 للمستمرة
-    });
+    context.push(
+      '/add-task',
+      extra: {
+        'currentPeriodId': astro.currentPeriod.id,
+        'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
+        'existingTask': task,
+        'initialTab': task.type == TaskType.permanent
+            ? 1
+            : 0, // 0 للعابرة، 1 للمستمرة
+      },
+    );
   }
 
   void _editRoutine(RoutineModel r) {
     HapticFeedback.selectionClick();
     final astro = ref.read(astroProvider);
     // 🌟 التوجيه للشاشة الشاملة على تبويب الروتين مباشرة
-    context.push('/add-task', extra: {
-      'currentPeriodId': astro.currentPeriod.id,
-      'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
-      'existingRoutine': r,
-      'initialTab': 2, // 2 للروتين
-    });
+    context.push(
+      '/add-task',
+      extra: {
+        'currentPeriodId': astro.currentPeriod.id,
+        'currentSuwaya': astro.currentSuwayaTime.periodLocalSlotNumber,
+        'existingRoutine': r,
+        'initialTab': 2, // 2 للروتين
+      },
+    );
   }
 }
 
@@ -430,14 +466,15 @@ class _TaskRowItem extends ConsumerStatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final VoidCallback onMoreOptions;
-  const _TaskRowItem(
-      {required this.task,
-      required this.periods,
-      required this.isSelectionMode,
-      required this.isSelected,
-      required this.onTap,
-      required this.onLongPress,
-      required this.onMoreOptions});
+  const _TaskRowItem({
+    required this.task,
+    required this.periods,
+    required this.isSelectionMode,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
+    required this.onMoreOptions,
+  });
   @override
   ConsumerState<_TaskRowItem> createState() => _TaskRowItemState();
 }
@@ -450,8 +487,9 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
     final t = widget.task;
     final settings = ref.watch(settingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final catColor = t.category
-        .uiColor(isDark); // 🌟 استخدام الدالة الموحدة المتكيفة مع الثيم
+    final catColor = t.category.uiColor(
+      isDark,
+    ); // 🌟 استخدام الدالة الموحدة المتكيفة مع الثيم
     final surfaceColor = Theme.of(context).cardColor;
     final textColor = Theme.of(context).colorScheme.onSurface;
 
@@ -503,26 +541,30 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
+          color: widget.isSelected
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+              : surfaceColor,
+          border: Border.all(
             color: widget.isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                : surfaceColor,
-            border: Border.all(
-                color: widget.isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.transparent)),
+                ? Theme.of(context).primaryColor
+                : Colors.transparent,
+          ),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
             if (widget.isSelectionMode)
               Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: Icon(
-                      widget.isSelected
-                          ? LucideIcons.circle_check
-                          : LucideIcons.circle,
-                      color: widget.isSelected
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey))
+                padding: const EdgeInsets.only(left: 12),
+                child: Icon(
+                  widget.isSelected
+                      ? LucideIcons.circle_check
+                      : LucideIcons.circle,
+                  color: widget.isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey,
+                ),
+              )
             else
               Semantics(
                 button: true,
@@ -549,12 +591,16 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: catColor, width: 2),
-                          color:
-                              _isLocalCompleted ? catColor : Colors.transparent,
+                          color: _isLocalCompleted
+                              ? catColor
+                              : Colors.transparent,
                         ),
                         child: _isLocalCompleted
-                            ? const Icon(Icons.check,
-                                size: 16, color: Colors.white)
+                            ? const Icon(
+                                Icons.check,
+                                size: 16,
+                                color: Colors.white,
+                              )
                             : null,
                       ),
                     ),
@@ -568,26 +614,34 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                   AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 300),
                     style: TextStyle(
-                        color: _isLocalCompleted ? Colors.grey : textColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        decoration: _isLocalCompleted
-                            ? TextDecoration.lineThrough
-                            : null),
+                      color: _isLocalCompleted ? Colors.grey : textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      decoration: _isLocalCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
+                    ),
                     child: Text(t.title),
                   ),
                   const SizedBox(height: 6),
                   Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: catColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(6)),
-                      child: Text(t.category.displayName,
-                          style: TextStyle(
-                              color: catColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold))),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      t.category.displayName,
+                      style: TextStyle(
+                        color: catColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -598,11 +652,14 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
                 children: [
                   clockWidget,
                   const SizedBox(height: 2),
-                  Text(dateStr,
-                      style: TextStyle(
-                          color: textColor.withValues(alpha: 0.5),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    dateStr,
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -610,8 +667,11 @@ class _TaskRowItemState extends ConsumerState<_TaskRowItem> {
               IconButton(
                 padding: const EdgeInsets.only(left: 8),
                 constraints: const BoxConstraints(),
-                icon: Icon(Icons.more_vert,
-                    color: textColor.withValues(alpha: 0.3), size: 20),
+                icon: Icon(
+                  Icons.more_vert,
+                  color: textColor.withValues(alpha: 0.3),
+                  size: 20,
+                ),
                 onPressed: widget.onMoreOptions,
               ),
           ],
@@ -629,14 +689,15 @@ class _RoutineRowItem extends ConsumerWidget {
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final VoidCallback onMoreOptions;
-  const _RoutineRowItem(
-      {required this.routine,
-      required this.periods,
-      required this.isSelectionMode,
-      required this.isSelected,
-      required this.onTap,
-      required this.onLongPress,
-      required this.onMoreOptions});
+  const _RoutineRowItem({
+    required this.routine,
+    required this.periods,
+    required this.isSelectionMode,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
+    required this.onMoreOptions,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -674,50 +735,60 @@ class _RoutineRowItem extends ConsumerWidget {
     );
     final recurrence =
         formatRoutineRecurrence(routine.recurrenceDays, locale) ??
-            'add_screen.daily'.tr();
+        'add_screen.daily'.tr();
 
     return GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
       child: Container(
         decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+              : Theme.of(context).cardColor,
+          border: Border.all(
             color: isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                : Theme.of(context).cardColor,
-            border: Border.all(
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.transparent)),
+                ? Theme.of(context).primaryColor
+                : Colors.transparent,
+          ),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
             if (isSelectionMode)
               Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: Icon(
-                      isSelected
-                          ? LucideIcons.circle_check
-                          : LucideIcons.circle,
-                      color: isSelected
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey)),
+                padding: const EdgeInsets.only(left: 12),
+                child: Icon(
+                  isSelected ? LucideIcons.circle_check : LucideIcons.circle,
+                  color: isSelected
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey,
+                ),
+              ),
             Container(
-                margin: const EdgeInsets.only(left: 8, right: 8),
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: rColor,
-                    boxShadow: [
-                      BoxShadow(
-                          color: rColor.withValues(alpha: 0.5), blurRadius: 4)
-                    ])),
+              margin: const EdgeInsets.only(left: 8, right: 8),
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: rColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: rColor.withValues(alpha: 0.5),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+            ),
             Expanded(
-                child: Text(routine.title,
-                    style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold))),
+              child: Text(
+                routine.title,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             Directionality(
               textDirection: ui.TextDirection.ltr,
               child: Column(
@@ -731,20 +802,24 @@ class _RoutineRowItem extends ConsumerWidget {
                         startRangeTime,
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 5),
-                          child: Text('→',
-                              style:
-                                  TextStyle(color: clockColor, fontSize: 12)),
+                          child: Text(
+                            '→',
+                            style: TextStyle(color: clockColor, fontSize: 12),
+                          ),
                         ),
                         endRangeTime,
                       ],
                     ),
                   ),
                   const SizedBox(height: 3),
-                  Text(recurrence,
-                      style: TextStyle(
-                          color: isDark ? Colors.white54 : Colors.black54,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold)),
+                  Text(
+                    recurrence,
+                    style: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -752,8 +827,11 @@ class _RoutineRowItem extends ConsumerWidget {
               IconButton(
                 padding: const EdgeInsets.only(left: 8),
                 constraints: const BoxConstraints(),
-                icon: Icon(Icons.more_vert,
-                    color: isDark ? Colors.white38 : Colors.black38, size: 20),
+                icon: Icon(
+                  Icons.more_vert,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                  size: 20,
+                ),
                 onPressed: onMoreOptions,
               ),
           ],

@@ -84,158 +84,172 @@ class _InMemorySettingsRepository implements SettingsRepository {
 void main() {
   group('MigrationService V1 (48 Suwayas) to V2 (24 Suwayas) Tests', () {
     test(
-        '1 & 2. Converts V1 period/suwaya/virtualMinute to V2 while preserving IDs, titles, and streak history',
-        () async {
-      final historyDate = DateTime(2026, 10, 10);
-      final v1Task = TaskModel()
-        ..id = 101
-        ..title = 'ورد الفجر'
-        ..scheduleModelVersion = 1
-        ..isAstroTime = true
-        ..targetPeriodId = 1 // في V1: الفجر كان الفترة 1
-        ..targetSuwayas = [2]
-        ..targetVirtualMinute = 15 // في V1: 15 من 30 (منتصف السويعة)
-        ..currentStreak = 7
-        ..longestStreak = 14
-        ..completionHistory = [historyDate];
+      '1 & 2. Converts V1 period/suwaya/virtualMinute to V2 while preserving IDs, titles, and streak history',
+      () async {
+        final historyDate = DateTime(2026, 10, 10);
+        final v1Task = TaskModel()
+          ..id = 101
+          ..title = 'ورد الفجر'
+          ..scheduleModelVersion = 1
+          ..isAstroTime = true
+          ..targetPeriodId =
+              1 // في V1: الفجر كان الفترة 1
+          ..targetSuwayas = [2]
+          ..targetVirtualMinute =
+              15 // في V1: 15 من 30 (منتصف السويعة)
+          ..currentStreak = 7
+          ..longestStreak = 14
+          ..completionHistory = [historyDate];
 
-      final taskRepo = _InMemoryTaskRepository([v1Task]);
-      final routineRepo = _InMemoryRoutineRepository([]);
-      final settingsRepo =
-          _InMemorySettingsRepository(SettingsModel()..madhab = 'shafi');
+        final taskRepo = _InMemoryTaskRepository([v1Task]);
+        final routineRepo = _InMemoryRoutineRepository([]);
+        final settingsRepo = _InMemorySettingsRepository(
+          SettingsModel()..madhab = 'shafi',
+        );
 
-      final container = ProviderContainer(
-        overrides: [
-          taskRepositoryProvider.overrideWithValue(taskRepo),
-          routineRepositoryProvider.overrideWithValue(routineRepo),
-          settingsRepositoryProvider.overrideWithValue(settingsRepo),
-        ],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [
+            taskRepositoryProvider.overrideWithValue(taskRepo),
+            routineRepositoryProvider.overrideWithValue(routineRepo),
+            settingsRepositoryProvider.overrideWithValue(settingsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      await container.read(migrationServiceProvider).runMigrationsIfNeeded();
+        await container.read(migrationServiceProvider).runMigrationsIfNeeded();
 
-      final migrated = taskRepo.tasks.first;
-      expect(migrated.scheduleModelVersion, 2);
-      expect(migrated.id, 101);
-      expect(migrated.title, 'ورد الفجر');
-      expect(migrated.currentStreak, 7);
-      expect(migrated.longestStreak, 14);
-      expect(migrated.completionHistory, equals([historyDate]));
-      // في V2: الفجر أصبح الفترة 4، وعدد سويعاته 1، والدقيقة 15*2 = 30
-      expect(migrated.targetPeriodId, V2AstroPeriod.fajr.id);
-      expect(migrated.targetSuwayas, equals([1]));
-      expect(migrated.targetVirtualMinute, 30);
-    });
-
-    test(
-        '3. Converts incomplete astro routines and tasks safely to civil fallback (10:00 - 11:00)',
-        () async {
-      final incompleteTask = TaskModel()
-        ..id = 202
-        ..title = 'مهمة ناقصة'
-        ..scheduleModelVersion = 1
-        ..isAstroTime = true
-        ..targetPeriodId = null
-        ..targetSuwayas = [];
-
-      final incompleteRoutine = RoutineModel()
-        ..id = 303
-        ..title = 'روتين ناقص'
-        ..scheduleModelVersion = 1
-        ..isAstroTime = true
-        ..startPeriodId = null
-        ..endPeriodId = null;
-
-      final taskRepo = _InMemoryTaskRepository([incompleteTask]);
-      final routineRepo = _InMemoryRoutineRepository([incompleteRoutine]);
-      final settingsRepo = _InMemorySettingsRepository(SettingsModel());
-
-      final container = ProviderContainer(
-        overrides: [
-          taskRepositoryProvider.overrideWithValue(taskRepo),
-          routineRepositoryProvider.overrideWithValue(routineRepo),
-          settingsRepositoryProvider.overrideWithValue(settingsRepo),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      await container.read(migrationServiceProvider).runMigrationsIfNeeded();
-
-      expect(incompleteTask.scheduleModelVersion, 2);
-      expect(incompleteTask.isAstroTime, isFalse);
-      expect(incompleteTask.targetCivilTimeMinutes, 10 * 60);
-
-      expect(incompleteRoutine.scheduleModelVersion, 2);
-      expect(incompleteRoutine.isAstroTime, isFalse);
-      expect(incompleteRoutine.startTimeMinutes, 10 * 60);
-      expect(incompleteRoutine.endTimeMinutes, 11 * 60);
-    });
+        final migrated = taskRepo.tasks.first;
+        expect(migrated.scheduleModelVersion, 2);
+        expect(migrated.id, 101);
+        expect(migrated.title, 'ورد الفجر');
+        expect(migrated.currentStreak, 7);
+        expect(migrated.longestStreak, 14);
+        expect(migrated.completionHistory, equals([historyDate]));
+        // في V2: الفجر أصبح الفترة 4، وعدد سويعاته 1، والدقيقة 15*2 = 30
+        expect(migrated.targetPeriodId, V2AstroPeriod.fajr.id);
+        expect(migrated.targetSuwayas, equals([1]));
+        expect(migrated.targetVirtualMinute, 30);
+      },
+    );
 
     test(
-        '4 & 5. Idempotency & interrupted restart: does not re-migrate records already at version 2',
-        () async {
-      final v1Task = TaskModel()
-        ..id = 1
-        ..scheduleModelVersion = 1
-        ..isAstroTime = true
-        ..targetPeriodId = 7 // قيام V1 -> الفترة 3 في V2
-        ..targetSuwayas = [4] // تتحول إلى 2 في المرة الأولى
-        ..targetVirtualMinute = 10; // تتحول إلى 20 في المرة الأولى
+      '3. Converts incomplete astro routines and tasks safely to civil fallback (10:00 - 11:00)',
+      () async {
+        final incompleteTask = TaskModel()
+          ..id = 202
+          ..title = 'مهمة ناقصة'
+          ..scheduleModelVersion = 1
+          ..isAstroTime = true
+          ..targetPeriodId = null
+          ..targetSuwayas = [];
 
-      final taskRepo = _InMemoryTaskRepository([v1Task]);
-      final container = ProviderContainer(
-        overrides: [
-          taskRepositoryProvider.overrideWithValue(taskRepo),
-          routineRepositoryProvider
-              .overrideWithValue(_InMemoryRoutineRepository([])),
-          settingsRepositoryProvider
-              .overrideWithValue(_InMemorySettingsRepository(SettingsModel())),
-        ],
-      );
-      addTearDown(container.dispose);
+        final incompleteRoutine = RoutineModel()
+          ..id = 303
+          ..title = 'روتين ناقص'
+          ..scheduleModelVersion = 1
+          ..isAstroTime = true
+          ..startPeriodId = null
+          ..endPeriodId = null;
 
-      // التشغيل الأول
-      await container.read(migrationServiceProvider).runMigrationsIfNeeded();
-      expect(v1Task.scheduleModelVersion, 2);
-      expect(v1Task.migrationCount, 1);
-      expect(v1Task.targetSuwayas, equals([2]));
-      expect(v1Task.targetVirtualMinute, 20);
+        final taskRepo = _InMemoryTaskRepository([incompleteTask]);
+        final routineRepo = _InMemoryRoutineRepository([incompleteRoutine]);
+        final settingsRepo = _InMemorySettingsRepository(SettingsModel());
 
-      // التشغيل الثاني (يجب ألا يغير شيئاً إطلاقاً)
-      await container.read(migrationServiceProvider).runMigrationsIfNeeded();
-      expect(v1Task.migrationCount, 1);
-      expect(v1Task.targetSuwayas, equals([2]));
-      expect(v1Task.targetVirtualMinute, 20);
-    });
+        final container = ProviderContainer(
+          overrides: [
+            taskRepositoryProvider.overrideWithValue(taskRepo),
+            routineRepositoryProvider.overrideWithValue(routineRepo),
+            settingsRepositoryProvider.overrideWithValue(settingsRepo),
+          ],
+        );
+        addTearDown(container.dispose);
 
-    test('6. Respects Hanafi vs Shafi max Suwayas clamping for Dhuhr and Asr',
-        () async {
-      // في المذهب الحنفي: الظهر 4 سويعات والعصر 2 سويعتان
-      // في مذهب الجمهور: الظهر 3 سويعات والعصر 3 سويعات
-      final asrTaskHanafi = TaskModel()
-        ..id = 10
-        ..scheduleModelVersion = 1
-        ..isAstroTime = true
-        ..targetPeriodId = 4 // العصر في V1
-        ..targetSuwayas = [6]; // (6+1)~/2 = 3 -> تُقيد بـ 2 في الحنفي
+        await container.read(migrationServiceProvider).runMigrationsIfNeeded();
 
-      final taskRepo = _InMemoryTaskRepository([asrTaskHanafi]);
-      final container = ProviderContainer(
-        overrides: [
-          taskRepositoryProvider.overrideWithValue(taskRepo),
-          routineRepositoryProvider
-              .overrideWithValue(_InMemoryRoutineRepository([])),
-          settingsRepositoryProvider.overrideWithValue(
-            _InMemorySettingsRepository(SettingsModel()..madhab = 'hanafi'),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
+        expect(incompleteTask.scheduleModelVersion, 2);
+        expect(incompleteTask.isAstroTime, isFalse);
+        expect(incompleteTask.targetCivilTimeMinutes, 10 * 60);
 
-      await container.read(migrationServiceProvider).runMigrationsIfNeeded();
-      expect(asrTaskHanafi.targetPeriodId, V2AstroPeriod.asr.id);
-      expect(asrTaskHanafi.targetSuwayas, equals([2]));
-    });
+        expect(incompleteRoutine.scheduleModelVersion, 2);
+        expect(incompleteRoutine.isAstroTime, isFalse);
+        expect(incompleteRoutine.startTimeMinutes, 10 * 60);
+        expect(incompleteRoutine.endTimeMinutes, 11 * 60);
+      },
+    );
+
+    test(
+      '4 & 5. Idempotency & interrupted restart: does not re-migrate records already at version 2',
+      () async {
+        final v1Task = TaskModel()
+          ..id = 1
+          ..scheduleModelVersion = 1
+          ..isAstroTime = true
+          ..targetPeriodId =
+              7 // قيام V1 -> الفترة 3 في V2
+          ..targetSuwayas =
+              [4] // تتحول إلى 2 في المرة الأولى
+          ..targetVirtualMinute = 10; // تتحول إلى 20 في المرة الأولى
+
+        final taskRepo = _InMemoryTaskRepository([v1Task]);
+        final container = ProviderContainer(
+          overrides: [
+            taskRepositoryProvider.overrideWithValue(taskRepo),
+            routineRepositoryProvider.overrideWithValue(
+              _InMemoryRoutineRepository([]),
+            ),
+            settingsRepositoryProvider.overrideWithValue(
+              _InMemorySettingsRepository(SettingsModel()),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        // التشغيل الأول
+        await container.read(migrationServiceProvider).runMigrationsIfNeeded();
+        expect(v1Task.scheduleModelVersion, 2);
+        expect(v1Task.migrationCount, 1);
+        expect(v1Task.targetSuwayas, equals([2]));
+        expect(v1Task.targetVirtualMinute, 20);
+
+        // التشغيل الثاني (يجب ألا يغير شيئاً إطلاقاً)
+        await container.read(migrationServiceProvider).runMigrationsIfNeeded();
+        expect(v1Task.migrationCount, 1);
+        expect(v1Task.targetSuwayas, equals([2]));
+        expect(v1Task.targetVirtualMinute, 20);
+      },
+    );
+
+    test(
+      '6. Respects Hanafi vs Shafi max Suwayas clamping for Dhuhr and Asr',
+      () async {
+        // في المذهب الحنفي: الظهر 4 سويعات والعصر 2 سويعتان
+        // في مذهب الجمهور: الظهر 3 سويعات والعصر 3 سويعات
+        final asrTaskHanafi = TaskModel()
+          ..id = 10
+          ..scheduleModelVersion = 1
+          ..isAstroTime = true
+          ..targetPeriodId =
+              4 // العصر في V1
+          ..targetSuwayas = [6]; // (6+1)~/2 = 3 -> تُقيد بـ 2 في الحنفي
+
+        final taskRepo = _InMemoryTaskRepository([asrTaskHanafi]);
+        final container = ProviderContainer(
+          overrides: [
+            taskRepositoryProvider.overrideWithValue(taskRepo),
+            routineRepositoryProvider.overrideWithValue(
+              _InMemoryRoutineRepository([]),
+            ),
+            settingsRepositoryProvider.overrideWithValue(
+              _InMemorySettingsRepository(SettingsModel()..madhab = 'hanafi'),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await container.read(migrationServiceProvider).runMigrationsIfNeeded();
+        expect(asrTaskHanafi.targetPeriodId, V2AstroPeriod.asr.id);
+        expect(asrTaskHanafi.targetSuwayas, equals([2]));
+      },
+    );
   });
 }

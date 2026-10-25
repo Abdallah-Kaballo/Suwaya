@@ -43,34 +43,35 @@ class SuwayaRecurrenceEngine {
 
     for (int index = 0; index < daysCount; index++) {
       final int dayOffset = startDayOffset + index;
-      final DateTime targetDate =
-          referenceWallTime.add(Duration(days: dayOffset));
+      final DateTime targetDate = referenceWallTime.add(
+        Duration(days: dayOffset),
+      );
 
       final Duration fallbackCurrent =
           (fallbackDayOffsets != null && index < fallbackDayOffsets.length)
-              ? fallbackDayOffsets[index]
-              : TimezoneResolver.resolveForInstant(
-                  DateTime.utc(
-                    targetDate.year,
-                    targetDate.month,
-                    targetDate.day,
-                    12,
-                  ),
-                  timezoneId: timezoneId,
-                ).utcOffset;
+          ? fallbackDayOffsets[index]
+          : TimezoneResolver.resolveForInstant(
+              DateTime.utc(
+                targetDate.year,
+                targetDate.month,
+                targetDate.day,
+                12,
+              ),
+              timezoneId: timezoneId,
+            ).utcOffset;
 
       final Duration fallbackNext =
           (fallbackDayOffsets != null && index + 1 < fallbackDayOffsets.length)
-              ? fallbackDayOffsets[index + 1]
-              : TimezoneResolver.resolveForInstant(
-                  DateTime.utc(
-                    targetDate.year,
-                    targetDate.month,
-                    targetDate.day,
-                    12,
-                  ).add(const Duration(days: 1)),
-                  timezoneId: timezoneId,
-                ).utcOffset;
+          ? fallbackDayOffsets[index + 1]
+          : TimezoneResolver.resolveForInstant(
+              DateTime.utc(
+                targetDate.year,
+                targetDate.month,
+                targetDate.day,
+                12,
+              ).add(const Duration(days: 1)),
+              timezoneId: timezoneId,
+            ).utcOffset;
 
       Duration resolveOffset(DateTime utcInstant) {
         return TimezoneResolver.resolveForInstant(

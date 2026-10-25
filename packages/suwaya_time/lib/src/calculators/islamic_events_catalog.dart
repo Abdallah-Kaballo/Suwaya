@@ -31,14 +31,14 @@ class SeasonalFastingRecommendation {
   });
 
   Map<String, dynamic> toJson() => {
-        'type': type.name,
-        'titleKey': titleKey,
-        'reasonKey': reasonKey,
-        'title': title,
-        'reason': reason,
-        'highlightColorHex': highlightColorHex,
-        'isFastingForbidden': isFastingForbidden,
-      };
+    'type': type.name,
+    'titleKey': titleKey,
+    'reasonKey': reasonKey,
+    'title': title,
+    'reason': reason,
+    'highlightColorHex': highlightColorHex,
+    'isFastingForbidden': isFastingForbidden,
+  };
 }
 
 class IslamicEventsCatalog {
@@ -80,7 +80,8 @@ class IslamicEventsCatalog {
     String? localizedMonthName,
   }) {
     final isAr = langCode.toLowerCase().startsWith('ar');
-    final monthName = localizedMonthName ??
+    final monthName =
+        localizedMonthName ??
         (isAr
             ? (_hijriMonthsAr[hMonth] ?? '$hMonth')
             : (_hijriMonthsEn[hMonth] ?? '$hMonth'));
@@ -120,8 +121,9 @@ class IslamicEventsCatalog {
         type: IslamicFastingType.tasua,
         titleKey: 'fasting.tasua_title',
         reasonKey: 'fasting.tasua_reason',
-        title:
-            isAr ? 'صيام يوم تاسوعاء (9 محرم)' : 'Fasting Tasu\'a (9 Muharram)',
+        title: isAr
+            ? 'صيام يوم تاسوعاء (9 محرم)'
+            : 'Fasting Tasu\'a (9 Muharram)',
         reason: isAr
             ? 'يُستحب صيامه مع يوم عاشوراء.'
             : 'Recommended to fast along with the Day of Ashura.',

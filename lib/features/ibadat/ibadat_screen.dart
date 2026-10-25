@@ -147,8 +147,9 @@ void showDialAndIbadatMarkersSheet(
 
                   // 🌟 3. أوقات الليل الخمسة بنفس تصميم زر الشروق (SwitchListTile)
                   ...availableNightParts.map((part) {
-                    final isSelected =
-                        settings.visibleNightParts.contains(part.id);
+                    final isSelected = settings.visibleNightParts.contains(
+                      part.id,
+                    );
                     final partTitle =
                         ('night_parts.${part.nameKey.replaceAll("np_", "")}')
                             .tr();
@@ -161,8 +162,9 @@ void showDialAndIbadatMarkersSheet(
                         style: TextStyle(
                           color: textColor,
                           fontSize: 14.5,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                         ),
                       ),
                       value: isSelected,
@@ -252,10 +254,7 @@ class IbadatScreen extends ConsumerWidget {
     }
 
     if (astroState.periods.isEmpty) {
-      return Text(
-        '00|00',
-        style: style.copyWith(color: suwayaColor),
-      );
+      return Text('00|00', style: style.copyWith(color: suwayaColor));
     }
 
     final fixedTime = getFixedAstroTime(identifier, astroState, isEnd: isEnd);
@@ -507,14 +506,15 @@ class IbadatScreen extends ConsumerWidget {
                   builder: (context, liveNow, _) {
                     final countdown =
                         SuwayaScheduleEngine.computeNextPrayerCountdown(
-                      astroState: astroState,
-                      liveNow: liveNow,
-                      useAstroTime: settings.useAstroTimeForIbadat,
-                      nowUtc: DateTime.now().toUtc(),
-                    );
+                          astroState: astroState,
+                          liveNow: liveNow,
+                          useAstroTime: settings.useAstroTimeForIbadat,
+                          nowUtc: DateTime.now().toUtc(),
+                        );
 
-                    final String nextPrayerName =
-                        prayerTitleForKey(countdown.prayerKey);
+                    final String nextPrayerName = prayerTitleForKey(
+                      countdown.prayerKey,
+                    );
                     final String topLabel = settings.useAstroTimeForIbadat
                         ? 'ibadat.virtual_remaining'.tr()
                         : 'ibadat.civil_remaining'.tr();
@@ -544,9 +544,9 @@ class IbadatScreen extends ConsumerWidget {
                         boxShadow: [
                           BoxShadow(
                             color: isDark
-                                ? Theme.of(context)
-                                    .primaryColor
-                                    .withValues(alpha: 0.08)
+                                ? Theme.of(
+                                    context,
+                                  ).primaryColor.withValues(alpha: 0.08)
                                 : Colors.black.withValues(alpha: 0.04),
                             blurRadius: 12,
                           ),
@@ -562,8 +562,9 @@ class IbadatScreen extends ConsumerWidget {
                               Text(
                                 'ibadat.next_prayer'.tr(),
                                 style: TextStyle(
-                                  color:
-                                      isDark ? Colors.white70 : Colors.black54,
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black54,
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -586,8 +587,9 @@ class IbadatScreen extends ConsumerWidget {
                               Text(
                                 topLabel,
                                 style: TextStyle(
-                                  color:
-                                      isDark ? Colors.white70 : Colors.black54,
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black54,
                                   fontSize: 12.0,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -599,8 +601,9 @@ class IbadatScreen extends ConsumerWidget {
                                     ? Text(
                                         '- ${sCount.toString().padLeft(2, '0')}|${mCount.toString().padLeft(2, '0')}',
                                         style: TextStyle(
-                                          color:
-                                              suwayaTimeContrastColor(context),
+                                          color: suwayaTimeContrastColor(
+                                            context,
+                                          ),
                                           fontSize: isCompact ? 20.0 : 23.0,
                                           fontWeight: FontWeight.w800,
                                           fontFamily: 'Inter',
@@ -810,9 +813,7 @@ class IbadatScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1A1D24) : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: pColor.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: pColor.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -837,8 +838,9 @@ class IbadatScreen extends ConsumerWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Directionality(
-                textDirection:
-                    isRTL ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                textDirection: isRTL
+                    ? ui.TextDirection.rtl
+                    : ui.TextDirection.ltr,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -886,7 +888,12 @@ class IbadatScreen extends ConsumerWidget {
               onTap: () {
                 HapticFeedback.mediumImpact();
                 _showAlarmChoiceSheet(
-                    context, ref, part.id, originalTitle, isDark);
+                  context,
+                  ref,
+                  part.id,
+                  originalTitle,
+                  isDark,
+                );
               },
               child: SizedBox(
                 width: 44,
@@ -925,11 +932,13 @@ class IbadatScreen extends ConsumerWidget {
   ) {
     final settings = ref.read(settingsProvider);
     final currentLevel = settings.getPeriodAlertLevel(periodId);
-    final bool isNightPart = periodId.startsWith('half') ||
+    final bool isNightPart =
+        periodId.startsWith('half') ||
         periodId.startsWith('third') ||
         periodId.startsWith('sixth');
-    final String defaultTone =
-        isNightPart ? 'assets/audio/soft.mp3' : 'assets/audio/adhan.mp3';
+    final String defaultTone = isNightPart
+        ? 'assets/audio/soft.mp3'
+        : 'assets/audio/adhan.mp3';
     final double defaultVol = isNightPart ? 0.5 : 1.0;
     final currentSound = settings.getPeriodSound(periodId, defaultTone);
     final currentVolume = settings.getPeriodVolume(periodId, defaultVol);

@@ -49,8 +49,9 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     HardwareKeyboard.instance.addHandler(_handleHardwareKey);
 
     _ringingSub = Alarm.ringing.listen((alarmSet) {
-      final stillRinging =
-          alarmSet.alarms.any((a) => a.id == widget.alarmSettings.id);
+      final stillRinging = alarmSet.alarms.any(
+        (a) => a.id == widget.alarmSettings.id,
+      );
       if (!stillRinging && mounted && !_isProcessingAction) {
         _closeRingScreen();
       }
@@ -71,7 +72,7 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
   }
-  
+
   Future<dynamic> _handlePlatformCallback(MethodCall call) async {
     if (call.method == 'onHardwareVolumeButton') {
       _onHardwareVolumePressed();
@@ -421,8 +422,9 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                     ),
                                     height: 80,
                                     decoration: BoxDecoration(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.5),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       borderRadius: BorderRadius.circular(40),
                                       border: Border.all(
                                         color: Colors.white24,
@@ -467,21 +469,25 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                           ],
                                         ),
                                         Positioned(
-                                          left: (trackWidth / 2) -
+                                          left:
+                                              (trackWidth / 2) -
                                               35 +
                                               _dragPosition,
                                           child: GestureDetector(
                                             onHorizontalDragUpdate: (details) {
                                               if (_isProcessingAction) return;
                                               setState(() {
-                                                _dragPosition = (_dragPosition +
-                                                        details.delta.dx)
-                                                    .clamp(
-                                                  canSnooze
-                                                      ? -_maxDragThreshold - 20
-                                                      : 0.0,
-                                                  _maxDragThreshold + 20,
-                                                );
+                                                _dragPosition =
+                                                    (_dragPosition +
+                                                            details.delta.dx)
+                                                        .clamp(
+                                                          canSnooze
+                                                              ? -_maxDragThreshold -
+                                                                    20
+                                                              : 0.0,
+                                                          _maxDragThreshold +
+                                                              20,
+                                                        );
                                               });
                                             },
                                             onHorizontalDragEnd: (details) {
@@ -495,13 +501,15 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                                 _triggerSnooze();
                                               } else {
                                                 setState(
-                                                    () => _dragPosition = 0);
+                                                  () => _dragPosition = 0,
+                                                );
                                               }
                                             },
                                             child: AnimatedContainer(
                                               duration: _dragPosition == 0
                                                   ? const Duration(
-                                                      milliseconds: 300)
+                                                      milliseconds: 300,
+                                                    )
                                                   : Duration.zero,
                                               curve: Curves.elasticOut,
                                               width: 70,
@@ -510,15 +518,13 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                                 color: _dragPosition > 50
                                                     ? Colors.redAccent
                                                     : (_dragPosition < -50
-                                                        ? Colors.amber
-                                                        : accentColor),
+                                                          ? Colors.amber
+                                                          : accentColor),
                                                 shape: BoxShape.circle,
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color:
-                                                        accentColor.withValues(
-                                                      alpha: 0.5,
-                                                    ),
+                                                    color: accentColor
+                                                        .withValues(alpha: 0.5),
                                                     blurRadius: 15,
                                                     spreadRadius: 2,
                                                   ),
@@ -528,8 +534,8 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                                 _dragPosition > 50
                                                     ? LucideIcons.x
                                                     : (_dragPosition < -50
-                                                        ? Icons.snooze
-                                                        : _kindIcon()),
+                                                          ? Icons.snooze
+                                                          : _kindIcon()),
                                                 color: Colors.white,
                                                 size: 30,
                                               ),
@@ -578,8 +584,9 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                     vertical: 14,
                                   ),
                                 ),
-                                onPressed:
-                                    _isProcessingAction ? null : _triggerStop,
+                                onPressed: _isProcessingAction
+                                    ? null
+                                    : _triggerStop,
                                 icon: const Icon(LucideIcons.power_off),
                                 label: Text(
                                   'alarm.stop'.tr(),

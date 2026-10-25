@@ -1,4 +1,3 @@
-// استبدل محتوى ملف: test/widgets/suwaya_time_text_test.dart بالكامل بهذا الكود
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,7 +32,7 @@ void main() {
   });
 
   testWidgets(
-      'SuwayaTimeText renders correctly in emoji and text modes (RTL & LTR)',
+      'SuwayaTimeText renders correctly in image badge and text modes (RTL & LTR)',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(
@@ -63,9 +62,11 @@ void main() {
     );
 
     expect(find.byType(SuwayaTimeText), findsNWidgets(2));
+    expect(find.byType(SuwayaPhaseBadge), findsNWidgets(2));
     expect(find.text('06'), findsOneWidget);
     expect(find.text('30'), findsOneWidget);
-    expect(find.text('🌑'), findsOneWidget);
+    // التحقق من عرض صورة القمر المضغوطة بدلاً من الإيموجي النصي القديم
+    expect(find.byType(Image), findsOneWidget);
     expect(find.text('03'), findsOneWidget);
     expect(find.text('15'), findsOneWidget);
     expect(find.text('ن'), findsOneWidget);

@@ -30,10 +30,7 @@ class _TaskCardState extends ConsumerState<TaskCard> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: catColor.withValues(alpha: 0.22)),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 5,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5),
         ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -72,8 +69,9 @@ class _TaskCardState extends ConsumerState<TaskCard> {
                     color: _isLocalCompleted ? Colors.grey : textColor,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    decoration:
-                        _isLocalCompleted ? TextDecoration.lineThrough : null,
+                    decoration: _isLocalCompleted
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                   child: Text(t.title),
                 ),

@@ -13,11 +13,10 @@ class ScheduleFingerprint {
   static DateTime resolveCollisionSafeTime(
     DateTime desiredTime,
     Set<int> occupiedEpochSeconds,
-  ) =>
-      SuwayaRecurrenceEngine.resolveCollisionSafeTime(
-        desiredTime,
-        occupiedEpochSeconds,
-      );
+  ) => SuwayaRecurrenceEngine.resolveCollisionSafeTime(
+    desiredTime,
+    occupiedEpochSeconds,
+  );
 
   /// بناء بصمة التغييرات الشاملة للموقع والإعدادات والمهام والروتينات
   static String compute({

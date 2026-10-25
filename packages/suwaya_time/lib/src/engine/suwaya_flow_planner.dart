@@ -14,10 +14,10 @@ class SuwayaFlowOption {
   });
 
   Map<String, dynamic> toJson() => {
-        'pomodoroCount': pomodoroCount,
-        'flowSpeed': flowSpeed,
-        'tag': tag,
-      };
+    'pomodoroCount': pomodoroCount,
+    'flowSpeed': flowSpeed,
+    'tag': tag,
+  };
 }
 
 /// لقطة حية لحالة جلسة البومودورو السُويعي عند أي لحظة زمنية
@@ -53,11 +53,8 @@ enum SuwayaFlowValidationError {
 }
 
 class SuwayaFlowPlanner {
-  static ({
-    bool isValid,
-    SuwayaFlowValidationError error,
-    int actualMinutes,
-  }) validateSessionWindow({
+  static ({bool isValid, SuwayaFlowValidationError error, int actualMinutes})
+  validateSessionWindow({
     required DateTime anchoredStart,
     required DateTime candidateEnd,
     int minDurationMinutes = 15,
@@ -99,8 +96,9 @@ class SuwayaFlowPlanner {
   ) {
     if (astroState.periods.isEmpty) return (globalIndex: 0, minute: 0);
     final anchors = astroState.cycleAnchors;
-    final cycleDuration =
-        anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib);
+    final cycleDuration = anchors.cycleEndMaghrib.difference(
+      anchors.cycleStartMaghrib,
+    );
 
     if (time.isAtSameMomentAs(anchors.cycleEndMaghrib)) {
       return (globalIndex: 0, minute: 0);
@@ -148,8 +146,9 @@ class SuwayaFlowPlanner {
     );
 
     if (!resolved.isAfter(anchoredStartTime)) {
-      final cycleDuration = astroState.cycleAnchors.cycleEndMaghrib
-          .difference(astroState.cycleAnchors.cycleStartMaghrib);
+      final cycleDuration = astroState.cycleAnchors.cycleEndMaghrib.difference(
+        astroState.cycleAnchors.cycleStartMaghrib,
+      );
       resolved = resolved.add(
         cycleDuration.inMinutes > 0 ? cycleDuration : const Duration(days: 1),
       );
@@ -240,8 +239,9 @@ class SuwayaFlowPlanner {
       }
     }
 
-    final cycleSpan =
-        anchors.cycleEndMaghrib.difference(anchors.cycleStartMaghrib);
+    final cycleSpan = anchors.cycleEndMaghrib.difference(
+      anchors.cycleStartMaghrib,
+    );
     return (
       prayerKey: PrayerKey.isha,
       time: anchors.cycleIsha.add(
@@ -286,8 +286,10 @@ class SuwayaFlowPlanner {
     final bool isNearPrayer =
         realSecondsToEnd <= prePrayerWarningSeconds && realSecondsToEnd > 0;
 
-    final int actualElapsedSecs =
-        math.max(0, nowUtc.difference(anchoredStartUtc).inSeconds);
+    final int actualElapsedSecs = math.max(
+      0,
+      nowUtc.difference(anchoredStartUtc).inSeconds,
+    );
     final double totalVirtualElapsed = actualElapsedSecs * flowSpeed;
     final double sessionMaxVirtualSecs = totalPomodoros * cycleTotalVirtualSecs;
 
@@ -305,11 +307,8 @@ class SuwayaFlowPlanner {
       );
     }
 
-    final int currentPomoIndex =
-        (totalVirtualElapsed ~/ cycleTotalVirtualSecs).clamp(
-      0,
-      totalPomodoros - 1,
-    );
+    final int currentPomoIndex = (totalVirtualElapsed ~/ cycleTotalVirtualSecs)
+        .clamp(0, totalPomodoros - 1);
     final int currentCycleNumber = currentPomoIndex + 1;
     final double elapsedInCurrentPomo =
         totalVirtualElapsed % cycleTotalVirtualSecs;
@@ -333,8 +332,8 @@ class SuwayaFlowPlanner {
 
     if (remainingVirtual < 0) remainingVirtual = 0;
 
-    final double cycProgress =
-        (elapsedInCurrentPomo / cycleTotalVirtualSecs).clamp(0.0, 1.0);
+    final double cycProgress = (elapsedInCurrentPomo / cycleTotalVirtualSecs)
+        .clamp(0.0, 1.0);
 
     return SuwayaFlowLiveSnapshot(
       isFinished: false,

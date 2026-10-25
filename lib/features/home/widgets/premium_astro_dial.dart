@@ -113,7 +113,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     super.dispose();
   }
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -267,7 +266,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
 
     if (dropTarget != null) {
       HapticFeedback.lightImpact();
-      ref.read(tasksProvider.notifier).rescheduleTask(
+      ref
+          .read(tasksProvider.notifier)
+          .rescheduleTask(
             _draggedTask!,
             dropTarget.periodId,
             dropTarget.localSuwaya,
@@ -289,7 +290,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   Future<void> _selectDialItem(DialSelection selection) async {
     _selectionTimer?.cancel();
     setState(() {
-      _highlightedMarkerId = selection.type == DialSelectionType.prayer ||
+      _highlightedMarkerId =
+          selection.type == DialSelectionType.prayer ||
               selection.type == DialSelectionType.task
           ? selection.id
           : null;
@@ -297,14 +299,16 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           ? int.tryParse(selection.id)
           : null;
     });
-    ref.read(highlightedTaskProvider.notifier).state =
-        selection.type == DialSelectionType.task
-            ? int.tryParse(selection.id)
-            : null;
-    ref.read(highlightedRoutineProvider.notifier).state =
-        selection.type == DialSelectionType.routine
-            ? int.tryParse(selection.id)
-            : null;
+    ref
+        .read(highlightedTaskProvider.notifier)
+        .state = selection.type == DialSelectionType.task
+        ? int.tryParse(selection.id)
+        : null;
+    ref
+        .read(highlightedRoutineProvider.notifier)
+        .state = selection.type == DialSelectionType.routine
+        ? int.tryParse(selection.id)
+        : null;
 
     await widget.onItemTapped?.call(selection);
     if (!mounted) return;
@@ -430,8 +434,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       final routines = ref.read(routinesProvider);
       for (final arc in widget.routineArcs) {
         if (_angleInSweep(actualDialAngle, arc.startAngle, arc.sweepAngle)) {
-          final routine =
-              routines.where((item) => item.id == arc.id).firstOrNull;
+          final routine = routines
+              .where((item) => item.id == arc.id)
+              .firstOrNull;
           if (routine == null) return;
           HapticFeedback.lightImpact();
           _selectDialItem(
@@ -553,13 +558,14 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         try {
           DateTime? taskTime;
           if (task.isAstroTime && task.targetPeriodId != null) {
-            final p = astroState.periods
-                .firstWhere((per) => per.id == task.targetPeriodId);
+            final p = astroState.periods.firstWhere(
+              (per) => per.id == task.targetPeriodId,
+            );
             final suwayaCount = p.suwayasCount > 0 ? p.suwayasCount : 1;
             final int localSuwaya = task.targetSuwayas.isNotEmpty
                 ? (task.targetSuwayas.first == -1
-                    ? (suwayaCount ~/ 2) + 1
-                    : task.targetSuwayas.first)
+                      ? (suwayaCount ~/ 2) + 1
+                      : task.targetSuwayas.first)
                 : (suwayaCount ~/ 2) + 1;
 
             taskTime = p.resolveSlotWallTime(
@@ -592,8 +598,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             }
           }
           if (taskTime != null) {
-            Color tColor =
-                getNeonColorForCategory(task.category, isDark: isDark);
+            Color tColor = getNeonColorForCategory(
+              task.category,
+              isDark: isDark,
+            );
             String formattedName = task.dialShortName ?? task.title;
             _currentDialTasks.add(
               DialTask(
@@ -643,8 +651,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     );
 
     final bool isDayPhase = astroState.currentSuwayaTime.phase.isDay;
-    final String effectivePinMode =
-        settings.useAstroTimeForIbadat ? 'suwaya24' : 'civil24';
+    final String effectivePinMode = settings.useAstroTimeForIbadat
+        ? 'suwaya24'
+        : 'civil24';
     final String currentLangCode = context.locale.languageCode;
 
     return SizedBox(
@@ -667,8 +676,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               );
 
               final needleAngle = timeToAngle(dialTime, dayStart, dayEnd);
-              final autoRotationOffset =
-                  settings.isDialAutoRotating ? -(needleAngle + pi / 2) : 0.0;
+              final autoRotationOffset = settings.isDialAutoRotating
+                  ? -(needleAngle + pi / 2)
+                  : 0.0;
 
               return Listener(
                 behavior: HitTestBehavior.opaque,
@@ -801,12 +811,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
               liveRegion: true,
               label:
                   '${_periodTitle(astroState.currentPeriod)}، ${settings.useAstroTimeForIbadat ? virtualTimeNotifier.value : formatCivilTime(astroState.virtualTime, format: settings.civilTimeFormat, locale: currentLangCode, context: context)}',
-              child: _buildCentralTime(
-                astroState,
-                textColor,
-                isDark,
-                settings,
-              ),
+              child: _buildCentralTime(astroState, textColor, isDark, settings),
             ),
           ),
         ],
@@ -815,14 +820,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   }
 
   Widget _buildLayer(CustomPainter painter) => SizedBox(
-        width: widget.size,
-        height: widget.size,
-        child: CustomPaint(
-          isComplex: true,
-          willChange: false,
-          painter: painter,
-        ),
-      );
+    width: widget.size,
+    height: widget.size,
+    child: CustomPaint(isComplex: true, willChange: false, painter: painter),
+  );
 
   Widget _buildHoursHandImage(double needleAngle, bool isDark) {
     final double r = widget.size / 2;
@@ -885,8 +886,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
 
   Widget _buildCenterGlow(bool isDark, DialDesign design, bool isDayPhase) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
-    final String imagePath =
-        isDayPhase ? 'assets/icons/sun.png' : 'assets/icons/moon.png';
+    final String imagePath = isDayPhase
+        ? 'assets/icons/sun.png'
+        : 'assets/icons/moon.png';
 
     return IgnorePointer(
       child: Container(
@@ -956,19 +958,13 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   ) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
     const Color primaryClockColor = Color(0xFFFFF6D6);
-    final Color secondaryClockColor =
-        const Color(0xFFFFF6D6).withValues(alpha: 0.78);
+    final Color secondaryClockColor = const Color(
+      0xFFFFF6D6,
+    ).withValues(alpha: 0.78);
 
     const List<Shadow> clockShadows = [
-      Shadow(
-        color: Colors.black87,
-        blurRadius: 8,
-        offset: Offset(0, 1.5),
-      ),
-      Shadow(
-        color: Colors.black54,
-        blurRadius: 16,
-      ),
+      Shadow(color: Colors.black87, blurRadius: 8, offset: Offset(0, 1.5)),
+      Shadow(color: Colors.black54, blurRadius: 16),
     ];
 
     if (!settings.useAstroTimeForIbadat) {

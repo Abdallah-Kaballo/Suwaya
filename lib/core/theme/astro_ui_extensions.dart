@@ -37,8 +37,9 @@ extension SmartContrast on Color {
     final hsl = HSLColor.fromColor(this);
 
     if (isDark) {
-      final safeLightness =
-          hsl.lightness < 0.66 ? 0.68 : hsl.lightness.clamp(0.66, 0.82);
+      final safeLightness = hsl.lightness < 0.66
+          ? 0.68
+          : hsl.lightness.clamp(0.66, 0.82);
       final safeSaturation = hsl.saturation.clamp(0.55, 0.90);
       return hsl
           .withLightness(safeLightness)
@@ -46,8 +47,9 @@ extension SmartContrast on Color {
           .toColor();
     }
 
-    final safeLightness =
-        hsl.lightness > 0.32 ? 0.28 : hsl.lightness.clamp(0.20, 0.32);
+    final safeLightness = hsl.lightness > 0.32
+        ? 0.28
+        : hsl.lightness.clamp(0.20, 0.32);
     final safeSaturation = (hsl.saturation * 1.1).clamp(0.60, 0.95);
     return hsl
         .withLightness(safeLightness)

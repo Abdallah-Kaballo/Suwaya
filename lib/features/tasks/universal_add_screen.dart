@@ -144,8 +144,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     int? periodId,
     int? localSuwaya,
     List<AstroPeriod> periods,
-  ) =>
-      SuwayaCoordinateMapper.localToGlobal(periodId, localSuwaya, periods);
+  ) => SuwayaCoordinateMapper.localToGlobal(periodId, localSuwaya, periods);
 
   int _uiToGlobal(int uiHour, bool isNight) =>
       SuwayaCoordinateMapper.uiPhaseToGlobal(uiHour, isNight);
@@ -184,7 +183,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       initialIndex: startTab,
     );
     final cityNow = virtualDateTimeNotifier.value;
-    _selectedDate = widget.initialDate ??
+    _selectedDate =
+        widget.initialDate ??
         DateTime(cityNow.year, cityNow.month, cityNow.day);
 
     final periods = ref.read(astroProvider).periods;
@@ -381,8 +381,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       routine.colorValue = _routineColor.toARGB32();
       routine.pattern = _routinePattern;
       routine.isActive = true;
-      routine.recurrenceDays =
-          _routineRecurrenceDays.isEmpty ? null : _routineRecurrenceDays;
+      routine.recurrenceDays = _routineRecurrenceDays.isEmpty
+          ? null
+          : _routineRecurrenceDays;
       routine.alertLevel = _alertLevel;
       routine.alarmTone = _alarmTone;
       routine.alarmVolume = _alarmVolume;
@@ -443,12 +444,14 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     final task = widget.existingTask ?? TaskModel();
     task.title = title;
-    task.type =
-        _tabController.index == 1 ? TaskType.permanent : TaskType.casual;
+    task.type = _tabController.index == 1
+        ? TaskType.permanent
+        : TaskType.casual;
     task.category = _selectedCategory;
     task.showOnDial = _showOnDial;
-    task.dialShortName =
-        _showOnDial ? (title.length > 6 ? title.substring(0, 6) : title) : '';
+    task.dialShortName = _showOnDial
+        ? (title.length > 6 ? title.substring(0, 6) : title)
+        : '';
     task.alarmMode = _alertLevel == 2;
     task.notifyMode = _alertLevel >= 1;
     task.vibrateMode = _alertLevel == 2;
@@ -562,8 +565,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                 Text(
                   isRoutine
                       ? (isStart
-                          ? 'add_screen.select_start_time'.tr()
-                          : 'add_screen.select_end_time'.tr())
+                            ? 'add_screen.select_start_time'.tr()
+                            : 'add_screen.select_end_time'.tr())
                       : 'add_screen.pin_exact_time'.tr(),
                   style: TextStyle(
                     color: text,
@@ -797,20 +800,22 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                           ),
                           textColor: text,
                           accentColor: pColor,
-                          hijriOffsetDays:
-                              ref.read(settingsProvider).hijriOffsetDays,
+                          hijriOffsetDays: ref
+                              .read(settingsProvider)
+                              .hijriOffsetDays,
                           onDateChanged: (d) {
                             setDialogState(() => tempDate = d);
                           },
                         )
                       : CalendarDatePicker(
-                          initialDate: tempDate.isBefore(
-                            DateTime(
-                              DateTime.now().year,
-                              DateTime.now().month,
-                              DateTime.now().day,
-                            ),
-                          )
+                          initialDate:
+                              tempDate.isBefore(
+                                DateTime(
+                                  DateTime.now().year,
+                                  DateTime.now().month,
+                                  DateTime.now().day,
+                                ),
+                              )
                               ? DateTime.now()
                               : tempDate,
                           firstDate: DateTime.now(),
@@ -842,9 +847,10 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                         final isSelected = activeList.contains(day);
                         return FilterChip(
                           label: Text(
-                            DateFormat('EE', safeIntl).format(
-                              DateTime(2024, 1, day),
-                            ),
+                            DateFormat(
+                              'EE',
+                              safeIntl,
+                            ).format(DateTime(2024, 1, day)),
                           ),
                           selected: isSelected,
                           selectedColor: pColor.withValues(alpha: 0.2),
@@ -940,14 +946,14 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
             children: [
               const SizedBox(height: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: surfaceColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: accentColor.withValues(alpha: 0.2),
-                  ),
+                  border: Border.all(color: accentColor.withValues(alpha: 0.2)),
                 ),
                 child: TextField(
                   controller: _titleController,
@@ -970,22 +976,22 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
               Expanded(
                 child: switch (_tabController.index) {
                   1 => _buildDashboardGrid(
-                      textColor,
-                      surfaceColor,
-                      accentColor,
-                      true,
-                    ),
+                    textColor,
+                    surfaceColor,
+                    accentColor,
+                    true,
+                  ),
                   2 => _buildRoutineDashboardGrid(
-                      textColor,
-                      surfaceColor,
-                      accentColor,
-                    ),
+                    textColor,
+                    surfaceColor,
+                    accentColor,
+                  ),
                   _ => _buildDashboardGrid(
-                      textColor,
-                      surfaceColor,
-                      accentColor,
-                      false,
-                    ),
+                    textColor,
+                    surfaceColor,
+                    accentColor,
+                    false,
+                  ),
                 },
               ),
               Row(
@@ -1121,8 +1127,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     String alertStr = _alertLevel == 0
         ? (isAr ? 'بدون إشعار' : 'No Notification')
         : (_alertLevel == 1
-            ? (isAr ? 'إشعار على الستارة' : 'Curtain Notification')
-            : (isAr ? 'تنبيه' : 'Alarm'));
+              ? (isAr ? 'إشعار على الستارة' : 'Curtain Notification')
+              : (isAr ? 'تنبيه' : 'Alarm'));
 
     return Column(
       children: [
@@ -1371,20 +1377,19 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     Color pColor,
     Color surface,
     Color text,
-  ) =>
-      showRoutinePatternModal(
-        context: context,
-        pColor: pColor,
-        surface: surface,
-        text: text,
-        initialColor: _routineColor,
-        initialPattern: _routinePattern,
-        availablePatterns: _availablePatterns,
-        onChanged: (color, pattern) => setState(() {
-          _routineColor = color;
-          _routinePattern = pattern;
-        }),
-      );
+  ) => showRoutinePatternModal(
+    context: context,
+    pColor: pColor,
+    surface: surface,
+    text: text,
+    initialColor: _routineColor,
+    initialPattern: _routinePattern,
+    availablePatterns: _availablePatterns,
+    onChanged: (color, pattern) => setState(() {
+      _routineColor = color;
+      _routinePattern = pattern;
+    }),
+  );
 
   Future<void> _showAlertsDialog(Color pColor, Color surface, Color text) =>
       showAlertsModal(
@@ -1407,19 +1412,18 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     Color pColor,
     Color surface,
     Color text,
-  ) =>
-      showCategoryDialModal(
-        context: context,
-        pColor: pColor,
-        surface: surface,
-        text: text,
-        initialCategory: _selectedCategory,
-        initialShowOnDial: _showOnDial,
-        onChanged: (cat, show) => setState(() {
-          _selectedCategory = cat;
-          _showOnDial = show;
-        }),
-      );
+  ) => showCategoryDialModal(
+    context: context,
+    pColor: pColor,
+    surface: surface,
+    text: text,
+    initialCategory: _selectedCategory,
+    initialShowOnDial: _showOnDial,
+    onChanged: (cat, show) => setState(() {
+      _selectedCategory = cat;
+      _showOnDial = show;
+    }),
+  );
   Widget _buildGridCard(
     Color surfaceColor,
     Color accentColor,

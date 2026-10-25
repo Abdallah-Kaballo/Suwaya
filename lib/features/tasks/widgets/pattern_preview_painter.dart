@@ -11,16 +11,18 @@ class PatternPreviewPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(6));
     canvas.drawRRect(
-        rRect,
-        Paint()
-          ..color = color.withValues(alpha: 0.2)
-          ..style = PaintingStyle.fill);
+      rRect,
+      Paint()
+        ..color = color.withValues(alpha: 0.2)
+        ..style = PaintingStyle.fill,
+    );
     canvas.drawRRect(
-        rRect,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2);
+      rRect,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
 
     final p = Paint()
       ..color = color

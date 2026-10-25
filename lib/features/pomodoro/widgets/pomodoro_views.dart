@@ -193,11 +193,11 @@ class TraditionalTimerView extends ConsumerWidget {
       PomodoroPhase.work => 'pomodoro.in_flow'.tr(),
       PomodoroPhase.shortBreak => 'pomodoro.deep_relaxation'.tr(),
       PomodoroPhase.longBreak => trPomodoro(
-          context,
-          'pomodoro.long_break',
-          'راحة طويلة',
-          'Long Break',
-        ),
+        context,
+        'pomodoro.long_break',
+        'راحة طويلة',
+        'Long Break',
+      ),
     };
 
     final totalCycles = state.traditionalSettings.cyclesBeforeLongBreak;
@@ -274,11 +274,21 @@ class TraditionalTimerView extends ConsumerWidget {
               label: Text(
                 state.status == PomodoroStatus.running
                     ? trPomodoro(
-                        context, 'pomodoro.pause', 'إيقاف مؤقت', 'Pause')
+                        context,
+                        'pomodoro.pause',
+                        'إيقاف مؤقت',
+                        'Pause',
+                      )
                     : trPomodoro(
-                        context, 'pomodoro.resume', 'استئناف', 'Resume'),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        context,
+                        'pomodoro.resume',
+                        'استئناف',
+                        'Resume',
+                      ),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -300,10 +310,12 @@ class TraditionalTimerView extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(totalCycles, (index) {
           final cycleNum = index + 1;
-          final isCompleted = cycleNum < state.currentCycle ||
+          final isCompleted =
+              cycleNum < state.currentCycle ||
               (cycleNum == state.currentCycle &&
                   state.phase == PomodoroPhase.longBreak);
-          final isCurrent = cycleNum == state.currentCycle &&
+          final isCurrent =
+              cycleNum == state.currentCycle &&
               state.phase != PomodoroPhase.longBreak;
 
           return AnimatedContainer(
@@ -483,8 +495,9 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
 
   void _resolveNextPrayer(AstroState astro) {
     final now = virtualDateTimeNotifier.value;
-    final referenceTime =
-        now.isAfter(_anchoredStartTime) ? now : _anchoredStartTime;
+    final referenceTime = now.isAfter(_anchoredStartTime)
+        ? now
+        : _anchoredStartTime;
 
     final resolved = SuwayaFlowPlanner.resolveNextCyclePrayer(
       anchors: astro.cycleAnchors,
@@ -542,27 +555,27 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
 
     return switch (result.error) {
       SuwayaFlowValidationError.endBeforeStart => (
-          isValid: false,
-          errorMessage: trPomodoro(
-            context,
-            'pomodoro.end_must_be_after_start',
-            'يجب أن يكون وقت النهاية بعد وقت البداية',
-            'End time must be after start time',
-          ),
+        isValid: false,
+        errorMessage: trPomodoro(
+          context,
+          'pomodoro.end_must_be_after_start',
+          'يجب أن يكون وقت النهاية بعد وقت البداية',
+          'End time must be after start time',
         ),
+      ),
       SuwayaFlowValidationError.tooShort => (
-          isValid: false,
-          errorMessage: 'pomodoro.time_too_short'.tr(),
-        ),
+        isValid: false,
+        errorMessage: 'pomodoro.time_too_short'.tr(),
+      ),
       SuwayaFlowValidationError.exceedsMaxHours => (
-          isValid: false,
-          errorMessage: trPomodoro(
-            context,
-            'pomodoro.max_12_hours',
-            'لا يمكن أن تزيد المدة عن 12 ساعة',
-            'Duration cannot exceed 12 hours',
-          ),
+        isValid: false,
+        errorMessage: trPomodoro(
+          context,
+          'pomodoro.max_12_hours',
+          'لا يمكن أن تزيد المدة عن 12 ساعة',
+          'Duration cannot exceed 12 hours',
         ),
+      ),
       SuwayaFlowValidationError.none => (isValid: true, errorMessage: null),
     };
   }
@@ -587,8 +600,10 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     final use12Hour = _isCivil12HourActive(context, settings.civilTimeFormat);
 
     int pickerTimeMode = settings.useAstroTimeForIbadat ? 0 : 1;
-    final initialAstro =
-        SuwayaFlowPlanner.dateTimeToAstroParts(currentEffectiveEnd, astroState);
+    final initialAstro = SuwayaFlowPlanner.dateTimeToAstroParts(
+      currentEffectiveEnd,
+      astroState,
+    );
     int tempGlobalSuwaya = initialAstro.globalIndex;
     int tempVirtualMinute = initialAstro.minute;
     int tempCivilHour = currentEffectiveEnd.hour;
@@ -719,11 +734,11 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                             if (pickerTimeMode == 0) {
                               candidate =
                                   SuwayaFlowPlanner.astroPartsToDateTime(
-                                globalIndex: tempGlobalSuwaya,
-                                virtualMinute: tempVirtualMinute,
-                                anchoredStartTime: _anchoredStartTime,
-                                astroState: astroState,
-                              );
+                                    globalIndex: tempGlobalSuwaya,
+                                    virtualMinute: tempVirtualMinute,
+                                    anchoredStartTime: _anchoredStartTime,
+                                    astroState: astroState,
+                                  );
                             } else {
                               candidate = DateTime.utc(
                                 _anchoredStartTime.year,
@@ -733,8 +748,9 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                                 tempCivilMinute,
                               );
                               if (!candidate.isAfter(_anchoredStartTime)) {
-                                candidate =
-                                    candidate.add(const Duration(days: 1));
+                                candidate = candidate.add(
+                                  const Duration(days: 1),
+                                );
                               }
                             }
 
@@ -844,8 +860,9 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
       _selectedOptionIndex = 0;
     }
 
-    final int actualMinutes =
-        effectiveEndTime.difference(_anchoredStartTime).inMinutes;
+    final int actualMinutes = effectiveEndTime
+        .difference(_anchoredStartTime)
+        .inMinutes;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -918,8 +935,9 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                           child: Text(
                             startFormatted,
                             style: TextStyle(
-                              color:
-                                  startDisplayAstro ? suwayaColor : textColor,
+                              color: startDisplayAstro
+                                  ? suwayaColor
+                                  : textColor,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               fontFamily: 'Inter',
@@ -1076,8 +1094,9 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                               child: Text(
                                 endFormatted,
                                 style: TextStyle(
-                                  color:
-                                      endDisplayAstro ? suwayaColor : textColor,
+                                  color: endDisplayAstro
+                                      ? suwayaColor
+                                      : textColor,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   fontFamily: 'Inter',
@@ -1170,23 +1189,23 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
 
               final String subtitleText = switch (opt.tag) {
                 'recommended' => trPomodoro(
-                    context,
-                    'pomodoro.recommended_closest',
-                    'الافتراضي (الأقرب لسرعة 1.00x)',
-                    'Default (Closest to 1.00x speed)',
-                  ),
+                  context,
+                  'pomodoro.recommended_closest',
+                  'الافتراضي (الأقرب لسرعة 1.00x)',
+                  'Default (Closest to 1.00x speed)',
+                ),
                 'slower' => trPomodoro(
-                    context,
-                    'pomodoro.slower_option',
-                    'سرعة أقل (إيقاع أهدأ)',
-                    'Lower speed (Calmer pace)',
-                  ),
+                  context,
+                  'pomodoro.slower_option',
+                  'سرعة أقل (إيقاع أهدأ)',
+                  'Lower speed (Calmer pace)',
+                ),
                 _ => trPomodoro(
-                    context,
-                    'pomodoro.faster_option',
-                    'سرعة أعلى (إنجاز مكثف)',
-                    'Higher speed (Intensive focus)',
-                  ),
+                  context,
+                  'pomodoro.faster_option',
+                  'سرعة أعلى (إنجاز مكثف)',
+                  'Higher speed (Intensive focus)',
+                ),
               };
 
               return GestureDetector(
@@ -1268,10 +1287,13 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                 onPressed: () {
                   HapticFeedback.mediumImpact();
                   final selectedOpt = flowOptions[_selectedOptionIndex];
-                  final endLabel =
-                      _useDefaultNextPrayer ? _nextPrayerName : endFormatted;
+                  final endLabel = _useDefaultNextPrayer
+                      ? _nextPrayerName
+                      : endFormatted;
 
-                  ref.read(pomodoroProvider.notifier).startSuwayaSession(
+                  ref
+                      .read(pomodoroProvider.notifier)
+                      .startSuwayaSession(
                         SuwayaSessionConfig(
                           anchoredStartTime: _anchoredStartTime,
                           endTime: effectiveEndTime,
@@ -1312,44 +1334,44 @@ class SuwayaActiveTimerView extends ConsumerWidget {
     final config = state.suwayaConfig;
 
     // 🌟 الاستماع لتغير حالة الانتهاء مرة واحدة فقط لمنع تكدس نوافذ الحوار أثناء إعادة البناء
-    ref.listen<bool>(
-      pomodoroProvider.select((s) => s.isFinished),
-      (previous, isFinished) {
-        if (isFinished && previous != true && context.mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (ctx) => AlertDialog(
-              title: Text(
-                'pomodoro.time_up_prayer'.tr(),
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                'pomodoro.time_up_desc'.tr(),
-                textAlign: TextAlign.center,
-              ),
-              actions: [
-                Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      notifier.acknowledgeFinish();
-                    },
-                    child: Text(
-                      'common.done'.tr(),
-                      style: const TextStyle(color: Colors.white),
-                    ),
+    ref.listen<bool>(pomodoroProvider.select((s) => s.isFinished), (
+      previous,
+      isFinished,
+    ) {
+      if (isFinished && previous != true && context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: Text(
+              'pomodoro.time_up_prayer'.tr(),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              'pomodoro.time_up_desc'.tr(),
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    notifier.acknowledgeFinish();
+                  },
+                  child: Text(
+                    'common.done'.tr(),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
-              ],
-            ),
-          );
-        }
-      },
-    );
+              ),
+            ],
+          ),
+        );
+      }
+    });
 
     if (config == null) return const SizedBox.shrink();
 
@@ -1359,8 +1381,9 @@ class SuwayaActiveTimerView extends ConsumerWidget {
     final String m = (remInt ~/ 60).toString().padLeft(2, '0');
     final String s = (remInt % 60).toString().padLeft(2, '0');
 
-    final Color activeColor =
-        state.isBreak ? const Color(0xFF64B5F6) : const Color(0xFFE53935);
+    final Color activeColor = state.isBreak
+        ? const Color(0xFF64B5F6)
+        : const Color(0xFFE53935);
     final String phaseLabel = state.isBreak
         ? 'pomodoro.deep_relaxation'.tr()
         : 'pomodoro.in_flow'.tr();

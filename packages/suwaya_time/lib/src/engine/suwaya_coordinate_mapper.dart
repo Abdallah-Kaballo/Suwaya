@@ -12,10 +12,8 @@ class SuwayaCoordinateMapper {
     PeriodKey periodKey,
     int localSuwaya,
     int suwayasCount,
-  }) globalToLocal(
-    int globalSlotIndex,
-    List<AstroPeriod> periods,
-  ) {
+  })
+  globalToLocal(int globalSlotIndex, List<AstroPeriod> periods) {
     if (periods.isEmpty) {
       return (
         periodId: 1,
@@ -114,7 +112,8 @@ class SuwayaCoordinateMapper {
       );
     }
 
-    final bool useUtc = instantUtc != null &&
+    final bool useUtc =
+        instantUtc != null &&
         day.periods.every((p) => p.startUtc != null && p.endUtc != null);
 
     AstroPeriod activePeriod = day.periods.last;
@@ -143,13 +142,14 @@ class SuwayaCoordinateMapper {
       accumulatedGlobalSlots = 24 - activePeriod.suwayasCount;
     }
 
-    final int count =
-        activePeriod.suwayasCount > 0 ? activePeriod.suwayasCount : 1;
+    final int count = activePeriod.suwayasCount > 0
+        ? activePeriod.suwayasCount
+        : 1;
     final int periodMicro = useUtc
         ? activePeriod.totalDuration.inMicroseconds
         : activePeriod.endTime
-            .difference(activePeriod.startTime)
-            .inMicroseconds;
+              .difference(activePeriod.startTime)
+              .inMicroseconds;
 
     if (periodMicro <= 0) {
       final ui = globalToUiPhase(accumulatedGlobalSlots);
@@ -166,16 +166,19 @@ class SuwayaCoordinateMapper {
       );
     }
 
-    final int elapsedMicro = (useUtc
-            ? instantUtc.difference(activePeriod.startUtc!).inMicroseconds
-            : instant.difference(activePeriod.startTime).inMicroseconds)
-        .clamp(0, periodMicro - 1);
+    final int elapsedMicro =
+        (useUtc
+                ? instantUtc.difference(activePeriod.startUtc!).inMicroseconds
+                : instant.difference(activePeriod.startTime).inMicroseconds)
+            .clamp(0, periodMicro - 1);
 
     // حساب موقع السويعة والدقيقة والثانية الافتراضية باستخدام الحساب الصحيح المضاد لانجراف الفاصلة العائمة
     final int totalVirtualSecondsInPeriod = count * 3600;
     final int currentPeriodVirtualSec =
-        ((elapsedMicro * totalVirtualSecondsInPeriod) ~/ periodMicro)
-            .clamp(0, totalVirtualSecondsInPeriod - 1);
+        ((elapsedMicro * totalVirtualSecondsInPeriod) ~/ periodMicro).clamp(
+          0,
+          totalVirtualSecondsInPeriod - 1,
+        );
 
     final int localSlotIndex = currentPeriodVirtualSec ~/ 3600; // 0 .. count-1
     final int remSecInSlot = currentPeriodVirtualSec % 3600;
@@ -184,11 +187,15 @@ class SuwayaCoordinateMapper {
 
     final double suwayaMicro = periodMicro / count;
     final double slotProgress =
-        ((elapsedMicro - (localSlotIndex * suwayaMicro)) / suwayaMicro)
-            .clamp(0.0, 0.999999);
+        ((elapsedMicro - (localSlotIndex * suwayaMicro)) / suwayaMicro).clamp(
+          0.0,
+          0.999999,
+        );
 
-    final int globalIndex =
-        (accumulatedGlobalSlots + localSlotIndex).clamp(0, 23);
+    final int globalIndex = (accumulatedGlobalSlots + localSlotIndex).clamp(
+      0,
+      23,
+    );
     final uiPhase = globalToUiPhase(globalIndex);
 
     return SuwayaCoordinate(
@@ -249,27 +256,32 @@ class SuwayaCoordinateMapper {
     final periodMicro = period.totalDuration.inMicroseconds;
 
     // معادلة السقف الصحيحة (Ceiling Integer Division) لضمان وقوع اللحظة داخل الثانية الافتراضية المطلوبة تماماً
-    final int offsetUtcMicro = (periodMicro * requestedVirtualSeconds +
+    final int offsetUtcMicro =
+        (periodMicro * requestedVirtualSeconds +
             totalVirtualSecondsInPeriod -
             1) ~/
         totalVirtualSecondsInPeriod;
 
-    final resolvedUtc =
-        baseStartUtc.add(Duration(microseconds: offsetUtcMicro));
+    final resolvedUtc = baseStartUtc.add(
+      Duration(microseconds: offsetUtcMicro),
+    );
 
     if (period.startUtc != null && toWallClock != null) {
       return (instantUtc: resolvedUtc, wallTime: toWallClock(resolvedUtc));
     }
 
-    final wallSpanMicro =
-        period.endTime.difference(period.startTime).inMicroseconds;
-    final int offsetWallMicro = (wallSpanMicro * requestedVirtualSeconds +
+    final wallSpanMicro = period.endTime
+        .difference(period.startTime)
+        .inMicroseconds;
+    final int offsetWallMicro =
+        (wallSpanMicro * requestedVirtualSeconds +
             totalVirtualSecondsInPeriod -
             1) ~/
         totalVirtualSecondsInPeriod;
 
-    final resolvedWall =
-        period.startTime.add(Duration(microseconds: offsetWallMicro));
+    final resolvedWall = period.startTime.add(
+      Duration(microseconds: offsetWallMicro),
+    );
 
     return (instantUtc: resolvedUtc, wallTime: resolvedWall);
   }
@@ -314,7 +326,8 @@ class SuwayaCoordinateMapper {
       startG = 12 + getCount(PeriodKey.daySunriseDhuhr);
       length = getCount(PeriodKey.dayDhuhrAsr);
     } else if (sid == '7' || sid.contains('asr')) {
-      startG = 12 +
+      startG =
+          12 +
           getCount(PeriodKey.daySunriseDhuhr) +
           getCount(PeriodKey.dayDhuhrAsr);
       length = getCount(PeriodKey.dayAsrMaghrib);

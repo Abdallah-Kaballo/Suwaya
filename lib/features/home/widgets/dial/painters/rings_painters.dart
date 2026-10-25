@@ -107,9 +107,11 @@ class RoutinesRingPainter extends CustomPainter {
     const double step = 6.0;
 
     if (pattern == 'linear') {
-      for (double i = -bounds.height;
-          i < bounds.width + bounds.height;
-          i += step) {
+      for (
+        double i = -bounds.height;
+        i < bounds.width + bounds.height;
+        i += step
+      ) {
         canvas.drawLine(
           Offset(bounds.left + i, bounds.top),
           Offset(bounds.left + i - bounds.height, bounds.bottom),
@@ -117,9 +119,11 @@ class RoutinesRingPainter extends CustomPainter {
         );
       }
     } else if (pattern == 'hexagon') {
-      for (double i = -bounds.height;
-          i < bounds.width + bounds.height;
-          i += step * 1.5) {
+      for (
+        double i = -bounds.height;
+        i < bounds.width + bounds.height;
+        i += step * 1.5
+      ) {
         canvas.drawLine(
           Offset(bounds.left + i, bounds.top),
           Offset(bounds.left + i - bounds.height, bounds.bottom),
@@ -147,18 +151,10 @@ class RoutinesRingPainter extends CustomPainter {
       }
     } else {
       for (double x = bounds.left; x < bounds.right; x += step * 1.2) {
-        canvas.drawLine(
-          Offset(x, bounds.top),
-          Offset(x, bounds.bottom),
-          paint,
-        );
+        canvas.drawLine(Offset(x, bounds.top), Offset(x, bounds.bottom), paint);
       }
       for (double y = bounds.top; y < bounds.bottom; y += step * 1.2) {
-        canvas.drawLine(
-          Offset(bounds.left, y),
-          Offset(bounds.right, y),
-          paint,
-        );
+        canvas.drawLine(Offset(bounds.left, y), Offset(bounds.right, y), paint);
       }
     }
   }
@@ -380,8 +376,9 @@ class PeriodRingPainter extends CustomPainter {
       if (period.id == 3 && period.suwayasCount == 6) {
         final suwayaAngle = sweepAngle / 6;
 
-        final s4Color =
-            isDark ? const Color(0xFF3949AB) : const Color(0xFF303F9F);
+        final s4Color = isDark
+            ? const Color(0xFF3949AB)
+            : const Color(0xFF303F9F);
         _drawArcSegment(
           canvas,
           center,
@@ -394,8 +391,9 @@ class PeriodRingPainter extends CustomPainter {
           isHighlighted,
         );
 
-        final lastThirdColor =
-            isDark ? const Color(0xFF7E57C2) : const Color(0xFF512DA8);
+        final lastThirdColor = isDark
+            ? const Color(0xFF7E57C2)
+            : const Color(0xFF512DA8);
         _drawArcSegment(
           canvas,
           center,
@@ -539,10 +537,7 @@ class OuterRingPainter extends CustomPainter {
     required int displayNum,
     required bool flipText,
   }) {
-    final badgeRect = Rect.fromCircle(
-      center: Offset.zero,
-      radius: badgeRadius,
-    );
+    final badgeRect = Rect.fromCircle(center: Offset.zero, radius: badgeRadius);
     final ui.Image? targetImage = isNight ? moonImage : sunImage;
 
     canvas.save();
@@ -581,9 +576,7 @@ class OuterRingPainter extends CustomPainter {
         Offset.zero,
         badgeRadius,
         Paint()
-          ..color = isNight
-              ? const Color(0xFF1E293B)
-              : const Color(0xFFD97706),
+          ..color = isNight ? const Color(0xFF1E293B) : const Color(0xFFD97706),
       );
     }
     canvas.restore();
@@ -662,8 +655,9 @@ class OuterRingPainter extends CustomPainter {
     final badgeRadius = (R * 0.058).clamp(10.5, 15.0);
     final badgeCenterR = pinEnd + badgeRadius + (R * 0.006);
 
-    final Color pinAndTextColor =
-        isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
+    final Color pinAndTextColor = isDark
+        ? const Color(0xFFF3F4F6)
+        : const Color(0xFF111827);
     final List<Shadow> textShadows = isDark
         ? const [Shadow(color: Colors.black, blurRadius: 4)]
         : const [Shadow(color: Colors.white, blurRadius: 3)];

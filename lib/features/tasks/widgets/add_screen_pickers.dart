@@ -97,9 +97,7 @@ class _AstroTimePickerState extends State<AstroTimePicker> {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Center(
-                  child: Text(nightDayLabel, style: headerStyle),
-                ),
+                child: Center(child: Text(nightDayLabel, style: headerStyle)),
               ),
             ],
           ),
@@ -473,9 +471,10 @@ class _DoubleWheelPickerState extends State<DoubleWheelPicker> {
                     },
                     itemBuilder: (ctx, idx) => Center(
                       child: Text(
-                        ((idx % range1) + widget.min1)
-                            .toString()
-                            .padLeft(2, '0'),
+                        ((idx % range1) + widget.min1).toString().padLeft(
+                          2,
+                          '0',
+                        ),
                         style: TextStyle(
                           color: widget.textColor,
                           fontSize: 26,
@@ -775,8 +774,8 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
                   color: isSelected
                       ? widget.accentColor
                       : (isDisabled
-                          ? widget.textColor.withValues(alpha: 0.04)
-                          : Colors.transparent),
+                            ? widget.textColor.withValues(alpha: 0.04)
+                            : Colors.transparent),
                   border: isToday && !isSelected
                       ? Border.all(color: widget.accentColor, width: 1.5)
                       : null,
@@ -787,10 +786,10 @@ class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
                     color: isSelected
                         ? Colors.white
                         : (isDisabled
-                            ? widget.textColor.withValues(alpha: 0.24)
-                            : (isToday
-                                ? widget.accentColor
-                                : widget.textColor)),
+                              ? widget.textColor.withValues(alpha: 0.24)
+                              : (isToday
+                                    ? widget.accentColor
+                                    : widget.textColor)),
                     fontSize: 14,
                     fontWeight: (isSelected || isToday)
                         ? FontWeight.w900

@@ -43,7 +43,10 @@ class PermissionsNotifier extends Notifier<PermissionsState> {
     }
 
     state = state.copyWith(
-        location: location, notification: notification, exactAlarm: exactAlarm);
+      location: location,
+      notification: notification,
+      exactAlarm: exactAlarm,
+    );
   }
 
   Future<bool> ensureNotificationPermission({
@@ -93,4 +96,5 @@ class PermissionsNotifier extends Notifier<PermissionsState> {
 
 final permissionsProvider =
     NotifierProvider<PermissionsNotifier, PermissionsState>(
-        PermissionsNotifier.new);
+      PermissionsNotifier.new,
+    );

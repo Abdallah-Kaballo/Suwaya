@@ -29,11 +29,12 @@ class AppDrawer extends ConsumerWidget {
       applicationVersion: packageInfo.version,
       applicationIcon: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.asset('assets/icons/app_icon.png',
-            width: 48,
-            height: 48,
-            errorBuilder: (c, e, s) =>
-                const Icon(LucideIcons.compass, size: 48)),
+        child: Image.asset(
+          'assets/icons/app_icon.png',
+          width: 48,
+          height: 48,
+          errorBuilder: (c, e, s) => const Icon(LucideIcons.compass, size: 48),
+        ),
       ),
       // 🌟 تم إرجاع سطر حقوق النشر ليكون ثابتاً (Hardcoded) كما طلبت
       applicationLegalese:
@@ -42,7 +43,9 @@ class AppDrawer extends ConsumerWidget {
   }
 
   Future<void> _checkForUpdates(
-      BuildContext context, Color primaryColor) async {
+    BuildContext context,
+    Color primaryColor,
+  ) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final scaffoldBgColor = Theme.of(context).scaffoldBackgroundColor;
@@ -55,8 +58,9 @@ class AppDrawer extends ConsumerWidget {
     if (!Platform.isAndroid) {
       scaffoldMessenger.showSnackBar(
         SnackBar(
-            content: Text('drawer.ios_update_msg'.tr()),
-            backgroundColor: primaryColor),
+          content: Text('drawer.ios_update_msg'.tr()),
+          backgroundColor: primaryColor,
+        ),
       );
       return;
     }
@@ -75,8 +79,10 @@ class AppDrawer extends ConsumerWidget {
               children: [
                 CircularProgressIndicator(color: primaryColor),
                 const SizedBox(width: 24),
-                Text('drawer.checking_updates'.tr(),
-                    style: TextStyle(color: textColor)),
+                Text(
+                  'drawer.checking_updates'.tr(),
+                  style: TextStyle(color: textColor),
+                ),
               ],
             ),
           ),
@@ -153,8 +159,9 @@ class AppDrawer extends ConsumerWidget {
 
       scaffoldMessenger.showSnackBar(
         SnackBar(
-            content: Text('drawer.update_error_msg'.tr()),
-            backgroundColor: Colors.redAccent),
+          content: Text('drawer.update_error_msg'.tr()),
+          backgroundColor: Colors.redAccent,
+        ),
       );
     }
   }
@@ -175,8 +182,8 @@ class AppDrawer extends ConsumerWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 border: Border(
-                    bottom:
-                        BorderSide(color: textColor.withValues(alpha: 0.05))),
+                  bottom: BorderSide(color: textColor.withValues(alpha: 0.05)),
+                ),
               ),
               child: Row(
                 children: [
@@ -197,12 +204,15 @@ class AppDrawer extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Text('app_name'.tr(),
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.2)),
+                            Text(
+                              'app_name'.tr(),
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             Consumer(
                               builder: (context, ref, child) {
@@ -233,8 +243,11 @@ class AppDrawer extends ConsumerWidget {
                                   default:
                                     return const SizedBox.shrink();
                                 }
-                                return Icon(badgeIcon,
-                                    color: badgeColor, size: 24);
+                                return Icon(
+                                  badgeIcon,
+                                  color: badgeColor,
+                                  size: 24,
+                                );
                               },
                             ),
                           ],
@@ -251,32 +264,55 @@ class AppDrawer extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
                   _buildDrawerItem(
-                      context, LucideIcons.settings, 'settings.title'.tr(), () {
-                    Navigator.pop(context);
-                    context.push('/settings');
-                  }),
+                    context,
+                    LucideIcons.settings,
+                    'settings.title'.tr(),
+                    () {
+                      Navigator.pop(context);
+                      context.push('/settings');
+                    },
+                  ),
                   _buildDrawerItem(
-                      context, LucideIcons.book_open, 'drawer.faq'.tr(), () {
-                    Navigator.pop(context);
-                    context.push('/faq');
-                  }),
+                    context,
+                    LucideIcons.book_open,
+                    'drawer.faq'.tr(),
+                    () {
+                      Navigator.pop(context);
+                      context.push('/faq');
+                    },
+                  ),
                   _buildDrawerItem(
-                      context, LucideIcons.mail, 'drawer.contact'.tr(), () {
-                    _launchUrl('mailto:suwaya2026@gmail.com');
-                  }),
+                    context,
+                    LucideIcons.mail,
+                    'drawer.contact'.tr(),
+                    () {
+                      _launchUrl('mailto:suwaya2026@gmail.com');
+                    },
+                  ),
                   Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
-                      child: Text('drawer.about_app'.tr(),
-                          style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold))),
-                  _buildDrawerItem(context, LucideIcons.heart_handshake,
-                      'drawer.support_app'.tr(), () {
-                    Navigator.pop(context);
-                    context.push('/support');
-                  }, iconColor: const Color(0xFFFFD700)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    child: Text(
+                      'drawer.about_app'.tr(),
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    LucideIcons.heart_handshake,
+                    'drawer.support_app'.tr(),
+                    () {
+                      Navigator.pop(context);
+                      context.push('/support');
+                    },
+                    iconColor: const Color(0xFFFFD700),
+                  ),
                   _buildDrawerItem(
                     context,
                     LucideIcons.heart_handshake,
@@ -293,27 +329,39 @@ class AppDrawer extends ConsumerWidget {
                     'drawer.share_app'.tr() != 'drawer.share_app'
                         ? 'drawer.share_app'.tr()
                         : (context.locale.languageCode == 'ar'
-                            ? 'مشاركة التطبيق'
-                            : 'Share App'),
+                              ? 'مشاركة التطبيق'
+                              : 'Share App'),
                     () => _shareApp(context),
                   ),
                   _buildDrawerItem(
-                      context,
-                      LucideIcons.refresh_cw,
-                      'drawer.check_updates'.tr(),
-                      () => _checkForUpdates(context, primaryColor)),
+                    context,
+                    LucideIcons.refresh_cw,
+                    'drawer.check_updates'.tr(),
+                    () => _checkForUpdates(context, primaryColor),
+                  ),
                   _buildDrawerItem(
-                      context, LucideIcons.code, 'drawer.develop_with_us'.tr(),
-                      () {
-                    _launchUrl('https://github.com/Abdallah-Kaballo/Suwaya');
-                  }),
-                  _buildDrawerItem(context, LucideIcons.shield,
-                      'settings.privacy_policy'.tr(), () {
-                    Navigator.pop(context);
-                    context.push('/privacy');
-                  }),
-                  _buildDrawerItem(context, LucideIcons.info,
-                      'settings.about'.tr(), () => _showAboutDialog(context)),
+                    context,
+                    LucideIcons.code,
+                    'drawer.develop_with_us'.tr(),
+                    () {
+                      _launchUrl('https://github.com/Abdallah-Kaballo/Suwaya');
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    LucideIcons.shield,
+                    'settings.privacy_policy'.tr(),
+                    () {
+                      Navigator.pop(context);
+                      context.push('/privacy');
+                    },
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    LucideIcons.info,
+                    'settings.about'.tr(),
+                    () => _showAboutDialog(context),
+                  ),
                 ],
               ),
             ),
@@ -324,19 +372,30 @@ class AppDrawer extends ConsumerWidget {
   }
 
   Widget _buildDrawerItem(
-      BuildContext context, IconData icon, String title, VoidCallback onTap,
-      {Color? iconColor, Color? textColor}) {
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    Color? iconColor,
+    Color? textColor,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final defaultColor = isDark ? Colors.white70 : Colors.black87;
 
     return ListTile(
-      leading: Icon(icon,
-          color: iconColor ?? defaultColor.withValues(alpha: 0.7), size: 22),
-      title: Text(title,
-          style: TextStyle(
-              color: textColor ?? defaultColor,
-              fontSize: 15,
-              fontWeight: FontWeight.w600)),
+      leading: Icon(
+        icon,
+        color: iconColor ?? defaultColor.withValues(alpha: 0.7),
+        size: 22,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: textColor ?? defaultColor,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
       onTap: () {
         HapticFeedback.lightImpact();

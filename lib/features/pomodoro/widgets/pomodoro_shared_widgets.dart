@@ -96,8 +96,9 @@ class LinkedTaskBar extends ConsumerWidget {
                       ? textColor
                       : textColor.withValues(alpha: 0.55),
                   fontSize: 13,
-                  fontWeight:
-                      linkedTask != null ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: linkedTask != null
+                      ? FontWeight.bold
+                      : FontWeight.w500,
                 ),
               ),
             ),
@@ -330,8 +331,9 @@ class LargeZenTimerDial extends StatelessWidget {
         final double dialSize =
             forcedSize ?? (availableWidth * 0.92).clamp(280.0, 420.0);
         final double timeFontSize = (dialSize * 0.29).clamp(80.0, 118.0);
-        final clockColor =
-            isDark ? const Color(0xFFF2C94C) : const Color(0xFF8A5A00);
+        final clockColor = isDark
+            ? const Color(0xFFF2C94C)
+            : const Color(0xFF8A5A00);
 
         return GestureDetector(
           onDoubleTap: onDoubleTap,
@@ -516,8 +518,9 @@ void showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
     builder: (ctx) {
       return Consumer(
         builder: (context, ref, _) {
-          final currentSettings =
-              ref.watch(pomodoroProvider).traditionalSettings;
+          final currentSettings = ref
+              .watch(pomodoroProvider)
+              .traditionalSettings;
           final notifier = ref.read(pomodoroProvider.notifier);
 
           Widget buildChipSelector({
@@ -552,8 +555,9 @@ void showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {
                         selectedColor: primaryColor.withValues(alpha: 0.2),
                         labelStyle: TextStyle(
                           color: isSelected ? primaryColor : textColor,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                         onSelected: (_) {
                           HapticFeedback.selectionClick();

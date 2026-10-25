@@ -64,8 +64,9 @@ class PrayerCalculator {
         break;
     }
 
-    params.madhab =
-        (madhabType == MadhabType.hanafi) ? Madhab.hanafi : Madhab.shafi;
+    params.madhab = (madhabType == MadhabType.hanafi)
+        ? Madhab.hanafi
+        : Madhab.shafi;
 
     switch (highLatRuleType) {
       case HighLatitudeRuleType.seventhOfTheNight:
@@ -99,7 +100,8 @@ class PrayerCalculator {
     final as2 = d2.asr.toUtc();
     final mg2 = d2.maghrib.toUtc();
 
-    final validOrder = f1.isBefore(sr1) &&
+    final validOrder =
+        f1.isBefore(sr1) &&
         sr1.isBefore(dh1) &&
         dh1.isBefore(as1) &&
         as1.isBefore(mg1) &&
@@ -118,7 +120,7 @@ class PrayerCalculator {
 
   /// استدعاء آمن لمكتبة adhan يمنع انهيار TimeComponents.fromDouble(NaN) أو انقلاب ترتيب الصلوات في العروض القطبية وشبه القطبية
   static ({PrayerTimes day1, PrayerTimes day2, double effectiveLat})
-      _safeComputePrayerTimesPair({
+  _safeComputePrayerTimesPair({
     required double lat,
     required double lng,
     required DateTime date,
@@ -215,8 +217,10 @@ class PrayerCalculator {
     }
 
     final effectiveNextOffset = nextDayCityOffset ?? cityOffset;
-    final elevationShift =
-        _computeElevationHorizonDip(pair.effectiveLat, elevationMeters);
+    final elevationShift = _computeElevationHorizonDip(
+      pair.effectiveLat,
+      elevationMeters,
+    );
 
     final rawSunsetUtc = today.maghrib.toUtc().add(elevationShift);
     var fajrUtc = _applyOffset(
@@ -261,13 +265,14 @@ class PrayerCalculator {
     DateTime toEveningWall(DateTime utc) =>
         utc.add(offsetResolver != null ? offsetResolver(utc) : cityOffset);
     DateTime toNextDayWall(DateTime utc) => utc.add(
-          offsetResolver != null ? offsetResolver(utc) : effectiveNextOffset,
-        );
+      offsetResolver != null ? offsetResolver(utc) : effectiveNextOffset,
+    );
 
     DateTime toNightWall(DateTime utc) {
       if (offsetResolver != null) return utc.add(offsetResolver(utc));
-      final halfNightUtc =
-          maghribUtc.add(nextFajrUtc.difference(maghribUtc) ~/ 2);
+      final halfNightUtc = maghribUtc.add(
+        nextFajrUtc.difference(maghribUtc) ~/ 2,
+      );
       return utc.isBefore(halfNightUtc)
           ? utc.add(cityOffset)
           : utc.add(effectiveNextOffset);
@@ -405,8 +410,10 @@ class PrayerCalculator {
     }
 
     final effectiveNextOffset = nextDayCityOffset ?? cityOffset;
-    final elevationShift =
-        _computeElevationHorizonDip(pair.effectiveLat, elevationMeters);
+    final elevationShift = _computeElevationHorizonDip(
+      pair.effectiveLat,
+      elevationMeters,
+    );
 
     final rawStartSunsetUtc = dayD.maghrib.toUtc().add(elevationShift);
     final rawEndSunsetUtc = dayDPlus1.maghrib.toUtc().add(elevationShift);
@@ -445,8 +452,9 @@ class PrayerCalculator {
 
     // ضمان عدم تسبب الإزاحات اليدوية في قلب ترتيب المراسي الفلكية في العروض العليا
     cycleFajrUtc = _clampBefore(cycleFajrUtc, cycleSunriseUtc);
-    final realNightMicroseconds =
-        cycleFajrUtc.difference(cycleStartMaghribUtc).inMicroseconds;
+    final realNightMicroseconds = cycleFajrUtc
+        .difference(cycleStartMaghribUtc)
+        .inMicroseconds;
     final sharIMidnightUtc = cycleStartMaghribUtc.add(
       Duration(microseconds: realNightMicroseconds ~/ 2),
     );
@@ -462,8 +470,8 @@ class PrayerCalculator {
     DateTime toEveningWall(DateTime utc) =>
         utc.add(offsetResolver != null ? offsetResolver(utc) : cityOffset);
     DateTime toNextDayWall(DateTime utc) => utc.add(
-          offsetResolver != null ? offsetResolver(utc) : effectiveNextOffset,
-        );
+      offsetResolver != null ? offsetResolver(utc) : effectiveNextOffset,
+    );
 
     return SuwayaCycleAnchors(
       cycleStartMaghrib: toEveningWall(cycleStartMaghribUtc),

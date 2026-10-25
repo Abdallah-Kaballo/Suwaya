@@ -51,7 +51,8 @@ class SuwayaBinaryCodec {
     int hijriMonth,
     int hijriDay,
     SuwayaCoordinate coordinate,
-  }) unpack(int packed) {
+  })
+  unpack(int packed) {
     final vSec = packed & 0x3F;
     final vMin = (packed >> 6) & 0x3F;
     final lSlot = (packed >> 12) & 0x0F;
@@ -95,8 +96,10 @@ class SuwayaBinaryCodec {
     final vMin = int.parse(match.group(3)!);
     final vSec = match.group(4) != null ? int.parse(match.group(4)!) : 0;
 
-    final globalSlot =
-        SuwayaCoordinateMapper.uiPhaseToGlobal(phaseHour, isNight);
+    final globalSlot = SuwayaCoordinateMapper.uiPhaseToGlobal(
+      phaseHour,
+      isNight,
+    );
 
     final mapped = periods != null && periods.isNotEmpty
         ? SuwayaCoordinateMapper.globalToLocal(globalSlot, periods)

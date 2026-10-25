@@ -42,13 +42,17 @@ class _NotificationsSettingsScreenState
     final accentColor = Theme.of(context).primaryColor;
 
     final int prayersLevel = settings.getPeriodAlertLevel('fajr', 1);
-    final String prayersTone =
-        settings.getPeriodSound('fajr', 'assets/audio/adhan.mp3');
+    final String prayersTone = settings.getPeriodSound(
+      'fajr',
+      'assets/audio/adhan.mp3',
+    );
     final double prayersVolume = settings.getPeriodVolume('fajr', 1.0);
 
     final int qiyamLevel = settings.getPeriodAlertLevel('third_3', 0);
-    final String qiyamTone =
-        settings.getPeriodSound('third_3', 'assets/audio/soft.mp3');
+    final String qiyamTone = settings.getPeriodSound(
+      'third_3',
+      'assets/audio/soft.mp3',
+    );
     final double qiyamVolume = settings.getPeriodVolume('third_3', 0.5);
 
     return Scaffold(
@@ -96,12 +100,18 @@ class _NotificationsSettingsScreenState
               await ref
                   .read(settingsProvider.notifier)
                   .updateBatchPeriodNotificationSettings(
-                periodIds: const ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'],
-                isEnabled: level > 0,
-                alertLevel: level,
-                soundPath: tone,
-                volume: vol,
-              );
+                    periodIds: const [
+                      'fajr',
+                      'dhuhr',
+                      'asr',
+                      'maghrib',
+                      'isha',
+                    ],
+                    isEnabled: level > 0,
+                    alertLevel: level,
+                    soundPath: tone,
+                    volume: vol,
+                  );
             },
           ),
           const SizedBox(height: 20),
@@ -123,18 +133,18 @@ class _NotificationsSettingsScreenState
               await ref
                   .read(settingsProvider.notifier)
                   .updateBatchPeriodNotificationSettings(
-                periodIds: const [
-                  'half_2',
-                  'third_3',
-                  'sixth_4',
-                  'sixth_5',
-                  'sixth_6',
-                ],
-                isEnabled: level > 0,
-                alertLevel: level,
-                soundPath: tone,
-                volume: vol,
-              );
+                    periodIds: const [
+                      'half_2',
+                      'third_3',
+                      'sixth_4',
+                      'sixth_5',
+                      'sixth_6',
+                    ],
+                    isEnabled: level > 0,
+                    alertLevel: level,
+                    soundPath: tone,
+                    volume: vol,
+                  );
             },
           ),
           const SizedBox(height: 32),
@@ -158,12 +168,7 @@ class _NotificationsSettingsScreenState
             accentColor,
           ),
           const SizedBox(height: 20),
-          _buildSnoozeSection(
-            settings,
-            surfaceColor,
-            textColor,
-            accentColor,
-          ),
+          _buildSnoozeSection(settings, surfaceColor, textColor, accentColor),
           const SizedBox(height: 40),
         ],
       ),
@@ -235,7 +240,9 @@ class _NotificationsSettingsScreenState
                 ),
                 onSelected: (_) {
                   HapticFeedback.selectionClick();
-                  ref.read(settingsProvider.notifier).updateSnoozeSettings(
+                  ref
+                      .read(settingsProvider.notifier)
+                      .updateSnoozeSettings(
                         durationMinutes: entry.key,
                         maxCount: settings.maxSnoozeCount,
                       );
@@ -267,7 +274,9 @@ class _NotificationsSettingsScreenState
                 ),
                 onSelected: (_) {
                   HapticFeedback.selectionClick();
-                  ref.read(settingsProvider.notifier).updateSnoozeSettings(
+                  ref
+                      .read(settingsProvider.notifier)
+                      .updateSnoozeSettings(
                         durationMinutes: settings.snoozeDurationMinutes,
                         maxCount: entry.key,
                       );
@@ -394,8 +403,9 @@ class _NotificationsSettingsScreenState
                         const SizedBox(height: 20),
                         Container(
                           decoration: BoxDecoration(
-                            color:
-                                isDark ? Colors.black : const Color(0xFFF1F5F9),
+                            color: isDark
+                                ? Colors.black
+                                : const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.all(4),
@@ -431,8 +441,10 @@ class _NotificationsSettingsScreenState
                           child: isEnabled
                               ? StatefulBuilder(
                                   builder: (context, setSliderState) {
-                                    double localVolume =
-                                        currentVolume.clamp(0.1, 1.0);
+                                    double localVolume = currentVolume.clamp(
+                                      0.1,
+                                      1.0,
+                                    );
                                     return Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -489,8 +501,7 @@ class _NotificationsSettingsScreenState
                                                   ),
                                                 ),
                                                 Text(
-                                                  _availableTones[
-                                                          currentTone] ??
+                                                  _availableTones[currentTone] ??
                                                       'alerts.default_ring'
                                                           .tr(),
                                                   style: TextStyle(
@@ -504,7 +515,7 @@ class _NotificationsSettingsScreenState
                                                   isRTL
                                                       ? LucideIcons.chevron_left
                                                       : LucideIcons
-                                                          .chevron_right,
+                                                            .chevron_right,
                                                   color: textColor.withValues(
                                                     alpha: 0.3,
                                                   ),
@@ -534,12 +545,12 @@ class _NotificationsSettingsScreenState
                                                   trackHeight: 4,
                                                   overlayShape:
                                                       const RoundSliderOverlayShape(
-                                                    overlayRadius: 14,
-                                                  ),
+                                                        overlayRadius: 14,
+                                                      ),
                                                   thumbShape:
                                                       const RoundSliderThumbShape(
-                                                    enabledThumbRadius: 6,
-                                                  ),
+                                                        enabledThumbRadius: 6,
+                                                      ),
                                                 ),
                                                 child: Slider(
                                                   value: localVolume,
@@ -599,8 +610,14 @@ class _NotificationsSettingsScreenState
     );
   }
 
-  Widget _buildSegmentButton(BuildContext context, String title, bool isActive,
-      Color textColor, Color accentColor, VoidCallback onTap) {
+  Widget _buildSegmentButton(
+    BuildContext context,
+    String title,
+    bool isActive,
+    Color textColor,
+    Color accentColor,
+    VoidCallback onTap,
+  ) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -610,15 +627,16 @@ class _NotificationsSettingsScreenState
           decoration: BoxDecoration(
             color: isActive
                 ? (Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFF334155)
-                    : Colors.white)
+                      ? const Color(0xFF334155)
+                      : Colors.white)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 4)
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                    ),
                   ]
                 : [],
           ),
@@ -637,51 +655,63 @@ class _NotificationsSettingsScreenState
   }
 
   void _showTonePicker(
-      BuildContext context,
-      String currentTone,
-      Color surfaceColor,
-      Color textColor,
-      Color accentColor,
-      Function(String) onSelected) {
+    BuildContext context,
+    String currentTone,
+    Color surfaceColor,
+    Color textColor,
+    Color accentColor,
+    Function(String) onSelected,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: surfaceColor,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: textColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(2))),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: textColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 20),
-            Text('notifications.default_tone'.tr(),
-                style: TextStyle(
-                    color: textColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              'notifications.default_tone'.tr(),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 16),
-            ..._availableTones.entries.map((e) => ListTile(
-                  title: Text(e.value,
-                      style: TextStyle(
-                          color: textColor,
-                          fontWeight: currentTone == e.key
-                              ? FontWeight.bold
-                              : FontWeight.normal)),
-                  trailing: currentTone == e.key
-                      ? Icon(LucideIcons.check, color: accentColor)
-                      : null,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onSelected(e.key);
-                    Navigator.pop(context);
-                  },
-                )),
+            ..._availableTones.entries.map(
+              (e) => ListTile(
+                title: Text(
+                  e.value,
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: currentTone == e.key
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+                trailing: currentTone == e.key
+                    ? Icon(LucideIcons.check, color: accentColor)
+                    : null,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onSelected(e.key);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -697,8 +727,9 @@ class _NotificationsSettingsScreenState
     Color accentColor,
   ) {
     final isRTL = Directionality.of(context) == TextDirection.rtl;
-    final chevronIcon =
-        isRTL ? LucideIcons.chevron_left : LucideIcons.chevron_right;
+    final chevronIcon = isRTL
+        ? LucideIcons.chevron_left
+        : LucideIcons.chevron_right;
 
     return Container(
       decoration: BoxDecoration(
@@ -816,10 +847,12 @@ class _NotificationsSettingsScreenState
     int tempLevel = isHabit
         ? settings.defaultHabitAlertLevel
         : settings.defaultTaskAlertLevel;
-    String tempTone =
-        isHabit ? settings.defaultHabitTone : settings.defaultTaskTone;
-    double tempVolume =
-        isHabit ? settings.defaultHabitVolume : settings.defaultTaskVolume;
+    String tempTone = isHabit
+        ? settings.defaultHabitTone
+        : settings.defaultTaskTone;
+    double tempVolume = isHabit
+        ? settings.defaultHabitVolume
+        : settings.defaultTaskVolume;
     if (!_availableTones.containsKey(tempTone)) {
       tempTone = 'assets/audio/default.mp3';
     }
@@ -892,8 +925,9 @@ class _NotificationsSettingsScreenState
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    border:
-                        Border.all(color: textColor.withValues(alpha: 0.12)),
+                    border: Border.all(
+                      color: textColor.withValues(alpha: 0.12),
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: DropdownButtonHideUnderline(

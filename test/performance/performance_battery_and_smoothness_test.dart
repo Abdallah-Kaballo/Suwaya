@@ -116,227 +116,225 @@ void main() {
 
   group('1. Battery & Lifecycle Optimization Tests', () {
     testWidgets(
-        'AstroNotifier suspends all periodic timers when app is paused/hidden and resumes cleanly on resume',
-        (WidgetTester tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(_PerfSettingsRepo()),
-          taskRepositoryProvider.overrideWithValue(_PerfTaskRepo()),
-          routineRepositoryProvider.overrideWithValue(_PerfRoutineRepo()),
-        ],
-      );
-
-      await container.read(settingsProvider.notifier).initialized;
-      await tester.pump();
-
-      final initialState = container.read(astroProvider);
-      expect(initialState.periods.length, 7);
-
-      // 1. محاكاة انتقال التطبيق إلى الخلفية (Pause)
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-      await tester.pump();
-
-      int notificationsWhilePaused = 0;
-      void listener() => notificationsWhilePaused++;
-      virtualDateTimeNotifier.addListener(listener);
-
-      // مرور 5 ثوانٍ في الخلفية: يجب ألا يعمل أي مؤقت (0% استهلاك بطارية)
-      await tester.pump(const Duration(seconds: 5));
-      expect(
-        notificationsWhilePaused,
-        equals(0),
-        reason:
-            'UI Timer continued ticking while app was paused in background!',
-      );
-
-      virtualDateTimeNotifier.removeListener(listener);
-
-      // 2. محاكاة عودة التطبيق للواجهة (Resume)
-      tester.binding.handleAppLifecycleStateChanged(
-        AppLifecycleState.hidden,
-      );
-
-      tester.binding.handleAppLifecycleStateChanged(
-        AppLifecycleState.inactive,
-      );
-
-      tester.binding.handleAppLifecycleStateChanged(
-        AppLifecycleState.resumed,
-      );
-      await tester.pump(const Duration(seconds: 2));
-
-      expect(container.read(astroProvider).periods.length, 7);
-
-      // 🌟 إغلاق الحاوية صراحةً قبل نهاية testWidgets لإلغاء المؤقتات النشطة (_stateTimer و _uiTimer)
-      container.dispose();
-      await tester.pump();
-    });
-  });
-
-  group('2. CustomPainter Repaint Guard & 60/120fps Smoothness Tests', () {
-    test(
-        'PeriodRingPainter, OuterRingPainter, RailwayRingPainter, and RoutinesRingPainter return shouldRepaint == false when inputs are unchanged',
-        () {
-      final day = SuwayaTimeEngine.generateDay(
-        21.4225,
-        39.8262,
-        DateTime.utc(2026, 10, 22),
-        CalculationMethodType.ummAlQura,
-        MadhabType.shafi,
-        HighLatitudeRuleType.middleOfTheNight,
-        18.5,
-        18.0,
-        const Duration(hours: 3),
-      );
-
-      final dayStart = day.periods.first.startTime;
-      final dayEnd = day.periods.last.endTime;
-
-      final p1 = PeriodRingPainter(
-        periods: day.periods,
-        currentPeriod: day.periods.first,
-        dayStart: dayStart,
-        dayEnd: dayEnd,
-        isDark: true,
-        langCode: 'ar',
-        design: DialDesign.classic,
-        totalRotation: 0.0,
-      );
-      final p2 = PeriodRingPainter(
-        periods: day.periods,
-        currentPeriod: day.periods.first,
-        dayStart: dayStart,
-        dayEnd: dayEnd,
-        isDark: true,
-        langCode: 'ar',
-        design: DialDesign.classic,
-        totalRotation: 0.001,
-      );
-      expect(p2.shouldRepaint(p1), isFalse);
-
-      final o1 = OuterRingPainter(
-        periods: day.periods,
-        dayStart: dayStart,
-        dayEnd: dayEnd,
-        isDark: true,
-        design: DialDesign.classic,
-        pinMode: 'suwaya24',
-        totalRotation: 0.0,
-      );
-      final o2 = OuterRingPainter(
-        periods: day.periods,
-        dayStart: dayStart,
-        dayEnd: dayEnd,
-        isDark: true,
-        design: DialDesign.classic,
-        pinMode: 'suwaya24',
-        totalRotation: 0.001,
-      );
-      expect(o2.shouldRepaint(o1), isFalse);
-
-      final r1 = RailwayRingPainter(
-        ibadat: day.ibadatTimings,
-        nightMarkers: const [],
-        tasks: const [],
-        periods: day.periods,
-        dayStart: dayStart,
-        dayEnd: dayEnd,
-        isDark: true,
-        langCode: 'ar',
-        design: DialDesign.classic,
-        totalRotation: 0.0,
-      );
-      final r2 = RailwayRingPainter(
-        ibadat: day.ibadatTimings,
-        nightMarkers: const [],
-        tasks: const [],
-        periods: day.periods,
-        dayStart: dayStart,
-        dayEnd: dayEnd,
-        isDark: true,
-        langCode: 'ar',
-        design: DialDesign.classic,
-        totalRotation: 0.001,
-      );
-      expect(r2.shouldRepaint(r1), isFalse);
-
-      final arc = RoutineArcData(
-        id: 1,
-        color: Colors.cyan,
-        startAngle: 0,
-        sweepAngle: math.pi / 3,
-        startTime: dayStart,
-        endTime: dayStart.add(const Duration(hours: 2)),
-      );
-      final rr1 = RoutinesRingPainter(
-        routineArcs: [arc],
-        isDark: true,
-        design: DialDesign.classic,
-      );
-      final rr2 = RoutinesRingPainter(
-        routineArcs: [arc],
-        isDark: true,
-        design: DialDesign.classic,
-      );
-      expect(rr2.shouldRepaint(rr1), isFalse);
-    });
-
-    testWidgets(
-        'PremiumAstroDial handles interactive touch pan rotation and elastic snap-back smoothly',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
+      'AstroNotifier suspends all periodic timers when app is paused/hidden and resumes cleanly on resume',
+      (WidgetTester tester) async {
+        final container = ProviderContainer(
           overrides: [
             settingsRepositoryProvider.overrideWithValue(_PerfSettingsRepo()),
             taskRepositoryProvider.overrideWithValue(_PerfTaskRepo()),
             routineRepositoryProvider.overrideWithValue(_PerfRoutineRepo()),
           ],
-          child: EasyLocalization(
-            supportedLocales: AppLocales.supported,
-            path: AppLocales.path,
-            fallbackLocale: const Locale('ar'),
-            startLocale: const Locale('ar'),
-            useOnlyLangCode: true,
-            assetLoader: const _PerfTranslationLoader(),
-            child: Builder(
-              builder: (context) => MaterialApp(
-                localizationsDelegates: context.localizationDelegates,
-                supportedLocales: context.supportedLocales,
-                locale: context.locale,
-                home: const Scaffold(
-                  body: Center(
-                    child: PremiumAstroDial(
-                      size: 360,
-                      routineArcs: [],
+        );
+
+        await container.read(settingsProvider.notifier).initialized;
+        await tester.pump();
+
+        final initialState = container.read(astroProvider);
+        expect(initialState.periods.length, 7);
+
+        // 1. محاكاة انتقال التطبيق إلى الخلفية (Pause)
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        await tester.pump();
+
+        int notificationsWhilePaused = 0;
+        void listener() => notificationsWhilePaused++;
+        virtualDateTimeNotifier.addListener(listener);
+
+        // مرور 5 ثوانٍ في الخلفية: يجب ألا يعمل أي مؤقت (0% استهلاك بطارية)
+        await tester.pump(const Duration(seconds: 5));
+        expect(
+          notificationsWhilePaused,
+          equals(0),
+          reason:
+              'UI Timer continued ticking while app was paused in background!',
+        );
+
+        virtualDateTimeNotifier.removeListener(listener);
+
+        // 2. محاكاة عودة التطبيق للواجهة (Resume)
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        await tester.pump(const Duration(seconds: 2));
+
+        expect(container.read(astroProvider).periods.length, 7);
+
+        // 🌟 إغلاق الحاوية صراحةً قبل نهاية testWidgets لإلغاء المؤقتات النشطة (_stateTimer و _uiTimer)
+        container.dispose();
+        await tester.pump();
+      },
+    );
+  });
+
+  group('2. CustomPainter Repaint Guard & 60/120fps Smoothness Tests', () {
+    test(
+      'PeriodRingPainter, OuterRingPainter, RailwayRingPainter, and RoutinesRingPainter return shouldRepaint == false when inputs are unchanged',
+      () {
+        final day = SuwayaTimeEngine.generateDay(
+          21.4225,
+          39.8262,
+          DateTime.utc(2026, 10, 22),
+          CalculationMethodType.ummAlQura,
+          MadhabType.shafi,
+          HighLatitudeRuleType.middleOfTheNight,
+          18.5,
+          18.0,
+          const Duration(hours: 3),
+        );
+
+        final dayStart = day.periods.first.startTime;
+        final dayEnd = day.periods.last.endTime;
+
+        final p1 = PeriodRingPainter(
+          periods: day.periods,
+          currentPeriod: day.periods.first,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+          isDark: true,
+          langCode: 'ar',
+          design: DialDesign.classic,
+          totalRotation: 0.0,
+        );
+        final p2 = PeriodRingPainter(
+          periods: day.periods,
+          currentPeriod: day.periods.first,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+          isDark: true,
+          langCode: 'ar',
+          design: DialDesign.classic,
+          totalRotation: 0.001,
+        );
+        expect(p2.shouldRepaint(p1), isFalse);
+
+        final o1 = OuterRingPainter(
+          periods: day.periods,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+          isDark: true,
+          design: DialDesign.classic,
+          pinMode: 'suwaya24',
+          totalRotation: 0.0,
+        );
+        final o2 = OuterRingPainter(
+          periods: day.periods,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+          isDark: true,
+          design: DialDesign.classic,
+          pinMode: 'suwaya24',
+          totalRotation: 0.001,
+        );
+        expect(o2.shouldRepaint(o1), isFalse);
+
+        final r1 = RailwayRingPainter(
+          ibadat: day.ibadatTimings,
+          nightMarkers: const [],
+          tasks: const [],
+          periods: day.periods,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+          isDark: true,
+          langCode: 'ar',
+          design: DialDesign.classic,
+          totalRotation: 0.0,
+        );
+        final r2 = RailwayRingPainter(
+          ibadat: day.ibadatTimings,
+          nightMarkers: const [],
+          tasks: const [],
+          periods: day.periods,
+          dayStart: dayStart,
+          dayEnd: dayEnd,
+          isDark: true,
+          langCode: 'ar',
+          design: DialDesign.classic,
+          totalRotation: 0.001,
+        );
+        expect(r2.shouldRepaint(r1), isFalse);
+
+        final arc = RoutineArcData(
+          id: 1,
+          color: Colors.cyan,
+          startAngle: 0,
+          sweepAngle: math.pi / 3,
+          startTime: dayStart,
+          endTime: dayStart.add(const Duration(hours: 2)),
+        );
+        final rr1 = RoutinesRingPainter(
+          routineArcs: [arc],
+          isDark: true,
+          design: DialDesign.classic,
+        );
+        final rr2 = RoutinesRingPainter(
+          routineArcs: [arc],
+          isDark: true,
+          design: DialDesign.classic,
+        );
+        expect(rr2.shouldRepaint(rr1), isFalse);
+      },
+    );
+
+    testWidgets(
+      'PremiumAstroDial handles interactive touch pan rotation and elastic snap-back smoothly',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              settingsRepositoryProvider.overrideWithValue(_PerfSettingsRepo()),
+              taskRepositoryProvider.overrideWithValue(_PerfTaskRepo()),
+              routineRepositoryProvider.overrideWithValue(_PerfRoutineRepo()),
+            ],
+            child: EasyLocalization(
+              supportedLocales: AppLocales.supported,
+              path: AppLocales.path,
+              fallbackLocale: const Locale('ar'),
+              startLocale: const Locale('ar'),
+              useOnlyLangCode: true,
+              assetLoader: const _PerfTranslationLoader(),
+              child: Builder(
+                builder: (context) => MaterialApp(
+                  localizationsDelegates: context.localizationDelegates,
+                  supportedLocales: context.supportedLocales,
+                  locale: context.locale,
+                  home: const Scaffold(
+                    body: Center(
+                      child: PremiumAstroDial(size: 360, routineArcs: []),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
 
-      final dialFinder = find.byType(PremiumAstroDial);
-      expect(dialFinder, findsOneWidget);
+        final dialFinder = find.byType(PremiumAstroDial);
+        expect(dialFinder, findsOneWidget);
 
-      // محاكاة سحب القرص الفلكي وإفلاته
-      final gesture = await tester.startGesture(const Offset(250, 180));
-      for (int i = 0; i < 10; i++) {
-        await gesture.moveBy(const Offset(-5, 8));
-        await tester.pump(const Duration(milliseconds: 16));
-      }
-      await gesture.up();
+        // محاكاة سحب القرص الفلكي وإفلاته
+        final gesture = await tester.startGesture(const Offset(250, 180));
+        for (int i = 0; i < 10; i++) {
+          await gesture.moveBy(const Offset(-5, 8));
+          await tester.pump(const Duration(milliseconds: 16));
+        }
+        await gesture.up();
 
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 1100));
-      expect(tester.takeException(), isNull);
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.pump(const Duration(milliseconds: 1100));
+        expect(tester.takeException(), isNull);
 
-      // 🌟 تفكيك الشجرة قبل انتهاء الاختبار لإيقاف مؤقتات astroProvider النشطة
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
-    });
+        // 🌟 تفكيك الشجرة قبل انتهاء الاختبار لإيقاف مؤقتات astroProvider النشطة
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      },
+    );
   });
 }

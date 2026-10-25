@@ -51,9 +51,7 @@ class _LoadingBootstrapScreenState extends State<LoadingBootstrapScreen> {
 
       // 🌟 1. إنشاء الحاوية (Container) مع تمرير قاعدة البيانات (Isar)
       final container = ProviderContainer(
-        overrides: [
-          isarProvider.overrideWithValue(isar),
-        ],
+        overrides: [isarProvider.overrideWithValue(isar)],
       );
 
       // 🌟 2. تشغيل خدمة الترحيل الآن بأمان لأن قاعدة البيانات تعمل
@@ -232,10 +230,9 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
     _alarmSubscription = Alarm.ringing.listen((AlarmSet alarmSet) async {
       final hasRinging = alarmSet.alarms.isNotEmpty;
       try {
-        await _lockscreenChannel.invokeMethod(
-          'setAlarmRingingState',
-          {'ringing': hasRinging},
-        );
+        await _lockscreenChannel.invokeMethod('setAlarmRingingState', {
+          'ringing': hasRinging,
+        });
       } catch (_) {}
 
       if (!hasRinging) {
@@ -251,7 +248,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
       try {
         isLocked =
             await _lockscreenChannel.invokeMethod<bool>('isDeviceLocked') ??
-                false;
+            false;
       } catch (_) {}
 
       if (isLocked) {
@@ -422,7 +419,8 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
         final maxSnoozes = settings.maxSnoozeCount > 0
             ? settings.maxSnoozeCount
             : parsed.maxSnoozes;
-        final canSnooze = parsed.kind != AlarmEventKind.prayer &&
+        final canSnooze =
+            parsed.kind != AlarmEventKind.prayer &&
             parsed.snoozeAllowed &&
             parsed.snoozeCount < maxSnoozes;
         final accentColor = Color(parsed.colorValue);
@@ -434,8 +432,10 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   child: Material(
                     elevation: 12,
                     borderRadius: BorderRadius.circular(20),
@@ -503,8 +503,9 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
                                 if (canSnooze) ...[
                                   TextButton.icon(
                                     style: TextButton.styleFrom(
-                                      backgroundColor:
-                                          Colors.amber.withValues(alpha: 0.16),
+                                      backgroundColor: Colors.amber.withValues(
+                                        alpha: 0.16,
+                                      ),
                                       foregroundColor: Colors.amber,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -529,8 +530,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
                                   onPressed: () async {
                                     await Alarm.stop(bannerAlarm.id);
                                     if (mounted) {
-                                      setState(
-                                          () => _activeBannerAlarm = null);
+                                      setState(() => _activeBannerAlarm = null);
                                     }
                                   },
                                   icon: const Icon(
