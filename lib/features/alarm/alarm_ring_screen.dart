@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:ui' as ui;
+import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,10 +39,22 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
   late AnimationController _glowController;
   late Animation<double> _glowAnimation;
 
+  StreamSubscription<AlarmSet>? _ringingSub;
+
   @override
   void initState() {
     super.initState();
     _enableLockScreenAndAlarmStream();
+    platform.setMethodCallHandler(_handlePlatformCallback);
+    HardwareKeyboard.instance.addHandler(_handleHardwareKey);
+
+    _ringingSub = Alarm.ringing.listen((alarmSet) {
+      final stillRinging =
+          alarmSet.alarms.any((a) => a.id == widget.alarmSettings.id);
+      if (!stillRinging && mounted && !_isProcessingAction) {
+        _closeRingScreen();
+      }
+    });
 
     parsedData = AlarmService.parseAlarmSettings(widget.alarmSettings);
     taskTitle = parsedData.title;
@@ -56,6 +70,58 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     _glowAnimation = Tween<double>(begin: 0.18, end: 0.55).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
+  }
+  
+  Future<dynamic> _handlePlatformCallback(MethodCall call) async {
+    if (call.method == 'onHardwareVolumeButton') {
+      _onHardwareVolumePressed();
+    }
+  }
+
+  bool _handleHardwareVolumeKey(KeyEvent event) {
+    if (event is KeyDownEvent &&
+        (event.logicalKey == LogicalKeyboardKey.audioVolumeDown ||
+            event.logicalKey == LogicalKeyboardKey.audioVolumeUp)) {
+      _triggerStop();
+      return true;
+    }
+    return false;
+  }
+
+  bool _handleHardwareKey(KeyEvent event) {
+    if (event is KeyDownEvent &&
+        (event.logicalKey == LogicalKeyboardKey.audioVolumeDown ||
+            event.logicalKey == LogicalKeyboardKey.audioVolumeUp)) {
+      _onHardwareVolumePressed();
+      return true;
+    }
+    return false;
+  }
+
+  void _onHardwareVolumePressed() {
+    if (!mounted || _isProcessingAction) return;
+    final settings = ref.read(settingsProvider);
+    final maxSnoozes = settings.maxSnoozeCount > 0
+        ? settings.maxSnoozeCount
+        : parsedData.maxSnoozes;
+    final isPrayer = parsedData.kind == AlarmEventKind.prayer;
+    final canSnooze =
+        !isPrayer && parsedData.snoozeAllowed && snoozeCount < maxSnoozes;
+
+    if (canSnooze) {
+      _triggerSnooze();
+    } else {
+      _triggerStop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ringingSub?.cancel();
+    HardwareKeyboard.instance.removeHandler(_handleHardwareVolumeKey);
+    _disableLockScreenAndRestoreStream();
+    _glowController.dispose();
+    super.dispose();
   }
 
   /// 🌟 تفعيل الظهور فوق شاشة القفل + ربط أزرار الصوت الفيزيائية بمسار صوت المنبه (STREAM_ALARM)
@@ -75,13 +141,6 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     } catch (e) {
       debugPrint('Lockscreen/Volume restore note: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    _disableLockScreenAndRestoreStream();
-    _glowController.dispose();
-    super.dispose();
   }
 
   void _closeRingScreen() {

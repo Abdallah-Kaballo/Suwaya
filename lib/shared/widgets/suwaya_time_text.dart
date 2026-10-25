@@ -5,6 +5,67 @@ import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/utils/time_formatters.dart';
 import '../../features/settings/settings_provider.dart';
 
+/// شارة دائرية مضغوطة عالية الدقة لصورتي الشمس والقمر بدلاً من الإيموجي النصي
+class SuwayaPhaseBadge extends StatelessWidget {
+  final bool isNight;
+  final double size;
+  final String iconMode;
+  final bool isRTL;
+  final TextStyle? textStyle;
+
+  const SuwayaPhaseBadge({
+    super.key,
+    required this.isNight,
+    this.size = 18.0,
+    this.iconMode = 'emoji',
+    this.isRTL = true,
+    this.textStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (iconMode == 'text') {
+      final label = isNight ? (isRTL ? 'ل' : 'N') : (isRTL ? 'ن' : 'D');
+      return Text(
+        label,
+        style: (textStyle ?? const TextStyle()).copyWith(
+          fontFamily: 'Tajawal',
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    }
+
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final targetCacheSize = (size * dpr).round().clamp(24, 96);
+    final assetPath = isNight ? 'assets/icons/moon.png' : 'assets/icons/sun.png';
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isNight
+              ? const Color(0xFF90CAF9).withValues(alpha: 0.45)
+              : const Color(0xFFFFD54F).withValues(alpha: 0.65),
+          width: 0.8,
+        ),
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          assetPath,
+          width: size,
+          height: size,
+          cacheWidth: targetCacheSize,
+          cacheHeight: targetCacheSize,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.medium,
+        ),
+      ),
+    );
+  }
+}
+
 class ClockTimeText extends ConsumerWidget {
   final CivilWallClock? civilClock;
   final int? globalSuwayaIndex;
@@ -13,7 +74,6 @@ class ClockTimeText extends ConsumerWidget {
   final String locale;
   final TextStyle style;
 
-  /// باني صريح يعتمد على CivilWallClock (Zero-Ambiguity Time Type)
   const ClockTimeText.civilClock({
     super.key,
     required CivilWallClock this.civilClock,
@@ -23,7 +83,6 @@ class ClockTimeText extends ConsumerWidget {
   })  : globalSuwayaIndex = null,
         virtualMinute = null;
 
-  /// باني متوافق يقبل DateTime أو يحوله داخلياً إلى CivilWallClock
   ClockTimeText.civil({
     super.key,
     required DateTime civilTime,
@@ -104,6 +163,7 @@ class SuwayaTimeText extends StatelessWidget {
       isRTL,
       iconMode,
     );
+    final isNight = globalSuwayaIndex.clamp(0, 23) < 12;
     final fontSize =
         style.fontSize ?? DefaultTextStyle.of(context).style.fontSize ?? 14;
 
@@ -134,17 +194,21 @@ class SuwayaTimeText extends StatelessWidget {
       ),
     );
 
-    final iconWidget = Text(
-      parts.icon,
-      style: style.copyWith(fontFamily: 'Tajawal'),
+    final badgeSize = (fontSize * 1.15).clamp(14.0, 24.0);
+    final iconWidget = SuwayaPhaseBadge(
+      isNight: isNight,
+      size: badgeSize,
+      iconMode: iconMode,
+      isRTL: isRTL,
+      textStyle: style,
     );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: isRTL
-          ? [iconWidget, const SizedBox(width: 4), numbersWidget]
-          : [numbersWidget, const SizedBox(width: 4), iconWidget],
+          ? [iconWidget, const SizedBox(width: 5), numbersWidget]
+          : [numbersWidget, const SizedBox(width: 5), iconWidget],
     );
   }
 }

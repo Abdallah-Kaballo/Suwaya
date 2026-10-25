@@ -263,7 +263,7 @@ class CalendarDayAgenda extends ConsumerWidget {
           _buildPhaseSectionCard(
             context: context,
             ref: ref,
-            title: '$nightHeaderTitle 🌑',
+            title: '$nightHeaderTitle SuwayaPhaseBadge(isNight: true, size: 20)',
             icon: LucideIcons.moon,
             phaseColor: const Color(0xFF7986CB),
             tasks: nightTasks,
@@ -276,7 +276,7 @@ class CalendarDayAgenda extends ConsumerWidget {
           _buildPhaseSectionCard(
             context: context,
             ref: ref,
-            title: '$dayHeaderTitle ☀️',
+            title: '$dayHeaderTitle SuwayaPhaseBadge(isNight: false, size: 20)',
             icon: LucideIcons.sun,
             phaseColor:
                 isDark ? const Color(0xFFFFB300) : const Color(0xFFB25000),

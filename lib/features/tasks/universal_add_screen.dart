@@ -120,6 +120,18 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
+  String _screenTitle() {
+    switch (_tabController.index) {
+      case 1:
+        return 'tasks.continuous_habit'.tr();
+      case 2:
+        return 'tasks.routine_period'.tr();
+      case 0:
+      default:
+        return 'tasks.casual_task'.tr();
+    }
+  }
+
   String _pastTimeErrorMessage(BuildContext context) {
     final trMsg = 'add_screen.past_time_error'.tr();
     if (trMsg != 'add_screen.past_time_error') return trMsg;
@@ -888,6 +900,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
@@ -895,17 +908,29 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final accentColor = Theme.of(context).primaryColor;
     final textColor = isDark ? Colors.white : Colors.black87;
 
+    final String hintText = switch (_tabController.index) {
+      1 => 'add_screen.what_habit'.tr(),
+      2 => 'add_screen.what_to_add'.tr(),
+      _ => 'add_screen.what_task'.tr(),
+    };
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-            icon: Icon(LucideIcons.x, color: textColor),
-            onPressed: () => Navigator.pop(context)),
-        title: Text('add_screen.new_addition'.tr(),
-            style: TextStyle(
-                color: textColor, fontWeight: FontWeight.bold, fontSize: 18)),
+          icon: Icon(LucideIcons.x, color: textColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          _screenTitle(),
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -913,116 +938,115 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
-              Container(
-                height: 48,
-                decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border:
-                        Border.all(color: accentColor.withValues(alpha: 0.1))),
-                child: TabBar(
-                  controller: _tabController,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicator: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: accentColor, width: 2)),
-                  labelColor: accentColor,
-                  unselectedLabelColor: textColor.withValues(alpha: 0.4),
-                  labelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14),
-                  tabs: [
-                    Tab(text: 'tasks.casual_task'.tr()),
-                    Tab(text: 'tasks.continuous_habit'.tr()),
-                    Tab(text: 'tasks.routine_period'.tr())
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(20),
-                    border:
-                        Border.all(color: accentColor.withValues(alpha: 0.2))),
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: accentColor.withValues(alpha: 0.2),
+                  ),
+                ),
                 child: TextField(
                   controller: _titleController,
                   autofocus: true,
                   style: TextStyle(
-                      color: textColor,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900),
+                    color: textColor,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                  ),
                   decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'add_screen.what_to_add'.tr(),
-                      hintStyle:
-                          TextStyle(color: textColor.withValues(alpha: 0.3))),
+                    border: InputBorder.none,
+                    hintText: hintText,
+                    hintStyle: TextStyle(
+                      color: textColor.withValues(alpha: 0.3),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
               Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildDashboardGrid(
-                        textColor, surfaceColor, accentColor, false),
-                    _buildDashboardGrid(
-                        textColor, surfaceColor, accentColor, true),
-                    _buildRoutineDashboardGrid(
-                        textColor, surfaceColor, accentColor),
-                  ],
-                ),
+                child: switch (_tabController.index) {
+                  1 => _buildDashboardGrid(
+                      textColor,
+                      surfaceColor,
+                      accentColor,
+                      true,
+                    ),
+                  2 => _buildRoutineDashboardGrid(
+                      textColor,
+                      surfaceColor,
+                      accentColor,
+                    ),
+                  _ => _buildDashboardGrid(
+                      textColor,
+                      surfaceColor,
+                      accentColor,
+                      false,
+                    ),
+                },
               ),
               Row(
                 children: [
                   if (widget.existingTask != null ||
                       widget.existingRoutine != null) ...[
                     Expanded(
-                        flex: 1,
-                        child: SizedBox(
-                            height: 60,
-                            child: OutlinedButton(
-                                onPressed: () {
-                                  if (widget.existingTask != null) {
-                                    ref
-                                        .read(tasksProvider.notifier)
-                                        .deleteTask(widget.existingTask!.id);
-                                  } else if (widget.existingRoutine != null) {
-                                    ref
-                                        .read(routinesProvider.notifier)
-                                        .deleteRoutine(
-                                            widget.existingRoutine!.id);
-                                  }
-                                  Navigator.pop(context);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(
-                                        color: Colors.redAccent),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20))),
-                                child: const Icon(LucideIcons.trash,
-                                    color: Colors.redAccent)))),
+                      flex: 1,
+                      child: SizedBox(
+                        height: 60,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            if (widget.existingTask != null) {
+                              ref
+                                  .read(tasksProvider.notifier)
+                                  .deleteTask(widget.existingTask!.id);
+                            } else if (widget.existingRoutine != null) {
+                              ref
+                                  .read(routinesProvider.notifier)
+                                  .deleteRoutine(widget.existingRoutine!.id);
+                            }
+                            Navigator.pop(context);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.redAccent),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: const Icon(
+                            LucideIcons.trash,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 12),
                   ],
                   Expanded(
-                      flex: 3,
-                      child: SizedBox(
-                          height: 60,
-                          child: ElevatedButton(
-                              onPressed: _saveItem,
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: accentColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20))),
-                              child: Text('add_screen.save_and_add'.tr(),
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold))))),
+                    flex: 3,
+                    child: SizedBox(
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: _saveItem,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'add_screen.save_and_add'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),

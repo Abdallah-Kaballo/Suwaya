@@ -1,14 +1,13 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math' show cos, asin, sqrt;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart';
-import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/geo_models.dart';
 
 class GeoDatabaseService {
   static Database? _database;
@@ -99,142 +98,74 @@ class GeoDatabaseService {
     list.sort((a, b) => a['name']!.compareTo(b['name']!));
     return list;
   }
-
-  static final RegExp _arDiacriticsRegex = RegExp(r'[\u064B-\u065F\u0670]');
-  static final RegExp _arMultiAlefLamRegex = RegExp(r'^ا{2,}ل');
-  static final RegExp _arAdminPrefixRegex =
-      RegExp(r'^(محافظة|مدينة|ولاية|مقاطعة|بلدية)\s+');
-  static final RegExp _arHyphenRegex =
-      RegExp(r'(?<=[\u0600-\u06FF])-(?=[\u0600-\u06FF])');
-  static final RegExp _parenthesesRegex = RegExp(r'\s*\(.*?\)\s*');
-  static final RegExp _multiSpaceRegex = RegExp(r'\s+');
-  static final RegExp _enAdminSuffixRegex = RegExp(
-    r'\s+(Governorate|City|Municipality|Province)$',
-    caseSensitive: false,
-  );
-
+  
   static Future<List<Map<String, dynamic>>> getCitiesByCountry(
-    String countryCode,
-  ) async {
+    String countryCode, {
+    String langCode = 'ar',
+  }) async {
     await loadDatabase();
     final results = await _database!.rawQuery('''
       SELECT name_ar as name, name_en as nameEn, country_code as countryCode, lat, lng, timezone
       FROM cities WHERE country_code = ?
     ''', [countryCode.toUpperCase()]);
 
-    return results.map((row) {
-      final mutableRow = Map<String, dynamic>.from(row);
-      String? arName = mutableRow['name'] as String?;
-      String? enName = mutableRow['nameEn'] as String?;
+    final rawList = results.map((r) => Map<String, dynamic>.from(r)).toList();
 
-      if (arName != null) {
-        arName = arName
-            .replaceAll(_arDiacriticsRegex, '')
-            .replaceAll(_arMultiAlefLamRegex, 'ال')
-            .replaceAll(_arAdminPrefixRegex, '')
-            .replaceAll(_arHyphenRegex, ' ')
-            .replaceAll(_parenthesesRegex, '')
-            .trim()
-            .replaceAll(_multiSpaceRegex, ' ');
-        mutableRow['name'] = arName;
+    return await Isolate.run(() {
+      final arDiacritics = RegExp(r'[\u064B-\u065F\u0670]');
+      final arMultiAlefLam = RegExp(r'^ا{2,}ل');
+      final arAdminPrefix = RegExp(r'^(محافظة|مدينة|ولاية|مقاطعة|بلدية)\s+');
+      final arHyphen = RegExp(r'(?<=[\u0600-\u06FF])-(?=[\u0600-\u06FF])');
+      final parentheses = RegExp(r'\s*\(.*?\)\s*');
+      final multiSpace = RegExp(r'\s+');
+      final enAdminSuffix = RegExp(
+        r'\s+(Governorate|City|Municipality|Province)$',
+        caseSensitive: false,
+      );
+
+      for (final mutableRow in rawList) {
+        String? arName = mutableRow['name'] as String?;
+        String? enName = mutableRow['nameEn'] as String?;
+
+        if (arName != null) {
+          arName = arName
+              .replaceAll(arDiacritics, '')
+              .replaceAll(arMultiAlefLam, 'ال')
+              .replaceAll(arAdminPrefix, '')
+              .replaceAll(arHyphen, ' ')
+              .replaceAll(parentheses, '')
+              .trim()
+              .replaceAll(multiSpace, ' ');
+          mutableRow['name'] = arName;
+        }
+
+        if (enName != null) {
+          enName = enName
+              .replaceAll(enAdminSuffix, '')
+              .replaceAll(parentheses, '')
+              .trim()
+              .replaceAll(multiSpace, ' ');
+          mutableRow['nameEn'] = enName;
+        }
       }
 
-      if (enName != null) {
-        enName = enName
-            .replaceAll(_enAdminSuffixRegex, '')
-            .replaceAll(_parenthesesRegex, '')
-            .trim()
-            .replaceAll(_multiSpaceRegex, ' ');
-        mutableRow['nameEn'] = enName;
-      }
-      return mutableRow;
-    }).toList();
-  }
+      rawList.sort((a, b) {
+        final nameA = (langCode == 'ar'
+                    ? (a['name'] ?? a['nameEn'])
+                    : (a['nameEn'] ?? a['name']))
+                ?.toString()
+                .trim() ??
+            '';
+        final nameB = (langCode == 'ar'
+                    ? (b['name'] ?? b['nameEn'])
+                    : (b['nameEn'] ?? b['name']))
+                ?.toString()
+                .trim() ??
+            '';
+        return nameA.compareTo(nameB);
+      });
 
-  // ==========================================
-  // 2. Isar: زراعة الدول الافتراضية
-  // ==========================================
-  static Future<void> seedCountries(Isar isar) async {
-    final countries = isar.collection<GeoCountry>();
-    if (await countries.count() > 0) return;
-
-    final List<Map<String, dynamic>> defaultCountries = [
-      {
-        'code': 'EG',
-        'ar': 'مصر',
-        'en': 'Egypt',
-        'method': 'egyptian',
-        'madhab': 'shafi'
-      },
-      {
-        'code': 'SA',
-        'ar': 'المملكة العربية السعودية',
-        'en': 'Saudi Arabia',
-        'method': 'ummAlQura',
-        'madhab': 'shafi'
-      },
-      {
-        'code': 'AE',
-        'ar': 'الإمارات العربية المتحدة',
-        'en': 'United Arab Emirates',
-        'method': 'dubai',
-        'madhab': 'shafi'
-      },
-      {
-        'code': 'QA',
-        'ar': 'قطر',
-        'en': 'Qatar',
-        'method': 'qatar',
-        'madhab': 'shafi'
-      },
-      {
-        'code': 'KW',
-        'ar': 'الكويت',
-        'en': 'Kuwait',
-        'method': 'kuwait',
-        'madhab': 'shafi'
-      },
-      {
-        'code': 'TR',
-        'ar': 'تركيا',
-        'en': 'Turkey',
-        'method': 'turkey',
-        'madhab': 'hanafi'
-      },
-      {
-        'code': 'PK',
-        'ar': 'باكستان',
-        'en': 'Pakistan',
-        'method': 'karachi',
-        'madhab': 'hanafi'
-      },
-      {
-        'code': 'US',
-        'ar': 'الولايات المتحدة',
-        'en': 'United States',
-        'method': 'north_america',
-        'madhab': 'shafi'
-      },
-      {
-        'code': 'UK',
-        'ar': 'المملكة المتحدة',
-        'en': 'United Kingdom',
-        'method': 'muslim_world_league',
-        'madhab': 'shafi'
-      },
-    ];
-
-    await isar.writeTxn(() async {
-      for (var data in defaultCountries) {
-        final country = GeoCountry()
-          ..code = data['code']
-          ..nameAr = data['ar']
-          ..nameEn = data['en']
-          ..defaultMethod = data['method']
-          ..defaultMadhab = data['madhab']
-          ..isDownloaded = false;
-        await countries.put(country);
-      }
+      return rawList;
     });
   }
 

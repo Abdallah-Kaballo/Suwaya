@@ -278,6 +278,26 @@ class AppDrawer extends ConsumerWidget {
                     context.push('/support');
                   }, iconColor: const Color(0xFFFFD700)),
                   _buildDrawerItem(
+                    context,
+                    LucideIcons.heart_handshake,
+                    'drawer.support_app'.tr(),
+                    () {
+                      Navigator.pop(context);
+                      context.push('/support');
+                    },
+                    iconColor: const Color(0xFFFFD700),
+                  ),
+                  _buildDrawerItem(
+                    context,
+                    LucideIcons.share_2,
+                    'drawer.share_app'.tr() != 'drawer.share_app'
+                        ? 'drawer.share_app'.tr()
+                        : (context.locale.languageCode == 'ar'
+                            ? 'مشاركة التطبيق'
+                            : 'Share App'),
+                    () => _shareApp(context),
+                  ),
+                  _buildDrawerItem(
                       context,
                       LucideIcons.refresh_cw,
                       'drawer.check_updates'.tr(),
@@ -323,5 +343,31 @@ class AppDrawer extends ConsumerWidget {
         onTap();
       },
     );
+  }
+
+  static const _platformChannel = MethodChannel('com.suwaya.app/lockscreen');
+  static const _playStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.suwaya.app';
+
+  Future<void> _shareApp(BuildContext context) async {
+    final isAr = context.locale.languageCode == 'ar';
+    final appTitle = 'app_name'.tr();
+    final shareMessage = isAr
+        ? 'جرّب تطبيق «سُويعَة» للإنتاجية الفلكية ومواقيت الصلاة:\n$_playStoreUrl'
+        : 'Check out Suwaya — Astro-Productivity & Prayer Times app:\n$_playStoreUrl';
+
+    Navigator.pop(context);
+
+    if (Platform.isAndroid) {
+      try {
+        await _platformChannel.invokeMethod('shareApp', {
+          'title': appTitle,
+          'text': shareMessage,
+        });
+        return;
+      } catch (_) {}
+    }
+
+    await _launchUrl(_playStoreUrl);
   }
 }

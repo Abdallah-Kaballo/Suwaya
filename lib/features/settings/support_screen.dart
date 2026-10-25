@@ -59,10 +59,11 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
       builder: (ctx) => const Center(child: CircularProgressIndicator()),
     );
 
-    final result = await ref.read(supporterProvider.notifier).purchaseTierPackage(
-          tier,
-          preloadedPackage: _storePackages[tier],
-        );
+    final result =
+        await ref.read(supporterProvider.notifier).purchaseTierPackage(
+              tier,
+              preloadedPackage: _storePackages[tier],
+            );
 
     if (!mounted) return;
     Navigator.pop(context); // إغلاق مؤشر التحميل

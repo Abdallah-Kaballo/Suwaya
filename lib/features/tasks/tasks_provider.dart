@@ -286,7 +286,8 @@ class TasksNotifier extends Notifier<TasksState> {
       }
     } else {
       task.isCompleted = !task.isCompleted;
-      task.completedAt = task.isCompleted ? virtualDateTimeNotifier.value : null;
+      task.completedAt =
+          task.isCompleted ? virtualDateTimeNotifier.value : null;
       isAchievedNow = task.isCompleted;
     }
 

@@ -259,6 +259,7 @@ class SuwayaScheduleEngine {
     final dayEnd = periods.last.endTime;
     final totalDayMicro = dayEnd.difference(dayStart).inMicroseconds;
     if (totalDayMicro <= 0) return null;
+    final actualCycleSpan = Duration(microseconds: totalDayMicro);
 
     final totalSuwayas = periods.fold<int>(0, (sum, p) => sum + p.suwayasCount);
     final effectiveTotalSuwayas = totalSuwayas > 0 ? totalSuwayas : 24;
@@ -312,7 +313,7 @@ class SuwayaScheduleEngine {
       final startTime = sPeriod.resolveSlotWallTime(sLocal, sm);
       var endTime = ePeriod.resolveSlotWallTime(eLocal, em);
       if (!endTime.isAfter(startTime)) {
-        endTime = endTime.add(const Duration(days: 1));
+        endTime = endTime.add(actualCycleSpan);
       }
 
       final startAngle = getAstroAngle(startGlobal, sm);
@@ -346,7 +347,7 @@ class SuwayaScheduleEngine {
       final startTime = mapCivilClockToCycle(startCivilClock);
       var endTime = mapCivilClockToCycle(endCivilClock);
       if (!endTime.isAfter(startTime)) {
-        endTime = endTime.add(const Duration(days: 1));
+        endTime = endTime.add(actualCycleSpan);
       }
 
       final startAngle = timeToDialAngle(startTime, dayStart, dayEnd);

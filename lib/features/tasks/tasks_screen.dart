@@ -5,6 +5,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:go_router/go_router.dart';
 import 'package:suwaya/core/theme/astro_ui_extensions.dart';
+import 'package:suwaya/shared/widgets/suwaya_speed_dial_fab.dart';
 import 'dart:ui' as ui;
 
 import '../../core/utils/time_formatters.dart';
@@ -217,29 +218,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen>
           ? null
           : Padding(
               padding: const EdgeInsets.only(bottom: 112.0),
-              child: FloatingActionButton(
-                heroTag: null,
-                backgroundColor: accentColor,
-                foregroundColor: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black
-                    : Colors.white,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  context.push(
-                    '/add-task',
-                    extra: {
-                      'currentPeriodId': astroState.currentPeriod.id,
-                      'currentSuwaya':
-                          astroState.currentSuwayaTime.periodLocalSlotNumber,
-                      'initialTab': _tabController.index,
-                    },
-                  );
-                },
-                child: const Icon(LucideIcons.plus, size: 28),
+              child: SuwayaSpeedDialFab(
+                color: accentColor,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+                currentPeriodId: astroState.currentPeriod.id,
+                currentSuwaya:
+                    astroState.currentSuwayaTime.periodLocalSlotNumber,
               ),
             ),
     );

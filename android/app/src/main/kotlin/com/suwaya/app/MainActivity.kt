@@ -2,8 +2,11 @@ package com.suwaya.app
 
 import android.app.KeyguardManager
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import android.os.Build
+import android.os.PowerManager
+import android.view.KeyEvent
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -11,61 +14,111 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
 
-    private val channel = "com.suwaya.app/lockscreen"
+    private val channelName = "com.suwaya.app/lockscreen"
+    private var methodChannel: MethodChannel? = null
+    private var isAlarmCurrentlyRinging = false
+
+    private fun applyLockScreenFlags(enable: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(enable)
+            setTurnScreenOn(enable)
+        } else {
+            @Suppress("DEPRECATION")
+            if (enable) {
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                )
+            } else {
+                window.clearFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                )
+            }
+        }
+        if (enable) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        MethodChannel(
+        methodChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            channel
-        ).setMethodCallHandler { call, result ->
-
-            when (call.method) {
-                "showOnLockScreen" -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                        setShowWhenLocked(true)
-                        setTurnScreenOn(true)
-                        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
-                        keyguardManager?.requestDismissKeyguard(this, null)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        window.addFlags(
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                        )
+            channelName
+        ).also { ch ->
+            ch.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isDeviceLocked" -> {
+                        val keyguardManager =
+                            getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+                        val powerManager =
+                            getSystemService(Context.POWER_SERVICE) as? PowerManager
+                        val isKeyguardLocked = keyguardManager?.isKeyguardLocked ?: false
+                        val isInteractive = powerManager?.isInteractive ?: true
+                        result.success(isKeyguardLocked || !isInteractive)
                     }
-                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    result.success(null)
-                }
 
-                "hideFromLockScreen" -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                        setShowWhenLocked(false)
-                        setTurnScreenOn(false)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        window.clearFlags(
-                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                        )
+                    "setAlarmRingingState" -> {
+                        val ringing = call.argument<Boolean>("ringing") ?: false
+                        isAlarmCurrentlyRinging = ringing
+                        if (ringing) {
+                            applyLockScreenFlags(true)
+                        }
+                        result.success(null)
                     }
-                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                    result.success(null)
-                }
 
-                "setAlarmVolumeControl" -> {
-                    val enabled = call.argument<Boolean>("enabled") ?: false
-                    volumeControlStream = if (enabled) {
-                        AudioManager.STREAM_ALARM
-                    } else {
-                        AudioManager.USE_DEFAULT_STREAM_TYPE
+                    "showOnLockScreen" -> {
+                        isAlarmCurrentlyRinging = true
+                        applyLockScreenFlags(true)
+                        result.success(null)
                     }
-                    result.success(null)
-                }
 
-                else -> result.notImplemented()
+                    "hideFromLockScreen" -> {
+                        applyLockScreenFlags(false)
+                        result.success(null)
+                    }
+
+                    "setAlarmVolumeControl" -> {
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        volumeControlStream = if (enabled) {
+                            AudioManager.STREAM_ALARM
+                        } else {
+                            AudioManager.USE_DEFAULT_STREAM_TYPE
+                        }
+                        result.success(null)
+                    }
+
+                    "shareApp" -> {
+                        val text = call.argument<String>("text")
+                            ?: "https://play.google.com/store/apps/details?id=com.suwaya.app"
+                        val title = call.argument<String>("title") ?: "Suwaya"
+                        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, title)
+                            putExtra(Intent.EXTRA_TEXT, text)
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, title)
+                        startActivity(shareIntent)
+                        result.success(true)
+                    }
+
+                    else -> result.notImplemented()
+                }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (isAlarmCurrentlyRinging &&
+            (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+        ) {
+            methodChannel?.invokeMethod("onHardwareVolumeStop", null)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }

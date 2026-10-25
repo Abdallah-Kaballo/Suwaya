@@ -74,7 +74,6 @@ flutter:
     - assets/icons/app_icon.png
     - assets/icons/sun.png
     - assets/icons/moon.png
-    - assets/icons/Astrolabe Crown.png
     - assets/icons/Hours Hand.png
     - assets/audio/
     - docs/faq/
@@ -89,3 +88,20 @@ flutter_launcher_icons:
   
   adaptive_icon_background: "assets/icons/ic_background.png" 
   adaptive_icon_foreground: "assets/icons/ic_foreground.png"
+
+  fonts:
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Tajawal-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Tajawal-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Tajawal-Black.ttf
+          weight: 900
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf

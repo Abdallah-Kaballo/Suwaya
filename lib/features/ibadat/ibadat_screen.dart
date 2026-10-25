@@ -933,7 +933,6 @@ class IbadatScreen extends ConsumerWidget {
     final double defaultVol = isNightPart ? 0.5 : 1.0;
     final currentSound = settings.getPeriodSound(periodId, defaultTone);
     final currentVolume = settings.getPeriodVolume(periodId, defaultVol);
-    final isAr = context.locale.languageCode == 'ar';
 
     showModalBottomSheet(
       context: context,
@@ -958,7 +957,7 @@ class IbadatScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(LucideIcons.bell_off, color: Colors.grey),
-                title: Text(isAr ? 'بدون إشعار' : 'No Notification'),
+                title: Text('alerts.silent'.tr()),
                 trailing: currentLevel == 0
                     ? Icon(
                         LucideIcons.circle_check,
@@ -980,9 +979,7 @@ class IbadatScreen extends ConsumerWidget {
               ),
               ListTile(
                 leading: const Icon(LucideIcons.bell, color: Colors.blueAccent),
-                title: Text(
-                  isAr ? 'إشعار على الستارة' : 'Curtain Notification',
-                ),
+                title: Text('ibadat.notification'.tr()),
                 trailing: currentLevel == 1
                     ? Icon(
                         LucideIcons.circle_check,

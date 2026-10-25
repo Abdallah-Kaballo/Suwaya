@@ -88,28 +88,13 @@ class _SmartLocationPickerState extends ConsumerState<SmartLocationPicker> {
     setState(() => _isLoadingCities = true);
     try {
       final langCode = context.locale.languageCode;
-      final rawCities =
-          await GeoDatabaseService.getCitiesByCountry(countryCode);
-      final mutableCities = List<Map<String, dynamic>>.from(rawCities);
-
-      mutableCities.sort((a, b) {
-        String nameA = (langCode == 'ar'
-                    ? (a['name'] ?? a['nameEn'])
-                    : (a['nameEn'] ?? a['name']))
-                ?.toString()
-                .trim() ??
-            '';
-        String nameB = (langCode == 'ar'
-                    ? (b['name'] ?? b['nameEn'])
-                    : (b['nameEn'] ?? b['name']))
-                ?.toString()
-                .trim() ??
-            '';
-        return nameA.compareTo(nameB);
-      });
+      final sortedCities = await GeoDatabaseService.getCitiesByCountry(
+        countryCode,
+        langCode: langCode,
+      );
       if (!mounted) return;
       setState(() {
-        _cities = mutableCities;
+        _cities = sortedCities;
         _isLoadingCities = false;
       });
     } catch (e) {

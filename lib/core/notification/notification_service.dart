@@ -37,6 +37,10 @@ class NotificationService {
     await _createAndSweepChannels();
   }
 
+  Future<void> refreshLocalizedChannels() async {
+    await _createAndSweepChannels();
+  }
+
   Future<void> _createAndSweepChannels() async {
     if (!Platform.isAndroid) return;
     final androidImplementation =

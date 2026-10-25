@@ -95,7 +95,6 @@
     "default_ring": "Nada Dering Lalai",
     "makkah_adhan": "Azan Makkah",
     "soft_bell": "Loceng Lembut",
-    "birds": "Kicauan Burung",
     "silent": "Senyap",
     "notification": "Pemberitahuan Senyap",
     "alarm": "Penggera Kuat",
@@ -611,7 +610,6 @@
     "feature_gold": "Memaparkan lencana Emas di sebelah nama aplikasi",
     "feature_diamond": "Memaparkan lencana Berlian di sebelah nama aplikasi",
     "feature_support": "Sokong falsafah dan kesinambungan projek",
-    "auto_renew_note": "Semua langganan adalah bulanan, tetapi \"Pembaharuan Auto\" dimatikan secara lalai untuk memastikan ketenangan fikiran anda—tiada caj masa depan akan berlaku tanpa kebenaran anda.",
     "restoring_msg": "Memeriksa sokongan anda sebelum ini...",
     "restore_purchases": "Pulihkan lencana sebelumnya",
     "active": "Aktif"

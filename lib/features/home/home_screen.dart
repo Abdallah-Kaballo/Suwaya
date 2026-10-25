@@ -4,6 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
+import 'package:suwaya/shared/widgets/suwaya_speed_dial_fab.dart';
 import 'package:suwaya_time/suwaya_time.dart';
 
 import 'package:suwaya/core/notification/scheduler_service.dart';
@@ -648,55 +649,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 112.0),
-        child: PremiumExpandableFab(
+        child: SuwayaSpeedDialFab(
           color: pColor,
           isDark: isDark,
           currentPeriodId: astroState.currentPeriod.id,
           currentSuwaya: astroState.currentSuwayaTime.periodLocalSlotNumber,
         ),
       ),
-    );
-  }
-}
-
-class PremiumExpandableFab extends StatefulWidget {
-  final Color color;
-  final bool isDark;
-  final int currentPeriodId;
-  final int currentSuwaya;
-
-  const PremiumExpandableFab({
-    super.key,
-    required this.color,
-    required this.isDark,
-    required this.currentPeriodId,
-    required this.currentSuwaya,
-  });
-
-  @override
-  State<PremiumExpandableFab> createState() => _PremiumExpandableFabState();
-}
-
-class _PremiumExpandableFabState extends State<PremiumExpandableFab> {
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: null,
-      backgroundColor: widget.color,
-      foregroundColor: widget.isDark ? Colors.black : Colors.white,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      onPressed: () {
-        HapticFeedback.lightImpact();
-        context.push(
-          '/add-task',
-          extra: {
-            'currentPeriodId': widget.currentPeriodId,
-            'currentSuwaya': widget.currentSuwaya,
-          },
-        );
-      },
-      child: const Icon(LucideIcons.plus, size: 28),
     );
   }
 }

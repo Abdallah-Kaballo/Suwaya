@@ -405,7 +405,6 @@ Future<void> showAlertsModal({
     );
   }
 
-  final isAr = context.locale.languageCode == 'ar';
 
   await showDialog(
     context: context,
@@ -432,14 +431,14 @@ Future<void> showAlertsModal({
                   buildAlertButton(
                     0,
                     LucideIcons.bell_off,
-                    isAr ? 'بدون إشعار' : 'No Notification',
+                    'alerts.silent'.tr(),
                     setDialogState,
                   ),
                   const SizedBox(width: 8),
                   buildAlertButton(
                     1,
                     LucideIcons.bell,
-                    isAr ? 'إشعار على الستارة' : 'Curtain Notif',
+                    'ibadat.notification'.tr(),
                     setDialogState,
                   ),
                   const SizedBox(width: 8),

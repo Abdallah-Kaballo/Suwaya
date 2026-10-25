@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya_time/suwaya_time.dart';
+import '../../../shared/widgets/suwaya_time_text.dart';
 
 // 🌟 1. العجلة السويعية (سويعات 1-12، دقائق 0-59، وزر ليل/نهار)
 class AstroTimePicker extends StatefulWidget {
@@ -71,9 +72,6 @@ class _AstroTimePickerState extends State<AstroTimePicker> {
       fontSize: 13,
       fontWeight: FontWeight.bold,
     );
-
-    final dayIcon = widget.iconMode == 'text' ? (isRTL ? 'ن' : 'D') : '☀️';
-    final nightIcon = widget.iconMode == 'text' ? (isRTL ? 'ل' : 'N') : '🌑';
 
     final nightDayLabel = 'add_screen.night_day'.tr() != 'add_screen.night_day'
         ? 'add_screen.night_day'.tr()
@@ -190,15 +188,16 @@ class _AstroTimePickerState extends State<AstroTimePicker> {
                         ),
                       ),
                       child: Center(
-                        child: Text(
-                          isNight ? nightIcon : dayIcon,
-                          style: TextStyle(
-                            fontSize: 28,
+                        child: SuwayaPhaseBadge(
+                          isNight: isNight,
+                          size: 38,
+                          iconMode: widget.iconMode,
+                          isRTL: isRTL,
+                          textStyle: TextStyle(
+                            fontSize: 26,
                             color: isNight
                                 ? const Color(0xFF64B5F6)
                                 : const Color(0xFFFFCA28),
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ),
@@ -552,8 +551,7 @@ class HijriCalendarDatePicker extends StatefulWidget {
 }
 
 class _HijriCalendarDatePickerState extends State<HijriCalendarDatePicker> {
-  static const UmmAlQuraHijriProvider _hijriProvider =
-      UmmAlQuraHijriProvider();
+  static const UmmAlQuraHijriProvider _hijriProvider = UmmAlQuraHijriProvider();
 
   late DateTime _selectedDate;
   late DateTime _minDate;

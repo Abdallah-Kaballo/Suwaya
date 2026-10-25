@@ -5,10 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import 'package:go_router/go_router.dart';
 import 'package:hijri/hijri_calendar.dart';
+import 'package:suwaya/shared/widgets/suwaya_speed_dial_fab.dart';
 import 'package:suwaya_time/suwaya_time.dart';
-
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/providers/ui_providers.dart';
@@ -143,8 +142,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     _syncFocusedMonthToDate(_selectedDate);
   }
 
-  static const UmmAlQuraHijriProvider _hijriProvider =
-      UmmAlQuraHijriProvider();
+  static const UmmAlQuraHijriProvider _hijriProvider = UmmAlQuraHijriProvider();
 
   HijriCalendar _toHijri(DateTime gregorianDate) {
     final offsetDays = ref.read(settingsProvider).hijriOffsetDays;
@@ -541,27 +539,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       // 🌟 التعديل 7: زر الإضافة مطابق للشاشة الرئيسية (+ فقط بدون نص ومرفوع بـ 112.0)
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 112.0),
-        child: FloatingActionButton(
-          heroTag: null,
-          backgroundColor: primaryColor,
-          foregroundColor: isDark ? Colors.black : Colors.white,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            context.push(
-              '/add-task',
-              extra: {
-                'currentPeriodId': astroState.currentPeriod.id,
-                'currentSuwaya':
-                    astroState.currentSuwayaTime.periodLocalSlotNumber,
-                'initialDate': _selectedDate,
-              },
-            );
-          },
-          child: const Icon(LucideIcons.plus, size: 28),
+        child: SuwayaSpeedDialFab(
+          color: primaryColor,
+          isDark: isDark,
+          currentPeriodId: astroState.currentPeriod.id,
+          currentSuwaya: astroState.currentSuwayaTime.periodLocalSlotNumber,
+          initialDate: _selectedDate,
         ),
       ),
     );

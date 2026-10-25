@@ -63,6 +63,10 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   int? _highlightedPeriodId;
   Timer? _selectionTimer;
 
+  ui.Image? _dialSunBadgeImage;
+  ui.Image? _dialMoonBadgeImage;
+  bool _assetsPrecached = false;
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +77,31 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     _animController.addListener(() {
       if (_anim != null) _manualRotation.value = _anim!.value;
     });
+    _loadCompressedBadgeImages();
+  }
+
+  Future<void> _loadCompressedBadgeImages() async {
+    try {
+      final sunImg = await _decodeBadgeAsset('assets/icons/sun.png', 64);
+      final moonImg = await _decodeBadgeAsset('assets/icons/moon.png', 64);
+      if (mounted) {
+        setState(() {
+          _dialSunBadgeImage = sunImg;
+          _dialMoonBadgeImage = moonImg;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<ui.Image> _decodeBadgeAsset(String path, int targetSize) async {
+    final data = await rootBundle.load(path);
+    final codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: targetSize,
+      targetHeight: targetSize,
+    );
+    final frame = await codec.getNextFrame();
+    return frame.image;
   }
 
   @override
@@ -82,6 +111,18 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     _longPressTimer?.cancel();
     _selectionTimer?.cancel();
     super.dispose();
+  }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_assetsPrecached) {
+      _assetsPrecached = true;
+      precacheImage(const AssetImage('assets/icons/Hours Hand.png'), context);
+      precacheImage(const AssetImage('assets/icons/sun.png'), context);
+      precacheImage(const AssetImage('assets/icons/moon.png'), context);
+    }
   }
 
   void _onPanDown(DragDownDetails details) {
@@ -603,7 +644,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
 
     final bool isDayPhase = astroState.currentSuwayaTime.phase.isDay;
     final String effectivePinMode =
-        settings.useAstroTimeForIbadat ? settings.dialPinMode : 'civil24';
+        settings.useAstroTimeForIbadat ? 'suwaya24' : 'civil24';
     final String currentLangCode = context.locale.languageCode;
 
     return SizedBox(
@@ -667,61 +708,69 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                           alignment: Alignment.center,
                           children: [
                             staticGeometryStack,
-                            _buildLayer(
-                              PeriodRingPainter(
-                                periods: astroState.periods,
-                                currentPeriod: astroState.currentPeriod,
-                                dayStart: dayStart,
-                                dayEnd: dayEnd,
-                                isDark: isDark,
-                                langCode: currentLangCode,
-                                design: selectedDesign,
-                                highlightedPeriodId: _highlightedPeriodId,
-                                totalRotation: totalRotation,
+                            RepaintBoundary(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  _buildLayer(
+                                    PeriodRingPainter(
+                                      periods: astroState.periods,
+                                      currentPeriod: astroState.currentPeriod,
+                                      dayStart: dayStart,
+                                      dayEnd: dayEnd,
+                                      isDark: isDark,
+                                      langCode: currentLangCode,
+                                      design: selectedDesign,
+                                      highlightedPeriodId: _highlightedPeriodId,
+                                      totalRotation: totalRotation,
+                                    ),
+                                  ),
+                                  _buildLayer(
+                                    OuterRingPainter(
+                                      periods: astroState.periods,
+                                      dayStart: dayStart,
+                                      dayEnd: dayEnd,
+                                      isDark: isDark,
+                                      design: selectedDesign,
+                                      pinMode: effectivePinMode,
+                                      totalRotation: totalRotation,
+                                      sunImage: _dialSunBadgeImage,
+                                      moonImage: _dialMoonBadgeImage,
+                                    ),
+                                  ),
+                                  _buildLayer(
+                                    DividerRingPainter(
+                                      periods: astroState.periods,
+                                      dayStart: dayStart,
+                                      dayEnd: dayEnd,
+                                      isDark: isDark,
+                                      design: selectedDesign,
+                                    ),
+                                  ),
+                                  _buildLayer(
+                                    RailwayRingPainter(
+                                      ibadat: _cycleAlignedIbadat(astroState),
+                                      nightMarkers: activeNightMarkers,
+                                      tasks: List.of(_currentDialTasks),
+                                      periods: astroState.periods,
+                                      dayStart: dayStart,
+                                      dayEnd: dayEnd,
+                                      isDark: isDark,
+                                      draggedTask: _draggedTask,
+                                      dragAngle: _dragAngle,
+                                      langCode: currentLangCode,
+                                      design: selectedDesign,
+                                      highlightedTaskId: highlightedTaskId,
+                                      highlightedMarkerId: _highlightedMarkerId,
+                                      dialPinMode: effectivePinMode,
+                                      precomputedLayouts:
+                                          precomputedMarkerLayouts,
+                                      totalRotation: totalRotation,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            _buildLayer(
-                              OuterRingPainter(
-                                periods: astroState.periods,
-                                dayStart: dayStart,
-                                dayEnd: dayEnd,
-                                isDark: isDark,
-                                design: selectedDesign,
-                                pinMode: effectivePinMode,
-                                totalRotation: totalRotation,
-                              ),
-                            ),
-                            _buildLayer(
-                              DividerRingPainter(
-                                periods: astroState.periods,
-                                dayStart: dayStart,
-                                dayEnd: dayEnd,
-                                isDark: isDark,
-                                design: selectedDesign,
-                              ),
-                            ),
-                            _buildLayer(
-                              RailwayRingPainter(
-                                ibadat: _cycleAlignedIbadat(astroState),
-                                nightMarkers: activeNightMarkers,
-                                tasks: List.of(_currentDialTasks),
-                                periods: astroState.periods,
-                                dayStart: dayStart,
-                                dayEnd: dayEnd,
-                                isDark: isDark,
-                                draggedTask: _draggedTask,
-                                dragAngle: _dragAngle,
-                                langCode: currentLangCode,
-                                design: selectedDesign,
-                                highlightedTaskId: highlightedTaskId,
-                                highlightedMarkerId: _highlightedMarkerId,
-                                dialPinMode: effectivePinMode,
-                                precomputedLayouts: precomputedMarkerLayouts,
-                                totalRotation: totalRotation,
-                              ),
-                            ),
-                            if (selectedDesign == DialDesign.classic)
-                              _buildMaghribCrownImage(dayStart, dayEnd),
                             if (selectedDesign == DialDesign.minimal)
                               _buildLayer(
                                 DynamicNeedlePainter(
@@ -768,7 +817,11 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
   Widget _buildLayer(CustomPainter painter) => SizedBox(
         width: widget.size,
         height: widget.size,
-        child: CustomPaint(painter: painter),
+        child: CustomPaint(
+          isComplex: true,
+          willChange: false,
+          painter: painter,
+        ),
       );
 
   Widget _buildHoursHandImage(double needleAngle, bool isDark) {
@@ -824,32 +877,6 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                     child: baseHandImage,
                   )
                 : baseHandImage,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMaghribCrownImage(DateTime dayStart, DateTime dayEnd) {
-    final double r = widget.size / 2;
-    final double edgeR = r * kRailwayR;
-    final double maghribAngle = timeToAngle(dayStart, dayStart, dayEnd);
-    const double crownWidth = 33.0;
-    const double crownHeight = 30.0;
-    final dpr = MediaQuery.devicePixelRatioOf(context);
-
-    return IgnorePointer(
-      child: Transform.rotate(
-        angle: maghribAngle + pi / 2,
-        child: Transform.translate(
-          offset: Offset(0, -(edgeR + (crownHeight / 2) - 2.5)),
-          child: Image.asset(
-            'assets/icons/Astrolabe Crown.png',
-            width: crownWidth,
-            height: crownHeight,
-            cacheWidth: (crownWidth * dpr).round(),
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.medium,
           ),
         ),
       ),
@@ -928,7 +955,21 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     SettingsModel settings,
   ) {
     final double centerDiameter = widget.size * (kInnerR - 0.02);
-    const Color centerClockColor = Color(0xFFFFF3C4);
+    const Color primaryClockColor = Color(0xFFFFF6D6);
+    final Color secondaryClockColor =
+        const Color(0xFFFFF6D6).withValues(alpha: 0.78);
+
+    const List<Shadow> clockShadows = [
+      Shadow(
+        color: Colors.black87,
+        blurRadius: 8,
+        offset: Offset(0, 1.5),
+      ),
+      Shadow(
+        color: Colors.black54,
+        blurRadius: 16,
+      ),
+    ];
 
     if (!settings.useAstroTimeForIbadat) {
       return IgnorePointer(
@@ -937,7 +978,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
           height: centerDiameter,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: ValueListenableBuilder<DateTime>(
                 valueListenable: virtualDateTimeNotifier,
                 builder: (context, liveTime, child) {
@@ -954,22 +995,13 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                       civilTimeString,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.w900,
-                        color: centerClockColor,
+                        fontSize: 46,
+                        fontWeight: FontWeight.w600,
+                        color: primaryClockColor,
                         fontFamily: 'Inter',
-                        letterSpacing: 1.2,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 10,
-                            offset: Offset(0, 2),
-                          ),
-                          Shadow(
-                            color: Colors.black,
-                            blurRadius: 20,
-                          ),
-                        ],
+                        letterSpacing: 0.4,
+                        fontFeatures: [ui.FontFeature.tabularFigures()],
+                        shadows: clockShadows,
                       ),
                     ),
                   );
@@ -991,33 +1023,55 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
             alignment: Alignment.center,
             children: [
               Align(
-                alignment: Alignment.center,
+                alignment: const Alignment(0.0, -0.06),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: ValueListenableBuilder<String>(
                     valueListenable: virtualTimeNotifier,
                     builder: (context, virtualTime, child) {
+                      final parts = virtualTime.split('|');
+                      final sPart = parts.isNotEmpty ? parts[0] : '00';
+                      final mPart = parts.length > 1 ? parts[1] : '00';
+                      final secPart = parts.length > 2 ? parts[2] : '00';
+
                       return FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(
-                          virtualTime,
+                        child: RichText(
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.w900,
-                            color: centerClockColor,
-                            fontFamily: 'Inter',
-                            letterSpacing: 1.4,
-                            fontFeatures: [ui.FontFeature.tabularFigures()],
-                            shadows: [
-                              Shadow(
-                                color: Colors.black,
-                                blurRadius: 10,
-                                offset: Offset(0, 2),
+                          text: TextSpan(
+                            style: const TextStyle(
+                              fontSize: 44,
+                              fontWeight: FontWeight.w600,
+                              color: primaryClockColor,
+                              fontFamily: 'Inter',
+                              letterSpacing: 0.3,
+                              fontFeatures: [ui.FontFeature.tabularFigures()],
+                              shadows: clockShadows,
+                            ),
+                            children: [
+                              TextSpan(text: sPart),
+                              TextSpan(
+                                text: '|',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  color: secondaryClockColor,
+                                ),
                               ),
-                              Shadow(
-                                color: Colors.black,
-                                blurRadius: 20,
+                              TextSpan(text: mPart),
+                              TextSpan(
+                                text: '|',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  color: secondaryClockColor,
+                                ),
+                              ),
+                              TextSpan(
+                                text: secPart,
+                                style: TextStyle(
+                                  fontSize: 38,
+                                  fontWeight: FontWeight.w500,
+                                  color: secondaryClockColor,
+                                ),
                               ),
                             ],
                           ),
@@ -1028,7 +1082,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                 ),
               ),
               const Align(
-                alignment: Alignment(0.0, 0.58),
+                alignment: Alignment(0.0, 0.62),
                 child: TimeSpeedIndicator(),
               ),
             ],

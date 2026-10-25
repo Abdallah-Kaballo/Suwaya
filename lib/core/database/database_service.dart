@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/task_model.dart';
 import '../../models/settings_model.dart';
-import '../../models/geo_models.dart';
 import '../../models/routine_model.dart';
 
 class DatabaseService {
@@ -23,7 +22,6 @@ class DatabaseService {
         [
           TaskModelSchema,
           SettingsModelSchema,
-          GeoCountrySchema,
           RoutineModelSchema,
         ],
         directory: dir.path,

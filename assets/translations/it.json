@@ -95,7 +95,6 @@
     "default_ring": "Suoneria Predefinita",
     "makkah_adhan": "Adhan di La Mecca",
     "soft_bell": "Campana Dolce",
-    "birds": "Cinguettio di Uccelli",
     "silent": "Silenzioso",
     "notification": "Notifica Silenciosa",
     "alarm": "Allarme Forte",
@@ -604,7 +603,6 @@
     "feature_gold": "Mostra il badge d'Oro accanto al nome dell'app",
     "feature_diamond": "Mostra il badge di Diamante accanto al nome dell'app",
     "feature_support": "Supporta la filosofia e la continuità del progetto",
-    "auto_renew_note": "Tutti gli abbonamenti sono mensili, ma il \"Rinnovo Automatico\" è disattivato di default per garantirti tranquillità—nessun addebito futuro avverrà senza il tuo consenso.",
     "restoring_msg": "Verifica del tuo supporto precedente...",
     "restore_purchases": "Ripristina badge precedente",
     "active": "Attivo"

@@ -18,9 +18,10 @@ class MainLayout extends ConsumerWidget {
     final primaryColor = Theme.of(context).primaryColor;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
 
-    final isDrawerOpen = ref.watch(isDrawerOpenProvider);
-    final isPomodoroFullScreen = ref.watch(isPomodoroFullScreenProvider);
-    final hideBottomBar = isDrawerOpen || isPomodoroFullScreen;
+    final hideBottomBar = ref.watch(
+          isDrawerOpenProvider.select((open) => open),
+        ) ||
+        ref.watch(isPomodoroFullScreenProvider);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -28,7 +29,7 @@ class MainLayout extends ConsumerWidget {
       body: RepaintBoundary(child: navigationShell),
       bottomNavigationBar: RepaintBoundary(
         child: AnimatedSlide(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 260),
           curve: Curves.easeInOutCubic,
           offset: hideBottomBar ? const Offset(0, 1.5) : Offset.zero,
           child: _buildFloatingNavBar(
@@ -54,17 +55,18 @@ class MainLayout extends ConsumerWidget {
         ? 'nav.calendar'.tr()
         : (context.locale.languageCode == 'ar' ? 'التقويم' : 'Calendar');
 
+    final surfaceColor = Theme.of(context)
+        .colorScheme
+        .surfaceContainerHighest
+        .withValues(alpha: isDark ? 0.90 : 0.94);
+    final borderColor = Theme.of(context).dividerColor;
+
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 18),
         height: 72,
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: isDark ? 0.88 : 0.92),
           borderRadius: BorderRadius.circular(36),
-          border: Border.all(color: Theme.of(context).dividerColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.07),
@@ -75,59 +77,74 @@ class MainLayout extends ConsumerWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(36),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildNavItem(
-                  LucideIcons.list_todo,
-                  0,
-                  currentIndex,
-                  isDark,
-                  primaryColor,
-                  'nav.tasks'.tr(),
-                  shell,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // عزل التمويه الضبابي في طبقة خلفية صامتة لا تعيد الرسم عند تحريك الأزرار
+              RepaintBoundary(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(36),
+                      border: Border.all(color: borderColor),
+                    ),
+                  ),
                 ),
-                _buildNavItem(
-                  LucideIcons.moon_star,
-                  1,
-                  currentIndex,
-                  isDark,
-                  primaryColor,
-                  'nav.ibadat'.tr(),
-                  shell,
-                ),
-                _buildNavItem(
-                  LucideIcons.compass,
-                  2,
-                  currentIndex,
-                  isDark,
-                  primaryColor,
-                  'nav.home'.tr(),
-                  shell,
-                ),
-                _buildNavItem(
-                  LucideIcons.calendar_days,
-                  3,
-                  currentIndex,
-                  isDark,
-                  primaryColor,
-                  calLabel,
-                  shell,
-                ),
-                _buildNavItem(
-                  LucideIcons.timer,
-                  4,
-                  currentIndex,
-                  isDark,
-                  primaryColor,
-                  'nav.pomodoro'.tr(),
-                  shell,
-                ),
-              ],
-            ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildNavItem(
+                    LucideIcons.list_todo,
+                    0,
+                    currentIndex,
+                    isDark,
+                    primaryColor,
+                    'nav.tasks'.tr(),
+                    shell,
+                  ),
+                  _buildNavItem(
+                    LucideIcons.moon_star,
+                    1,
+                    currentIndex,
+                    isDark,
+                    primaryColor,
+                    'nav.ibadat'.tr(),
+                    shell,
+                  ),
+                  _buildNavItem(
+                    LucideIcons.compass,
+                    2,
+                    currentIndex,
+                    isDark,
+                    primaryColor,
+                    'nav.home'.tr(),
+                    shell,
+                  ),
+                  _buildNavItem(
+                    LucideIcons.calendar_days,
+                    3,
+                    currentIndex,
+                    isDark,
+                    primaryColor,
+                    calLabel,
+                    shell,
+                  ),
+                  _buildNavItem(
+                    LucideIcons.timer,
+                    4,
+                    currentIndex,
+                    isDark,
+                    primaryColor,
+                    'nav.pomodoro'.tr(),
+                    shell,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -144,49 +161,48 @@ class MainLayout extends ConsumerWidget {
     StatefulNavigationShell shell,
   ) {
     final isSelected = currentIndex == index;
-    final scale = isSelected ? 1.05 : 1.0;
+    final inactiveColor = isDark ? Colors.white54 : Colors.black45;
 
-    return Tooltip(
-      message: label,
-      child: Semantics(
-        label: label,
-        button: true,
-        selected: isSelected,
-        child: GestureDetector(
-          onTap: () {
-            if (index == currentIndex) return;
-            HapticFeedback.selectionClick();
-            shell.goBranch(index, initialLocation: index == currentIndex);
-          },
-          behavior: HitTestBehavior.opaque,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOutBack,
-            transformAlignment: Alignment.center,
-            transform: Matrix4.diagonal3Values(scale, scale, 1.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 23,
-                  color: isSelected
-                      ? primaryColor
-                      : (isDark ? Colors.white54 : Colors.black45),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected
-                        ? primaryColor
-                        : (isDark ? Colors.white54 : Colors.black45),
+    return Expanded(
+      child: Tooltip(
+        message: label,
+        child: Semantics(
+          label: label,
+          button: true,
+          selected: isSelected,
+          child: GestureDetector(
+            onTap: () {
+              if (index == currentIndex) return;
+              HapticFeedback.selectionClick();
+              shell.goBranch(index, initialLocation: false);
+            },
+            behavior: HitTestBehavior.opaque,
+            child: AnimatedScale(
+              scale: isSelected ? 1.06 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 23,
+                    color: isSelected ? primaryColor : inactiveColor,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? primaryColor : inactiveColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:suwaya/core/location/location_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:suwaya/core/notification/notification_service.dart';
 import 'package:suwaya/core/theme/app_theme.dart';
 import 'package:suwaya/core/theme/dial_design_provider.dart';
 import 'package:suwaya/core/theme/theme_color_provider.dart';
@@ -137,46 +139,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 60),
               children: [
-                _buildSettingsGroup(
-                  'settings.notifications_alerts'.tr(),
-                  [
-                    _buildSettingRow(
-                      context,
-                      icon: LucideIcons.bell_ring,
-                      title: 'settings.notifications_alerts'.tr(),
-                      subtitle: 'settings.notifications_desc'.tr(),
-                      onTap: () => context.push('/settings/notifications'),
-                      isDark: isDark,
-                      primaryColor: primaryColor,
-                      textColor: textColor,
-                    ),
-                  ],
-                  isDark,
-                  surfaceColor,
-                  borderColor,
-                  textColor,
-                  primaryColor,
-                ),
-                _buildSettingsGroup(
-                  'settings.advanced_astro'.tr(),
-                  [
-                    _buildSettingRow(
-                      context,
-                      icon: LucideIcons.telescope,
-                      title: 'settings.astro_settings'.tr(),
-                      subtitle: 'settings.astro_desc'.tr(),
-                      onTap: () => context.push('/settings/astro'),
-                      isDark: isDark,
-                      primaryColor: primaryColor,
-                      textColor: textColor,
-                    ),
-                  ],
-                  isDark,
-                  surfaceColor,
-                  borderColor,
-                  textColor,
-                  primaryColor,
-                ),
+                // 1. الموقع النشط
                 _buildSettingsGroup(
                   'settings.active_location'.tr(),
                   [
@@ -203,108 +166,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   textColor,
                   primaryColor,
                 ),
+
+                // 2. المظهر وإمكانية الوصول (المظهر + اللون + تصميم القرص)
                 _buildSettingsGroup(
-                  'settings.general'.tr(),
+                  'settings.appearance_accessibility'.tr(),
                   [
                     _buildSettingRow(
                       context,
-                      icon: LucideIcons.clock_3,
-                      title: 'home.civil_time'.tr(),
-                      subtitle: _civilTimeFormatLabel(
-                        context,
-                        settingsState.civilTimeFormat,
-                      ),
-                      onTap: () => _showSelectionSheet(
-                        'home.civil_time'.tr(),
-                        {
-                          civilTimeFormatSystem: 'settings.theme_system'.tr(),
-                          civilTimeFormat12Hour: _civilTimeFormatLabel(
-                            context,
-                            civilTimeFormat12Hour,
-                          ),
-                          civilTimeFormat24Hour: _civilTimeFormatLabel(
-                            context,
-                            civilTimeFormat24Hour,
-                          ),
-                        },
-                        settingsState.civilTimeFormat,
-                        notifier.updateCivilTimeFormat,
-                        isDark,
-                        surfaceColor,
-                        textColor,
-                        primaryColor,
-                      ),
-                      isDark: isDark,
-                      primaryColor: primaryColor,
-                      textColor: textColor,
-                    ),
-
-                    _buildSettingRow(
-                      context,
-                      icon: LucideIcons.calendar,
-                      title: context.locale.languageCode == 'ar'
-                          ? 'تصحيح التاريخ الهجري'
-                          : 'Hijri Date Adjustment',
-                      subtitle: _hijriOffsetLabel(
-                        context,
-                        settingsState.hijriOffsetDays,
-                      ),
-                      onTap: () => _showSelectionSheet(
-                        context.locale.languageCode == 'ar'
-                            ? 'تصحيح التاريخ الهجري'
-                            : 'Hijri Date Adjustment',
-                        {
-                          '-2': context.locale.languageCode == 'ar'
-                              ? '- يومان (-2)'
-                              : '-2 Days',
-                          '-1': context.locale.languageCode == 'ar'
-                              ? '- يوم واحد (-1)'
-                              : '-1 Day',
-                          '0': context.locale.languageCode == 'ar'
-                              ? 'تلقائي (0)'
-                              : 'Default (0)',
-                          '1': context.locale.languageCode == 'ar'
-                              ? '+ يوم واحد (+1)'
-                              : '+1 Day',
-                          '2': context.locale.languageCode == 'ar'
-                              ? '+ يومان (+2)'
-                              : '+2 Days',
-                        },
-                        settingsState.hijriOffsetDays.toString(),
-                        (String val) {
-                          notifier.updateHijriOffsetDays(
-                            int.tryParse(val) ?? 0,
-                          );
-                        },
-                        isDark,
-                        surfaceColor,
-                        textColor,
-                        primaryColor,
-                      ),
-                      isDark: isDark,
-                      primaryColor: primaryColor,
-                      textColor: textColor,
-                    ),
-
-                    // 🌟 داخل _buildSettingsGroup('settings.general'.tr(), [...]):
-                    _buildSettingRow(
-                      context,
                       icon: isDark ? LucideIcons.moon : LucideIcons.sun,
-                      title: 'settings.theme'.tr() != 'settings.theme'
-                          ? 'settings.theme'.tr()
-                          : (context.locale.languageCode == 'ar'
-                              ? 'مظهر التطبيق'
-                              : 'App Theme'),
+                      title: 'settings.app_appearance'.tr(),
                       subtitle: _themeModeLabel(
                         context,
                         settingsState.themeMode,
                       ),
                       onTap: () => _showSelectionSheet(
-                        'settings.theme'.tr() != 'settings.theme'
-                            ? 'settings.theme'.tr()
-                            : (context.locale.languageCode == 'ar'
-                                ? 'مظهر التطبيق'
-                                : 'App Theme'),
+                        'settings.app_appearance'.tr(),
                         {
                           'dark': _themeModeLabel(context, 'dark'),
                           'light': _themeModeLabel(context, 'light'),
@@ -322,7 +198,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       primaryColor: primaryColor,
                       textColor: textColor,
                     ),
-
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.palette,
@@ -396,31 +271,62 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       primaryColor: primaryColor,
                       textColor: textColor,
                     ),
+                  ],
+                  isDark,
+                  surfaceColor,
+                  borderColor,
+                  textColor,
+                  primaryColor,
+                ),
+
+                // 3. الإشعارات والتنبيهات
+                _buildSettingsGroup(
+                  'settings.notifications_alerts'.tr(),
+                  [
                     _buildSettingRow(
                       context,
-                      icon: LucideIcons.hash,
-                      title: 'settings.dial_pin_mode'.tr(),
-                      subtitle: settingsState.dialPinMode == 'civil24'
-                          ? 'settings.dial_pin_24'.tr()
-                          : 'settings.dial_pin_12'.tr(),
-                      onTap: () => _showSelectionSheet(
-                        'settings.dial_pin_mode'.tr(),
-                        {
-                          'suwaya24': 'settings.dial_pin_12'.tr(),
-                          'civil24': 'settings.dial_pin_24'.tr(),
-                        },
-                        settingsState.dialPinMode,
-                        notifier.updateDialPinMode,
-                        isDark,
-                        surfaceColor,
-                        textColor,
-                        primaryColor,
-                      ),
+                      icon: LucideIcons.bell_ring,
+                      title: 'settings.notifications_alerts'.tr(),
+                      subtitle: 'settings.notifications_desc'.tr(),
+                      onTap: () => context.push('/settings/notifications'),
                       isDark: isDark,
                       primaryColor: primaryColor,
                       textColor: textColor,
                     ),
+                  ],
+                  isDark,
+                  surfaceColor,
+                  borderColor,
+                  textColor,
+                  primaryColor,
+                ),
 
+                // 4. إعدادات فلكية متقدمة
+                _buildSettingsGroup(
+                  'settings.advanced_astro'.tr(),
+                  [
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.telescope,
+                      title: 'settings.astro_settings'.tr(),
+                      subtitle: 'settings.astro_desc'.tr(),
+                      onTap: () => context.push('/settings/astro'),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                  ],
+                  isDark,
+                  surfaceColor,
+                  borderColor,
+                  textColor,
+                  primaryColor,
+                ),
+
+                // 5. عام
+                _buildSettingsGroup(
+                  'settings.general'.tr(),
+                  [
                     _buildSettingRow(
                       context,
                       icon: LucideIcons.languages,
@@ -430,9 +336,91 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         'settings.app_language'.tr(),
                         _appLanguages,
                         currentLang,
-                        (v) {
-                          notifier.updateLanguage(v);
-                          context.setLocale(Locale(v));
+                        (v) async {
+                          await notifier.updateLanguage(v);
+                          if (context.mounted) {
+                            await context.setLocale(Locale(v));
+                          }
+                          await NotificationService()
+                              .refreshLocalizedChannels();
+                        },
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.clock_3,
+                      title: 'home.civil_time'.tr(),
+                      subtitle: _civilTimeFormatLabel(
+                        context,
+                        settingsState.civilTimeFormat,
+                      ),
+                      onTap: () => _showSelectionSheet(
+                        'home.civil_time'.tr(),
+                        {
+                          civilTimeFormatSystem: 'settings.theme_system'.tr(),
+                          civilTimeFormat12Hour: _civilTimeFormatLabel(
+                            context,
+                            civilTimeFormat12Hour,
+                          ),
+                          civilTimeFormat24Hour: _civilTimeFormatLabel(
+                            context,
+                            civilTimeFormat24Hour,
+                          ),
+                        },
+                        settingsState.civilTimeFormat,
+                        notifier.updateCivilTimeFormat,
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.calendar,
+                      title: context.locale.languageCode == 'ar'
+                          ? 'تصحيح التاريخ الهجري'
+                          : 'Hijri Date Adjustment',
+                      subtitle: _hijriOffsetLabel(
+                        context,
+                        settingsState.hijriOffsetDays,
+                      ),
+                      onTap: () => _showSelectionSheet(
+                        context.locale.languageCode == 'ar'
+                            ? 'تصحيح التاريخ الهجري'
+                            : 'Hijri Date Adjustment',
+                        {
+                          '-2': context.locale.languageCode == 'ar'
+                              ? '- يومان (-2)'
+                              : '-2 Days',
+                          '-1': context.locale.languageCode == 'ar'
+                              ? '- يوم واحد (-1)'
+                              : '-1 Day',
+                          '0': context.locale.languageCode == 'ar'
+                              ? 'تلقائي (0)'
+                              : 'Default (0)',
+                          '1': context.locale.languageCode == 'ar'
+                              ? '+ يوم واحد (+1)'
+                              : '+1 Day',
+                          '2': context.locale.languageCode == 'ar'
+                              ? '+ يومان (+2)'
+                              : '+2 Days',
+                        },
+                        settingsState.hijriOffsetDays.toString(),
+                        (String val) {
+                          notifier.updateHijriOffsetDays(
+                            int.tryParse(val) ?? 0,
+                          );
                         },
                         isDark,
                         surfaceColor,
@@ -460,6 +448,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   textColor,
                   primaryColor,
                 ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Column(
@@ -474,13 +463,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        'settings.version'.tr(),
-                        style: TextStyle(
-                          color: isDark ? Colors.white38 : Colors.black38,
-                          fontSize: 11,
-                          fontFamily: 'monospace',
-                        ),
+                      FutureBuilder<PackageInfo>(
+                        future: PackageInfo.fromPlatform(),
+                        builder: (context, snapshot) {
+                          final versionText = snapshot.hasData
+                              ? 'v${snapshot.data!.version} (${snapshot.data!.buildNumber})'
+                              : 'settings.version'.tr();
+                          return Text(
+                            versionText,
+                            style: TextStyle(
+                              color: isDark ? Colors.white38 : Colors.black38,
+                              fontSize: 11,
+                              fontFamily: 'Inter',
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),

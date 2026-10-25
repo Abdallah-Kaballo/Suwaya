@@ -155,6 +155,7 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
           : 29;
     }
   }
+
   /// خوارزمية التقويم الهجري القياسي (Kuwaiti/Tabular Arithmetic) للتواريخ البعيدة خارج جدول أم القرى
   static HijriDate _tabularHijriFromGregorian(
     DateTime gregUtc,

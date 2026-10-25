@@ -489,6 +489,8 @@ class OuterRingPainter extends CustomPainter {
   final DialDesign design;
   final String pinMode;
   final double totalRotation;
+  final ui.Image? sunImage;
+  final ui.Image? moonImage;
 
   OuterRingPainter({
     required this.periods,
@@ -498,6 +500,8 @@ class OuterRingPainter extends CustomPainter {
     required this.design,
     this.pinMode = 'suwaya24',
     this.totalRotation = 0.0,
+    this.sunImage,
+    this.moonImage,
   });
 
   int _computePinsFlipMask() {
@@ -528,14 +532,135 @@ class OuterRingPainter extends CustomPainter {
     return mask;
   }
 
+  void _drawPhasePinBadge({
+    required Canvas canvas,
+    required double badgeRadius,
+    required bool isNight,
+    required int displayNum,
+    required bool flipText,
+  }) {
+    final badgeRect = Rect.fromCircle(
+      center: Offset.zero,
+      radius: badgeRadius,
+    );
+    final ui.Image? targetImage = isNight ? moonImage : sunImage;
+
+    canvas.save();
+    if (flipText) {
+      canvas.rotate(pi);
+    }
+
+    // 1. رسم صورة القمر أو الشمس مقصوصة دائرياً فوق الدبوس مباشرة
+    final clipPath = Path()..addOval(badgeRect);
+    canvas.save();
+    canvas.clipPath(clipPath);
+
+    if (targetImage != null) {
+      final srcRect = Rect.fromLTWH(
+        0,
+        0,
+        targetImage.width.toDouble(),
+        targetImage.height.toDouble(),
+      );
+      canvas.drawImageRect(
+        targetImage,
+        srcRect,
+        badgeRect,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+      // طبقة توازن بصري خفيفة لضمان بروز الرقم بوضوح فائق داخل الصورة
+      canvas.drawRect(
+        badgeRect,
+        Paint()
+          ..color = isNight
+              ? Colors.black.withValues(alpha: 0.25)
+              : Colors.black.withValues(alpha: 0.18),
+      );
+    } else {
+      canvas.drawCircle(
+        Offset.zero,
+        badgeRadius,
+        Paint()
+          ..color = isNight
+              ? const Color(0xFF1E293B)
+              : const Color(0xFFD97706),
+      );
+    }
+    canvas.restore();
+
+    // 2. حلقة حافة دقيقة تحدد قرص الشمس/القمر
+    canvas.drawCircle(
+      Offset.zero,
+      badgeRadius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.1
+        ..color = isNight
+            ? const Color(0xFF93C5FD).withValues(alpha: 0.75)
+            : const Color(0xFFFDE047).withValues(alpha: 0.90),
+    );
+
+    // 3. رسم الرقم في قلب قرص الشمس/القمر بحجم متناسق لا يخرج عن الحواف أبداً
+    final numStr = displayNum.toString();
+    final fontSize = displayNum >= 10 ? badgeRadius * 0.96 : badgeRadius * 1.08;
+
+    final Color strokeColor = isNight
+        ? const Color(0xFF050811)
+        : const Color(0xFF0B0F19);
+    final Color fillColor = isNight
+        ? const Color(0xFFFFF3C4)
+        : const Color(0xFFFFFFFF);
+
+    final strokePainter = TextPainter(
+      text: TextSpan(
+        text: numStr,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Inter',
+          height: 1.0,
+          foreground: Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2.4
+            ..strokeJoin = StrokeJoin.round
+            ..color = strokeColor,
+        ),
+      ),
+      textDirection: ui.TextDirection.ltr,
+      textAlign: TextAlign.center,
+    )..layout();
+
+    final fillPainter = TextPainter(
+      text: TextSpan(
+        text: numStr,
+        style: TextStyle(
+          color: fillColor,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w900,
+          fontFamily: 'Inter',
+          height: 1.0,
+        ),
+      ),
+      textDirection: ui.TextDirection.ltr,
+      textAlign: TextAlign.center,
+    )..layout();
+
+    final offset = Offset(-fillPainter.width / 2, -fillPainter.height / 2);
+    strokePainter.paint(canvas, offset);
+    fillPainter.paint(canvas, offset);
+
+    canvas.restore();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final R = size.width / 2;
 
     final pinStart = R * kRailwayR;
-    final pinEnd = pinStart + (R * 0.04);
-    final textR = pinEnd + (R * 0.08);
+    final pinEnd = pinStart + (R * 0.022);
+    final badgeRadius = (R * 0.058).clamp(10.5, 15.0);
+    final badgeCenterR = pinEnd + badgeRadius + (R * 0.006);
 
     final Color pinAndTextColor =
         isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
@@ -549,6 +674,7 @@ class OuterRingPainter extends CustomPainter {
     );
 
     if (pinMode == 'civil24') {
+      final textR = pinEnd + (R * 0.065);
       final pins = buildCivilDialPins(dayStart, dayEnd);
       for (var index = 0; index < pins.length; index++) {
         final pin = pins[index];
@@ -575,7 +701,7 @@ class OuterRingPainter extends CustomPainter {
             text: pin.hour.toString().padLeft(2, '0'),
             style: TextStyle(
               color: pinAndTextColor,
-              fontSize: 14.5,
+              fontSize: 13.5,
               fontWeight: FontWeight.w800,
               fontFamily: 'Inter',
               shadows: textShadows,
@@ -628,28 +754,17 @@ class OuterRingPainter extends CustomPainter {
           Paint()..color = pinAndTextColor,
         );
 
-        int displayNum = (globalLineIndex % 12) + 1;
-        String icon = globalLineIndex < 12 ? '🌑' : '☀️';
+        final int displayNum = (globalLineIndex % 12) + 1;
+        final bool isNight = globalLineIndex < 12;
+        final bool flipText = sin(lineAngle + totalRotation) > 0;
 
-        textPainter.text = TextSpan(
-          text: '$displayNum $icon',
-          style: TextStyle(
-            color: pinAndTextColor,
-            fontSize: 13.5,
-            fontWeight: FontWeight.w800,
-            fontFamily: 'Inter',
-            shadows: textShadows,
-          ),
-        );
-        textPainter.layout();
-
-        canvas.translate(0, -textR);
-        if (sin(lineAngle + totalRotation) > 0) {
-          canvas.rotate(pi);
-        }
-        textPainter.paint(
-          canvas,
-          Offset(-textPainter.width / 2, -textPainter.height / 2),
+        canvas.translate(0, -badgeCenterR);
+        _drawPhasePinBadge(
+          canvas: canvas,
+          badgeRadius: badgeRadius,
+          isNight: isNight,
+          displayNum: displayNum,
+          flipText: flipText,
         );
 
         canvas.restore();
@@ -665,6 +780,8 @@ class OuterRingPainter extends CustomPainter {
       old.dayEnd != dayEnd ||
       old.design != design ||
       old.pinMode != pinMode ||
+      old.sunImage != sunImage ||
+      old.moonImage != moonImage ||
       old.periods.length != periods.length ||
       old._computePinsFlipMask() != _computePinsFlipMask() ||
       _periodsChanged(old.periods, periods);

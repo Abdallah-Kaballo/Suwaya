@@ -95,7 +95,6 @@
     "default_ring": "Standard Ringetone",
     "makkah_adhan": "Adhan fra Mekka",
     "soft_bell": "Blød Klokke",
-    "birds": "Fuglekvidder",
     "silent": "Lydløs",
     "notification": "Lydløs Notifikation",
     "alarm": "Høj Alarm",
@@ -611,7 +610,6 @@
     "feature_gold": "Viser Guld-badget ved siden af appens navn",
     "feature_diamond": "Viser Diamant-badget ved siden af appens navn",
     "feature_support": "Støt filosofien og projektets kontinuitet",
-    "auto_renew_note": "Alle abonnementer er månedlige, men \"Automatisk Fornyelse\" er slået fra som standard for at sikre din tryghed — der vil ikke forekomme fremtidige opkrævninger uden dit samtykke.",
     "restoring_msg": "Tjekker din tidligere støtte...",
     "restore_purchases": "Gendan tidligere badge",
     "active": "Aktiv"

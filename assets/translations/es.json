@@ -95,7 +95,6 @@
     "default_ring": "Tono Predeterminado",
     "makkah_adhan": "Adhan de La Meca",
     "soft_bell": "Campana Suave",
-    "birds": "Pájaros",
     "silent": "Silencio",
     "notification": "Notificación Silenciosa",
     "alarm": "Alarma Fuerte",
@@ -611,7 +610,6 @@
     "feature_gold": "Muestra la insignia de Oro junto al nombre de la aplicación",
     "feature_diamond": "Muestra la insignia de Diamante junto al nombre de la aplicación",
     "feature_support": "Apoyar la filosofía y la continuidad del proyecto",
-    "auto_renew_note": "Todas las suscripciones son mensuales, pero la \"Renovación Automática\" está desactivada por defecto para tu tranquilidad; no se realizarán cargos futuros sin tu consentimiento.",
     "restoring_msg": "Comprobando tu apoyo anterior...",
     "restore_purchases": "Restaurar insignia anterior",
     "active": "Activo"

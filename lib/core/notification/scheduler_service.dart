@@ -208,9 +208,7 @@ class NotificationScheduler {
     if (soundId == null || soundId.isEmpty || soundId == 'default') {
       return 'assets/audio/default.mp3';
     }
-    if (soundId == 'assets/audio/birds.mp3' || soundId == 'birds') {
-      return 'assets/audio/soft.mp3';
-    }
+
     if (soundId.contains('assets/')) return soundId;
     return 'assets/audio/$soundId.mp3';
   }
@@ -385,9 +383,6 @@ class NotificationScheduler {
               final int alertLevel = settings.getPeriodAlertLevel(pId, 1);
 
               if (alertLevel > 0) {
-                final String soundId =
-                    settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
-                final String assetPath = _getAssetAudioPath(soundId);
                 final int notificationId =
                     100000 + (safeOffsetIndex * 1000) + numericId;
 
@@ -402,78 +397,93 @@ class NotificationScheduler {
                   continue;
                 }
 
-                final realAlarmTime = resolveCollisionSafeTime(
-                  rawDeviceTime,
-                  occupiedAlarmSeconds,
-                );
-
-                final bool isFullScreenAlarm = alertLevel == 2;
-                final deliveryMode = isFullScreenAlarm
-                    ? AlarmDeliveryMode.fullscreenAlarm
-                    : AlarmDeliveryMode.curtainAudio;
                 final String prayerTitle =
                     '${'notifications.prayer_of'.tr()} ${nameKey.tr()}';
                 final String prayerBody = 'notifications.adhan_time_body'.tr();
-                final policy = AlarmPolicyTable.forEvent(
-                  kind: AlarmEventKind.prayer,
-                  sourceId: pId,
-                );
 
-                final payloadStr = ParsedAlarmData(
-                  eventId: notificationId,
-                  kind: AlarmEventKind.prayer,
-                  deliveryMode: deliveryMode,
-                  sourceId: pId,
-                  title: prayerTitle,
-                  body: prayerBody,
-                  colorValue: 0xFFD4AF37,
-                  snoozeAllowed: false, // الأذان لا يقبل الغفوة افتراضياً
-                  snoozeDurationMinutes: userSnoozeMins,
-                  snoozeCount: 0,
-                  maxSnoozes: 0,
-                  loopAudio:
-                      false, // الأذان يعمل مرة واحدة كاملاً دون تكرار مزعج
-                  volumePolicy: AlarmVolumePolicy.userAdjustable,
-                ).toPayloadString();
+                if (alertLevel == 2) {
+                  // المستوى 2: تنبيه كامل (يوقظ الشاشة المقفلة أو يظهر كتنبيه علوي مع صوت الأذان)
+                  final String soundId =
+                      settings.getPeriodSound(pId, 'assets/audio/adhan.mp3');
+                  final String assetPath = _getAssetAudioPath(soundId);
 
-                requiredAlarmIds.add(notificationId);
-                final existing = activeAlarmMap[notificationId];
-                bool needsUpdate = true;
-                if (existing != null) {
-                  final timeDiff = existing.dateTime
-                      .difference(realAlarmTime)
-                      .inSeconds
-                      .abs();
-                  if (timeDiff < 5 &&
-                      existing.assetAudioPath == assetPath &&
-                      existing.androidFullScreenIntent == isFullScreenAlarm &&
-                      existing.loopAudio == false &&
-                      existing.payload == payloadStr) {
-                    needsUpdate = false;
+                  final realAlarmTime = resolveCollisionSafeTime(
+                    rawDeviceTime,
+                    occupiedAlarmSeconds,
+                  );
+
+                  final policy = AlarmPolicyTable.forEvent(
+                    kind: AlarmEventKind.prayer,
+                    sourceId: pId,
+                  );
+
+                  final payloadStr = ParsedAlarmData(
+                    eventId: notificationId,
+                    kind: AlarmEventKind.prayer,
+                    deliveryMode: AlarmDeliveryMode.fullscreenAlarm,
+                    sourceId: pId,
+                    title: prayerTitle,
+                    body: prayerBody,
+                    colorValue: 0xFFD4AF37,
+                    snoozeAllowed: false,
+                    snoozeDurationMinutes: userSnoozeMins,
+                    snoozeCount: 0,
+                    maxSnoozes: 0,
+                    loopAudio: false,
+                    volumePolicy: AlarmVolumePolicy.userAdjustable,
+                  ).toPayloadString();
+
+                  requiredAlarmIds.add(notificationId);
+                  final existing = activeAlarmMap[notificationId];
+                  bool needsUpdate = true;
+                  if (existing != null) {
+                    final timeDiff = existing.dateTime
+                        .difference(realAlarmTime)
+                        .inSeconds
+                        .abs();
+                    if (timeDiff < 5 &&
+                        existing.assetAudioPath == assetPath &&
+                        existing.androidFullScreenIntent == true &&
+                        existing.loopAudio == false &&
+                        existing.payload == payloadStr) {
+                      needsUpdate = false;
+                    }
                   }
-                }
 
-                if (needsUpdate) {
-                  final ok = await Alarm.set(
-                    alarmSettings: AlarmSettings(
-                      id: notificationId,
-                      dateTime: realAlarmTime,
-                      assetAudioPath: assetPath,
-                      loopAudio: false,
-                      vibrate: true,
-                      androidFullScreenIntent: isFullScreenAlarm,
-                      payload: payloadStr,
-                      volumeSettings: VolumeSettings.fade(
-                        volume: settings.getPeriodVolume(pId, 1.0),
-                        fadeDuration: policy.fadeDuration,
-                        volumeEnforced: false,
+                  if (needsUpdate) {
+                    final ok = await Alarm.set(
+                      alarmSettings: AlarmSettings(
+                        id: notificationId,
+                        dateTime: realAlarmTime,
+                        assetAudioPath: assetPath,
+                        loopAudio: false,
+                        vibrate: true,
+                        androidFullScreenIntent: true,
+                        payload: payloadStr,
+                        volumeSettings: VolumeSettings.fade(
+                          volume: settings.getPeriodVolume(pId, 1.0),
+                          fadeDuration: policy.fadeDuration,
+                          volumeEnforced: false,
+                        ),
+                        notificationSettings: NotificationSettings(
+                          title: prayerTitle,
+                          body: prayerBody,
+                          stopButton: 'alarm.stop'.tr(),
+                        ),
                       ),
-                      notificationSettings: NotificationSettings(
-                        title: prayerTitle,
-                        body: prayerBody,
-                        stopButton: 'alarm.stop'.tr(),
-                      ),
-                    ),
+                    );
+                    if (!ok) hadSchedulingFailures = true;
+                  }
+                } else if (alertLevel == 1) {
+                  // المستوى 1: إشعار نظام عادي بصوت إشعارات الهاتف القياسي
+                  requiredNormalIds.add(notificationId);
+                  final ok = await _service.scheduleNormalNotification(
+                    id: notificationId,
+                    title: prayerTitle,
+                    body: 'notifications.adhan_time_short'.tr(),
+                    scheduledTime: rawDeviceTime,
+                    playSound: true,
+                    enableVibration: true,
                   );
                   if (!ok) hadSchedulingFailures = true;
                 }
