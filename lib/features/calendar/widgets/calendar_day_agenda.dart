@@ -265,8 +265,8 @@ class CalendarDayAgenda extends ConsumerWidget {
           _buildPhaseSectionCard(
             context: context,
             ref: ref,
-            title:
-                '$nightHeaderTitle SuwayaPhaseBadge(isNight: true, size: 20)',
+            title: nightHeaderTitle,
+            isNight: true,
             icon: LucideIcons.moon,
             phaseColor: const Color(0xFF7986CB),
             tasks: nightTasks,
@@ -279,7 +279,8 @@ class CalendarDayAgenda extends ConsumerWidget {
           _buildPhaseSectionCard(
             context: context,
             ref: ref,
-            title: '$dayHeaderTitle SuwayaPhaseBadge(isNight: false, size: 20)',
+            title: dayHeaderTitle,
+            isNight: false,
             icon: LucideIcons.sun,
             phaseColor: isDark
                 ? const Color(0xFFFFB300)
@@ -299,6 +300,7 @@ class CalendarDayAgenda extends ConsumerWidget {
     required BuildContext context,
     required WidgetRef ref,
     required String title,
+    required bool isNight,
     required IconData icon,
     required Color phaseColor,
     required List<TaskModel> tasks,
@@ -308,6 +310,7 @@ class CalendarDayAgenda extends ConsumerWidget {
     required bool isDark,
   }) {
     final isEmpty = tasks.isEmpty && routines.isEmpty;
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -327,15 +330,37 @@ class CalendarDayAgenda extends ConsumerWidget {
               Icon(icon, color: phaseColor, size: 18),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: phaseColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w900,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: phaseColor,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SuwayaPhaseBadge(
+                      isNight: isNight,
+                      size: 20,
+                      iconMode: settings.suwayaIconMode,
+                      isRTL: isRTL,
+                      textStyle: TextStyle(
+                        color: phaseColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(

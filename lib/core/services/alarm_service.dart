@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:alarm/alarm.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-
+import 'dart:async';
+import 'package:flutter/services.dart';
 /// 🌟 أنواع الأحداث الصريحة (مستقلة تماماً عن اللغة أو طريقة العرض)
 enum AlarmEventKind {
   prayer,
@@ -221,7 +222,34 @@ class AlarmService {
   static const int defaultMaxSnoozes = 3;
   static const int defaultSnoozeMinutes = 5;
 
+  static const MethodChannel lockscreenChannel = MethodChannel(
+    'com.suwaya.app/lockscreen',
+  );
+
+  static final StreamController<void> _hardwareVolumeController =
+      StreamController<void>.broadcast();
+  static bool _channelHandlerRegistered = false;
+
+  /// تدفق موحد لأحداث ضغط أزرار الصوت الفيزيائية أثناء رنين المنبه
+  static Stream<void> get onHardwareVolumeAction {
+    _ensureChannelHandlerRegistered();
+    return _hardwareVolumeController.stream;
+  }
+
+  static void _ensureChannelHandlerRegistered() {
+    if (_channelHandlerRegistered) return;
+    _channelHandlerRegistered = true;
+    lockscreenChannel.setMethodCallHandler((MethodCall call) async {
+      if (call.method == 'onHardwareVolumeAction' ||
+          call.method == 'onHardwareVolumeStop' ||
+          call.method == 'onHardwareVolumeButton') {
+        _hardwareVolumeController.add(null);
+      }
+    });
+  }
+
   static Future<void> init() async {
+    _ensureChannelHandlerRegistered();
     await Alarm.init();
   }
 

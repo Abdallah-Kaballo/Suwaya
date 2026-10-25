@@ -65,9 +65,7 @@ class MainActivity : FlutterActivity() {
                     "setAlarmRingingState" -> {
                         val ringing = call.argument<Boolean>("ringing") ?: false
                         isAlarmCurrentlyRinging = ringing
-                        if (ringing) {
-                            applyLockScreenFlags(true)
-                        }
+                        applyLockScreenFlags(ringing)
                         result.success(null)
                     }
 
@@ -78,6 +76,7 @@ class MainActivity : FlutterActivity() {
                     }
 
                     "hideFromLockScreen" -> {
+                        isAlarmCurrentlyRinging = false
                         applyLockScreenFlags(false)
                         result.success(null)
                     }
@@ -116,7 +115,7 @@ class MainActivity : FlutterActivity() {
         if (isAlarmCurrentlyRinging &&
             (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)
         ) {
-            methodChannel?.invokeMethod("onHardwareVolumeStop", null)
+            methodChannel?.invokeMethod("onHardwareVolumeAction", null)
             return true
         }
         return super.onKeyDown(keyCode, event)

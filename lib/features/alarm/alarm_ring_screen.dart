@@ -30,8 +30,6 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
   late final Color accentColor;
   late final int snoozeCount;
 
-  static const platform = MethodChannel('com.suwaya.app/lockscreen');
-
   double _dragPosition = 0.0;
   final double _maxDragThreshold = 110.0;
   bool _isProcessingAction = false;
@@ -40,12 +38,15 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
   late Animation<double> _glowAnimation;
 
   StreamSubscription<AlarmSet>? _ringingSub;
+  StreamSubscription<void>? _hardwareVolumeSub;
 
   @override
   void initState() {
     super.initState();
     _enableLockScreenAndAlarmStream();
-    platform.setMethodCallHandler(_handlePlatformCallback);
+    _hardwareVolumeSub = AlarmService.onHardwareVolumeAction.listen((_) {
+      _onHardwareVolumePressed();
+    });
     HardwareKeyboard.instance.addHandler(_handleHardwareKey);
 
     _ringingSub = Alarm.ringing.listen((alarmSet) {
@@ -71,22 +72,6 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     _glowAnimation = Tween<double>(begin: 0.18, end: 0.55).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
-  }
-
-  Future<dynamic> _handlePlatformCallback(MethodCall call) async {
-    if (call.method == 'onHardwareVolumeButton') {
-      _onHardwareVolumePressed();
-    }
-  }
-
-  bool _handleHardwareVolumeKey(KeyEvent event) {
-    if (event is KeyDownEvent &&
-        (event.logicalKey == LogicalKeyboardKey.audioVolumeDown ||
-            event.logicalKey == LogicalKeyboardKey.audioVolumeUp)) {
-      _triggerStop();
-      return true;
-    }
-    return false;
   }
 
   bool _handleHardwareKey(KeyEvent event) {
@@ -119,17 +104,20 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
   @override
   void dispose() {
     _ringingSub?.cancel();
-    HardwareKeyboard.instance.removeHandler(_handleHardwareVolumeKey);
+    _hardwareVolumeSub?.cancel();
+    HardwareKeyboard.instance.removeHandler(_handleHardwareKey);
     _disableLockScreenAndRestoreStream();
     _glowController.dispose();
     super.dispose();
   }
 
-  /// 🌟 تفعيل الظهور فوق شاشة القفل + ربط أزرار الصوت الفيزيائية بمسار صوت المنبه (STREAM_ALARM)
   Future<void> _enableLockScreenAndAlarmStream() async {
     try {
-      await platform.invokeMethod('showOnLockScreen');
-      await platform.invokeMethod('setAlarmVolumeControl', {'enabled': true});
+      await AlarmService.lockscreenChannel.invokeMethod('showOnLockScreen');
+      await AlarmService.lockscreenChannel.invokeMethod(
+        'setAlarmVolumeControl',
+        {'enabled': true},
+      );
     } catch (e) {
       debugPrint('Lockscreen/Volume channel note: $e');
     }
@@ -137,8 +125,11 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
 
   Future<void> _disableLockScreenAndRestoreStream() async {
     try {
-      await platform.invokeMethod('setAlarmVolumeControl', {'enabled': false});
-      await platform.invokeMethod('hideFromLockScreen');
+      await AlarmService.lockscreenChannel.invokeMethod(
+        'setAlarmVolumeControl',
+        {'enabled': false},
+      );
+      await AlarmService.lockscreenChannel.invokeMethod('hideFromLockScreen');
     } catch (e) {
       debugPrint('Lockscreen/Volume restore note: $e');
     }

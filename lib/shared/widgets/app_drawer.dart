@@ -315,16 +315,6 @@ class AppDrawer extends ConsumerWidget {
                   ),
                   _buildDrawerItem(
                     context,
-                    LucideIcons.heart_handshake,
-                    'drawer.support_app'.tr(),
-                    () {
-                      Navigator.pop(context);
-                      context.push('/support');
-                    },
-                    iconColor: const Color(0xFFFFD700),
-                  ),
-                  _buildDrawerItem(
-                    context,
                     LucideIcons.share_2,
                     'drawer.share_app'.tr() != 'drawer.share_app'
                         ? 'drawer.share_app'.tr()

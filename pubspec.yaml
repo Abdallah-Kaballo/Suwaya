@@ -80,16 +80,6 @@ flutter:
     - docs/faq/
     - docs/privacy/
 
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/icons/app_icon.png" 
-  remove_alpha_ios: true
-  min_sdk_android: 21
-  
-  adaptive_icon_background: "assets/icons/ic_background.png" 
-  adaptive_icon_foreground: "assets/icons/ic_foreground.png"
-
   fonts:
     - family: Tajawal
       fonts:
@@ -106,3 +96,13 @@ flutter_launcher_icons:
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-Variable.ttf
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png" 
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  
+  adaptive_icon_background: "assets/icons/ic_background.png" 
+  adaptive_icon_foreground: "assets/icons/ic_foreground.png"

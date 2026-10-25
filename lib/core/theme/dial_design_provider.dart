@@ -8,14 +8,14 @@ extension DialDesignExt on DialDesign {
   String get displayName {
     switch (this) {
       case DialDesign.classic:
-        final tr = 'settings.dial_classic'.tr();
-        return tr != 'settings.dial_classic' ? tr : 'Classic Astrolabe';
+        final tr = 'settings.design_classic'.tr();
+        return tr != 'settings.design_classic' ? tr : 'Classic Astrolabe';
       case DialDesign.minimal:
-        final tr = 'settings.dial_minimal'.tr();
-        return tr != 'settings.dial_minimal' ? tr : 'Minimal';
+        final tr = 'settings.design_minimal'.tr();
+        return tr != 'settings.design_minimal' ? tr : 'Minimal';
       case DialDesign.geometric:
-        final tr = 'settings.dial_geometric'.tr();
-        return tr != 'settings.dial_geometric' ? tr : 'Islamic Geometric';
+        final tr = 'settings.design_geometric'.tr();
+        return tr != 'settings.design_geometric' ? tr : 'Islamic Geometric';
     }
   }
 }

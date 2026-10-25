@@ -214,9 +214,8 @@ class SuwayaApp extends ConsumerStatefulWidget {
 
 class _SuwayaAppState extends ConsumerState<SuwayaApp>
     with WidgetsBindingObserver {
-  static const _lockscreenChannel = MethodChannel('com.suwaya.app/lockscreen');
-
   StreamSubscription<AlarmSet>? _alarmSubscription;
+  StreamSubscription<void>? _hardwareVolumeSub;
   int? _pushedFullScreenAlarmId;
   AlarmSettings? _activeBannerAlarm;
 
@@ -224,15 +223,18 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _lockscreenChannel.setMethodCallHandler(_handlePlatformChannel);
+    _hardwareVolumeSub = AlarmService.onHardwareVolumeAction.listen((_) {
+      _handleBannerHardwareVolumeAction();
+    });
     HardwareKeyboard.instance.addHandler(_handleGlobalHardwareKey);
 
     _alarmSubscription = Alarm.ringing.listen((AlarmSet alarmSet) async {
       final hasRinging = alarmSet.alarms.isNotEmpty;
       try {
-        await _lockscreenChannel.invokeMethod('setAlarmRingingState', {
-          'ringing': hasRinging,
-        });
+        await AlarmService.lockscreenChannel.invokeMethod(
+          'setAlarmRingingState',
+          {'ringing': hasRinging},
+        );
       } catch (_) {}
 
       if (!hasRinging) {
@@ -247,7 +249,9 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
       bool isLocked = false;
       try {
         isLocked =
-            await _lockscreenChannel.invokeMethod<bool>('isDeviceLocked') ??
+            await AlarmService.lockscreenChannel.invokeMethod<bool>(
+              'isDeviceLocked',
+            ) ??
             false;
       } catch (_) {}
 
@@ -257,7 +261,6 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
         }
         _openFullScreenAlarm(ringingAlarm);
       } else {
-        // الشاشة مفتوحة: يظهر كإشعار علوي أنيق مع أزرار الإيقاف والغفوة
         if (_pushedFullScreenAlarmId != ringingAlarm.id && mounted) {
           setState(() => _activeBannerAlarm = ringingAlarm);
         }
@@ -265,18 +268,36 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
     });
   }
 
-  Future<dynamic> _handlePlatformChannel(MethodCall call) async {
-    if (call.method == 'onHardwareVolumeStop') {
+  Future<void> _handleBannerHardwareVolumeAction() async {
+    // إذا كانت شاشة الرنين الكاملة مفتوحة، فهي التي تتولى معالجة الغفوة أو الإيقاف
+    if (_pushedFullScreenAlarmId != null) return;
+    final bannerAlarm = _activeBannerAlarm;
+    if (bannerAlarm == null) return;
+
+    final settings = ref.read(settingsProvider);
+    final parsed = AlarmService.parseAlarmSettings(bannerAlarm);
+    final maxSnoozes = settings.maxSnoozeCount > 0
+        ? settings.maxSnoozeCount
+        : parsed.maxSnoozes;
+    final canSnooze =
+        parsed.kind != AlarmEventKind.prayer &&
+        parsed.snoozeAllowed &&
+        parsed.snoozeCount < maxSnoozes;
+
+    if (canSnooze) {
+      await _snoozeBannerAlarm(bannerAlarm);
+    } else {
       await _stopAllActiveAlarms();
     }
   }
 
   bool _handleGlobalHardwareKey(KeyEvent event) {
     if (event is KeyDownEvent &&
-        (_activeBannerAlarm != null || _pushedFullScreenAlarmId != null) &&
+        _pushedFullScreenAlarmId == null &&
+        _activeBannerAlarm != null &&
         (event.logicalKey == LogicalKeyboardKey.audioVolumeDown ||
             event.logicalKey == LogicalKeyboardKey.audioVolumeUp)) {
-      _stopAllActiveAlarms();
+      _handleBannerHardwareVolumeAction();
       return true;
     }
     return false;
@@ -333,7 +354,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
     _pushedFullScreenAlarmId = alarmSettings.id;
 
     try {
-      await _lockscreenChannel.invokeMethod('showOnLockScreen');
+      await AlarmService.lockscreenChannel.invokeMethod('showOnLockScreen');
     } catch (_) {}
 
     Future<void> pushRoute(NavigatorState navState) async {
@@ -365,7 +386,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
   @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handleGlobalHardwareKey);
-    _lockscreenChannel.setMethodCallHandler(null);
+    _hardwareVolumeSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _alarmSubscription?.cancel();
     super.dispose();
