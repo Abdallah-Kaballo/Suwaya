@@ -7,7 +7,7 @@ part of 'settings_model.dart';
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types, experimental_member_use
 
 extension GetSettingsModelCollection on Isar {
   IsarCollection<SettingsModel> get settingsModels => this.collection();
@@ -21,6 +21,7 @@ const SettingsModelSchema = CollectionSchema(
       id: 0,
       name: r'activeLocation',
       type: IsarType.object,
+
       target: r'SavedLocation',
     ),
     r'activeNightMarkers': PropertySchema(
@@ -143,6 +144,7 @@ const SettingsModelSchema = CollectionSchema(
       id: 25,
       name: r'periodConfigs',
       type: IsarType.objectList,
+
       target: r'PeriodConfig',
     ),
     r'qiyamAlarmEnabled': PropertySchema(
@@ -154,6 +156,7 @@ const SettingsModelSchema = CollectionSchema(
       id: 27,
       name: r'savedLocations',
       type: IsarType.objectList,
+
       target: r'SavedLocation',
     ),
     r'showSunrise': PropertySchema(
@@ -202,6 +205,7 @@ const SettingsModelSchema = CollectionSchema(
       type: IsarType.stringList,
     ),
   },
+
   estimateSize: _settingsModelEstimateSize,
   serialize: _settingsModelSerialize,
   deserialize: _settingsModelDeserialize,
@@ -213,10 +217,11 @@ const SettingsModelSchema = CollectionSchema(
     r'SavedLocation': SavedLocationSchema,
     r'PeriodConfig': PeriodConfigSchema,
   },
+
   getId: _settingsModelGetId,
   getLinks: _settingsModelGetLinks,
   attach: _settingsModelAttach,
-  version: '3.3.2',
+  version: '3.4.1',
 );
 
 int _settingsModelEstimateSize(
@@ -1195,6 +1200,7 @@ extension SettingsModelQueryFilter
         FilterCondition.equalTo(
           property: r'customFajrAngle',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1213,6 +1219,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'customFajrAngle',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1231,6 +1238,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'customFajrAngle',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1253,6 +1261,7 @@ extension SettingsModelQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
@@ -1266,6 +1275,7 @@ extension SettingsModelQueryFilter
         FilterCondition.equalTo(
           property: r'customIshaAngle',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1284,6 +1294,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'customIshaAngle',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1302,6 +1313,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'customIshaAngle',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1324,6 +1336,7 @@ extension SettingsModelQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
@@ -1677,6 +1690,7 @@ extension SettingsModelQueryFilter
         FilterCondition.equalTo(
           property: r'defaultHabitVolume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1695,6 +1709,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'defaultHabitVolume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1713,6 +1728,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'defaultHabitVolume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1735,6 +1751,7 @@ extension SettingsModelQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
@@ -1947,6 +1964,7 @@ extension SettingsModelQueryFilter
         FilterCondition.equalTo(
           property: r'defaultTaskVolume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1965,6 +1983,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'defaultTaskVolume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -1983,6 +2002,7 @@ extension SettingsModelQueryFilter
           include: include,
           property: r'defaultTaskVolume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -2005,6 +2025,7 @@ extension SettingsModelQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
@@ -5449,7 +5470,7 @@ extension SettingsModelQueryProperty
 // **************************************************************************
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types, experimental_member_use
 
 const SavedLocationSchema = Schema(
   name: r'SavedLocation',
@@ -5492,6 +5513,7 @@ const SavedLocationSchema = Schema(
       type: IsarType.string,
     ),
   },
+
   estimateSize: _savedLocationEstimateSize,
   serialize: _savedLocationSerialize,
   deserialize: _savedLocationDeserialize,
@@ -5761,6 +5783,7 @@ extension SavedLocationQueryFilter
         FilterCondition.equalTo(
           property: r'latitude',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -5779,6 +5802,7 @@ extension SavedLocationQueryFilter
           include: include,
           property: r'latitude',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -5797,6 +5821,7 @@ extension SavedLocationQueryFilter
           include: include,
           property: r'latitude',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -5819,6 +5844,7 @@ extension SavedLocationQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
@@ -5973,6 +5999,7 @@ extension SavedLocationQueryFilter
         FilterCondition.equalTo(
           property: r'longitude',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -5991,6 +6018,7 @@ extension SavedLocationQueryFilter
           include: include,
           property: r'longitude',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -6009,6 +6037,7 @@ extension SavedLocationQueryFilter
           include: include,
           property: r'longitude',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -6031,6 +6060,7 @@ extension SavedLocationQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
@@ -6486,7 +6516,7 @@ extension SavedLocationQueryObject
     on QueryBuilder<SavedLocation, SavedLocation, QFilterCondition> {}
 
 // coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types, experimental_member_use
 
 const PeriodConfigSchema = Schema(
   name: r'PeriodConfig',
@@ -6519,6 +6549,7 @@ const PeriodConfigSchema = Schema(
     ),
     r'volume': PropertySchema(id: 5, name: r'volume', type: IsarType.double),
   },
+
   estimateSize: _periodConfigEstimateSize,
   serialize: _periodConfigSerialize,
   deserialize: _periodConfigDeserialize,
@@ -7048,6 +7079,7 @@ extension PeriodConfigQueryFilter
         FilterCondition.equalTo(
           property: r'volume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -7066,6 +7098,7 @@ extension PeriodConfigQueryFilter
           include: include,
           property: r'volume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -7084,6 +7117,7 @@ extension PeriodConfigQueryFilter
           include: include,
           property: r'volume',
           value: value,
+
           epsilon: epsilon,
         ),
       );
@@ -7105,6 +7139,7 @@ extension PeriodConfigQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+
           epsilon: epsilon,
         ),
       );
