@@ -25,6 +25,14 @@ class ModeSelectorView extends ConsumerWidget {
     final dailyCount = ref.watch(
       pomodoroProvider.select((s) => s.dailyCompletedSessions),
     );
+    final numStyle = ref.watch(
+      settingsProvider.select((s) => s.suwayaNumberStyle),
+    );
+    final formattedCount = formatDigitsForStyle(
+      '$dailyCount',
+      numberStyle: numStyle,
+      locale: context.locale.languageCode,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -45,12 +53,13 @@ class ModeSelectorView extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Text(
                   context.locale.languageCode == 'ar'
-                      ? 'إنجاز اليوم: $dailyCount جلسات تركيز'
-                      : 'Completed Today: $dailyCount focus sessions',
+                      ? 'إنجاز اليوم: $formattedCount جلسات تركيز'
+                      : 'Completed Today: $formattedCount focus sessions',
                   style: TextStyle(
                     color: primaryColor,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
                   ),
                 ),
               ],
@@ -171,17 +180,103 @@ class ModeSelectorView extends ConsumerWidget {
 class TraditionalTimerView extends ConsumerWidget {
   const TraditionalTimerView({super.key});
 
+  Widget _buildZenFullScreenTopBar(
+    BuildContext context,
+    PomodoroState state,
+    PomodoroEngine notifier,
+  ) {
+    final isAr = context.locale.languageCode == 'ar';
+    final modeTitle = switch (state.zenMode) {
+      PomodoroZenMode.ring => isAr ? 'نمط الحلقة' : 'Zen Ring',
+      PomodoroZenMode.digital => isAr ? 'نمط رقمي' : 'Pure Digital',
+      PomodoroZenMode.ambient => isAr ? 'نبض هادئ' : 'Ambient Breath',
+    };
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TextButton.icon(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white70,
+            backgroundColor: Colors.white.withValues(alpha: 0.06),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            notifier.cycleZenMode();
+          },
+          icon: const Icon(LucideIcons.sparkles, size: 15),
+          label: Text(
+            modeTitle,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              tooltip: 'Mute / Unmute',
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                notifier.toggleMute();
+              },
+              icon: Icon(
+                state.isMuted ? LucideIcons.volume_x : LucideIcons.volume_2,
+                color: Colors.white54,
+                size: 19,
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              tooltip: 'Exit Full Screen',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                notifier.setFullScreen(false);
+              },
+              icon: const Icon(
+                LucideIcons.minimize_2,
+                color: Colors.white54,
+                size: 19,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pomodoroProvider);
     final notifier = ref.read(pomodoroProvider.notifier);
+    final numStyle = ref.watch(
+      settingsProvider.select((s) => s.suwayaNumberStyle),
+    );
+    final langCode = context.locale.languageCode;
+
     final isDark =
         state.isFullScreen || Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
 
     final int remInt = state.remainingSeconds.ceil();
-    final String m = (remInt ~/ 60).toString().padLeft(2, '0');
-    final String s = (remInt % 60).toString().padLeft(2, '0');
+    final String m = formatDigitsForStyle(
+      (remInt ~/ 60).toString().padLeft(2, '0'),
+      numberStyle: numStyle,
+      locale: langCode,
+    );
+    final String s = formatDigitsForStyle(
+      (remInt % 60).toString().padLeft(2, '0'),
+      numberStyle: numStyle,
+      locale: langCode,
+    );
 
     final Color activeColor = switch (state.phase) {
       PomodoroPhase.work => const Color(0xFFE53935),
@@ -321,12 +416,12 @@ class TraditionalTimerView extends ConsumerWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 250),
             margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: isCurrent ? 22 : 10,
-            height: 10,
+            width: isCurrent ? 22 : 8,
+            height: 8,
             decoration: BoxDecoration(
               color: (isCompleted || isCurrent)
                   ? activeColor
-                  : textColor.withValues(alpha: 0.15),
+                  : textColor.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(6),
             ),
           );
@@ -337,36 +432,49 @@ class TraditionalTimerView extends ConsumerWidget {
     if (isLandscape) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
+        child: Column(
           children: [
+            if (state.isFullScreen)
+              _buildZenFullScreenTopBar(context, state, notifier),
             Expanded(
-              child: Center(
-                child: LargeZenTimerDial(
-                  progress: state.phaseProgress,
-                  minutesStr: m,
-                  secondsStr: s,
-                  phaseLabel: phaseLabel,
-                  isBreak: state.isBreak,
-                  activeColor: activeColor,
-                  isDark: isDark,
-                  forcedSize: 250,
-                  onDoubleTap: () {
-                    HapticFeedback.lightImpact();
-                    notifier.toggleFullScreen();
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Row(
                 children: [
-                  LinkedTaskBar(accentColor: activeColor, isCompact: true),
-                  const SizedBox(height: 16),
-                  buildCycleDots(),
-                  const SizedBox(height: 24),
-                  buildControls(),
+                  Expanded(
+                    child: Center(
+                      child: LargeZenTimerDial(
+                        progress: state.phaseProgress,
+                        minutesStr: m,
+                        secondsStr: s,
+                        phaseLabel: phaseLabel,
+                        isBreak: state.isBreak,
+                        activeColor: activeColor,
+                        isDark: isDark,
+                        forcedSize: 240,
+                        onDoubleTap: () {
+                          HapticFeedback.lightImpact();
+                          notifier.toggleFullScreen();
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (!state.isFullScreen) ...[
+                          LinkedTaskBar(
+                            accentColor: activeColor,
+                            isCompact: true,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        buildCycleDots(),
+                        const SizedBox(height: 24),
+                        buildControls(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -379,48 +487,57 @@ class TraditionalTimerView extends ConsumerWidget {
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
         20,
-        state.isFullScreen ? 16 : 8,
+        state.isFullScreen ? 12 : 8,
         20,
         state.isFullScreen ? 24 : 100,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'pomodoro.traditional'.tr(),
-                style: TextStyle(
-                  color: activeColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: activeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${state.traditionalSettings.workMinutes}/${state.traditionalSettings.shortBreakMinutes} · ${state.currentCycle}/$totalCycles',
+          if (state.isFullScreen) ...[
+            _buildZenFullScreenTopBar(context, state, notifier),
+            const SizedBox(height: 32),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'pomodoro.traditional'.tr(),
                   style: TextStyle(
-                    color: activeColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    fontFamily: 'Inter',
+                    color: textColor.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          LinkedTaskBar(accentColor: activeColor, isCompact: true),
-          SizedBox(height: state.isFullScreen ? 28 : 18),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: activeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    formatDigitsForStyle(
+                      '${state.traditionalSettings.workMinutes}/${state.traditionalSettings.shortBreakMinutes} · ${state.currentCycle}/$totalCycles',
+                      numberStyle: numStyle,
+                      locale: langCode,
+                    ),
+                    style: TextStyle(
+                      color: activeColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            LinkedTaskBar(accentColor: activeColor, isCompact: true),
+            const SizedBox(height: 20),
+          ],
           LargeZenTimerDial(
             progress: state.phaseProgress,
             minutesStr: m,
@@ -482,15 +599,24 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     );
   }
 
-  String _formatSessionsCount(BuildContext context, int count) {
+  String _formatSessionsCount(
+    BuildContext context,
+    int count,
+    String numberStyle,
+  ) {
     final lang = context.locale.languageCode;
+    final numStr = formatDigitsForStyle(
+      '$count',
+      numberStyle: numberStyle,
+      locale: lang,
+    );
     if (lang == 'ar') {
-      if (count == 1) return '1 جلسة';
-      if (count == 2) return '2 جلستان';
-      if (count >= 3 && count <= 10) return '$count جلسات';
-      return '$count جلسة';
+      if (count == 1) return '$numStr جلسة';
+      if (count == 2) return '$numStr جلستان';
+      if (count >= 3 && count <= 10) return '$numStr جلسات';
+      return '$numStr جلسة';
     }
-    return count == 1 ? '1 Session' : '$count Sessions';
+    return count == 1 ? '$numStr Session' : '$numStr Sessions';
   }
 
   void _resolveNextPrayer(AstroState astro) {
@@ -523,12 +649,14 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     required bool useAstro,
   }) {
     final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+    final langCode = context.locale.languageCode;
     if (!useAstro) {
       return formatCivilClock(
         CivilWallClock.fromDateTime(time),
         format: settings.civilTimeFormat,
-        locale: context.locale.languageCode,
+        locale: langCode,
         context: context,
+        numberStyle: settings.suwayaNumberStyle,
       );
     }
     final parts = SuwayaFlowPlanner.dateTimeToAstroParts(time, astroState);
@@ -538,6 +666,8 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
       separator: '|',
       isRTL: isRTL,
       iconMode: settings.suwayaIconMode,
+      numberStyle: settings.suwayaNumberStyle,
+      locale: langCode,
     );
   }
 
@@ -804,6 +934,8 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     final primaryColor = Theme.of(context).primaryColor;
     final cardBg = isDark ? const Color(0xFF1A1D24) : Colors.white;
     final suwayaColor = suwayaTimeContrastColor(context);
+    final langCode = context.locale.languageCode;
+    final numStyle = settings.suwayaNumberStyle;
 
     if (astroState.periods.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -863,6 +995,11 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
     final int actualMinutes = effectiveEndTime
         .difference(_anchoredStartTime)
         .inMinutes;
+    final String actualMinutesStr = formatDigitsForStyle(
+      '$actualMinutes',
+      numberStyle: numStyle,
+      locale: langCode,
+    );
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -1079,10 +1216,11 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '$actualMinutes ${'pomodoro.actual_minutes_avail'.tr()}',
+                              '$actualMinutesStr ${'pomodoro.actual_minutes_avail'.tr()}',
                               style: TextStyle(
                                 color: textColor.withValues(alpha: 0.55),
                                 fontSize: 12,
+                                fontFamily: 'Inter',
                               ),
                             ),
                           ],
@@ -1172,11 +1310,16 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '25/5 (30 ${'details.minute'.tr()})',
+                    formatDigitsForStyle(
+                      '25/5 (30 ${'details.minute'.tr()})',
+                      numberStyle: numStyle,
+                      locale: langCode,
+                    ),
                     style: TextStyle(
                       color: primaryColor,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
                     ),
                   ),
                 ),
@@ -1207,6 +1350,12 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                   'Higher speed (Intensive focus)',
                 ),
               };
+
+              final speedStr = formatDigitsForStyle(
+                '${opt.flowSpeed.toStringAsFixed(2)}x',
+                numberStyle: numStyle,
+                locale: langCode,
+              );
 
               return GestureDetector(
                 onTap: () {
@@ -1249,11 +1398,12 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${_formatSessionsCount(context, opt.pomodoroCount)} · ${opt.flowSpeed.toStringAsFixed(2)}x',
+                              '${_formatSessionsCount(context, opt.pomodoroCount, numStyle)} · $speedStr',
                               style: TextStyle(
                                 color: isSelected ? primaryColor : textColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
+                                fontFamily: 'Inter',
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -1327,13 +1477,89 @@ class _SuwayaSetupViewState extends ConsumerState<SuwayaSetupView> {
 class SuwayaActiveTimerView extends ConsumerWidget {
   const SuwayaActiveTimerView({super.key});
 
+  Widget _buildZenFullScreenTopBar(
+    BuildContext context,
+    PomodoroState state,
+    PomodoroEngine notifier,
+  ) {
+    final isAr = context.locale.languageCode == 'ar';
+    final modeTitle = switch (state.zenMode) {
+      PomodoroZenMode.ring => isAr ? 'نمط الحلقة' : 'Zen Ring',
+      PomodoroZenMode.digital => isAr ? 'نمط رقمي' : 'Pure Digital',
+      PomodoroZenMode.ambient => isAr ? 'نبض هادئ' : 'Ambient Breath',
+    };
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TextButton.icon(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white70,
+            backgroundColor: Colors.white.withValues(alpha: 0.06),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            notifier.cycleZenMode();
+          },
+          icon: const Icon(LucideIcons.sparkles, size: 15),
+          label: Text(
+            modeTitle,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              tooltip: 'Mute / Unmute',
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                notifier.toggleMute();
+              },
+              icon: Icon(
+                state.isMuted ? LucideIcons.volume_x : LucideIcons.volume_2,
+                color: Colors.white54,
+                size: 19,
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              tooltip: 'Exit Full Screen',
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                notifier.setFullScreen(false);
+              },
+              icon: const Icon(
+                LucideIcons.minimize_2,
+                color: Colors.white54,
+                size: 19,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(pomodoroProvider);
     final notifier = ref.read(pomodoroProvider.notifier);
+    final numStyle = ref.watch(
+      settingsProvider.select((s) => s.suwayaNumberStyle),
+    );
+    final langCode = context.locale.languageCode;
     final config = state.suwayaConfig;
 
-    // 🌟 الاستماع لتغير حالة الانتهاء مرة واحدة فقط لمنع تكدس نوافذ الحوار أثناء إعادة البناء
     ref.listen<bool>(pomodoroProvider.select((s) => s.isFinished), (
       previous,
       isFinished,
@@ -1377,9 +1603,18 @@ class SuwayaActiveTimerView extends ConsumerWidget {
 
     final isDark =
         state.isFullScreen || Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
     final int remInt = state.remainingSeconds.ceil();
-    final String m = (remInt ~/ 60).toString().padLeft(2, '0');
-    final String s = (remInt % 60).toString().padLeft(2, '0');
+    final String m = formatDigitsForStyle(
+      (remInt ~/ 60).toString().padLeft(2, '0'),
+      numberStyle: numStyle,
+      locale: langCode,
+    );
+    final String s = formatDigitsForStyle(
+      (remInt % 60).toString().padLeft(2, '0'),
+      numberStyle: numStyle,
+      locale: langCode,
+    );
 
     final Color activeColor = state.isBreak
         ? const Color(0xFF64B5F6)
@@ -1407,7 +1642,7 @@ class SuwayaActiveTimerView extends ConsumerWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                context.locale.languageCode == 'ar'
+                langCode == 'ar'
                     ? 'اقترب الميقات (${config.endLabel}) — اختم فكرتك بهدوء'
                     : 'Approaching ${config.endLabel} — wrap up your current thought',
                 style: const TextStyle(
@@ -1459,35 +1694,48 @@ class SuwayaActiveTimerView extends ConsumerWidget {
     if (isLandscape) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
+        child: Column(
           children: [
+            if (state.isFullScreen)
+              _buildZenFullScreenTopBar(context, state, notifier),
             Expanded(
-              child: Center(
-                child: LargeZenTimerDial(
-                  progress: state.phaseProgress,
-                  minutesStr: m,
-                  secondsStr: s,
-                  phaseLabel: phaseLabel,
-                  isBreak: state.isBreak,
-                  activeColor: activeColor,
-                  isDark: isDark,
-                  forcedSize: 250,
-                  onDoubleTap: () {
-                    HapticFeedback.lightImpact();
-                    notifier.toggleFullScreen();
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Row(
                 children: [
-                  buildPrePrayerWarningBanner(),
-                  LinkedTaskBar(accentColor: activeColor, isCompact: true),
-                  const SizedBox(height: 20),
-                  buildEndSessionButton(),
+                  Expanded(
+                    child: Center(
+                      child: LargeZenTimerDial(
+                        progress: state.phaseProgress,
+                        minutesStr: m,
+                        secondsStr: s,
+                        phaseLabel: phaseLabel,
+                        isBreak: state.isBreak,
+                        activeColor: activeColor,
+                        isDark: isDark,
+                        forcedSize: 240,
+                        onDoubleTap: () {
+                          HapticFeedback.lightImpact();
+                          notifier.toggleFullScreen();
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        buildPrePrayerWarningBanner(),
+                        if (!state.isFullScreen) ...[
+                          LinkedTaskBar(
+                            accentColor: activeColor,
+                            isCompact: true,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                        buildEndSessionButton(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1496,51 +1744,65 @@ class SuwayaActiveTimerView extends ConsumerWidget {
       );
     }
 
+    final cycleAndSpeedBadge = formatDigitsForStyle(
+      '${state.currentCycle}/${config.totalPomodoros} · ${config.flowSpeed.toStringAsFixed(2)}x',
+      numberStyle: numStyle,
+      locale: langCode,
+    );
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
         20,
-        state.isFullScreen ? 16 : 8,
+        state.isFullScreen ? 12 : 8,
         20,
         state.isFullScreen ? 24 : 100,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${'pomodoro.suwaya_mode'.tr()} (${state.currentCycle}/${config.totalPomodoros})',
-                style: TextStyle(
-                  color: activeColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: activeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${config.flowSpeed.toStringAsFixed(2)}x',
+          if (state.isFullScreen) ...[
+            _buildZenFullScreenTopBar(context, state, notifier),
+            const SizedBox(height: 24),
+            buildPrePrayerWarningBanner(),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'pomodoro.suwaya_mode'.tr(),
                   style: TextStyle(
-                    color: activeColor,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
+                    color: textColor.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          buildPrePrayerWarningBanner(),
-          LinkedTaskBar(accentColor: activeColor, isCompact: true),
-          SizedBox(height: state.isFullScreen ? 28 : 18),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: activeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    cycleAndSpeedBadge,
+                    style: TextStyle(
+                      color: activeColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            buildPrePrayerWarningBanner(),
+            LinkedTaskBar(accentColor: activeColor, isCompact: true),
+            const SizedBox(height: 20),
+          ],
           LargeZenTimerDial(
             progress: state.phaseProgress,
             minutesStr: m,

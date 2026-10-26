@@ -828,7 +828,7 @@ class _NotificationsSettingsScreenState
                 children: [
                   _buildSegmentButton(
                     context,
-                    isAr ? 'بدون إشعار' : 'No Notification',
+                    isAr ? 'صامت' : 'No Notification',
                     tempLevel == 0,
                     textColor,
                     accentColor,
@@ -837,7 +837,7 @@ class _NotificationsSettingsScreenState
                   const SizedBox(width: 6),
                   _buildSegmentButton(
                     context,
-                    isAr ? 'إشعار على الستارة' : 'Curtain Notif',
+                    isAr ? 'إشعار' : 'Curtain Notif',
                     tempLevel == 1,
                     textColor,
                     accentColor,

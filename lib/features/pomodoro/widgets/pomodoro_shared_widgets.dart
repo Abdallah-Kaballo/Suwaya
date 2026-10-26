@@ -297,7 +297,7 @@ class LinkedTaskBar extends ConsumerWidget {
   }
 }
 
-class LargeZenTimerDial extends StatelessWidget {
+class LargeZenTimerDial extends ConsumerWidget {
   final double progress;
   final String minutesStr;
   final String secondsStr;
@@ -322,18 +322,124 @@ class LargeZenTimerDial extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final zenMode = ref.watch(pomodoroProvider.select((s) => s.zenMode));
+    final isFullScreen = ref.watch(
+      pomodoroProvider.select((s) => s.isFullScreen),
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final double availableWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.of(context).size.width - 40;
         final double dialSize =
-            forcedSize ?? (availableWidth * 0.92).clamp(280.0, 420.0);
-        final double timeFontSize = (dialSize * 0.29).clamp(80.0, 118.0);
+            forcedSize ?? (availableWidth * 0.88).clamp(260.0, 390.0);
+
         final clockColor = isDark
-            ? const Color(0xFFF2C94C)
-            : const Color(0xFF8A5A00);
+            ? const Color(0xFFF8FAFC)
+            : const Color(0xFF0F172A);
+
+        // 🌟 النمط الثاني: الرقمي الخالص (Pure Digital Typography)
+        if (isFullScreen && zenMode == PomodoroZenMode.digital) {
+          return GestureDetector(
+            onDoubleTap: onDoubleTap,
+            child: Container(
+              width: dialSize,
+              height: dialSize * 0.85,
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: Text(
+                        '$minutesStr:$secondsStr',
+                        style: TextStyle(
+                          fontSize: 124,
+                          fontWeight: FontWeight.w900,
+                          color: clockColor,
+                          fontFamily: 'Inter',
+                          letterSpacing: 3.0,
+                          height: 1.0,
+                          fontFeatures: const [ui.FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    phaseLabel,
+                    style: TextStyle(
+                      color: activeColor.withValues(alpha: 0.85),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Inter',
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // 🌟 النمط الثالث: النبض المحيطي الهادئ (Ambient Breath)
+        if (isFullScreen && zenMode == PomodoroZenMode.ambient) {
+          return GestureDetector(
+            onDoubleTap: onDoubleTap,
+            child: Container(
+              width: dialSize,
+              height: dialSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    activeColor.withValues(alpha: 0.24),
+                    activeColor.withValues(alpha: 0.05),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.55, 1.0],
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Directionality(
+                    textDirection: ui.TextDirection.ltr,
+                    child: Text(
+                      '$minutesStr:$secondsStr',
+                      style: TextStyle(
+                        fontSize: 86,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontFamily: 'Inter',
+                        letterSpacing: 4.0,
+                        fontFeatures: const [ui.FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    phaseLabel,
+                    style: TextStyle(
+                      color: activeColor.withValues(alpha: 0.75),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // 🌟 النمط الأول (الافتراضي): حلقة الصفاء المتوازنة (Zen Ring)
+        final double timeFontSize = (dialSize * 0.26).clamp(72.0, 104.0);
 
         return GestureDetector(
           onDoubleTap: onDoubleTap,
@@ -355,7 +461,7 @@ class LargeZenTimerDial extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: dialSize * 0.08),
+                  padding: EdgeInsets.symmetric(horizontal: dialSize * 0.10),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -370,7 +476,8 @@ class LargeZenTimerDial extends StatelessWidget {
                               fontWeight: FontWeight.w800,
                               color: clockColor,
                               fontFamily: 'Inter',
-                              letterSpacing: 2.0,
+                              letterSpacing: 1.5,
+                              height: 1.05,
                               fontFeatures: const [
                                 ui.FontFeature.tabularFigures(),
                               ],
@@ -378,37 +485,26 @@ class LargeZenTimerDial extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: activeColor.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isBreak
-                                  ? LucideIcons.coffee
-                                  : LucideIcons.sparkles,
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isBreak ? LucideIcons.coffee : LucideIcons.sparkles,
+                            color: activeColor,
+                            size: 15,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            phaseLabel,
+                            style: TextStyle(
                               color: activeColor,
-                              size: 17,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Inter',
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              phaseLabel,
-                              style: TextStyle(
-                                color: activeColor,
-                                fontSize: 15.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -436,58 +532,39 @@ class ZenTimerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 10;
+    final radius = (size.width / 2) - 12;
 
     final trackPaint = Paint()
       ..color = isDark
-          ? Colors.white.withValues(alpha: 0.08)
-          : Colors.black.withValues(alpha: 0.08)
+          ? Colors.white.withValues(alpha: 0.06)
+          : Colors.black.withValues(alpha: 0.06)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 6.0;
+      ..strokeWidth = 4.5;
     canvas.drawCircle(center, radius, trackPaint);
 
     final safeProgress = progress.clamp(0.0, 1.0);
 
     if (safeProgress > 0) {
-      final glowPaint = Paint()
-        ..color = activeColor.withValues(alpha: 0.35)
+      final progressPaint = Paint()
+        ..color = activeColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 12.0
-        ..strokeCap = StrokeCap.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+        ..strokeWidth = 6.0
+        ..strokeCap = StrokeCap.round;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         -pi / 2,
         safeProgress * 2 * pi,
         false,
-        glowPaint,
+        progressPaint,
       );
+
+      final knobAngle = -pi / 2 + (safeProgress * 2 * pi);
+      final knobCenter = Offset(
+        center.dx + cos(knobAngle) * radius,
+        center.dy + sin(knobAngle) * radius,
+      );
+      canvas.drawCircle(knobCenter, 6.5, Paint()..color = activeColor);
     }
-
-    final progressPaint = Paint()
-      ..color = activeColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8.5
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      safeProgress * 2 * pi,
-      false,
-      progressPaint,
-    );
-
-    final knobAngle = -pi / 2 + (safeProgress * 2 * pi);
-    final knobCenter = Offset(
-      center.dx + cos(knobAngle) * radius,
-      center.dy + sin(knobAngle) * radius,
-    );
-    canvas.drawCircle(knobCenter, 10, Paint()..color = activeColor);
-    canvas.drawCircle(
-      knobCenter,
-      4.5,
-      Paint()..color = isDark ? const Color(0xFF121316) : Colors.white,
-    );
   }
 
   @override

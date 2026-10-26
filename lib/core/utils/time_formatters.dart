@@ -6,11 +6,23 @@ const civilTimeFormatSystem = SuwayaTimeFormatter.civilTimeFormatSystem;
 const civilTimeFormat12Hour = SuwayaTimeFormatter.civilTimeFormat12Hour;
 const civilTimeFormat24Hour = SuwayaTimeFormatter.civilTimeFormat24Hour;
 
+String formatDigitsForStyle(
+  String input, {
+  String numberStyle = 'english',
+  String locale = 'en',
+}) {
+  if (numberStyle == 'localized') {
+    return SuwayaTimeFormatter.toLocalizedDigits(input, locale);
+  }
+  return SuwayaTimeFormatter.toEnglishDigits(input);
+}
+
 String formatCivilClock(
   CivilWallClock clock, {
   required String format,
   required String locale,
   required BuildContext context,
+  String numberStyle = 'english',
 }) {
   final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
   final bool use24Hour =
@@ -23,6 +35,7 @@ String formatCivilClock(
     use24Hour: use24Hour,
     locale: locale,
     isRTL: isRTL,
+    useEnglishDigits: numberStyle != 'localized',
   );
 }
 
@@ -31,12 +44,14 @@ String formatCivilTime(
   required String format,
   required String locale,
   required BuildContext context,
+  String numberStyle = 'english',
 }) {
   return formatCivilClock(
     CivilWallClock.fromDateTime(time),
     format: format,
     locale: locale,
     context: context,
+    numberStyle: numberStyle,
   );
 }
 
@@ -53,13 +68,28 @@ String getSuwayaIcon(bool isNight, bool isRTL, String iconMode) {
   int globalSuwayaIndex,
   int minute,
   bool isRTL,
-  String iconMode,
-) {
-  return SuwayaCoordinateMapper.formatParts(
+  String iconMode, {
+  String numberStyle = 'english',
+  String locale = 'en',
+}) {
+  final raw = SuwayaCoordinateMapper.formatParts(
     globalSuwayaIndex,
     minute,
     isRTL: isRTL,
     iconMode: iconMode,
+  );
+  return (
+    suwayaStr: formatDigitsForStyle(
+      raw.suwayaStr,
+      numberStyle: numberStyle,
+      locale: locale,
+    ),
+    minStr: formatDigitsForStyle(
+      raw.minStr,
+      numberStyle: numberStyle,
+      locale: locale,
+    ),
+    icon: raw.icon,
   );
 }
 
@@ -68,16 +98,20 @@ String formatSuwayaClockTime(
   String separator = '|',
   required bool isRTL,
   String iconMode = 'emoji',
+  String numberStyle = 'english',
+  String locale = 'en',
 }) {
   final globalIndex = time.phase.isNight
       ? (time.phaseSlotNumber - 1)
       : (12 + time.phaseSlotNumber - 1);
-  return SuwayaCoordinateMapper.formatString(
+  return formatSuwayaTime(
     globalIndex,
     time.virtualMinute,
     separator: separator,
     isRTL: isRTL,
     iconMode: iconMode,
+    numberStyle: numberStyle,
+    locale: locale,
   );
 }
 
@@ -87,14 +121,17 @@ String formatSuwayaTime(
   String separator = '|',
   bool isRTL = true,
   String iconMode = 'emoji',
+  String numberStyle = 'english',
+  String locale = 'en',
 }) {
-  return SuwayaCoordinateMapper.formatString(
+  final raw = SuwayaCoordinateMapper.formatString(
     globalSuwayaIndex,
     minute,
     separator: separator,
     isRTL: isRTL,
     iconMode: iconMode,
   );
+  return formatDigitsForStyle(raw, numberStyle: numberStyle, locale: locale);
 }
 
 ({int globalIndex, int minute}) getFixedAstroTime(

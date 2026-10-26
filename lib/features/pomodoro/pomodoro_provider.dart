@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,9 @@ enum PomodoroView { selector, traditional, suwayaSetup, suwayaActive }
 enum PomodoroPhase { work, shortBreak, longBreak }
 
 enum PomodoroStatus { idle, running, paused, finished }
+
+/// أنماط العرض البصري الخالي من التشتت (Zen Modes)
+enum PomodoroZenMode { ring, digital, ambient }
 
 class TraditionalPomodoroSettings {
   final int workMinutes;
@@ -96,6 +100,7 @@ class PomodoroState {
   final bool isFinished;
   final bool isMuted;
   final bool isFullScreen;
+  final PomodoroZenMode zenMode;
   final int? linkedTaskId;
   final int dailyCompletedSessions;
   final bool isPrePrayerWarningActive;
@@ -114,6 +119,7 @@ class PomodoroState {
     this.isFinished = false,
     this.isMuted = false,
     this.isFullScreen = false,
+    this.zenMode = PomodoroZenMode.ring,
     this.linkedTaskId,
     this.dailyCompletedSessions = 0,
     this.isPrePrayerWarningActive = false,
@@ -121,6 +127,9 @@ class PomodoroState {
 
   bool get isBreak =>
       phase == PomodoroPhase.shortBreak || phase == PomodoroPhase.longBreak;
+
+  bool get hasActiveSession =>
+      status == PomodoroStatus.running || status == PomodoroStatus.paused;
 
   PomodoroState copyWith({
     PomodoroView? currentView,
@@ -137,6 +146,7 @@ class PomodoroState {
     bool? isFinished,
     bool? isMuted,
     bool? isFullScreen,
+    PomodoroZenMode? zenMode,
     int? linkedTaskId,
     bool clearLinkedTask = false,
     int? dailyCompletedSessions,
@@ -158,6 +168,7 @@ class PomodoroState {
       isFinished: isFinished ?? this.isFinished,
       isMuted: isMuted ?? this.isMuted,
       isFullScreen: isFullScreen ?? this.isFullScreen,
+      zenMode: zenMode ?? this.zenMode,
       linkedTaskId: clearLinkedTask
           ? null
           : (linkedTaskId ?? this.linkedTaskId),
@@ -171,6 +182,7 @@ class PomodoroState {
 
 class PomodoroEngine extends Notifier<PomodoroState> {
   Timer? _timer;
+  AppLifecycleListener? _lifecycleListener;
 
   DateTime? _traditionalPhaseStartedAt;
   int _traditionalAccumulatedElapsedSecs = 0;
@@ -184,16 +196,42 @@ class PomodoroEngine extends Notifier<PomodoroState> {
   static const _prefLongBreakKey = 'pomo_trad_long_break_mins';
   static const _prefCyclesKey = 'pomo_trad_cycles_count';
   static const _prefMutedKey = 'pomo_is_muted';
+  static const _prefZenModeKey = 'pomo_zen_mode_idx';
   static const _prefDailyDateKey = 'pomo_daily_date';
   static const _prefDailyCountKey = 'pomo_daily_completed_count';
 
+  // مفاتيح حفظ الجلسة النشطة لمنع ضياعها عند الخروج من التطبيق
+  static const _prefActiveViewKey = 'pomo_active_view';
+  static const _prefActiveStatusKey = 'pomo_active_status';
+  static const _prefActivePhaseKey = 'pomo_active_phase';
+  static const _prefActiveCycleKey = 'pomo_active_cycle';
+  static const _prefActiveTradStartMsKey = 'pomo_active_trad_start_ms';
+  static const _prefActiveTradAccSecsKey = 'pomo_active_trad_acc_secs';
+  static const _prefActiveLinkedTaskKey = 'pomo_active_linked_task';
+  static const _prefSuwayaStartWallMsKey = 'pomo_suwaya_start_wall_ms';
+  static const _prefSuwayaEndWallMsKey = 'pomo_suwaya_end_wall_ms';
+  static const _prefSuwayaStartUtcMsKey = 'pomo_suwaya_start_utc_ms';
+  static const _prefSuwayaEndUtcMsKey = 'pomo_suwaya_end_utc_ms';
+  static const _prefSuwayaEndLabelKey = 'pomo_suwaya_end_label';
+  static const _prefSuwayaTotalPomosKey = 'pomo_suwaya_total_pomos';
+  static const _prefSuwayaSpeedKey = 'pomo_suwaya_speed';
+
   @override
   PomodoroState build() {
+    _lifecycleListener?.dispose();
+    _lifecycleListener = AppLifecycleListener(
+      onResume: () {
+        _syncOnResume();
+      },
+    );
+
     ref.onDispose(() {
       _timer?.cancel();
-      NotificationService().cancelLivePomodoroNotification();
+      _lifecycleListener?.dispose();
+      _lifecycleListener = null;
     });
-    _loadPreferences();
+
+    _loadPreferencesAndRestoreSession();
     return const PomodoroState();
   }
 
@@ -202,7 +240,112 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _loadPreferences() async {
+  void _syncOnResume() {
+    if (state.currentView == PomodoroView.traditional &&
+        state.status == PomodoroStatus.running) {
+      _onTraditionalTick();
+      _timer?.cancel();
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => _onTraditionalTick(),
+      );
+    } else if (state.currentView == PomodoroView.suwayaActive &&
+        state.status == PomodoroStatus.running) {
+      _onSuwayaTick(isInitialTick: false);
+      if (!state.isFinished) {
+        _timer?.cancel();
+        _timer = Timer.periodic(
+          const Duration(seconds: 1),
+          (_) => _onSuwayaTick(isInitialTick: false),
+        );
+      }
+    }
+  }
+
+  Future<void> _persistActiveSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!state.hasActiveSession) {
+        await _clearPersistedActiveSession(prefs);
+        return;
+      }
+
+      await prefs.setString(_prefActiveViewKey, state.currentView.name);
+      await prefs.setString(_prefActiveStatusKey, state.status.name);
+      await prefs.setString(_prefActivePhaseKey, state.phase.name);
+      await prefs.setInt(_prefActiveCycleKey, state.currentCycle);
+      if (state.linkedTaskId != null) {
+        await prefs.setInt(_prefActiveLinkedTaskKey, state.linkedTaskId!);
+      } else {
+        await prefs.remove(_prefActiveLinkedTaskKey);
+      }
+
+      if (state.currentView == PomodoroView.traditional) {
+        if (_traditionalPhaseStartedAt != null) {
+          await prefs.setInt(
+            _prefActiveTradStartMsKey,
+            _traditionalPhaseStartedAt!.millisecondsSinceEpoch,
+          );
+        } else {
+          await prefs.remove(_prefActiveTradStartMsKey);
+        }
+        await prefs.setInt(
+          _prefActiveTradAccSecsKey,
+          _traditionalAccumulatedElapsedSecs,
+        );
+      } else if (state.currentView == PomodoroView.suwayaActive &&
+          state.suwayaConfig != null) {
+        final cfg = state.suwayaConfig!;
+        await prefs.setInt(
+          _prefSuwayaStartWallMsKey,
+          cfg.anchoredStartTime.millisecondsSinceEpoch,
+        );
+        await prefs.setInt(
+          _prefSuwayaEndWallMsKey,
+          cfg.endTime.millisecondsSinceEpoch,
+        );
+        await prefs.setInt(
+          _prefSuwayaStartUtcMsKey,
+          cfg.anchoredStartUtc.millisecondsSinceEpoch,
+        );
+        await prefs.setInt(
+          _prefSuwayaEndUtcMsKey,
+          cfg.endUtc.millisecondsSinceEpoch,
+        );
+        await prefs.setString(_prefSuwayaEndLabelKey, cfg.endLabel);
+        await prefs.setInt(_prefSuwayaTotalPomosKey, cfg.totalPomodoros);
+        await prefs.setDouble(_prefSuwayaSpeedKey, cfg.flowSpeed);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _clearPersistedActiveSession([
+    SharedPreferences? instance,
+  ]) async {
+    try {
+      final prefs = instance ?? await SharedPreferences.getInstance();
+      for (final key in [
+        _prefActiveViewKey,
+        _prefActiveStatusKey,
+        _prefActivePhaseKey,
+        _prefActiveCycleKey,
+        _prefActiveTradStartMsKey,
+        _prefActiveTradAccSecsKey,
+        _prefActiveLinkedTaskKey,
+        _prefSuwayaStartWallMsKey,
+        _prefSuwayaEndWallMsKey,
+        _prefSuwayaStartUtcMsKey,
+        _prefSuwayaEndUtcMsKey,
+        _prefSuwayaEndLabelKey,
+        _prefSuwayaTotalPomosKey,
+        _prefSuwayaSpeedKey,
+      ]) {
+        await prefs.remove(key);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadPreferencesAndRestoreSession() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final work = prefs.getInt(_prefWorkKey) ?? 25;
@@ -210,6 +353,10 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       final longB = prefs.getInt(_prefLongBreakKey) ?? 30;
       final cycles = prefs.getInt(_prefCyclesKey) ?? 4;
       final muted = prefs.getBool(_prefMutedKey) ?? false;
+      final zenIdx = (prefs.getInt(_prefZenModeKey) ?? 0).clamp(
+        0,
+        PomodoroZenMode.values.length - 1,
+      );
 
       final savedDate = prefs.getString(_prefDailyDateKey) ?? '';
       final todayKey = _todayDateKey();
@@ -231,6 +378,135 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       final ratio =
           loaded.workMinutes / (loaded.workMinutes + loaded.shortBreakMinutes);
 
+      // فحص وجود جلسة نشطة محفوظة قبل الخروج من التطبيق
+      final savedViewName = prefs.getString(_prefActiveViewKey);
+      final savedStatusName = prefs.getString(_prefActiveStatusKey);
+
+      if (savedViewName != null &&
+          (savedStatusName == PomodoroStatus.running.name ||
+              savedStatusName == PomodoroStatus.paused.name)) {
+        final linkedTask = prefs.getInt(_prefActiveLinkedTaskKey);
+
+        if (savedViewName == PomodoroView.suwayaActive.name) {
+          final startWallMs = prefs.getInt(_prefSuwayaStartWallMsKey);
+          final endWallMs = prefs.getInt(_prefSuwayaEndWallMsKey);
+          final startUtcMs = prefs.getInt(_prefSuwayaStartUtcMsKey);
+          final endUtcMs = prefs.getInt(_prefSuwayaEndUtcMsKey);
+          final endLabel = prefs.getString(_prefSuwayaEndLabelKey) ?? '';
+          final totalPomos = prefs.getInt(_prefSuwayaTotalPomosKey) ?? 1;
+          final speed = prefs.getDouble(_prefSuwayaSpeedKey) ?? 1.0;
+
+          if (startWallMs != null &&
+              endWallMs != null &&
+              startUtcMs != null &&
+              endUtcMs != null) {
+            final endUtc = DateTime.fromMillisecondsSinceEpoch(
+              endUtcMs,
+              isUtc: true,
+            );
+            if (DateTime.now().toUtc().isBefore(endUtc)) {
+              final config = SuwayaSessionConfig(
+                anchoredStartTime: DateTime.fromMillisecondsSinceEpoch(
+                  startWallMs,
+                  isUtc: true,
+                ),
+                endTime: DateTime.fromMillisecondsSinceEpoch(
+                  endWallMs,
+                  isUtc: true,
+                ),
+                anchoredStartUtc: DateTime.fromMillisecondsSinceEpoch(
+                  startUtcMs,
+                  isUtc: true,
+                ),
+                endUtc: endUtc,
+                endLabel: endLabel,
+                totalPomodoros: totalPomos,
+                flowSpeed: speed,
+              );
+
+              state = state.copyWith(
+                traditionalSettings: loaded,
+                isMuted: muted,
+                zenMode: PomodoroZenMode.values[zenIdx],
+                dailyCompletedSessions: dailyCount,
+                linkedTaskId: linkedTask,
+                currentView: PomodoroView.suwayaActive,
+                status: PomodoroStatus.running,
+                suwayaConfig: config,
+              );
+              _onSuwayaTick(isInitialTick: true);
+              _syncLiveCurtainNotification();
+              _timer?.cancel();
+              _timer = Timer.periodic(
+                const Duration(seconds: 1),
+                (_) => _onSuwayaTick(isInitialTick: false),
+              );
+              return;
+            }
+          }
+          await _clearPersistedActiveSession(prefs);
+        } else if (savedViewName == PomodoroView.traditional.name) {
+          final phaseName =
+              prefs.getString(_prefActivePhaseKey) ?? PomodoroPhase.work.name;
+          final restoredPhase = PomodoroPhase.values.firstWhere(
+            (e) => e.name == phaseName,
+            orElse: () => PomodoroPhase.work,
+          );
+          final restoredCycle = prefs.getInt(_prefActiveCycleKey) ?? 1;
+          final startMs = prefs.getInt(_prefActiveTradStartMsKey);
+          final accSecs = prefs.getInt(_prefActiveTradAccSecsKey) ?? 0;
+          final isRunning = savedStatusName == PomodoroStatus.running.name;
+
+          _traditionalAccumulatedElapsedSecs = accSecs;
+          _traditionalPhaseStartedAt = (isRunning && startMs != null)
+              ? DateTime.fromMillisecondsSinceEpoch(startMs)
+              : null;
+
+          final phaseTotalSecs = _getTraditionalPhaseDurationSecs(
+            restoredPhase,
+            loaded,
+          );
+          final remSecs = (phaseTotalSecs - accSecs)
+              .clamp(1, phaseTotalSecs)
+              .toDouble();
+          final progress = phaseTotalSecs > 0
+              ? (accSecs / phaseTotalSecs).clamp(0.0, 1.0)
+              : 0.0;
+          final r = _computeTraditionalFocusRatio(restoredPhase, loaded);
+
+          state = state.copyWith(
+            traditionalSettings: loaded,
+            isMuted: muted,
+            zenMode: PomodoroZenMode.values[zenIdx],
+            dailyCompletedSessions: dailyCount,
+            linkedTaskId: linkedTask,
+            currentView: PomodoroView.traditional,
+            status: isRunning ? PomodoroStatus.running : PomodoroStatus.paused,
+            phase: restoredPhase,
+            currentCycle: restoredCycle,
+            remainingSeconds: remSecs,
+            phaseProgress: progress,
+            cycleProgress: _computeTraditionalCycleProgress(
+              restoredPhase,
+              progress,
+              r,
+            ),
+            focusRatio: r,
+          );
+
+          if (isRunning) {
+            _onTraditionalTick();
+            _syncLiveCurtainNotification();
+            _timer?.cancel();
+            _timer = Timer.periodic(
+              const Duration(seconds: 1),
+              (_) => _onTraditionalTick(),
+            );
+          }
+          return;
+        }
+      }
+
       if (state.status == PomodoroStatus.idle &&
           state.currentView != PomodoroView.suwayaActive) {
         state = state.copyWith(
@@ -240,15 +516,27 @@ class PomodoroEngine extends Notifier<PomodoroState> {
           cycleProgress: 0.0,
           focusRatio: ratio,
           isMuted: muted,
+          zenMode: PomodoroZenMode.values[zenIdx],
           dailyCompletedSessions: dailyCount,
         );
       } else {
         state = state.copyWith(
           traditionalSettings: loaded,
           isMuted: muted,
+          zenMode: PomodoroZenMode.values[zenIdx],
           dailyCompletedSessions: dailyCount,
         );
       }
+    } catch (_) {}
+  }
+
+  Future<void> cycleZenMode() async {
+    final nextIdx = (state.zenMode.index + 1) % PomodoroZenMode.values.length;
+    final nextMode = PomodoroZenMode.values[nextIdx];
+    state = state.copyWith(zenMode: nextMode);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_prefZenModeKey, nextIdx);
     } catch (_) {}
   }
 
@@ -291,6 +579,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     } else {
       state = state.copyWith(linkedTaskId: taskId);
     }
+    _persistActiveSession();
     _syncLiveCurtainNotification();
   }
 
@@ -449,6 +738,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     NotificationService().cancelLivePomodoroNotification();
     _traditionalPhaseStartedAt = null;
     _traditionalAccumulatedElapsedSecs = 0;
+    _clearPersistedActiveSession();
 
     final workSecs = state.traditionalSettings.workMinutes * 60.0;
     final ratio = _computeTraditionalFocusRatio(
@@ -475,6 +765,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     _timer?.cancel();
     setFullScreen(false);
     NotificationService().cancelLivePomodoroNotification();
+    _clearPersistedActiveSession();
     state = state.copyWith(
       currentView: PomodoroView.suwayaSetup,
       status: PomodoroStatus.idle,
@@ -489,6 +780,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     NotificationService().cancelLivePomodoroNotification();
     _traditionalPhaseStartedAt = null;
     _traditionalAccumulatedElapsedSecs = 0;
+    _clearPersistedActiveSession();
 
     state = state.copyWith(
       currentView: PomodoroView.selector,
@@ -526,6 +818,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       focusRatio: ratio,
     );
 
+    _persistActiveSession();
     _syncLiveCurtainNotification();
     _timer = Timer.periodic(
       const Duration(seconds: 1),
@@ -543,6 +836,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       _traditionalPhaseStartedAt = null;
     }
     state = state.copyWith(status: PomodoroStatus.paused);
+    _persistActiveSession();
     NotificationService().cancelLivePomodoroNotification();
   }
 
@@ -550,6 +844,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     if (state.status != PomodoroStatus.paused) return;
     _traditionalPhaseStartedAt = DateTime.now();
     state = state.copyWith(status: PomodoroStatus.running);
+    _persistActiveSession();
     _syncLiveCurtainNotification();
     _timer = Timer.periodic(
       const Duration(seconds: 1),
@@ -563,6 +858,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     NotificationService().cancelLivePomodoroNotification();
     _traditionalPhaseStartedAt = null;
     _traditionalAccumulatedElapsedSecs = 0;
+    _clearPersistedActiveSession();
 
     final workSecs = state.traditionalSettings.workMinutes * 60.0;
     final ratio = _computeTraditionalFocusRatio(
@@ -680,6 +976,8 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       focusRatio: ratio,
     );
 
+    _persistActiveSession();
+
     if (fromNaturalCompletion) {
       _triggerPhaseTransitionFeedback(
         newPhase: nextPhase,
@@ -722,6 +1020,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
       isPrePrayerWarningActive: false,
     );
 
+    _persistActiveSession();
     _onSuwayaTick(isInitialTick: true);
     _syncLiveCurtainNotification();
 
@@ -804,6 +1103,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     );
 
     if (phaseChanged) {
+      _persistActiveSession();
       _syncLiveCurtainNotification();
     }
   }
@@ -812,6 +1112,7 @@ class PomodoroEngine extends Notifier<PomodoroState> {
     _timer?.cancel();
     setFullScreen(false);
     NotificationService().cancelLivePomodoroNotification();
+    _clearPersistedActiveSession();
     _incrementDailyCompletedSessions();
     try {
       HapticFeedback.heavyImpact();

@@ -203,6 +203,7 @@ class RailwayRingPainter extends CustomPainter {
   final String dialPinMode;
   final List<DialMarkerLayout>? precomputedLayouts;
   final double totalRotation;
+  final String? fontFamily;
 
   RailwayRingPainter({
     required this.ibadat,
@@ -221,6 +222,7 @@ class RailwayRingPainter extends CustomPainter {
     this.dialPinMode = 'suwaya24',
     this.precomputedLayouts,
     this.totalRotation = 0.0,
+    this.fontFamily,
   });
 
   int _computeBadgesFlipMask() {
@@ -360,7 +362,7 @@ class RailwayRingPainter extends CustomPainter {
         style: TextStyle(
           fontSize: 12.5,
           fontWeight: FontWeight.w700,
-          fontFamily: 'Tajawal',
+          fontFamily: fontFamily,
           foreground: Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 2.2
@@ -381,7 +383,7 @@ class RailwayRingPainter extends CustomPainter {
           color: fillColor,
           fontSize: 12.5,
           fontWeight: FontWeight.w700,
-          fontFamily: 'Tajawal',
+          fontFamily: fontFamily,
         ),
       ),
       textDirection: ui.TextDirection.ltr,

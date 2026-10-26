@@ -121,7 +121,6 @@ class AlarmPolicyTable {
   }
 }
 
-/// 🌟 النموذج الموحد لبيانات التنبيه (Schema V2) مع دعم كامل لقراءة الصيغ القديمة
 class ParsedAlarmData {
   static const int currentSchemaVersion = 2;
 
@@ -139,6 +138,7 @@ class ParsedAlarmData {
   final int maxSnoozes;
   final bool loopAudio;
   final AlarmVolumePolicy volumePolicy;
+  final bool isAstroScheduled;
 
   const ParsedAlarmData({
     this.schemaVersion = currentSchemaVersion,
@@ -155,6 +155,7 @@ class ParsedAlarmData {
     required this.maxSnoozes,
     required this.loopAudio,
     required this.volumePolicy,
+    this.isAstroScheduled = true,
   });
 
   bool get isCurtainOnly => deliveryMode == AlarmDeliveryMode.curtainAudio;
@@ -166,6 +167,7 @@ class ParsedAlarmData {
     int? snoozeDurationMinutes,
     int? maxSnoozes,
     AlarmDeliveryMode? deliveryMode,
+    bool? isAstroScheduled,
   }) {
     return ParsedAlarmData(
       schemaVersion: currentSchemaVersion,
@@ -183,6 +185,7 @@ class ParsedAlarmData {
       maxSnoozes: maxSnoozes ?? this.maxSnoozes,
       loopAudio: loopAudio,
       volumePolicy: volumePolicy,
+      isAstroScheduled: isAstroScheduled ?? this.isAstroScheduled,
     );
   }
 
@@ -202,6 +205,7 @@ class ParsedAlarmData {
       'ms': maxSnoozes,
       'l': loopAudio,
       'vp': volumePolicy.name,
+      'ia': isAstroScheduled,
     };
     return jsonEncode(map);
   }

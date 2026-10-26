@@ -181,7 +181,9 @@ class SettingsModel {
     }
   }
 
-  /// 🌟 قراءة وحفظ نوع الخط ('system' = الخط الأصلي القديم كافتراضي، أو 'tajawal'، أو 'inter')
+  // استبدل getter و setter الخاصين بـ appFontFamily و appFontScale في lib/models/settings_model.dart:
+
+  /// 🌟 قراءة وحفظ نوع الخط ('inter' كافتراضي، أو 'tajawal'، أو 'system')
   String get appFontFamily {
     for (final c in periodConfigs) {
       if (c.periodId == '__app_font__') {
@@ -189,7 +191,7 @@ class SettingsModel {
         if (val != null && val.isNotEmpty) return val;
       }
     }
-    return 'system';
+    return 'inter';
   }
 
   set appFontFamily(String family) {
@@ -227,7 +229,7 @@ class SettingsModel {
         PeriodConfig()
           ..periodId = '__app_font__'
           ..isEnabled = false
-          ..soundPath = 'system'
+          ..soundPath = 'inter'
           ..volume = clamped,
       );
     }

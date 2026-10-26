@@ -20,7 +20,7 @@ class PomodoroScreen extends ConsumerWidget {
     final notifier = ref.read(pomodoroProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final scaffoldBgColor = pomodoroState.isFullScreen
-        ? Colors.black
+        ? const Color(0xFF07090E)
         : Theme.of(context).scaffoldBackgroundColor;
     final textColor = isDark ? Colors.white : Colors.black87;
     final primaryColor = Theme.of(context).primaryColor;
@@ -30,13 +30,16 @@ class PomodoroScreen extends ConsumerWidget {
         pomodoroState.currentView == PomodoroView.traditional ||
         pomodoroState.currentView == PomodoroView.suwayaActive;
 
+    // 🌟 حماية الجلسة النشطة من الإلغاء غير المقصود عند ضغط زر الرجوع للخروج من التطبيق
     return PopScope(
-      canPop: !pomodoroState.isFullScreen && !isSubView,
+      canPop:
+          !pomodoroState.isFullScreen &&
+          (!isSubView || pomodoroState.hasActiveSession),
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (pomodoroState.isFullScreen) {
           notifier.setFullScreen(false);
-        } else if (isSubView) {
+        } else if (isSubView && !pomodoroState.hasActiveSession) {
           notifier.backToSelector();
         }
       },
@@ -83,9 +86,10 @@ class PomodoroScreen extends ConsumerWidget {
                   ),
                 ),
                 actions: [
-                  if (isTimerView)
+                  if (isTimerView) ...[
                     IconButton(
                       visualDensity: VisualDensity.compact,
+                      tooltip: 'Mute / Unmute',
                       icon: Icon(
                         pomodoroState.isMuted
                             ? LucideIcons.volume_x
@@ -100,9 +104,9 @@ class PomodoroScreen extends ConsumerWidget {
                         notifier.toggleMute();
                       },
                     ),
-                  if (isTimerView)
                     IconButton(
                       visualDensity: VisualDensity.compact,
+                      tooltip: 'Zen Mode',
                       icon: Icon(
                         LucideIcons.maximize_2,
                         color: primaryColor,
@@ -113,6 +117,7 @@ class PomodoroScreen extends ConsumerWidget {
                         notifier.toggleFullScreen();
                       },
                     ),
+                  ],
                   if (pomodoroState.currentView == PomodoroView.traditional)
                     IconButton(
                       visualDensity: VisualDensity.compact,
@@ -126,50 +131,54 @@ class PomodoroScreen extends ConsumerWidget {
                         showTraditionalSettingsSheet(context, ref);
                       },
                     ),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final settings = ref.watch(settingsProvider);
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            trPomodoro(
-                              context,
-                              'common.suwaya_time',
-                              'الوقت السُويعي',
-                              'Suwaya Time',
+                  // إظهار مفتاح الوقت السويعي في شاشة الإعداد فقط لمنع الزحمة أثناء التركيز
+                  if (pomodoroState.currentView == PomodoroView.suwayaSetup)
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final settings = ref.watch(settingsProvider);
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              trPomodoro(
+                                context,
+                                'common.suwaya_time',
+                                'الوقت السُويعي',
+                                'Suwaya Time',
+                              ),
+                              style: TextStyle(
+                                color: settings.useAstroTimeForIbadat
+                                    ? primaryColor
+                                    : (isDark
+                                          ? Colors.white70
+                                          : Colors.black54),
+                                fontSize: 11.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            style: TextStyle(
-                              color: settings.useAstroTimeForIbadat
-                                  ? primaryColor
-                                  : (isDark ? Colors.white70 : Colors.black54),
-                              fontSize: 11.0,
-                              fontWeight: FontWeight.bold,
+                            Transform.scale(
+                              scale: 0.70,
+                              child: Switch(
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                value: settings.useAstroTimeForIbadat,
+                                activeThumbColor: isDark
+                                    ? Colors.black
+                                    : Colors.white,
+                                activeTrackColor: primaryColor,
+                                onChanged: (val) {
+                                  HapticFeedback.lightImpact();
+                                  ref
+                                      .read(settingsProvider.notifier)
+                                      .updateUseAstroTimeForIbadat(val);
+                                },
+                              ),
                             ),
-                          ),
-                          Transform.scale(
-                            scale: 0.70,
-                            child: Switch(
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              value: settings.useAstroTimeForIbadat,
-                              activeThumbColor: isDark
-                                  ? Colors.black
-                                  : Colors.white,
-                              activeTrackColor: primaryColor,
-                              onChanged: (val) {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(settingsProvider.notifier)
-                                    .updateUseAstroTimeForIbadat(val);
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 4),
+                          ],
+                        );
+                      },
+                    ),
+                  const SizedBox(width: 6),
                 ],
               ),
         body: SafeArea(

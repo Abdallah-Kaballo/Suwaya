@@ -734,6 +734,12 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     state = newState;
     await _repository.saveSettings(newState);
   }
+
+  Future<void> updateSuwayaNumberStyle(String numberStyle) async {
+    final newState = state.clone()..suwayaNumberStyle = numberStyle;
+    state = newState;
+    await _repository.saveSettings(newState);
+  }
 }
 
 final settingsProvider = NotifierProvider<SettingsNotifier, SettingsModel>(

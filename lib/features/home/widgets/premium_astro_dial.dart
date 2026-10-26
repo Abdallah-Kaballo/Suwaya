@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:suwaya/core/providers/ui_providers.dart';
+import 'package:suwaya/core/theme/app_theme.dart';
 import 'package:suwaya/core/theme/astro_ui_extensions.dart';
 import 'package:suwaya/core/utils/time_formatters.dart';
 import 'package:suwaya/features/home/widgets/dial/dial_constants.dart';
@@ -729,6 +730,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                                       dayStart: dayStart,
                                       dayEnd: dayEnd,
                                       isDark: isDark,
+                                      fontFamily: AppTheme.resolveFontFamily(
+                                        settings.appFontFamily,
+                                      ),
                                       langCode: currentLangCode,
                                       design: selectedDesign,
                                       highlightedPeriodId: _highlightedPeriodId,
@@ -769,6 +773,9 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
                                       draggedTask: _draggedTask,
                                       dragAngle: _dragAngle,
                                       langCode: currentLangCode,
+                                      fontFamily: AppTheme.resolveFontFamily(
+                                        settings.appFontFamily,
+                                      ),
                                       design: selectedDesign,
                                       highlightedTaskId: highlightedTaskId,
                                       highlightedMarkerId: _highlightedMarkerId,

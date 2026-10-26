@@ -30,82 +30,6 @@ String trCal(
   return context.locale.languageCode == 'ar' ? arFallback : enFallback;
 }
 
-/// 🌟 بيانات استحباب الصيام للأيام الهجرية الموسمية (الأيام البيض + عاشوراء + عرفة)
-class _FastingRecommendation {
-  final String title;
-  final String reason;
-  final Color highlightColor;
-
-  const _FastingRecommendation({
-    required this.title,
-    required this.reason,
-    required this.highlightColor,
-  });
-}
-
-_FastingRecommendation? _getSeasonalFastingInfo(
-  HijriCalendar hDate,
-  String langCode,
-) {
-  final isAr = langCode == 'ar';
-
-  // 1. يوم عرفة (9 ذو الحجة)
-  if (hDate.hMonth == 12 && hDate.hDay == 9) {
-    return _FastingRecommendation(
-      title: isAr
-          ? 'صيام يوم عرفة (9 ذو الحجة)'
-          : 'Fasting Day of Arafah (9 Dhu al-Hijjah)',
-      reason: isAr
-          ? 'يُستحب صيامه لغير الحاج؛ يكفّر السنة الماضية والباقية.'
-          : 'Recommended for non-pilgrims; expiates sins of the previous and coming year.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-
-  // 2. يوم عاشوراء (10 محرم) وتاسوعاء (9 محرم)
-  if (hDate.hMonth == 1 && hDate.hDay == 10) {
-    return _FastingRecommendation(
-      title: isAr
-          ? 'صيام يوم عاشوراء (10 محرم)'
-          : 'Fasting Day of Ashura (10 Muharram)',
-      reason: isAr
-          ? 'صيام يوم عاشوراء يكفّر السنة التي قبله.'
-          : 'Recommended fast; expiates the sins of the preceding year.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-  if (hDate.hMonth == 1 && hDate.hDay == 9) {
-    return _FastingRecommendation(
-      title: isAr
-          ? 'صيام يوم تاسوعاء (9 محرم)'
-          : 'Fasting Tasu\'a (9 Muharram)',
-      reason: isAr
-          ? 'يُستحب صيامه مع يوم عاشوراء.'
-          : 'Recommended to fast along with the Day of Ashura.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-
-  // 3. الأيام البيض (13 و 14 و 15 من كل شهر هجري، باستثناء 13 ذي الحجة لأنه من أيام التشريق، واستثناء شهر رمضان)
-  if (hDate.hMonth != 9 &&
-      (hDate.hDay == 13 || hDate.hDay == 14 || hDate.hDay == 15)) {
-    if (hDate.hMonth == 12 && hDate.hDay == 13) {
-      return null; // 13 ذو الحجة من أيام التشريق التي لا يُصام فيها تطوعاً
-    }
-    return _FastingRecommendation(
-      title: isAr
-          ? 'من الأيام البيض (${hDate.hDay} ${'hijri.m${hDate.hMonth}'.tr()})'
-          : 'White Days Fast (${hDate.hDay} ${'hijri.m${hDate.hMonth}'.tr()})',
-      reason: isAr
-          ? 'يُندب صيام الأيام البيض (13 و14 و15) من كل شهر هجري، وصيامها كصيام الدهر.'
-          : 'Recommended monthly fast on the 13th, 14th, and 15th of the Hijri month.',
-      highlightColor: const Color(0xFF10B981),
-    );
-  }
-
-  return null;
-}
-
 class CalendarDayCellData {
   final DateTime gregorianDate;
   final HijriCalendar hijriDate;
@@ -756,7 +680,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         final isToday = _isSameDay(cell.gregorianDate, today);
 
         // 🌟 التعديل 11: فحص ما إذا كان اليوم من الأيام الموسمية التي يُندب صيامها
-        final fastingInfo = _getSeasonalFastingInfo(cell.hijriDate, langCode);
+        final fastingInfo = getSeasonalFastingInfo(cell.hijriDate, langCode);
         final bool isFastingDay = fastingInfo != null;
         const fastingEmerald = Color(0xFF10B981);
 

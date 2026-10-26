@@ -192,6 +192,7 @@ class PeriodRingPainter extends CustomPainter {
   final DialDesign design;
   final int? highlightedPeriodId;
   final double totalRotation;
+  final String? fontFamily;
 
   PeriodRingPainter({
     required this.periods,
@@ -203,6 +204,7 @@ class PeriodRingPainter extends CustomPainter {
     required this.design,
     this.highlightedPeriodId,
     this.totalRotation = 0.0,
+    this.fontFamily = 'Inter',
   });
 
   int _computeFlipMask() {
@@ -307,12 +309,12 @@ class PeriodRingPainter extends CustomPainter {
 
     textPainter.text = TextSpan(
       text: text,
-      style: const TextStyle(
+      style: TextStyle(
         color: Colors.white,
         fontSize: 13,
         fontWeight: FontWeight.w900,
-        fontFamily: 'Tajawal',
-        shadows: [
+        fontFamily: fontFamily,
+        shadows: const [
           Shadow(color: Colors.black, blurRadius: 4, offset: Offset(0, 1)),
           Shadow(color: Colors.black87, blurRadius: 8, offset: Offset(0, 0)),
         ],
@@ -563,20 +565,17 @@ class OuterRingPainter extends CustomPainter {
         badgeRect,
         Paint()..filterQuality = FilterQuality.medium,
       );
-      // طبقة توازن بصري خفيفة لضمان بروز الرقم بوضوح فائق داخل الصورة
+      // طبقة إضاءة ناعمة جداً تضمن بروز الرقم الأسود فوق تفاصيل الشمس والقمر
       canvas.drawRect(
         badgeRect,
-        Paint()
-          ..color = isNight
-              ? Colors.black.withValues(alpha: 0.25)
-              : Colors.black.withValues(alpha: 0.18),
+        Paint()..color = Colors.white.withValues(alpha: isNight ? 0.22 : 0.14),
       );
     } else {
       canvas.drawCircle(
         Offset.zero,
         badgeRadius,
         Paint()
-          ..color = isNight ? const Color(0xFF1E293B) : const Color(0xFFD97706),
+          ..color = isNight ? const Color(0xFFCBD5E1) : const Color(0xFFFDE047),
       );
     }
     canvas.restore();
@@ -589,20 +588,16 @@ class OuterRingPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.1
         ..color = isNight
-            ? const Color(0xFF93C5FD).withValues(alpha: 0.75)
-            : const Color(0xFFFDE047).withValues(alpha: 0.90),
+            ? const Color(0xFF93C5FD).withValues(alpha: 0.85)
+            : const Color(0xFFFACC15).withValues(alpha: 0.95),
     );
 
-    // 3. رسم الرقم في قلب قرص الشمس/القمر بحجم متناسق لا يخرج عن الحواف أبداً
+    // 3. رسم الرقم باللون الأسود الصريح وبخط Inter في قلب قرص الشمس/القمر
     final numStr = displayNum.toString();
     final fontSize = displayNum >= 10 ? badgeRadius * 0.96 : badgeRadius * 1.08;
 
-    final Color strokeColor = isNight
-        ? const Color(0xFF050811)
-        : const Color(0xFF0B0F19);
-    final Color fillColor = isNight
-        ? const Color(0xFFFFF3C4)
-        : const Color(0xFFFFFFFF);
+    const Color fillColor = Color(0xFF000000);
+    final Color strokeColor = Colors.white.withValues(alpha: 0.90);
 
     final strokePainter = TextPainter(
       text: TextSpan(
@@ -614,7 +609,7 @@ class OuterRingPainter extends CustomPainter {
           height: 1.0,
           foreground: Paint()
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 2.4
+            ..strokeWidth = 2.2
             ..strokeJoin = StrokeJoin.round
             ..color = strokeColor,
         ),

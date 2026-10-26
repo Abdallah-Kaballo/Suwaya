@@ -3,14 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:hijri/hijri_calendar.dart';
+import 'package:suwaya_time/suwaya_time.dart';
 
 import 'tasks_provider.dart';
 import '../routines/routines_provider.dart';
 import '../../models/task_model.dart';
 import '../../models/routine_model.dart';
 import '../../core/astro_engine/astro_provider.dart';
-import 'package:suwaya_time/suwaya_time.dart';
 import '../../core/location/permissions_provider.dart';
 import '../../features/settings/settings_provider.dart';
 import '../../shared/widgets/suwaya_time_text.dart';
@@ -25,7 +24,7 @@ class UniversalAddScreen extends ConsumerStatefulWidget {
   final int initialTab;
   final TaskModel? existingTask;
   final RoutineModel? existingRoutine;
-  final DateTime? initialDate; // 🌟 استقبال التاريخ المختار من شاشة التقويم
+  final DateTime? initialDate;
 
   const UniversalAddScreen({
     super.key,
@@ -79,6 +78,27 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
   late final Map<String, String> _availableTones;
   late final Map<String, String> _availablePatterns;
 
+  /// 🌟 حساب الحد الأدنى المنطقي للتاريخ:
+  /// - في الوضع السويعي (mode == 0): ينقلب اليوم فور أذان المغرب إلى اليوم الهجري الجديد
+  /// - في الوضع المدني (mode == 1): ينقلب اليوم عند منتصف الليل (00:00)
+  DateTime _getLogicalMinDateForMode(int mode) {
+    final astroState = ref.read(astroProvider);
+    final cityNow = virtualDateTimeNotifier.value;
+    return getLogicalDateForMode(
+      isAstroTime: mode == 0,
+      astroState: astroState,
+      civilReference: cityNow,
+    );
+  }
+
+  /// 🌟 ضمان عدم بقاء التاريخ المختار في اليوم الهجري المنتهي بعد المغرب
+  void _syncSelectedDateWithMode(int mode) {
+    final minDate = _getLogicalMinDateForMode(mode);
+    if (_selectedDate == null || _selectedDate!.isBefore(minDate)) {
+      _selectedDate = minDate;
+    }
+  }
+
   bool _isCandidateTaskTimeInPast({
     required int mode,
     required int candidateGlobalSuwaya,
@@ -98,7 +118,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       civilReference: cityNow,
     );
 
-    final targetCivilDate = _selectedDate != null
+    final effectiveSelected =
+        _selectedDate != null &&
+            !_selectedDate!.isBefore(
+              DateTime(logicalToday.year, logicalToday.month, logicalToday.day),
+            )
         ? CivilDate(
             _selectedDate!.year,
             _selectedDate!.month,
@@ -108,7 +132,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     return SuwayaScheduleEngine.isCandidateTaskTimeInPast(
       isAstroMode: isAstroMode,
-      targetDate: targetCivilDate,
+      targetDate: effectiveSelected,
       candidateGlobalSuwaya: candidateGlobalSuwaya,
       candidateVirtualMinute: candidateVirtualMin,
       candidateCivilClock: CivilWallClock(
@@ -182,10 +206,20 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       vsync: this,
       initialIndex: startTab,
     );
-    final cityNow = virtualDateTimeNotifier.value;
-    _selectedDate =
-        widget.initialDate ??
-        DateTime(cityNow.year, cityNow.month, cityNow.day);
+
+    final initialLogicalMin = _getLogicalMinDateForMode(_timeMode);
+    if (widget.initialDate != null) {
+      final cleanInit = DateTime(
+        widget.initialDate!.year,
+        widget.initialDate!.month,
+        widget.initialDate!.day,
+      );
+      _selectedDate = cleanInit.isBefore(initialLogicalMin)
+          ? initialLogicalMin
+          : cleanInit;
+    } else {
+      _selectedDate = initialLogicalMin;
+    }
 
     final periods = ref.read(astroProvider).periods;
     final defaultGlobal = _mapLocalToGlobal(
@@ -204,7 +238,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       final t = widget.existingTask!;
       _titleController.text = t.title;
       _selectedCategory = t.category;
-      _selectedDate = t.targetDate ?? _selectedDate;
       _recurrenceDays = List.from(t.recurrenceDays ?? []);
       _showOnDial = t.showOnDial;
       _alertLevel = t.alarmMode ? 2 : (t.notifyMode ? 1 : 0);
@@ -227,6 +260,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
         _targetCivilHour = t.targetCivilClock!.hour;
         _targetCivilMinute = t.targetCivilClock!.minute;
       }
+
+      _selectedDate = t.targetDate ?? _getLogicalMinDateForMode(_timeMode);
     }
 
     if (widget.existingRoutine != null) {
@@ -320,7 +355,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       return;
     }
 
-    // 🌟 منع حفظ مهمة عابرة أو عادة مستمرة بدون تحديد وقت (يمنع نشوء مهام صامتة بلا فترة أو منبه)
     if (_tabController.index != 2 && !_hasTime) {
       HapticFeedback.heavyImpact();
       setState(() => _timeError = true);
@@ -333,23 +367,25 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       return;
     }
 
-    if (_tabController.index == 0 &&
-        _isCandidateTaskTimeInPast(
-          mode: _timeMode,
-          candidateGlobalSuwaya: _targetGlobalSuwaya,
-          candidateVirtualMin: _targetVirtualMinute,
-          candidateCivilHour: _targetCivilHour,
-          candidateCivilMin: _targetCivilMinute,
-        )) {
-      HapticFeedback.heavyImpact();
-      setState(() => _timeError = true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_pastTimeErrorMessage(context)),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
+    if (_tabController.index == 0) {
+      _syncSelectedDateWithMode(_timeMode);
+      if (_isCandidateTaskTimeInPast(
+        mode: _timeMode,
+        candidateGlobalSuwaya: _targetGlobalSuwaya,
+        candidateVirtualMin: _targetVirtualMinute,
+        candidateCivilHour: _targetCivilHour,
+        candidateCivilMin: _targetCivilMinute,
+      )) {
+        HapticFeedback.heavyImpact();
+        setState(() => _timeError = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_pastTimeErrorMessage(context)),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
     }
 
     final periods = ref.read(astroProvider).periods;
@@ -357,7 +393,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final scaffold = ScaffoldMessenger.of(context);
 
     if (_tabController.index == 2) {
-      // 🌟 فحص موحد لصلاحيات الإشعارات والمنبهات قبل حفظ الروتين أو المهمة
       if (_alertLevel >= 1) {
         final permsNotifier = ref.read(permissionsProvider.notifier);
         final hasNotif = await permsNotifier.ensureNotificationPermission();
@@ -389,7 +424,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       routine.alarmVolume = _alarmVolume;
 
       if (_routineTimeMode == 1) {
-        // المدني
         routine.isAstroTime = false;
         routine.startTimeMinutes =
             (_routineStartCivilHour * 60) + _routineStartCivilMinute;
@@ -402,7 +436,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
         routine.endSuwaya = null;
         routine.endVirtualMinute = null;
       } else {
-        // السويعي
         routine.isAstroTime = true;
         routine.startTimeMinutes = null;
         routine.endTimeMinutes = null;
@@ -423,7 +456,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       return;
     }
 
-    // 🌟 فحص موحد لصلاحيات الإشعارات والمنبهات قبل حفظ الروتين أو المهمة
     if (_alertLevel >= 1) {
       final permsNotifier = ref.read(permissionsProvider.notifier);
       final hasNotif = await permsNotifier.ensureNotificationPermission();
@@ -477,6 +509,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     }
 
     if (task.type == TaskType.casual) {
+      _syncSelectedDateWithMode(_timeMode);
       task.targetDate = _selectedDate;
       task.recurrenceDays = null;
     } else {
@@ -513,7 +546,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     int tempMode = isRoutine ? _routineTimeMode : _timeMode;
 
-    // إذا لم يكن المستخدم قد حدد وقتاً بعد، نبدأ العجلات من الوقت الحالي + 5 دقائق لتفادي الوقوع في الماضي
     int defaultGlobalSuwaya = _targetGlobalSuwaya;
     int defaultVirtualMin = _targetVirtualMinute;
     int defaultCivilHour = _targetCivilHour;
@@ -596,6 +628,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                       });
                       setState(() {
                         _timeMode = tempMode;
+                        _syncSelectedDateWithMode(_timeMode);
                       });
                     },
                     style: ButtonStyle(
@@ -690,20 +723,21 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                           backgroundColor: pColor,
                         ),
                         onPressed: () {
-                          // 🌟 منع تأكيد وقت قد مضى في اليوم الحالي للمهام العابرة
-                          if (!isRoutine &&
-                              _isCandidateTaskTimeInPast(
-                                mode: tempMode,
-                                candidateGlobalSuwaya: tGlobalSuwaya,
-                                candidateVirtualMin: tVirtualMinute,
-                                candidateCivilHour: tCivilHour,
-                                candidateCivilMin: tCivilMinute,
-                              )) {
-                            HapticFeedback.heavyImpact();
-                            setDialogState(() {
-                              dialogError = _pastTimeErrorMessage(context);
-                            });
-                            return;
+                          if (!isRoutine) {
+                            _syncSelectedDateWithMode(tempMode);
+                            if (_isCandidateTaskTimeInPast(
+                              mode: tempMode,
+                              candidateGlobalSuwaya: tGlobalSuwaya,
+                              candidateVirtualMin: tVirtualMinute,
+                              candidateCivilHour: tCivilHour,
+                              candidateCivilMin: tCivilMinute,
+                            )) {
+                              HapticFeedback.heavyImpact();
+                              setDialogState(() {
+                                dialogError = _pastTimeErrorMessage(context);
+                              });
+                              return;
+                            }
                           }
 
                           setState(() {
@@ -723,6 +757,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                               _hasTime = true;
                               _timeError = false;
                               _timeMode = tempMode;
+                              _syncSelectedDateWithMode(_timeMode);
                               _targetGlobalSuwaya = tGlobalSuwaya;
                               _targetVirtualMinute = tVirtualMinute;
                               _targetCivilHour = tCivilHour;
@@ -763,7 +798,12 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     final langCode = context.locale.languageCode;
     final safeIntl = (langCode == 'ff' || langCode == 'ug') ? 'en' : langCode;
 
-    DateTime tempDate = _selectedDate ?? DateTime.now();
+    // 🌟 اعتماد التاريخ المنطقي للدورة الفلكية (ينتقل بعد المغرب مباشرةً لليوم الهجري الجديد ويظلل اليوم المنتهي)
+    final DateTime logicalMinDate = _getLogicalMinDateForMode(_timeMode);
+    DateTime tempDate =
+        (_selectedDate == null || _selectedDate!.isBefore(logicalMinDate))
+        ? logicalMinDate
+        : _selectedDate!;
 
     await showDialog(
       context: context,
@@ -790,12 +830,11 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                 ),
                 const SizedBox(height: 16),
                 if (!isHabit)
-                  // 🌟 عرض الرزنامة الهجرية الشبكية (مع تظليل الأيام السابقة بالرمادي) في الوضع السويعي، والرزنامة الميلادية في الوضع المدني
                   (_timeMode == 0
                       ? HijriCalendarDatePicker(
                           initialDate: tempDate,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(
+                          firstDate: logicalMinDate,
+                          lastDate: logicalMinDate.add(
                             const Duration(days: 365),
                           ),
                           textColor: text,
@@ -808,18 +847,9 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
                           },
                         )
                       : CalendarDatePicker(
-                          initialDate:
-                              tempDate.isBefore(
-                                DateTime(
-                                  DateTime.now().year,
-                                  DateTime.now().month,
-                                  DateTime.now().day,
-                                ),
-                              )
-                              ? DateTime.now()
-                              : tempDate,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(
+                          initialDate: tempDate,
+                          firstDate: logicalMinDate,
+                          lastDate: logicalMinDate.add(
                             const Duration(days: 365),
                           ),
                           onDateChanged: (d) {
@@ -905,7 +935,6 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     );
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -1072,6 +1101,8 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     String timeStr = 'add_screen.not_set_mandatory'.tr();
     Widget? timePreview;
     final settings = ref.watch(settingsProvider);
+    final langCode = context.locale.languageCode;
+    final numStyle = settings.suwayaNumberStyle;
 
     if (_hasTime) {
       if (_timeMode == 1) {
@@ -1081,7 +1112,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
             minute: _targetCivilMinute,
           ),
           civilTimeFormat: settings.civilTimeFormat,
-          locale: context.locale.languageCode,
+          locale: langCode,
           style: TextStyle(
             color: textColor,
             fontSize: 16,
@@ -1105,29 +1136,48 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
 
     String dateStr;
     if (isHabit) {
+      final countStr = formatDigitsForStyle(
+        '${_recurrenceDays.length}',
+        numberStyle: numStyle,
+        locale: langCode,
+      );
       dateStr = _recurrenceDays.isEmpty
           ? 'add_screen.daily'.tr()
-          : '${_recurrenceDays.length} ${'common.days'.tr()}';
+          : '$countStr ${'common.days'.tr()}';
     } else {
-      final targetDate = _selectedDate ?? DateTime.now();
+      final logicalMin = _getLogicalMinDateForMode(_timeMode);
+      final targetDate =
+          (_selectedDate == null || _selectedDate!.isBefore(logicalMin))
+          ? logicalMin
+          : _selectedDate!;
+
       if (_timeMode == 0) {
-        // 🌟 تطبيق تصحيح التاريخ الهجري
-        final adjustedDate = targetDate.add(
-          Duration(days: settings.hijriOffsetDays),
+        const hijriProvider = UmmAlQuraHijriProvider();
+        final hDate = hijriProvider.dateForGregorianDate(
+          date: CivilDate(targetDate.year, targetDate.month, targetDate.day),
+          adjustmentDays: settings.hijriOffsetDays,
         );
-        final hDate = HijriCalendar.fromDate(adjustedDate);
-        dateStr =
-            '${hDate.hDay} ${'hijri.m${hDate.hMonth}'.tr()} ${hDate.hYear}';
+        final rawHijri =
+            '${hDate.day} ${'hijri.m${hDate.month}'.tr()} ${hDate.year}';
+        dateStr = formatDigitsForStyle(
+          rawHijri,
+          numberStyle: numStyle,
+          locale: langCode,
+        );
       } else {
-        dateStr = DateFormat('yyyy/MM/dd').format(targetDate);
+        dateStr = formatDigitsForStyle(
+          DateFormat('yyyy/MM/dd').format(targetDate),
+          numberStyle: numStyle,
+          locale: langCode,
+        );
       }
     }
 
-    final isAr = context.locale.languageCode == 'ar';
+    final isAr = langCode == 'ar';
     String alertStr = _alertLevel == 0
-        ? (isAr ? 'بدون إشعار' : 'No Notification')
+        ? (isAr ? 'صامت' : 'No Notification')
         : (_alertLevel == 1
-              ? (isAr ? 'إشعار على الستارة' : 'Curtain Notification')
+              ? (isAr ? 'إشعار' : 'Curtain Notification')
               : (isAr ? 'تنبيه' : 'Alarm'));
 
     return Column(
@@ -1203,10 +1253,17 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
     Color surfaceColor,
     Color accentColor,
   ) {
+    final settings = ref.watch(settingsProvider);
+    final langCode = context.locale.languageCode;
+    final numStyle = settings.suwayaNumberStyle;
+    final daysCountStr = formatDigitsForStyle(
+      '${_routineRecurrenceDays.length}',
+      numberStyle: numStyle,
+      locale: langCode,
+    );
     final String recurrenceStr = _routineRecurrenceDays.isEmpty
         ? 'add_screen.daily'.tr()
-        : '${_routineRecurrenceDays.length} ${'common.days'.tr()}';
-    final settings = ref.watch(settingsProvider);
+        : '$daysCountStr ${'common.days'.tr()}';
 
     Widget startPreview;
     Widget endPreview;
@@ -1217,7 +1274,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           minute: _routineStartCivilMinute,
         ),
         civilTimeFormat: settings.civilTimeFormat,
-        locale: context.locale.languageCode,
+        locale: langCode,
         style: TextStyle(
           color: textColor,
           fontSize: 16,
@@ -1231,7 +1288,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
           minute: _routineEndCivilMinute,
         ),
         civilTimeFormat: settings.civilTimeFormat,
-        locale: context.locale.languageCode,
+        locale: langCode,
         style: TextStyle(
           color: textColor,
           fontSize: 16,
@@ -1424,6 +1481,7 @@ class _UniversalAddScreenState extends ConsumerState<UniversalAddScreen>
       _showOnDial = show;
     }),
   );
+
   Widget _buildGridCard(
     Color surfaceColor,
     Color accentColor,

@@ -8,11 +8,11 @@ class AppTheme {
     switch (fontKey.toLowerCase().trim()) {
       case 'tajawal':
         return 'Tajawal';
-      case 'inter':
-        return 'Inter';
       case 'system':
-      default:
         return null;
+      case 'inter':
+      default:
+        return 'Inter';
     }
   }
 

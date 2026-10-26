@@ -228,9 +228,10 @@ class _SuwayaSpeedDialFabState extends ConsumerState<SuwayaSpeedDialFab>
     );
   }
 
+  // استبدل دالة build في lib/shared/widgets/suwaya_speed_dial_fab.dart بالكامل بما يلي:
+
   @override
   Widget build(BuildContext context) {
-    // إغلاق القائمة تلقائياً إذا فُتحت القائمة الجانبية (Drawer)
     ref.listen<bool>(isDrawerOpenProvider, (prev, isOpen) {
       if (isOpen && _isOpen) {
         _closeMenu(immediate: true);
@@ -263,45 +264,60 @@ class _SuwayaSpeedDialFabState extends ConsumerState<SuwayaSpeedDialFab>
                   ),
                 ),
               ),
-              // 2. الخيارات الثلاثة وزر الإغلاق (×) مرتبطة بموقع الزر الأصلي بدقة
+
+              // 2. الخيارات الثلاثة منفصلة ومرتبطة بأعلى الزر الأصلي مباشرة
               CompositedTransformFollower(
                 link: _layerLink,
                 showWhenUnlinked: false,
-                targetAnchor: isRTL
-                    ? Alignment.bottomLeft
-                    : Alignment.bottomRight,
+                targetAnchor: isRTL ? Alignment.topLeft : Alignment.topRight,
                 followerAnchor: isRTL
                     ? Alignment.bottomLeft
                     : Alignment.bottomRight,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: isRTL
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.end,
-                  children: [
-                    _buildPillOption(
-                      label: 'tasks.routine_period'.tr(),
-                      icon: LucideIcons.compass,
-                      tabIndex: 2,
-                      fgColor: fgColor,
-                      isRTL: isRTL,
-                    ),
-                    _buildPillOption(
-                      label: 'tasks.continuous_habit'.tr(),
-                      icon: LucideIcons.repeat,
-                      tabIndex: 1,
-                      fgColor: fgColor,
-                      isRTL: isRTL,
-                    ),
-                    _buildPillOption(
-                      label: 'tasks.casual_task'.tr(),
-                      icon: LucideIcons.check,
-                      tabIndex: 0,
-                      fgColor: fgColor,
-                      isRTL: isRTL,
-                    ),
-                    _buildFabButton(fgColor),
-                  ],
+                offset: const Offset(0, -4),
+                child: Directionality(
+                  textDirection: isRTL
+                      ? ui.TextDirection.rtl
+                      : ui.TextDirection.ltr,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildPillOption(
+                        label: 'tasks.routine_period'.tr(),
+                        icon: LucideIcons.compass,
+                        tabIndex: 2,
+                        fgColor: fgColor,
+                        isRTL: isRTL,
+                      ),
+                      _buildPillOption(
+                        label: 'tasks.continuous_habit'.tr(),
+                        icon: LucideIcons.repeat,
+                        tabIndex: 1,
+                        fgColor: fgColor,
+                        isRTL: isRTL,
+                      ),
+                      _buildPillOption(
+                        label: 'tasks.casual_task'.tr(),
+                        icon: LucideIcons.check,
+                        tabIndex: 0,
+                        fgColor: fgColor,
+                        isRTL: isRTL,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // 3. زر الإغلاق (×) منطبق 100% فوق مركز الزر الأصلي (+) بحجم ثابت لا يتحرك أبداً
+              CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                targetAnchor: Alignment.center,
+                followerAnchor: Alignment.center,
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: _buildFabButton(fgColor),
                 ),
               ),
             ],
@@ -309,9 +325,13 @@ class _SuwayaSpeedDialFabState extends ConsumerState<SuwayaSpeedDialFab>
         },
         child: CompositedTransformTarget(
           link: _layerLink,
-          child: Opacity(
-            opacity: _isOpen ? 0.0 : 1.0,
-            child: _buildFabButton(fgColor),
+          child: SizedBox(
+            width: 56,
+            height: 56,
+            child: Opacity(
+              opacity: _isOpen ? 0.0 : 1.0,
+              child: _buildFabButton(fgColor),
+            ),
           ),
         ),
       ),

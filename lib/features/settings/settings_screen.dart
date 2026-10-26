@@ -65,13 +65,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     switch (fontKey.toLowerCase()) {
       case 'tajawal':
         return isAr ? 'خط تجوال (Tajawal)' : 'Tajawal Font';
-      case 'inter':
-        return isAr ? 'خط إنتر (Inter)' : 'Inter Font';
       case 'system':
+        return isAr ? 'خط النظام (System)' : 'System Font';
+      case 'inter':
       default:
-        return isAr
-            ? 'الخط الأصلي للنظام (الافتراضي)'
-            : 'System Default (Original)';
+        return isAr ? 'خط إنتر (Inter - الافتراضي)' : 'Inter Font (Default)';
     }
   }
 
@@ -96,12 +94,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             final notifier = ref.read(settingsProvider.notifier);
             final selectedFont = currentSettings.appFontFamily;
             final currentScale = currentSettings.appFontScale;
+            final selectedNumStyle = currentSettings.suwayaNumberStyle;
             final isAr = context.locale.languageCode == 'ar';
 
             final fontOptions = <String, String>{
-              'system': _fontFamilyLabel(context, 'system'),
-              'tajawal': _fontFamilyLabel(context, 'tajawal'),
               'inter': _fontFamilyLabel(context, 'inter'),
+              'tajawal': _fontFamilyLabel(context, 'tajawal'),
+              'system': _fontFamilyLabel(context, 'system'),
             };
 
             final scalePresets = <double, String>{
@@ -113,7 +112,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             };
 
             return SafeArea(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -141,7 +140,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // بطاقة معاينة حية للخط والحجم
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -157,8 +155,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             isAr
-                                ? 'معاينة الخط وحجم النص'
-                                : 'Live Font & Size Preview',
+                                ? 'معاينة الخط والأرقام'
+                                : 'Live Font & Numerals Preview',
                             style: TextStyle(
                               color: primaryColor,
                               fontSize: 14 * currentScale,
@@ -170,9 +168,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            isAr
-                                ? 'سُويعَة يربط يومك ومهامك بالإيقاع الفلكي الطبيعي (04|30 🌑).'
-                                : 'Suwaya aligns your daily rhythm with astronomical time (04|30 🌑).',
+                            formatDigitsForStyle(
+                              isAr
+                                  ? 'سُويعَة يربط يومك ومهامك بالإيقاع الفلكي الطبيعي (04|30 🌑).'
+                                  : 'Suwaya aligns your daily rhythm with astronomical time (04|30 🌑).',
+                              numberStyle: selectedNumStyle,
+                              locale: context.locale.languageCode,
+                            ),
                             style: TextStyle(
                               color: textColor,
                               fontSize: 14.5 * currentScale,
@@ -185,7 +187,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
                     Text(
                       isAr ? 'نوع الخط' : 'Font Family',
                       style: TextStyle(
@@ -194,7 +196,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     ...fontOptions.entries.map((entry) {
                       final isSelected = selectedFont == entry.key;
                       return ListTile(
@@ -231,7 +233,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                       );
                     }),
-                    const Divider(height: 24),
+                    const Divider(height: 20),
+                    Text(
+                      isAr ? 'نمط الأرقام' : 'Numerals Style',
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ChoiceChip(
+                            label: Text(
+                              isAr
+                                  ? 'إنجليزية (0-9 · الافتراضي)'
+                                  : 'English (0-9 · Default)',
+                            ),
+                            selected: selectedNumStyle != 'localized',
+                            selectedColor: primaryColor.withValues(alpha: 0.2),
+                            labelStyle: TextStyle(
+                              color: selectedNumStyle != 'localized'
+                                  ? primaryColor
+                                  : textColor,
+                              fontWeight: selectedNumStyle != 'localized'
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              fontSize: 12.5,
+                              fontFamily: 'Inter',
+                            ),
+                            onSelected: (_) {
+                              HapticFeedback.selectionClick();
+                              notifier.updateSuwayaNumberStyle('english');
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ChoiceChip(
+                            label: Text(
+                              isAr ? 'محلية (٠-٩)' : 'Localized Numerals',
+                            ),
+                            selected: selectedNumStyle == 'localized',
+                            selectedColor: primaryColor.withValues(alpha: 0.2),
+                            labelStyle: TextStyle(
+                              color: selectedNumStyle == 'localized'
+                                  ? primaryColor
+                                  : textColor,
+                              fontWeight: selectedNumStyle == 'localized'
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              fontSize: 12.5,
+                            ),
+                            onSelected: (_) {
+                              HapticFeedback.selectionClick();
+                              notifier.updateSuwayaNumberStyle('localized');
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

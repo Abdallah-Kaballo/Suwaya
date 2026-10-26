@@ -471,22 +471,73 @@ class SuwayaTimeFormatter {
     return DateFormat.localeExists(locale) ? locale : 'en';
   }
 
-  /// تنسيق كائن القيمة الصريح CivilWallClock وفق إعدادات 12/24 ساعة واتجاه اللغة
+  /// تحويل أي أرقام عربية مشرقية (٠-٩) أو فارسية/أردية (۰-۹) إلى أرقام إنجليزية قياسية (0-9)
+  static String toEnglishDigits(String input) {
+    final sb = StringBuffer();
+    for (final codeUnit in input.codeUnits) {
+      if (codeUnit >= 0x0660 && codeUnit <= 0x0669) {
+        sb.writeCharCode(0x30 + (codeUnit - 0x0660));
+      } else if (codeUnit >= 0x06F0 && codeUnit <= 0x06F9) {
+        sb.writeCharCode(0x30 + (codeUnit - 0x06F0));
+      } else {
+        sb.writeCharCode(codeUnit);
+      }
+    }
+    return sb.toString();
+  }
+
+  /// تحويل الأرقام الإنجليزية (0-9) إلى أرقام عربية مشرقية (٠-٩) عند اختيار الأرقام المحلية
+  static String toLocalizedDigits(String input, String locale) {
+    final lang = locale.toLowerCase();
+    if (lang == 'ar') {
+      final sb = StringBuffer();
+      for (final codeUnit in input.codeUnits) {
+        if (codeUnit >= 0x30 && codeUnit <= 0x39) {
+          sb.writeCharCode(0x0660 + (codeUnit - 0x30));
+        } else {
+          sb.writeCharCode(codeUnit);
+        }
+      }
+      return sb.toString();
+    } else if (lang == 'ur' || lang == 'ug') {
+      final sb = StringBuffer();
+      for (final codeUnit in input.codeUnits) {
+        if (codeUnit >= 0x30 && codeUnit <= 0x39) {
+          sb.writeCharCode(0x06F0 + (codeUnit - 0x30));
+        } else {
+          sb.writeCharCode(codeUnit);
+        }
+      }
+      return sb.toString();
+    }
+    return toEnglishDigits(input);
+  }
+
+  /// تنسيق كائن القيمة الصريح CivilWallClock وفق إعدادات 12/24 ساعة واتجاه اللغة ونمط الأرقام
   static String formatCivilWallClock(
     CivilWallClock clock, {
     required bool use24Hour,
     required String locale,
     required bool isRTL,
+    bool useEnglishDigits = true,
   }) {
     final safeLoc = _safeLocale(locale);
     final refDt = DateTime.utc(2000, 1, 1, clock.hour, clock.minute);
 
+    String applyNumeralStyle(String text) => useEnglishDigits
+        ? toEnglishDigits(text)
+        : toLocalizedDigits(text, locale);
+
     if (use24Hour) {
-      final time24 = DateFormat('HH:mm', safeLoc).format(refDt);
+      final time24 = applyNumeralStyle(
+        DateFormat('HH:mm', safeLoc).format(refDt),
+      );
       return '\u202A\u200E$time24\u200E\u202C';
     }
 
-    final timeDigits = DateFormat('h:mm', safeLoc).format(refDt);
+    final timeDigits = applyNumeralStyle(
+      DateFormat('h:mm', safeLoc).format(refDt),
+    );
     final periodMarker = DateFormat('a', safeLoc).format(refDt);
 
     if (isRTL) {
@@ -496,10 +547,17 @@ class SuwayaTimeFormatter {
   }
 
   /// تنسيق وقت الروتين المدني بنظام 24 ساعة القياسي
-  static String formatCivilRoutineClock(CivilWallClock clock, String locale) {
+  static String formatCivilRoutineClock(
+    CivilWallClock clock,
+    String locale, {
+    bool useEnglishDigits = true,
+  }) {
     final safeLoc = _safeLocale(locale);
     final refDt = DateTime.utc(2000, 1, 1, clock.hour, clock.minute);
-    return DateFormat('HH:mm', safeLoc).format(refDt);
+    final raw = DateFormat('HH:mm', safeLoc).format(refDt);
+    return useEnglishDigits
+        ? toEnglishDigits(raw)
+        : toLocalizedDigits(raw, locale);
   }
 
   /// تنسيق أيام تكرار الروتين أو العادة

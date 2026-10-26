@@ -7,10 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:alarm/alarm.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:suwaya_time/suwaya_time.dart';
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/services/alarm_service.dart';
+import '../../core/utils/time_formatters.dart';
 import '../../features/settings/settings_provider.dart';
+import '../../models/settings_model.dart';
 import '../../shared/widgets/suwaya_time_text.dart';
 
 class AlarmRingScreen extends ConsumerStatefulWidget {
@@ -27,7 +30,8 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
   late final ParsedAlarmData parsedData;
   late final String taskTitle;
   late final String taskBody;
-  late final Color accentColor;
+  late final Color rawAccentColor;
+  late final Color highContrastAccent;
   late final int snoozeCount;
 
   double _dragPosition = 0.0;
@@ -39,6 +43,19 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
 
   StreamSubscription<AlarmSet>? _ringingSub;
   StreamSubscription<void>? _hardwareVolumeSub;
+
+  /// ضمان تباين عالٍ جداً (WCAG AAA) للون المميز فوق الخلفية الداكنة (#0B0F19)
+  Color _ensureHighContrastOnDark(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    final safeLightness = hsl.lightness < 0.72
+        ? 0.74
+        : hsl.lightness.clamp(0.72, 0.90);
+    final safeSaturation = hsl.saturation.clamp(0.65, 1.0);
+    return hsl
+        .withLightness(safeLightness)
+        .withSaturation(safeSaturation)
+        .toColor();
+  }
 
   @override
   void initState() {
@@ -59,9 +76,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     });
 
     parsedData = AlarmService.parseAlarmSettings(widget.alarmSettings);
-    taskTitle = parsedData.title;
-    taskBody = parsedData.body;
-    accentColor = Color(parsedData.colorValue);
+    taskTitle = SuwayaTimeFormatter.toEnglishDigits(parsedData.title);
+    taskBody = SuwayaTimeFormatter.toEnglishDigits(parsedData.body);
+    rawAccentColor = Color(parsedData.colorValue);
+    highContrastAccent = _ensureHighContrastOnDark(rawAccentColor);
     snoozeCount = parsedData.snoozeCount;
 
     _glowController = AnimationController(
@@ -69,7 +87,7 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
-    _glowAnimation = Tween<double>(begin: 0.18, end: 0.55).animate(
+    _glowAnimation = Tween<double>(begin: 0.16, end: 0.45).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
   }
@@ -149,7 +167,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'Inter', color: Colors.white),
+        ),
         backgroundColor: const Color(0xFFD32F2F),
         behavior: SnackBarBehavior.floating,
       ),
@@ -209,7 +230,6 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
       }
     } catch (_) {}
 
-    // محاولة ثانية احتياطية لضمان عدم بقاء المستخدم عالقاً
     try {
       await Alarm.stop(widget.alarmSettings.id);
     } catch (_) {}
@@ -248,9 +268,100 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     }
   }
 
+  /// بناء عرض الوقت السويعي بأرقام إنجليزية وخط Inter
+  Widget _buildSuwayaClockDisplay({
+    required AstroState astroState,
+    required SettingsModel settings,
+    required double fontSize,
+    required FontWeight fontWeight,
+    required Color color,
+  }) {
+    final ct = astroState.currentSuwayaTime;
+    final globalIdx = ct.phase.isNight
+        ? (ct.phaseSlotNumber - 1)
+        : (12 + ct.phaseSlotNumber - 1);
+    final sStr = ct.phaseSlotNumber.toString().padLeft(2, '0');
+    final mStr = ct.virtualMinute.toString().padLeft(2, '0');
+    final isNight = globalIdx < 12;
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+
+    final badge = SuwayaPhaseBadge(
+      isNight: isNight,
+      size: (fontSize * 0.62).clamp(20.0, 44.0),
+      iconMode: settings.suwayaIconMode,
+      isRTL: isRTL,
+      textStyle: TextStyle(
+        color: color,
+        fontSize: fontSize * 0.55,
+        fontWeight: FontWeight.w800,
+        fontFamily: 'Inter',
+      ),
+    );
+
+    final digits = Directionality(
+      textDirection: ui.TextDirection.ltr,
+      child: Text(
+        '$sStr|$mStr',
+        style: TextStyle(
+          color: color,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          fontFamily: 'Inter',
+          letterSpacing: 1.0,
+          height: 1.05,
+          fontFeatures: const [ui.FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: isRTL
+          ? [badge, const SizedBox(width: 10), digits]
+          : [digits, const SizedBox(width: 10), badge],
+    );
+  }
+
+  /// بناء عرض الوقت المدني بأرقام إنجليزية وخط Inter
+  Widget _buildCivilClockDisplay({
+    required DateTime civilNow,
+    required SettingsModel settings,
+    required double fontSize,
+    required FontWeight fontWeight,
+    required Color color,
+  }) {
+    final formatted = SuwayaTimeFormatter.toEnglishDigits(
+      formatCivilTime(
+        civilNow,
+        format: settings.civilTimeFormat,
+        locale: context.locale.languageCode,
+        context: context,
+        numberStyle: 'english',
+      ),
+    );
+
+    return Directionality(
+      textDirection: ui.TextDirection.ltr,
+      child: Text(
+        formatted,
+        style: TextStyle(
+          color: color,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+          fontFamily: 'Inter',
+          letterSpacing: 1.0,
+          height: 1.05,
+          fontFeatures: const [ui.FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
+    final astroState = ref.watch(astroProvider);
     final maxSnoozes = settings.maxSnoozeCount > 0
         ? settings.maxSnoozeCount
         : parsedData.maxSnoozes;
@@ -262,10 +373,12 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
     final bool canSnooze =
         !isPrayer && parsedData.snoozeAllowed && snoozeCount < maxSnoozes;
 
+    final bool isAstroPrimary = parsedData.isAstroScheduled;
+
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0B0F19),
+        backgroundColor: const Color(0xFF070A12),
         body: Stack(
           alignment: Alignment.center,
           children: [
@@ -276,11 +389,13 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                   return Container(
                     decoration: BoxDecoration(
                       gradient: RadialGradient(
-                        center: Alignment.center,
-                        radius: 1.4,
+                        center: const Alignment(0.0, -0.2),
+                        radius: 1.25,
                         colors: [
-                          accentColor.withValues(alpha: _glowAnimation.value),
-                          const Color(0xFF0B0F19),
+                          rawAccentColor.withValues(
+                            alpha: _glowAnimation.value,
+                          ),
+                          const Color(0xFF070A12),
                         ],
                       ),
                     ),
@@ -295,61 +410,126 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // 🌟 القسم العلوي: شارة نوع الحدث، الأيقونة، الساعة المدنية والسويعية، العنوان
+                      // 🌟 القسم العلوي: شارة نوع الحدث + الوقت الأساسي الكبير جداً + الوقت الثانوي الأصغر بفرق واضح + العنوان
                       Column(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 6,
+                              horizontal: 16,
+                              vertical: 7,
                             ),
                             decoration: BoxDecoration(
-                              color: accentColor.withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(20),
+                              color: highContrastAccent.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(24),
                               border: Border.all(
-                                color: accentColor.withValues(alpha: 0.4),
+                                color: highContrastAccent.withValues(
+                                  alpha: 0.55,
+                                ),
+                                width: 1.2,
                               ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(_kindIcon(), color: accentColor, size: 15),
-                                const SizedBox(width: 6),
+                                Icon(
+                                  _kindIcon(),
+                                  color: highContrastAccent,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
                                 Text(
                                   _kindBadgeLabel(context),
                                   style: TextStyle(
-                                    color: accentColor,
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
+                                    color: highContrastAccent,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: 'Inter',
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 22),
+
+                          // 🌟 عرض الوقت المجدول به بخط كبير جداً (66pt) والثاني بخط كبير وواضح ولكن أصغر بفرق واضح (32pt)
                           ValueListenableBuilder<DateTime>(
                             valueListenable: virtualDateTimeNotifier,
                             builder: (context, liveCivilNow, _) {
-                              return ClockTimeText.civil(
-                                civilTime: liveCivilNow,
-                                civilTimeFormat: settings.civilTimeFormat,
-                                locale: context.locale.languageCode,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 62,
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'Inter',
-                                ),
+                              final primaryWidget = isAstroPrimary
+                                  ? _buildSuwayaClockDisplay(
+                                      astroState: astroState,
+                                      settings: settings,
+                                      fontSize: 66,
+                                      fontWeight: FontWeight.w900,
+                                      color: const Color(0xFFFFF6D6),
+                                    )
+                                  : _buildCivilClockDisplay(
+                                      civilNow: liveCivilNow,
+                                      settings: settings,
+                                      fontSize: 66,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    );
+
+                              final secondaryWidget = isAstroPrimary
+                                  ? _buildCivilClockDisplay(
+                                      civilNow: liveCivilNow,
+                                      settings: settings,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFFE2E8F0),
+                                    )
+                                  : _buildSuwayaClockDisplay(
+                                      astroState: astroState,
+                                      settings: settings,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFFFDE68A),
+                                    );
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: primaryWidget,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                      borderRadius: BorderRadius.circular(18),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.18,
+                                        ),
+                                      ),
+                                    ),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: secondaryWidget,
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),
-                          const SizedBox(height: 6),
+
+                          const SizedBox(height: 20),
                           Text(
                             taskTitle,
                             style: TextStyle(
-                              color: accentColor,
+                              color: highContrastAccent,
                               fontSize: 28,
                               fontWeight: FontWeight.w900,
+                              fontFamily: 'Inter',
+                              height: 1.2,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -358,8 +538,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                             Text(
                               taskBody,
                               style: const TextStyle(
-                                color: Colors.white70,
+                                color: Color(0xFFE2E8F0),
                                 fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Inter',
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -369,8 +551,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                             Text(
                               '${'alarm.snooze'.tr()} +$snoozeMins ${'details.minute'.tr()} (${snoozeCount + 1}/$maxSnoozes)',
                               style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 13,
+                                color: Color(0xFFCBD5E1),
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Inter',
                               ),
                             )
                           else if (!isPrayer &&
@@ -379,15 +563,16 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                             Text(
                               'alarm.max_snoozes_reached'.tr(),
                               style: const TextStyle(
-                                color: Colors.redAccent,
-                                fontSize: 13,
+                                color: Color(0xFFFF8A80),
+                                fontSize: 13.5,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'Inter',
                               ),
                             ),
                         ],
                       ),
 
-                      // 🌟 القسم السفلي: شريط السحب والأزرار الصريحة
+                      // 🌟 القسم السفلي: شريط السحب والأزرار الصريحة بتباين عالٍ
                       Column(
                         children: [
                           Padding(
@@ -395,9 +580,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                             child: Text(
                               'alarm.swipe_to_stop'.tr(),
                               style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 13,
+                                color: Color(0xFFCBD5E1),
+                                fontSize: 13.5,
                                 fontWeight: FontWeight.w600,
+                                fontFamily: 'Inter',
                               ),
                             ),
                           ),
@@ -414,11 +600,11 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                     height: 80,
                                     decoration: BoxDecoration(
                                       color: Colors.black.withValues(
-                                        alpha: 0.5,
+                                        alpha: 0.65,
                                       ),
                                       borderRadius: BorderRadius.circular(40),
                                       border: Border.all(
-                                        color: Colors.white24,
+                                        color: Colors.white38,
                                         width: 1.5,
                                       ),
                                     ),
@@ -437,10 +623,11 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                                 'alarm.snooze'.tr(),
                                                 style: TextStyle(
                                                   color: canSnooze
-                                                      ? Colors.white54
+                                                      ? Colors.white70
                                                       : Colors.transparent,
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Inter',
                                                 ),
                                               ),
                                             ),
@@ -451,9 +638,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                               child: Text(
                                                 'alarm.stop'.tr(),
                                                 style: const TextStyle(
-                                                  color: Colors.white54,
+                                                  color: Colors.white70,
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Inter',
                                                 ),
                                               ),
                                             ),
@@ -507,16 +695,20 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                               height: 70,
                                               decoration: BoxDecoration(
                                                 color: _dragPosition > 50
-                                                    ? Colors.redAccent
+                                                    ? const Color(0xFFEF4444)
                                                     : (_dragPosition < -50
-                                                          ? Colors.amber
-                                                          : accentColor),
+                                                          ? const Color(
+                                                              0xFFF59E0B,
+                                                            )
+                                                          : highContrastAccent),
                                                 shape: BoxShape.circle,
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color: accentColor
-                                                        .withValues(alpha: 0.5),
-                                                    blurRadius: 15,
+                                                    color: highContrastAccent
+                                                        .withValues(
+                                                          alpha: 0.55,
+                                                        ),
+                                                    blurRadius: 16,
                                                     spreadRadius: 2,
                                                   ),
                                                 ],
@@ -527,7 +719,7 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                                     : (_dragPosition < -50
                                                           ? Icons.snooze
                                                           : _kindIcon()),
-                                                color: Colors.white,
+                                                color: const Color(0xFF070A12),
                                                 size: 30,
                                               ),
                                             ),
@@ -540,14 +732,17 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 22),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (canSnooze) ...[
                                 TextButton.icon(
                                   style: TextButton.styleFrom(
-                                    foregroundColor: Colors.white70,
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.white.withValues(
+                                      alpha: 0.08,
+                                    ),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                       vertical: 14,
@@ -556,12 +751,13 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                   onPressed: _isProcessingAction
                                       ? null
                                       : _triggerSnooze,
-                                  icon: const Icon(Icons.snooze),
+                                  icon: const Icon(Icons.snooze, size: 20),
                                   label: Text(
                                     'alarm.snooze'.tr(),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
+                                      fontFamily: 'Inter',
                                     ),
                                   ),
                                 ),
@@ -569,7 +765,10 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                               ],
                               TextButton.icon(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Colors.redAccent,
+                                  foregroundColor: const Color(0xFFFF8A80),
+                                  backgroundColor: const Color(
+                                    0xFFEF4444,
+                                  ).withValues(alpha: 0.14),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                     vertical: 14,
@@ -578,12 +777,16 @@ class _AlarmRingScreenState extends ConsumerState<AlarmRingScreen>
                                 onPressed: _isProcessingAction
                                     ? null
                                     : _triggerStop,
-                                icon: const Icon(LucideIcons.power_off),
+                                icon: const Icon(
+                                  LucideIcons.power_off,
+                                  size: 20,
+                                ),
                                 label: Text(
                                   'alarm.stop'.tr(),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
+                                    fontFamily: 'Inter',
                                   ),
                                 ),
                               ),
