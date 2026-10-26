@@ -722,6 +722,18 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     state = newState;
     await _repository.saveSettings(newState);
   }
+
+  Future<void> updateAppFontFamily(String family) async {
+    final newState = state.clone()..appFontFamily = family;
+    state = newState;
+    await _repository.saveSettings(newState);
+  }
+
+  Future<void> updateAppFontScale(double scale) async {
+    final newState = state.clone()..appFontScale = scale.clamp(0.85, 1.25);
+    state = newState;
+    await _repository.saveSettings(newState);
+  }
 }
 
 final settingsProvider = NotifierProvider<SettingsNotifier, SettingsModel>(

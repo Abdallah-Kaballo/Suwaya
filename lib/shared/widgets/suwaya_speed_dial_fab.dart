@@ -3,10 +3,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 
-class SuwayaSpeedDialFab extends StatefulWidget {
+import '../../core/providers/ui_providers.dart';
+
+class SuwayaSpeedDialFab extends ConsumerStatefulWidget {
   final Color color;
   final bool isDark;
   final int currentPeriodId;
@@ -23,18 +26,25 @@ class SuwayaSpeedDialFab extends StatefulWidget {
   });
 
   @override
-  State<SuwayaSpeedDialFab> createState() => _SuwayaSpeedDialFabState();
+  ConsumerState<SuwayaSpeedDialFab> createState() => _SuwayaSpeedDialFabState();
 }
 
-class _SuwayaSpeedDialFabState extends State<SuwayaSpeedDialFab>
-    with SingleTickerProviderStateMixin {
+class _SuwayaSpeedDialFabState extends ConsumerState<SuwayaSpeedDialFab>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _controller;
   late final Animation<double> _expandAnimation;
+  late final Animation<double> _backdropAnimation;
+  final OverlayPortalController _overlayController = OverlayPortalController();
+  final LayerLink _layerLink = LayerLink();
+
+  GoRouterDelegate? _routerDelegate;
   bool _isOpen = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 220),
@@ -44,30 +54,99 @@ class _SuwayaSpeedDialFabState extends State<SuwayaSpeedDialFab>
       curve: Curves.easeOutBack,
       reverseCurve: Curves.easeInCubic,
     );
-  }
+    _backdropAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    );
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _toggleMenu() {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _isOpen = !_isOpen;
-      if (_isOpen) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed &&
+          !_isOpen &&
+          _overlayController.isShowing) {
+        _overlayController.hide();
       }
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final delegate = GoRouter.maybeOf(context)?.routerDelegate;
+    if (_routerDelegate != delegate) {
+      _routerDelegate?.removeListener(_onRouteChanged);
+      _routerDelegate = delegate;
+      _routerDelegate?.addListener(_onRouteChanged);
+    }
+  }
+
+  @override
+  void deactivate() {
+    _closeMenu(immediate: true);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _routerDelegate?.removeListener(_onRouteChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && _isOpen) {
+      _closeMenu(immediate: true);
+    }
+  }
+
+  void _onRouteChanged() {
+    if (_isOpen) {
+      _closeMenu(immediate: true);
+    }
+  }
+
+  void _openMenu() {
+    if (_isOpen) return;
+    HapticFeedback.lightImpact();
+    setState(() => _isOpen = true);
+    if (!_overlayController.isShowing) {
+      _overlayController.show();
+    }
+    _controller.forward();
+  }
+
+  void _closeMenu({bool immediate = false}) {
+    if (!_isOpen && !_overlayController.isShowing) return;
+    if (mounted) {
+      setState(() => _isOpen = false);
+    } else {
+      _isOpen = false;
+    }
+
+    if (immediate) {
+      _controller.value = 0.0;
+      if (_overlayController.isShowing) {
+        _overlayController.hide();
+      }
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  void _toggleMenu() {
+    if (_isOpen) {
+      HapticFeedback.lightImpact();
+      _closeMenu();
+    } else {
+      _openMenu();
+    }
+  }
+
   void _openAddScreen(int tabIndex) {
     HapticFeedback.selectionClick();
-    setState(() => _isOpen = false);
-    _controller.reverse();
+    _closeMenu(immediate: true);
 
     context.push(
       '/add-task',
@@ -85,20 +164,19 @@ class _SuwayaSpeedDialFabState extends State<SuwayaSpeedDialFab>
     required IconData icon,
     required int tabIndex,
     required Color fgColor,
+    required bool isRTL,
   }) {
     return ScaleTransition(
       scale: _expandAnimation,
-      alignment: Directionality.of(context) == ui.TextDirection.rtl
-          ? Alignment.bottomLeft
-          : Alignment.bottomRight,
+      alignment: isRTL ? Alignment.bottomLeft : Alignment.bottomRight,
       child: FadeTransition(
-        opacity: _expandAnimation,
+        opacity: _backdropAnimation,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
           child: Material(
             color: widget.color,
-            elevation: 6,
-            shadowColor: Colors.black45,
+            elevation: 8,
+            shadowColor: Colors.black54,
             borderRadius: BorderRadius.circular(28),
             child: InkWell(
               borderRadius: BorderRadius.circular(28),
@@ -131,53 +209,112 @@ class _SuwayaSpeedDialFabState extends State<SuwayaSpeedDialFab>
     );
   }
 
+  Widget _buildFabButton(Color fgColor) {
+    return FloatingActionButton(
+      heroTag: null,
+      backgroundColor: widget.color,
+      foregroundColor: fgColor,
+      elevation: _isOpen ? 10 : 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(_isOpen ? 28 : 20),
+      ),
+      onPressed: _toggleMenu,
+      child: AnimatedRotation(
+        turns: _isOpen ? 0.125 : 0.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        child: const Icon(LucideIcons.plus, size: 28),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final fgColor = widget.isDark ? const Color(0xFF0F172A) : Colors.white;
+    // إغلاق القائمة تلقائياً إذا فُتحت القائمة الجانبية (Drawer)
+    ref.listen<bool>(isDrawerOpenProvider, (prev, isOpen) {
+      if (isOpen && _isOpen) {
+        _closeMenu(immediate: true);
+      }
+    });
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (_isOpen || _controller.isAnimating) ...[
-          _buildPillOption(
-            label: 'tasks.routine_period'.tr(),
-            icon: LucideIcons.compass,
-            tabIndex: 2,
-            fgColor: fgColor,
-          ),
-          _buildPillOption(
-            label: 'tasks.continuous_habit'.tr(),
-            icon: LucideIcons.repeat,
-            tabIndex: 1,
-            fgColor: fgColor,
-          ),
-          _buildPillOption(
-            label: 'tasks.casual_task'.tr(),
-            icon: LucideIcons.check,
-            tabIndex: 0,
-            fgColor: fgColor,
-          ),
-        ],
-        FloatingActionButton(
-          heroTag: null,
-          backgroundColor: _isOpen
-              ? widget.color.withValues(alpha: 0.85)
-              : widget.color,
-          foregroundColor: fgColor,
-          elevation: 6,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(_isOpen ? 28 : 20),
-          ),
-          onPressed: _toggleMenu,
-          child: AnimatedRotation(
-            turns: _isOpen ? 0.125 : 0.0, // دوران 45 درجة يحول + إلى × بنعومة
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            child: const Icon(LucideIcons.plus, size: 28),
+    final fgColor = widget.isDark ? const Color(0xFF0F172A) : Colors.white;
+    final isRTL = Directionality.of(context) == ui.TextDirection.rtl;
+
+    return PopScope(
+      canPop: !_isOpen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _isOpen) {
+          _closeMenu();
+        }
+      },
+      child: OverlayPortal(
+        controller: _overlayController,
+        overlayChildBuilder: (overlayContext) {
+          return Stack(
+            children: [
+              // 1. طبقة تعتيم الخلفية الكاملة التي تغلق القائمة عند لمس أي مكان فارغ
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _closeMenu,
+                  child: FadeTransition(
+                    opacity: _backdropAnimation,
+                    child: const ColoredBox(color: Color(0x8C000000)),
+                  ),
+                ),
+              ),
+              // 2. الخيارات الثلاثة وزر الإغلاق (×) مرتبطة بموقع الزر الأصلي بدقة
+              CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                targetAnchor: isRTL
+                    ? Alignment.bottomLeft
+                    : Alignment.bottomRight,
+                followerAnchor: isRTL
+                    ? Alignment.bottomLeft
+                    : Alignment.bottomRight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: isRTL
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.end,
+                  children: [
+                    _buildPillOption(
+                      label: 'tasks.routine_period'.tr(),
+                      icon: LucideIcons.compass,
+                      tabIndex: 2,
+                      fgColor: fgColor,
+                      isRTL: isRTL,
+                    ),
+                    _buildPillOption(
+                      label: 'tasks.continuous_habit'.tr(),
+                      icon: LucideIcons.repeat,
+                      tabIndex: 1,
+                      fgColor: fgColor,
+                      isRTL: isRTL,
+                    ),
+                    _buildPillOption(
+                      label: 'tasks.casual_task'.tr(),
+                      icon: LucideIcons.check,
+                      tabIndex: 0,
+                      fgColor: fgColor,
+                      isRTL: isRTL,
+                    ),
+                    _buildFabButton(fgColor),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+        child: CompositedTransformTarget(
+          link: _layerLink,
+          child: Opacity(
+            opacity: _isOpen ? 0.0 : 1.0,
+            child: _buildFabButton(fgColor),
           ),
         ),
-      ],
+      ),
     );
   }
 }

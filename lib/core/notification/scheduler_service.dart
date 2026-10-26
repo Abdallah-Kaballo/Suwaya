@@ -464,7 +464,7 @@ class NotificationScheduler {
                         androidFullScreenIntent: true,
                         payload: payloadStr,
                         volumeSettings: VolumeSettings.fade(
-                          volume: settings.getPeriodVolume(pId, 1.0),
+                          volume: null, // اعتماد صوت نظام الجهاز 100%
                           fadeDuration: policy.fadeDuration,
                           volumeEnforced: false,
                         ),
@@ -581,7 +581,7 @@ class NotificationScheduler {
                         androidFullScreenIntent: true,
                         payload: payloadStr,
                         volumeSettings: VolumeSettings.fade(
-                          volume: settings.getPeriodVolume(nightPart.id, 0.5),
+                          volume: null, // اعتماد صوت نظام الجهاز 100%
                           fadeDuration: policy.fadeDuration,
                           volumeEnforced: false,
                         ),
@@ -1084,10 +1084,20 @@ class NotificationScheduler {
         }
       }
 
-      // تنظيف المنبهات القديمة
+      // 🌟 تنظيف المنبهات القديمة مع حماية صارمة لأي منبه يرن حالياً أو في نافذة الرنين النشطة
+      final nowCheck = DateTime.now();
       for (var alarm in activeAlarms) {
         if (!requiredAlarmIds.contains(alarm.id)) {
-          await Alarm.stop(alarm.id);
+          final isCurrentlyRinging = await Alarm.isRinging(alarm.id);
+          final secondsSinceTrigger = nowCheck
+              .difference(alarm.dateTime)
+              .inSeconds;
+          final isInActiveRingingWindow =
+              secondsSinceTrigger >= -5 && secondsSinceTrigger <= 900;
+
+          if (!isCurrentlyRinging && !isInActiveRingingWindow) {
+            await Alarm.stop(alarm.id);
+          }
         }
       }
 

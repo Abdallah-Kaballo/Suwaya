@@ -181,6 +181,58 @@ class SettingsModel {
     }
   }
 
+  /// 🌟 قراءة وحفظ نوع الخط ('system' = الخط الأصلي القديم كافتراضي، أو 'tajawal'، أو 'inter')
+  String get appFontFamily {
+    for (final c in periodConfigs) {
+      if (c.periodId == '__app_font__') {
+        final val = c.soundPath?.trim();
+        if (val != null && val.isNotEmpty) return val;
+      }
+    }
+    return 'system';
+  }
+
+  set appFontFamily(String family) {
+    final idx = periodConfigs.indexWhere((c) => c.periodId == '__app_font__');
+    if (idx >= 0) {
+      periodConfigs[idx].soundPath = family;
+    } else {
+      periodConfigs.add(
+        PeriodConfig()
+          ..periodId = '__app_font__'
+          ..isEnabled = false
+          ..soundPath = family
+          ..volume = 1.0,
+      );
+    }
+  }
+
+  /// 🌟 قراءة وحفظ حجم الخط (من 0.85 إلى 1.25، والافتراضي 1.0)
+  double get appFontScale {
+    for (final c in periodConfigs) {
+      if (c.periodId == '__app_font__') {
+        return c.volume.clamp(0.85, 1.25);
+      }
+    }
+    return 1.0;
+  }
+
+  set appFontScale(double scale) {
+    final clamped = scale.clamp(0.85, 1.25);
+    final idx = periodConfigs.indexWhere((c) => c.periodId == '__app_font__');
+    if (idx >= 0) {
+      periodConfigs[idx].volume = clamped;
+    } else {
+      periodConfigs.add(
+        PeriodConfig()
+          ..periodId = '__app_font__'
+          ..isEnabled = false
+          ..soundPath = 'system'
+          ..volume = clamped,
+      );
+    }
+  }
+
   int getManualOffset(String pId) {
     return _getConfig(pId)?.manualOffsetMinutes ?? 0;
   }

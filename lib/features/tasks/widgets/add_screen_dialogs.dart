@@ -490,14 +490,6 @@ Future<void> showAlertsModal({
                   ),
                 ),
                 const SizedBox(height: 16),
-                Slider(
-                  value: currentVolume,
-                  activeColor: pColor,
-                  onChanged: (v) {
-                    setDialogState(() => currentVolume = v);
-                    onChanged(currentLevel, currentTone, currentVolume);
-                  },
-                ),
               ],
               const SizedBox(height: 20),
               SizedBox(

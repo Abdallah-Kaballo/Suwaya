@@ -14,9 +14,12 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const String _standardChannelId = 'suwaya_system_standard_v3';
-  static const String _insistentChannelId = 'suwaya_system_alarm_v3';
-  static const String _vibrateChannelId = 'suwaya_system_vibrate_v3';
+  static const String _standardChannelId = 'suwaya_system_standard_v4';
+  static const String _insistentChannelId = 'suwaya_system_alarm_v4';
+  static const String _vibrateChannelId = 'suwaya_system_vibrate_v4';
+
+  /// اهتزاز خفيف وأنيق (120ms) يحترم إعدادات النظام
+  static final Int64List _gentleVibrationPattern = Int64List.fromList([0, 120]);
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -48,17 +51,18 @@ class NotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >();
 
-    try {
-      await androidImplementation?.deleteNotificationChannel(
-        'suwaya_system_standard_v2',
-      );
-      await androidImplementation?.deleteNotificationChannel(
-        'suwaya_system_alarm_v2',
-      );
-      await androidImplementation?.deleteNotificationChannel(
-        'suwaya_system_vibrate_v2',
-      );
-    } catch (_) {}
+    for (final oldChannel in [
+      'suwaya_system_standard_v2',
+      'suwaya_system_alarm_v2',
+      'suwaya_system_vibrate_v2',
+      'suwaya_system_standard_v3',
+      'suwaya_system_alarm_v3',
+      'suwaya_system_vibrate_v3',
+    ]) {
+      try {
+        await androidImplementation?.deleteNotificationChannel(oldChannel);
+      } catch (_) {}
+    }
 
     const systemAlarmSound = UriAndroidNotificationSound(
       'content://settings/system/alarm_alert',
@@ -72,10 +76,12 @@ class NotificationService {
         _standardChannelId,
         'notifications.system_alerts'.tr(),
         description: 'notifications.normal_tasks_desc'.tr(),
-        importance: Importance.max,
+        importance: Importance.high,
         playSound: true,
         sound: systemNotifSound,
         enableVibration: true,
+        vibrationPattern: _gentleVibrationPattern,
+        audioAttributesUsage: AudioAttributesUsage.notification,
       ),
     );
 
@@ -100,6 +106,7 @@ class NotificationService {
         importance: Importance.high,
         playSound: false,
         enableVibration: true,
+        vibrationPattern: _gentleVibrationPattern,
       ),
     );
   }
@@ -128,32 +135,20 @@ class NotificationService {
     );
     if (safeTime.isBefore(DateTime.now())) return true;
 
-    final stopText = 'alarm.stop'.tr() != 'alarm.stop'
-        ? 'alarm.stop'.tr()
-        : 'إيقاف';
-
     final androidDetails = AndroidNotificationDetails(
       playSound ? _standardChannelId : _vibrateChannelId,
       'notifications.system_alerts'.tr(),
-      importance: Importance.max,
-      priority: Priority.max,
+      importance: Importance.high,
+      priority: Priority.high,
       playSound: playSound,
       enableVibration: enableVibration,
+      vibrationPattern: enableVibration ? _gentleVibrationPattern : null,
       sound: playSound
           ? const UriAndroidNotificationSound(
               'content://settings/system/notification_sound',
             )
           : null,
-      actions: playSound
-          ? <AndroidNotificationAction>[
-              AndroidNotificationAction(
-                'stop_action',
-                stopText,
-                cancelNotification: true,
-                showsUserInterface: false,
-              ),
-            ]
-          : null,
+      // بدون أي أزرار إيقاف (actions: null) ليكون إشعار نظام قياسي نظيف
     );
 
     return await _safeZonedSchedule(
@@ -162,7 +157,7 @@ class NotificationService {
       body,
       safeTime,
       androidDetails,
-      InterruptionLevel.timeSensitive,
+      InterruptionLevel.active,
     );
   }
 
@@ -240,10 +235,10 @@ class NotificationService {
 
   Future<void> cancelAll() async =>
       await flutterLocalNotificationsPlugin.cancelAll();
+
   static const int _pomodoroLiveNotificationId = 888888;
   static const int _pomodoroChimeNotificationId = 888889;
 
-  /// 🌟 إظهار البومودورو الحية على الستارة مع عداد تنازلي حي (Chronometer Countdown)
   Future<void> showLivePomodoroNotification({
     required String title,
     required String body,
@@ -282,14 +277,12 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// 🌟 إلغاء إشعار البومودورو الحي من الستارة عند الإيقاف أو الانتهاء
   Future<void> cancelLivePomodoroNotification() async {
     try {
       await flutterLocalNotificationsPlugin.cancel(_pomodoroLiveNotificationId);
     } catch (_) {}
   }
 
-  /// 🌟 إصدار جرس تنبيه فوري عند انتهاء أو بدء جلسات البومودورو والراحة
   Future<void> playPomodoroTransitionAlert({
     required String title,
     required String body,
@@ -303,6 +296,7 @@ class NotificationService {
         priority: Priority.high,
         playSound: !isMuted,
         enableVibration: true,
+        vibrationPattern: _gentleVibrationPattern,
         autoCancel: true,
         timeoutAfter: 6000,
         sound: isMuted

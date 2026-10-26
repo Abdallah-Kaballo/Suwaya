@@ -180,7 +180,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'Tajawal',
                             foreground: Paint()
                               ..style = PaintingStyle.stroke
                               ..strokeWidth = 1.0
@@ -193,7 +192,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             color: textColor,
                             fontSize: 22,
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'Tajawal',
                           ),
                         ),
                       ],
@@ -207,7 +205,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     color: textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    fontFamily: 'Tajawal',
                     letterSpacing: 0.5,
                   ),
                 ),

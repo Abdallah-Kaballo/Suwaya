@@ -383,7 +383,7 @@ class AlarmService {
     );
   }
 
-  /// 🌟 جدولة منبه موحد مع التحقق من النتيجة
+  /// 🌟 جدولة منبه موحد يعتمد 100% على درجة صوت المنبه في نظام الجهاز
   static Future<bool> scheduleAlarm({
     required int id,
     required DateTime dateTime,
@@ -393,7 +393,7 @@ class AlarmService {
     required String body,
     required int colorValue,
     required String tonePath,
-    required double volume,
+    double? volume,
     AlarmDeliveryMode deliveryMode = AlarmDeliveryMode.fullscreenAlarm,
     bool? loopAudioOverride,
     bool? snoozeAllowedOverride,
@@ -411,8 +411,6 @@ class AlarmService {
     final effectiveSnoozeAllowed =
         snoozeAllowedOverride ?? policy.snoozeAllowedDefault;
     final isFullscreen = deliveryMode == AlarmDeliveryMode.fullscreenAlarm;
-    final enforceVolume =
-        policy.volumePolicyDefault == AlarmVolumePolicy.enforced;
 
     final payloadData = ParsedAlarmData(
       eventId: id,
@@ -427,7 +425,7 @@ class AlarmService {
       snoozeCount: 0,
       maxSnoozes: maxSnoozes,
       loopAudio: effectiveLoop,
-      volumePolicy: policy.volumePolicyDefault,
+      volumePolicy: AlarmVolumePolicy.userAdjustable,
     );
 
     final alarmSettings = AlarmSettings(
@@ -438,10 +436,11 @@ class AlarmService {
       vibrate: vibrate,
       androidFullScreenIntent: isFullscreen,
       payload: payloadData.toPayloadString(),
+      // volume: null يضمن الاعتماد 100% على صوت المنبه المضبوط في نظام الجهاز
       volumeSettings: VolumeSettings.fade(
-        volume: volume.clamp(0.05, 1.0),
+        volume: null,
         fadeDuration: policy.fadeDuration,
-        volumeEnforced: enforceVolume,
+        volumeEnforced: false,
       ),
       notificationSettings: NotificationSettings(
         title: title,

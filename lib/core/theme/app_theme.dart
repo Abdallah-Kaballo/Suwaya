@@ -3,7 +3,18 @@ import 'package:flutter/material.dart';
 enum AppColorTheme { gold, ocean, forest, desert }
 
 class AppTheme {
-  static const String fontFamily = 'Tajawal';
+  /// يحول معرف الخط المحفوظ إلى اسم الخط الفعلي (null = خط النظام الأصلي القديم)
+  static String? resolveFontFamily(String fontKey) {
+    switch (fontKey.toLowerCase().trim()) {
+      case 'tajawal':
+        return 'Tajawal';
+      case 'inter':
+        return 'Inter';
+      case 'system':
+      default:
+        return null;
+    }
+  }
 
   static Color _getPrimaryLight(AppColorTheme theme) {
     switch (theme) {
@@ -31,7 +42,7 @@ class AppTheme {
     }
   }
 
-  static ThemeData getDarkTheme(AppColorTheme theme) {
+  static ThemeData getDarkTheme(AppColorTheme theme, {String? fontFamily}) {
     final primary = _getPrimaryDark(theme);
     const bgScaffold = Color(0xFF121316);
     const surfaceCard = Color(0xFF1C1E24);
@@ -39,9 +50,7 @@ class AppTheme {
     const borderGray = Color(0xFF2E3340);
     const textPrimary = Color(0xFFF3F4F6);
     const textSecondary = Color(0xFFA1A8B8);
-    const onPrimaryDark = Color(
-      0xFF0F172A,
-    ); // تباين فائق (> 10:1) فوق الذهبي والألوان الفاتحة
+    const onPrimaryDark = Color(0xFF0F172A);
 
     return ThemeData(
       useMaterial3: true,
@@ -64,18 +73,18 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: onPrimaryDark,
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontFamily: fontFamily,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: textPrimary, size: 22),
+        iconTheme: const IconThemeData(color: textPrimary, size: 22),
         titleTextStyle: TextStyle(
           color: textPrimary,
           fontSize: 18,
@@ -109,7 +118,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData getLightTheme(AppColorTheme theme) {
+  static ThemeData getLightTheme(AppColorTheme theme, {String? fontFamily}) {
     final primary = _getPrimaryLight(theme);
     const bgScaffold = Color(0xFFF4F6F9);
     const surfaceCard = Color(0xFFFFFFFF);
@@ -139,18 +148,18 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: Colors.white,
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontFamily: fontFamily,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: textPrimary, size: 22),
+        iconTheme: const IconThemeData(color: textPrimary, size: 22),
         titleTextStyle: TextStyle(
           color: textPrimary,
           fontSize: 18,

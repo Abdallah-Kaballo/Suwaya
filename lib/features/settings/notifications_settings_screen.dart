@@ -438,165 +438,99 @@ class _NotificationsSettingsScreenState
                         ),
                         AnimatedSize(
                           duration: const Duration(milliseconds: 300),
-                          child: isEnabled
-                              ? StatefulBuilder(
-                                  builder: (context, setSliderState) {
-                                    double localVolume = currentVolume.clamp(
-                                      0.1,
-                                      1.0,
-                                    );
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 24),
-                                        GestureDetector(
-                                          onTap: () => _showTonePicker(
-                                            context,
-                                            currentTone,
-                                            surfaceColor,
-                                            textColor,
-                                            accentColor,
-                                            (selectedTone) {
-                                              onSave(
-                                                mode,
-                                                selectedTone,
-                                                localVolume,
-                                              );
-                                            },
+                          child: mode == 2
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 20),
+                                    GestureDetector(
+                                      onTap: () => _showTonePicker(
+                                        context,
+                                        currentTone,
+                                        surfaceColor,
+                                        textColor,
+                                        accentColor,
+                                        (selectedTone) {
+                                          onSave(
+                                            mode,
+                                            selectedTone,
+                                            currentVolume,
+                                          );
+                                        },
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 14,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: textColor.withValues(
+                                              alpha: 0.1,
+                                            ),
                                           ),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 14,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: textColor.withValues(
-                                                  alpha: 0.1,
-                                                ),
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  LucideIcons.mic,
-                                                  color: textColor.withValues(
-                                                    alpha: 0.5,
-                                                  ),
-                                                  size: 18,
-                                                ),
-                                                const SizedBox(width: 12),
-                                                Expanded(
-                                                  child: Text(
-                                                    'notifications.alarm_tone'
-                                                        .tr(),
-                                                    style: TextStyle(
-                                                      color: textColor,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  _availableTones[currentTone] ??
-                                                      'alerts.default_ring'
-                                                          .tr(),
-                                                  style: TextStyle(
-                                                    color: accentColor,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Icon(
-                                                  isRTL
-                                                      ? LucideIcons.chevron_left
-                                                      : LucideIcons
-                                                            .chevron_right,
-                                                  color: textColor.withValues(
-                                                    alpha: 0.3,
-                                                  ),
-                                                  size: 18,
-                                                ),
-                                              ],
-                                            ),
+                                          borderRadius: BorderRadius.circular(
+                                            16,
                                           ),
                                         ),
-                                        const SizedBox(height: 20),
-                                        Row(
+                                        child: Row(
                                           children: [
                                             Icon(
-                                              LucideIcons.volume_1,
+                                              LucideIcons.mic,
                                               color: textColor.withValues(
-                                                alpha: 0.4,
+                                                alpha: 0.5,
                                               ),
                                               size: 18,
                                             ),
+                                            const SizedBox(width: 12),
                                             Expanded(
-                                              child: SliderTheme(
-                                                data: SliderThemeData(
-                                                  activeTrackColor: accentColor,
-                                                  thumbColor: accentColor,
-                                                  inactiveTrackColor: textColor
-                                                      .withValues(alpha: 0.1),
-                                                  trackHeight: 4,
-                                                  overlayShape:
-                                                      const RoundSliderOverlayShape(
-                                                        overlayRadius: 14,
-                                                      ),
-                                                  thumbShape:
-                                                      const RoundSliderThumbShape(
-                                                        enabledThumbRadius: 6,
-                                                      ),
-                                                ),
-                                                child: Slider(
-                                                  value: localVolume,
-                                                  min: 0.1,
-                                                  max: 1.0,
-                                                  onChanged: (val) {
-                                                    setSliderState(() {
-                                                      currentVolume = val;
-                                                      localVolume = val;
-                                                    });
-                                                  },
-                                                  onChangeEnd: (val) => onSave(
-                                                    mode,
-                                                    currentTone,
-                                                    val,
-                                                  ),
+                                              child: Text(
+                                                'notifications.alarm_tone'.tr(),
+                                                style: TextStyle(
+                                                  color: textColor,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
                                               ),
                                             ),
+                                            Text(
+                                              _availableTones[currentTone] ??
+                                                  'alerts.default_ring'.tr(),
+                                              style: TextStyle(
+                                                color: accentColor,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
                                             Icon(
-                                              LucideIcons.volume_2,
+                                              isRTL
+                                                  ? LucideIcons.chevron_left
+                                                  : LucideIcons.chevron_right,
                                               color: textColor.withValues(
-                                                alpha: 0.4,
+                                                alpha: 0.3,
                                               ),
                                               size: 18,
                                             ),
                                           ],
                                         ),
-                                        if (isFadeInForced)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 8.0,
-                                              right: 4,
-                                            ),
-                                            child: Text(
-                                              '✨ ${'notifications.fade_in'.tr()}',
-                                              style: TextStyle(
-                                                color: accentColor,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
+                                      ),
+                                    ),
+                                    if (isFadeInForced)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 10.0,
+                                          right: 4,
+                                        ),
+                                        child: Text(
+                                          '✨ ${'notifications.fade_in'.tr()}',
+                                          style: TextStyle(
+                                            color: accentColor,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                      ],
-                                    );
-                                  },
+                                        ),
+                                      ),
+                                  ],
                                 )
                               : const SizedBox.shrink(),
                         ),
@@ -951,13 +885,6 @@ class _NotificationsSettingsScreenState
                   ),
                 ),
                 const SizedBox(height: 12),
-                Slider(
-                  value: tempVolume,
-                  min: 0.1,
-                  max: 1.0,
-                  activeColor: accentColor,
-                  onChanged: (v) => setSheetState(() => tempVolume = v),
-                ),
               ],
               const SizedBox(height: 20),
               ElevatedButton(

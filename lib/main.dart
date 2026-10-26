@@ -235,6 +235,10 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
           'setAlarmRingingState',
           {'ringing': hasRinging},
         );
+        await AlarmService.lockscreenChannel.invokeMethod(
+          'setAlarmVolumeControl',
+          {'enabled': hasRinging},
+        );
       } catch (_) {}
 
       if (!hasRinging) {
@@ -255,21 +259,18 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
             false;
       } catch (_) {}
 
+      // نحفظ المنبه دائماً في _activeBannerAlarm ليظهر أعلى الشاشة الرئيسية فور فتح القفل أو إغلاق شاشة ملء الشاشة
+      if (mounted) {
+        setState(() => _activeBannerAlarm = ringingAlarm);
+      }
+
       if (isLocked) {
-        if (mounted && _activeBannerAlarm != null) {
-          setState(() => _activeBannerAlarm = null);
-        }
         _openFullScreenAlarm(ringingAlarm);
-      } else {
-        if (_pushedFullScreenAlarmId != ringingAlarm.id && mounted) {
-          setState(() => _activeBannerAlarm = ringingAlarm);
-        }
       }
     });
   }
 
   Future<void> _handleBannerHardwareVolumeAction() async {
-    // إذا كانت شاشة الرنين الكاملة مفتوحة، فهي التي تتولى معالجة الغفوة أو الإيقاف
     if (_pushedFullScreenAlarmId != null) return;
     final bannerAlarm = _activeBannerAlarm;
     if (bannerAlarm == null) return;
@@ -318,6 +319,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
   }
 
   Future<void> _snoozeBannerAlarm(AlarmSettings alarmSettings) async {
+    HapticFeedback.heavyImpact();
     final settings = ref.read(settingsProvider);
     final parsed = AlarmService.parseAlarmSettings(alarmSettings);
     final snoozeMins = settings.snoozeDurationMinutes > 0
@@ -340,6 +342,10 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // لا نعيد الجدولة أثناء رنين منبه نشط حتى لا نقاطع جلسته
+      if (_activeBannerAlarm != null || _pushedFullScreenAlarmId != null) {
+        return;
+      }
       final settings = ref.read(settingsProvider);
       final tasks = ref.read(tasksProvider).allTasks;
       final routines = ref.read(routinesProvider);
@@ -352,6 +358,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
   Future<void> _openFullScreenAlarm(AlarmSettings alarmSettings) async {
     if (_pushedFullScreenAlarmId == alarmSettings.id) return;
     _pushedFullScreenAlarmId = alarmSettings.id;
+    if (mounted) setState(() {});
 
     try {
       await AlarmService.lockscreenChannel.invokeMethod('showOnLockScreen');
@@ -366,6 +373,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
         ),
       );
       _pushedFullScreenAlarmId = null;
+      if (mounted) setState(() {});
     }
 
     final navState = rootNavigatorKey.currentState;
@@ -378,6 +386,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
           await pushRoute(deferredNav);
         } else {
           _pushedFullScreenAlarmId = null;
+          if (mounted) setState(() {});
         }
       });
     }
@@ -397,6 +406,9 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
     final settings = ref.watch(settingsProvider);
     final activeColorTheme = ref.watch(themeColorProvider);
     final goRouter = ref.watch(routerProvider);
+    final resolvedFontFamily = AppTheme.resolveFontFamily(
+      settings.appFontFamily,
+    );
 
     final bool isDayTime = ref.watch(
       astroProvider.select((state) {
@@ -418,147 +430,213 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
         settings.themeMode,
         isDayTime: isDayTime,
       ),
-      theme: AppTheme.getLightTheme(activeColorTheme),
-      darkTheme: AppTheme.getDarkTheme(activeColorTheme),
+      theme: AppTheme.getLightTheme(
+        activeColorTheme,
+        fontFamily: resolvedFontFamily,
+      ),
+      darkTheme: AppTheme.getDarkTheme(
+        activeColorTheme,
+        fontFamily: resolvedFontFamily,
+      ),
       routerConfig: goRouter,
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
+        final userFontScale = settings.appFontScale.clamp(0.85, 1.25);
         final safeMediaQuery = mediaQuery.copyWith(
-          textScaler: mediaQuery.textScaler.clamp(
-            minScaleFactor: 0.85,
-            maxScaleFactor: 1.25,
-          ),
+          textScaler: TextScaler.linear(userFontScale),
         );
+
         final bannerAlarm = _activeBannerAlarm;
+        final showTopBanner =
+            bannerAlarm != null && _pushedFullScreenAlarmId != bannerAlarm.id;
+
         final appContent = MediaQuery(
           data: safeMediaQuery,
           child: child ?? const SizedBox.shrink(),
         );
-        if (bannerAlarm == null) return appContent;
+
+        if (!showTopBanner) return appContent;
 
         final parsed = AlarmService.parseAlarmSettings(bannerAlarm);
         final maxSnoozes = settings.maxSnoozeCount > 0
             ? settings.maxSnoozeCount
             : parsed.maxSnoozes;
+        final snoozeMins = settings.snoozeDurationMinutes > 0
+            ? settings.snoozeDurationMinutes
+            : parsed.snoozeDurationMinutes;
         final canSnooze =
             parsed.kind != AlarmEventKind.prayer &&
             parsed.snoozeAllowed &&
             parsed.snoozeCount < maxSnoozes;
         final accentColor = Color(parsed.colorValue);
 
-        return Stack(
-          children: [
-            appContent,
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  child: Material(
-                    elevation: 12,
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color(0xFF161922),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () {
-                        setState(() => _activeBannerAlarm = null);
-                        _openFullScreenAlarm(bannerAlarm);
-                      },
+        return MediaQuery(
+          data: safeMediaQuery,
+          child: Stack(
+            children: [
+              appContent,
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    child: Material(
+                      elevation: 18,
+                      shadowColor: Colors.black87,
+                      borderRadius: BorderRadius.circular(24),
+                      color: const Color(0xFF141720),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: accentColor, width: 1.5),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: accentColor.withValues(alpha: 0.85),
+                            width: 1.8,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withValues(alpha: 0.25),
+                              blurRadius: 20,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
                               children: [
-                                Icon(
-                                  Icons.notifications_active_rounded,
-                                  color: accentColor,
-                                  size: 22,
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: accentColor.withValues(alpha: 0.18),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.alarm_on_rounded,
+                                    color: accentColor,
+                                    size: 24,
+                                  ),
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 12),
                                 Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        parsed.title,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      if (parsed.body.isNotEmpty)
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () =>
+                                        _openFullScreenAlarm(bannerAlarm),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
                                         Text(
-                                          parsed.body,
+                                          parsed.title,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 16.5,
                                           ),
                                         ),
-                                    ],
+                                        if (parsed.body.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            parsed.body,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: 'Full Screen',
+                                  onPressed: () =>
+                                      _openFullScreenAlarm(bannerAlarm),
+                                  icon: const Icon(
+                                    Icons.open_in_full_rounded,
+                                    color: Colors.white70,
+                                    size: 20,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 if (canSnooze) ...[
-                                  TextButton.icon(
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: Colors.amber.withValues(
-                                        alpha: 0.16,
-                                      ),
-                                      foregroundColor: Colors.amber,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 44,
+                                      child: OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.amber,
+                                          side: const BorderSide(
+                                            color: Colors.amber,
+                                            width: 1.4,
+                                          ),
+                                          backgroundColor: Colors.amber
+                                              .withValues(alpha: 0.12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              14,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: () =>
+                                            _snoozeBannerAlarm(bannerAlarm),
+                                        icon: const Icon(
+                                          Icons.snooze_rounded,
+                                          size: 18,
+                                        ),
+                                        label: Text(
+                                          '${'alarm.snooze'.tr()} +$snoozeMins${'details.minute'.tr()}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13.5,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    onPressed: () =>
-                                        _snoozeBannerAlarm(bannerAlarm),
-                                    icon: const Icon(Icons.snooze, size: 17),
-                                    label: Text('alarm.snooze'.tr()),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 10),
                                 ],
-                                TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.redAccent
-                                        .withValues(alpha: 0.2),
-                                    foregroundColor: Colors.redAccent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 44,
+                                    child: ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.redAccent,
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        HapticFeedback.heavyImpact();
+                                        await _stopAllActiveAlarms();
+                                      },
+                                      icon: const Icon(
+                                        Icons.stop_circle_outlined,
+                                        size: 20,
+                                      ),
+                                      label: Text(
+                                        'alarm.stop'.tr(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  onPressed: () async {
-                                    await Alarm.stop(bannerAlarm.id);
-                                    if (mounted) {
-                                      setState(() => _activeBannerAlarm = null);
-                                    }
-                                  },
-                                  icon: const Icon(
-                                    Icons.stop_circle_outlined,
-                                    size: 18,
-                                  ),
-                                  label: Text('alarm.stop'.tr()),
                                 ),
                               ],
                             ),
@@ -569,8 +647,8 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

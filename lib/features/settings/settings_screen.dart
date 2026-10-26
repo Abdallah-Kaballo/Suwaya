@@ -52,6 +52,292 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     'nl': 'Nederlands',
   };
 
+  String _fontSettingsTitle(BuildContext context) {
+    final tr = 'settings.fonts_and_size'.tr();
+    if (tr != 'settings.fonts_and_size') return tr;
+    return context.locale.languageCode == 'ar'
+        ? 'الخطوط وحجم النص'
+        : 'Fonts & Text Size';
+  }
+
+  String _fontFamilyLabel(BuildContext context, String fontKey) {
+    final isAr = context.locale.languageCode == 'ar';
+    switch (fontKey.toLowerCase()) {
+      case 'tajawal':
+        return isAr ? 'خط تجوال (Tajawal)' : 'Tajawal Font';
+      case 'inter':
+        return isAr ? 'خط إنتر (Inter)' : 'Inter Font';
+      case 'system':
+      default:
+        return isAr
+            ? 'الخط الأصلي للنظام (الافتراضي)'
+            : 'System Default (Original)';
+    }
+  }
+
+  void _showFontCustomizationSheet(
+    BuildContext context,
+    bool isDark,
+    Color surfaceColor,
+    Color textColor,
+    Color primaryColor,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final currentSettings = ref.watch(settingsProvider);
+            final notifier = ref.read(settingsProvider.notifier);
+            final selectedFont = currentSettings.appFontFamily;
+            final currentScale = currentSettings.appFontScale;
+            final isAr = context.locale.languageCode == 'ar';
+
+            final fontOptions = <String, String>{
+              'system': _fontFamilyLabel(context, 'system'),
+              'tajawal': _fontFamilyLabel(context, 'tajawal'),
+              'inter': _fontFamilyLabel(context, 'inter'),
+            };
+
+            final scalePresets = <double, String>{
+              0.85: isAr ? 'صغير (85%)' : 'Small (85%)',
+              0.92: isAr ? 'متوسط (92%)' : 'Medium (92%)',
+              1.00: isAr ? 'افتراضي (100%)' : 'Default (100%)',
+              1.10: isAr ? 'كبير (110%)' : 'Large (110%)',
+              1.20: isAr ? 'كبير جداً (120%)' : 'Extra Large (120%)',
+            };
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: textColor.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Text(
+                        _fontSettingsTitle(context),
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // بطاقة معاينة حية للخط والحجم
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isAr
+                                ? 'معاينة الخط وحجم النص'
+                                : 'Live Font & Size Preview',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 14 * currentScale,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: AppTheme.resolveFontFamily(
+                                selectedFont,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            isAr
+                                ? 'سُويعَة يربط يومك ومهامك بالإيقاع الفلكي الطبيعي (04|30 🌑).'
+                                : 'Suwaya aligns your daily rhythm with astronomical time (04|30 🌑).',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 14.5 * currentScale,
+                              height: 1.4,
+                              fontFamily: AppTheme.resolveFontFamily(
+                                selectedFont,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      isAr ? 'نوع الخط' : 'Font Family',
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...fontOptions.entries.map((entry) {
+                      final isSelected = selectedFont == entry.key;
+                      return ListTile(
+                        dense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        title: Text(
+                          entry.value,
+                          style: TextStyle(
+                            color: isSelected ? primaryColor : textColor,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            fontSize: 15,
+                            fontFamily: AppTheme.resolveFontFamily(entry.key),
+                          ),
+                        ),
+                        trailing: Icon(
+                          isSelected
+                              ? LucideIcons.circle_check
+                              : LucideIcons.circle,
+                          color: isSelected
+                              ? primaryColor
+                              : textColor.withValues(alpha: 0.3),
+                          size: 20,
+                        ),
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          notifier.updateAppFontFamily(entry.key);
+                        },
+                      );
+                    }),
+                    const Divider(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isAr ? 'حجم الخط' : 'Text Size',
+                          style: TextStyle(
+                            color: textColor.withValues(alpha: 0.7),
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${(currentScale * 100).round()}%',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          LucideIcons.a_large_small,
+                          size: 16,
+                          color: textColor.withValues(alpha: 0.5),
+                        ),
+                        Expanded(
+                          child: Slider(
+                            value: currentScale,
+                            min: 0.85,
+                            max: 1.25,
+                            divisions: 8,
+                            activeColor: primaryColor,
+                            onChanged: (val) {
+                              notifier.updateAppFontScale(
+                                double.parse(val.toStringAsFixed(2)),
+                              );
+                            },
+                          ),
+                        ),
+                        Icon(
+                          LucideIcons.a_large_small,
+                          size: 24,
+                          color: textColor,
+                        ),
+                      ],
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: scalePresets.entries.map((entry) {
+                        final isSelected =
+                            (currentScale - entry.key).abs() < 0.02;
+                        return ChoiceChip(
+                          label: Text(entry.value),
+                          selected: isSelected,
+                          selectedColor: primaryColor.withValues(alpha: 0.2),
+                          labelStyle: TextStyle(
+                            color: isSelected ? primaryColor : textColor,
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                          onSelected: (_) {
+                            HapticFeedback.selectionClick();
+                            notifier.updateAppFontScale(entry.key);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(sheetCtx),
+                        child: Text(
+                          'common.done'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -262,6 +548,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               .read(dialDesignProvider.notifier)
                               .changeDesign(selected);
                         },
+                        isDark,
+                        surfaceColor,
+                        textColor,
+                        primaryColor,
+                      ),
+                      isDark: isDark,
+                      primaryColor: primaryColor,
+                      textColor: textColor,
+                    ),
+
+                    _buildSettingRow(
+                      context,
+                      icon: LucideIcons.type,
+                      title: _fontSettingsTitle(context),
+                      subtitle:
+                          '${_fontFamilyLabel(context, settingsState.appFontFamily)} · ${(settingsState.appFontScale * 100).round()}%',
+                      onTap: () => _showFontCustomizationSheet(
+                        context,
                         isDark,
                         surfaceColor,
                         textColor,
