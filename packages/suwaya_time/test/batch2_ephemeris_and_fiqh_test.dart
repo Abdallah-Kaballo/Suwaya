@@ -80,28 +80,24 @@ void main() {
       },
     );
 
-    test(
-      '3. WGS84 Ellipsoidal Qibla & Solar Zenith over Kaaba accuracy',
-      () {
-        // أم درمان (15.6445°N, 32.4777°E) -> القبلة الجيوديسية WGS84 = 49.3809° (والكروية = 49.2117°)
-        final omdurmanQibla = QiblaCalculator.calculate(15.6445, 32.4777);
-        expect(omdurmanQibla.bearingDegrees, closeTo(49.38, 0.05));
-        expect(omdurmanQibla.sphericalBearingDegrees, closeTo(49.21, 0.05));
-        expect(omdurmanQibla.distanceKilometers, closeTo(1005.0, 15.0));
+    test('3. WGS84 Ellipsoidal Qibla & Solar Zenith over Kaaba accuracy', () {
+      // أم درمان (15.6445°N, 32.4777°E) -> القبلة الجيوديسية WGS84 = 49.3809° (والكروية = 49.2117°)
+      final omdurmanQibla = QiblaCalculator.calculate(15.6445, 32.4777);
+      expect(omdurmanQibla.bearingDegrees, closeTo(49.38, 0.05));
+      expect(omdurmanQibla.sphericalBearingDegrees, closeTo(49.21, 0.05));
+      expect(omdurmanQibla.distanceKilometers, closeTo(1005.0, 15.0));
 
-        // التحقق من تعامد الشمس على الكعبة المشرفة يوم 28 مايو الساعة 09:18 UTC
-        final zeniths = QiblaCalculator.annualKaabaSolarZeniths(2026);
-        final sunAtKaabaZenith =
-            SolarEphemerisCalculator.evaluateSolarPosition(
-              instant: zeniths.firstZenithUtc,
-              latitude: QiblaCalculator.kaabaLatitude,
-              longitude: QiblaCalculator.kaabaLongitude,
-            );
+      // التحقق من تعامد الشمس على الكعبة المشرفة يوم 28 مايو الساعة 09:18 UTC
+      final zeniths = QiblaCalculator.annualKaabaSolarZeniths(2026);
+      final sunAtKaabaZenith = SolarEphemerisCalculator.evaluateSolarPosition(
+        instant: zeniths.firstZenithUtc,
+        latitude: QiblaCalculator.kaabaLatitude,
+        longitude: QiblaCalculator.kaabaLongitude,
+      );
 
-        // عند التعامد، تكون زاوية ارتفاع الشمس في مكة ~89.8° إلى 90.0°
-        expect(sunAtKaabaZenith.apparentAltitudeDegrees, greaterThan(89.5));
-      },
-    );
+      // عند التعامد، تكون زاوية ارتفاع الشمس في مكة ~89.8° إلى 90.0°
+      expect(sunAtKaabaZenith.apparentAltitudeDegrees, greaterThan(89.5));
+    });
 
     test(
       '4. ProhibitedTimesCalculator computes dynamic spear-height (+3.5°), zenith, and sunset windows',

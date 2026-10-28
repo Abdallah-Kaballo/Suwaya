@@ -119,9 +119,7 @@ class IslamicEventsCatalog {
       if (!includeObligatoryAndForbidden) return null;
 
       final String forbiddenTitle = isEidAlFitr
-          ? (isAr
-                ? 'عيد الفطر المبارك (1 شوال)'
-                : 'Eid al-Fitr (1 Shawwal)')
+          ? (isAr ? 'عيد الفطر المبارك (1 شوال)' : 'Eid al-Fitr (1 Shawwal)')
           : isEidAlAdha
           ? (isAr
                 ? 'عيد الأضحى المبارك (10 ذو الحجة)'
@@ -231,9 +229,7 @@ class IslamicEventsCatalog {
         type: IslamicFastingType.shawwalSixDaysWindow,
         titleKey: 'fasting.shawwal_six_title',
         reasonKey: 'fasting.shawwal_six_reason',
-        title: isAr
-            ? 'موسم صيام الست من شوال'
-            : 'Six Days of Shawwal Window',
+        title: isAr ? 'موسم صيام الست من شوال' : 'Six Days of Shawwal Window',
         reason: isAr
             ? 'من صام رمضان ثم أتبعه ستاً من شوال كان كصيام الدهر.'
             : 'Fasting Ramadan followed by six days of Shawwal is like fasting the entire year.',

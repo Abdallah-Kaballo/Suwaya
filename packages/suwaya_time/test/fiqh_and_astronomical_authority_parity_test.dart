@@ -19,9 +19,7 @@ void main() {
           hDay: 1,
         );
         // ليلة 1 رمضان تبدأ عند غروب شمس اليوم السابق (29/30 شعبان)
-        final eveOfRamadanDate = firstRamadanGreg
-            .addDays(-1)
-            .toDateTimeUtc();
+        final eveOfRamadanDate = firstRamadanGreg.addDays(-1).toDateTimeUtc();
 
         final firstNightAnchors = PrayerCalculator.getCycleAnchors(
           21.4225,

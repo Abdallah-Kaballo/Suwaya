@@ -8,54 +8,51 @@ void main() {
   });
 
   group('Zonal & Bi-Annual Equinox Distribution System (Fiqh Academy Zones 1, 2, 3)', () {
-    test(
-      '1. Exact latitude boundary classification (45.00°, 48.56°, 66.56°)',
-      () {
-        expect(SuwayaDistributor.zone1StartLatitude, equals(45.00));
-        expect(SuwayaDistributor.zone2TwilightLimitLatitude, equals(48.56));
-        expect(SuwayaDistributor.zone3PolarCircleLatitude, equals(66.56));
+    test('1. Exact latitude boundary classification (45.00°, 48.56°, 66.56°)', () {
+      expect(SuwayaDistributor.zone1StartLatitude, equals(45.00));
+      expect(SuwayaDistributor.zone2TwilightLimitLatitude, equals(48.56));
+      expect(SuwayaDistributor.zone3PolarCircleLatitude, equals(66.56));
 
-        // مكة (21.42°) وأم درمان (15.64°) -> المنطقة الطبيعية
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(21.4225),
-          equals(SuwayaLatitudeZone.normalTemperate),
-        );
+      // مكة (21.42°) وأم درمان (15.64°) -> المنطقة الطبيعية
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(21.4225),
+        equals(SuwayaLatitudeZone.normalTemperate),
+      );
 
-        // ميلانو (45.46°) وميونخ (48.13°) وخط 48.56° -> المنطقة الأولى (ثابت سنوياً)
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(45.00),
-          equals(SuwayaLatitudeZone.highLatZone1Canonical),
-        );
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(48.56),
-          equals(SuwayaLatitudeZone.highLatZone1Canonical),
-        );
+      // ميلانو (45.46°) وميونخ (48.13°) وخط 48.56° -> المنطقة الأولى (ثابت سنوياً)
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(45.00),
+        equals(SuwayaLatitudeZone.highLatZone1Canonical),
+      );
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(48.56),
+        equals(SuwayaLatitudeZone.highLatZone1Canonical),
+      );
 
-        // باريس (48.85°)، لندن (51.50°)، برلين (52.52°)، ستوكهولم (59.33°) -> المنطقة الثانية (تقسيمتان سنويتان)
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(48.57),
-          equals(SuwayaLatitudeZone.highLatZone2BiAnnual),
-        );
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(51.5074),
-          equals(SuwayaLatitudeZone.highLatZone2BiAnnual),
-        );
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(66.56),
-          equals(SuwayaLatitudeZone.highLatZone2BiAnnual),
-        );
+      // باريس (48.85°)، لندن (51.50°)، برلين (52.52°)، ستوكهولم (59.33°) -> المنطقة الثانية (تقسيمتان سنويتان)
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(48.57),
+        equals(SuwayaLatitudeZone.highLatZone2BiAnnual),
+      );
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(51.5074),
+        equals(SuwayaLatitudeZone.highLatZone2BiAnnual),
+      );
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(66.56),
+        equals(SuwayaLatitudeZone.highLatZone2BiAnnual),
+      );
 
-        // ترومسو (69.65°N) -> المنطقة الثالثة القطبية (تُقاس على 45.00° وتأخذ التوزيع الثابت)
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(66.57),
-          equals(SuwayaLatitudeZone.highLatZone3PolarProjected),
-        );
-        expect(
-          SuwayaDistributor.classifyLatitudeZone(69.6492),
-          equals(SuwayaLatitudeZone.highLatZone3PolarProjected),
-        );
-      },
-    );
+      // ترومسو (69.65°N) -> المنطقة الثالثة القطبية (تُقاس على 45.00° وتأخذ التوزيع الثابت)
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(66.57),
+        equals(SuwayaLatitudeZone.highLatZone3PolarProjected),
+      );
+      expect(
+        SuwayaDistributor.classifyLatitudeZone(69.6492),
+        equals(SuwayaLatitudeZone.highLatZone3PolarProjected),
+      );
+    });
 
     test(
       '2. Normal Zone, Zone 1 (<= 48.56°), and Zone 3 (> 66.56°) keep fixed canonical distribution year-round (Summer & Winter)',

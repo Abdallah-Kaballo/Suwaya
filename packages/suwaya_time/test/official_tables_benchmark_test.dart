@@ -35,96 +35,150 @@ void main() {
     );
   });
 
-  group('2. Official Jurisprudential Prayer Timetables Parity (1-Minute Tolerance)', () {
-    int toRoundedMinutes(DateTime dt) =>
-        dt.hour * 60 + dt.minute + (dt.second >= 30 ? 1 : 0);
+  group(
+    '2. Official Jurisprudential Prayer Timetables Parity (1-Minute Tolerance)',
+    () {
+      int toRoundedMinutes(DateTime dt) =>
+          dt.hour * 60 + dt.minute + (dt.second >= 30 ? 1 : 0);
 
-    test('Makkah matches Official Umm Al-Qura Calendar (27 Oct 2026)', () {
-      final ibadat = PrayerCalculator.getIbadatTimings(
-        21.4225,
-        39.8262,
-        DateTime.utc(2026, 10, 27),
-        CalculationMethodType.ummAlQura,
-        MadhabType.shafi,
-        HighLatitudeRuleType.middleOfTheNight,
-        18.5,
-        18.0,
-        const Duration(hours: 3),
-      );
-
-      expect(toRoundedMinutes(ibadat.fajr), closeTo(5 * 60 + 4, 1)); // 05:04 (زاوية 18.5°)
-      expect(toRoundedMinutes(ibadat.sunrise), closeTo(6 * 60 + 21, 1)); // 06:21
-      expect(toRoundedMinutes(ibadat.dhuhr), closeTo(12 * 60 + 5, 1)); // 12:05
-      expect(toRoundedMinutes(ibadat.asr), closeTo(15 * 60 + 21, 1)); // 15:21
-      expect(toRoundedMinutes(ibadat.maghrib), closeTo(17 * 60 + 48, 1)); // 17:48
-      expect(toRoundedMinutes(ibadat.isha), closeTo(19 * 60 + 18, 1)); // 19:18 (+90m)
-    });
-
-    test(
-      'Cairo & Omdurman match Egyptian General Authority of Survey (27 Oct 2026)',
-      () {
-        final cairo = PrayerCalculator.getIbadatTimings(
-          30.0444,
-          31.2357,
+      test('Makkah matches Official Umm Al-Qura Calendar (27 Oct 2026)', () {
+        final ibadat = PrayerCalculator.getIbadatTimings(
+          21.4225,
+          39.8262,
           DateTime.utc(2026, 10, 27),
-          CalculationMethodType.egyptian,
+          CalculationMethodType.ummAlQura,
           MadhabType.shafi,
           HighLatitudeRuleType.middleOfTheNight,
-          19.5,
-          17.5,
-          const Duration(hours: 2),
-        );
-
-        expect(toRoundedMinutes(cairo.fajr), closeTo(4 * 60 + 38, 1)); // 04:38
-        expect(toRoundedMinutes(cairo.sunrise), closeTo(6 * 60 + 5, 1)); // 06:05
-        expect(toRoundedMinutes(cairo.dhuhr), closeTo(11 * 60 + 39, 1)); // 11:39
-        expect(toRoundedMinutes(cairo.asr), closeTo(14 * 60 + 48, 1)); // 14:48
-        expect(toRoundedMinutes(cairo.maghrib), closeTo(17 * 60 + 12, 1)); // 17:12
-        expect(toRoundedMinutes(cairo.isha), closeTo(18 * 60 + 30, 1)); // 18:30
-
-        final omdurman = PrayerCalculator.getIbadatTimings(
-          15.6445,
-          32.4777,
-          DateTime.utc(2026, 10, 27),
-          CalculationMethodType.egyptian,
-          MadhabType.shafi,
-          HighLatitudeRuleType.middleOfTheNight,
-          19.5,
-          17.5,
-          const Duration(hours: 2),
-        );
-
-        expect(toRoundedMinutes(omdurman.fajr), closeTo(4 * 60 + 26, 1)); // 04:26
-        expect(toRoundedMinutes(omdurman.sunrise), closeTo(5 * 60 + 45, 1)); // 05:45
-        expect(toRoundedMinutes(omdurman.dhuhr), closeTo(11 * 60 + 34, 1)); // 11:34
-        expect(toRoundedMinutes(omdurman.asr), closeTo(14 * 60 + 54, 1)); // 14:54
-        expect(toRoundedMinutes(omdurman.maghrib), closeTo(17 * 60 + 23, 1)); // 17:23
-        expect(toRoundedMinutes(omdurman.isha), closeTo(18 * 60 + 33, 1)); // 18:33
-      },
-    );
-
-    test(
-      'Rabat matches Moroccan Ministry of Habous (+5m Dhuhr & Maghrib precaution over astronomical sunset)',
-      () {
-        final rabat = PrayerCalculator.getIbadatTimings(
-          34.0209,
-          -6.8416,
-          DateTime.utc(2026, 10, 27),
-          CalculationMethodType.morocco,
-          MadhabType.shafi,
-          HighLatitudeRuleType.middleOfTheNight,
-          19.0,
-          17.0,
-          const Duration(hours: 1),
+          18.5,
+          18.0,
+          const Duration(hours: 3),
         );
 
         expect(
-          rabat.maghrib.difference(rabat.calculatedSunset!).inMinutes,
-          equals(5),
-        );
-      },
-    );
-  });
+          toRoundedMinutes(ibadat.fajr),
+          closeTo(5 * 60 + 4, 1),
+        ); // 05:04 (زاوية 18.5°)
+        expect(
+          toRoundedMinutes(ibadat.sunrise),
+          closeTo(6 * 60 + 21, 1),
+        ); // 06:21
+        expect(
+          toRoundedMinutes(ibadat.dhuhr),
+          closeTo(12 * 60 + 5, 1),
+        ); // 12:05
+        expect(toRoundedMinutes(ibadat.asr), closeTo(15 * 60 + 21, 1)); // 15:21
+        expect(
+          toRoundedMinutes(ibadat.maghrib),
+          closeTo(17 * 60 + 48, 1),
+        ); // 17:48
+        expect(
+          toRoundedMinutes(ibadat.isha),
+          closeTo(19 * 60 + 18, 1),
+        ); // 19:18 (+90m)
+      });
+
+      test(
+        'Cairo & Omdurman match Egyptian General Authority of Survey (27 Oct 2026)',
+        () {
+          final cairo = PrayerCalculator.getIbadatTimings(
+            30.0444,
+            31.2357,
+            DateTime.utc(2026, 10, 27),
+            CalculationMethodType.egyptian,
+            MadhabType.shafi,
+            HighLatitudeRuleType.middleOfTheNight,
+            19.5,
+            17.5,
+            const Duration(hours: 2),
+          );
+
+          expect(
+            toRoundedMinutes(cairo.fajr),
+            closeTo(4 * 60 + 38, 1),
+          ); // 04:38
+          expect(
+            toRoundedMinutes(cairo.sunrise),
+            closeTo(6 * 60 + 5, 1),
+          ); // 06:05
+          expect(
+            toRoundedMinutes(cairo.dhuhr),
+            closeTo(11 * 60 + 39, 1),
+          ); // 11:39
+          expect(
+            toRoundedMinutes(cairo.asr),
+            closeTo(14 * 60 + 48, 1),
+          ); // 14:48
+          expect(
+            toRoundedMinutes(cairo.maghrib),
+            closeTo(17 * 60 + 12, 1),
+          ); // 17:12
+          expect(
+            toRoundedMinutes(cairo.isha),
+            closeTo(18 * 60 + 30, 1),
+          ); // 18:30
+
+          final omdurman = PrayerCalculator.getIbadatTimings(
+            15.6445,
+            32.4777,
+            DateTime.utc(2026, 10, 27),
+            CalculationMethodType.egyptian,
+            MadhabType.shafi,
+            HighLatitudeRuleType.middleOfTheNight,
+            19.5,
+            17.5,
+            const Duration(hours: 2),
+          );
+
+          expect(
+            toRoundedMinutes(omdurman.fajr),
+            closeTo(4 * 60 + 26, 1),
+          ); // 04:26
+          expect(
+            toRoundedMinutes(omdurman.sunrise),
+            closeTo(5 * 60 + 45, 1),
+          ); // 05:45
+          expect(
+            toRoundedMinutes(omdurman.dhuhr),
+            closeTo(11 * 60 + 34, 1),
+          ); // 11:34
+          expect(
+            toRoundedMinutes(omdurman.asr),
+            closeTo(14 * 60 + 54, 1),
+          ); // 14:54
+          expect(
+            toRoundedMinutes(omdurman.maghrib),
+            closeTo(17 * 60 + 23, 1),
+          ); // 17:23
+          expect(
+            toRoundedMinutes(omdurman.isha),
+            closeTo(18 * 60 + 33, 1),
+          ); // 18:33
+        },
+      );
+
+      test(
+        'Rabat matches Moroccan Ministry of Habous (+5m Dhuhr & Maghrib precaution over astronomical sunset)',
+        () {
+          final rabat = PrayerCalculator.getIbadatTimings(
+            34.0209,
+            -6.8416,
+            DateTime.utc(2026, 10, 27),
+            CalculationMethodType.morocco,
+            MadhabType.shafi,
+            HighLatitudeRuleType.middleOfTheNight,
+            19.0,
+            17.0,
+            const Duration(hours: 1),
+          );
+
+          expect(
+            rabat.maghrib.difference(rabat.calculatedSunset!).inMinutes,
+            equals(5),
+          );
+        },
+      );
+    },
+  );
 
   group('3. WGS84 Geodesic Qibla Benchmark Across 6 Global Capitals', () {
     test('Matches standard Vincenty WGS84 bearings within 0.05°', () {

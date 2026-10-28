@@ -131,7 +131,9 @@ class QiblaCalculator {
                   c *
                       sinSigma *
                       (cos2SigmaM +
-                          c * cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)));
+                          c *
+                              cosSigma *
+                              (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM)));
     }
 
     if (iterLimit == 0) {
@@ -213,10 +215,7 @@ class QiblaCalculator {
   }
 
   /// إيجاد اللحظة اليومية التي تكون فيها الشمس في سمت القبلة أو عكسه (+180° بحيث يشير ظل أي شاخص رأسي نحو القبلة)
-  static ({
-    InstantUtc? sunFacingQiblaUtc,
-    InstantUtc? shadowPointingToQiblaUtc,
-  })
+  static ({InstantUtc? sunFacingQiblaUtc, InstantUtc? shadowPointingToQiblaUtc})
   findDailySolarQiblaAlignment({
     required double latitude,
     required double longitude,

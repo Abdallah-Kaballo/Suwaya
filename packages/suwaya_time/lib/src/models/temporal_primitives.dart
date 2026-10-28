@@ -503,11 +503,8 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     return SuwayaCoordinate(
       globalSlotIndex: g,
       phase: ui.phase,
-      phaseSlotNumber:
-          ((json['phaseSlotNumber'] as num?)?.toInt() ?? ui.uiHour).clamp(
-            1,
-            12,
-          ),
+      phaseSlotNumber: ((json['phaseSlotNumber'] as num?)?.toInt() ?? ui.uiHour)
+          .clamp(1, 12),
       periodId: pId,
       periodKey: resolvedPeriodKey,
       periodLocalSlotNumber:

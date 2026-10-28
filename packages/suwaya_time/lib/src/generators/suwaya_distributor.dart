@@ -91,7 +91,9 @@ class SuwayaDistributor {
 
   /// تحديد الموسم نصف السنوي (الصيفي أو الشتوي) بدقة فلكية عبر مقارنة طول النهار بطول الليل
   /// ينقلب تلقائياً عند لحظة الاعتدال الربيعي والاعتدال الخريفي في كل من نصفي الكرة الشمالي والجنوبي
-  static SuwayaHalfYearSeason resolveHalfYearSeason(SuwayaCycleAnchors anchors) {
+  static SuwayaHalfYearSeason resolveHalfYearSeason(
+    SuwayaCycleAnchors anchors,
+  ) {
     final nightMicro = _spanMicro(
       anchors.cycleStartMaghrib,
       anchors.cycleSunrise,

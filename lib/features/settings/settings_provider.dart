@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:suwaya/core/location/location_service.dart';
 import 'package:suwaya/core/location/permissions_provider.dart';
 import 'package:suwaya/models/settings_model.dart';
-import 'package:suwaya_time/suwaya_time.dart'
-    show AstroSmartDefaults;
+import 'package:suwaya_time/suwaya_time.dart' show AstroSmartDefaults;
 
 import '../../core/astro_engine/astro_provider.dart';
 import '../../core/repositories/settings_repository.dart';

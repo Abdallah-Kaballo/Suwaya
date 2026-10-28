@@ -170,8 +170,7 @@ class PolarCycleSynthesizer {
 
     final rawEndSunsetUtc = rawStartSunsetUtc.add(const Duration(hours: 24));
 
-    int offsetMins(PrayerKey key) =>
-        (manualOffsets?[key] ?? 0).clamp(-30, 30);
+    int offsetMins(PrayerKey key) => (manualOffsets?[key] ?? 0).clamp(-30, 30);
 
     final startMaghribUtc = rawStartSunsetUtc.add(
       Duration(minutes: offsetMins(PrayerKey.maghrib)),

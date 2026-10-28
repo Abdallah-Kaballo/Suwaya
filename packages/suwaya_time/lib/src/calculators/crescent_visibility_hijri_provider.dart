@@ -118,9 +118,7 @@ class OdehCrescentVisibilityProvider implements HijriCalendarProvider {
           0.0087414 * t * t +
           (t * t * t) / 69699.0,
     );
-    final double f = _norm(
-      93.2720950 + 483202.0175233 * t - 0.0036539 * t * t,
-    );
+    final double f = _norm(93.2720950 + 483202.0175233 * t - 0.0036539 * t * t);
 
     final double eFactor = 1.0 - 0.002516 * t - 0.0000074 * t * t;
     final double dRad = d * _degToRad;
@@ -386,9 +384,13 @@ class OdehCrescentVisibilityProvider implements HijriCalendarProvider {
           isMorning: false,
         ) ??
         InstantUtc.fromDateTime(
-          DateTime.utc(date.year, date.month, date.day, 18, 0).subtract(
-            Duration(hours: (observerLongitude / 15.0).round()),
-          ),
+          DateTime.utc(
+            date.year,
+            date.month,
+            date.day,
+            18,
+            0,
+          ).subtract(Duration(hours: (observerLongitude / 15.0).round())),
         );
 
     final report = evaluateAtSunset(

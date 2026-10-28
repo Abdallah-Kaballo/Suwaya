@@ -291,8 +291,7 @@ class SolarEphemerisCalculator {
     InstantUtc instant,
   ) {
     final dt = instant.toDateTimeUtc();
-    final double jdUt =
-        (instant.epochMicroseconds / 86400000000.0) + 2440587.5;
+    final double jdUt = (instant.epochMicroseconds / 86400000000.0) + 2440587.5;
     final double deltaT = computeDeltaTSeconds(dt.year, dt.month);
     final double jdeTt = jdUt + (deltaT / 86400.0);
     return (jdUt: jdUt, jdeTt: jdeTt, deltaTSeconds: deltaT);
@@ -311,8 +310,7 @@ class SolarEphemerisCalculator {
     final double rArcMinutes = 1.02 / math.tan(tanArg);
     final double ptFactor =
         (conditions.pressureHpa / 1010.0) *
-        (283.15 /
-            (273.15 + conditions.temperatureCelsius.clamp(-60.0, 60.0)));
+        (283.15 / (273.15 + conditions.temperatureCelsius.clamp(-60.0, 60.0)));
     return math.max(0.0, (rArcMinutes * ptFactor) / 60.0);
   }
 
@@ -362,10 +360,7 @@ class SolarEphemerisCalculator {
 
     // المطلع المستقيم (Right Ascension) والميل الاستوائي (Declination)
     final double alpha = _normalizeDegrees(
-      math.atan2(
-            math.cos(epsRad) * math.sin(lambdaRad),
-            math.cos(lambdaRad),
-          ) *
+      math.atan2(math.cos(epsRad) * math.sin(lambdaRad), math.cos(lambdaRad)) *
           _radToDeg,
     );
     final double delta =
@@ -390,8 +385,7 @@ class SolarEphemerisCalculator {
           (tUt * tUt * tUt) / 38710000.0,
     );
     final double gast =
-        gmst +
-        (-0.00478 * math.sin(omega * _degToRad)) * math.cos(epsRad);
+        gmst + (-0.00478 * math.sin(omega * _degToRad)) * math.cos(epsRad);
 
     double hourAngle = _normalizeDegrees(gast + longitude - alpha);
     if (hourAngle > 180.0) hourAngle -= 360.0;
@@ -462,10 +456,7 @@ class SolarEphemerisCalculator {
 
     final double h1Deg = math.acos(cosH(fromAltitudeDegrees)) * _radToDeg;
     final double h2Deg = math.acos(cosH(toAltitudeDegrees)) * _radToDeg;
-    final double deltaMinutes = ((h1Deg - h2Deg).abs() * 4.0).clamp(
-      12.0,
-      45.0,
-    );
+    final double deltaMinutes = ((h1Deg - h2Deg).abs() * 4.0).clamp(12.0, 45.0);
 
     return Duration(microseconds: (deltaMinutes * 60 * 1000000).round());
   }

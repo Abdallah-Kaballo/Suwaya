@@ -126,18 +126,18 @@ class PrayerCalculator {
         : Madhab.shafi;
 
     switch (highLatRuleType) {
-    case HighLatitudeRuleType.seventhOfTheNight:
-    case HighLatitudeRuleType.aqrabAlAyyam:
-    case HighLatitudeRuleType.aqrabAlBilad:
-      params.highLatitudeRule = HighLatitudeRule.seventh_of_the_night;
-      break;
-    case HighLatitudeRuleType.twilightAngle:
-      params.highLatitudeRule = HighLatitudeRule.twilight_angle;
-      params.ishaAngle ??= 18.0;
-      break;
-    case HighLatitudeRuleType.middleOfTheNight:
-      params.highLatitudeRule = HighLatitudeRule.middle_of_the_night;
-      break;
+      case HighLatitudeRuleType.seventhOfTheNight:
+      case HighLatitudeRuleType.aqrabAlAyyam:
+      case HighLatitudeRuleType.aqrabAlBilad:
+        params.highLatitudeRule = HighLatitudeRule.seventh_of_the_night;
+        break;
+      case HighLatitudeRuleType.twilightAngle:
+        params.highLatitudeRule = HighLatitudeRule.twilight_angle;
+        params.ishaAngle ??= 18.0;
+        break;
+      case HighLatitudeRuleType.middleOfTheNight:
+        params.highLatitudeRule = HighLatitudeRule.middle_of_the_night;
+        break;
     }
     return params;
   }
@@ -221,8 +221,8 @@ class PrayerCalculator {
     final declDeg =
         23.44 * math.sin((2.0 * math.pi / 365.0) * (dayOfYear - 81));
     // ينعدم الشفق الفلكي عندما لا تنخفض الشمس عند منتصف الليل إلى الزاوية المطلوبة: |lat + decl| > 90 - angle
-    final sameHemisphere = (latitude >= 0 && declDeg >= 0) ||
-        (latitude < 0 && declDeg < 0);
+    final sameHemisphere =
+        (latitude >= 0 && declDeg >= 0) || (latitude < 0 && declDeg < 0);
     if (!sameHemisphere) return false;
     return (latitude.abs() + declDeg.abs()) >= (90.0 - maxDepressionAngle);
   }
@@ -403,8 +403,8 @@ class PrayerCalculator {
             );
             calcNextFajr = tomorrowSunriseUtc.subtract(
               Duration(
-                microseconds:
-                    (localNightMicro * (1.0 - ishaShare) * 0.85).round(),
+                microseconds: (localNightMicro * (1.0 - ishaShare) * 0.85)
+                    .round(),
               ),
             );
           }
