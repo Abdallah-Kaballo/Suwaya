@@ -42,8 +42,10 @@ class InstantUtc implements Comparable<InstantUtc> {
   };
 
   factory InstantUtc.fromJson(Map<String, dynamic> json) {
-    if (json['epochMicroseconds'] is int) {
-      return InstantUtc.fromMicroseconds(json['epochMicroseconds'] as int);
+    if (json['epochMicroseconds'] is num) {
+      return InstantUtc.fromMicroseconds(
+        (json['epochMicroseconds'] as num).toInt(),
+      );
     }
     return InstantUtc.fromDateTime(
       DateTime.parse(json['iso8601Utc'] as String),
@@ -66,7 +68,6 @@ class InstantUtc implements Comparable<InstantUtc> {
 }
 
 /// كائن قيمة غير قابل للتغيير (Immutable Value Object) يمثل وقت الحائط المدني المجرد (ساعة، دقيقة، ثانية)
-/// يقضي نهائياً على استخدام DateTime(2000, 1, 1, h, m) أو الدقائق الخام في الواجهة
 class CivilWallClock implements Comparable<CivilWallClock> {
   final int hour; // 0..23
   final int minute; // 0..59
@@ -82,6 +83,13 @@ class CivilWallClock implements Comparable<CivilWallClock> {
     return CivilWallClock(hour: normalized ~/ 60, minute: normalized % 60);
   }
 
+  factory CivilWallClock.fromSecondsSinceMidnight(int totalSeconds) {
+    final normalized = ((totalSeconds % 86400) + 86400) % 86400;
+    final h = normalized ~/ 3600;
+    final rem = normalized % 3600;
+    return CivilWallClock(hour: h, minute: rem ~/ 60, second: rem % 60);
+  }
+
   factory CivilWallClock.fromZonedWallTime(ZonedWallTime zwt) {
     return CivilWallClock(
       hour: zwt.hour,
@@ -90,7 +98,6 @@ class CivilWallClock implements Comparable<CivilWallClock> {
     );
   }
 
-  /// جسر توافق لتحويل DateTime إلى CivilWallClock عند الحاجة
   factory CivilWallClock.fromDateTime(DateTime dt) {
     return CivilWallClock(hour: dt.hour, minute: dt.minute, second: dt.second);
   }
@@ -124,6 +131,30 @@ class CivilWallClock implements Comparable<CivilWallClock> {
       return '\u202A\u200E$marker\u200E \u200E$digits\u200E\u202C';
     }
     return '\u202A\u200E$digits\u200E \u200E$marker\u200E\u202C';
+  }
+
+  Map<String, dynamic> toJson() => {
+    'hour': hour,
+    'minute': minute,
+    'second': second,
+    'minutesSinceMidnight': minutesSinceMidnight,
+    'formatted24h': format24Hour(includeSeconds: true),
+  };
+
+  factory CivilWallClock.fromJson(Map<String, dynamic> json) {
+    if (json['hour'] is num && json['minute'] is num) {
+      return CivilWallClock(
+        hour: (json['hour'] as num).toInt(),
+        minute: (json['minute'] as num).toInt(),
+        second: (json['second'] as num?)?.toInt() ?? 0,
+      );
+    }
+    if (json['minutesSinceMidnight'] is num) {
+      return CivilWallClock.fromMinutesSinceMidnight(
+        (json['minutesSinceMidnight'] as num).toInt(),
+      );
+    }
+    return const CivilWallClock(hour: 0, minute: 0);
   }
 
   @override
@@ -179,7 +210,6 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
     );
   }
 
-  /// إنشاء ZonedWallTime من تاريخ مدني ووقت حائط محلي في منطقة زمنية محددة
   factory ZonedWallTime.fromCivilDateAndClock({
     required CivilDate date,
     required CivilWallClock clock,
@@ -209,7 +239,6 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
 
   DateTime get _wallProjection => instant.toDateTimeUtc().add(utcOffset);
 
-  /// يبقى للتوافق العكسي مع الاختبارات القديمة فقط
   DateTime get wallClockProjection => _wallProjection;
 
   int get year => _wallProjection.year;
@@ -224,7 +253,6 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
   CivilWallClock get wallClock =>
       CivilWallClock(hour: hour, minute: minute, second: second);
 
-  /// يضمن تثبيت بداية الدقيقة (تصفير الثواني والمايكروثواني) ككائن غير قابل للتغيير
   ZonedWallTime truncateToMinute() {
     final excessMicro =
         (second * Duration.microsecondsPerSecond) +
@@ -266,6 +294,21 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
         '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:${second.toString().padLeft(2, '0')}',
   };
 
+  factory ZonedWallTime.fromJson(Map<String, dynamic> json) {
+    final inst = json['epochMicroseconds'] is num
+        ? InstantUtc.fromMicroseconds(
+            (json['epochMicroseconds'] as num).toInt(),
+          )
+        : InstantUtc.fromDateTime(DateTime.parse(json['instantUtc'] as String));
+    final offsetSecs = (json['utcOffsetSeconds'] as num?)?.toInt() ?? 0;
+    return ZonedWallTime(
+      instant: inst,
+      utcOffset: Duration(seconds: offsetSecs),
+      timezoneId: json['timezoneId'] as String?,
+      isDaylightSavingTime: (json['isDst'] as bool?) ?? false,
+    );
+  }
+
   @override
   int compareTo(ZonedWallTime other) => instant.compareTo(other.instant);
 
@@ -282,6 +325,14 @@ class ZonedWallTime implements Comparable<ZonedWallTime> {
 
 /// 3. الإحداثي الزمني السُويعي الموحد (SuwayaCoordinate)
 class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
+  static const int _multMin = 64; // 2^6
+  static const int _multLocalSlot = 4096; // 2^12
+  static const int _multPeriodId = 65536; // 2^16
+  static const int _multGlobalSlot = 1048576; // 2^20
+  static const int _multDay = 33554432; // 2^25
+  static const int _multMonth = 1073741824; // 2^30
+  static const int _multYear = 17179869184; // 2^34
+
   final int globalSlotIndex;
   final SuwayaPhase phase;
   final int phaseSlotNumber;
@@ -309,7 +360,6 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
   int get totalVirtualSeconds =>
       (globalSlotIndex * 3600) + (virtualMinute * 60) + virtualSecond;
 
-  /// صيغة قياسية مقترحة للـ APIs (مثال: SWY-N04:15 أو SWY-D09:42:10)
   String toIsoSuwayaString({bool includeSeconds = false}) {
     final phaseChar = phase.isNight ? 'N' : 'D';
     final s = phaseSlotNumber.toString().padLeft(2, '0');
@@ -319,7 +369,6 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     return 'SWY-$phaseChar$s:$m:$sec';
   }
 
-  /// تحليل صيغة ISO-Suwaya القياسية (مثل "SWY-N04:15" أو "SWY-D09:42:10")
   static SuwayaCoordinate? tryParseIsoSuwaya(
     String input,
     List<AstroPeriod> periods,
@@ -364,8 +413,8 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     );
   }
 
-  /// ضغط الإحداثي السويعي مع التاريخ في عدد صحيح واحد (64-bit Integer) للفهرسة الفائقة في قواعد البيانات
-  /// التوزيع البتي: [Year: 14 bits][Month: 4 bits][Day: 5 bits][GlobalSlot: 5 bits][PeriodId: 4 bits][LocalSlot: 4 bits][VMin: 6 bits][VSec: 6 bits]
+  /// ضغط الإحداثي السويعي مع التاريخ في عدد صحيح واحد (48-bit Safe Integer)
+  /// آمن 100% على الويب (JavaScript) والأنظمة الأصلية (64-bit VM)
   int toPackedInt64({
     int cycleYear = 1448,
     int cycleMonth = 1,
@@ -380,17 +429,17 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     final vm = virtualMinute.clamp(0, 59);
     final vs = virtualSecond.clamp(0, 59);
 
-    return (y << 34) |
-        (m << 30) |
-        (d << 25) |
-        (g << 20) |
-        (p << 16) |
-        (l << 12) |
-        (vm << 6) |
-        vs;
+    return vs +
+        (vm * _multMin) +
+        (l * _multLocalSlot) +
+        (p * _multPeriodId) +
+        (g * _multGlobalSlot) +
+        (d * _multDay) +
+        (m * _multMonth) +
+        (y * _multYear);
   }
 
-  /// فك ضغط العدد الصحيح (64-bit Integer) إلى مكونات الإحداثي السويعي
+  /// فك ضغط العدد الصحيح (48-bit Safe Integer) إلى مكونات الإحداثي السويعي
   static ({
     int cycleYear,
     int cycleMonth,
@@ -402,14 +451,15 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     int virtualSecond,
   })
   unpackInt64(int packed) {
-    final vs = packed & 0x3F;
-    final vm = (packed >> 6) & 0x3F;
-    final l = (packed >> 12) & 0x0F;
-    final p = (packed >> 16) & 0x0F;
-    final g = (packed >> 20) & 0x1F;
-    final d = (packed >> 25) & 0x1F;
-    final m = (packed >> 30) & 0x0F;
-    final y = (packed >> 34) & 0x3FFF;
+    final safePacked = packed < 0 ? 0 : packed;
+    final vs = (safePacked % 64).clamp(0, 59);
+    final vm = ((safePacked ~/ _multMin) % 64).clamp(0, 59);
+    final l = ((safePacked ~/ _multLocalSlot) % 16).clamp(1, 12);
+    final p = ((safePacked ~/ _multPeriodId) % 16).clamp(1, 7);
+    final g = ((safePacked ~/ _multGlobalSlot) % 32).clamp(0, 23);
+    final d = ((safePacked ~/ _multDay) % 32).clamp(1, 31);
+    final m = ((safePacked ~/ _multMonth) % 16).clamp(1, 12);
+    final y = ((safePacked ~/ _multYear) % 16384).clamp(0, 16383);
 
     return (
       cycleYear: y,
@@ -437,6 +487,38 @@ class SuwayaCoordinate implements Comparable<SuwayaCoordinate> {
     'isoSuwaya': toIsoSuwayaString(includeSeconds: true),
     'packedInt64': toPackedInt64(),
   };
+
+  factory SuwayaCoordinate.fromJson(Map<String, dynamic> json) {
+    final g = ((json['globalSlotIndex'] as num?)?.toInt() ?? 0).clamp(0, 23);
+    final pId = ((json['periodId'] as num?)?.toInt() ?? 1).clamp(1, 7);
+    final vMin = ((json['virtualMinute'] as num?)?.toInt() ?? 0).clamp(0, 59);
+    final vSec = ((json['virtualSecond'] as num?)?.toInt() ?? 0).clamp(0, 59);
+    final ui = SuwayaCoordinateMapper.globalToUiPhase(g);
+    final pKeyName = json['periodKey'] as String?;
+    final resolvedPeriodKey = PeriodKey.values.firstWhere(
+      (k) => k.name == pKeyName,
+      orElse: () => PeriodKey.values[pId - 1],
+    );
+
+    return SuwayaCoordinate(
+      globalSlotIndex: g,
+      phase: ui.phase,
+      phaseSlotNumber:
+          ((json['phaseSlotNumber'] as num?)?.toInt() ?? ui.uiHour).clamp(
+            1,
+            12,
+          ),
+      periodId: pId,
+      periodKey: resolvedPeriodKey,
+      periodLocalSlotNumber:
+          ((json['periodLocalSlotNumber'] as num?)?.toInt() ?? 1).clamp(1, 12),
+      virtualMinute: vMin,
+      virtualSecond: vSec,
+      slotProgress:
+          (json['slotProgress'] as num?)?.toDouble() ??
+          (((vMin * 60 + vSec) / 3600.0).clamp(0.0, 0.999999)),
+    );
+  }
 
   @override
   int compareTo(SuwayaCoordinate other) =>

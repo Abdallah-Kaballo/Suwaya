@@ -128,34 +128,44 @@ void main() {
     },
   );
 
-  group('3. Dynamic Proportional Allocation & 47-Bit Binary Codec Tests', () {
+  group('3. Zonal Bi-Annual Distribution Invariants & 47-Bit Binary Codec Tests', () {
     test(
-      'DynamicProportional mode always sums to 12 Night (5+6+1) and 12 Day Suwayas',
+      'Standard Zonal Bi-Annual distribution always preserves 12 Night (5+6+1), 6 Duha, and 6 Afternoon Suwayas across all zones',
       () {
-        final anchors = PrayerCalculator.getCycleAnchors(
-          51.5074,
-          -0.1278, // لندن في الانقلاب الصيفي (نهار طويل جداً وليل قصير)
-          DateTime.utc(2026, 6, 21),
-          CalculationMethodType.muslimWorldLeague,
-          MadhabType.shafi,
-          HighLatitudeRuleType.seventhOfTheNight,
-          18.0,
-          18.0,
-          const Duration(hours: 1),
-        );
+        for (final lat in [15.6445, 47.3769, 51.5074, 69.6492]) {
+          for (final date in [
+            DateTime.utc(2026, 6, 21),
+            DateTime.utc(2026, 12, 21),
+          ]) {
+            for (final madhab in MadhabType.values) {
+              final anchors = PrayerCalculator.getCycleAnchors(
+                lat,
+                18.0686,
+                date,
+                CalculationMethodType.muslimWorldLeague,
+                madhab,
+                HighLatitudeRuleType.seventhOfTheNight,
+                18.0,
+                17.0,
+                const Duration(hours: 1),
+              );
 
-        final dynamicDist = SuwayaDistributor.resolveDistribution(
-          madhab: MadhabType.shafi,
-          anchors: anchors,
-          mode: SuwayaDistributionMode.dynamicProportional,
-        );
+              final dist = SuwayaDistributor.resolveDistribution(
+                madhab: madhab,
+                anchors: anchors,
+                latitude: lat,
+              );
 
-        expect(dynamicDist.length, equals(7));
-        expect(dynamicDist[0] + dynamicDist[1], equals(5));
-        expect(dynamicDist[2], equals(6));
-        expect(dynamicDist[3], equals(1));
-        expect(dynamicDist[4] + dynamicDist[5] + dynamicDist[6], equals(12));
-        expect(dynamicDist.every((count) => count >= 1), isTrue);
+              expect(dist.length, equals(7));
+              expect(dist[0] + dist[1], equals(5));
+              expect(dist[2], equals(6));
+              expect(dist[3], equals(1));
+              expect(dist[4], equals(6));
+              expect(dist[5] + dist[6], equals(6));
+              expect(dist.every((count) => count >= 1), isTrue);
+            }
+          }
+        }
       },
     );
 

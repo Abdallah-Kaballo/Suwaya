@@ -38,6 +38,14 @@ class CivilDate {
     'weekday': weekday,
   };
 
+  factory CivilDate.fromJson(Map<String, dynamic> json) {
+    return CivilDate(
+      (json['year'] as num).toInt(),
+      (json['month'] as num).toInt(),
+      (json['day'] as num).toInt(),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       other is CivilDate &&
@@ -58,6 +66,7 @@ class HijriDate {
   final HijriCalendarSystem calendarSystem;
   final int adjustmentDays;
   final TemporalConfidence confidence;
+  final double? moonSightingProbability;
 
   const HijriDate({
     required this.year,
@@ -67,6 +76,7 @@ class HijriDate {
     this.calendarSystem = HijriCalendarSystem.ummAlQura,
     this.adjustmentDays = 0,
     this.confidence = TemporalConfidence.exact,
+    this.moonSightingProbability,
   });
 
   Map<String, dynamic> toJson() => {
@@ -77,7 +87,31 @@ class HijriDate {
     'calendarSystem': calendarSystem.name,
     'adjustmentDays': adjustmentDays,
     'confidence': confidence.name,
+    if (moonSightingProbability != null)
+      'moonSightingProbability': moonSightingProbability,
   };
+
+  factory HijriDate.fromJson(Map<String, dynamic> json) {
+    final sysStr = json['calendarSystem'] as String?;
+    final confStr = json['confidence'] as String?;
+    return HijriDate(
+      year: (json['year'] as num).toInt(),
+      month: (json['month'] as num).toInt(),
+      day: (json['day'] as num).toInt(),
+      lengthOfMonth: (json['lengthOfMonth'] as num?)?.toInt() ?? 30,
+      calendarSystem: HijriCalendarSystem.values.firstWhere(
+        (e) => e.name == sysStr,
+        orElse: () => HijriCalendarSystem.ummAlQura,
+      ),
+      adjustmentDays: (json['adjustmentDays'] as num?)?.toInt() ?? 0,
+      confidence: TemporalConfidence.values.firstWhere(
+        (e) => e.name == confStr,
+        orElse: () => TemporalConfidence.exact,
+      ),
+      moonSightingProbability: (json['moonSightingProbability'] as num?)
+          ?.toDouble(),
+    );
+  }
 }
 
 /// واجهة مجردة قابلة للتبديل لحساب التاريخ الهجري
@@ -159,7 +193,6 @@ class UmmAlQuraHijriProvider implements HijriCalendarProvider {
     }
   }
 
-  /// خوارزمية التقويم الهجري القياسي (Kuwaiti/Tabular Arithmetic) للتواريخ البعيدة خارج جدول أم القرى
   static HijriDate _tabularHijriFromGregorian(
     DateTime gregUtc,
     int adjustmentDays,
@@ -265,10 +298,25 @@ class TimezoneContext {
     'isDaylightSavingTime': isDaylightSavingTime,
     'confidence': confidence.name,
   };
+
+  factory TimezoneContext.fromJson(Map<String, dynamic> json) {
+    final confStr = json['confidence'] as String?;
+    return TimezoneContext(
+      timezoneId: json['timezoneId'] as String?,
+      utcOffset: Duration(
+        minutes: (json['utcOffsetMinutes'] as num?)?.toInt() ?? 0,
+      ),
+      isDaylightSavingTime: (json['isDaylightSavingTime'] as bool?) ?? false,
+      confidence: TemporalConfidence.values.firstWhere(
+        (e) => e.name == confStr,
+        orElse: () => TemporalConfidence.exact,
+      ),
+    );
+  }
 }
 
 class TimezoneResolver {
-  static const int _maxCachedLocations = 32;
+  static const int _maxCachedLocations = 64;
   static final Map<String, tz.Location> _locationCache = {};
 
   static tz.Location? _getLocationCached(String timezoneId) {
@@ -277,7 +325,6 @@ class TimezoneResolver {
 
     final existing = _locationCache.remove(trimmed);
     if (existing != null) {
-      // إعادة الإدراج في النهاية للحفاظ على ترتيب LRU
       _locationCache[trimmed] = existing;
       return existing;
     }
@@ -294,41 +341,22 @@ class TimezoneResolver {
     }
   }
 
-  /// حساب تصحيح الشروق والغروب الناتج عن الارتفاع عن سطح البحر (بالمتر)
-  /// يبكر الشروق ويتأخر الغروب بمقدار ~0.0347 درجة لكل جذر تربيعي للمتر
+  /// تفويض مباشر للدالة المرجعية الموحدة في PrayerCalculator لمنع تكرار المعادلات
   static Duration elevationDipTimeAdjustment(
     double elevationMeters,
     double latitudeDegrees,
   ) {
-    if (elevationMeters <= 0) return Duration.zero;
-    final dipDegrees =
-        0.0347 * (elevationMeters > 10000 ? 100.0 : _sqrt(elevationMeters));
-    // كل درجة قوسية للشمس تعادل 4 دقائق زمنية عند خط الاستواء وتزداد مع جيب تمام خط العرض
-    final latRad =
-        (latitudeDegrees.abs().clamp(0.0, 60.0)) * 0.017453292519943295;
-    final cosLat = _cosApprox(latRad);
-    final extraMinutes = (4.0 * dipDegrees) / (cosLat > 0.25 ? cosLat : 0.25);
-    return Duration(microseconds: (extraMinutes * 60 * 1000000).round());
-  }
-
-  static double _sqrt(double x) {
-    if (x <= 0) return 0;
-    double z = x;
-    for (int i = 0; i < 8; i++) {
-      z = 0.5 * (z + x / z);
-    }
-    return z;
-  }
-
-  static double _cosApprox(double rad) {
-    final x2 = rad * rad;
-    return 1.0 - (x2 / 2.0) + (x2 * x2 / 24.0);
+    return PrayerCalculator.computeElevationHorizonDip(
+      latitudeDegrees,
+      elevationMeters,
+    );
   }
 
   static TimezoneContext resolveForInstant(
     DateTime instantUtc, {
     String? timezoneId,
     Duration? fallbackOffset,
+    double? longitude,
   }) {
     final utc = instantUtc.toUtc();
     if (timezoneId != null && timezoneId.isNotEmpty) {
@@ -353,7 +381,16 @@ class TimezoneResolver {
       );
     }
 
-    // حساب إزاحة النظام المحلي في نفس اللحظة التاريخية/المستقبلية المطلوبة وليس اللحظة الحالية
+    if (longitude != null) {
+      final solarOffsetHours = (longitude.clamp(-180.0, 180.0) / 15.0).round();
+      return TimezoneContext(
+        timezoneId: null,
+        utcOffset: Duration(hours: solarOffsetHours),
+        isDaylightSavingTime: false,
+        confidence: TemporalConfidence.fallback,
+      );
+    }
+
     final localAtInstant = utc.toLocal();
     return TimezoneContext(
       timezoneId: null,
@@ -367,11 +404,13 @@ class TimezoneResolver {
     DateTime instantUtc, {
     String? timezoneId,
     Duration? fallbackOffset,
+    double? longitude,
   }) {
     final ctx = resolveForInstant(
       instantUtc,
       timezoneId: timezoneId,
       fallbackOffset: fallbackOffset,
+      longitude: longitude,
     );
     return instantUtc.toUtc().add(ctx.utcOffset);
   }
@@ -416,19 +455,53 @@ class SuwayaTemporalContext {
     'islamicLogicalGregorianDate': islamicLogicalGregorianDate.toJson(),
     'hijriDate': hijriDate.toJson(),
     'isIslamicNight': isIslamicNight,
+    'suwayaDay': suwayaDay.toJson(),
     'astroState': astroState.toJson(),
   };
+
+  factory SuwayaTemporalContext.fromJson(Map<String, dynamic> json) {
+    final cDate = CivilDate.fromJson(json['civilDate'] as Map<String, dynamic>);
+    final iDate = CivilDate.fromJson(
+      json['islamicLogicalGregorianDate'] as Map<String, dynamic>,
+    );
+    final aState = AstroState.fromJson(
+      json['astroState'] as Map<String, dynamic>,
+    );
+    final sDay = json['suwayaDay'] is Map<String, dynamic>
+        ? SuwayaDay.fromJson(json['suwayaDay'] as Map<String, dynamic>)
+        : SuwayaDay(
+            ibadatTimings: aState.ibadatTimings,
+            civilDayIbadat: aState.civilDayIbadat,
+            cycleAnchors: aState.cycleAnchors,
+            periods: aState.periods,
+          );
+
+    return SuwayaTemporalContext(
+      instantUtc: DateTime.parse(json['instantUtc'] as String).toUtc(),
+      cityWallTime: DateTime.parse(json['cityWallTime'] as String),
+      timezone: TimezoneContext.fromJson(
+        json['timezone'] as Map<String, dynamic>,
+      ),
+      civilDate: cDate,
+      civilWeekday: cDate.weekday,
+      islamicLogicalGregorianDate: iDate,
+      islamicWeekday: iDate.weekday,
+      hijriDate: HijriDate.fromJson(json['hijriDate'] as Map<String, dynamic>),
+      isIslamicNight: (json['isIslamicNight'] as bool?) ?? false,
+      suwayaDay: sDay,
+      astroState: aState,
+    );
+  }
 }
 
 class TemporalContextEngine {
   static const HijriCalendarProvider _defaultHijriProvider =
       UmmAlQuraHijriProvider();
 
-  static const int _maxCachedDays = 24;
+  static const int _maxCachedDays = 64;
   static final Map<String, SuwayaDay> _internalDayCache = {};
   static final Map<String, IbadatTimings> _internalCivilIbadatCache = {};
 
-  /// مسح الذاكرة المؤقتة الداخلية (مفيد عند الاختبارات أو إعادة التعيين)
   static void clearCache() {
     _internalDayCache.clear();
     _internalCivilIbadatCache.clear();
@@ -437,6 +510,7 @@ class TemporalContextEngine {
   static String _buildConfigKey({
     required double latitude,
     required double longitude,
+    required double elevationMeters,
     required String? timezoneId,
     required Duration? fallbackOffset,
     required CalculationMethodType methodType,
@@ -449,6 +523,7 @@ class TemporalContextEngine {
   }) {
     final latKey = (latitude * 10000).round();
     final lngKey = (longitude * 10000).round();
+    final elevKey = elevationMeters.round();
     final fallbackKey = fallbackOffset?.inMinutes.toString() ?? 'none';
     final offsetsKey = manualOffsets == null || manualOffsets.isEmpty
         ? ''
@@ -456,7 +531,7 @@ class TemporalContextEngine {
                 ..sort((a, b) => a.key.index.compareTo(b.key.index)))
               .map((e) => '${e.key.index}:${e.value}')
               .join(',');
-    return '$latKey:$lngKey:${timezoneId ?? ''}:$fallbackKey:${methodType.index}:'
+    return '$latKey:$lngKey:$elevKey:${timezoneId ?? ''}:$fallbackKey:${methodType.index}:'
         '${madhabType.index}:${highLatRuleType.index}:'
         '$customFajrAngle:$customIshaAngle:${polarPolicy.index}:$offsetsKey';
   }
@@ -466,6 +541,7 @@ class TemporalContextEngine {
     required DateTime instantUtc,
     required double latitude,
     required double longitude,
+    double elevationMeters = 0.0,
     String? timezoneId,
     Duration? fallbackOffset,
     CalculationMethodType methodType = CalculationMethodType.muslimWorldLeague,
@@ -502,6 +578,7 @@ class TemporalContextEngine {
     final configKey = _buildConfigKey(
       latitude: latitude,
       longitude: longitude,
+      elevationMeters: elevationMeters,
       timezoneId: timezoneId,
       fallbackOffset: fallbackOffset,
       methodType: methodType,
@@ -544,6 +621,8 @@ class TemporalContextEngine {
         nextDayCityOffset: nextCivilOffset,
         manualOffsets: manualOffsets,
         offsetResolver: offsetAt,
+        elevationMeters: elevationMeters,
+        polarPolicy: polarPolicy,
       );
       if (_internalCivilIbadatCache.length >= _maxCachedDays) {
         _internalCivilIbadatCache.remove(_internalCivilIbadatCache.keys.first);
@@ -596,6 +675,7 @@ class TemporalContextEngine {
         manualOffsets: manualOffsets,
         offsetResolver: offsetAt,
         civilDayIbadatOverride: todayIbadat,
+        elevationMeters: elevationMeters,
         polarPolicy: polarPolicy,
       );
       if (_internalDayCache.length >= _maxCachedDays) {

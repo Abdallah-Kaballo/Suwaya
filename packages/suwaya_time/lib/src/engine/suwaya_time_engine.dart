@@ -21,7 +21,7 @@ class SuwayaTimeEngine {
     Map<PrayerKey, int>? manualOffsets,
     Duration Function(DateTime utcInstant)? offsetResolver,
     IbadatTimings? civilDayIbadatOverride,
-    SuwayaAllocationMode allocationMode = SuwayaAllocationMode.canonicalMadhab,
+    double elevationMeters = 0.0,
     PolarResolutionPolicy polarPolicy = PolarResolutionPolicy.nearestLatitude45,
   }) {
     final ibadat = PrayerCalculator.getIbadatTimings(
@@ -36,7 +36,9 @@ class SuwayaTimeEngine {
       cityOffset,
       nextDayCityOffset: nextDayCityOffset,
       manualOffsets: manualOffsets,
-      offsetResolver: offsetResolver,
+      offsetResolver: offsetAtOrNull(offsetResolver),
+      elevationMeters: elevationMeters,
+      polarPolicy: polarPolicy,
     );
 
     final anchors = PrayerCalculator.getCycleAnchors(
@@ -51,14 +53,15 @@ class SuwayaTimeEngine {
       cityOffset,
       nextDayCityOffset: nextDayCityOffset,
       manualOffsets: manualOffsets,
-      offsetResolver: offsetResolver,
+      offsetResolver: offsetAtOrNull(offsetResolver),
+      elevationMeters: elevationMeters,
       polarPolicy: polarPolicy,
     );
 
     final distribution = SuwayaDistributor.resolveDistribution(
       madhab: madhabType,
       anchors: anchors,
-      mode: allocationMode,
+      latitude: lat,
     );
     final periods = PeriodGenerator.generatePeriods(anchors, distribution);
 
@@ -69,6 +72,10 @@ class SuwayaTimeEngine {
       periods: periods,
     );
   }
+
+  static Duration Function(DateTime)? offsetAtOrNull(
+    Duration Function(DateTime)? resolver,
+  ) => resolver;
 
   static AstroState calculateCurrentState(
     SuwayaDay day,

@@ -101,9 +101,54 @@ class SuwayaCycleAnchors {
     'cycleEndMaghrib': cycleEndMaghrib.toIso8601String(),
     if (cycleStartMaghribUtc != null)
       'cycleStartMaghribUtc': cycleStartMaghribUtc!.toIso8601String(),
+    if (cycleIshaUtc != null) 'cycleIshaUtc': cycleIshaUtc!.toIso8601String(),
+    if (sharIMidnightUtc != null)
+      'sharIMidnightUtc': sharIMidnightUtc!.toIso8601String(),
+    if (cycleFajrUtc != null) 'cycleFajrUtc': cycleFajrUtc!.toIso8601String(),
+    if (cycleSunriseUtc != null)
+      'cycleSunriseUtc': cycleSunriseUtc!.toIso8601String(),
+    if (cycleDhuhrUtc != null)
+      'cycleDhuhrUtc': cycleDhuhrUtc!.toIso8601String(),
+    if (cycleAsrUtc != null) 'cycleAsrUtc': cycleAsrUtc!.toIso8601String(),
     if (cycleEndMaghribUtc != null)
       'cycleEndMaghribUtc': cycleEndMaghribUtc!.toIso8601String(),
+    if (calculatedStartSunset != null)
+      'calculatedStartSunset': calculatedStartSunset!.toIso8601String(),
+    if (calculatedEndSunset != null)
+      'calculatedEndSunset': calculatedEndSunset!.toIso8601String(),
+    if (calculatedStartSunsetUtc != null)
+      'calculatedStartSunsetUtc': calculatedStartSunsetUtc!.toIso8601String(),
+    if (calculatedEndSunsetUtc != null)
+      'calculatedEndSunsetUtc': calculatedEndSunsetUtc!.toIso8601String(),
   };
+
+  factory SuwayaCycleAnchors.fromJson(Map<String, dynamic> json) {
+    DateTime? parseOpt(String key) =>
+        json[key] is String ? DateTime.parse(json[key] as String) : null;
+
+    return SuwayaCycleAnchors(
+      cycleStartMaghrib: DateTime.parse(json['cycleStartMaghrib'] as String),
+      cycleIsha: DateTime.parse(json['cycleIsha'] as String),
+      sharIMidnight: DateTime.parse(json['sharIMidnight'] as String),
+      cycleFajr: DateTime.parse(json['cycleFajr'] as String),
+      cycleSunrise: DateTime.parse(json['cycleSunrise'] as String),
+      cycleDhuhr: DateTime.parse(json['cycleDhuhr'] as String),
+      cycleAsr: DateTime.parse(json['cycleAsr'] as String),
+      cycleEndMaghrib: DateTime.parse(json['cycleEndMaghrib'] as String),
+      cycleStartMaghribUtc: parseOpt('cycleStartMaghribUtc')?.toUtc(),
+      cycleIshaUtc: parseOpt('cycleIshaUtc')?.toUtc(),
+      sharIMidnightUtc: parseOpt('sharIMidnightUtc')?.toUtc(),
+      cycleFajrUtc: parseOpt('cycleFajrUtc')?.toUtc(),
+      cycleSunriseUtc: parseOpt('cycleSunriseUtc')?.toUtc(),
+      cycleDhuhrUtc: parseOpt('cycleDhuhrUtc')?.toUtc(),
+      cycleAsrUtc: parseOpt('cycleAsrUtc')?.toUtc(),
+      cycleEndMaghribUtc: parseOpt('cycleEndMaghribUtc')?.toUtc(),
+      calculatedStartSunset: parseOpt('calculatedStartSunset'),
+      calculatedEndSunset: parseOpt('calculatedEndSunset'),
+      calculatedStartSunsetUtc: parseOpt('calculatedStartSunsetUtc')?.toUtc(),
+      calculatedEndSunsetUtc: parseOpt('calculatedEndSunsetUtc')?.toUtc(),
+    );
+  }
 }
 
 class SuwayaClockTime {
@@ -136,7 +181,39 @@ class SuwayaClockTime {
     'virtualMinute': virtualMinute,
     'virtualSecond': virtualSecond,
     'slotProgress': slotProgress,
+    'cycleStartDate': cycleStartDate.toIso8601String(),
+    'instant': instant.toIso8601String(),
   };
+
+  factory SuwayaClockTime.fromJson(Map<String, dynamic> json) {
+    final phaseStr = (json['phase'] as String?) ?? 'night';
+    final pKeyStr = (json['periodKey'] as String?) ?? 'nightMaghribIsha';
+    final nowFallback = DateTime.now().toUtc();
+
+    return SuwayaClockTime(
+      phase: phaseStr == 'day' ? SuwayaPhase.day : SuwayaPhase.night,
+      phaseSlotNumber: ((json['phaseSlotNumber'] as num?)?.toInt() ?? 1).clamp(
+        1,
+        12,
+      ),
+      periodKey: PeriodKey.values.firstWhere(
+        (e) => e.name == pKeyStr,
+        orElse: () => PeriodKey.nightMaghribIsha,
+      ),
+      periodLocalSlotNumber:
+          ((json['periodLocalSlotNumber'] as num?)?.toInt() ?? 1).clamp(1, 12),
+      slotProgress: ((json['slotProgress'] as num?)?.toDouble() ?? 0.0).clamp(
+        0.0,
+        0.999999,
+      ),
+      cycleStartDate: json['cycleStartDate'] is String
+          ? DateTime.parse(json['cycleStartDate'] as String)
+          : nowFallback,
+      instant: json['instant'] is String
+          ? DateTime.parse(json['instant'] as String)
+          : nowFallback,
+    );
+  }
 }
 
 class AstroPeriod {
@@ -159,7 +236,6 @@ class AstroPeriod {
     required this.colorValue,
   });
 
-  /// أنواع زمنية صريحة غير قابلة للتغيير (Zero-Ambiguity Value Objects)
   InstantUtc get startInstant =>
       InstantUtc.fromDateTime(startUtc ?? startTime.toUtc());
   InstantUtc get endInstant =>
@@ -182,7 +258,6 @@ class AstroPeriod {
     return endTime.difference(startTime);
   }
 
-  /// الطول الفيزيائي الفعلي للسويعة الواحدة داخل هذه الفترة
   Duration get actualSuwayaDuration {
     if (suwayasCount <= 0) return Duration.zero;
     final actualMicro = totalDuration.inMicroseconds ~/ suwayasCount;
@@ -191,7 +266,6 @@ class AstroPeriod {
         : Duration.zero;
   }
 
-  /// سرعة تدفق الزمن في هذه الفترة (60 دقيقة افتراضية / الطول الفعلي)
   double get flowSpeed {
     final micro = actualSuwayaDuration.inMicroseconds;
     if (micro <= 0) return 0.0;
@@ -280,6 +354,29 @@ class AstroPeriod {
     'flowSpeed': flowSpeed,
     'colorValue': colorValue,
   };
+
+  factory AstroPeriod.fromJson(Map<String, dynamic> json) {
+    final idVal = ((json['id'] as num?)?.toInt() ?? 1).clamp(1, 7);
+    final pKeyStr = json['periodKey'] as String?;
+    return AstroPeriod(
+      id: idVal,
+      periodKey: PeriodKey.values.firstWhere(
+        (e) => e.name == pKeyStr,
+        orElse: () => PeriodKey.values[idVal - 1],
+      ),
+      nameKey: (json['nameKey'] as String?) ?? 'periods.maghrib',
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+      startUtc: json['startUtc'] is String
+          ? DateTime.parse(json['startUtc'] as String).toUtc()
+          : null,
+      endUtc: json['endUtc'] is String
+          ? DateTime.parse(json['endUtc'] as String).toUtc()
+          : null,
+      suwayasCount: (json['suwayasCount'] as num?)?.toInt() ?? 1,
+      colorValue: (json['colorValue'] as num?)?.toInt() ?? 0xFFD4AF37,
+    );
+  }
 }
 
 class NightPart {
@@ -309,6 +406,22 @@ class NightPart {
     if (endUtc != null) 'endUtc': endUtc!.toIso8601String(),
     'durationSeconds': realDuration.inSeconds,
   };
+
+  factory NightPart.fromJson(Map<String, dynamic> json) {
+    final idStr = (json['id'] as String?) ?? 'sixth_5';
+    return NightPart(
+      id: idStr,
+      nameKey: (json['nameKey'] as String?) ?? 'np_$idStr',
+      startTime: DateTime.parse(json['startTime'] as String),
+      endTime: DateTime.parse(json['endTime'] as String),
+      startUtc: json['startUtc'] is String
+          ? DateTime.parse(json['startUtc'] as String).toUtc()
+          : null,
+      endUtc: json['endUtc'] is String
+          ? DateTime.parse(json['endUtc'] as String).toUtc()
+          : null,
+    );
+  }
 }
 
 class IbadatTimings {
@@ -340,6 +453,25 @@ class IbadatTimings {
       'calculatedSunset': calculatedSunset!.toIso8601String(),
     'nightParts': nightParts.map((np) => np.toJson()).toList(),
   };
+
+  factory IbadatTimings.fromJson(Map<String, dynamic> json) {
+    final rawParts = (json['nightParts'] as List<dynamic>?) ?? const [];
+    return IbadatTimings(
+      fajr: DateTime.parse(json['fajr'] as String),
+      sunrise: DateTime.parse(json['sunrise'] as String),
+      dhuhr: DateTime.parse(json['dhuhr'] as String),
+      asr: DateTime.parse(json['asr'] as String),
+      maghrib: DateTime.parse(json['maghrib'] as String),
+      isha: DateTime.parse(json['isha'] as String),
+      nextFajr: DateTime.parse(json['nextFajr'] as String),
+      calculatedSunset: json['calculatedSunset'] is String
+          ? DateTime.parse(json['calculatedSunset'] as String)
+          : null,
+      nightParts: rawParts
+          .map((e) => NightPart.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 class SuwayaDay {
@@ -370,6 +502,28 @@ class SuwayaDay {
     'cycleAnchors': cycleAnchors.toJson(),
     'periods': periods.map((p) => p.toJson()).toList(),
   };
+
+  factory SuwayaDay.fromJson(Map<String, dynamic> json) {
+    final ibadat = IbadatTimings.fromJson(
+      json['ibadatTimings'] as Map<String, dynamic>,
+    );
+    final civilIbadat = json['civilDayIbadat'] is Map<String, dynamic>
+        ? IbadatTimings.fromJson(json['civilDayIbadat'] as Map<String, dynamic>)
+        : ibadat;
+    final anchors = SuwayaCycleAnchors.fromJson(
+      json['cycleAnchors'] as Map<String, dynamic>,
+    );
+    final rawPeriods = (json['periods'] as List<dynamic>?) ?? const [];
+
+    return SuwayaDay(
+      ibadatTimings: ibadat,
+      civilDayIbadat: civilIbadat,
+      cycleAnchors: anchors,
+      periods: rawPeriods
+          .map((p) => AstroPeriod.fromJson(p as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 class AstroState {
@@ -411,6 +565,40 @@ class AstroState {
     'civilDayIbadat': civilDayIbadat.toJson(),
     'cycleAnchors': cycleAnchors.toJson(),
   };
+
+  factory AstroState.fromJson(Map<String, dynamic> json) {
+    final rawPeriods = (json['periods'] as List<dynamic>?) ?? const [];
+    final parsedPeriods = rawPeriods
+        .map((p) => AstroPeriod.fromJson(p as Map<String, dynamic>))
+        .toList();
+    final ibadat = IbadatTimings.fromJson(
+      json['ibadatTimings'] as Map<String, dynamic>,
+    );
+    final civilIbadat = json['civilDayIbadat'] is Map<String, dynamic>
+        ? IbadatTimings.fromJson(json['civilDayIbadat'] as Map<String, dynamic>)
+        : ibadat;
+
+    return AstroState(
+      virtualTime: DateTime.parse(json['virtualTime'] as String),
+      instantUtc: json['instantUtc'] is String
+          ? DateTime.parse(json['instantUtc'] as String).toUtc()
+          : null,
+      periods: parsedPeriods,
+      currentPeriod: AstroPeriod.fromJson(
+        json['currentPeriod'] as Map<String, dynamic>,
+      ),
+      currentSuwayaTime: SuwayaClockTime.fromJson(
+        json['currentSuwayaTime'] as Map<String, dynamic>,
+      ),
+      timeSpeedMultiplier:
+          (json['timeSpeedMultiplier'] as num?)?.toDouble() ?? 1.0,
+      ibadatTimings: ibadat,
+      civilDayIbadat: civilIbadat,
+      cycleAnchors: SuwayaCycleAnchors.fromJson(
+        json['cycleAnchors'] as Map<String, dynamic>,
+      ),
+    );
+  }
 }
 
 enum CalculationMethodType {
@@ -427,23 +615,58 @@ enum CalculationMethodType {
   turkey,
   franceUoif,
   russia,
+  morocco,
+  algeria,
+  tunisia,
+  malaysiaJakim,
+  indonesiaKemenag,
+  jordan,
+  oman,
   custom,
 }
 
 enum MadhabType { hanafi, shafi }
 
-enum HighLatitudeRuleType { middleOfTheNight, seventhOfTheNight, twilightAngle }
+enum HighLatitudeRuleType {
+  middleOfTheNight,
+  seventhOfTheNight,
+  twilightAngle,
+  aqrabAlBilad,
+  aqrabAlAyyam,
+}
 
 enum PrayerKey { fajr, sunrise, dhuhr, asr, maghrib, isha }
 
 extension AstroStringParsers on String {
   String get _normalized => replaceAll('_', '').toLowerCase();
 
-  CalculationMethodType toCalculationMethod() =>
-      CalculationMethodType.values.firstWhere(
-        (e) => e.name.toLowerCase() == _normalized,
-        orElse: () => CalculationMethodType.muslimWorldLeague,
-      );
+  CalculationMethodType toCalculationMethod() {
+    switch (_normalized) {
+      case 'morocco':
+        return CalculationMethodType.morocco;
+      case 'algeria':
+        return CalculationMethodType.algeria;
+      case 'tunisia':
+        return CalculationMethodType.tunisia;
+      case 'malaysia':
+      case 'jakim':
+      case 'malaysiajakim':
+        return CalculationMethodType.malaysiaJakim;
+      case 'indonesia':
+      case 'kemenag':
+      case 'indonesiakemenag':
+        return CalculationMethodType.indonesiaKemenag;
+      case 'jordan':
+        return CalculationMethodType.jordan;
+      case 'oman':
+        return CalculationMethodType.oman;
+      default:
+        return CalculationMethodType.values.firstWhere(
+          (e) => e.name.toLowerCase() == _normalized,
+          orElse: () => CalculationMethodType.muslimWorldLeague,
+        );
+    }
+  }
 
   MadhabType toMadhab() => MadhabType.values.firstWhere(
     (e) => e.name.toLowerCase() == _normalized,

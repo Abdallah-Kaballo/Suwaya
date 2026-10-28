@@ -174,27 +174,30 @@ $$
 
 * **Crucial Distinction:** `IbadatTimings` and `SuwayaCycleAnchors` preserve both the user-adjusted Maghrib (`maghrib`) and the pure astronomical sunset (`calculatedSunset` / `calculatedStartSunsetUtc`). The Hijri date transitions at pure astronomical sunset regardless of manual Adhan offsets.
 
-## 5. The Seven Astronomical Periods & Allocation Modes
+## 5. The Seven Astronomical Periods & Zonal Distribution Standard
 
-`PeriodGenerator` divides the Maghrib-to-Maghrib cycle into **7 contiguous periods** (`id` 1 to 7):
+`PeriodGenerator` divides the Maghrib-to-Maghrib cycle into **7 contiguous periods** (`id` 1 to 7) totaling **24 Suwayas** (12 Night Suwayas and 12 Day Suwayas):
 
-| ID | `PeriodKey` | Phase | Name Key | Start Anchor | End Anchor | Canonical Shafi | Canonical Hanafi | Dynamic Proportional Mode | 
-| ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | 
-| 1 | `nightMaghribIsha` | Night (`🌑`) | `periods.maghrib` | Maghrib | Isha | `1` (`01 🌑`) | `1` (`01 🌑`) | Shared with Period 2 (Sum = 5, $\min = 1$) | 
-| 2 | `nightIshaMidnight` | Night (`🌑`) | `periods.isha` | Isha | Shar'i Midnight | `4` (`02..05 🌑`) | `4` (`02..05 🌑`) | Shared with Period 1 (Sum = 5, $\min = 1$) | 
-| 3 | `nightMidnightFajr` | Night (`🌑`) | `periods.qiyam` | Shar'i Midnight | Fajr | **6** (`06..11 🌑`) | **6** (`06..11 🌑`) | **6** (Fixed: `06..11 🌑`) | 
-| 4 | `nightFajrSunrise` | Night (`🌑`) | `periods.fajr` | Fajr | Sunrise | **1** (`12 🌑`) | **1** (`12 🌑`) | **1** (Fixed: `12 🌑`) | 
-| 5 | `daySunriseDhuhr` | Day (`☀️`) | `periods.duha` | Sunrise | Dhuhr | `6` (`01..06 ☀️`) | `6` (`01..06 ☀️`) | Shared across 5, 6, 7 (Sum = 12, $\min = 1$) | 
-| 6 | `dayDhuhrAsr` | Day (`☀️`) | `periods.dhuhr` | Dhuhr | Asr | `3` (`07..09 ☀️`) | `4` (`07..10 ☀️`) | Shared across 5, 6, 7 (Sum = 12, $\min = 1$) | 
-| 7 | `dayAsrMaghrib` | Day (`☀️`) | `periods.asr` | Asr | Next Maghrib | `3` (`10..12 ☀️`) | `2` (`11..12 ☀️`) | Shared across 5, 6, 7 (Sum = 12, $\min = 1$) | 
+| ID | `PeriodKey` | Phase | Name Key | Start Anchor | End Anchor | Zone 1 & 3 (`<= 48.56°`, `> 66.56°`) Jumhur / Hanafi | Zone 2 (`48.56°..66.56°`) Summer Jumhur / Hanafi | Zone 2 (`48.56°..66.56°`) Winter Jumhur / Hanafi |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `nightMaghribIsha` | Night (`🌑`) | `periods.maghrib` | Maghrib | Isha | `1` / `1` | `2` / `2` | `1` / `1` |
+| 2 | `nightIshaMidnight` | Night (`🌑`) | `periods.isha` | Isha | Shar'i Midnight | `4` / `4` | `3` / `3` | `4` / `4` |
+| 3 | `nightMidnightFajr` | Night (`🌑`) | `periods.qiyam` | Shar'i Midnight | Fajr | **6** / **6** | **6** / **6** | **6** / **6** |
+| 4 | `nightFajrSunrise` | Night (`🌑`) | `periods.fajr` | Fajr | Sunrise | **1** / **1** | **1** / **1** | **1** / **1** |
+| 5 | `daySunriseDhuhr` | Day (`☀️`) | `periods.duha` | Sunrise | Dhuhr | **6** / **6** | **6** / **6** | **6** / **6** |
+| 6 | `dayDhuhrAsr` | Day (`☀️`) | `periods.dhuhr` | Dhuhr | Asr | `3` / `4` | `3` / `4` | `2` / `3` |
+| 7 | `dayAsrMaghrib` | Day (`☀️`) | `periods.asr` | Asr | Next Maghrib | `3` / `2` | `3` / `2` | `4` / `3` |
 
-### Allocation Modes (`SuwayaDistributionMode`)
+### Unified Zonal & Bi-Annual Standard (`SuwayaDistributor`)
 
-`SuwayaDistributor.resolveDistribution` supports two mathematical allocation strategies:
-
-1. **`SuwayaDistributionMode.canonicalMadhab` (Default):** Uses the fixed jurisprudential distributions (`[1, 4, 6, 1, 6, 3, 3]` for Jumhur/Shafi and `[1, 4, 6, 1, 6, 4, 2]` for Hanafi) so prayer boundaries always map to predictable Suwaya numbers year-round.
-
-2. **`SuwayaDistributionMode.dynamicProportional`:** Uses Hamilton's Largest Remainder method (`_allocateProportional`) to distribute the 5 first-half night Suwayas across Periods 1 & 2 and the 12 day Suwayas across Periods 5, 6, & 7 according to their exact physical UTC durations on that date, while keeping Period 3 fixed at 6 Suwayas and Period 4 fixed at 1 Suwaya.
+1. **Temperate & High-Lat Zone 1 ($|\phi| \le 48.56^\circ$) and Polar Zone 3 ($|\phi| > 66.56^\circ$, projected to $45^\circ$):**
+   Applies the fixed year-round canonical distributions:
+   * **Jumhur (Shafi / Maliki / Hanbali):** `[1, 4, 6, 1, 6, 3, 3]`
+   * **Hanafi:** `[1, 4, 6, 1, 6, 4, 2]`
+2. **High-Lat Zone 2 ($48.56^\circ < |\phi| \le 66.56^\circ$):**
+   Switches twice a year at the Spring and Autumn Equinoxes (`Daylight >= Night` vs. `Night > Daylight`):
+   * **Summer Half-Year:** `[2, 3, 6, 1, 6, 3, 3]` (Jumhur) and `[2, 3, 6, 1, 6, 4, 2]` (Hanafi) to absorb extended summer twilight.
+   * **Winter Half-Year:** `[1, 4, 6, 1, 6, 2, 4]` (Jumhur) and `[1, 4, 6, 1, 6, 3, 3]` (Hanafi) to balance low-solar-altitude afternoon intervals and keep flow speeds near $1.00\text{x}$.
 
 ## 6. Second-Half Night Division (`NightPart` — Qiyam Parts)
 
