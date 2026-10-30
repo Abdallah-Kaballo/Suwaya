@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/services.dart';
+import 'package:suwaya/features/settings/supporter_provider.dart';
 
 import 'core/bootstrap/app_bootstrap.dart';
 import 'core/database/database_provider.dart';
@@ -18,8 +19,7 @@ import 'core/astro_engine/astro_provider.dart';
 import 'features/settings/settings_provider.dart';
 import 'core/router/app_router.dart';
 
-// 🌟 استيراد خدمة الترحيل وشاشة رنين المنبه الموحدة
-import 'core/services/migration_service.dart';
+// 🌟 استيراد شاشة رنين المنبه الموحدة
 import 'features/alarm/alarm_ring_screen.dart';
 import 'features/routines/routines_provider.dart';
 import 'features/tasks/tasks_provider.dart';
@@ -49,17 +49,12 @@ class _LoadingBootstrapScreenState extends State<LoadingBootstrapScreen> {
     try {
       final isar = await DatabaseService.init();
 
-      // 🌟 1. إنشاء الحاوية (Container) مع تمرير قاعدة البيانات (Isar)
       final container = ProviderContainer(
         overrides: [isarProvider.overrideWithValue(isar)],
       );
 
-      // 🌟 2. تشغيل خدمة الترحيل الآن بأمان لأن قاعدة البيانات تعمل
-      await container.read(migrationServiceProvider).runMigrationsIfNeeded();
-
       if (!mounted) return;
 
-      // 🌟 3. استخدام الحاوية التي أنشأناها لتشغيل التطبيق
       runApp(
         UncontrolledProviderScope(
           container: container,
@@ -342,6 +337,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      ref.read(supporterProvider.notifier).syncWithStore();
       // لا نعيد الجدولة أثناء رنين منبه نشط حتى لا نقاطع جلسته
       if (_activeBannerAlarm != null || _pushedFullScreenAlarmId != null) {
         return;
@@ -403,6 +399,7 @@ class _SuwayaAppState extends ConsumerState<SuwayaApp>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(supporterProvider);
     final settings = ref.watch(settingsProvider);
     final activeColorTheme = ref.watch(themeColorProvider);
     final goRouter = ref.watch(routerProvider);

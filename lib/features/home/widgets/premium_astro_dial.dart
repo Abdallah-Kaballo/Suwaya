@@ -864,13 +864,34 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     ];
 
     final dpr = MediaQuery.devicePixelRatioOf(context);
-    final Widget baseHandImage = Image.asset(
-      'assets/icons/Hours Hand.png',
-      width: handWidth,
-      height: handLength,
-      cacheHeight: (handLength * dpr).round(),
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.low,
+    final int targetCacheHeight = (handLength * dpr).round();
+
+    Widget buildRawImage({Color? tintColor}) {
+      return Image.asset(
+        'assets/icons/Hours Hand.png',
+        width: handWidth,
+        height: handLength,
+        cacheHeight: targetCacheHeight,
+        color: tintColor,
+        colorBlendMode: tintColor != null ? BlendMode.srcIn : null,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.low,
+      );
+    }
+
+    final Widget mainHand = isDark
+        ? ColorFiltered(
+            colorFilter: const ColorFilter.matrix(silverWhiteMatrix),
+            child: buildRawImage(),
+          )
+        : buildRawImage();
+
+    // 🌟 حافة مزدوجة خفيفة (توهج ذهبي رقيق + حد أسود حاد بـ 4 اتجاهات) لإبراز العقرب
+    final Color outerRimColor = goldBase.withValues(
+      alpha: isDark ? 0.50 : 0.35,
+    );
+    final Color darkStrokeColor = Colors.black.withValues(
+      alpha: isDark ? 0.88 : 0.72,
     );
 
     return IgnorePointer(
@@ -879,12 +900,35 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
         child: Transform.translate(
           offset: Offset(0, centerOffsetY),
           child: RepaintBoundary(
-            child: isDark
-                ? ColorFiltered(
-                    colorFilter: const ColorFilter.matrix(silverWhiteMatrix),
-                    child: baseHandImage,
-                  )
-                : baseHandImage,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // 1. حافة ذهبية خارجية خفيفة
+                Transform.scale(
+                  scale: 1.045,
+                  child: buildRawImage(tintColor: outerRimColor),
+                ),
+                // 2. حافة سوداء دقيقة من 4 جهات لعزل العقرب عن الخلفية
+                Transform.translate(
+                  offset: const Offset(1.1, 0),
+                  child: buildRawImage(tintColor: darkStrokeColor),
+                ),
+                Transform.translate(
+                  offset: const Offset(-1.1, 0),
+                  child: buildRawImage(tintColor: darkStrokeColor),
+                ),
+                Transform.translate(
+                  offset: const Offset(0, 1.1),
+                  child: buildRawImage(tintColor: darkStrokeColor),
+                ),
+                Transform.translate(
+                  offset: const Offset(0, -1.1),
+                  child: buildRawImage(tintColor: darkStrokeColor),
+                ),
+                // 3. صورة العقرب الأساسية في المنتصف
+                mainHand,
+              ],
+            ),
           ),
         ),
       ),

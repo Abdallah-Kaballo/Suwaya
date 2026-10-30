@@ -34,14 +34,14 @@ class SettingsModel {
   bool isDialAutoRotating = true;
   String dialPinMode = 'suwaya24';
   String suwayaNumberStyle = 'english';
-  List<String> activeNightMarkers = ['sixth_5'];
+  List<String> activeNightMarkers = ['third_3'];
 
   List<PeriodConfig> periodConfigs = [];
 
   bool useAstroTimeForIbadat = true;
   String civilTimeFormat = 'system';
   bool showSunrise = true;
-  List<String> visibleNightParts = ['sixth_5'];
+  List<String> visibleNightParts = ['third_3'];
 
   int defaultTaskAlertLevel = 1;
   String defaultTaskTone = 'assets/audio/default.mp3';

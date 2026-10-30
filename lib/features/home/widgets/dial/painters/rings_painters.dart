@@ -828,34 +828,47 @@ class DividerRingPainter extends CustomPainter {
           p1,
           p2,
           Paint()
-            ..color = isDark ? Colors.white24 : Colors.black26
-            ..strokeWidth = 1.5
+            ..color = (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.14,
+            )
+            ..strokeWidth = 1.2
             ..strokeCap = StrokeCap.round,
         );
         continue;
       }
 
+      // 🌟 ظل خلفي خفيف وشفاف للفواصل
       canvas.drawLine(
         p1,
         p2,
         Paint()
-          ..color = isDark ? Colors.black : Colors.white
-          ..strokeWidth = 6.0
+          ..color = (isDark ? Colors.black : Colors.white).withValues(
+            alpha: 0.25,
+          )
+          ..strokeWidth = 4.0
           ..strokeCap = StrokeCap.round,
       );
+      // 🌟 خط ذهبي نصف شفاف لا يشوش على العقرب عند مروره فوقه
       canvas.drawLine(
         p1,
         p2,
         Paint()
-          ..color = goldBase
-          ..strokeWidth = 2.5
+          ..color = goldBase.withValues(alpha: 0.35)
+          ..strokeWidth = 1.8
           ..strokeCap = StrokeCap.round,
       );
-      canvas.drawCircle(p2, 4.0, Paint()..color = goldBase);
       canvas.drawCircle(
         p2,
-        2.0,
-        Paint()..color = isDark ? Colors.black : Colors.white,
+        3.2,
+        Paint()..color = goldBase.withValues(alpha: 0.45),
+      );
+      canvas.drawCircle(
+        p2,
+        1.5,
+        Paint()
+          ..color = (isDark ? Colors.black : Colors.white).withValues(
+            alpha: 0.45,
+          ),
       );
     }
   }

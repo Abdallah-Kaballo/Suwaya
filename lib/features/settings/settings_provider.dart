@@ -408,32 +408,11 @@ class SettingsNotifier extends Notifier<SettingsModel> {
 
   Future<void> toggleNightMarker(String markerId) async {
     final newState = state.clone();
-    List<String> current = List.from(newState.activeNightMarkers);
+    final List<String> current = List.from(newState.activeNightMarkers);
 
     if (current.contains(markerId)) {
       current.remove(markerId);
     } else {
-      if (markerId == 'np_third_3') {
-        current.remove('np_sixth_5');
-        current.remove('np_sixth_6');
-      }
-      if (markerId == 'np_sixth_5' || markerId == 'np_sixth_6') {
-        current.remove('np_third_3');
-      }
-      if (markerId == 'np_half_2') {
-        current.remove('np_sixth_4');
-        current.remove('np_sixth_5');
-        current.remove('np_sixth_6');
-        current.remove('np_third_3');
-      }
-      if (markerId == 'np_sixth_4') current.remove('np_half_2');
-      if (markerId == 'np_third_2') {
-        current.remove('np_sixth_3');
-        current.remove('np_sixth_4');
-      }
-      if (markerId == 'np_sixth_3') current.remove('np_third_2');
-
-      if (current.length >= 2) current.removeAt(0);
       current.add(markerId);
     }
 
@@ -501,22 +480,10 @@ class SettingsNotifier extends Notifier<SettingsModel> {
     if (newState.visibleNightParts.contains(partId)) {
       newState.visibleNightParts.remove(partId);
     } else {
-      // 🌟 تطبيق قاعدة التعارض الذكية عند الإضافة
-      if (partId == 'third_3') {
-        newState.visibleNightParts.remove('sixth_5');
-        newState.visibleNightParts.remove('sixth_6');
-      } else if (partId == 'sixth_5' || partId == 'sixth_6') {
-        newState.visibleNightParts.remove('third_3');
-      } else if (partId == 'half_2') {
-        newState.visibleNightParts.remove('sixth_4');
-      } else if (partId == 'sixth_4') {
-        newState.visibleNightParts.remove('half_2');
-      }
-
       newState.visibleNightParts.add(partId);
     }
 
-    final order = [
+    const order = [
       'half_1',
       'half_2',
       'third_1',

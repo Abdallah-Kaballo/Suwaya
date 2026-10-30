@@ -115,8 +115,9 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
     final configured = await AppBootstrap.ensureRevenueCatConfigured();
     if (!configured) return state;
     try {
-      await Purchases.invalidateCustomerInfoCache();
-      final customerInfo = await Purchases.getCustomerInfo();
+      // 🌟 دفع أي إيصالات محلية في Google Play Billing لم يُقر بها بعد إلى RevenueCat
+      final syncResult = await Purchases.syncPurchasesForResult();
+      final customerInfo = syncResult.customerInfo;
       final detected = _extractTierFromCustomerInfo(customerInfo);
       await _persistTier(detected);
       return detected;
@@ -183,11 +184,8 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
         packageToBuy = packagesMap[targetTier];
       }
 
-      late final PurchaseResult purchaseResult;
       if (packageToBuy != null) {
-        purchaseResult = await Purchases.purchase(
-          PurchaseParams.package(packageToBuy),
-        );
+        await Purchases.purchase(PurchaseParams.package(packageToBuy));
       } else {
         // مسار مباشر عبر معرّف المنتج في Google Play في حال لم يُربط داخل Offering بعد
         final products = await Purchases.getProducts(
@@ -201,19 +199,24 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
                 'Product (${targetTier.packageId}) is not active in Google Play Console / RevenueCat yet.',
           );
         }
-        purchaseResult = await Purchases.purchase(
-          PurchaseParams.storeProduct(products.first),
+        await Purchases.purchase(PurchaseParams.storeProduct(products.first));
+      }
+
+      // 🌟 إجبار مزامنة الإيصال مع الخادم والتأكد من تفعيل الاشتراك فعلياً
+      await Purchases.syncPurchases();
+      final freshInfo = await Purchases.getCustomerInfo();
+      final verifiedTier = _extractTierFromCustomerInfo(freshInfo);
+
+      if (verifiedTier == SupporterTier.none) {
+        return (
+          success: false,
+          userCancelled: false,
+          errorMessage:
+              'تم الدفع، وجارٍ تأكيد الاشتراك مع المتجر. يرجى الضغط على استعادة المشتريات بعد قليل.',
         );
       }
 
-      final verifiedTier = _extractTierFromCustomerInfo(
-        purchaseResult.customerInfo,
-      );
-      final effectiveTier = verifiedTier != SupporterTier.none
-          ? verifiedTier
-          : targetTier;
-
-      await _persistTier(effectiveTier);
+      await _persistTier(verifiedTier);
       return (success: true, userCancelled: false, errorMessage: null);
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);

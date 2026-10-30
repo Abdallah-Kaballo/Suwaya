@@ -29,178 +29,188 @@ const SettingsModelSchema = CollectionSchema(
       name: r'activeNightMarkers',
       type: IsarType.stringList,
     ),
-    r'calculationMethod': PropertySchema(
+    r'appFontFamily': PropertySchema(
       id: 2,
+      name: r'appFontFamily',
+      type: IsarType.string,
+    ),
+    r'appFontScale': PropertySchema(
+      id: 3,
+      name: r'appFontScale',
+      type: IsarType.double,
+    ),
+    r'calculationMethod': PropertySchema(
+      id: 4,
       name: r'calculationMethod',
       type: IsarType.string,
     ),
     r'civilTimeFormat': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'civilTimeFormat',
       type: IsarType.string,
     ),
     r'currentStreak': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'currentStreak',
       type: IsarType.long,
     ),
     r'customFajrAngle': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'customFajrAngle',
       type: IsarType.double,
     ),
     r'customIshaAngle': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'customIshaAngle',
       type: IsarType.double,
     ),
     r'dayBoundary': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'dayBoundary',
       type: IsarType.string,
     ),
     r'defaultHabitAlertLevel': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'defaultHabitAlertLevel',
       type: IsarType.long,
     ),
     r'defaultHabitTone': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'defaultHabitTone',
       type: IsarType.string,
     ),
     r'defaultHabitVolume': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'defaultHabitVolume',
       type: IsarType.double,
     ),
     r'defaultTaskAlertLevel': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'defaultTaskAlertLevel',
       type: IsarType.long,
     ),
     r'defaultTaskTone': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'defaultTaskTone',
       type: IsarType.string,
     ),
     r'defaultTaskVolume': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'defaultTaskVolume',
       type: IsarType.double,
     ),
     r'dialPinMode': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'dialPinMode',
       type: IsarType.string,
     ),
     r'hiddenPeriods': PropertySchema(
-      id: 15,
+      id: 17,
       name: r'hiddenPeriods',
       type: IsarType.longList,
     ),
     r'highLatitudeRule': PropertySchema(
-      id: 16,
+      id: 18,
       name: r'highLatitudeRule',
       type: IsarType.string,
     ),
     r'hijriOffsetDays': PropertySchema(
-      id: 17,
+      id: 19,
       name: r'hijriOffsetDays',
       type: IsarType.long,
     ),
     r'isDialAutoRotating': PropertySchema(
-      id: 18,
+      id: 20,
       name: r'isDialAutoRotating',
       type: IsarType.bool,
     ),
     r'isFirstLaunch': PropertySchema(
-      id: 19,
+      id: 21,
       name: r'isFirstLaunch',
       type: IsarType.bool,
     ),
     r'languageCode': PropertySchema(
-      id: 20,
+      id: 22,
       name: r'languageCode',
       type: IsarType.string,
     ),
     r'lastStreakDate': PropertySchema(
-      id: 21,
+      id: 23,
       name: r'lastStreakDate',
       type: IsarType.dateTime,
     ),
     r'longestStreak': PropertySchema(
-      id: 22,
+      id: 24,
       name: r'longestStreak',
       type: IsarType.long,
     ),
-    r'madhab': PropertySchema(id: 23, name: r'madhab', type: IsarType.string),
+    r'madhab': PropertySchema(id: 25, name: r'madhab', type: IsarType.string),
     r'maxSnoozeCount': PropertySchema(
-      id: 24,
+      id: 26,
       name: r'maxSnoozeCount',
       type: IsarType.long,
     ),
     r'periodConfigs': PropertySchema(
-      id: 25,
+      id: 27,
       name: r'periodConfigs',
       type: IsarType.objectList,
 
       target: r'PeriodConfig',
     ),
     r'qiyamAlarmEnabled': PropertySchema(
-      id: 26,
+      id: 28,
       name: r'qiyamAlarmEnabled',
       type: IsarType.bool,
     ),
     r'savedLocations': PropertySchema(
-      id: 27,
+      id: 29,
       name: r'savedLocations',
       type: IsarType.objectList,
 
       target: r'SavedLocation',
     ),
     r'showSunrise': PropertySchema(
-      id: 28,
+      id: 30,
       name: r'showSunrise',
       type: IsarType.bool,
     ),
     r'snoozeDurationMinutes': PropertySchema(
-      id: 29,
+      id: 31,
       name: r'snoozeDurationMinutes',
       type: IsarType.long,
     ),
     r'streakFreezesAvailable': PropertySchema(
-      id: 30,
+      id: 32,
       name: r'streakFreezesAvailable',
       type: IsarType.long,
     ),
     r'suwayaIconMode': PropertySchema(
-      id: 31,
+      id: 33,
       name: r'suwayaIconMode',
       type: IsarType.string,
     ),
     r'suwayaNumberStyle': PropertySchema(
-      id: 32,
+      id: 34,
       name: r'suwayaNumberStyle',
       type: IsarType.string,
     ),
     r'themeMode': PropertySchema(
-      id: 33,
+      id: 35,
       name: r'themeMode',
       type: IsarType.string,
     ),
     r'timeDisplayMode': PropertySchema(
-      id: 34,
+      id: 36,
       name: r'timeDisplayMode',
       type: IsarType.string,
     ),
     r'useAstroTimeForIbadat': PropertySchema(
-      id: 35,
+      id: 37,
       name: r'useAstroTimeForIbadat',
       type: IsarType.bool,
     ),
     r'visibleNightParts': PropertySchema(
-      id: 36,
+      id: 38,
       name: r'visibleNightParts',
       type: IsarType.stringList,
     ),
@@ -249,6 +259,7 @@ int _settingsModelEstimateSize(
       bytesCount += value.length * 3;
     }
   }
+  bytesCount += 3 + object.appFontFamily.length * 3;
   bytesCount += 3 + object.calculationMethod.length * 3;
   bytesCount += 3 + object.civilTimeFormat.length * 3;
   bytesCount += 3 + object.dayBoundary.length * 3;
@@ -306,51 +317,53 @@ void _settingsModelSerialize(
     object.activeLocation,
   );
   writer.writeStringList(offsets[1], object.activeNightMarkers);
-  writer.writeString(offsets[2], object.calculationMethod);
-  writer.writeString(offsets[3], object.civilTimeFormat);
-  writer.writeLong(offsets[4], object.currentStreak);
-  writer.writeDouble(offsets[5], object.customFajrAngle);
-  writer.writeDouble(offsets[6], object.customIshaAngle);
-  writer.writeString(offsets[7], object.dayBoundary);
-  writer.writeLong(offsets[8], object.defaultHabitAlertLevel);
-  writer.writeString(offsets[9], object.defaultHabitTone);
-  writer.writeDouble(offsets[10], object.defaultHabitVolume);
-  writer.writeLong(offsets[11], object.defaultTaskAlertLevel);
-  writer.writeString(offsets[12], object.defaultTaskTone);
-  writer.writeDouble(offsets[13], object.defaultTaskVolume);
-  writer.writeString(offsets[14], object.dialPinMode);
-  writer.writeLongList(offsets[15], object.hiddenPeriods);
-  writer.writeString(offsets[16], object.highLatitudeRule);
-  writer.writeLong(offsets[17], object.hijriOffsetDays);
-  writer.writeBool(offsets[18], object.isDialAutoRotating);
-  writer.writeBool(offsets[19], object.isFirstLaunch);
-  writer.writeString(offsets[20], object.languageCode);
-  writer.writeDateTime(offsets[21], object.lastStreakDate);
-  writer.writeLong(offsets[22], object.longestStreak);
-  writer.writeString(offsets[23], object.madhab);
-  writer.writeLong(offsets[24], object.maxSnoozeCount);
+  writer.writeString(offsets[2], object.appFontFamily);
+  writer.writeDouble(offsets[3], object.appFontScale);
+  writer.writeString(offsets[4], object.calculationMethod);
+  writer.writeString(offsets[5], object.civilTimeFormat);
+  writer.writeLong(offsets[6], object.currentStreak);
+  writer.writeDouble(offsets[7], object.customFajrAngle);
+  writer.writeDouble(offsets[8], object.customIshaAngle);
+  writer.writeString(offsets[9], object.dayBoundary);
+  writer.writeLong(offsets[10], object.defaultHabitAlertLevel);
+  writer.writeString(offsets[11], object.defaultHabitTone);
+  writer.writeDouble(offsets[12], object.defaultHabitVolume);
+  writer.writeLong(offsets[13], object.defaultTaskAlertLevel);
+  writer.writeString(offsets[14], object.defaultTaskTone);
+  writer.writeDouble(offsets[15], object.defaultTaskVolume);
+  writer.writeString(offsets[16], object.dialPinMode);
+  writer.writeLongList(offsets[17], object.hiddenPeriods);
+  writer.writeString(offsets[18], object.highLatitudeRule);
+  writer.writeLong(offsets[19], object.hijriOffsetDays);
+  writer.writeBool(offsets[20], object.isDialAutoRotating);
+  writer.writeBool(offsets[21], object.isFirstLaunch);
+  writer.writeString(offsets[22], object.languageCode);
+  writer.writeDateTime(offsets[23], object.lastStreakDate);
+  writer.writeLong(offsets[24], object.longestStreak);
+  writer.writeString(offsets[25], object.madhab);
+  writer.writeLong(offsets[26], object.maxSnoozeCount);
   writer.writeObjectList<PeriodConfig>(
-    offsets[25],
+    offsets[27],
     allOffsets,
     PeriodConfigSchema.serialize,
     object.periodConfigs,
   );
-  writer.writeBool(offsets[26], object.qiyamAlarmEnabled);
+  writer.writeBool(offsets[28], object.qiyamAlarmEnabled);
   writer.writeObjectList<SavedLocation>(
-    offsets[27],
+    offsets[29],
     allOffsets,
     SavedLocationSchema.serialize,
     object.savedLocations,
   );
-  writer.writeBool(offsets[28], object.showSunrise);
-  writer.writeLong(offsets[29], object.snoozeDurationMinutes);
-  writer.writeLong(offsets[30], object.streakFreezesAvailable);
-  writer.writeString(offsets[31], object.suwayaIconMode);
-  writer.writeString(offsets[32], object.suwayaNumberStyle);
-  writer.writeString(offsets[33], object.themeMode);
-  writer.writeString(offsets[34], object.timeDisplayMode);
-  writer.writeBool(offsets[35], object.useAstroTimeForIbadat);
-  writer.writeStringList(offsets[36], object.visibleNightParts);
+  writer.writeBool(offsets[30], object.showSunrise);
+  writer.writeLong(offsets[31], object.snoozeDurationMinutes);
+  writer.writeLong(offsets[32], object.streakFreezesAvailable);
+  writer.writeString(offsets[33], object.suwayaIconMode);
+  writer.writeString(offsets[34], object.suwayaNumberStyle);
+  writer.writeString(offsets[35], object.themeMode);
+  writer.writeString(offsets[36], object.timeDisplayMode);
+  writer.writeBool(offsets[37], object.useAstroTimeForIbadat);
+  writer.writeStringList(offsets[38], object.visibleNightParts);
 }
 
 SettingsModel _settingsModelDeserialize(
@@ -366,56 +379,58 @@ SettingsModel _settingsModelDeserialize(
     allOffsets,
   );
   object.activeNightMarkers = reader.readStringList(offsets[1]) ?? [];
-  object.calculationMethod = reader.readString(offsets[2]);
-  object.civilTimeFormat = reader.readString(offsets[3]);
-  object.currentStreak = reader.readLong(offsets[4]);
-  object.customFajrAngle = reader.readDouble(offsets[5]);
-  object.customIshaAngle = reader.readDouble(offsets[6]);
-  object.dayBoundary = reader.readString(offsets[7]);
-  object.defaultHabitAlertLevel = reader.readLong(offsets[8]);
-  object.defaultHabitTone = reader.readString(offsets[9]);
-  object.defaultHabitVolume = reader.readDouble(offsets[10]);
-  object.defaultTaskAlertLevel = reader.readLong(offsets[11]);
-  object.defaultTaskTone = reader.readString(offsets[12]);
-  object.defaultTaskVolume = reader.readDouble(offsets[13]);
-  object.dialPinMode = reader.readString(offsets[14]);
-  object.hiddenPeriods = reader.readLongList(offsets[15]) ?? [];
-  object.highLatitudeRule = reader.readString(offsets[16]);
-  object.hijriOffsetDays = reader.readLong(offsets[17]);
+  object.appFontFamily = reader.readString(offsets[2]);
+  object.appFontScale = reader.readDouble(offsets[3]);
+  object.calculationMethod = reader.readString(offsets[4]);
+  object.civilTimeFormat = reader.readString(offsets[5]);
+  object.currentStreak = reader.readLong(offsets[6]);
+  object.customFajrAngle = reader.readDouble(offsets[7]);
+  object.customIshaAngle = reader.readDouble(offsets[8]);
+  object.dayBoundary = reader.readString(offsets[9]);
+  object.defaultHabitAlertLevel = reader.readLong(offsets[10]);
+  object.defaultHabitTone = reader.readString(offsets[11]);
+  object.defaultHabitVolume = reader.readDouble(offsets[12]);
+  object.defaultTaskAlertLevel = reader.readLong(offsets[13]);
+  object.defaultTaskTone = reader.readString(offsets[14]);
+  object.defaultTaskVolume = reader.readDouble(offsets[15]);
+  object.dialPinMode = reader.readString(offsets[16]);
+  object.hiddenPeriods = reader.readLongList(offsets[17]) ?? [];
+  object.highLatitudeRule = reader.readString(offsets[18]);
+  object.hijriOffsetDays = reader.readLong(offsets[19]);
   object.id = id;
-  object.isDialAutoRotating = reader.readBool(offsets[18]);
-  object.isFirstLaunch = reader.readBool(offsets[19]);
-  object.languageCode = reader.readString(offsets[20]);
-  object.lastStreakDate = reader.readDateTimeOrNull(offsets[21]);
-  object.longestStreak = reader.readLong(offsets[22]);
-  object.madhab = reader.readString(offsets[23]);
-  object.maxSnoozeCount = reader.readLong(offsets[24]);
+  object.isDialAutoRotating = reader.readBool(offsets[20]);
+  object.isFirstLaunch = reader.readBool(offsets[21]);
+  object.languageCode = reader.readString(offsets[22]);
+  object.lastStreakDate = reader.readDateTimeOrNull(offsets[23]);
+  object.longestStreak = reader.readLong(offsets[24]);
+  object.madhab = reader.readString(offsets[25]);
+  object.maxSnoozeCount = reader.readLong(offsets[26]);
   object.periodConfigs =
       reader.readObjectList<PeriodConfig>(
-        offsets[25],
+        offsets[27],
         PeriodConfigSchema.deserialize,
         allOffsets,
         PeriodConfig(),
       ) ??
       [];
-  object.qiyamAlarmEnabled = reader.readBool(offsets[26]);
+  object.qiyamAlarmEnabled = reader.readBool(offsets[28]);
   object.savedLocations =
       reader.readObjectList<SavedLocation>(
-        offsets[27],
+        offsets[29],
         SavedLocationSchema.deserialize,
         allOffsets,
         SavedLocation(),
       ) ??
       [];
-  object.showSunrise = reader.readBool(offsets[28]);
-  object.snoozeDurationMinutes = reader.readLong(offsets[29]);
-  object.streakFreezesAvailable = reader.readLong(offsets[30]);
-  object.suwayaIconMode = reader.readString(offsets[31]);
-  object.suwayaNumberStyle = reader.readString(offsets[32]);
-  object.themeMode = reader.readString(offsets[33]);
-  object.timeDisplayMode = reader.readString(offsets[34]);
-  object.useAstroTimeForIbadat = reader.readBool(offsets[35]);
-  object.visibleNightParts = reader.readStringList(offsets[36]) ?? [];
+  object.showSunrise = reader.readBool(offsets[30]);
+  object.snoozeDurationMinutes = reader.readLong(offsets[31]);
+  object.streakFreezesAvailable = reader.readLong(offsets[32]);
+  object.suwayaIconMode = reader.readString(offsets[33]);
+  object.suwayaNumberStyle = reader.readString(offsets[34]);
+  object.themeMode = reader.readString(offsets[35]);
+  object.timeDisplayMode = reader.readString(offsets[36]);
+  object.useAstroTimeForIbadat = reader.readBool(offsets[37]);
+  object.visibleNightParts = reader.readStringList(offsets[38]) ?? [];
   return object;
 }
 
@@ -438,50 +453,54 @@ P _settingsModelDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 4:
-      return (reader.readLong(offset)) as P;
-    case 5:
-      return (reader.readDouble(offset)) as P;
-    case 6:
-      return (reader.readDouble(offset)) as P;
-    case 7:
       return (reader.readString(offset)) as P;
-    case 8:
+    case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
       return (reader.readLong(offset)) as P;
+    case 7:
+      return (reader.readDouble(offset)) as P;
+    case 8:
+      return (reader.readDouble(offset)) as P;
     case 9:
       return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readDouble(offset)) as P;
-    case 11:
       return (reader.readLong(offset)) as P;
-    case 12:
+    case 11:
       return (reader.readString(offset)) as P;
-    case 13:
+    case 12:
       return (reader.readDouble(offset)) as P;
+    case 13:
+      return (reader.readLong(offset)) as P;
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readLongList(offset) ?? []) as P;
+      return (reader.readDouble(offset)) as P;
     case 16:
       return (reader.readString(offset)) as P;
     case 17:
-      return (reader.readLong(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     case 18:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 19:
-      return (reader.readBool(offset)) as P;
-    case 20:
-      return (reader.readString(offset)) as P;
-    case 21:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 22:
       return (reader.readLong(offset)) as P;
-    case 23:
+    case 20:
+      return (reader.readBool(offset)) as P;
+    case 21:
+      return (reader.readBool(offset)) as P;
+    case 22:
       return (reader.readString(offset)) as P;
+    case 23:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 24:
       return (reader.readLong(offset)) as P;
     case 25:
+      return (reader.readString(offset)) as P;
+    case 26:
+      return (reader.readLong(offset)) as P;
+    case 27:
       return (reader.readObjectList<PeriodConfig>(
                 offset,
                 PeriodConfigSchema.deserialize,
@@ -490,9 +509,9 @@ P _settingsModelDeserializeProp<P>(
               ) ??
               [])
           as P;
-    case 26:
+    case 28:
       return (reader.readBool(offset)) as P;
-    case 27:
+    case 29:
       return (reader.readObjectList<SavedLocation>(
                 offset,
                 SavedLocationSchema.deserialize,
@@ -501,23 +520,23 @@ P _settingsModelDeserializeProp<P>(
               ) ??
               [])
           as P;
-    case 28:
-      return (reader.readBool(offset)) as P;
-    case 29:
-      return (reader.readLong(offset)) as P;
     case 30:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 31:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 32:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 33:
       return (reader.readString(offset)) as P;
     case 34:
       return (reader.readString(offset)) as P;
     case 35:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 36:
+      return (reader.readString(offset)) as P;
+    case 37:
+      return (reader.readBool(offset)) as P;
+    case 38:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -852,6 +871,222 @@ extension SettingsModelQueryFilter
         includeLower,
         upper,
         includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'appFontFamily',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'appFontFamily',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'appFontFamily',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'appFontFamily',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'appFontFamily',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'appFontFamily',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'appFontFamily',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'appFontFamily',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'appFontFamily', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontFamilyIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'appFontFamily', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontScaleEqualTo(double value, {double epsilon = Query.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'appFontScale',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontScaleGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'appFontScale',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontScaleLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'appFontScale',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterFilterCondition>
+  appFontScaleBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'appFontScale',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
+        ),
       );
     });
   }
@@ -4067,6 +4302,34 @@ extension SettingsModelQueryLinks
 extension SettingsModelQuerySortBy
     on QueryBuilder<SettingsModel, SettingsModel, QSortBy> {
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  sortByAppFontFamily() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontFamily', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  sortByAppFontFamilyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontFamily', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  sortByAppFontScale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontScale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  sortByAppFontScaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontScale', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
   sortByCalculationMethod() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'calculationMethod', Sort.asc);
@@ -4497,6 +4760,34 @@ extension SettingsModelQuerySortBy
 
 extension SettingsModelQuerySortThenBy
     on QueryBuilder<SettingsModel, SettingsModel, QSortThenBy> {
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  thenByAppFontFamily() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontFamily', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  thenByAppFontFamilyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontFamily', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  thenByAppFontScale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontScale', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
+  thenByAppFontScaleDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'appFontScale', Sort.desc);
+    });
+  }
+
   QueryBuilder<SettingsModel, SettingsModel, QAfterSortBy>
   thenByCalculationMethod() {
     return QueryBuilder.apply(this, (query) {
@@ -4948,6 +5239,23 @@ extension SettingsModelQueryWhereDistinct
   }
 
   QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+  distinctByAppFontFamily({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'appFontFamily',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
+  distinctByAppFontScale() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'appFontScale');
+    });
+  }
+
+  QueryBuilder<SettingsModel, SettingsModel, QDistinct>
   distinctByCalculationMethod({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(
@@ -5227,6 +5535,19 @@ extension SettingsModelQueryProperty
   activeNightMarkersProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'activeNightMarkers');
+    });
+  }
+
+  QueryBuilder<SettingsModel, String, QQueryOperations>
+  appFontFamilyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'appFontFamily');
+    });
+  }
+
+  QueryBuilder<SettingsModel, double, QQueryOperations> appFontScaleProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'appFontScale');
     });
   }
 

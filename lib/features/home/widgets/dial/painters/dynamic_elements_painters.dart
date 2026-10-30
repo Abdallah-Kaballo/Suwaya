@@ -263,16 +263,17 @@ class RailwayRingPainter extends CustomPainter {
     if (isDragged || isHighlighted) canvas.scale(1.4);
 
     if (design == DialDesign.minimal) {
+      final double dotRadius = isPrayer ? 4.0 : 5.2;
       if (isDragged || isHighlighted) {
         canvas.drawCircle(
           Offset.zero,
-          8.0,
+          dotRadius * 2.0,
           Paint()
             ..color = color.withValues(alpha: 0.9)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
         );
       }
-      canvas.drawCircle(Offset.zero, 4.0, Paint()..color = color);
+      canvas.drawCircle(Offset.zero, dotRadius, Paint()..color = color);
       canvas.restore();
       return;
     }
@@ -294,7 +295,6 @@ class RailwayRingPainter extends CustomPainter {
       );
     }
 
-    // إطار داكن خفيف حول السهم ليبرز بوضوح في الوضعين الفاتح والداكن
     canvas.drawPath(
       path,
       Paint()
@@ -305,10 +305,11 @@ class RailwayRingPainter extends CustomPainter {
     canvas.drawPath(path, Paint()..color = color);
 
     if (!isPrayer) {
+      final double inset = baseWidth * 0.18;
       final inner = Path()
-        ..moveTo(0, -height + 2)
-        ..lineTo(-baseWidth / 2 + 2, -1)
-        ..lineTo(baseWidth / 2 - 2, -1)
+        ..moveTo(0, -height + (inset * 1.15))
+        ..lineTo(-baseWidth / 2 + inset, -1.2)
+        ..lineTo(baseWidth / 2 - inset, -1.2)
         ..close();
       canvas.drawPath(
         inner,
@@ -535,7 +536,7 @@ class RailwayRingPainter extends CustomPainter {
         canvas,
         center,
         layout.radius,
-        12.0,
+        15.5,
         angle,
         item.color,
         isDragged: isDragged,
@@ -637,17 +638,36 @@ class DynamicNeedlePainter extends CustomPainter {
         : const Color(0xFF1E293B);
 
     if (design == DialDesign.minimal) {
+      final Color outlineColor = isDark
+          ? Colors.black.withValues(alpha: 0.85)
+          : goldDark.withValues(alpha: 0.55);
+
       if (isDark) {
         canvas.drawLine(
           Offset(0, -needleStart),
           Offset(0, -needleLength),
           Paint()
-            ..color = const Color(0xFFE0F2FE).withValues(alpha: 0.65)
-            ..strokeWidth = 6.0
+            ..color = const Color(0xFFE0F2FE).withValues(alpha: 0.55)
+            ..strokeWidth = 6.5
             ..strokeCap = StrokeCap.round
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
         );
       }
+      // 🌟 حافة داكنة/ذهبية خفيفة حول عقرب النمط المبسط
+      canvas.drawLine(
+        Offset(0, -needleStart),
+        Offset(0, -needleLength),
+        Paint()
+          ..color = outlineColor
+          ..strokeWidth = 4.2
+          ..strokeCap = StrokeCap.round,
+      );
+      canvas.drawCircle(
+        Offset(0, -needleLength),
+        5.8,
+        Paint()..color = outlineColor,
+      );
+
       canvas.drawLine(
         Offset(0, -needleStart),
         Offset(0, -needleLength),
