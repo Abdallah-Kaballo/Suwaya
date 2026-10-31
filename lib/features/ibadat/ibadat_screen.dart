@@ -17,10 +17,205 @@ import '../../core/providers/ui_providers.dart';
 
 /// 🌟 نافذة موحدة للتحكم في التدوير التلقائي للقرص، الشروق، وأوقات الليل الخمسة
 /// تُفتح من زر تعديل القرص في الشاشة الرئيسية ومن زر الإعدادات في شاشة العبادات
-void showDialAndIbadatMarkersSheet(
-  BuildContext context,
-  AstroState astroState,
-) {
+void showDialCustomizationSheet(BuildContext context, AstroState astroState) {
+  HapticFeedback.selectionClick();
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  const allowedOrder = ['half_2', 'third_3', 'sixth_4', 'sixth_5', 'sixth_6'];
+  final sourceNightParts = astroState.activeOrUpcomingNightParts;
+  final availableNightParts = <NightPart>[];
+  for (final id in allowedOrder) {
+    final match = sourceNightParts.where((p) => p.id == id);
+    if (match.isNotEmpty) {
+      availableNightParts.add(match.first);
+    }
+  }
+
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Theme.of(context).cardColor,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (sheetContext) {
+      return Consumer(
+        builder: (context, ref, _) {
+          final settings = ref.watch(settingsProvider);
+          final notifier = ref.read(settingsProvider.notifier);
+          final pColor = homeFixedYellowColor(context);
+          final textColor = isDark ? Colors.white : Colors.black87;
+
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 14),
+                    decoration: BoxDecoration(
+                      color: textColor.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Text(
+                    'home.edit_dial'.tr(),
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 1. الدوران التلقائي للقرص (يظهر في الشاشة الرئيسية فقط)
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    dense: true,
+                    title: Text(
+                      'settings.auto_rotate'.tr(),
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14.5,
+                        fontWeight: settings.isDialAutoRotating
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'settings.auto_rotate_desc'.tr(),
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.55),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    value: settings.isDialAutoRotating,
+                    activeThumbColor: isDark ? Colors.black : Colors.white,
+                    activeTrackColor: pColor,
+                    secondary: Icon(
+                      LucideIcons.refresh_ccw,
+                      color: settings.isDialAutoRotating ? pColor : Colors.grey,
+                      size: 20,
+                    ),
+                    onChanged: (val) {
+                      HapticFeedback.lightImpact();
+                      notifier.updateDialAutoRotation(val);
+                    },
+                  ),
+                  Divider(
+                    height: 8,
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+
+                  // 2. إظهار الشروق (مشترك بين القرص والعبادات)
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    dense: true,
+                    title: Text(
+                      'ibadat.show_sunrise'.tr(),
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14.5,
+                        fontWeight: settings.showSunrise
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                      ),
+                    ),
+                    value: settings.showSunrise,
+                    activeThumbColor: isDark ? Colors.black : Colors.white,
+                    activeTrackColor: pColor,
+                    secondary: Icon(
+                      LucideIcons.sun,
+                      color: settings.showSunrise
+                          ? Colors.orangeAccent
+                          : Colors.grey,
+                      size: 20,
+                    ),
+                    onChanged: (val) {
+                      HapticFeedback.lightImpact();
+                      notifier.updateShowSunrise(val);
+                    },
+                  ),
+                  Divider(
+                    height: 8,
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+
+                  // 3. علامات الليل على القرص (تمنع تعارض البداية تلقائياً)
+                  ...availableNightParts.map((part) {
+                    final isSelected = settings.activeNightMarkers.contains(
+                      part.id,
+                    );
+                    final partTitle =
+                        ('night_parts.${part.nameKey.replaceAll("np_", "")}')
+                            .tr();
+
+                    return SwitchListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      dense: true,
+                      title: Text(
+                        partTitle,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 14.5,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      value: isSelected,
+                      activeThumbColor: isDark ? Colors.black : Colors.white,
+                      activeTrackColor: pColor,
+                      secondary: Icon(
+                        LucideIcons.sparkles,
+                        color: isSelected ? pColor : Colors.grey,
+                        size: 20,
+                      ),
+                      onChanged: (_) {
+                        HapticFeedback.lightImpact();
+                        notifier.toggleNightMarker(part.id);
+                      },
+                    );
+                  }),
+
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: pColor,
+                        foregroundColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(sheetContext),
+                      child: Text(
+                        'common.done'.tr(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+void showIbadatCustomizationSheet(BuildContext context, AstroState astroState) {
   HapticFeedback.selectionClick();
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -65,7 +260,7 @@ void showDialAndIbadatMarkersSheet(
                     ),
                   ),
                   Text(
-                    'home.dial_markers_settings'.tr(),
+                    'ibadat.customize_qiyam'.tr(),
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -74,45 +269,7 @@ void showDialAndIbadatMarkersSheet(
                   ),
                   const SizedBox(height: 12),
 
-                  // 🌟 1. التدوير التلقائي للقرص (منقول من شاشة الإعدادات)
-                  SwitchListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                    dense: true,
-                    title: Text(
-                      'settings.auto_rotate'.tr(),
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 14.5,
-                        fontWeight: settings.isDialAutoRotating
-                            ? FontWeight.bold
-                            : FontWeight.w500,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'settings.auto_rotate_desc'.tr(),
-                      style: TextStyle(
-                        color: textColor.withValues(alpha: 0.55),
-                        fontSize: 11.5,
-                      ),
-                    ),
-                    value: settings.isDialAutoRotating,
-                    activeThumbColor: pColor,
-                    secondary: Icon(
-                      LucideIcons.refresh_ccw,
-                      color: settings.isDialAutoRotating ? pColor : Colors.grey,
-                      size: 20,
-                    ),
-                    onChanged: (val) {
-                      HapticFeedback.lightImpact();
-                      notifier.updateDialAutoRotation(val);
-                    },
-                  ),
-                  Divider(
-                    height: 8,
-                    color: isDark ? Colors.white12 : Colors.black12,
-                  ),
-
-                  // 🌟 2. إظهار الشروق
+                  // 1. إظهار الشروق (مشترك)
                   SwitchListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                     dense: true,
@@ -127,7 +284,8 @@ void showDialAndIbadatMarkersSheet(
                       ),
                     ),
                     value: settings.showSunrise,
-                    activeThumbColor: pColor,
+                    activeThumbColor: isDark ? Colors.black : Colors.white,
+                    activeTrackColor: pColor,
                     secondary: Icon(
                       LucideIcons.sun,
                       color: settings.showSunrise
@@ -145,7 +303,7 @@ void showDialAndIbadatMarkersSheet(
                     color: isDark ? Colors.white12 : Colors.black12,
                   ),
 
-                  // 🌟 3. أوقات الليل الخمسة بنفس تصميم زر الشروق (SwitchListTile)
+                  // 2. أوقات قيام الليل في شاشة العبادات (يُسمح بظهور الأوقات المتعارضة معاً)
                   ...availableNightParts.map((part) {
                     final isSelected = settings.visibleNightParts.contains(
                       part.id,
@@ -168,7 +326,8 @@ void showDialAndIbadatMarkersSheet(
                         ),
                       ),
                       value: isSelected,
-                      activeThumbColor: pColor,
+                      activeThumbColor: isDark ? Colors.black : Colors.white,
+                      activeTrackColor: pColor,
                       secondary: Icon(
                         LucideIcons.sparkles,
                         color: isSelected ? pColor : Colors.grey,
@@ -188,6 +347,9 @@ void showDialAndIbadatMarkersSheet(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: pColor,
+                        foregroundColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -196,7 +358,6 @@ void showDialAndIbadatMarkersSheet(
                       child: Text(
                         'common.done'.tr(),
                         style: const TextStyle(
-                          color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
@@ -387,7 +548,7 @@ class IbadatScreen extends ConsumerWidget {
               color: Theme.of(context).primaryColor,
               size: 20,
             ),
-            onPressed: () => showDialAndIbadatMarkersSheet(context, astroState),
+            onPressed: () => showIbadatCustomizationSheet(context, astroState),
           ),
           const SizedBox(width: 6),
         ],

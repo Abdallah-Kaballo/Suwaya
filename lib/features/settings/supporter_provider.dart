@@ -8,6 +8,8 @@ import '../../core/bootstrap/app_bootstrap.dart';
 
 enum SupporterTier { none, bronze, silver, gold, diamond }
 
+typedef SupporterPackagesMap = Map<SupporterTier, Package>;
+
 extension SupporterTierId on SupporterTier {
   String get packageId {
     switch (this) {
@@ -39,6 +41,7 @@ extension SupporterTierId on SupporterTier {
 
 class SupporterNotifier extends StateNotifier<SupporterTier> {
   bool _listenerRegistered = false;
+  bool _isPurchasing = false;
 
   SupporterNotifier() : super(SupporterTier.none) {
     _loadAndSyncTier();
@@ -67,13 +70,16 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
     if (_listenerRegistered) return;
     _listenerRegistered = true;
     Purchases.addCustomerInfoUpdateListener((customerInfo) {
+      if (_isPurchasing) return;
       final updatedTier = _extractTierFromCustomerInfo(customerInfo);
-      _persistTier(updatedTier);
+      if (updatedTier != SupporterTier.none) {
+        _persistTier(updatedTier);
+      }
     });
   }
 
   /// جلب الحزم المتاحة من المتجر وربط كل وسام بحزمته الفعلية
-  Future<Map<SupporterTier, Package>> fetchAvailableTierPackages() async {
+  Future<SupporterPackagesMap> fetchAvailableTierPackages() async {
     final configured = await AppBootstrap.ensureRevenueCatConfigured();
     if (!configured) return {};
     _registerCustomerListenerIfNeeded();
@@ -110,17 +116,19 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
     return resolved;
   }
 
-  /// مزامنة الشارة مع المشتريات الفعلية في المتجر (بما في ذلك انتهاء الاشتراك أو الاسترداد)
+  /// مزامنة الشارة وإقرار المشتريات المعلقة في Google Play
   Future<SupporterTier> syncWithStore() async {
+    if (_isPurchasing) return state;
     final configured = await AppBootstrap.ensureRevenueCatConfigured();
     if (!configured) return state;
     try {
-      // 🌟 دفع أي إيصالات محلية في Google Play Billing لم يُقر بها بعد إلى RevenueCat
       final syncResult = await Purchases.syncPurchasesForResult();
-      final customerInfo = syncResult.customerInfo;
-      final detected = _extractTierFromCustomerInfo(customerInfo);
-      await _persistTier(detected);
-      return detected;
+      final detected = _extractTierFromCustomerInfo(syncResult.customerInfo);
+      if (detected != SupporterTier.none) {
+        await _persistTier(detected);
+        return detected;
+      }
+      return state;
     } catch (e) {
       debugPrint('RevenueCat sync error: $e');
       return state;
@@ -177,6 +185,7 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
     }
     _registerCustomerListenerIfNeeded();
 
+    _isPurchasing = true;
     try {
       Package? packageToBuy = preloadedPackage;
       if (packageToBuy == null) {
@@ -184,10 +193,12 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
         packageToBuy = packagesMap[targetTier];
       }
 
+      late final PurchaseResult purchaseResult;
       if (packageToBuy != null) {
-        await Purchases.purchase(PurchaseParams.package(packageToBuy));
+        purchaseResult = await Purchases.purchase(
+          PurchaseParams.package(packageToBuy),
+        );
       } else {
-        // مسار مباشر عبر معرّف المنتج في Google Play في حال لم يُربط داخل Offering بعد
         final products = await Purchases.getProducts(
           targetTier.candidateProductIds,
         );
@@ -199,24 +210,25 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
                 'Product (${targetTier.packageId}) is not active in Google Play Console / RevenueCat yet.',
           );
         }
-        await Purchases.purchase(PurchaseParams.storeProduct(products.first));
-      }
-
-      // 🌟 إجبار مزامنة الإيصال مع الخادم والتأكد من تفعيل الاشتراك فعلياً
-      await Purchases.syncPurchases();
-      final freshInfo = await Purchases.getCustomerInfo();
-      final verifiedTier = _extractTierFromCustomerInfo(freshInfo);
-
-      if (verifiedTier == SupporterTier.none) {
-        return (
-          success: false,
-          userCancelled: false,
-          errorMessage:
-              'تم الدفع، وجارٍ تأكيد الاشتراك مع المتجر. يرجى الضغط على استعادة المشتريات بعد قليل.',
+        purchaseResult = await Purchases.purchase(
+          PurchaseParams.storeProduct(products.first),
         );
       }
 
-      await _persistTier(verifiedTier);
+      CustomerInfo latestInfo = purchaseResult.customerInfo;
+      try {
+        final syncResult = await Purchases.syncPurchasesForResult();
+        latestInfo = syncResult.customerInfo;
+      } catch (e) {
+        debugPrint('Post-purchase sync note: $e');
+      }
+
+      final verifiedTier = _extractTierFromCustomerInfo(latestInfo);
+      final effectiveTier = verifiedTier != SupporterTier.none
+          ? verifiedTier
+          : targetTier;
+
+      await _persistTier(effectiveTier);
       return (success: true, userCancelled: false, errorMessage: null);
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
@@ -224,16 +236,19 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
         return (success: false, userCancelled: true, errorMessage: null);
       }
       if (errorCode == PurchasesErrorCode.productAlreadyPurchasedError) {
-        // إذا كان المستخدم يمتلك هذا الاشتراك فعلاً على حسابه في Google Play، نقوم باستعادته وتفعيله فوراً
         final synced = await syncWithStore();
-        if (synced != SupporterTier.none) {
-          return (success: true, userCancelled: false, errorMessage: null);
-        }
+        final effectiveTier = synced != SupporterTier.none
+            ? synced
+            : targetTier;
+        await _persistTier(effectiveTier);
+        return (success: true, userCancelled: false, errorMessage: null);
       }
       return (success: false, userCancelled: false, errorMessage: e.message);
     } catch (e) {
       debugPrint('Purchase error: $e');
       return (success: false, userCancelled: false, errorMessage: null);
+    } finally {
+      _isPurchasing = false;
     }
   }
 
@@ -242,10 +257,14 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
     if (!configured) return false;
     _registerCustomerListenerIfNeeded();
     try {
+      await Purchases.syncPurchasesForResult();
       final customerInfo = await Purchases.restorePurchases();
       final restoredTier = _extractTierFromCustomerInfo(customerInfo);
-      await _persistTier(restoredTier);
-      return restoredTier != SupporterTier.none;
+      if (restoredTier != SupporterTier.none) {
+        await _persistTier(restoredTier);
+        return true;
+      }
+      return false;
     } catch (e) {
       debugPrint('Restore purchases error: $e');
       return false;

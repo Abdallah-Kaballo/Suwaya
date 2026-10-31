@@ -407,15 +407,41 @@ class SettingsNotifier extends Notifier<SettingsModel> {
   }
 
   Future<void> toggleNightMarker(String markerId) async {
+    const Map<String, String> startConflicts = {
+      'half_2': 'sixth_4',
+      'sixth_4': 'half_2',
+      'third_3': 'sixth_5',
+      'sixth_5': 'third_3',
+    };
+
+    const order = [
+      'half_1',
+      'half_2',
+      'third_1',
+      'third_2',
+      'third_3',
+      'sixth_1',
+      'sixth_2',
+      'sixth_3',
+      'sixth_4',
+      'sixth_5',
+      'sixth_6',
+    ];
+
     final newState = state.clone();
     final List<String> current = List.from(newState.activeNightMarkers);
 
     if (current.contains(markerId)) {
       current.remove(markerId);
     } else {
+      final conflictingId = startConflicts[markerId];
+      if (conflictingId != null) {
+        current.remove(conflictingId);
+      }
       current.add(markerId);
     }
 
+    current.sort((a, b) => order.indexOf(a).compareTo(order.indexOf(b)));
     newState.activeNightMarkers = current;
     state = newState;
     await _repository.saveSettings(newState);

@@ -476,8 +476,8 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
     final settings = ref.read(settingsProvider);
     final markers = <Map<String, dynamic>>[];
     for (final part in state.ibadatTimings.nightParts) {
-      if (settings.visibleNightParts.contains(part.id)) {
-        markers.add({
+      if (settings.activeNightMarkers.contains(part.id)) {
+        markers.add(<String, dynamic>{
           'id': part.id,
           'n': ('night_parts.${part.nameKey.replaceAll('np_', '')}').tr(),
           't': part.startTime,
@@ -485,7 +485,7 @@ class _PremiumAstroDialState extends ConsumerState<PremiumAstroDial>
       }
     }
     if (settings.showSunrise) {
-      markers.add({
+      markers.add(<String, dynamic>{
         'id': 'sunrise',
         'n': 'ibadat.sunrise'.tr(),
         't': state.cycleAnchors.cycleSunrise,

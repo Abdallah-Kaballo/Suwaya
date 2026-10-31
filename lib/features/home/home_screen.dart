@@ -313,7 +313,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
     }
 
-    final pColor = astroState.currentPeriod.uiColor.adapt(context);
+    final pColor = homeFixedYellowColor(context);
     final cityNow = _getCityTime(settings);
     final isDialTouching = ref.watch(isDialTouchActiveProvider);
 
@@ -344,7 +344,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           Consumer(
             builder: (context, ref, _) {
               final settings = ref.watch(settingsProvider);
-              final primaryColor = Theme.of(context).primaryColor;
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -352,7 +351,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     'common.suwaya_time'.tr(),
                     style: TextStyle(
                       color: settings.useAstroTimeForIbadat
-                          ? primaryColor
+                          ? pColor
                           : (isDark ? Colors.white70 : Colors.black54),
                       fontSize: 11.5,
                       fontWeight: FontWeight.bold,
@@ -364,7 +363,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       value: settings.useAstroTimeForIbadat,
                       activeThumbColor: isDark ? Colors.black : Colors.white,
-                      activeTrackColor: primaryColor,
+                      activeTrackColor: pColor,
                       onChanged: (val) {
                         HapticFeedback.lightImpact();
                         ref
@@ -423,10 +422,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onTap: () => showDialAndIbadatMarkersSheet(
-                              context,
-                              astroState,
-                            ),
+                            onTap: () =>
+                                showDialCustomizationSheet(context, astroState),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,

@@ -92,3 +92,13 @@ Color prayerAccentColor(String prayerId, {required bool isDark}) {
       return isDark ? const Color(0xFFE5C158) : const Color(0xFF8A5A00);
   }
 }
+
+/// 🌟 اللون الأصفر/الذهبي الثابت للشاشة الرئيسية وزر الإضافة (متطابق مع العبادات وباقي الشاشات في الوضعين الداكن والفاتح)
+Color homeFixedYellowColor(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return homeFixedYellowForBrightness(isDark);
+}
+
+Color homeFixedYellowForBrightness(bool isDark) {
+  return isDark ? const Color(0xFFE5C158) : const Color(0xFF8A5A00);
+}

@@ -13,7 +13,7 @@ class TimeSpeedIndicator extends ConsumerWidget {
     if (astroState.periods.isEmpty) return const SizedBox.shrink();
 
     final speedMultiplier = astroState.timeSpeedMultiplier;
-    final pColor = astroState.currentPeriod.uiColor;
+    final pColor = homeFixedYellowForBrightness(true);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
