@@ -224,11 +224,17 @@ class SupporterNotifier extends StateNotifier<SupporterTier> {
       }
 
       final verifiedTier = _extractTierFromCustomerInfo(latestInfo);
-      final effectiveTier = verifiedTier != SupporterTier.none
-          ? verifiedTier
-          : targetTier;
 
-      await _persistTier(effectiveTier);
+      if (verifiedTier == SupporterTier.none) {
+        return (
+          success: false,
+          userCancelled: false,
+          errorMessage:
+              'تعذر التحقق من الاشتراك عبر الخادم، يرجى المحاولة لاحقاً.',
+        );
+      }
+
+      await _persistTier(verifiedTier);
       return (success: true, userCancelled: false, errorMessage: null);
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);

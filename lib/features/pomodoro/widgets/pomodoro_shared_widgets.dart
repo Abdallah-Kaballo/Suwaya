@@ -297,7 +297,7 @@ class LinkedTaskBar extends ConsumerWidget {
   }
 }
 
-class LargeZenTimerDial extends ConsumerWidget {
+class LargeZenTimerDial extends ConsumerStatefulWidget {
   final double progress;
   final String minutesStr;
   final String secondsStr;
@@ -322,7 +322,104 @@ class LargeZenTimerDial extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LargeZenTimerDial> createState() => _LargeZenTimerDialState();
+}
+
+class _LargeZenTimerDialState extends ConsumerState<LargeZenTimerDial>
+    with TickerProviderStateMixin {
+  late final AnimationController _breathController;
+  late final Animation<double> _breathAnim;
+
+  late final AnimationController _progressController;
+  late Animation<double> _progressAnim;
+  double _lastTargetProgress = 0.0;
+
+  late final AnimationController _phaseTransitionController;
+  late final Animation<double> _phaseScaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _breathController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3400),
+    )..repeat(reverse: true);
+
+    _breathAnim = CurvedAnimation(
+      parent: _breathController,
+      curve: Curves.easeInOutSine,
+    );
+
+    _lastTargetProgress = widget.progress.clamp(0.0, 1.0);
+    _progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
+    _progressAnim =
+        Tween<double>(
+          begin: _lastTargetProgress,
+          end: _lastTargetProgress,
+        ).animate(
+          CurvedAnimation(
+            parent: _progressController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    _phaseTransitionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _phaseScaleAnim = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.0,
+          end: 1.05,
+        ).chain(CurveTween(curve: Curves.easeOutQuad)),
+        weight: 45,
+      ),
+      TweenSequenceItem(
+        tween: Tween(
+          begin: 1.05,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInQuad)),
+        weight: 55,
+      ),
+    ]).animate(_phaseTransitionController);
+  }
+
+  @override
+  void didUpdateWidget(covariant LargeZenTimerDial oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newTarget = widget.progress.clamp(0.0, 1.0);
+    if ((newTarget - _lastTargetProgress).abs() > 0.0001) {
+      _progressAnim = Tween<double>(begin: _progressAnim.value, end: newTarget)
+          .animate(
+            CurvedAnimation(
+              parent: _progressController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+      _progressController.forward(from: 0.0);
+      _lastTargetProgress = newTarget;
+    }
+
+    if (widget.isBreak != oldWidget.isBreak ||
+        widget.phaseLabel != oldWidget.phaseLabel) {
+      _phaseTransitionController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _breathController.dispose();
+    _progressController.dispose();
+    _phaseTransitionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final zenMode = ref.watch(pomodoroProvider.select((s) => s.zenMode));
     final isFullScreen = ref.watch(
       pomodoroProvider.select((s) => s.isFullScreen),
@@ -334,20 +431,307 @@ class LargeZenTimerDial extends ConsumerWidget {
             ? constraints.maxWidth
             : MediaQuery.of(context).size.width - 40;
         final double dialSize =
-            forcedSize ?? (availableWidth * 0.88).clamp(260.0, 390.0);
+            widget.forcedSize ?? (availableWidth * 0.88).clamp(260.0, 390.0);
 
-        final clockColor = isDark
+        final clockColor = widget.isDark
             ? const Color(0xFFF8FAFC)
             : const Color(0xFF0F172A);
 
-        // 🌟 النمط الثاني: الرقمي الخالص (Pure Digital Typography)
-        if (isFullScreen && zenMode == PomodoroZenMode.digital) {
-          return GestureDetector(
-            onDoubleTap: onDoubleTap,
-            child: Container(
+        return ScaleTransition(
+          scale: _phaseScaleAnim,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([_breathAnim, _progressAnim]),
+            builder: (context, child) {
+              // 🌟 النمط الثاني: الرقمي الخالص (Pure Digital Typography)
+              if (isFullScreen && zenMode == PomodoroZenMode.digital) {
+                return _buildDigitalView(dialSize, clockColor);
+              }
+
+              // 🌟 النمط الثالث: النبض المحيطي الهادئ (Ambient Breath Orb)
+              if (isFullScreen && zenMode == PomodoroZenMode.ambient) {
+                return _buildAmbientView(dialSize, clockColor);
+              }
+
+              // 🌟 النمط الأول (الافتراضي): حلقة الصفاء الدقيقة والساحرة (Zen Precision Ring)
+              return _buildRingView(dialSize, clockColor);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDigitalView(double dialSize, Color clockColor) {
+    final progressVal = _progressAnim.value.clamp(0.0, 1.0);
+    final percentStr = '${(progressVal * 100).toInt()}%';
+
+    return GestureDetector(
+      onDoubleTap: widget.onDoubleTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: dialSize,
+        height: dialSize * 0.88,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Big crisp digital typography with subtle glow
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Directionality(
+                textDirection: ui.TextDirection.ltr,
+                child: Text(
+                  '${widget.minutesStr}:${widget.secondsStr}',
+                  style: TextStyle(
+                    fontSize: 122,
+                    fontWeight: FontWeight.w900,
+                    color: clockColor,
+                    fontFamily: 'Inter',
+                    letterSpacing: 3.5,
+                    height: 1.0,
+                    fontFeatures: const [ui.FontFeature.tabularFigures()],
+                    shadows: [
+                      Shadow(
+                        color: widget.activeColor.withValues(alpha: 0.28),
+                        blurRadius: 28,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            // Minimalist horizontal progress track
+            SizedBox(
+              width: dialSize * 0.72,
+              child: Column(
+                children: [
+                  Container(
+                    height: 5.5,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: widget.isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FractionallySizedBox(
+                      widthFactor: progressVal > 0 ? progressVal : 0.01,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              widget.activeColor.withValues(alpha: 0.8),
+                              widget.activeColor,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: widget.activeColor.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            widget.isBreak
+                                ? LucideIcons.coffee
+                                : LucideIcons.sparkles,
+                            color: widget.activeColor,
+                            size: 13,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            widget.phaseLabel,
+                            style: TextStyle(
+                              color: widget.activeColor,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        percentStr,
+                        style: TextStyle(
+                          color: clockColor.withValues(alpha: 0.45),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAmbientView(double dialSize, Color clockColor) {
+    final breath = _breathAnim.value; // 0.0 -> 1.0
+    final scale = 0.94 + (0.09 * breath);
+    final auraAlpha = 0.16 + (0.16 * breath);
+
+    return GestureDetector(
+      onDoubleTap: widget.onDoubleTap,
+      behavior: HitTestBehavior.opaque,
+      child: Transform.scale(
+        scale: scale,
+        child: Container(
+          width: dialSize,
+          height: dialSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                widget.activeColor.withValues(alpha: auraAlpha),
+                widget.activeColor.withValues(alpha: auraAlpha * 0.45),
+                widget.activeColor.withValues(alpha: 0.02),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.48, 0.78, 1.0],
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Container(
+            width: dialSize * 0.72,
+            height: dialSize * 0.72,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.isDark
+                  ? const Color(0xFF0F141C).withValues(alpha: 0.65)
+                  : Colors.white.withValues(alpha: 0.65),
+              border: Border.all(
+                color: widget.activeColor.withValues(
+                  alpha: 0.22 + 0.18 * breath,
+                ),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.activeColor.withValues(alpha: 0.18 * breath),
+                  blurRadius: 28,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Directionality(
+                  textDirection: ui.TextDirection.ltr,
+                  child: Text(
+                    '${widget.minutesStr}:${widget.secondsStr}',
+                    style: TextStyle(
+                      fontSize: 68,
+                      fontWeight: FontWeight.w300,
+                      color: clockColor.withValues(alpha: 0.95),
+                      fontFamily: 'Inter',
+                      letterSpacing: 4.0,
+                      fontFeatures: const [ui.FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.activeColor.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: widget.activeColor,
+                          boxShadow: [
+                            BoxShadow(color: widget.activeColor, blurRadius: 6),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        widget.phaseLabel,
+                        style: TextStyle(
+                          color: widget.activeColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.locale.languageCode == 'ar'
+                      ? 'تنفّس بعمق · وحافظ على سكونك'
+                      : 'Breathe deeply · Stay present',
+                  style: TextStyle(
+                    color: clockColor.withValues(alpha: 0.38),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRingView(double dialSize, Color clockColor) {
+    final double timeFontSize = (dialSize * 0.25).clamp(68.0, 98.0);
+
+    return GestureDetector(
+      onDoubleTap: widget.onDoubleTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: dialSize,
+        height: dialSize,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // The Precision Horological Painter
+            SizedBox(
               width: dialSize,
-              height: dialSize * 0.85,
-              alignment: Alignment.center,
+              height: dialSize,
+              child: CustomPaint(
+                painter: ZenRingPainter(
+                  progress: _progressAnim.value,
+                  activeColor: widget.activeColor,
+                  isDark: widget.isDark,
+                  breathValue: _breathAnim.value,
+                ),
+              ),
+            ),
+            // Center content
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: dialSize * 0.12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -356,222 +740,506 @@ class LargeZenTimerDial extends ConsumerWidget {
                     child: Directionality(
                       textDirection: ui.TextDirection.ltr,
                       child: Text(
-                        '$minutesStr:$secondsStr',
+                        '${widget.minutesStr}:${widget.secondsStr}',
                         style: TextStyle(
-                          fontSize: 124,
-                          fontWeight: FontWeight.w900,
+                          fontSize: timeFontSize,
+                          fontWeight: FontWeight.w800,
                           color: clockColor,
                           fontFamily: 'Inter',
-                          letterSpacing: 3.0,
-                          height: 1.0,
+                          letterSpacing: 1.5,
+                          height: 1.05,
                           fontFeatures: const [ui.FontFeature.tabularFigures()],
+                          shadows: [
+                            Shadow(
+                              color: widget.activeColor.withValues(alpha: 0.20),
+                              blurRadius: 18,
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    phaseLabel,
-                    style: TextStyle(
-                      color: activeColor.withValues(alpha: 0.85),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Inter',
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        // 🌟 النمط الثالث: النبض المحيطي الهادئ (Ambient Breath)
-        if (isFullScreen && zenMode == PomodoroZenMode.ambient) {
-          return GestureDetector(
-            onDoubleTap: onDoubleTap,
-            child: Container(
-              width: dialSize,
-              height: dialSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    activeColor.withValues(alpha: 0.24),
-                    activeColor.withValues(alpha: 0.05),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.55, 1.0],
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Directionality(
-                    textDirection: ui.TextDirection.ltr,
-                    child: Text(
-                      '$minutesStr:$secondsStr',
-                      style: TextStyle(
-                        fontSize: 86,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.white.withValues(alpha: 0.92),
-                        fontFamily: 'Inter',
-                        letterSpacing: 4.0,
-                        fontFeatures: const [ui.FontFeature.tabularFigures()],
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    phaseLabel,
-                    style: TextStyle(
-                      color: activeColor.withValues(alpha: 0.75),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Inter',
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.activeColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: widget.activeColor.withValues(alpha: 0.25),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          widget.isBreak
+                              ? LucideIcons.coffee
+                              : LucideIcons.sparkles,
+                          color: widget.activeColor,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.phaseLabel,
+                          style: TextStyle(
+                            color: widget.activeColor,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        }
-
-        // 🌟 النمط الأول (الافتراضي): حلقة الصفاء المتوازنة (Zen Ring)
-        final double timeFontSize = (dialSize * 0.26).clamp(72.0, 104.0);
-
-        return GestureDetector(
-          onDoubleTap: onDoubleTap,
-          child: SizedBox(
-            width: dialSize,
-            height: dialSize,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: dialSize,
-                  height: dialSize,
-                  child: CustomPaint(
-                    painter: ZenTimerPainter(
-                      progress: progress,
-                      activeColor: activeColor,
-                      isDark: isDark,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: dialSize * 0.10),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Directionality(
-                          textDirection: ui.TextDirection.ltr,
-                          child: Text(
-                            '$minutesStr:$secondsStr',
-                            style: TextStyle(
-                              fontSize: timeFontSize,
-                              fontWeight: FontWeight.w800,
-                              color: clockColor,
-                              fontFamily: 'Inter',
-                              letterSpacing: 1.5,
-                              height: 1.05,
-                              fontFeatures: const [
-                                ui.FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isBreak ? LucideIcons.coffee : LucideIcons.sparkles,
-                            color: activeColor,
-                            size: 15,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            phaseLabel,
-                            style: TextStyle(
-                              color: activeColor,
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
 
-class ZenTimerPainter extends CustomPainter {
+class ZenRingPainter extends CustomPainter {
   final double progress;
   final Color activeColor;
   final bool isDark;
+  final double breathValue; // 0.0 -> 1.0
 
-  ZenTimerPainter({
+  ZenRingPainter({
     required this.progress,
     required this.activeColor,
     required this.isDark,
+    required this.breathValue,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 12;
+    final radius = (size.width / 2) - 18;
+    if (radius <= 0) return;
+
+    // 1. Subtle smooth track
+    final trackColor = isDark
+        ? Colors.white.withValues(alpha: 0.07)
+        : Colors.black.withValues(alpha: 0.07);
 
     final trackPaint = Paint()
-      ..color = isDark
-          ? Colors.white.withValues(alpha: 0.06)
-          : Colors.black.withValues(alpha: 0.06)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.5;
+      ..strokeWidth = 8.5
+      ..strokeCap = StrokeCap.round;
+
     canvas.drawCircle(center, radius, trackPaint);
 
-    final safeProgress = progress.clamp(0.0, 1.0);
+    // 2. Horological clock ticks around the circle
+    const int tickCount = 60;
+    final double tickInnerR = radius - 15;
+    final double tickOuterR = radius - 10;
+    final double majorTickInnerR = radius - 19;
 
-    if (safeProgress > 0) {
-      final progressPaint = Paint()
-        ..color = activeColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 6.0
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        -pi / 2,
-        safeProgress * 2 * pi,
-        false,
-        progressPaint,
+    final tickPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < tickCount; i++) {
+      final bool isMajor = (i % 5 == 0);
+      final double angle = (i * 2 * pi / tickCount) - (pi / 2);
+      final double rIn = isMajor ? majorTickInnerR : tickInnerR;
+      final p1 = Offset(
+        center.dx + cos(angle) * rIn,
+        center.dy + sin(angle) * rIn,
+      );
+      final p2 = Offset(
+        center.dx + cos(angle) * tickOuterR,
+        center.dy + sin(angle) * tickOuterR,
       );
 
-      final knobAngle = -pi / 2 + (safeProgress * 2 * pi);
+      final double tickProgress = i / tickCount;
+      final bool isElapsed = tickProgress <= progress;
+
+      if (isElapsed) {
+        tickPaint.color = activeColor.withValues(alpha: isMajor ? 0.70 : 0.40);
+        tickPaint.strokeWidth = isMajor ? 2.0 : 1.2;
+      } else {
+        tickPaint.color = isDark
+            ? Colors.white.withValues(alpha: isMajor ? 0.20 : 0.08)
+            : Colors.black.withValues(alpha: isMajor ? 0.18 : 0.07);
+        tickPaint.strokeWidth = isMajor ? 1.6 : 0.9;
+      }
+      canvas.drawLine(p1, p2, tickPaint);
+    }
+
+    final double safeProgress = progress.clamp(0.0, 1.0);
+    if (safeProgress > 0.002) {
+      final double sweepAngle = safeProgress * 2 * pi;
+      final arcRect = Rect.fromCircle(center: center, radius: radius);
+
+      // 3. Animated breathing glow layer behind progress arc
+      final double glowAlpha = (0.22 + 0.18 * breathValue).clamp(0.0, 1.0);
+      final glowPaint = Paint()
+        ..color = activeColor.withValues(alpha: glowAlpha)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 16.0
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+
+      canvas.drawArc(arcRect, -pi / 2, sweepAngle, false, glowPaint);
+
+      // 4. Main progress arc
+      final sweepGradient = SweepGradient(
+        startAngle: -pi / 2,
+        endAngle: -pi / 2 + sweepAngle,
+        colors: [activeColor.withValues(alpha: 0.88), activeColor],
+      );
+
+      final progressPaint = Paint()
+        ..shader = sweepGradient.createShader(arcRect)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 9.0
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawArc(arcRect, -pi / 2, sweepAngle, false, progressPaint);
+
+      // 5. Precision Knob at current angle
+      final double knobAngle = -pi / 2 + sweepAngle;
       final knobCenter = Offset(
         center.dx + cos(knobAngle) * radius,
         center.dy + sin(knobAngle) * radius,
       );
-      canvas.drawCircle(knobCenter, 6.5, Paint()..color = activeColor);
+
+      // Knob shadow
+      canvas.drawCircle(
+        knobCenter + const Offset(0, 1.5),
+        8.0,
+        Paint()
+          ..color = Colors.black.withValues(alpha: 0.35)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+      );
+
+      // Knob outer ring
+      canvas.drawCircle(knobCenter, 7.5, Paint()..color = activeColor);
+
+      // Knob core dot
+      canvas.drawCircle(knobCenter, 3.0, Paint()..color = Colors.white);
     }
   }
 
   @override
-  bool shouldRepaint(covariant ZenTimerPainter old) =>
+  bool shouldRepaint(covariant ZenRingPainter old) =>
       old.progress != progress ||
       old.activeColor != activeColor ||
-      old.isDark != isDark;
+      old.isDark != isDark ||
+      old.breathValue != breathValue;
+}
+
+// Backwards compatibility alias
+class ZenTimerPainter extends ZenRingPainter {
+  ZenTimerPainter({
+    required super.progress,
+    required super.activeColor,
+    required super.isDark,
+    super.breathValue = 0.5,
+  });
+}
+
+/// 🎊 نافذة الاحتفال بإتمام جلسة التركيز
+void showPomodoroCelebrationDialog({
+  required BuildContext context,
+  required WidgetRef ref,
+  required String title,
+  required String subtitle,
+  required VoidCallback onContinue,
+  VoidCallback? onFinish,
+}) {
+  HapticFeedback.heavyImpact();
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'Celebration',
+    barrierColor: Colors.black.withValues(alpha: 0.72),
+    transitionDuration: const Duration(milliseconds: 380),
+    pageBuilder: (ctx, anim1, anim2) {
+      return _PomodoroCelebrationContent(
+        title: title,
+        subtitle: subtitle,
+        onContinue: () {
+          Navigator.of(ctx).pop();
+          onContinue();
+        },
+        onFinish: onFinish != null
+            ? () {
+                Navigator.of(ctx).pop();
+                onFinish();
+              }
+            : null,
+      );
+    },
+    transitionBuilder: (ctx, anim1, anim2, child) {
+      final curved = CurvedAnimation(parent: anim1, curve: Curves.easeOutBack);
+      return ScaleTransition(
+        scale: curved,
+        child: FadeTransition(opacity: anim1, child: child),
+      );
+    },
+  );
+}
+
+class _PomodoroCelebrationContent extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onContinue;
+  final VoidCallback? onFinish;
+
+  const _PomodoroCelebrationContent({
+    required this.title,
+    required this.subtitle,
+    required this.onContinue,
+    this.onFinish,
+  });
+
+  @override
+  State<_PomodoroCelebrationContent> createState() =>
+      _PomodoroCelebrationContentState();
+}
+
+class _PomodoroCelebrationContentState
+    extends State<_PomodoroCelebrationContent>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).primaryColor;
+    final surfaceColor = isDark ? const Color(0xFF1E232F) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            // Confetti particle overlay
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _confettiController,
+                  builder: (context, _) => CustomPaint(
+                    painter: _ConfettiPainter(
+                      progress: _confettiController.value,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Dialog card
+            Container(
+              width: 320,
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: primaryColor.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.22),
+                    blurRadius: 32,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Celebration badge
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          primaryColor.withValues(alpha: 0.25),
+                          primaryColor.withValues(alpha: 0.08),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      border: Border.all(
+                        color: primaryColor.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      LucideIcons.sparkles,
+                      color: primaryColor,
+                      size: 38,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    widget.title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.subtitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: textColor.withValues(alpha: 0.65),
+                      fontSize: 13.5,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 26),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: widget.onContinue,
+                      child: Text(
+                        trPomodoro(
+                          context,
+                          'common.continue',
+                          'استمرار',
+                          'Continue',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (widget.onFinish != null) ...[
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: widget.onFinish,
+                      child: Text(
+                        trPomodoro(
+                          context,
+                          'pomodoro.done_for_now',
+                          'اكتفيت لليوم',
+                          'Done for Now',
+                        ),
+                        style: TextStyle(
+                          color: textColor.withValues(alpha: 0.60),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfettiPainter extends CustomPainter {
+  final double progress;
+
+  _ConfettiPainter({required this.progress});
+
+  static final List<
+    ({double x, double speed, double size, Color color, double rot})
+  >
+  _particles = List.generate(36, (i) {
+    final colors = [
+      const Color(0xFFE53935),
+      const Color(0xFF64B5F6),
+      const Color(0xFF00E676),
+      const Color(0xFFFFD54F),
+      const Color(0xFFAB47BC),
+      const Color(0xFFFF7043),
+    ];
+    final seed = (i * 37) % 100 / 100.0;
+    return (
+      x: seed,
+      speed: 0.6 + ((i * 13) % 40) / 40.0,
+      size: 4.0 + ((i * 7) % 5),
+      color: colors[i % colors.length],
+      rot: ((i * 23) % 360) * pi / 180,
+    );
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0.0 || progress >= 1.0) return;
+
+    for (final p in _particles) {
+      final y = (p.speed * progress * size.height * 1.1) - 40;
+      final x = p.x * size.width + sin(progress * 4 * pi + p.rot) * 20;
+      final alpha = (1.0 - progress).clamp(0.0, 1.0);
+
+      final paint = Paint()
+        ..color = p.color.withValues(alpha: alpha)
+        ..style = PaintingStyle.fill;
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(p.rot + progress * 4);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: p.size * 1.8,
+            height: p.size,
+          ),
+          const Radius.circular(2),
+        ),
+        paint,
+      );
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConfettiPainter old) =>
+      old.progress != progress;
 }
 
 void showTraditionalSettingsSheet(BuildContext context, WidgetRef ref) {

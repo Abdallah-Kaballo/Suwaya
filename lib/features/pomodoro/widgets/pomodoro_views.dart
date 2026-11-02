@@ -15,11 +15,55 @@ import '../../tasks/widgets/add_screen_pickers.dart';
 import '../pomodoro_provider.dart';
 import 'pomodoro_shared_widgets.dart';
 
-class ModeSelectorView extends ConsumerWidget {
+class ModeSelectorView extends ConsumerStatefulWidget {
   const ModeSelectorView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ModeSelectorView> createState() => _ModeSelectorViewState();
+}
+
+class _ModeSelectorViewState extends ConsumerState<ModeSelectorView>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildStaggered({
+    required double start,
+    required double end,
+    required Widget child,
+  }) {
+    final curved = CurvedAnimation(
+      parent: _animController,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.15),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
     final dailyCount = ref.watch(
@@ -33,144 +77,270 @@ class ModeSelectorView extends ConsumerWidget {
       numberStyle: numStyle,
       locale: context.locale.languageCode,
     );
+    final isAr = context.locale.languageCode == 'ar';
 
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+          // Daily Streak Badge with subtle glow
+          _buildStaggered(
+            start: 0.0,
+            end: 0.45,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: primaryColor.withValues(alpha: 0.35),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.15),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.flame, color: primaryColor, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    isAr
+                        ? 'إنجاز اليوم: $formattedCount جلسات تركيز'
+                        : 'Completed Today: $formattedCount focus sessions',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          ),
+          const Spacer(),
+          // Title
+          _buildStaggered(
+            start: 0.15,
+            end: 0.60,
+            child: Column(
               children: [
-                Icon(LucideIcons.flame, color: primaryColor, size: 18),
-                const SizedBox(width: 8),
                 Text(
-                  context.locale.languageCode == 'ar'
-                      ? 'إنجاز اليوم: $formattedCount جلسات تركيز'
-                      : 'Completed Today: $formattedCount focus sessions',
+                  'pomodoro.choose_mode'.tr(),
                   style: TextStyle(
-                    color: primaryColor,
+                    fontSize: 23,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  isAr
+                      ? 'اختر طريقة التركيز الأنسب ليومك وجدولك'
+                      : 'Choose the focus flow that suits your schedule',
+                  style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Inter',
+                    color: isDark ? Colors.white60 : Colors.black54,
                   ),
                 ),
               ],
             ),
           ),
-          const Spacer(),
-          Text(
-            'pomodoro.choose_mode'.tr(),
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87,
+          const SizedBox(height: 18),
+          // Linked Task Bar
+          _buildStaggered(
+            start: 0.25,
+            end: 0.70,
+            child: LinkedTaskBar(accentColor: primaryColor),
+          ),
+          const SizedBox(height: 22),
+          // Suwaya Mode Card
+          _buildStaggered(
+            start: 0.35,
+            end: 0.85,
+            child: _InteractiveModeCard(
+              title: 'pomodoro.suwaya_mode'.tr(),
+              subtitle: 'pomodoro.suwaya_mode_desc'.tr(),
+              badge: isAr ? 'فلكي متصل بالصلاة' : 'Astro Flow',
+              icon: LucideIcons.moon_star,
+              color: const Color(0xFFE53935),
+              onTap: () {
+                ref.read(pomodoroProvider.notifier).openSuwayaSetup();
+              },
             ),
           ),
           const SizedBox(height: 16),
-          LinkedTaskBar(accentColor: primaryColor),
-          const SizedBox(height: 24),
-          _buildModeCard(
-            context: context,
-            title: 'pomodoro.suwaya_mode'.tr(),
-            subtitle: 'pomodoro.suwaya_mode_desc'.tr(),
-            icon: LucideIcons.moon_star,
-            color: const Color(0xFFE53935),
-            onTap: () {
-              HapticFeedback.selectionClick();
-              ref.read(pomodoroProvider.notifier).openSuwayaSetup();
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildModeCard(
-            context: context,
-            title: 'pomodoro.traditional'.tr(),
-            subtitle: 'pomodoro.traditional_desc'.tr(),
-            icon: LucideIcons.clock,
-            color: const Color(0xFF64B5F6),
-            onTap: () {
-              HapticFeedback.selectionClick();
-              ref.read(pomodoroProvider.notifier).openTraditionalMode();
-            },
+          // Traditional Mode Card
+          _buildStaggered(
+            start: 0.45,
+            end: 1.0,
+            child: _InteractiveModeCard(
+              title: 'pomodoro.traditional'.tr(),
+              subtitle: 'pomodoro.traditional_desc'.tr(),
+              badge: isAr ? 'فترات ٢٥ / ٥ كلاسيكية' : 'Classic 25/5 Interval',
+              icon: LucideIcons.clock,
+              color: const Color(0xFF64B5F6),
+              onTap: () {
+                ref.read(pomodoroProvider.notifier).openTraditionalMode();
+              },
+            ),
           ),
           const Spacer(flex: 2),
         ],
       ),
     );
   }
+}
 
-  Widget _buildModeCard({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+class _InteractiveModeCard extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final String badge;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _InteractiveModeCard({
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  State<_InteractiveModeCard> createState() => _InteractiveModeCardState();
+}
+
+class _InteractiveModeCardState extends State<_InteractiveModeCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1A1D24) : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+
+    return AnimatedScale(
+      scale: _isPressed ? 0.975 : 1.0,
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOutCubic,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          widget.onTap();
+        },
+        child: Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF161A22) : Colors.white,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(
+              color: widget.color.withValues(alpha: 0.32),
+              width: 1.5,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
-              child: Icon(icon, color: color, size: 32),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      widget.color.withValues(alpha: 0.22),
+                      widget.color.withValues(alpha: 0.08),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark ? Colors.white60 : Colors.black54,
-                    ),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: widget.color.withValues(alpha: 0.45),
+                    width: 1.5,
                   ),
-                ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                child: Icon(widget.icon, color: widget.color, size: 28),
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: color.withValues(alpha: 0.5),
-              size: 16,
-            ),
-          ],
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            widget.title,
+                            style: TextStyle(
+                              fontSize: 17.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: widget.color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            widget.badge,
+                            style: TextStyle(
+                              color: widget.color,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      widget.subtitle,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        height: 1.35,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: widget.color.withValues(alpha: 0.55),
+                size: 15,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -186,10 +356,19 @@ class TraditionalTimerView extends ConsumerWidget {
     PomodoroEngine notifier,
   ) {
     final isAr = context.locale.languageCode == 'ar';
-    final modeTitle = switch (state.zenMode) {
-      PomodoroZenMode.ring => isAr ? 'نمط الحلقة' : 'Zen Ring',
-      PomodoroZenMode.digital => isAr ? 'نمط رقمي' : 'Pure Digital',
-      PomodoroZenMode.ambient => isAr ? 'نبض هادئ' : 'Ambient Breath',
+    final (modeTitle, modeIcon) = switch (state.zenMode) {
+      PomodoroZenMode.ring => (
+        isAr ? 'نمط الحلقة' : 'Zen Ring',
+        LucideIcons.circle_dot,
+      ),
+      PomodoroZenMode.digital => (
+        isAr ? 'نمط رقمي' : 'Pure Digital',
+        LucideIcons.hash,
+      ),
+      PomodoroZenMode.ambient => (
+        isAr ? 'نبض هادئ' : 'Ambient Breath',
+        LucideIcons.wind,
+      ),
     };
 
     return Row(
@@ -197,18 +376,22 @@ class TraditionalTimerView extends ConsumerWidget {
       children: [
         TextButton.icon(
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white70,
-            backgroundColor: Colors.white.withValues(alpha: 0.06),
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(22),
+              side: BorderSide(
+                color: Colors.white.withValues(alpha: 0.18),
+                width: 1,
+              ),
             ),
           ),
           onPressed: () {
             HapticFeedback.selectionClick();
             notifier.cycleZenMode();
           },
-          icon: const Icon(LucideIcons.sparkles, size: 15),
+          icon: Icon(modeIcon, size: 14, color: Colors.white70),
           label: Text(
             modeTitle,
             style: const TextStyle(
@@ -230,10 +413,11 @@ class TraditionalTimerView extends ConsumerWidget {
               },
               icon: Icon(
                 state.isMuted ? LucideIcons.volume_x : LucideIcons.volume_2,
-                color: Colors.white54,
+                color: Colors.white70,
                 size: 19,
               ),
             ),
+            const SizedBox(width: 4),
             IconButton(
               visualDensity: VisualDensity.compact,
               tooltip: 'Exit Full Screen',
@@ -243,7 +427,7 @@ class TraditionalTimerView extends ConsumerWidget {
               },
               icon: const Icon(
                 LucideIcons.minimize_2,
-                color: Colors.white54,
+                color: Colors.white70,
                 size: 19,
               ),
             ),
@@ -302,8 +486,8 @@ class TraditionalTimerView extends ConsumerWidget {
     Widget buildControls() {
       if (state.status == PomodoroStatus.idle) {
         return SizedBox(
-          width: 220,
-          height: 54,
+          width: 230,
+          height: 56,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: activeColor,
@@ -312,15 +496,21 @@ class TraditionalTimerView extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(28),
               ),
               elevation: 4,
+              shadowColor: activeColor.withValues(alpha: 0.5),
             ),
             onPressed: () {
               HapticFeedback.mediumImpact();
               notifier.startTraditional();
             },
-            icon: const Icon(LucideIcons.play, size: 20),
+            icon: const Icon(LucideIcons.play, size: 21),
             label: Text(
-              trPomodoro(context, 'pomodoro.start', 'بدء', 'Start'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              trPomodoro(
+                context,
+                'pomodoro.start',
+                'بدء التركيز',
+                'Start Focus',
+              ),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
           ),
         );
@@ -329,28 +519,55 @@ class TraditionalTimerView extends ConsumerWidget {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton.filledTonal(
-            style: IconButton.styleFrom(
-              backgroundColor: isDark ? Colors.white10 : Colors.black12,
-              padding: const EdgeInsets.all(15),
+          Tooltip(
+            message: trPomodoro(
+              context,
+              'pomodoro.reset',
+              'إعادة ضبط',
+              'Reset',
             ),
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              notifier.resetTraditional();
-            },
-            icon: Icon(LucideIcons.rotate_ccw, color: textColor, size: 21),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(26),
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  notifier.resetTraditional();
+                },
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.06),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: textColor.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: Icon(
+                    LucideIcons.rotate_ccw,
+                    color: textColor.withValues(alpha: 0.85),
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 20),
           SizedBox(
-            height: 56,
+            height: 58,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: activeColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 26),
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(30),
                 ),
+                elevation: 5,
+                shadowColor: activeColor.withValues(alpha: 0.5),
               ),
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -364,7 +581,7 @@ class TraditionalTimerView extends ConsumerWidget {
                 state.status == PomodoroStatus.running
                     ? LucideIcons.pause
                     : LucideIcons.play,
-                size: 21,
+                size: 22,
               ),
               label: Text(
                 state.status == PomodoroStatus.running
@@ -381,20 +598,48 @@ class TraditionalTimerView extends ConsumerWidget {
                         'Resume',
                       ),
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.5,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 18),
-          IconButton.filledTonal(
-            style: IconButton.styleFrom(
-              backgroundColor: isDark ? Colors.white10 : Colors.black12,
-              padding: const EdgeInsets.all(15),
+          const SizedBox(width: 20),
+          Tooltip(
+            message: trPomodoro(
+              context,
+              'pomodoro.skip',
+              'تخطي المرحلة',
+              'Skip',
             ),
-            onPressed: notifier.skipTraditionalPhase,
-            icon: Icon(LucideIcons.skip_forward, color: textColor, size: 21),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(26),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  notifier.skipTraditionalPhase();
+                },
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.06),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: textColor.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: Icon(
+                    LucideIcons.skip_forward,
+                    color: textColor.withValues(alpha: 0.85),
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       );
@@ -414,15 +659,25 @@ class TraditionalTimerView extends ConsumerWidget {
               state.phase != PomodoroPhase.longBreak;
 
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 250),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: isCurrent ? 22 : 8,
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.symmetric(horizontal: 4.5),
+            width: isCurrent ? 26 : (isCompleted ? 10 : 8),
             height: 8,
             decoration: BoxDecoration(
               color: (isCompleted || isCurrent)
                   ? activeColor
                   : textColor.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(6),
+              boxShadow: isCurrent
+                  ? [
+                      BoxShadow(
+                        color: activeColor.withValues(alpha: 0.55),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
             ),
           );
         }),
@@ -1483,10 +1738,19 @@ class SuwayaActiveTimerView extends ConsumerWidget {
     PomodoroEngine notifier,
   ) {
     final isAr = context.locale.languageCode == 'ar';
-    final modeTitle = switch (state.zenMode) {
-      PomodoroZenMode.ring => isAr ? 'نمط الحلقة' : 'Zen Ring',
-      PomodoroZenMode.digital => isAr ? 'نمط رقمي' : 'Pure Digital',
-      PomodoroZenMode.ambient => isAr ? 'نبض هادئ' : 'Ambient Breath',
+    final (modeTitle, modeIcon) = switch (state.zenMode) {
+      PomodoroZenMode.ring => (
+        isAr ? 'نمط الحلقة' : 'Zen Ring',
+        LucideIcons.circle_dot,
+      ),
+      PomodoroZenMode.digital => (
+        isAr ? 'نمط رقمي' : 'Pure Digital',
+        LucideIcons.hash,
+      ),
+      PomodoroZenMode.ambient => (
+        isAr ? 'نبض هادئ' : 'Ambient Breath',
+        LucideIcons.wind,
+      ),
     };
 
     return Row(
@@ -1494,18 +1758,22 @@ class SuwayaActiveTimerView extends ConsumerWidget {
       children: [
         TextButton.icon(
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white70,
-            backgroundColor: Colors.white.withValues(alpha: 0.06),
+            foregroundColor: Colors.white,
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(22),
+              side: BorderSide(
+                color: Colors.white.withValues(alpha: 0.18),
+                width: 1,
+              ),
             ),
           ),
           onPressed: () {
             HapticFeedback.selectionClick();
             notifier.cycleZenMode();
           },
-          icon: const Icon(LucideIcons.sparkles, size: 15),
+          icon: Icon(modeIcon, size: 14, color: Colors.white70),
           label: Text(
             modeTitle,
             style: const TextStyle(
@@ -1527,10 +1795,11 @@ class SuwayaActiveTimerView extends ConsumerWidget {
               },
               icon: Icon(
                 state.isMuted ? LucideIcons.volume_x : LucideIcons.volume_2,
-                color: Colors.white54,
+                color: Colors.white70,
                 size: 19,
               ),
             ),
+            const SizedBox(width: 4),
             IconButton(
               visualDensity: VisualDensity.compact,
               tooltip: 'Exit Full Screen',
@@ -1540,7 +1809,7 @@ class SuwayaActiveTimerView extends ConsumerWidget {
               },
               icon: const Icon(
                 LucideIcons.minimize_2,
-                color: Colors.white54,
+                color: Colors.white70,
                 size: 19,
               ),
             ),
@@ -1565,36 +1834,17 @@ class SuwayaActiveTimerView extends ConsumerWidget {
       isFinished,
     ) {
       if (isFinished && previous != true && context.mounted) {
-        showDialog(
+        showPomodoroCelebrationDialog(
           context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            title: Text(
-              'pomodoro.time_up_prayer'.tr(),
-              textAlign: TextAlign.center,
-            ),
-            content: Text(
-              'pomodoro.time_up_desc'.tr(),
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    notifier.acknowledgeFinish();
-                  },
-                  child: Text(
-                    'common.done'.tr(),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ref: ref,
+          title: 'pomodoro.time_up_prayer'.tr(),
+          subtitle: 'pomodoro.time_up_desc'.tr(),
+          onContinue: () {
+            notifier.acknowledgeFinish();
+          },
+          onFinish: () {
+            notifier.acknowledgeFinish();
+          },
         );
       }
     });
@@ -1658,34 +1908,42 @@ class SuwayaActiveTimerView extends ConsumerWidget {
     }
 
     Widget buildEndSessionButton() {
-      return GestureDetector(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          notifier.backToSelector();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.white10 : Colors.black12,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                LucideIcons.x,
-                color: isDark ? Colors.white70 : Colors.black87,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'pomodoro.end_session'.tr(),
-                style: TextStyle(
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            notifier.backToSelector();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: textColor.withValues(alpha: 0.12)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  LucideIcons.x,
                   color: isDark ? Colors.white70 : Colors.black87,
-                  fontWeight: FontWeight.bold,
+                  size: 18,
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Text(
+                  'pomodoro.end_session'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
