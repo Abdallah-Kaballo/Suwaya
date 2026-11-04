@@ -1,11 +1,5 @@
-# This file is served at /Suwaya/robots.txt on a GitHub Pages project site.
-# Host-wide crawler policy is controlled by https://abdallah-kaballo.github.io/robots.txt.
-User-agent: OAI-SearchBot
-Allow: /
-User-agent: Googlebot
-Allow: /
-User-agent: Bingbot
-Allow: /
+# This file is served at /Suwaya/robots.txt on the GitHub Pages project site.
+# It does not replace the host-level robots.txt at https://abdallah-kaballo.github.io/robots.txt.
 User-agent: *
 Allow: /
-Sitemap: https://abdallah-kaballo.github.io/Suwaya/sitemap.txt
+Sitemap: https://abdallah-kaballo.github.io/Suwaya/sitemap.xml
