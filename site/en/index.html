@@ -1,49 +1,29 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>What Is Suwaya Time? | Suwaya</title>
-  <meta name="description" content="The reference definition of Suwaya Time: an alternative virtual time model spanning sunset to the next sunset and divided into 24 Suwayas.">
-  <meta name="robots" content="index,follow,max-image-preview:large">
-  <link rel="canonical" href="https://abdallah-kaballo.github.io/Suwaya/en/">
-  <link rel="alternate" hreflang="ar" href="https://abdallah-kaballo.github.io/Suwaya/ar/">
-  <link rel="alternate" hreflang="en" href="https://abdallah-kaballo.github.io/Suwaya/en/">
-  <link rel="alternate" hreflang="x-default" href="https://abdallah-kaballo.github.io/Suwaya/en/">
-  <meta property="og:type" content="website"><meta property="og:title" content="What Is Suwaya Time?"><meta property="og:description" content="A clear definition of the Suwaya virtual time model and the open-source app built around it."><meta property="og:url" content="https://abdallah-kaballo.github.io/Suwaya/en/"><meta property="og:site_name" content="Suwaya | سُويعة"><meta name="theme-color" content="#101218">
-  <link rel="stylesheet" href="../assets/styles.css">
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","name":"What Is Suwaya Time?","inLanguage":"en","url":"https://abdallah-kaballo.github.io/Suwaya/en/","about":{"@type":"SoftwareApplication","name":"Suwaya","alternateName":["سُويعة","Suwaya Time"],"applicationCategory":"ProductivityApplication","operatingSystem":"Android","url":"https://play.google.com/store/apps/details?id=com.suwaya.app","sameAs":"https://github.com/Abdallah-Kaballo/Suwaya"}}
-  </script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suwaya | A Different Way to Organize the Day</title>
+<meta name="description" content="Discover Suwaya, an open-source productivity project exploring a sunset-to-sunset time model divided into 24 virtual Suwayas.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://abdallah-kaballo.github.io/Suwaya/en/"><link rel="alternate" hreflang="ar" href="https://abdallah-kaballo.github.io/Suwaya/ar/"><link rel="alternate" hreflang="en" href="https://abdallah-kaballo.github.io/Suwaya/en/"><link rel="alternate" hreflang="x-default" href="https://abdallah-kaballo.github.io/Suwaya/en/">
+<meta property="og:type" content="website"><meta property="og:title" content="Suwaya | Suwaya Time"><meta property="og:description" content="An open-source project exploring a different way to organize a day around the sunset-to-sunset cycle."><meta property="og:url" content="https://abdallah-kaballo.github.io/Suwaya/en/"><meta name="theme-color" content="#101218"><link rel="stylesheet" href="../assets/styles.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Suwaya","inLanguage":"en","url":"https://abdallah-kaballo.github.io/Suwaya/en/","about":{"@type":"SoftwareApplication","name":"Suwaya","alternateName":["سُويعة","Suwaya Time"],"applicationCategory":"ProductivityApplication","operatingSystem":"Android","url":"https://play.google.com/store/apps/details?id=com.suwaya.app","sameAs":"https://github.com/Abdallah-Kaballo/Suwaya"}}</script>
 </head>
 <body dir="ltr">
-<header><div class="wrap nav"><a class="brand" href="../">Suwaya <span class="muted">| سُويعة</span></a><nav class="lang" aria-label="Language selection"><a href="../ar/" lang="ar">العربية</a><a href="./" lang="en" aria-current="page">English</a></nav></div></header>
+<header><div class="wrap nav"><a class="brand" href="../">Suwaya <span class="muted">| سُويعة</span></a><nav class="lang"><a href="../ar/" lang="ar">العربية</a><a href="./" aria-current="page">English</a></nav></div></header>
 <main class="wrap">
-  <section class="hero"><div class="eyebrow">Reference definition</div><h1>What are Suwaya and Suwaya Time?</h1>
-  <p class="lead"><strong>Suwaya</strong> is an open-source software project and productivity application. It explores an alternative way to represent time and organize daily activities, called the <strong>Suwaya Time model</strong>, which relates the displayed time to an astronomical cycle and prayer-time calculations configured for a location.</p>
-  <div class="actions"><a class="btn primary" href="https://play.google.com/store/apps/details?id=com.suwaya.app">Get the Android app</a><a class="btn" href="https://github.com/Abdallah-Kaballo/Suwaya">Source repository</a><a class="btn" href="https://github.com/Abdallah-Kaballo/Suwaya/blob/main/Suwaya-Time.md">Technical specification</a></div></section>
-  <section class="panel"><span class="pill">Short definition</span><h2>Definition of Suwaya Time</h2>
-  <p><strong>Suwaya Time</strong> is a virtual time representation that divides a cycle from Maghrib to the following Maghrib into 24 Suwayas: 12 Night Suwayas from Maghrib to sunrise and 12 Day Suwayas from sunrise to the next Maghrib. Each Suwaya contains 60 virtual minutes, but its duration in civil time varies with the astronomical period, location, date, and selected calculation settings.</p>
-  <p class="muted">Equal numbers of virtual Night and Day Suwayas do not mean that actual night and day are equal in duration. Suwaya Time is an alternative representation model, not an internationally adopted time standard or a replacement for official civil time.</p></section>
-  <section><h2>How does the model work?</h2><div class="grid">
-    <article class="panel step"><h3>1. Set location and date</h3><p class="muted">Geographic coordinates, date, time zone, and prayer calculation settings determine the temporal anchors.</p></article>
-    <article class="panel step"><h3>2. Calculate astronomical anchors</h3><p class="muted">Solar events and prayer times are calculated using the selected method. Results can differ across methods and settings.</p></article>
-    <article class="panel step"><h3>3. Build the cycle</h3><p class="muted">The model cycle runs from Maghrib to the next Maghrib, with a Night phase from Maghrib to sunrise and a Day phase from sunrise to Maghrib.</p></article>
-    <article class="panel step"><h3>4. Map it to 24 Suwayas</h3><p class="muted">The model allocates 12 Suwayas to each phase. The real duration of a Suwaya and the flow of its virtual minutes vary by period.</p></article>
-  </div></section>
-  <section class="panel"><h2>How is it different from civil time?</h2><p>Civil time uses conventional clock hours. Suwaya Time maps a 24-Suwaya virtual cycle onto the astronomical cycle from Maghrib to Maghrib. Every Suwaya has 60 virtual minutes, which do not necessarily equal 60 civil minutes; therefore, virtual time can flow at different rates during different periods.</p><p>This is a model for time display and the organization of tasks, habits, routines, and focus sessions. It does not change official time and should not replace civil time for legal schedules, transport, or other purposes requiring an official clock standard.</p></section>
-  <section><h2>What does the app offer?</h2><div class="grid">
-    <article class="panel"><h3>Daily planning</h3><p class="muted">Tasks, recurring habits, routines, and focus sessions, with civil and Suwaya time displays.</p></article>
-    <article class="panel"><h3>Prayer times and calendar</h3><p class="muted">Prayer-time calculations using multiple methods and location settings, plus a Hijri calendar and night/day period tools.</p></article>
-    <article class="panel"><h3>Open-source time engine</h3><p class="muted">The repository includes a Dart package for cycle calculation, Suwaya distribution, and mapping between civil and Suwaya time.</p></article>
-    <article class="panel"><h3>Inspect and contribute</h3><p class="muted">The public repository contains the source, specification, and tests that can be reviewed and improved.</p></article>
-  </div></section>
-  <section class="panel"><h2>Frequently asked questions</h2>
-    <div class="faq"><h3>Are the actual night and day equal in length?</h3><p>No. The model assigns 12 virtual Suwayas to each phase. Actual night and day durations vary by location and season.</p></div>
-    <div class="faq"><h3>Is Suwaya Time an official standard or a UTC replacement?</h3><p>No. It is an alternative time representation within an open-source project, not an internationally adopted standard and not a replacement for official civil time.</p></div>
-    <div class="faq"><h3>Do prayer-time calculations always produce identical results?</h3><p>No. Results depend on coordinates, calculation method, Fajr and Isha angles, madhab settings, manual adjustments, and high-latitude rules.</p></div>
-    <div class="faq"><h3>Where can I read the mathematical details?</h3><p>See the published <a href="https://github.com/Abdallah-Kaballo/Suwaya/blob/main/Suwaya-Time.md">technical specification</a>, source code, and repository tests.</p></div>
-  </section>
-  <section class="panel"><h2>Project sources</h2><p><a href="https://github.com/Abdallah-Kaballo/Suwaya">Suwaya source repository</a> · <a href="https://github.com/Abdallah-Kaballo/Suwaya/blob/main/README.md">Project overview and app features</a> · <a href="https://github.com/Abdallah-Kaballo/Suwaya/blob/main/Suwaya-Time.md">Suwaya Time technical specification</a> · <a href="https://play.google.com/store/apps/details?id=com.suwaya.app">Google Play listing</a></p></section>
-</main>
-<footer><div class="wrap"><p><strong>Suwaya | سُويعة</strong> — an open-source software project.</p><small>Prayer-time outputs and virtual time allocation depend on location, date, method, and settings. Consult the published specification for the model's details and limitations.</small></div></footer>
+<section class="hero"><div class="eyebrow">Open-source time project</div><h1>Not just a different clock face: a different way to organize the day.</h1>
+<p class="lead"><strong>Suwaya</strong> is an open-source project and productivity app exploring a time model built around a cycle from Maghrib to the next Maghrib. The model divides that cycle into 24 virtual Suwayas anchored to calculated astronomical and prayer-time markers.</p>
+<div class="actions"><a class="btn primary" href="https://play.google.com/store/apps/details?id=com.suwaya.app">Get the Android app</a><a class="btn" href="./suwaya-time/">What is Suwaya Time?</a><a class="btn" href="https://github.com/Abdallah-Kaballo/Suwaya">Source code & specification</a></div>
+<figure class="diagram"><img src="../assets/suwaya-cycle.svg" alt="Diagram of a cycle from Maghrib to the next Maghrib divided into 12 Night Suwayas and 12 Day Suwayas. Each unit has 60 virtual minutes, not necessarily 60 civil minutes."><figcaption>The graphic shows the number of virtual units, not the actual duration of night or day.</figcaption></figure>
+</section>
+<section class="grid">
+<article class="panel"><h2>From Maghrib to the next Maghrib</h2><p>Instead of organizing the model solely around 24 equal civil clock hours beginning at midnight, Suwaya builds a cycle around Maghrib, sunrise, and other time markers. The modeled night phase runs from Maghrib to sunrise, followed by the day phase until the next Maghrib.</p></article>
+<article class="panel"><h2>24 virtual units</h2><p>The model allocates 12 Night Suwayas and 12 Day Suwayas. Every Suwaya contains 60 virtual minutes; the amount of civil time those minutes occupy varies with the duration of the astronomical period.</p></article>
+<article class="panel"><h2>Time and planning together</h2><p>The app offers tasks, habits, routines, and focus sessions, plus prayer-time calculations and a Hijri calendar. Users can switch between Suwaya and civil time displays.</p></article>
+<article class="panel"><h2>Clearly stated limits</h2><p>Suwaya Time is a software-defined representation model, not an internationally adopted time standard. It does not change official civil time or replace religious authorities in matters of worship.</p></article>
+</section>
+<section class="panel"><h2>Learn the model</h2><div class="grid"><div><h3><a href="./">1. What is Suwaya?</a></h3><p>A brief introduction to the project and its app.</p></div><div><h3><a href="suwaya-time/">2. What is Suwaya Time?</a></h3><p>The cycle, unit allocation, seven periods, calculation inputs, and the distinction between astronomy, religious time definitions, and project conventions.</p></div></div></section>
+<section class="panel"><h2>Project sources</h2><p><a href="https://github.com/Abdallah-Kaballo/Suwaya">Source repository</a> · <a href="https://github.com/Abdallah-Kaballo/Suwaya/blob/main/Suwaya-Time.md">Suwaya Time technical specification</a> · <a href="https://play.google.com/store/apps/details?id=com.suwaya.app">Google Play listing</a></p></section>
+</main><footer><div class="wrap"><p><strong>Suwaya | سُويعة</strong> — open-source software project.</p><small>Calculated outputs depend on location, date, calculation method, and settings. See the source specification for implementation details.</small></div></footer>
 </body></html>
