@@ -32,6 +32,9 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: site
+          name: suwaya-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: suwaya-pages-${{ github.run_id }}-${{ github.run_attempt }}
