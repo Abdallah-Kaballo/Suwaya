@@ -1,23 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://abdallah-kaballo.github.io/Suwaya/</loc>
-    <lastmod>2026-11-04</lastmod>
-  </url>
-  <url>
-    <loc>https://abdallah-kaballo.github.io/Suwaya/ar/</loc>
-    <lastmod>2026-11-04</lastmod>
-  </url>
-  <url>
-    <loc>https://abdallah-kaballo.github.io/Suwaya/en/</loc>
-    <lastmod>2026-11-04</lastmod>
-  </url>
-  <url>
-    <loc>https://abdallah-kaballo.github.io/Suwaya/ar/suwaya-time/</loc>
-    <lastmod>2026-11-04</lastmod>
-  </url>
-  <url>
-    <loc>https://abdallah-kaballo.github.io/Suwaya/en/suwaya-time/</loc>
-    <lastmod>2026-11-04</lastmod>
-  </url>
+  <url><loc>https://abdallah-kaballo.github.io/Suwaya/</loc></url>
+  <url><loc>https://abdallah-kaballo.github.io/Suwaya/ar/</loc></url>
+  <url><loc>https://abdallah-kaballo.github.io/Suwaya/en/</loc></url>
+  <url><loc>https://abdallah-kaballo.github.io/Suwaya/ar/suwaya-time/</loc></url>
+  <url><loc>https://abdallah-kaballo.github.io/Suwaya/en/suwaya-time/</loc></url>
 </urlset>
