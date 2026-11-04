@@ -8,4 +8,4 @@ User-agent: Bingbot
 Allow: /
 User-agent: *
 Allow: /
-Sitemap: https://abdallah-kaballo.github.io/Suwaya/sitemap.xml
+Sitemap: https://abdallah-kaballo.github.io/Suwaya/sitemap.txt
