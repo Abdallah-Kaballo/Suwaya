@@ -40,5 +40,5 @@
 <text x="75" y="292" font-family="Tahoma, Arial, sans-serif" font-size="21" fill="#f2c766" text-anchor="start" direction="rtl">المغرب</text>
 <text x="699" y="292" font-family="Tahoma, Arial, sans-serif" font-size="21" fill="#f4f1e9" text-anchor="middle" direction="rtl">الشروق</text>
 <text x="1323" y="292" font-family="Tahoma, Arial, sans-serif" font-size="21" fill="#f2c766" text-anchor="end" direction="rtl">المغرب التالي</text>
-<text x="700" y="346" font-family="Tahoma, Arial, sans-serif" font-size="19" fill="#b9bbc5" text-anchor="middle" direction="rtl">المخطط يشرح عدد السويعات في كل طور؛ أما مدتها الفعلية فتتغير مع المكان والتاريخ والفترة.</text>
+<text x="700" y="346" font-family="Tahoma, Arial, sans-serif" font-size="19" fill="#b9bbc5" text-anchor="middle" direction="rtl">المخطط يشرح عدد السُويعات في كل طور؛ أما مدتها الفعلية فتتغير مع المكان والتاريخ والفترة.</text>
 </svg>
